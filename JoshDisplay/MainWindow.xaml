@@ -46,7 +46,7 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <TextBox x:Name="inputBox" Background="MediumSlateBlue" HorizontalAlignment="Left" Margin="-147,-66,0,0" TextWrapping="Wrap" Text="255,255,255,255" VerticalAlignment="Top" TextChanged="RichTextBox_TextChanged" Width="108"/>
+        <TextBox x:Name="inputBox" Background="MediumSlateBlue" HorizontalAlignment="Left" Margin="-147,-66,0,0" TextWrapping="Wrap" Text="0,0,0,255" VerticalAlignment="Top" TextChanged="RichTextBox_TextChanged" Width="108"/>
 
         <Button Foreground="Red" x:Name="acceptButton" Background="MediumSlateBlue" Content="draw" HorizontalAlignment="Left" Margin="-26,-63,0,0" VerticalAlignment="Top" Height="19" Width="45" Click="Accept_Clicked" />
         <Button Foreground="Red" FontSize="9" x:Name="resetButton" Background="Black" Content="⚠reset image⚠" HorizontalAlignment="Left" Margin="-17,-36,0,0" VerticalAlignment="Top" Height="25" Width="76" Click="Reset_buttonClick" Grid.ColumnSpan="2" />
@@ -62,6 +62,9 @@
         <Label Background="MediumSlateBlue" Foreground="Black" Grid.Column="8" FontSize="9" Content="Display Offset  (x,y) px" HorizontalAlignment="Left" Margin="14,-66,0,0" VerticalAlignment="Top" Grid.ColumnSpan="6" Width="218" Height="22"/>
         <TextBox x:Name="UpdateIntervalInSecs" HorizontalAlignment="Left" Margin="-147,0,0,0" Grid.Row="4" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="49"/>
         <Label Foreground="Black" Background="White" FontSize="8" x:Name="TimeSpanLabel" Content="Time between refresh (in seconds)" HorizontalAlignment="Left" Margin="-147,0,0,0" Grid.Row="3" VerticalAlignment="Center" Width="135"/>
+        <CheckBox Checked="ScrollX_checked" Unchecked="ScrollX_unchecked" FontSize="8" Content="Scroll X" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Grid.Column="15" Margin="4,-64,-25,0"/>
+        <CheckBox Checked="ScrollY_checked" Unchecked="ScrollY_unchecked" FontSize="8" Content="Scroll Y" HorizontalAlignment="Left" VerticalAlignment="Top" Width="72" Grid.Column="15" Margin="4,-48,-20,0"/>
+        <CheckBox Checked="ScrollingColor_checked" Unchecked="ScrollingColor_unchecked" FontSize="8" Content="Scrolling Color" HorizontalAlignment="Left" VerticalAlignment="Top" Width="72" Grid.Column="15" Margin="4,-32,-60,0"/>
     </Grid>
 
 </Window>
