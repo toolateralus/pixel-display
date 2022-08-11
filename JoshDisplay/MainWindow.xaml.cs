@@ -15,9 +15,7 @@ using System.Windows.Shapes;
 
 namespace JoshDisplay
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+    
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -31,19 +29,24 @@ namespace JoshDisplay
         }
         private void Accept_Clicked(object sender, RoutedEventArgs e)
         {
-            // get color from text box (0,0,0)
-            PixelProcessing.Pixel Vec = PixelProcessing.FormatPixelColor(Interface.GetColorVector(inputBox.Text));
 
-            Brush color = new SolidColorBrush(Color.FromRgb((byte)Vec.r, (byte)Vec.g, (byte)Vec.b));
+            // get color from text box text string (0,0,0) alpha nyi 
+            PixelProcessing.Pixel Vec = PixelProcessing.FormatPixelColor(Interface.GetColorValues(inputBox.Text));
 
-            outputTextBox.Content = $" Current Color: \n (R,G,B) \n {Vec.r} {Vec.g} {Vec.b}";
+            Brush color = new SolidColorBrush(Color.FromArgb(255,  (byte)Vec.r, (byte)Vec.g, (byte)Vec.b));
+
 
             // length of one side of the screen; a square.
-             //!! starts in the center if displayArea == 3; && offset == 6;!! 
-            byte displayAreaX = (byte)Char.GetNumericValue(displayAreaXText.Text[0]);
-            byte displayAreaY = (byte)Char.GetNumericValue(displayAreaYText.Text[0]);
-            byte offsetX = (byte)Char.GetNumericValue(displayOffsetXText.Text[0]);
-            byte offsetY = (byte)Char.GetNumericValue(displayOffsetYText.Text[0]);
+            //!! starts in the center if displayArea == 3; && offset == 6;!! 
+            Int32.TryParse(displayAreaXText.Text, out int displayAreaX);
+            Int32.TryParse(displayAreaYText.Text, out int displayAreaY);
+
+            Int32.TryParse(displayOffsetXText.Text, out int offsetX);
+            Int32.TryParse(displayOffsetYText.Text, out int offsetY);
+
+            outputTextBox.Content = $" Current Color: \n in (R,G,B) {Vec.r} {Vec.g} {Vec.b} \n " +
+                $"xOffset: {offsetX} yOffset: {offsetY} \n xArea: {displayAreaX} yArea: {displayAreaY}";
+
 
             for (int i = 0; i < displayAreaX; i++)
             {
@@ -51,16 +54,16 @@ namespace JoshDisplay
                 {
                     var rect = new Rectangle();
                     rect.Fill = color;
-                    Grid.SetRow(rect, offsetY + i);
-                    Grid.SetRow(rect, offsetY + j);
-                    Grid.SetColumn(rect, offsetX + j);
                     Grid.SetColumn(rect, offsetX + i);
-                    outputGrid.Children.Add(rect); 
+                    Grid.SetRow(rect, offsetY + j);
+                    Grid.SetRow(rect, offsetY + i);
+                    Grid.SetColumn(rect, offsetX + j);
+                    outputGrid.Children.Add(rect);
                 }
             }
-            
             outputGrid.UpdateLayout();
         }
+    
 
         private void Reset_buttonClick(object sender, RoutedEventArgs e)
         {
@@ -97,23 +100,19 @@ namespace JoshDisplay
 
     public static class Interface 
     {
-        public static List<int> GetColorVector(string rawInput)
+        public static List<int> GetColorValues(string input)
         {
-            var list = new List<int>(2);
-            try
-            {
-                var chars = rawInput.Split(',');
-                for (int i = 0; i < chars.Length; i++)
-                {
-                    var j = chars[i][0];
-                    if (Char.GetNumericValue(j) >= 0)
-                    {
-                        list.Add(j - 48);
-                    }
-                }
-            }
-            catch (Exception e) { Console.WriteLine(e.Message); }
-            return list;
+            var list = new List<int>(3);
+            var inputs = input.Split(',');
+            Int32.TryParse(inputs[0], out var red);
+            Int32.TryParse(inputs[1], out var green);
+            Int32.TryParse(inputs[2], out var blue);
+            //Int32.TryParse(inputs[3], out var alpha);
+            list.Add(red);
+            list.Add(green);
+            list.Add(blue);
+
+            return list; 
         }
     }
 }
