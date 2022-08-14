@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JoshDisplay"
         mc:Ignorable="d"
-        Background="DarkSlateGray"
+        Background="Black"
         Title="Pixel Display" Height="800" Width="900">
 
     <Grid x:Name="outputGrid" Background="AliceBlue" HorizontalAlignment="Left" Margin="150,70,0,0" VerticalAlignment="Top" Height="600" Width="600">
@@ -47,24 +47,26 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <TextBox x:Name="inputBox" Background="MediumSlateBlue" HorizontalAlignment="Left" Margin="-147,-66,0,0" TextWrapping="Wrap" Text="0,0,0,255" VerticalAlignment="Top" TextChanged="RichTextBox_TextChanged" Width="108"/>
+        <Rectangle x:Name="ignoreMe" Grid.ColumnSpan="16" Fill="Gray" HorizontalAlignment="Left" Height="62" Margin="8,-68,0,0" Stroke="Black" VerticalAlignment="Top" Width="463" Grid.Column="5"/>
 
-        <Button Foreground="Red" x:Name="acceptButton" Background="MediumSlateBlue" Content="draw" HorizontalAlignment="Left" Margin="-26,-63,0,0" VerticalAlignment="Top" Height="19" Width="45" Click="Accept_Clicked" />
-        <Button Foreground="Red" FontSize="9" x:Name="resetButton" Background="Black" Content="⚠reset image⚠" HorizontalAlignment="Left" Margin="-17,-36,0,0" VerticalAlignment="Top" Height="25" Width="76" Click="Reset_buttonClick" Grid.ColumnSpan="2" />
+        <Button Foreground="Red" x:Name="acceptButton" Background="Black" Content="draw" HorizontalAlignment="Left" Margin="-26,-63,0,0" VerticalAlignment="Top" Height="19" Width="45" Click="Accept_Clicked" />
+        <Button Foreground="Red" FontSize="9" x:Name="resetButton" Background="Black" Content="⚠stop⚠" HorizontalAlignment="Left" Margin="-17,-36,0,0" VerticalAlignment="Top" Height="25" Width="76" Click="Reset_buttonClick" Grid.ColumnSpan="2" />
 
-        <TextBox x:Name="displayAreaYText" Grid.Column="5" Grid.ColumnSpan="4" HorizontalAlignment="Left" Margin="11,-32,0,0" TextWrapping="Wrap"  Text="1" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="displayAreaXText" Grid.Column="1" Grid.ColumnSpan="4" HorizontalAlignment="Left" Margin="23,-32,0,0" TextWrapping="Wrap"   Text="1" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="displayOffsetXText" Grid.Column="1" Grid.ColumnSpan="4" HorizontalAlignment="Left" Margin="23,-62,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="displayOffsetYText" Grid.Column="5" Grid.ColumnSpan="4" HorizontalAlignment="Left" Margin="11,-62,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="displayAreaYText" Grid.Column="7" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="6,-32,0,0" TextWrapping="Wrap"  Text="8" VerticalAlignment="Top" Width="46" Height="18"/>
+        <TextBox x:Name="displayAreaXText" Grid.Column="5" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="28,-32,0,0" TextWrapping="Wrap"   Text="8" VerticalAlignment="Top" Width="45" Height="18"/>
+        <TextBox x:Name="displayOffsetXText" Grid.Column="5" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="28,-60,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="45" Height="18"/>
+        <TextBox x:Name="displayOffsetYText" Grid.Column="7" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="6,-60,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="46" Height="18"/>
+        <TextBox x:Name="UpdateIntervalInSecs" HorizontalAlignment="Left" Margin="-147,0,0,0" Grid.Row="4" TextWrapping="Wrap" Text="0.05" VerticalAlignment="Top" Width="49"/>
 
-        <Label Background="MediumSlateBlue" Foreground="Black" Grid.Column="8" FontSize="9" Content="Display Area (x,y) px " HorizontalAlignment="Left" Margin="14,-34,0,0" VerticalAlignment="Top" Grid.ColumnSpan="5" Width="156" Height="20"/>
+        <Label Background="MediumSlateBlue" Foreground="Black" Grid.Column="8" FontSize="9" Content="Texture Length/Height (x,y) px " HorizontalAlignment="Left" Margin="14,-36,0,0" VerticalAlignment="Top" Grid.ColumnSpan="7" Width="218" Height="24"/>
+        <Label Background="MediumSlateBlue" Foreground="Black" Grid.Column="8" FontSize="9" Content="Pixel Offset  (x,y) px" HorizontalAlignment="Left" Margin="14,-64,0,0" VerticalAlignment="Top" Grid.ColumnSpan="7" Width="218" Height="22"/>
         <Label Foreground="White" x:Name="outputTextBox" Background="Black" Content="" HorizontalAlignment="Left" Margin="-147,-39,0,0" VerticalAlignment="Top" Height="104" Width="125" Grid.RowSpan="3"/>
-
-        <Label Background="MediumSlateBlue" Foreground="Black" Grid.Column="8" FontSize="9" Content="Display Offset  (x,y) px" HorizontalAlignment="Left" Margin="14,-66,0,0" VerticalAlignment="Top" Grid.ColumnSpan="6" Width="218" Height="22"/>
-        <TextBox x:Name="UpdateIntervalInSecs" HorizontalAlignment="Left" Margin="-147,0,0,0" Grid.Row="4" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="49"/>
         <Label Foreground="Black" Background="White" FontSize="8" x:Name="TimeSpanLabel" Content="Time between refresh (in seconds)" HorizontalAlignment="Left" Margin="-147,0,0,0" Grid.Row="3" VerticalAlignment="Center" Width="135"/>
-        <CheckBox Checked="ScrollX_checked" Unchecked="ScrollX_unchecked" FontSize="8" Content="Scroll X" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Grid.Column="15" Margin="4,-64,-25,0"/>
-        <CheckBox Checked="ScrollY_checked" Unchecked="ScrollY_unchecked" FontSize="8" Content="Scroll Y" HorizontalAlignment="Left" VerticalAlignment="Top" Width="72" Grid.Column="15" Margin="4,-48,-20,0"/>
-        <CheckBox Checked="ScrollingColor_checked" Unchecked="ScrollingColor_unchecked" FontSize="8" Content="Scrolling Color" HorizontalAlignment="Left" VerticalAlignment="Top" Width="72" Grid.Column="15" Margin="4,-32,-60,0"/>
+
+        <CheckBox Checked="ScrollX_checked" Unchecked="ScrollX_unchecked" FontSize="8" Content="Scroll X" HorizontalAlignment="Left" VerticalAlignment="Top" Width="71" Grid.Column="13" Margin="28,-61,0,0" Grid.ColumnSpan="3"/>
+        <CheckBox Checked="ScrollY_checked" Unchecked="ScrollY_unchecked" FontSize="8" Content="Scroll Y" HorizontalAlignment="Left" VerticalAlignment="Top" Width="72" Grid.Column="13" Margin="28,-45,0,0" Grid.ColumnSpan="3"/>
+        <CheckBox Checked="ScrollingColor_checked" Unchecked="ScrollingColor_unchecked" FontSize="8" Content="Scrolling Color" HorizontalAlignment="Left" VerticalAlignment="Top" Width="72" Grid.Column="13" Margin="28,-29,0,0" Grid.ColumnSpan="3"/>
+        <CheckBox Checked="AnimationCheckbox_checked" Unchecked="AnimationCheckbox_unchecked" FontSize="8" Content="Enable Animation" HorizontalAlignment="Left" VerticalAlignment="Top" Width="86" Grid.Column="11" Margin="8,-59,0,0" Grid.ColumnSpan="3" Height="17"/>
     </Grid>
 
 </Window>

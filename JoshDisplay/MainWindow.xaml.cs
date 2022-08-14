@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,17 +14,32 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Bitmap = System.Drawing.Bitmap; 
 
 namespace JoshDisplay
 {
 
     public partial class MainWindow : Window
     {
+        bool scrollingColor = false, moving = false, movingX = false, movingY = false, cleaning= false; 
+        int backgroundIndex = 0;
+        float gravity = 1f;  
+        string fileName;
+        private string workingDirectory;
+        
+        Rectangle[,] Display = new Rectangle[1,1];
+        DispatcherTimer timer = new DispatcherTimer();
+        DotCharacter player = new DotCharacter();
+
+        public List<Color[,]> Backgrounds = new List<Color[,]>();
+
         public MainWindow()
         {
             InitializeComponent();
             outputGrid.ShowGridLines = false;
+            InitializeRenderGrid();
         }
+
         private void RichTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
@@ -32,152 +48,128 @@ namespace JoshDisplay
         {
             RefreshRateClock(TimeSpan.FromSeconds(float.Parse(UpdateIntervalInSecs.Text)));
         }
-        bool scrollingColor = false;
-        bool moving = false;
-        bool movingX = false;
-        bool movingY = false;
-        private bool cleaning;
-
-        // updated on clock tick -- see RefreshRateClock()
-        public void RefreshDisplay(object? sender, EventArgs e)
+        public void Update(object? sender, EventArgs e)
         {
-            WipeDisplay();
-            if (cleaning) return;
             // length of one side of the screen; a square.
             Int32.TryParse(displayAreaXText.Text, out int displayAreaX);
             Int32.TryParse(displayAreaYText.Text, out int displayAreaY);
-            //!! starts in the center if displayArea == 3; && offset == 6;!! 
 
             Int32.TryParse(displayOffsetXText.Text, out int offsetX);
             Int32.TryParse(displayOffsetYText.Text, out int offsetY);
 
-            if (moving)
+            
+            player.Update();
+            UpdatePhysics(player); 
+
+            var frame = (Color[,])Backgrounds[backgroundIndex].Clone();
+            if (scrollingColor && moving)
             {
-                if (movingX)
-                {
-                    if (offsetX < 16) offsetX++;
-                    else if (offsetY < 16)
-                    {
-                        offsetY++;
-                        offsetX = 0;
-                    }
-                    else offsetY = 0;
-                }
-                if (movingY)
-                {
-                    if (offsetY < 16) offsetY++;
-                    else if (offsetX < 16)
-                    {
-                        offsetX++;
-                        offsetY = 0;
-                    }
-                    else offsetX = 0;
-                }
-                displayOffsetXText.Text = offsetX.ToString();
-                displayOffsetYText.Text = offsetY.ToString();
+                frame = ScrollingGradient(); 
             }
-            for (int i = 0; i < displayAreaX; i++)
-            {
-                //PixelProcessing.Pixel Vec = PixelProcessing.FormatPixelColor(Interface.GetColorValues(inputBox.Text));
-                //// Scroll through colors 
-                //if (scrollingColor)
-                //{
-                //    if (Vec.r < 255) Vec.r++; else Vec.r = 0;
-                //    if (Vec.g < 255) Vec.g++; else Vec.g = 0;
-                //    if (Vec.b < 255) Vec.b++; else Vec.b = 0;
-                //}
-                for (int j = 0; j < displayAreaY; j++)
-                {
-                    // get color from text box text string (0,0,0) alpha nyi 
-                    PixelProcessing.Pixel Vec = PixelProcessing.FormatPixelColor(Interface.GetColorValues(inputBox.Text));
-                    if (scrollingColor)
-                    {
-                        if (Vec.r < 255) Vec.r++; else Vec.r = 0;
-                        if (Vec.g < 255) Vec.g++; else Vec.g = 0;
-                        if (Vec.b < 255) Vec.b++; else Vec.b = 0;
-                        inputBox.Text = $"{Vec.a},{Vec.r},{Vec.g},{Vec.b}";
-                    }
-                    Brush color = new SolidColorBrush(Color.FromArgb(255, (byte)Vec.r, (byte)Vec.g, (byte)Vec.b));
+            frame[(int)player.pos.x, (int)player.pos.y] = Color.FromRgb(255,255,255);
+            DrawImage(frame);
 
-                    // offset text, used to determine X,Y origin of pixel draw, area expanding down right
-
-                    outputTextBox.Content = $" Current Color: \n in (R,G,B) {Vec.r} {Vec.g} {Vec.b} \n " +
-                        $"xOffset: {offsetX} yOffset: {offsetY} \n xArea: {displayAreaX} yArea: {displayAreaY}";
-                    var rect = new Rectangle();
-                    rect.Fill = color;
-                    Grid.SetColumn(rect, offsetX + i);
-                    Grid.SetRow(rect, offsetY + j);
-                    Grid.SetRow(rect, offsetY + i);
-                    Grid.SetColumn(rect, offsetX + j);
-                    outputGrid.Children.Add(rect);
-                }
-            }
-            outputGrid.UpdateLayout();
-        }
-
-        public void RefreshRateClock(TimeSpan? interval)
+        } // Update -- Mostly drawing pixels. 
+        private void UpdatePhysics(DotCharacter player)
         {
-            try
+            player.vel.y += gravity;
+            player.vel.x *= 0.6f;
+            player.vel.y *= 0.6f;
+            player.pos.y += player.vel.y;
+            player.pos.x += player.vel.x;
+            // move player left and right
+            if (player.pos.x > 15)
             {
-                if (interval == null)
-                    return;
+                if (backgroundIndex < Backgrounds.Count - 1)
+                {
+                    backgroundIndex++;
+                    player.pos.x = 0;
+                }
+                else
+                {
+                    player.vel.x = 0; 
+                    player.pos.x = 15;
+                }
             }
-            catch (Exception e)
+            if (player.pos.x < 0)
             {
-                outputTextBox.Content = e.Message;
-            }
-            var timer = new DispatcherTimer();
-            timer.Tick += RefreshDisplay;
-#pragma warning disable CS8629 // Nullable value type may be null.
-            timer.Interval = (TimeSpan)interval;
-#pragma warning restore CS8629 // Nullable value type may be null.
+                if (backgroundIndex > 0)
+                {
+                    backgroundIndex--;
+                    player.pos.x = 15;
+                }
+                else
+                {
+                    player.pos.x = 0;
+                    player.vel.x = 0;
+                }
 
-            if (timer.IsEnabled)
-            {
-                timer.Stop();
-                return;
             }
-            timer.Start();
+
+            // floor & ceiling prevents ascenscion/descent
+            if (player.pos.y > 13)
+            {
+                player.pos.y = 13;
+                player.vel.y = 13;
+                player.isGrounded = true;
+            }
+            else player.isGrounded = false;
+            if (player.pos.y < 0)
+            {
+                player.pos.y = 0;
+                player.vel.y = 0;
+            }
+            
         }
+        
+        public Color[,] ScrollingGradient()
+        {
+            var inputs = inputBox.Text.Split(',');
+            byte.TryParse(inputs[0], out var red);
+            byte.TryParse(inputs[1], out var green);
+            byte.TryParse(inputs[2], out var blue);
+            byte.TryParse(inputs[3], out var alpha);
+
+            if (scrollingColor && moving)
+            {
+                if (red < 255) red++; else red = 0;
+                if (green < 255) green++; else green = 0;
+                if (blue < 255) blue++; else blue = 0;
+                inputBox.Text = $"{alpha},{red},{green},{blue}";
+            }
+            var brush = new SolidColorBrush(Color.FromArgb(alpha, red, green, blue));
+            var c = new Color[16, 16];
+            const byte temp = 16;
+            for (int i = 0; i < 16 * 16; i++)
+            {
+                c[i / 16, i % 16] = Color.FromArgb((byte)i, Convert.ToByte(i % temp), (byte)i, 0) + brush.Color;
+            }
+            return c; 
+        }
+        public static Color[,] GetImage(string path)
+        {
+            
+            var colorArray = new Color[16,16];
+            Bitmap bitmap = new Bitmap(path);
+            for (int x = 0; x < bitmap.Width;x++)
+            {
+                for (int y = 0; y < bitmap.Height; y++)
+                {
+                    var a = bitmap.GetPixel(x, y).A;
+                    var r = bitmap.GetPixel(x, y).R;
+                    var g = bitmap.GetPixel(x, y).G;
+                    var b = bitmap.GetPixel(x, y).B;
+                    colorArray[x, y] = Color.FromArgb(a,r,g,b); 
+                }
+            }
+            return colorArray;
+        }
+        #region Checkbox Events ((Massive Crud Below..))
         private void Reset_buttonClick(object sender, RoutedEventArgs e)
         {
             WipeDisplay();
+            if (timer != null) timer.Stop();
         }
-        // Cleans all rectangles off screen
-        void WipeDisplay()
-        {
-            if (cleaning) return;
-            cleaning = true;
-            List<int> list = new List<int>();
-            for (int i = 0; i < outputGrid.Children.Count; i++)
-            {
-                // ugly IF to check type
-                if (outputGrid.Children[i].GetType() != typeof(Button)
-                && outputGrid.Children[i].GetType() != typeof(RichTextBox)
-                && outputGrid.Children[i].GetType() != typeof(Label)
-                && outputGrid.Children[i].GetType() != typeof(TextBox)
-                && outputGrid.Children[i].GetType() != typeof(CheckBox))
-
-                { list.Add(i); }
-            }
-            foreach (int r in list)
-            {
-                try
-                {
-                    if (outputGrid.Children.Contains(outputGrid.Children[r]))
-                    {
-                        outputGrid.Children.RemoveAt(r);
-                    }
-                }
-                catch (Exception e)
-                {
-                    outputTextBox.Content = e.Message;
-                }
-            }
-            outputGrid.UpdateLayout();
-            cleaning = false;
-        }
-
 
         private void ScrollX_checked(object sender, RoutedEventArgs e)
         {
@@ -206,38 +198,113 @@ namespace JoshDisplay
             scrollingColor=false;
         }
 
-
-    }
-    public static class PixelProcessing
-    {
-        public struct Pixel { public int r; public int g; public int b; public int a; }
-        public static Pixel FormatPixelColor(List<int> color)
+        private void AnimationCheckbox_checked(object sender, RoutedEventArgs e)
         {
-            Pixel vector = new Pixel();
-            vector.r = color[0];
-            vector.g = color[1];
-            vector.b = color[2];
-            vector.a = color[3];
-            return vector;
+            moving = true;
+        }
+        private void AnimationCheckbox_unchecked(object sender, RoutedEventArgs e)
+        {
+            moving = false; 
+        }
+        #endregion
+        
+        private void InitializeBitmapCollection()
+        {
+            foreach (string path in Directory.GetFiles(workingDirectory))
+            {
+                var bitmap = GetImage(path);
+                Backgrounds.Add(bitmap);
+            }
+        }
+        private void InitializeRenderGrid()
+        {
+            workingDirectory = Directory.GetCurrentDirectory() + "\\Images";
+            InitializeBitmapCollection(); 
+            Int32.TryParse(displayOffsetXText.Text, out int offsetX);
+            Int32.TryParse(displayOffsetYText.Text, out int offsetY);
+            Display = new Rectangle[16,16];
+            // scroll texture back and forth +y or +x 
+            for (int x = 0; x < 16; x++)
+            {
+                for (int y = 0; y < 16; y++)
+                {
+                    // offset text, used to determine X,Y origin of pixel draw, area expanding down right
+                    var rect = new Rectangle();
+
+                    Grid.SetColumn(rect, offsetX + x);
+                    Grid.SetRow(rect, offsetY + y);
+                    
+                    Grid.SetRow(rect, offsetY + y);
+                    Grid.SetColumn(rect, offsetX + x);
+
+                   
+                    
+                    Display[x,y] = rect;
+                    outputGrid.Children.Add(rect);
+                }
+
+            }
+            outputGrid.UpdateLayout();
+        }
+        public void RefreshRateClock(TimeSpan interval)
+        {
+            if (timer != null) timer.Stop(); 
+            timer = new DispatcherTimer();
+            timer.Tick += Update;
+            timer.Interval = interval;
+
+            if (timer.IsEnabled)
+            {
+                timer.Stop();
+                return;
+            }
+            timer.Start();
+        }     // master clock for update method
+        private void WipeDisplay()
+        {
+            if (cleaning) return;
+            cleaning = true;
+            List<int> toRemove = new List<int>();
+            for (int i = 0; i < outputGrid.Children.Count; i++)
+            {
+                // if typeof Rectangle send in list to get removed; 
+                if (outputGrid.Children[i].GetType() == typeof(Rectangle))
+                { toRemove.Add(i); }
+                
+            }
+            // iterate on previously created list, actually destroying the pixels.
+            foreach (int r in toRemove)
+            {
+                try
+                {
+                    if (outputGrid.Children.Contains(outputGrid.Children[r]))
+                    {
+                        if (outputGrid.Children[r] as Rectangle == null) continue;
+                        var rect = (Rectangle)outputGrid.Children[r];
+                        rect.Fill = Brushes.Black; 
+                    }
+                }
+                catch (Exception e)
+                {
+                    outputTextBox.Content = $"{ e.Message}";
+                }
+            }
+            outputGrid.UpdateLayout();
+            cleaning = false;
+        } // Returns All rectangles to black 
+        private void DrawImage(Color[,] colorData)
+        {
+            for (int x = 0; x < colorData.GetLength(0); x++)
+            {
+                for (int y = 0; y < colorData.GetLength(1); y++)
+                {
+                    if (x > Display.GetLength(0) || y > Display.GetLength(1)) continue;
+                    var brush = new SolidColorBrush(colorData[x, y]);
+                    if (Display[x, y].Fill == brush) return;
+                    Display[x, y].Fill = brush; 
+                }
+            }
         }
     }
-
-    public static class Interface 
-    {
-        public static List<int> GetColorValues(string input)
-        {
-            var list = new List<int>(3);
-            var inputs = input.Split(',');
-            Int32.TryParse(inputs[0], out var red);
-            Int32.TryParse(inputs[1], out var green);
-            Int32.TryParse(inputs[2], out var blue);
-            Int32.TryParse(inputs[3], out var alpha);
-            list.Add(red);
-            list.Add(green);
-            list.Add(blue);
-            list.Add(alpha);
-
-            return list; 
-        }
-    }
+    
 }
