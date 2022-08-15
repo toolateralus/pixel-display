@@ -21,7 +21,9 @@ namespace JoshDisplay.Classes
         // hierarchy info
         public Node? parentNode;
         public Node[]? children;
-
+        public List<object> Components = new List<object>();
+        public Rigidbody? rb;
+        public Sprite? sprite; 
 
         // Constructors 
         public Node(Stage parentStage, string name, string gUID, Vec2 position, Vec2 velocity, Vec2 scale, Node? parentNode, Node[]? children, bool usingPhysics)
@@ -34,36 +36,51 @@ namespace JoshDisplay.Classes
             this.scale = scale;
             this.parentNode = parentNode;
             this.children = children;
-            this.usingPhysics = usingPhysics;
         }
         public Node(string name, string gUID)
         {
             this.UUID = gUID;
             this.Name = name; 
         }
+        public Node() { }
         public Node(string name, string gUID, Vec2 pos, Vec2 scale, bool usingPhysics)
         {
             this.Name = name;
             this.UUID = gUID;
             this.position = pos;
             this.scale = scale;
-            this.usingPhysics = usingPhysics;
         }
 
         // rigidbody info
-        public bool usingPhysics { get; private set; }
         
         // awake - to be called before first update; 
         public void Awake(object? sender, EventArgs e)
         {
-            if (parentStage == null) return; 
-            if (UUID == null) this.UUID = GUID.GetGUID();
-            if (Name == null) Name = string.Empty; 
-        }
-        // update - if(usingPhysics) Update(); every frame.
-        public void Update(object? sender, EventArgs e)
-        {
+            foreach (object component in Components)
+            { 
+                if (component as Rigidbody != null)
+                {
+                    rb = component as Rigidbody;
+                    rb.node = this;
+                }
+                if (component as Sprite != null)
+                {
+                    sprite = component as Sprite;
+                }
+            }
             if (parentStage == null) return;
+            if (UUID == null) this.UUID = Classes.UUID.NewUUID();
+            if (Name == null) Name = string.Empty;
+            if (position == null) position = new Vec2(0, 0);
+            if (velocity == null) velocity = new Vec2(0, 0);
+            
+        }
+
+
+        // update - if(usingPhysics) Update(); every frame.
+        public void Update()
+        {
+            rb.Update(); 
         }
 
 

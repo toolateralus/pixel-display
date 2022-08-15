@@ -20,29 +20,16 @@ namespace JoshDisplay.Classes
             RefreshStageDictionary(); 
         }
         // List of nodes within stage
-        public Dictionary<string, Node> nodesByName { get; private set; }
+        public Dictionary<string, Node> nodesByName { get; private set; } = new Dictionary<string, Node>();
         public Node[] nodes { get; private set; }
         public Node FindNode(string name)
         {
-            Node node = new Node("", Classes.GUID.GetGUID());
+            Node node = new Node();
             if (nodesByName.ContainsKey(name)) 
             {
                 node = nodesByName[name];
             }
             return node;
-        }
-        public Node[] GetPhysicsNodes()
-        {
-            var physicsNodes = new List<Node>();
-            if (nodes.Count() <= 0) return physicsNodes.ToArray(); 
-           foreach (Node node in nodes)
-           {
-               if (node.usingPhysics)
-               {
-                   physicsNodes.Add(node);
-               }
-           }
-           return physicsNodes.ToArray();
         }
         void RefreshStageDictionary()
         {
@@ -50,7 +37,7 @@ namespace JoshDisplay.Classes
             {
                 if (!nodes.Contains(node))
                     nodesByName.Add(node.Name, node);
-            }
+            }       
         }
         
         // Skybox image

@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 namespace JoshDisplay.Classes
 {
 
-    public static class GUID
+    public static class UUID
     {
         public static Dictionary<string, int> GUIDs = new Dictionary<string, int>();
         public static int index = 0; 
-        public static string GetGUID()
+        public static string NewUUID()
         {
             index++; 
             var guid = Guid.NewGuid().ToString();

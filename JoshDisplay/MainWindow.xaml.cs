@@ -30,17 +30,37 @@ namespace JoshDisplay
             InitializeComponent();
             InitializeRenderGrid();
             InitializeBitmapCollection();
-            var nodes = new List<Node>(16);
+            SetupDefaultStage(); 
+        }
+
+        private void SetupDefaultStage() // Initialize Default home Stage, with 16 rigidbody nodes
+        {
+            var nodes = new List<Node>(16); // Create 16 new 'Nodes'
+           
             for (int i = 0; i < 16; i++)
             {
-                nodes.Add(new Node($"NODE_INSTANCE_{i}", GUID.GetGUID(), new Vec2(i,i) , new Vec2(1,1), false));
+                if (i == 0) // Setup Player
+                {
+                    nodes.Add(new Node("Player", UUID.NewUUID(), new Vec2(i, i), new Vec2(1, 1), false)); // add new node
+                    // Initialize Rigidbody on Player
+                    var rb = new Rigidbody();
+                    nodes[i].Components.Add(rb);
+                    nodes[i].rb = rb;
+                    rb.node = nodes[i];
+                    _playerRigidbody = rb;
+                    // Draw Sprite on Player
+                    var sprite = new Sprite(new Vec2(2, 2), Color.FromArgb(255, 80, 110, 255), false);
+                    nodes[i].sprite = sprite;
+                    nodes[i].Components.Add(sprite);
+                    continue; 
+                }
+                nodes.Add(new Node($"New Node_{i}", UUID.NewUUID(), new Vec2(i, i), new Vec2(1, 1), false));
             }
             SetCurrentStage(new Stage("DefaultStage", Backgrounds[0], nodes.ToArray()));
             stage.Awake();
             foreach (Node node in stage.nodes)
             {
                 node.parentStage = stage;
-                dispatchTimer.Tick += node.Update;  
             }
         }
 
@@ -49,16 +69,15 @@ namespace JoshDisplay
         float gravity = 1f;
 
         private string? workingDirectory;
-        
+        Rigidbody _playerRigidbody;
         Rectangle[,] Display = new Rectangle[1,1];
         DispatcherTimer dispatchTimer = new DispatcherTimer();
         Timer? physicsTimer; 
-        DotCharacter player = new DotCharacter();
 
         public List<Color[,]> Backgrounds = new List<Color[,]>();
 
-        private long lastFrameTime;
-        private int framesUntilCheck;
+        private long lastFrameTime = 0;
+        private int framesUntilCheck = 50; 
 
         private const int screenWidth = 64;
         private const int screenHeight = 64;
@@ -66,6 +85,7 @@ namespace JoshDisplay
         int frameCount;
         private bool running;
         Stage stage;
+        public string debug = "";
         #endregion
         
         
@@ -87,7 +107,6 @@ namespace JoshDisplay
             }
             return colorArray;
         } //Find bitmap .bmp file @ specified path and return array of colors corresponding to each pixel in the image.
-
         private void WipeDisplay()
         {
             List<int> toRemove = new List<int>();
@@ -117,8 +136,7 @@ namespace JoshDisplay
             }
             outputGrid.UpdateLayout();
         } // Returns All rectangles to black 
-        
-        private void Render(Color[,] colorData)
+        private void FinalRender(Color[,] colorData)
         {
             for (int x = 0; x < colorData.GetLength(0); x++)
             {
@@ -131,116 +149,120 @@ namespace JoshDisplay
                 }
             }
         } // render final output image as colorData Array to display
-        
-        private void CompositionTarget_Rendering(object? sender, EventArgs e)
+        private void PreRendering(object? sender, EventArgs e)
         {
             //FPS counter
             const int frameThreshold = 50;
             if (framesUntilCheck >= frameThreshold)
             {
-                // FORMAT FOR OUTPUT TEXT BOX DEBUGGING -- COMMENT OUT FOR A LOT OF PERFORMANCE INCREASE
-                SendConsoleDebug();
-                // END STRING FORMATTING
                 lastFrameTime = DateTime.Now.Ticks;
-
                 framesUntilCheck = 0;
                 frameCount = 0;
             }
             framesUntilCheck++;
 
-            // Display every node in the debug console
-            
-            // Get input
-            Input.UpdateKeyboardState();
-            var frame = (Color[,])stage.Background.Clone();
-            frame[(int)player.pos.x, (int)player.pos.y] = Color.FromRgb(0, 0, 0);
-            Render(frame);
-        }
-
+            // Display every node in the debug console (See method for inclusions)
+            if (running) 
+            {
+                Input.UpdateKeyboardState();
+                SendConsoleDebug();
+                var frame = (Color[,])stage.Background.Clone();
+                foreach (var node in stage.nodes)
+                {
+                    if (node.sprite != null)
+                    {
+                        for (int i = 0; i < node.sprite.size.x; i++)
+                        {
+                            for (int j = 0; j < node.sprite.size.y; j++)
+                            {
+                                frame[(int)node.position.x + i, (int)node.position.y + j] = node.sprite.color;
+                                frame[(int)node.position.x + i, (int)node.position.y + j] = node.sprite.color;
+                            }
+                        }
+                        
+                    }
+                }
+                frame[(int)_playerRigidbody.pos.x, (int)_playerRigidbody.pos.y] = Color.FromRgb(0, 0, 0);
+                FinalRender(frame);
+            }
+        } // Main Rendering thread for front end, does not handle bitmap pixels
         private void SendConsoleDebug()
         {
             outputTextBox.Text =
-                            $" ===STATS===: \n\t {Math.Floor((1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds) * frameCount)} Frames Per Second " +
+                            $" ===STATS===: \n\t {Math.Floor((1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds) * frameCount)} Frames Per Second \n PLAYER STATS : \t{_playerRigidbody.GetDebugs()} " +
                             $"\n\t Current Room : {backgroundIndex}";
             outputTextBox.Text += "\n ===HIERARCHY===";
             outputTextBox.Text += $"\n\t Stage : {stage.Name} (Loaded Nodes : {stage.nodes.Count()}) \n";
-            foreach (var node in stage.nodes) outputTextBox.Text +=
-            $"\n Node : \n\t Name : {node.Name} \n\t Position : {node.position.x} , {node.position.y} \n";
-        }
-
+            
+            // NODE HEIRARCHY
+            foreach (var node in stage.nodes) outputTextBox.Text += 
+            $" \n\t\b Node : \n\t \b Name  : {node.Name} \n\t \b Position : {node.position.x} , {node.position.y} \n\t\t BOOL__isSprite : {node.sprite} \n\t\t BOOL__isRigidbody : {node.rb} \t";
+            
+            outputTextBox.Text += $" \n {debug} \n";
+        }// formats and sends the framerate , hierarchy status and other info to the "Debug Console" outputTextBox;
         public void Update(object? sender, EventArgs e)
         {
-            // script update
-            player.Update();
-            //physics update
-            UpdatePlayerPhysics(player);
             if (stage != null) PhysicsUpdate(stage); // update all physics objects in current stage 
-            
-            frameCount++;
-        } // Update -- Mostly drawing pixels. 
+           
+        } // runs PhysicsUpdate() with current scene 
         private void PhysicsUpdate(Stage stage)
-        {
-            //var physicsNodes = stage.GetPhysicsNodes();
-            //foreach (var physicsObject in physicsNodes)
-            //{
-            //    physicsObject.Update();
-            //}
-        }
+        {   
+                _playerRigidbody.Update(); 
+                _playerRigidbody.velocity.y += gravity;
+                _playerRigidbody.velocity.x *= 0.6f;
+                _playerRigidbody.velocity.y *= 0.6f;
+           
+                _playerRigidbody.pos.y += _playerRigidbody.velocity.y;
+                _playerRigidbody.pos.x += _playerRigidbody.velocity.x;
+                // move player left and right
+                if (_playerRigidbody.pos.x > screenWidth)
+                {
+                    if (backgroundIndex < Backgrounds.Count - 1)
+                    {
+                        backgroundIndex++;
+                        _playerRigidbody.pos.x = 0;
+                    }
+                    else
+                    {
+                        _playerRigidbody.velocity.x = 0;
+                        _playerRigidbody.pos.x = screenWidth - 1;
+                    }
+                }
+                if (_playerRigidbody.pos.x < 0)
+                {
+                    if (backgroundIndex > 0)
+                    {
+                        backgroundIndex--;
+                        _playerRigidbody.pos.x = screenWidth - 1;
+                    }
+                    else
+                    {
+                        _playerRigidbody.pos.x = 0;
+                        _playerRigidbody.velocity.x = 0;
+                    }
+
+                }
+
+                // floor & ceiling prevents ascenscion/descent
+                if (_playerRigidbody.pos.y > screenHeight - 4)
+                {
+                    _playerRigidbody.pos.y = screenHeight - 4;
+                    _playerRigidbody.velocity.y = 0;
+                    _playerRigidbody.isGrounded = true;
+                }
+                else _playerRigidbody.isGrounded = false;
+                if (_playerRigidbody.pos.y < 0)
+                {
+                    _playerRigidbody.pos.y = 0;
+                    _playerRigidbody.velocity.y = 0;
+                }
+                frameCount++;
+
+        }// updates all physics objects within the specified stage
         void SetCurrentStage(Stage stage)
         {
             this.stage = stage; 
-        }
-        private void UpdatePlayerPhysics(DotCharacter player)
-        {
-            player.vel.y += gravity;
-            player.vel.x *= 0.6f;
-            player.vel.y *= 0.6f;
-            player.pos.y += player.vel.y;
-            player.pos.x += player.vel.x;
-            // move player left and right
-            if (player.pos.x > screenWidth)
-            {
-                if (backgroundIndex < Backgrounds.Count - 1)
-                {
-                    backgroundIndex++;
-                    player.pos.x = 0;
-                }
-                else
-                {
-                    player.vel.x = 0; 
-                    player.pos.x = screenWidth -1;
-                }
-            }
-            if (player.pos.x < 0)
-            {
-                if (backgroundIndex > 0)
-                {
-                    backgroundIndex--;
-                    player.pos.x = screenWidth - 1;
-                }
-                else
-                {
-                    player.pos.x = 0;
-                    player.vel.x = 0;
-                }
-
-            }
-
-            // floor & ceiling prevents ascenscion/descent
-            if (player.pos.y > screenHeight - 4)
-            {
-                player.pos.y = screenHeight - 4;
-                player.vel.y = 0;
-                player.isGrounded = true;
-            }
-            else player.isGrounded = false;
-            if (player.pos.y < 0)
-            {
-                player.pos.y = 0;
-                player.vel.y = 0;
-            }
-            
-        } // old method to update physics for the player
+        } // sets the current stage to the specified stage.
         private void InitializeRenderGrid()
         {
             Display = new Rectangle[screenWidth,screenHeight];
@@ -272,7 +294,7 @@ namespace JoshDisplay
 
             }
             outputGrid.UpdateLayout();
-        }
+        } // initializes the zone which all pixels are held, and sets them to a default color. 
         private void InitializeBitmapCollection()
         {
             if (workingDirectory == null) return; 
@@ -284,26 +306,14 @@ namespace JoshDisplay
         } // find all .bmp bitmap images in working directory of program.
         public void InitializeClocks(TimeSpan interval)
         {
-            CompositionTarget.Rendering += CompositionTarget_Rendering;
-
-            //if (dispatchTimer != null) dispatchTimer.Stop();
-            //dispatchTimer = new DispatcherTimer(DispatcherPriority.Normal);
-            //dispatchTimer.Tick += Update;
-            //dispatchTimer.Interval = interval;
-
-
+            CompositionTarget.Rendering += PreRendering;
             if (physicsTimer != null)
             {
                 physicsTimer.Stop();
                 return;
             }
-            //Thread t = new Thread(physicsTimer = new System.Threading.Timer();
-            //t.SetApartmentState(ApartmentState.STA);
-
             physicsTimer = new Timer(interval.TotalSeconds);
             physicsTimer.Elapsed += Update;
-            //t.Start();
-            
             if (physicsTimer.Enabled)
             {
                 physicsTimer.Start();
@@ -311,19 +321,7 @@ namespace JoshDisplay
                 return;
             }
             physicsTimer.Start();
-
-            //if (dispatchTimer.IsEnabled)
-            //{
-            //    dispatchTimer.Stop();
-            //    return;
-            //}
-            //dispatchTimer.Start();
         }     // master clock for update method
-        #region UI Button Event Methods
-        private void RichTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
         private void Accept_Clicked(object sender, RoutedEventArgs e)
         {
             if (running)
@@ -340,10 +338,5 @@ namespace JoshDisplay
             InitializeClocks(TimeSpan.FromSeconds(float.Parse(updateTickBox.Text)));
             running = true;
         }
-        private void Reset_buttonClick(object sender, RoutedEventArgs e)
-        {
-        }
-        #endregion
-
     }
 }
