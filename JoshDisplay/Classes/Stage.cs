@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using JoshDisplay.Classes;
+using PixelRenderer.Components;
 
 
-namespace JoshDisplay.Classes
+namespace PixelRenderer.Components
 {
     public class Stage : IEnumerable
     {

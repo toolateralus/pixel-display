@@ -1,12 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows.Input;
 
-namespace JoshDisplay.Classes
+namespace PixelRenderer
 {
+    public class Vec2
+    {
+        public float x; public float y;
+        public Vec2(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        public Vec2()
+        { }
+    }
     public static class Input
     {
         static Dictionary<Key, bool> KeyDown = new Dictionary<Key, bool>();
@@ -28,7 +35,7 @@ namespace JoshDisplay.Classes
             {
                 KeyDown.Add(key, result);
             }
-            else  KeyDown[key] = result;
+            else KeyDown[key] = result;
         }
         public static void UpdateKeyboardState()
         {

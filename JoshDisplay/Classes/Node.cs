@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JoshDisplay.Classes; 
-namespace JoshDisplay.Classes
+using PixelRenderer.Components; 
+namespace PixelRenderer.Components
 {
     public class Node
     {
@@ -51,36 +51,33 @@ namespace JoshDisplay.Classes
             this.scale = scale;
         }
 
-        // rigidbody info
-        
         // awake - to be called before first update; 
         public void Awake(object? sender, EventArgs e)
         {
             foreach (object component in Components)
             { 
-                if (component as Rigidbody != null)
+                if (component is Rigidbody)
                 {
                     rb = component as Rigidbody;
-                    rb.node = this;
+                    if(rb != null) rb.parentNode = this;
                 }
-                if (component as Sprite != null)
+                if (component is Sprite)
                 {
                     sprite = component as Sprite;
                 }
             }
             if (parentStage == null) return;
-            if (UUID == null) this.UUID = Classes.UUID.NewUUID();
+            if (UUID == null) this.UUID = PixelRenderer.Components.UUID.NewUUID();
             if (Name == null) Name = string.Empty;
             if (position == null) position = new Vec2(0, 0);
             if (velocity == null) velocity = new Vec2(0, 0);
             
         }
 
-
         // update - if(usingPhysics) Update(); every frame.
         public void Update()
         {
-            rb.Update(); 
+           if(rb!=null) rb.Update(); 
         }
 
 
