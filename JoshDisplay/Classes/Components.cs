@@ -7,7 +7,7 @@ namespace PixelRenderer.Components
     public class Component
     {
         public Node parentNode;
-
+        
         
     }
 
@@ -15,8 +15,8 @@ namespace PixelRenderer.Components
     {
         public Vec2 pos = new Vec2();
         public Vec2 velocity = new Vec2();
-        public bool isGrounded = false; 
-        public bool takingInput { get;  set; } = false; 
+        public bool isGrounded = false;
+        public bool takingInput { get; set; } = false;
         bool jumpHeld = false;
 
         public string GetDebugs()
@@ -26,7 +26,7 @@ namespace PixelRenderer.Components
         public void Update()
         {
             this.pos = parentNode.position;
-            this.velocity = parentNode.velocity; 
+            this.velocity = parentNode.velocity;
 
             if (parentNode == null) return;
             if (takingInput)
@@ -44,24 +44,44 @@ namespace PixelRenderer.Components
             }
 
             parentNode.position = this.pos;
-            parentNode.velocity = this.velocity;  
+            parentNode.velocity = this.velocity;
             
-           
         }
-      
     }
+
     public class Sprite : Component
     {
         public Vec2 size = new Vec2();
-        public Color color;
+        public Color[,] colorData;
         public bool isCollider = false;
 
         public Sprite(Vec2 size, Color color, bool isCollider)
         {
+            colorData = new Color[(int)size.x, (int)size.y];
+            for (int x = 0; x < size.x; x++)
+            for (int y = 0; y < size.y; y++)
+            {
+                 this.colorData[x, y] = color;       
+            }
             this.size = size;
-            this.color = color;
             this.isCollider = isCollider;
         }
-    }
+        public Sprite(Color[,] colorData)
+        {
+            this.colorData = colorData; 
+        }
+        public Sprite(Vec2 size)
+        {
+            this.size = size; 
+        }
+        public Sprite(Vec2 size, bool isCollider)
+        {
+            this.size = size;
+            this.isCollider = isCollider; 
+        }
+        public Sprite()
+        {
 
+        }
+    }
 }

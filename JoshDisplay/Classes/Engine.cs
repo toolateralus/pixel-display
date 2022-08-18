@@ -3,6 +3,8 @@ using System.Windows.Input;
 
 namespace PixelRenderer
 {
+    namespace MathP { }
+
     public class Vec2
     {
         public float x; public float y;

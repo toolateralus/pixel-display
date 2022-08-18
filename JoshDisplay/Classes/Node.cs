@@ -21,10 +21,19 @@ namespace PixelRenderer.Components
         // hierarchy info
         public Node? parentNode;
         public Node[]? children;
-        public List<object> Components = new List<object>();
+        public Dictionary<Type, Component> Components { get; private set; } = new Dictionary<Type, Component>();
         public Rigidbody? rb;
-        public Sprite? sprite; 
+        public Sprite? sprite;
 
+        public void AddComponent(Component component) { Components.Add(component.GetType(),component); }
+        public Component GetComponent<T1>() 
+        {
+            if (Components.ContainsKey(typeof(T1)))
+            {
+                return Components[key: typeof(T1)];
+            }
+            throw new Exception("invalid getComponent call"); 
+        }
         // Constructors 
         public Node(Stage parentStage, string name, string gUID, Vec2 position, Vec2 velocity, Vec2 scale, Node? parentNode, Node[]? children, bool usingPhysics)
         {
@@ -50,10 +59,11 @@ namespace PixelRenderer.Components
             this.position = pos;
             this.scale = scale;
         }
-
+        
         // awake - to be called before first update; 
         public void Awake(object? sender, EventArgs e)
         {
+            // cross reference components and node
             foreach (object component in Components)
             { 
                 if (component is Rigidbody)
@@ -64,6 +74,7 @@ namespace PixelRenderer.Components
                 if (component is Sprite)
                 {
                     sprite = component as Sprite;
+                    if(sprite != null) sprite.parentNode = this; 
                 }
             }
             if (parentStage == null) return;

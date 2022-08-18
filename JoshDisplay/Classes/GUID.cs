@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace PixelRenderer.Components
 {
-
     public static class UUID
     {
         public static Dictionary<string, int> GUIDs = new Dictionary<string, int>();

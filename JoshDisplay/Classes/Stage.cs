@@ -15,27 +15,24 @@ namespace PixelRenderer.Components
         public string? Name { get; set; }
         public string? GUID { get; private set; }
         
-        public void Awake()
-        {
-            RefreshStageDictionary(); 
-        }
         // List of nodes within stage
         public Dictionary<string, Node> nodesByName { get; private set; } = new Dictionary<string, Node>();
         public Node[] nodes { get; private set; }
+        
         public Node FindNode(string name)
         {
-            Node node = new Node();
             if (nodesByName.ContainsKey(name)) 
             {
-                node = nodesByName[name];
+                return nodesByName[name];
             }
-            return node;
+            return null; 
         }
-        void RefreshStageDictionary()
+        
+        public void RefreshStageDictionary()
         {
             foreach (Node node in nodes)
             {
-                if (!nodes.Contains(node))
+                if (!nodesByName.ContainsKey(node.Name))
                     nodesByName.Add(node.Name, node);
             }       
         }
@@ -43,8 +40,7 @@ namespace PixelRenderer.Components
         // Skybox image
         public Color[,] Background { get; set; } 
 
-        // For iterating on in other scripts IENUMERARTOR
-
+        // Constructors
         public Stage(Node[] nodes)
         {
             nodes = new Node[nodes.Length];
@@ -53,6 +49,7 @@ namespace PixelRenderer.Components
             {
                 nodes[i] = nodes[i];
             }
+            RefreshStageDictionary(); 
         }
 
         public Stage(string Name, Color[,] Background, Node[] nodes)
@@ -60,6 +57,7 @@ namespace PixelRenderer.Components
             this.Name = Name;
             this.Background = Background;
             this.nodes = nodes;
+            RefreshStageDictionary();
         }
 
         // Implementation for the GetEnumerator method.
