@@ -26,16 +26,36 @@ namespace PixelRenderer.Components
         public Sprite? sprite;
 
         public void AddComponent(Component component) { Components.Add(component.GetType(),component); }
-        public Component GetComponent<T1>() 
+
+        public bool TryGetComponent<T> (out T? component) where T : Component
         {
-            if (Components.ContainsKey(typeof(T1)))
+            if (Components.ContainsKey(typeof(T)))
             {
-                return Components[key: typeof(T1)];
+                component = (T)Components[typeof(T)];
+                return true;
             }
-            throw new Exception("invalid getComponent call"); 
+            component = null;
+            return false;
         }
-        // Constructors 
-        public Node(Stage parentStage, string name, string gUID, Vec2 position, Vec2 velocity, Vec2 scale, Node? parentNode, Node[]? children, bool usingPhysics)
+
+        public T? GetComponent<T>()
+        {
+            try
+            {
+                if (Components.ContainsKey(typeof(T)))
+                {
+                    var component = Components[typeof(T)];
+                    return (T)Convert.ChangeType(component, typeof(T));
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+            return (T)Convert.ChangeType(0, typeof(T));
+        }
+            // Constructors 
+        public Node(Stage parentStage, string name, string gUID, Vec2 position, Vec2 velocity, Vec2 scale, Node? parentNode, Node[]? children)
         {
             this.parentStage = parentStage;
             Name = name;
@@ -52,7 +72,7 @@ namespace PixelRenderer.Components
             this.Name = name; 
         }
         public Node() { }
-        public Node(string name, string gUID, Vec2 pos, Vec2 scale, bool usingPhysics)
+        public Node(string name, string gUID, Vec2 pos, Vec2 scale)
         {
             this.Name = name;
             this.UUID = gUID;
@@ -82,7 +102,6 @@ namespace PixelRenderer.Components
             if (Name == null) Name = string.Empty;
             if (position == null) position = new Vec2(0, 0);
             if (velocity == null) velocity = new Vec2(0, 0);
-            
         }
 
         // update - if(usingPhysics) Update(); every frame.
@@ -90,7 +109,6 @@ namespace PixelRenderer.Components
         {
            if(rb!=null) rb.Update(); 
         }
-
 
     }
 }

@@ -57,18 +57,18 @@ namespace PixelRenderer
         {
             var nodes = new List<Node>(); // Create 16 new 'Nodes' for new stage;
             var sprite = new Sprite(new Vec2(2, 2), Color.FromArgb(255, 255,255,255), false);
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 24; i++)
             {
                 if (i == 0) // Setup Player
                 {
-                    nodes.Add(new Node("Player", UUID.NewUUID(), new Vec2(0, 0), new Vec2(1, 1), false)); // add new node
+                    nodes.Add(new Node("Player", UUID.NewUUID(), new Vec2(48, 0), new Vec2(1, 1))); // add new node
 
                     // Initialize Rigidbody on Player
-                    var playerRigidbody = new Rigidbody();
-                    playerRigidbody.takingInput = true;
-                    nodes[i].rb = playerRigidbody;
-                    playerRigidbody.parentNode = nodes[i];
-                    nodes[i].AddComponent(playerRigidbody);
+                    //var playerRigidbody = new Rigidbody();
+                    //playerRigidbody.takingInput = true;
+                    //nodes[i].rb = playerRigidbody;
+                    //playerRigidbody.parentNode = nodes[i];
+                    //nodes[i].AddComponent(playerRigidbody);
 
                     // Draw Sprite on Player
                     sprite = new Sprite(new Vec2(5,5), Color.FromArgb(255, 180, 185, 90), true); 
@@ -77,8 +77,10 @@ namespace PixelRenderer
                     continue; 
                 }
                 
-                sprite = new Sprite(new Vec2(24,24), Color.FromArgb((byte)(150 + (i * 2)), 150, 255, 255), true); 
-                nodes.Add(new Node($"New Node_{i}", UUID.NewUUID(), new Vec2(i, i), new Vec2(1, 1), false));
+                
+                
+                sprite = new Sprite(new Vec2(5,2), Color.FromArgb((byte)(150 + (i * 2)), 150, 255, 255), true); 
+                nodes.Add(new Node($"New Node_{i}", UUID.NewUUID(), new Vec2(15, 0), new Vec2(1, 1)));
 
                 // add rigidbody component
                 var rb = new Rigidbody();
@@ -104,6 +106,7 @@ namespace PixelRenderer
                 node.parentStage = stage;
             }
             stage.RefreshStageDictionary();
+            
         }
         public static Color[,] ConvertBitmap(string path)
         {
@@ -190,7 +193,6 @@ namespace PixelRenderer
         } // Main Rendering thread for front end, does not handle bitmap pixels
         private void PrintDebugs()
         {
-            if (stage.FindNode("Player") == null) return; 
             outputTextBox.Text =
             $" ===STATS===: \n\t {Math.Floor((1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds) * frameCount)} Frames Per Second \n PLAYER STATS : {stage.FindNode("Player").rb.GetDebugs()}\t" +
             $"\n\t Current Room : {backgroundIndex}";
@@ -200,7 +202,7 @@ namespace PixelRenderer
             $"\n\t Stage : {stage.Name} (Loaded Nodes : {stage.nodes.Count()}) \n";
             // NODE HEIRARCHY
             foreach (var node in stage.nodes) outputTextBox.Text +=
-            $" \n\t Node : \n\t  Name  : {node.Name} \n\t Position : {node.position.x} , {node.position.y} \n\t\t isSprite : {node.sprite} \n\t\t isRigidbody : {node.rb} \t";
+            $" \n\t Node : \n\t  Name  : {node.Name} \n\t\t Position : {node.position.x} , {node.position.y} \n\t isSprite : {node.sprite} \n\t\t isRigidbody : {node.rb} \n\t Velocity : {node.rb.velocity.x} , {node.rb.velocity.y}\n ";
             outputTextBox.Text += $" \n {debug} \n";
         }// formats and sends the framerate , hierarchy status and other info to the "Debug Console" outputTextBox;
         public void Update(object? sender, EventArgs e)
@@ -220,9 +222,10 @@ namespace PixelRenderer
                     for (int x = 0; x < node.sprite.size.x; x++)
                     for (int y = 0; y < node.sprite.size.y; y++)
                     {
-                        if (node.position.x + x > screenWidth) continue;
+                        if (node.position.x + x >= screenWidth) continue;
                         if (node.position.x + x < 0) continue;
-                        if (node.position.y + y > screenHeight) continue;
+                        if (node.position.y + y < 0) continue;
+                        if (node.position.y + y >= screenHeight) continue;
                         frame[(int)node.position.x + x, (int)node.position.y + y] = node.sprite.colorData[x, y];
                     }
                 }
@@ -252,8 +255,11 @@ namespace PixelRenderer
                         if (node.position.x + node.sprite.size.x < collider.position.x || node.position.x > collider.position.x + collider.sprite.size.x) continue;
                         if (node.position.y + node.sprite.size.y < collider.position.y || node.position.y > collider.position.y + collider.sprite.size.y) continue;
                         
-                        if (node.Name == "Player" || collider.Name == "Player") node.position.x += 3;
-                        
+                        node.position.x += 3;
+                        var newVelocity = node.velocity + collider.velocity;
+                        node.velocity = newVelocity / 2;
+                        collider.velocity = newVelocity / 2; 
+
                         return; 
                     
                     }
@@ -274,14 +280,14 @@ namespace PixelRenderer
                 {
                     if (node.rb.pos.y > screenHeight - 4 - node.sprite.size.y)
                     {
+                        node.rb.isGrounded = true;
                         node.rb.pos.y = screenHeight - 4 - node.sprite.size.y;
-                    }
+                    } else node.rb.isGrounded = false; 
 
                     if (node.rb.pos.x > screenWidth - node.sprite.size.x)
                     {
                         node.rb.pos.x = screenWidth - node.sprite.size.x;
                         node.rb.velocity.x = 0;
-                        //node.rb.takingInput = false;
                         //node.rb.velocity.x = 0;
                         //node.rb.pos.x = screenWidth - node.sprite.size.x;
                         //backgroundIndex++;
@@ -292,8 +298,6 @@ namespace PixelRenderer
                     {
                         node.rb.pos.x = 0;
                         node.rb.velocity.x = 0;
-                        //node.rb.pos.x = 0;
-                        //node.rb.velocity.x = 0;
 
                         //if (backgroundIndex > 1) backgroundIndex--;
                         //else backgroundIndex = 0;
@@ -306,7 +310,6 @@ namespace PixelRenderer
         {
             stage.RefreshStageDictionary();
             debug = "";
-            CheckCollision();
             foreach (Node node in stage)
             {
                 // if has collision, calculate accordingly
@@ -316,6 +319,7 @@ namespace PixelRenderer
                 // call Update on node thus their components
                 node.Update();
             }
+            CheckCollision();
             frameCount++;
 
         } // updates all physics objects within the specified stage
@@ -398,6 +402,16 @@ namespace PixelRenderer
             acceptButton.Foreground = Brushes.OrangeRed;
             InitializeClocks(TimeSpan.FromSeconds(0.05f));
             running = true;
+        }
+
+        private void debugUnchecked(object sender, RoutedEventArgs e)
+        {
+            debugMode = false; 
+        }
+
+        private void debugChecked(object sender, RoutedEventArgs e)
+        {
+            debugMode = true;
         }
     }
     

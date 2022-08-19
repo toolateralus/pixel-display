@@ -30,6 +30,7 @@
                 </Grid.RowDefinitions>
             </Grid>
             <Label  FontFamily="MS Gothic Bold" Content="Debug Console: " Canvas.Left="99" Canvas.Top="46" HorizontalAlignment="Left" VerticalAlignment="Top" Width="279" Foreground="White" FontSize="14"/>
+            <CheckBox x:Name="debugCheckbox" Content="" Canvas.Left="86" Canvas.Top="50" Background="#FF680700" BorderBrush="#FF00FF21" FontFamily="MS Gothic" Checked="debugChecked" Unchecked="debugUnchecked"/>
         </Canvas>
     </Viewbox>
 </Window>

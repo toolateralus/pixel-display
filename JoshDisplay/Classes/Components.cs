@@ -33,7 +33,7 @@ namespace PixelRenderer.Components
             {
                 if (Input.GetKeyDown(Key.W))
                 {
-                    if (isGrounded && !jumpHeld) velocity.y = -5;
+                    if (isGrounded && !jumpHeld) velocity.y = -50;
                     jumpHeld = true;
                 }
                 else if (isGrounded) jumpHeld = false;
