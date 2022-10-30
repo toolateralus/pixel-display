@@ -1,14 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows.Input;
-
+using System.Linq;
 namespace PixelRenderer
 {
-    namespace MathP { }
+    namespace Math
+    {
+        public static class Math
+        {
+            public const float PI => MathF.PI; 
+            public const float Tau => MathF.PI * 2;
+            public static float Power(float value, int power)
+            {
+                float output = 1f; 
+                for (int i = 0; i < power; i++)
+                {
+                    output *= value; 
+                }
+                return output; 
+            }
+        }
+    }
 
     public class Vec2
     {
-        public float x; public float y;
-        
+        public float x; 
+        public float y;
+
         public Vec2(float x, float y)
         {
             this.x = x;

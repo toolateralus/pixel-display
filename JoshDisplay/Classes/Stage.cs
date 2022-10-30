@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using PixelRenderer.Components;
-
+using System.Drawing; 
 
 namespace PixelRenderer.Components
 {
@@ -14,31 +9,31 @@ namespace PixelRenderer.Components
     {
         public string? Name { get; set; }
         public string? GUID { get; private set; }
-        
+
         // List of nodes within stage
         public Dictionary<string, Node> nodesByName { get; private set; } = new Dictionary<string, Node>();
         public Node[] nodes { get; private set; }
-        
+
         public Node FindNode(string name)
         {
-            if (nodesByName.ContainsKey(name)) 
+            if (nodesByName.ContainsKey(name))
             {
                 return nodesByName[name];
             }
-            return null; 
+            return null;
         }
-        
+
         public void RefreshStageDictionary()
         {
             foreach (Node node in nodes)
             {
                 if (!nodesByName.ContainsKey(node.Name))
                     nodesByName.Add(node.Name, node);
-            }       
+            }
         }
-        
+
         // Skybox image
-        public Color[,] Background { get; set; } 
+        public Bitmap Background { get; set; }
 
         // Constructors
         public Stage(Node[] nodes)
@@ -49,10 +44,10 @@ namespace PixelRenderer.Components
             {
                 nodes[i] = nodes[i];
             }
-            RefreshStageDictionary(); 
+            RefreshStageDictionary();
         }
 
-        public Stage(string Name, Color[,] Background, Node[] nodes)
+        public Stage(string Name, Bitmap Background, Node[] nodes)
         {
             this.Name = Name;
             this.Background = Background;

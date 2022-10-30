@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PixelRenderer.Components; 
 namespace PixelRenderer.Components
 {
     public class Node
@@ -25,9 +21,13 @@ namespace PixelRenderer.Components
         public Rigidbody? rb;
         public Sprite? sprite;
 
-        public void AddComponent(Component component) { Components.Add(component.GetType(),component); }
+        public void AddComponent(Component component) 
+        {
+            Components.Add(component.GetType(), component);
+            component.parentNode = this;         
+        }
 
-        public bool TryGetComponent<T> (out T? component) where T : Component
+        public bool TryGetComponent<T>(out T? component) where T : Component
         {
             if (Components.ContainsKey(typeof(T)))
             {
@@ -40,21 +40,10 @@ namespace PixelRenderer.Components
 
         public T? GetComponent<T>()
         {
-            try
-            {
-                if (Components.ContainsKey(typeof(T)))
-                {
-                    var component = Components[typeof(T)];
-                    return (T)Convert.ChangeType(component, typeof(T));
-                }
-            }
-            catch (Exception e)
-            {
-
-            }
-            return (T)Convert.ChangeType(0, typeof(T));
+            var component = Components[typeof(T)];
+            return (T)Convert.ChangeType(component, typeof(T));
         }
-            // Constructors 
+        // Constructors 
         public Node(Stage parentStage, string name, string gUID, Vec2 position, Vec2 velocity, Vec2 scale, Node? parentNode, Node[]? children)
         {
             this.parentStage = parentStage;
@@ -69,7 +58,7 @@ namespace PixelRenderer.Components
         public Node(string name, string gUID)
         {
             this.UUID = gUID;
-            this.Name = name; 
+            this.Name = name;
         }
         public Node() { }
         public Node(string name, string gUID, Vec2 pos, Vec2 scale)
@@ -79,35 +68,23 @@ namespace PixelRenderer.Components
             this.position = pos;
             this.scale = scale;
         }
-        
+
         // awake - to be called before first update; 
         public void Awake(object? sender, EventArgs e)
         {
-            // cross reference components and node
-            foreach (object component in Components)
-            { 
-                if (component is Rigidbody)
-                {
-                    rb = component as Rigidbody;
-                    if(rb != null) rb.parentNode = this;
-                }
-                if (component is Sprite)
-                {
-                    sprite = component as Sprite;
-                    if(sprite != null) sprite.parentNode = this; 
-                }
+            foreach (var component in Components)
+            {
+                component.Value.Awake();
             }
-            if (parentStage == null) return;
-            if (UUID == null) this.UUID = PixelRenderer.Components.UUID.NewUUID();
-            if (Name == null) Name = string.Empty;
-            if (position == null) position = new Vec2(0, 0);
-            if (velocity == null) velocity = new Vec2(0, 0);
         }
 
         // update - if(usingPhysics) Update(); every frame.
         public void Update()
         {
-           if(rb!=null) rb.Update(); 
+            foreach (var component in Components)
+            {
+                component.Value.Update();  
+            }
         }
 
     }
