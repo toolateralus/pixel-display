@@ -53,7 +53,7 @@ namespace PixelRenderer
         private void PrintDebugs()
         {
             outputTextBox.Text =
-            $" ===STATS===: \n\t {Math.Floor((1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds) * frameCount)} Frames Per Second \n PLAYER STATS : {stage.FindNode("Player").rb.GetDebugs()}\t" +
+            $" ===STATS===: \n\t {System.Math.Floor((1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds) * frameCount)} Frames Per Second \n PLAYER STATS : {stage.FindNode("Player").rb.GetDebugs()}\t" +
             $"\n\t Current Room : {backgroundIndex}";
             outputTextBox.Text +=
             "\n ===HIERARCHY===";

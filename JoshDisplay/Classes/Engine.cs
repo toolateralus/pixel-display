@@ -8,8 +8,8 @@ namespace PixelRenderer
     {
         public static class Math
         {
-            public const float PI => MathF.PI; 
-            public const float Tau => MathF.PI * 2;
+            public const float PI = MathF.PI; 
+            public const float Tau = MathF.PI * 2;
             public static float Power(float value, int power)
             {
                 float output = 1f; 
