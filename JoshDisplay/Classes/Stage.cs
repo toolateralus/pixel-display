@@ -13,7 +13,6 @@ namespace PixelRenderer.Components
         // List of nodes within stage
         public Dictionary<string, Node> nodesByName { get; private set; } = new Dictionary<string, Node>();
         public Node[] nodes { get; private set; }
-
         public Node FindNode(string name)
         {
             if (nodesByName.ContainsKey(name))
@@ -22,16 +21,19 @@ namespace PixelRenderer.Components
             }
             return null;
         }
-
         public void RefreshStageDictionary()
         {
             foreach (Node node in nodes)
             {
                 if (!nodesByName.ContainsKey(node.Name))
-                    nodesByName.Add(node.Name, node);
+                    nodesByName.Add(node.Name, node); 
             }
         }
-
+        public void Update(float delta)
+        {
+            foreach (Node node in nodes) node.Update(); 
+            Collision.CheckCollision(this);
+        }
         // Skybox image
         public Bitmap Background { get; set; }
 

@@ -4,21 +4,19 @@ using System.Windows.Input;
 using System.Linq;
 namespace PixelRenderer
 {
-    namespace Math
+    public static class Math
     {
-        public static class Math
+        public const float Gravity = 1f; 
+        public const float PI = MathF.PI; 
+        public const float Tau = MathF.PI * 2;
+        public static float Power(float value, int power)
         {
-            public const float PI = MathF.PI; 
-            public const float Tau = MathF.PI * 2;
-            public static float Power(float value, int power)
+            float output = 1f; 
+            for (int i = 0; i < power; i++)
             {
-                float output = 1f; 
-                for (int i = 0; i < power; i++)
-                {
-                    output *= value; 
-                }
-                return output; 
+                output *= value; 
             }
+            return output; 
         }
     }
 
@@ -26,21 +24,17 @@ namespace PixelRenderer
     {
         public float x; 
         public float y;
-
         public Vec2(float x, float y)
         {
             this.x = x;
             this.y = y;
         }
-
         public Vec2()
         { }
-
         public static Vec2 operator +(Vec2 a, Vec2 b) { return new Vec2(a.x + b.x, a.y + b.y); }
         public static Vec2 operator -(Vec2 a, Vec2 b) { return new Vec2(a.x - b.x, a.y - b.y); }
         public static Vec2 operator /(Vec2 a, float b) { return new Vec2(a.x / b, a.y / b); }
         public static Vec2 operator *(Vec2 a, float b) { return new Vec2(a.x * b, a.y * b); }
-
     }
     public static class Input
     {
