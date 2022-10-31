@@ -67,7 +67,8 @@ namespace PixelRenderer
         {
             _runtime.mainWnd = mainWnd; 
             _runtime.ImageDirectory = Directory.GetCurrentDirectory() + "\\Images";
-            _runtime.InitializeBitmapCollection(); 
+            _runtime.InitializeBitmapCollection();
+            Staging.InitializeDefaultStage(); 
         }
         public void InitializeClocks(TimeSpan interval)
         {
@@ -88,6 +89,13 @@ namespace PixelRenderer
             return;
 
         }
+        public void InitializeBitmapCollection()
+        {
+            if (ImageDirectory == null) return;
+            foreach (string path in
+                Directory.GetFiles(path: ImageDirectory)) Backgrounds.Add(new Bitmap(path));
+        }
+        
         public void FixedUpdate(object? sender, EventArgs e)
         {
             if (stage != null)
@@ -98,9 +106,9 @@ namespace PixelRenderer
             HandleFrameRate();
             Execute();
         }
+        
         private void Execute()
         {
-            if (stage.Equals(null)) return; 
             if (running)
             {
                 Input.UpdateKeyboardState();
@@ -119,12 +127,6 @@ namespace PixelRenderer
                 frameCount = 0;
             }
             framesUntilCheck++;
-        }
-        public void InitializeBitmapCollection()
-        {
-            if (ImageDirectory == null) return;
-            foreach (string path in
-                Directory.GetFiles(path: ImageDirectory)) Backgrounds.Add(new Bitmap(path));
         }
     }
 }
@@ -282,12 +284,14 @@ namespace PixelRenderer
                     {
                         var collider = stage.nodes[j];
                         // make sure colliders are sprite and have collision enabled
-                        if (collider.sprite == null) continue;
+                        if (collider.sprite is null) continue;
                         if (!collider.sprite.isCollider) continue;
 
                         // check for intersecting sprites
-                        if (node.position.x + node.sprite.size.x < collider.position.x || node.position.x > collider.position.x + collider.sprite.size.x) continue;
-                        if (node.position.y + node.sprite.size.y < collider.position.y || node.position.y > collider.position.y + collider.sprite.size.y) continue;
+                        if (node.position.x + node.sprite.size.x < collider.position.x ||
+                            node.position.x > collider.position.x + collider.sprite.size.x) continue;
+                        if (node.position.y + node.sprite.size.y < collider.position.y ||
+                            node.position.y > collider.position.y + collider.sprite.size.y) continue;
 
                         Vec2 position = new();
                         // get 4 corners of collider
