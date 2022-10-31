@@ -47,38 +47,39 @@ namespace PixelRenderer.Components
                 sprite = parentNode.sprite; 
 
             }
-               velocity.y += Math.Gravity;
-               velocity.y *= 0.4f;
-               velocity.x *= 0.4f;
+            velocity.y += Math.Gravity;
+            velocity.y *= 0.4f;
+            velocity.x *= 0.4f;
 
-                parentNode.position.y += velocity.y;
-                parentNode.position.x += velocity.x;
+            parentNode.position.y += velocity.y;
+            parentNode.position.x += velocity.x;
 
-                if (sprite != null && sprite.isCollider)
+            if (sprite != null && sprite.isCollider)
+            {
+                if (parentNode.position.y > Pixel.screenHeight - 4 - sprite.size.y)
                 {
-                    if (parentNode.position.y > Pixel.screenHeight - 4 - sprite.size.y)
-                    {
-                        isGrounded = true;
-                        parentNode.position.y = Pixel.screenHeight - 4 - sprite.size.y;
-                    }
-                    else isGrounded = false;
+                    isGrounded = true;
+                    parentNode.position.y = Pixel.screenHeight - 4 - sprite.size.y;
+                }
+                else isGrounded = false;
 
-                    if (parentNode.position.x > Pixel.screenWidth - sprite.size.x)
-                    {
-                        parentNode.position.x = Pixel.screenWidth - sprite.size.x;
-                        StageManager.SetCurrentStage(new Stage("new", Images.Backgrounds[Images.BackroundIndex + 1], new Node[16]), (Engine)App.Current.MainWindow);
-                        velocity.x = 0;
-                    }
+                if (parentNode.position.x > Pixel.screenWidth - sprite.size.x)
+                {
+                    parentNode.position.x = Pixel.screenWidth - sprite.size.x;
+                    velocity.x = 0;
+                    var engine = (Engine)System.Windows.Application.Current.MainWindow;
+                    var runtime = engine.runtime; 
+                    StageManager.SetCurrentStage(new Stage("new", runtime.Backgrounds[runtime.BackroundIndex + 1], new Node[16]), engine);
+                }
 
-                    if (parentNode.position.x < 0)
-                    {
-                        parentNode.position.x = 0;
-                        velocity.x = 0;
+                if (parentNode.position.x < 0)
+                {
+                    parentNode.position.x = 0;
+                    velocity.x = 0;
 
-                    }
                 }
             }
         }
-        
     }
+}
 

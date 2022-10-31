@@ -24,12 +24,12 @@ namespace PixelRenderer
         public Timer? physicsTimer;
         public Stage? stage;
         public const int frameThreshold = 50;
-
+        public RuntimeEnvironment runtime = new(); 
         public Engine()
         {
-            Images.ImageDirectory = Directory.GetCurrentDirectory() + "\\Images";
             InitializeComponent();
-            Images.InitializeBitmapCollection();
+            runtime.ImageDirectory = Directory.GetCurrentDirectory() + "\\Images";
+            runtime.InitializeBitmapCollection();
             StageManager.InitializeDefaultStage(this);
         } 
         public void FixedUpdate(object? sender, EventArgs e)
@@ -61,8 +61,9 @@ namespace PixelRenderer
             // if no timer - instantiate; 
             if (physicsTimer == null)
             {
-                physicsTimer = new Timer(interval.TotalSeconds);
                 CompositionTarget.Rendering += Update;
+
+                physicsTimer = new Timer(interval.TotalSeconds);
                 physicsTimer.Elapsed += FixedUpdate;
                 physicsTimer.Start();
                 return;
@@ -148,8 +149,8 @@ namespace PixelRenderer
         public static void Log(TextBox outputTextBox, Engine engine)
         {
             outputTextBox.Text =
-            $" ===STATS===: \n\t {Rendering.FrameRate} Frames Per Second \n PLAYER STATS : {engine.stage.FindNode("Player").rb.GetDebugs()}\t" +
-            $"\n\t Current Room : {Images.BackroundIndex}";
+            $" ===STATS===: \n\t {Rendering.FrameRate()} Frames Per Second \n PLAYER STATS : {engine.stage.FindNode("Player").rb.GetDebugs()}\t" +
+            $"\n\t Current Room : {engine.runtime.BackroundIndex}";
             outputTextBox.Text +=
             "\n ===HIERARCHY===";
             outputTextBox.Text +=
@@ -311,7 +312,7 @@ namespace PixelRenderer
                 nodes[i].AddComponent(sprite);
 
             }
-            SetCurrentStage(new Stage("DefaultStage", Images.Backgrounds[0], nodes.ToArray()), engine);
+            SetCurrentStage(new Stage("DefaultStage", engine.runtime.Backgrounds[0], nodes.ToArray()), engine);
             foreach (Node node in engine.stage.nodes)
             {
                 node.parentStage = engine.stage;
@@ -321,21 +322,23 @@ namespace PixelRenderer
     }
     public class RuntimeEnvironment
     {
-        public  int stageIndex = 0;
+        public int stageIndex = 0;
+        public int BackroundIndex = 1;
+        public string? ImageDirectory;
+        public List<Bitmap> Backgrounds = new List<Bitmap>();
         public void InitializeBitmapCollection()
         {
             if (ImageDirectory == null) return;
             foreach (string path in
                 Directory.GetFiles(path: ImageDirectory)) Backgrounds.Add(new Bitmap(path));
         }
-        public int BackroundIndex = 1;
-        public string? ImageDirectory;
-        public List<Bitmap> Backgrounds = new List<Bitmap>();
     }
     public abstract class Script
     {
+        Node node; 
         public Script(Node node)
         {
+            this.node = node; 
             node.OnUpdateCalled += Update;
             node.OnAwakeCalled += Awake; 
         }
