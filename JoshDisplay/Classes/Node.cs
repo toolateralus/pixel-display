@@ -11,7 +11,6 @@ namespace PixelRenderer.Components
 
         // Node Transform Info NYI
         public Vec2 position = new Vec2();
-        public Vec2 velocity = new Vec2();
         public Vec2 scale = new Vec2();
 
         // hierarchy info
@@ -21,10 +20,10 @@ namespace PixelRenderer.Components
         public Rigidbody? rb;
         public Sprite? sprite;
 
-        public void AddComponent(Component component) 
+        public void AddComponent(Component component)
         {
             Components.Add(component.GetType(), component);
-            component.parentNode = this;         
+            component.parentNode = this;
         }
 
         public bool TryGetComponent<T>(out T? component) where T : Component
@@ -50,7 +49,6 @@ namespace PixelRenderer.Components
             Name = name;
             UUID = gUID;
             this.position = position;
-            this.velocity = velocity;
             this.scale = scale;
             this.parentNode = parentNode;
             this.children = children;
@@ -69,9 +67,13 @@ namespace PixelRenderer.Components
             this.scale = scale;
         }
 
+        public event Action OnAwakeCalled;
+        public event Action OnUpdateCalled;
+
         // awake - to be called before first update; 
         public void Awake(object? sender, EventArgs e)
         {
+            OnAwakeCalled?.Invoke();
             foreach (var component in Components)
             {
                 component.Value.Awake();
@@ -81,6 +83,7 @@ namespace PixelRenderer.Components
         // update - if(usingPhysics) Update(); every frame.
         public void Update()
         {
+            OnUpdateCalled?.Invoke(); 
             foreach (var component in Components)
             {
                 component.Value.Update();  
