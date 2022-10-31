@@ -56,20 +56,19 @@ namespace PixelRenderer.Components
 
             if (sprite != null && sprite.isCollider)
             {
-                if (parentNode.position.y > Pixel.screenHeight - 4 - sprite.size.y)
+                if (parentNode.position.y > Constants.screenHeight - 4 - sprite.size.y)
                 {
                     isGrounded = true;
-                    parentNode.position.y = Pixel.screenHeight - 4 - sprite.size.y;
+                    parentNode.position.y = Constants.screenHeight - 4 - sprite.size.y;
                 }
                 else isGrounded = false;
 
-                if (parentNode.position.x > Pixel.screenWidth - sprite.size.x)
+                if (parentNode.position.x > Constants.screenWidth - sprite.size.x)
                 {
-                    parentNode.position.x = Pixel.screenWidth - sprite.size.x;
+                    parentNode.position.x = Constants.screenWidth - sprite.size.x;
                     velocity.x = 0;
-                    var engine = (Engine)System.Windows.Application.Current.MainWindow;
-                    var runtime = engine.runtime; 
-                    StageManager.SetCurrentStage(new Stage("new", runtime.Backgrounds[runtime.BackroundIndex + 1], new Node[16]), engine);
+                    var runtime = RuntimeEnvironment.Instance; 
+                    StageManager.SetCurrentStage(new Stage("new", runtime.Backgrounds[runtime.BackroundIndex + 1], new Node[16]));
                 }
 
                 if (parentNode.position.x < 0)
