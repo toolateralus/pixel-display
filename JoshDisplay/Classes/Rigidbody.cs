@@ -1,55 +1,42 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 using Color = System.Drawing.Color;
 namespace PixelRenderer.Components
 {
     public class Rigidbody : Component
     {
-        
+        float mass = .02f;
+        public float GetDrag()
+        {
+            var sprite = parentNode.sprite ?? new Sprite(Vec2.one * 2, JRandom.GetRandomColor(), true);
+            var area = sprite.size.x * sprite.size.y;
+            var velocity = this.velocity.Length;
+            var drag = mass * velocity * area * 0.5f;
+            return drag; 
+        }
+        public float drag = 0.0f; 
         public Vec2 velocity = new();
         public bool isGrounded = false;
-        public bool TakingInput { get; set; } = false;
-        bool jumpHeld = false;
-
         public string GetDebugs()
         {
-            return $" \n VELOCITY__X = {velocity.x} \n VELOCITY__Y = {velocity.y} \n POSITION__X = {parentNode.position.x} \n POSITION__Y {parentNode.position.y} \n NODE : {parentNode.Name} \n IS__KINEMATIC :{!TakingInput} \n";
+            return $" \n VELOCITY__X = {velocity.x} \n VELOCITY__Y = {velocity.y} \n POSITION__X = {parentNode.position.x} \n POSITION__Y {parentNode.position.y} \n NODE : {parentNode.Name}";
         }
-        public override void Update()
+        public override void FixedUpdate()
         {
-            ApplyPhysics(); 
-            if (parentNode == null) return;
-            if (TakingInput)
-            {
-                if (Input.GetKeyDown(Key.W) || Input.GetKeyDown(Key.Space))
-                {
-                    if (isGrounded && !jumpHeld) velocity.y = -20;
-                    jumpHeld = true;
-                }
-                else if (isGrounded) jumpHeld = false;
-
-                if (Input.GetKeyDown(Key.S)) velocity.y = 1;
-                if (Input.GetKeyDown(Key.A)) velocity.x += -1;
-                if (Input.GetKeyDown(Key.D)) velocity.x += 1;
-
-                // change guy's color based on velocity + position on 64x64
-                
-                if (parentNode.sprite != null)
-                {
-                    parentNode.sprite = new Sprite(new Vec2(4, 4), Color.FromArgb(255, (byte)(velocity.x), (byte)(velocity.y), (byte)(velocity.y)), true);  ;
-                }
-            }
+            drag = GetDrag();
+            ApplyPhysics();
         }
         public void ApplyPhysics()
         {
-            Sprite sprite = new(); 
+            Sprite sprite = new();
             if (parentNode.sprite != null)
             {
-                sprite = parentNode.sprite; 
-
+                sprite = parentNode.sprite;
             }
-            velocity.y += Math.Gravity;
-            velocity.y *= 0.4f;
-            velocity.x *= 0.4f;
+            velocity.y += CMath.Gravity;
+            velocity.y *= drag;
+            velocity.x *= drag;
+            
 
             parentNode.position.y += velocity.y;
             parentNode.position.x += velocity.x;
@@ -67,15 +54,13 @@ namespace PixelRenderer.Components
                 {
                     parentNode.position.x = Constants.screenWidth - sprite.size.x;
                     velocity.x = 0;
-                    var runtime = RuntimeEnvironment.Instance; 
-                    StageManager.SetCurrentStage(new Stage("new", runtime.Backgrounds[runtime.BackroundIndex + 1], new Node[16]));
+                    
                 }
 
                 if (parentNode.position.x < 0)
                 {
                     parentNode.position.x = 0;
                     velocity.x = 0;
-
                 }
             }
         }

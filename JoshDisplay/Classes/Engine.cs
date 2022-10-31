@@ -13,24 +13,18 @@ using Bitmap = System.Drawing.Bitmap;
 using Color = System.Drawing.Color;
 namespace PixelRenderer
 {
-    public static class Constants
-    {
-        public const int frameRateCheckThresh = 60;
-        public const int screenWidth = 64;
-        public const int screenHeight = 64;
-    }
     public partial class MainWindow : Window
     {
+        // main entry point for application
         public MainWindow()
         {
             InitializeComponent();
-            RuntimeEnvironment.Awake(this); 
-            StageManager.InitializeDefaultStage();
+            Runtime.Awake(this); 
         }
         // start / stop button on UI.
         public void Accept_Clicked(object sender, RoutedEventArgs e)
         {
-            RuntimeEnvironment env = RuntimeEnvironment.Instance; 
+            Runtime env = Runtime.Instance; 
             if (env.running)
             {
                 acceptButton.Background = Brushes.Black;
@@ -52,11 +46,95 @@ namespace PixelRenderer
             Debug.debugging = true;
         }
     }
+    public class Runtime
+    {
+        private static Runtime _runtime = new(); 
+        public static Runtime Instance{ get { return _runtime; } }
+        
+        public MainWindow mainWnd;
+        public Timer? physicsTimer;
+        public Stage? stage;
+        public List<Bitmap> Backgrounds = new List<Bitmap>();
+        
+        public int BackroundIndex = 0;
+        public string? ImageDirectory;
+        public bool running;
+        public long lastFrameTime = 0;
+        public int framesUntilCheck = 50;
+        public int frameCount;
+
+        public static void Awake(MainWindow mainWnd)
+        {
+            _runtime.mainWnd = mainWnd; 
+            _runtime.ImageDirectory = Directory.GetCurrentDirectory() + "\\Images";
+            _runtime.InitializeBitmapCollection(); 
+        }
+        public void InitializeClocks(TimeSpan interval)
+        {
+            if (physicsTimer == null)
+            {
+                CompositionTarget.Rendering += Update;
+                physicsTimer = new Timer(interval.TotalSeconds);
+                physicsTimer.Elapsed += FixedUpdate;
+                physicsTimer.Start();
+                return;
+            }
+            if (!physicsTimer.Enabled)
+            {
+                physicsTimer.Start();
+                return;
+            }
+            physicsTimer.Stop();
+            return;
+
+        }
+        public void FixedUpdate(object? sender, EventArgs e)
+        {
+            if (stage != null)
+                Staging.UpdateCurrentStage(stage);
+        }
+        public void Update(object? sender, EventArgs e)
+        {
+            HandleFrameRate();
+            Execute();
+        }
+        private void Execute()
+        {
+            if (stage.Equals(null)) return; 
+            if (running)
+            {
+                Input.UpdateKeyboardState();
+                var frame = (Bitmap)stage.Background.Clone();
+                frame = Rendering.DrawSprites(frame);
+                if (Debug.debugging) Debug.Log(mainWnd.outputTextBox);
+                Rendering.DisplayBitmap(frame, mainWnd.renderImage);
+            }
+        }
+        private void HandleFrameRate()
+        {
+            if (framesUntilCheck >= Constants.frameRateCheckThresh)
+            {
+                lastFrameTime = DateTime.Now.Ticks;
+                framesUntilCheck = 0;
+                frameCount = 0;
+            }
+            framesUntilCheck++;
+        }
+        public void InitializeBitmapCollection()
+        {
+            if (ImageDirectory == null) return;
+            foreach (string path in
+                Directory.GetFiles(path: ImageDirectory)) Backgrounds.Add(new Bitmap(path));
+        }
+    }
+}
+namespace PixelRenderer
+{
     public static class Rendering
     {
         public static double FrameRate()
         {
-            RuntimeEnvironment env = RuntimeEnvironment.Instance;
+            Runtime env = Runtime.Instance;
             var lastFrameTime = env.lastFrameTime;
             var frameCount = env.frameCount; 
             var frameRate = 
@@ -78,7 +156,7 @@ namespace PixelRenderer
         }
         public static Bitmap DrawSprites(Bitmap frame)
         {
-            Stage stage = RuntimeEnvironment.Instance.stage; 
+            Stage stage = Runtime.Instance.stage; 
             foreach (var node in stage.nodes)
             {
                 // draw sprites in scene
@@ -107,8 +185,47 @@ namespace PixelRenderer
         public static bool debugging;
         public static void Log(TextBox outputTextBox)
         {
-            var runtime = RuntimeEnvironment.Instance;
+            var runtime = Runtime.Instance;
             Stage stage = runtime.stage; 
+            outputTextBox.Text =
+            $" ===STATS===: \n\t {Rendering.FrameRate()} Frames Per Second \n PLAYER STATS : {stage.FindNode("Player").rb.GetDebugs()}\t" +
+            $"\n\t Current Room : {runtime.BackroundIndex}";
+            outputTextBox.Text +=
+            "\n ===HIERARCHY===";
+            outputTextBox.Text +=
+            $"\n\t Stage : {stage.Name} (Loaded Nodes : {stage.nodes.Count()}) \n";
+            // NODE HEIRARCHY
+            outputTextBox.Text += "\n\n";
+            foreach (var node in stage.nodes)
+            {
+                if (node.Components.Count == 0) return;
+
+                outputTextBox.Text +=
+                $" \n\t Node : \n\t  Name  : {node.Name} \n\t\t Position : {node.position.x} , {node.position.y} ";
+
+                if (node.sprite != null)
+                {
+                    outputTextBox.Text +=
+                    $"\n\t isSprite : {node.sprite} \n\t\t";
+                }
+
+                if (node.rb != null)
+                {
+                    outputTextBox.Text +=
+                    $" isRigidbody : {node.rb} \n\t Velocity : {node.rb.velocity.x} , {node.rb.velocity.y}\n ";
+                }
+            }
+            outputTextBox.Text += $" \n {debug} \n";
+        }
+        public static void Log(TextBox outputTextBox, object additionalData)
+        {
+            string additional = additionalData.ToString(); 
+            if (additional == null)
+            {
+                additional = "";
+            }
+            var runtime = Runtime.Instance;
+            Stage stage = runtime.stage;
             outputTextBox.Text =
             $" ===STATS===: \n\t {Rendering.FrameRate()} Frames Per Second \n PLAYER STATS : {stage.FindNode("Player").rb.GetDebugs()}\t" +
             $"\n\t Current Room : {runtime.BackroundIndex}";
@@ -217,9 +334,9 @@ namespace PixelRenderer
             }
         } 
     }
-    public static class StageManager
+    public static class Staging
     {
-        static RuntimeEnvironment Env = RuntimeEnvironment.Instance; 
+        static Runtime Env = Runtime.Instance; 
         public static void SetCurrentStage(Stage stage) => Env.stage = stage;
         public static void UpdateCurrentStage(Stage stage)
         {
@@ -240,7 +357,6 @@ namespace PixelRenderer
                     nodes.Add(new Node("Player", UUID.NewUUID(), new Vec2(48, 0), new Vec2(1, 1))); // add new node
                     //Initialize Rigidbody on Player
                     var playerRigidbody = new Rigidbody();
-                    playerRigidbody.TakingInput = true;
                     nodes[i].rb = playerRigidbody;
                     nodes[i].AddComponent(playerRigidbody);
 
@@ -248,6 +364,8 @@ namespace PixelRenderer
                     sprite = new Sprite(new Vec2(3, 8), Color.FromArgb(255, 180, 185, 90), true);
                     nodes[i].sprite = sprite;
                     nodes[i].AddComponent(sprite);
+                    var player = new Player();
+                    nodes[i].AddComponent(player);
                     continue;
                 }
                 if (i == 1)
@@ -265,7 +383,6 @@ namespace PixelRenderer
                 var rb = new Rigidbody();
                 nodes[i].rb = rb;
                 // set up rigidbody
-                rb.TakingInput = false;
                 // add sprite component
                 nodes[i].sprite = sprite;
                 // finalize component addition
@@ -277,120 +394,13 @@ namespace PixelRenderer
             foreach (Node node in Env.stage.nodes)
             {
                 node.parentStage = Env.stage;
+                foreach (var component in node.Components)
+                {
+                    component.Value.Awake(); 
+                }
             }
+            
             Env.stage.RefreshStageDictionary();
-        }
-    }
-    public class RuntimeEnvironment
-    {
-        public static RuntimeEnvironment _instance = new(); 
-        public static RuntimeEnvironment Instance{ get { return _instance; } }
-        
-        public MainWindow mainWnd;
-        public Timer? physicsTimer;
-        public Stage? stage;
-        public List<Bitmap> Backgrounds = new List<Bitmap>();
-        
-        public int BackroundIndex = 0;
-        public string? ImageDirectory;
-        public bool running;
-        public long lastFrameTime = 0;
-        public int framesUntilCheck = 50;
-        public int frameCount;
-
-        public static void Awake(MainWindow mainWnd)
-        {
-            _instance.mainWnd = mainWnd; 
-            _instance.ImageDirectory = Directory.GetCurrentDirectory() + "\\Images";
-            _instance.InitializeBitmapCollection(); 
-        }
-        public void InitializeClocks(TimeSpan interval)
-        {
-            // if no timer - instantiate; 
-            if (physicsTimer == null)
-            {
-                CompositionTarget.Rendering += Update;
-                physicsTimer = new Timer(interval.TotalSeconds);
-                physicsTimer.Elapsed += FixedUpdate;
-                physicsTimer.Start();
-                return;
-            }
-            if (!physicsTimer.Enabled)
-            {
-                physicsTimer.Start();
-                return;
-            }
-            physicsTimer.Stop();
-            return;
-
-        }
-        public void FixedUpdate(object? sender, EventArgs e)
-        {
-            if (stage != null)
-                StageManager.UpdateCurrentStage(stage);
-        }
-        public void Update(object? sender, EventArgs e)
-        {
-            HandleFrameRate();
-            Execute();
-        }
-
-        private void Execute()
-        {
-            if (stage.Equals(null)) return; 
-            if (running)
-            {
-                Input.UpdateKeyboardState();
-                var frame = (Bitmap)stage.Background.Clone();
-                frame = Rendering.DrawSprites(frame);
-                if (Debug.debugging) Debug.Log(mainWnd.outputTextBox);
-                Rendering.DisplayBitmap(frame, mainWnd.renderImage);
-            }
-        }
-
-        private void HandleFrameRate()
-        {
-            if (framesUntilCheck >= Constants.frameRateCheckThresh)
-            {
-                lastFrameTime = DateTime.Now.Ticks;
-                framesUntilCheck = 0;
-                frameCount = 0;
-            }
-            framesUntilCheck++;
-        }
-
-        public void InitializeBitmapCollection()
-        {
-            if (ImageDirectory == null) return;
-            foreach (string path in
-                Directory.GetFiles(path: ImageDirectory)) Backgrounds.Add(new Bitmap(path));
-        }
-    }
-    public abstract class Script
-    {
-        Node node; 
-        public Script(Node node)
-        {
-            this.node = node; 
-            node.OnUpdateCalled += Update;
-            node.OnAwakeCalled += Awake; 
-        }
-        public virtual void Awake()
-        {
-
-        }
-        public virtual void Update()
-        {
-
-        }
-        public override bool Equals(object? obj)
-        {
-            return obj is Script unit &&
-                   EqualityComparer<Node>.Default.Equals(node, unit.node);
-        }
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(node);
         }
     }
 }

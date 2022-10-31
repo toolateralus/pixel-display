@@ -1,10 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Input;
-using System.Linq;
-namespace PixelRenderer
+﻿namespace PixelRenderer
 {
-    public static class Math
+    using System;
+    using System.Collections.Generic;
+    using System.Windows.Input;
+    using Color = System.Drawing.Color;
+    public static class Constants
+    {
+        public const int frameRateCheckThresh = 60;
+        public const int screenWidth = 64;
+        public const int screenHeight = 64;
+    }
+    public static class CMath
     {
         public const float Gravity = 1f; 
         public const float PI = MathF.PI; 
@@ -19,11 +25,29 @@ namespace PixelRenderer
             return output; 
         }
     }
+    public static class JRandom
+    {
+        public static Color GetRandomColor()
+        {
+            byte r = RandomByte(),
+                g = RandomByte(),
+                b = RandomByte(),
+                a = RandomByte();
 
+            return Color.FromArgb(r, g, b, a);
+        }
+        public static byte RandomByte() => (byte)Random.Shared.Next(0, 255);
+        public static int RandomInt(int min, int max) => Random.Shared.Next(min, max);
+      
+           
+
+    }
     public class Vec2
     {
-        public float x; 
+        public float x;
         public float y;
+        public float Length => x * x + y * y;
+        public static Vec2 one = new Vec2(1, 1);
         public Vec2(float x, float y)
         {
             this.x = x;

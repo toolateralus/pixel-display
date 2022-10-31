@@ -9,11 +9,9 @@ namespace PixelRenderer.Components
         public string Name { get; set; }
         public string UUID { get; private set; }
 
-        // Node Transform Info NYI
         public Vec2 position = new Vec2();
         public Vec2 scale = new Vec2();
 
-        // hierarchy info
         public Node? parentNode;
         public Node[]? children;
         public Dictionary<Type, Component> Components { get; private set; } = new Dictionary<Type, Component>();
@@ -25,7 +23,12 @@ namespace PixelRenderer.Components
             Components.Add(component.GetType(), component);
             component.parentNode = this;
         }
-
+        /// <summary>
+        /// Attempts to look for a component and push out if found.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="component"></param>
+        /// <returns>A boolean signifying the success of the operation, and out<T> instance of specified Component </returns>
         public bool TryGetComponent<T>(out T? component) where T : Component
         {
             if (Components.ContainsKey(typeof(T)))
@@ -36,7 +39,6 @@ namespace PixelRenderer.Components
             component = null;
             return false;
         }
-
         public T? GetComponent<T>()
         {
             var component = Components[typeof(T)];
@@ -68,7 +70,7 @@ namespace PixelRenderer.Components
         }
 
         public event Action OnAwakeCalled;
-        public event Action OnUpdateCalled;
+        public event Action OnFixedUpdateCalled;
 
         // awake - to be called before first update; 
         public void Awake(object? sender, EventArgs e)
@@ -79,14 +81,13 @@ namespace PixelRenderer.Components
                 component.Value.Awake();
             }
         }
-
         // update - if(usingPhysics) Update(); every frame.
-        public void Update()
+        public void FixedUpdate()
         {
-            OnUpdateCalled?.Invoke(); 
+            OnFixedUpdateCalled?.Invoke(); 
             foreach (var component in Components)
             {
-                component.Value.Update();  
+                component.Value.FixedUpdate();  
             }
         }
 
