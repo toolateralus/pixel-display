@@ -363,11 +363,13 @@ namespace PixelRenderer
         private void InitializeBitmapCollection()
         {
             if (workingDirectory == null) return;
-            foreach (string path in Directory.GetFiles(path: workingDirectory))
+            var files = Directory.GetFiles(path: workingDirectory);
+            foreach (var path in files)
             {
                 Backgrounds.Add(new Bitmap(path));
             }
-        } // find all .bmp bitmap images in working directory of program.
+        } 
+        // find all .bmp bitmap images in working directory of program.
         public void InitializeClocks(TimeSpan interval)
         {
             // if no timer - instantiate; 
