@@ -197,7 +197,7 @@ namespace PixelRenderer
         public static void Render(Image output)
         {
             var runtime = Runtime.Instance; 
-            var frame = Draw(runtime.stage.Background);
+            var frame = Draw((Bitmap)runtime.stage.Background.Clone());
             Insert(frame);
             DrawToImage(FrameBuffer[0], output);
         }
