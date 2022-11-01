@@ -4,6 +4,7 @@ using Bitmap = System.Drawing.Bitmap;
     public static class ConvertBitmapToBitmapImage
     {
         /// <summary>
+        /// From Github. Source Unknown.
         /// Takes a bitmap and converts it to an image that can be handled by WPF ImageBrush
         /// </summary>
         /// <param name="src">A bitmap image</param>

@@ -15,9 +15,8 @@ namespace PixelRenderer.Components
         public Node? parentNode;
         public Node[]? children;
         public Dictionary<Type, Component> Components { get; private set; } = new Dictionary<Type, Component>();
-        public Rigidbody? rb;
-        public Sprite? sprite;
 
+        
         public void AddComponent(Component component)
         {
             Components.Add(component.GetType(), component);
@@ -63,9 +62,9 @@ namespace PixelRenderer.Components
         public Node() { }
         public Node(string name, string gUID, Vec2 pos, Vec2 scale)
         {
-            this.Name = name;
-            this.UUID = gUID;
-            this.position = pos;
+            Name = name;
+            UUID = gUID;
+            position = pos;
             this.scale = scale;
         }
 
