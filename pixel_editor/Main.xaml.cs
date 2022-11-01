@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows;
-
+using System.Windows.Controls;
 namespace pixel_editor
 {
     /// <summary>
@@ -8,7 +8,12 @@ namespace pixel_editor
     /// </summary>
     public partial class Main : Window
     {
-        public Main() => InitializeComponent();
+        Inspector inspector;
+        public Main()
+        {
+            InitializeComponent();
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
+        }
         #region ScaleValue Depdency Property
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
 
@@ -55,6 +60,22 @@ namespace pixel_editor
         public void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             CalculateScale();
+        }
+    }
+    public class Inspector
+    {
+        public Label name;
+        public Label objInfo;
+        public Grid componentGrid;
+        public Inspector(Label name, Label objInfo, Grid componentGrid)
+        {
+            this.name = name;
+            this.objInfo = objInfo;
+            this.componentGrid = componentGrid;
+        }
+        public void AddComponent()
+        {
+
         }
     }
 }

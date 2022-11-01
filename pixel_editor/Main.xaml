@@ -3,8 +3,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Editor" 
     Name="window"
-    Width="200" Height="250">
-    <Grid Name="MainGrid" SizeChanged="MainGrid_SizeChanged">                               
+    Width="1820" Height="980">
+    <Grid Name="MainGrid" SizeChanged="MainGrid_SizeChanged">
         <Grid.LayoutTransform>
             <ScaleTransform x:Name="ApplicationScaleTransform"
                         CenterX="0"
@@ -12,9 +12,43 @@
                         ScaleX="{Binding ElementName=window, Path=ScaleValue}"
                         ScaleY="{Binding ElementName=window, Path=ScaleValue}" />
         </Grid.LayoutTransform>
-        <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Height="150">
-            <TextBlock FontSize="20" Text="window" Margin="5" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-            <Button Content="button" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+        <Grid x:Name="inspectorGrid" Height="Auto" Width="Auto">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Label  FontSize="3" Grid.Column="10" Grid.RowSpan="3" Grid.ColumnSpan="2" Grid.Row="1" x:Name="inspectorObjName" Content="Object Name" />
+            <Label  FontSize="3" Grid.Column="10" Grid.RowSpan="3" Grid.ColumnSpan="2" Grid.Row="2" x:Name="inspectorObjInfo" Content="Object Details" />
+            <Grid x:Name="inspectorChildGrid">
+                
+                
+                
+            </Grid>
+
         </Grid>
     </Grid>
 </Window>
