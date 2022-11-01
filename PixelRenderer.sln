@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32126.315
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pixel_renderer", "JoshDisplay\pixel_renderer.csproj", "{54E0C1B7-0B8F-4C48-A9D4-7D3B5E4869BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pixel_editor", "pixeleditor\pixel_editor.csproj", "{52B6451E-3B92-49F1-990C-4E644810B68A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pixel_editor", "pixel_editor\pixel_editor.csproj", "{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +23,14 @@ Global
 		{54E0C1B7-0B8F-4C48-A9D4-7D3B5E4869BF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{54E0C1B7-0B8F-4C48-A9D4-7D3B5E4869BF}.Release|x64.ActiveCfg = Release|x64
 		{54E0C1B7-0B8F-4C48-A9D4-7D3B5E4869BF}.Release|x64.Build.0 = Release|x64
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Debug|x64.Build.0 = Debug|Any CPU
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Release|x64.ActiveCfg = Release|Any CPU
-		{52B6451E-3B92-49F1-990C-4E644810B68A}.Release|x64.Build.0 = Release|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Debug|x64.Build.0 = Debug|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Release|x64.ActiveCfg = Release|Any CPU
+		{0F5D1247-BB6F-4364-ABBE-1CB486B6E0E9}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
