@@ -7,10 +7,9 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using PixelRenderer.Components;
 using Bitmap = System.Drawing.Bitmap;
-using Color = System.Drawing.Color;
+
 namespace PixelRenderer
 {
     /// <summary>
@@ -140,7 +139,8 @@ namespace PixelRenderer
     {
         public float x;
         public float y;
-        public double Length => Math.Sqrt(x * x + y * y);
+        public double Length_Double => Math.Sqrt(x * x + y * y);
+        public float Length => (float)Math.Sqrt(x * x + y * y); 
         public static Vec2 one = new Vec2(1, 1);
         internal static Vec2 zero = new Vec2(0, 0);
 
@@ -415,7 +415,7 @@ namespace PixelRenderer
         {
             var node = new Node($"NODE {i}", UUID.NewUUID(), new Vec2(0, 0), new Vec2(0, 1));
             var position = Vec2.one * JRandom.RandomInt(1, 3);
-            var jumpingBeanScript = new JumpingBean();
+            var jumpingBeanScript = new Wind();
             node.AddComponent(jumpingBeanScript); 
             node.AddComponent(new Sprite(position, JRandom.GetRandomColor(), true));
             node.AddComponent(new Rigidbody());
@@ -426,7 +426,8 @@ namespace PixelRenderer
             Vec2 playerStartPosition = new Vec2(3, 8);
             Node playerNode = new("Player", UUID.NewUUID(), playerStartPosition , Vec2.one);
             Rigidbody rb = new();
-            Sprite sprite = new(Vec2.one* 3, JRandom.GetRandomColor(), true);
+            Wind bean = new(); 
+            Sprite sprite = new(Vec2.one* 6, JRandom.GetRandomColor(), true);
             Player player_obj = new()
             {
                 TakingInput = true
@@ -434,6 +435,7 @@ namespace PixelRenderer
             playerNode.AddComponent(sprite);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(rb);
+            playerNode.AddComponent(bean);
             nodes.Add(playerNode);
         }
     }

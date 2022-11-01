@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Windows.Input;
+    using Random = System.Random;
     using Color = System.Drawing.Color;
     public static class Constants
     {
@@ -40,8 +41,8 @@
 
             return Color.FromArgb(r, g, b, a);
         }
-        public static byte RandomByte() => (byte)Random.Shared.Next(0, 255);
-        public static int RandomInt(int min, int max) => Random.Shared.Next(min, max);
+        public static byte RandomByte() => (byte)new Random().Next(0, 255);
+        public static int RandomInt(int min, int max) => new Random().Next(min, max);
 
     }
     public static class WaveForms
@@ -55,7 +56,7 @@
         /// <summary>
         /// Samples a random vertex point on a Sine Wave operating within pre-defined parameters.
         /// </summary>
-        public static Vec2 Point => GetPointOnSine();
+        public static Vec2 Next => GetPointOnSine();
         /// <summary>
         /// Manually define parameters for a sample from a sine wave.
         /// </summary>
