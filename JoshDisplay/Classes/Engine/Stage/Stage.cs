@@ -31,7 +31,7 @@ namespace PixelRenderer.Components
         }
         public void Update(float delta)
         {
-            foreach (Node node in nodes) node.Update(); 
+            foreach (Node node in nodes) node.FixedUpdate(); 
             Collision.CheckCollision(this);
         }
         // Skybox image
