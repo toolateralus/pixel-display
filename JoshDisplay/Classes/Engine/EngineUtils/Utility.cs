@@ -8,9 +8,31 @@
     public static class Constants
     {
         public const int frameRateCheckThresh = 60;
-        public const int screenWidth = 64;
-        public const int screenHeight = 64;
+        public const int screenWidth = 255;
+        public const int screenHeight = 255;
     }
+    public class Vec2
+    {
+        public float x;
+        public float y;
+        public float Length => (float)Math.Sqrt(x * x + y * y);
+        public static Vec2 one = new Vec2(1, 1);
+        public static Vec2 zero = new Vec2(0, 0);
+
+        public Vec2(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        public Vec2()
+        { }
+
+        public static Vec2 operator +(Vec2 a, Vec2 b) { return new Vec2(a.x + b.x, a.y + b.y); }
+        public static Vec2 operator -(Vec2 a, Vec2 b) { return new Vec2(a.x - b.x, a.y - b.y); }
+        public static Vec2 operator /(Vec2 a, float b) { return new Vec2(a.x / b, a.y / b); }
+        public static Vec2 operator *(Vec2 a, float b) { return new Vec2(a.x * b, a.y * b); }
+    }
+    public enum RenderState { Off, Game, Scene }
     public static class CMath
     {
         public const float Gravity = 3f; 

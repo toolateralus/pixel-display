@@ -113,8 +113,13 @@ namespace PixelRenderer
 
         public static void Awake(EngineInstance mainWnd)
         {
-            instance.mainWnd = mainWnd; 
-            instance.ImageDirectory = Directory.GetCurrentDirectory() + "\\Images";
+            instance.mainWnd = mainWnd;
+            var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            instance.ImageDirectory =  appdata + "\\Pixel\\Images";
+            if (!Directory.Exists(instance.ImageDirectory))
+            {
+                Directory.CreateDirectory(instance.ImageDirectory);
+            }
             instance.InitializeBitmapCollection();
             Staging.InitializeDefaultStage(); 
         }
@@ -129,36 +134,13 @@ namespace PixelRenderer
             Execute();
         }
     }
-}
-namespace PixelRenderer
-{
-    public class Vec2
-    {
-        public float x;
-        public float y;
-        public float Length => (float)Math.Sqrt(x * x + y * y); 
-        public static Vec2 one = new Vec2(1, 1);
-        public static Vec2 zero = new Vec2(0, 0);
-
-        public Vec2(float x, float y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-        public Vec2()
-        { }
-
-        public static Vec2 operator +(Vec2 a, Vec2 b) { return new Vec2(a.x + b.x, a.y + b.y); }
-        public static Vec2 operator -(Vec2 a, Vec2 b) { return new Vec2(a.x - b.x, a.y - b.y); }
-        public static Vec2 operator /(Vec2 a, float b) { return new Vec2(a.x / b, a.y / b); }
-        public static Vec2 operator *(Vec2 a, float b) { return new Vec2(a.x * b, a.y * b); }
-    }
-    public enum RenderState { Off, Game, Scene}
+    
     public static class Rendering
     {
         public static List<Bitmap> FrameBuffer = new List<Bitmap>(); 
-        public static RenderState State = RenderState.Scene; 
-       private static Bitmap Draw(Bitmap frame)
+        // RenderState.Game == Build
+        public static RenderState State = RenderState.Game;
+        private static Bitmap Draw(Bitmap frame)
         {
             Stage? stage = Runtime.Instance.stage;
             if (stage == null) return new Bitmap(Runtime.Instance.Backgrounds[0]);
@@ -180,7 +162,7 @@ namespace PixelRenderer
 
                             var position = new Vec2((int)node.position.x + x, (int)node.position.y + y);
                             var color = sprite.colorData[x, y];
-                            
+
                             var pixelOffsetX = (int)position.x;
                             var pixelOffsetY = (int)position.y;
 
@@ -202,12 +184,12 @@ namespace PixelRenderer
                 * frameCount);
             return frameRate; 
         }
-       private static void Insert(Bitmap inputFrame)
+        private static void Insert(Bitmap inputFrame)
         {
             if (FrameBuffer.Count > 1) FrameBuffer.RemoveAt(0);
             FrameBuffer.Add(inputFrame);
         }
-       private static void DrawToImage(Bitmap inputFrame, Image renderImage)
+        private static void DrawToImage(Bitmap inputFrame, Image renderImage)
         {
             var bitmap = ConvertBitmapToBitmapImage.Convert(inputFrame);
             renderImage.Source = bitmap;
@@ -215,7 +197,7 @@ namespace PixelRenderer
         public static void Render(Image output)
         {
             var runtime = Runtime.Instance; 
-            var frame = Draw((Bitmap)runtime.Backgrounds[7].Clone());
+            var frame = Draw(runtime.stage.Background);
             Insert(frame);
             DrawToImage(FrameBuffer[0], output);
         }
@@ -408,7 +390,7 @@ namespace PixelRenderer
             {
                 AddDefaultNodes(nodes, i);
             }
-            SetCurrentStage(new Stage("Stage One!", Env.Backgrounds[0], nodes.ToArray()));
+            SetCurrentStage(new Stage("Stage One!", Env.Backgrounds[1], nodes.ToArray()));
             InitializeNodes();
             Env.stage.RefreshStageDictionary();
         }
