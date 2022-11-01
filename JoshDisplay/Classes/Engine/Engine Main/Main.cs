@@ -15,10 +15,10 @@ namespace PixelRenderer
     /// <summary>
     /// Main Entry-Point for App.
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class EngineInstance : Window
     {
         // main entry point for application
-        public MainWindow()
+        public EngineInstance()
         {
             InitializeComponent();
             Runtime.Awake(this); 
@@ -52,8 +52,7 @@ namespace PixelRenderer
     {
         private static Runtime instance = new(); 
         public static Runtime Instance{ get { return instance; } }
-        
-        public MainWindow mainWnd;
+        public EngineInstance mainWnd;
         public Timer? physicsTimer;
         public Stage? stage;
         public List<Bitmap> Backgrounds = new List<Bitmap>();
@@ -71,10 +70,8 @@ namespace PixelRenderer
             if (running)
             {
                 Input.UpdateKeyboardState();
-                var frame = (Bitmap)stage.Background.Clone();
-                frame = Rendering.DrawSprites(frame);
+                if (Rendering.State == RenderState.Game) Rendering.Render(mainWnd.renderImage);
                 if (Debug.debugging) Debug.Log(mainWnd.outputTextBox);
-                Rendering.DisplayBitmap(frame, mainWnd.renderImage);
             }
         }
         private void GetFramerate()
@@ -114,7 +111,7 @@ namespace PixelRenderer
                 Directory.GetFiles(path: ImageDirectory)) Backgrounds.Add(new Bitmap(path));
         }
 
-        public static void Awake(MainWindow mainWnd)
+        public static void Awake(EngineInstance mainWnd)
         {
             instance.mainWnd = mainWnd; 
             instance.ImageDirectory = Directory.GetCurrentDirectory() + "\\Images";
@@ -139,10 +136,9 @@ namespace PixelRenderer
     {
         public float x;
         public float y;
-        public double Length_Double => Math.Sqrt(x * x + y * y);
         public float Length => (float)Math.Sqrt(x * x + y * y); 
         public static Vec2 one = new Vec2(1, 1);
-        internal static Vec2 zero = new Vec2(0, 0);
+        public static Vec2 zero = new Vec2(0, 0);
 
         public Vec2(float x, float y)
         {
@@ -151,30 +147,18 @@ namespace PixelRenderer
         }
         public Vec2()
         { }
+
         public static Vec2 operator +(Vec2 a, Vec2 b) { return new Vec2(a.x + b.x, a.y + b.y); }
         public static Vec2 operator -(Vec2 a, Vec2 b) { return new Vec2(a.x - b.x, a.y - b.y); }
         public static Vec2 operator /(Vec2 a, float b) { return new Vec2(a.x / b, a.y / b); }
         public static Vec2 operator *(Vec2 a, float b) { return new Vec2(a.x * b, a.y * b); }
     }
+    public enum RenderState { Off, Game, Scene}
     public static class Rendering
     {
-        public static double FrameRate()
-        {
-            Runtime env = Runtime.Instance;
-            var lastFrameTime = env.lastFrameTime;
-            var frameCount = env.frameCount; 
-            var frameRate = 
-                System.Math.Floor(1 / 
-                TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds
-                * frameCount);
-            return frameRate; 
-        }
-        public static void DisplayBitmap(Bitmap input, Image renderImage)
-        {
-            var bitmap = ConvertBitmapToBitmapImage.Convert(input);
-            renderImage.Source = bitmap;
-        }
-        public static Bitmap DrawSprites(Bitmap frame)
+        public static List<Bitmap> FrameBuffer = new List<Bitmap>(); 
+        public static RenderState State = RenderState.Scene; 
+       private static Bitmap Draw(Bitmap frame)
         {
             Stage? stage = Runtime.Instance.stage;
             if (stage == null) return new Bitmap(Runtime.Instance.Backgrounds[0]);
@@ -206,6 +190,34 @@ namespace PixelRenderer
                 }
             }
             return frame;
+        }
+        public static double FrameRate()
+        {
+            Runtime env = Runtime.Instance;
+            var lastFrameTime = env.lastFrameTime;
+            var frameCount = env.frameCount; 
+            var frameRate = 
+                System.Math.Floor(1 / 
+                TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds
+                * frameCount);
+            return frameRate; 
+        }
+       private static void Insert(Bitmap inputFrame)
+        {
+            if (FrameBuffer.Count > 1) FrameBuffer.RemoveAt(0);
+            FrameBuffer.Add(inputFrame);
+        }
+       private static void DrawToImage(Bitmap inputFrame, Image renderImage)
+        {
+            var bitmap = ConvertBitmapToBitmapImage.Convert(inputFrame);
+            renderImage.Source = bitmap;
+        }
+        public static void Render(Image output)
+        {
+            var runtime = Runtime.Instance; 
+            var frame = Draw((Bitmap)runtime.Backgrounds[7].Clone());
+            Insert(frame);
+            DrawToImage(FrameBuffer[0], output);
         }
     }
     public static class Debug
