@@ -1,8 +1,7 @@
-﻿using pixel_renderer.Components;
-using PixelRenderer;
+﻿using PixelRenderer;
 using PixelRenderer.Components;
 
-namespace pixel_renderer.Components
+namespace PixelRenderer.Components
 {
     public class Camera : Component
     {

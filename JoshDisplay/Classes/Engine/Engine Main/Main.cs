@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -50,18 +51,18 @@ namespace PixelRenderer
     }
     public class Runtime
     {
-        private static Runtime instance = new(); 
-        public static Runtime Instance{ get { return instance; } }
+        private static Runtime instance = new();
+        public static Runtime Instance { get { return instance; } }
         public EngineInstance mainWnd;
         public Timer? physicsTimer;
         public Stage? stage;
         public List<Bitmap> Backgrounds = new List<Bitmap>();
-        
+
         public long lastFrameTime = 0;
         public int BackroundIndex = 0;
         public int framesUntilCheck = 50;
         public int frameCount;
-        
+
         public bool running;
         public string? ImageDirectory;
 
@@ -84,7 +85,7 @@ namespace PixelRenderer
             }
             framesUntilCheck++;
         }
-        
+
         public void InitializeClocks(TimeSpan interval)
         {
             if (physicsTimer == null)
@@ -110,18 +111,17 @@ namespace PixelRenderer
             foreach (string path in
                 Directory.GetFiles(path: ImageDirectory)) Backgrounds.Add(new Bitmap(path));
         }
-
         public static void Awake(EngineInstance mainWnd)
         {
             instance.mainWnd = mainWnd;
             var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            instance.ImageDirectory =  appdata + "\\Pixel\\Images";
+            instance.ImageDirectory = appdata + "\\Pixel\\Images";
             if (!Directory.Exists(instance.ImageDirectory))
             {
                 Directory.CreateDirectory(instance.ImageDirectory);
             }
             instance.InitializeBitmapCollection();
-            Staging.InitializeDefaultStage(); 
+            Staging.InitializeDefaultStage();
         }
         public void FixedUpdate(object? sender, EventArgs e)
         {
@@ -137,41 +137,14 @@ namespace PixelRenderer
     
     public static class Rendering
     {
-        public static Queue<Bitmap> FrameBuffer = new Queue<Bitmap>(); 
-        // RenderState.Game == Build
+        /// <summary>
+        /// Game = Build;
+        /// Scene = Inspector;
+        /// Off = Off; 
+        /// Controlled and read externally, serves as a reference to what is currently being rendered; 
+        /// </summary>
         public static RenderState State = RenderState.Game;
-        private static Bitmap Draw(Bitmap frame)
-        {
-            Stage? stage = Runtime.Instance.stage;
-            if (stage == null) return new Bitmap(Runtime.Instance.Backgrounds[0]);
-            foreach (var node in stage.nodes)
-            {
-                var sprite = node.GetComponent<Sprite>();
-                // draw sprites in scene
-                if (sprite != null)
-                {
-                    // Draw pixels according to sprite data
-                    for (int x = 0; x < sprite.size.x; x++)
-                        for (int y = 0; y < sprite.size.y; y++)
-                        {
-                            if (node.position.x + x < 0) continue;
-                            if (node.position.y + y < 0) continue;
-
-                            if (node.position.x + x >= Constants.screenWidth) continue;
-                            if (node.position.y + y >= Constants.screenHeight) continue;
-
-                            var position = new Vec2((int)node.position.x + x, (int)node.position.y + y);
-                            var color = sprite.colorData[x, y];
-
-                            var pixelOffsetX = (int)position.x;
-                            var pixelOffsetY = (int)position.y;
-
-                            frame.SetPixel(pixelOffsetX, pixelOffsetY, color);
-                        }
-                }
-            }
-            return frame;
-        }
+        public static Queue<Bitmap> FrameBuffer = new Queue<Bitmap>(); 
         public static double FrameRate()
         {
             Runtime env = Runtime.Instance;
@@ -183,22 +156,55 @@ namespace PixelRenderer
                 * frameCount);
             return frameRate; 
         }
+        public static void Render(Image output)
+        {
+            var runtime = Runtime.Instance; 
+            var player = runtime.stage.FindNode("Player");
+            var cam = player.GetComponent<Camera>();
+            var frame = Draw(cam, (Bitmap)runtime.stage.Background.Clone());
+            Insert(frame);
+            DrawToImage(FrameBuffer.First(), output);
+        }
+        private static Bitmap Draw(Camera camera, Bitmap frame)
+        {
+            Stage stage = Runtime.Instance.stage;
+            Vec2 camPos = camera.parentNode.position; 
+            foreach (var node in stage.nodes)
+            {
+                var sprite = node.GetComponent<Sprite>();
+                if (sprite is null) continue; 
+                    
+                for (int x = 0; x < sprite.size.x; x++)
+                    for (int y = 0; y < sprite.size.y; y++)
+                    {
+                        var offsetX =   node.position.x + x;
+                        var offsetY =   node.position.y + y; 
+                        if (offsetX < 0) continue;
+                        if (offsetY < 0) continue;
+
+                        if (offsetX >= Constants.screenWidth) continue;
+                        if (offsetY >= Constants.screenHeight) continue;
+
+                        var color = sprite.colorData[x, y];
+                        var position = new Vec2((int)offsetX, (int)offsetY);
+
+                        var pixelOffsetX = (int)position.x;
+                        var pixelOffsetY = (int)position.y;
+
+                        frame.SetPixel(pixelOffsetX, pixelOffsetY, color);
+                    }
+            }
+            return frame;
+        }
         private static void Insert(Bitmap inputFrame)
         {
-            if (FrameBuffer.Count > 1) FrameBuffer.Dequeue();
+            if (FrameBuffer.Count > 0) FrameBuffer.Dequeue();
             FrameBuffer.Enqueue(inputFrame);
         }
         private static void DrawToImage(Bitmap inputFrame, Image renderImage)
         {
             var bitmap = ConvertBitmapToBitmapImage.Convert(inputFrame);
             renderImage.Source = bitmap;
-        }
-        public static void Render(Image output)
-        {
-            var runtime = Runtime.Instance; 
-            var frame = Draw((Bitmap)runtime.stage.Background);
-            Insert(frame);
-            DrawToImage(FrameBuffer.First(), output);
         }
     }
     public static class Debug
@@ -419,12 +425,14 @@ namespace PixelRenderer
             Vec2 playerStartPosition = new Vec2(3, 8);
             Node playerNode = new("Player", UUID.NewUUID(), playerStartPosition , Vec2.one);
             Rigidbody rb = new();
+            Camera cam = new(); 
             Wind bean = new(); 
             Sprite sprite = new(Vec2.one* 14, JRandom.GetRandomColor(), true);
             Player player_obj = new()
             {
                 TakingInput = true
             };
+            playerNode.AddComponent(cam);
             playerNode.AddComponent(sprite);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(rb);

@@ -33,7 +33,6 @@ namespace pixel_editor
             CompositionTarget.Rendering += Update;
 
         }
-
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
@@ -42,9 +41,10 @@ namespace pixel_editor
 
             Rendering.Render(image); 
         }
-        #region ScaleValue Depdency Property
-        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
-
+        public static readonly DependencyProperty ScaleValueProperty = 
+            DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main),
+                new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged),
+                    new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
         {
             Main mainWindow = o as Main;
@@ -52,14 +52,12 @@ namespace pixel_editor
                 return mainWindow.OnCoerceScaleValue((double)value);
             else return value;
         }
-
         private static void OnScaleValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             Main mainWindow = o as Main;
             if (mainWindow != null)
                 mainWindow.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
         }
-
         protected virtual double OnCoerceScaleValue(double value)
         {
             if (double.IsNaN(value))
@@ -68,15 +66,12 @@ namespace pixel_editor
             value = Math.Max(0.1, value);
             return value;
         }
-
         protected virtual void OnScaleValueChanged(double oldValue, double newValue) { }
-
         public double ScaleValue
         {
             get => (double)GetValue(ScaleValueProperty);
             set => SetValue(ScaleValueProperty, value);
         }
-        #endregion
         private void CalculateScale()
         {
             double yScale = ActualHeight / 250f;
@@ -98,8 +93,8 @@ namespace pixel_editor
                 renderStateIndex = 0; 
             }
             Rendering.State = (RenderState)renderStateIndex;
+            viewBtn.Content = Rendering.State.ToString(); 
         }
-
         private void OnPlay(object sender, RoutedEventArgs e)
         {
             if (!Runtime.Instance.running)
@@ -110,12 +105,12 @@ namespace pixel_editor
     }
     public class Inspector
     {
-        public Label name;
-        public Label objInfo;
-        public Grid componentGrid;
-        public Node node;
-        public Dictionary<Type, Component> components = new(); 
-        
+        private Label name;
+        private Label objInfo;
+        private Grid componentGrid;
+        private Node node;
+        private Dictionary<Type, Component> components = new(); 
+        private Stage stage; 
         public Inspector(Label name, Label objInfo, Grid componentGrid)
         {
             this.name = name;
@@ -124,10 +119,8 @@ namespace pixel_editor
             name.Content = "Name Gotten";
             objInfo.Content = "Object Gotten";
         }
+        
 
-       
-
-        Stage stage; 
         public void Update(object? sender, EventArgs e)
         {
             UpdateInspector(); 
@@ -146,7 +139,6 @@ namespace pixel_editor
             i = 0; 
             UpdateCurrentSelectedComponentInfo();
         }
-
         private void UpdateCurrentSelectedComponentInfo()
         {
             name.Content = node.Name;
@@ -158,21 +150,27 @@ namespace pixel_editor
 
             foreach (var value in components.Values)
             {
-                Label nameLabel = CreateInspectorComponentLabel(thickness, value);
-                SetInspectorComponentLabelPosition(i, nameLabel);
-                componentGrid.Children.Add(nameLabel);
+                string componentInfo = GetComponentInfo(value);
+                var control = CreateBlock(componentInfo ,thickness);
+                AddBlockToGrid(i, control);
+                componentGrid.Children.Add(control);
                 componentGrid.UpdateLayout();
                 i++;
             }
         }
-        private static void SetInspectorComponentLabelPosition(int i, Label nameLabel)
+        private static void AddLabelToGrid(int i, Label nameLabel)
         {
-            nameLabel.SetValue(Grid.RowSpanProperty, 3);
+            nameLabel.SetValue(Grid.RowSpanProperty, 2);
             nameLabel.SetValue(Grid.ColumnSpanProperty, 8);
             nameLabel.SetValue(Grid.RowProperty, i);
         }
-       
-        private static Label CreateInspectorComponentLabel(Thickness margin, Component component)
+        private static void AddBlockToGrid(int i, TextBlock block)
+        {
+            block.SetValue(Grid.RowSpanProperty, 2);
+            block.SetValue(Grid.ColumnSpanProperty, 8);
+            block.SetValue(Grid.RowProperty, i);
+        }
+        private static string GetComponentInfo(Component component)
         {
             IEnumerable<PropertyInfo> props = component.GetType().GetRuntimeProperties();
             IEnumerable<FieldInfo> fields = component.GetType().GetRuntimeFields();
@@ -183,11 +181,16 @@ namespace pixel_editor
             }
             foreach (var field in fields)
             {
-                output += $"{field} \n";  
+                output += $"{field} \n";
             }
+            return output; 
+        }
+        private static Label CreateLabel(string componentInfo, Thickness margin)
+        {
+            margin.Bottom = componentInfo.Split(' ').Length;
             return new Label
             {
-                Content = output,
+                Content = componentInfo,
                 FontSize = 2.25f,
                 Background = Brushes.DarkGray,
                 Foreground = Brushes.White, 
@@ -195,6 +198,24 @@ namespace pixel_editor
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Top,
                 FontFamily = new System.Windows.Media.FontFamily("MS Gothic")
+            };
+        }
+        private static TextBlock CreateBlock(string componentInfo, Thickness margin)
+        {
+            margin.Bottom = componentInfo.Split(' ').Length + 3;
+            return new TextBlock()
+            {
+                Text = componentInfo,
+                FontSize = 2.25f,
+                FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
+                TextWrapping = TextWrapping.Wrap,
+                Background = Brushes.DarkGray,
+                Foreground = Brushes.White,
+                
+                Margin = margin,
+                
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top,
             };
         }
     }

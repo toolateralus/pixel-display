@@ -15,36 +15,36 @@
         </Grid.LayoutTransform>
         <Grid x:Name="inspectorGrid" Height="Auto" Width="Auto">
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <Label  FontSize="3" Grid.Column="9" FontFamily="MS Gothic" Grid.RowSpan="4" Grid.ColumnSpan="3" Grid.Row="4" x:Name="inspectorObjName" Content="Object Name"  />
             <Label  FontSize="3" Grid.Column="9" FontFamily="MS Gothic" Grid.RowSpan="4" Grid.ColumnSpan="3" Grid.Row="5" x:Name="inspectorObjInfo" Content="Object Details"  />
-            <Grid x:Name="inspectorChildGrid" Grid.ColumnSpan="3" Grid.RowSpan="9" Grid.Column="9" Margin="10,80,0,0" Grid.Row="2">
+            <Grid x:Name="inspectorChildGrid" Grid.ColumnSpan="5" Grid.RowSpan="9" Grid.Column="7"  Grid.Row="2">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -61,8 +61,8 @@
                 </Grid.ColumnDefinitions>
             </Grid>
             <Image x:Name="image" RenderOptions.BitmapScalingMode ="NearestNeighbor" HorizontalAlignment="Stretch" Margin="15,15,0,0" Grid.RowSpan="11" VerticalAlignment="Stretch" Grid.ColumnSpan="7"/>
-            <Button  Click="OnViewChanged" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="View" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="1" Grid.RowSpan="1"/>
-            <Button  Click="OnPlay" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="Play" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="1" Grid.RowSpan="1" Grid.Column="1" Margin="0,-1,0,2"/>
+            <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="View" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="1" Click="OnViewChanged" x:Name="viewBtn"/>
+            <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="Play" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="0" Click="OnPlay"  x:Name="playBtn"      />
         </Grid>
-    </Grid>
+    </Grid>                         
 </Window>
