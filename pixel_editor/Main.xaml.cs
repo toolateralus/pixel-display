@@ -8,6 +8,7 @@ using PixelRenderer.Components;
 using System.Timers;
 using System.Windows.Media;
 using System.Drawing;
+using System.Reflection; 
 using Brushes = System.Windows.Media.Brushes; 
 namespace pixel_editor
 {
@@ -98,6 +99,14 @@ namespace pixel_editor
             }
             Rendering.State = (RenderState)renderStateIndex;
         }
+
+        private void OnPlay(object sender, RoutedEventArgs e)
+        {
+            if (!Runtime.Instance.running)
+            {
+                engine.Accept_Clicked(sender, e); 
+            }
+        }
     }
     public class Inspector
     {
@@ -132,7 +141,7 @@ namespace pixel_editor
         private void UpdateInspector()
         {
             i++;
-            if (i < 2500) return;
+            if (i < 25) return;
             if (node == null) return;
             i = 0; 
             UpdateCurrentSelectedComponentInfo();
@@ -147,7 +156,7 @@ namespace pixel_editor
             int i = 0;
             var thickness = new Thickness(0, 0, 0, 0);
 
-            foreach (var value in components.Keys)
+            foreach (var value in components.Values)
             {
                 Label nameLabel = CreateInspectorComponentLabel(thickness, value);
                 SetInspectorComponentLabelPosition(i, nameLabel);
@@ -156,23 +165,36 @@ namespace pixel_editor
                 i++;
             }
         }
-
         private static void SetInspectorComponentLabelPosition(int i, Label nameLabel)
         {
-            nameLabel.SetValue(Grid.RowSpanProperty, 1);
-            nameLabel.SetValue(Grid.ColumnSpanProperty, 2);
+            nameLabel.SetValue(Grid.RowSpanProperty, 3);
+            nameLabel.SetValue(Grid.ColumnSpanProperty, 8);
             nameLabel.SetValue(Grid.RowProperty, i);
         }
-        private static Label CreateInspectorComponentLabel(Thickness margin, Type typeName)
+       
+        private static Label CreateInspectorComponentLabel(Thickness margin, Component component)
         {
+            IEnumerable<PropertyInfo> props = component.GetType().GetRuntimeProperties();
+            IEnumerable<FieldInfo> fields = component.GetType().GetRuntimeFields();
+            string output = "properties : \n";
+            foreach (var prop in props)
+            {
+                output += $"{prop.Name} \n";
+            }
+            foreach (var field in fields)
+            {
+                output += $"{field} \n";  
+            }
             return new Label
             {
-                Content = typeName.Name,
-                FontSize = 5f,
+                Content = output,
+                FontSize = 2.25f,
                 Background = Brushes.DarkGray,
+                Foreground = Brushes.White, 
                 Margin = margin,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Top,
+                FontFamily = new System.Windows.Media.FontFamily("MS Gothic")
             };
         }
     }

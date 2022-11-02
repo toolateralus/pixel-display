@@ -137,7 +137,7 @@ namespace PixelRenderer
     
     public static class Rendering
     {
-        public static List<Bitmap> FrameBuffer = new List<Bitmap>(); 
+        public static Queue<Bitmap> FrameBuffer = new Queue<Bitmap>(); 
         // RenderState.Game == Build
         public static RenderState State = RenderState.Game;
         private static Bitmap Draw(Bitmap frame)
@@ -166,7 +166,6 @@ namespace PixelRenderer
                             var pixelOffsetX = (int)position.x;
                             var pixelOffsetY = (int)position.y;
 
-                            if (frame.GetPixel(pixelOffsetX, pixelOffsetY) == null) continue;
                             frame.SetPixel(pixelOffsetX, pixelOffsetY, color);
                         }
                 }
@@ -186,8 +185,8 @@ namespace PixelRenderer
         }
         private static void Insert(Bitmap inputFrame)
         {
-            if (FrameBuffer.Count > 1) FrameBuffer.RemoveAt(0);
-            FrameBuffer.Add(inputFrame);
+            if (FrameBuffer.Count > 1) FrameBuffer.Dequeue();
+            FrameBuffer.Enqueue(inputFrame);
         }
         private static void DrawToImage(Bitmap inputFrame, Image renderImage)
         {
@@ -197,9 +196,9 @@ namespace PixelRenderer
         public static void Render(Image output)
         {
             var runtime = Runtime.Instance; 
-            var frame = Draw((Bitmap)runtime.stage.Background.Clone());
+            var frame = Draw((Bitmap)runtime.stage.Background);
             Insert(frame);
-            DrawToImage(FrameBuffer[0], output);
+            DrawToImage(FrameBuffer.First(), output);
         }
     }
     public static class Debug
@@ -390,7 +389,7 @@ namespace PixelRenderer
             {
                 AddDefaultNodes(nodes, i);
             }
-            SetCurrentStage(new Stage("Stage One!", Env.Backgrounds[1], nodes.ToArray()));
+            SetCurrentStage(new Stage("Stage One!", Env.Backgrounds[0], nodes.ToArray()));
             InitializeNodes();
             Env.stage.RefreshStageDictionary();
         }
@@ -421,7 +420,7 @@ namespace PixelRenderer
             Node playerNode = new("Player", UUID.NewUUID(), playerStartPosition , Vec2.one);
             Rigidbody rb = new();
             Wind bean = new(); 
-            Sprite sprite = new(Vec2.one* 6, JRandom.GetRandomColor(), true);
+            Sprite sprite = new(Vec2.one* 14, JRandom.GetRandomColor(), true);
             Player player_obj = new()
             {
                 TakingInput = true
