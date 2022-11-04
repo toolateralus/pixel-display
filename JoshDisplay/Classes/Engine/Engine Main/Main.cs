@@ -8,10 +8,9 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using PixelRenderer.Components;
 using Bitmap = System.Drawing.Bitmap;
 
-namespace PixelRenderer
+namespace pixel_renderer
 {
     /// <summary>
     /// Main Entry-Point for App.
@@ -134,7 +133,6 @@ namespace PixelRenderer
             Execute();
         }
     }
-    
     public static class Rendering
     {
         /// <summary>
@@ -378,6 +376,7 @@ namespace PixelRenderer
     }
     public static class Staging
     {
+        private const int maxClickDistance_InPixels = 0;
         static Runtime Env = Runtime.Instance; 
         public static void SetCurrentStage(Stage stage) => Env.stage = stage;
         public static void UpdateCurrentStage(Stage stage)
@@ -414,29 +413,66 @@ namespace PixelRenderer
         {
             var node = new Node($"NODE {i}", UUID.NewUUID(), new Vec2(0, 0), new Vec2(0, 1));
             var position = Vec2.one * JRandom.RandomInt(1, 3);
-            var jumpingBeanScript = new Wind();
-            node.AddComponent(jumpingBeanScript); 
+            var wind = new Wind();
+            wind.direction = Direction.Down; 
+            node.AddComponent(wind); 
             node.AddComponent(new Sprite(position, JRandom.GetRandomColor(), true));
             node.AddComponent(new Rigidbody());
             nodes.Add(node);
+        }
+        public static bool TryCheckOccupant(Point pos, out Node? result)
+        {
+            // round up number to improve click accuracy
+            // todo = consider size of sprite to reliably get 
+            // clicks that arent exactly on the corner of the object
+            pos = new Point()
+            {
+                X = Math.Round(pos.X),
+                Y = Math.Round(pos.Y)
+            };
+
+            Stage stage = Runtime.Instance.stage ?? Stage.Empty;
+            foreach (var node in stage.nodes)
+            {
+                // round up number to improve click accuracy
+                Point pt = (Point)node.position;
+                pt = new()
+                {
+                    X = Math.Round(pt.X),
+                    Y = Math.Round(pt.Y)
+                };
+                // (200 == 250) == true;
+                var xDelta = pt.X - pos.X;
+                var yDelta = pt.Y - pos.Y;
+                 
+                if (xDelta + yDelta < maxClickDistance_InPixels)
+                {
+                    result = node;
+                    return true;
+                }
+            }
+            result = null;
+            return false;
         }
         private static void AddPlayer(List<Node> nodes)
         {
             Vec2 playerStartPosition = new Vec2(3, 8);
             Node playerNode = new("Player", UUID.NewUUID(), playerStartPosition , Vec2.one);
+            
             Rigidbody rb = new();
-            Camera cam = new(); 
-            Wind bean = new(); 
             Sprite sprite = new(Vec2.one* 14, JRandom.GetRandomColor(), true);
+            
+            Camera cam = new(); 
+            
             Player player_obj = new()
             {
-                TakingInput = true
+                takingInput = true
             };
-            playerNode.AddComponent(cam);
-            playerNode.AddComponent(sprite);
+
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(rb);
-            playerNode.AddComponent(bean);
+            playerNode.AddComponent(sprite);
+            playerNode.AddComponent(cam);
             nodes.Add(playerNode);
         }
     }

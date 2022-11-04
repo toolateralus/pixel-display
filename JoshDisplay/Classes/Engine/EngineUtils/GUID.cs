@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace PixelRenderer.Components
+﻿
+namespace pixel_renderer
 {
+    using System;
+    using System.Collections.Generic;
     public static class UUID
     {
         public static Dictionary<string, int> GUIDs = new Dictionary<string, int>();

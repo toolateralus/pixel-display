@@ -1,9 +1,9 @@
-﻿<Window x:Class="PixelRenderer.EngineInstance"
+﻿<Window x:Class="pixel_renderer.EngineInstance"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PixelRenderer"
+        xmlns:local="clr-namespace:pixel_renderer"
         mc:Ignorable="d"
         Background="Black"
         Title="Pixel Display" Height="600" Width="800" BorderBrush="White" BorderThickness="10" >

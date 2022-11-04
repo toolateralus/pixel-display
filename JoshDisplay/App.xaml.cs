@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace PixelRenderer
+namespace pixel_renderer
 {
     /// <summary>
     /// Interaction logic for App.xaml

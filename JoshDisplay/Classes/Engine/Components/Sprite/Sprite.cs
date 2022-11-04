@@ -1,7 +1,7 @@
 ﻿using Color = System.Drawing.Color;
 
-namespace PixelRenderer.Components
-{
+namespace pixel_renderer
+{ 
     public class Sprite : Component
     {
         public Vec2 size = new Vec2();
@@ -25,13 +25,13 @@ namespace PixelRenderer.Components
         }
         public void DrawSquare(Vec2 size, Color[,] color, bool isCollider)
         {
-            this.colorData = color; 
+            colorData = color;
             this.size = size;
             this.isCollider = isCollider;
         }
-      
-        
-        
+
+
+
         public Sprite()
         {
 

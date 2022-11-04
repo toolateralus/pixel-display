@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing; 
+using System.Drawing;
 
-namespace PixelRenderer.Components
+namespace pixel_renderer
 {
     public class Stage : IEnumerable
     {
@@ -26,17 +26,19 @@ namespace PixelRenderer.Components
             foreach (Node node in nodes)
             {
                 if (!nodesByName.ContainsKey(node.Name))
-                    nodesByName.Add(node.Name, node); 
+                    nodesByName.Add(node.Name, node);
             }
         }
         public void Update(float delta)
         {
-            foreach (Node node in nodes) node.FixedUpdate(); 
+            foreach (Node node in nodes) node.FixedUpdate();
             Collision.CheckCollision(this);
         }
         // Skybox image
         public Bitmap Background { get; set; }
-
+        // static members 
+        public static Stage Empty => new Stage(Array.Empty<Node>());
+        public static Stage New => new Stage("New Stage", new Bitmap(256, 256), Array.Empty<Node>());
         // Constructors
         public Stage(Node[] nodes)
         {
@@ -60,7 +62,7 @@ namespace PixelRenderer.Components
         // Implementation for the GetEnumerator method.
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (IEnumerator)GetEnumerator();
+            return GetEnumerator();
         }
         public NodeEnum GetEnumerator()
         {
@@ -83,7 +85,7 @@ namespace PixelRenderer.Components
         public bool MoveNext()
         {
             position++;
-            return (position < _stage.Length);
+            return position < _stage.Length;
         }
 
         public void Reset()

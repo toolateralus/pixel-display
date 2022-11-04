@@ -1,10 +1,12 @@
-﻿namespace PixelRenderer
+﻿namespace pixel_renderer
 {
     using System;
     using System.Collections.Generic;
     using System.Windows.Input;
     using Random = System.Random;
     using Color = System.Drawing.Color;
+    using System.Windows;
+
     public static class Constants
     {
         public const int frameRateCheckThresh = 60;
@@ -31,12 +33,18 @@
         public static Vec2 operator -(Vec2 a, Vec2 b) { return new Vec2(a.x - b.x, a.y - b.y); }
         public static Vec2 operator /(Vec2 a, float b) { return new Vec2(a.x / b, a.y / b); }
         public static Vec2 operator *(Vec2 a, float b) { return new Vec2(a.x * b, a.y * b); }
+
+        public static explicit operator Point(Vec2 v) => new()
+        {
+            X = v.x,
+            Y = v.y
+        };
     }
     public enum RenderState { Off, Game, Scene }
     public static class CMath
     {
-        public const float Gravity = 3f; 
-        public const float PI = MathF.PI; 
+        public const float Gravity = 3f;
+        public const float PI = MathF.PI;
         public const float Tau = MathF.PI * 2;
         public static float Lerp(float a, float b, float t)
         {
@@ -44,12 +52,12 @@
         }
         public static float Power(float value, int power)
         {
-            float output = 1f; 
+            float output = 1f;
             for (int i = 0; i < power; i++)
             {
-                output *= value; 
+                output *= value;
             }
-            return output; 
+            return output;
         }
     }
     public static class JRandom
@@ -93,7 +101,7 @@
         {
             float progress = (float)vertexIndex / (vertices - 1);
             float x = CMath.Lerp(startPosition, endPosition, progress);
-            float y = (float)(amplitude * Math.Sin((Tau * frequency * x) + Runtime.Instance.frameCount * movementSpeed));
+            float y = (float)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
         /// <summary>
@@ -106,7 +114,7 @@
             const float Tau = CMath.PI * 2;
             float progress = (float)vertexIndex / (vertices - 1);
             var x = CMath.Lerp(0, 1, progress);
-            float y = (float)(amplitude * Math.Sin((Tau * frequency * x) + (Runtime.Instance.frameCount * movementSpeed)));
+            float y = (float)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
     }
@@ -146,19 +154,19 @@
         /// </summary>
         /// <returns>new Vec2(right - left, up - down) between -1 and 1</returns>
         public static Vec2 GetMoveVector()
-    {
-        bool right = GetKeyDown(Key.A);
-        bool left = GetKeyDown(Key.D);
-        bool up = GetKeyDown(Key.W);
-        bool down = GetKeyDown(Key.S);
+        {
+            bool right = GetKeyDown(Key.A);
+            bool left = GetKeyDown(Key.D);
+            bool up = GetKeyDown(Key.W);
+            bool down = GetKeyDown(Key.S);
 
-        int upMove = up ? 0 : 1;
-        int downMove = down ? 0 : 1;
-        int rightMove = right ? 0 : 1;
-        int leftMove = left ? 0 : 1;
+            int upMove = up ? 0 : 1;
+            int downMove = down ? 0 : 1;
+            int rightMove = right ? 0 : 1;
+            int leftMove = left ? 0 : 1;
 
-        return new Vec2(rightMove - leftMove, upMove - downMove); 
-    }
+            return new Vec2(rightMove - leftMove, upMove - downMove);
+        }
     }
 }
 

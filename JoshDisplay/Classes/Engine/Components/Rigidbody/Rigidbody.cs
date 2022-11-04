@@ -1,35 +1,37 @@
-﻿namespace PixelRenderer.Components
+﻿using pixel_renderer;
+
+namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
         private float _drag = 0.0f;
-        public float drag = .2f; 
+        public float drag = .2f;
         public bool usingGravity = true;
         public Vec2 velocity = new();
-        public Sprite sprite; 
+        public Sprite sprite;
 
         public override void Awake()
         {
-            sprite = parentNode.GetComponent<Sprite>(); 
+            sprite = parentNode.GetComponent<Sprite>();
             base.Awake();
         }
         public override void FixedUpdate()
         {
-            if(usingGravity) velocity.y += CMath.Gravity;
-            Collision.ViewportCollision(parentNode, sprite, this); 
+            if (usingGravity) velocity.y += CMath.Gravity;
+            Collision.ViewportCollision(parentNode, sprite, this);
             _drag = (float)GetDrag().Clamp(-drag, drag);
             ApplyVelocity();
             ApplyPosition();
-           
+
         }
         const double dragCoefficient = 1;
         public double GetDrag()
         {
             Sprite sprite = parentNode.GetComponent<Sprite>() ?? new Sprite(Vec2.one, JRandom.GetRandomColor(), true);
             double velocity = this.velocity.Length;
-            double drag = (velocity * velocity) * dragCoefficient;
-            if (drag < 0) drag = -drag; 
-            return drag; 
+            double drag = velocity * velocity * dragCoefficient;
+            if (drag < 0) drag = -drag;
+            return drag;
         }
         public string GetDebugs()
         {
@@ -52,7 +54,7 @@
             velocity.y *= _drag;
             velocity.x *= _drag;
         }
-        
+
     }
 }
 

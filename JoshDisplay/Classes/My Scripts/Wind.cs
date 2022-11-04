@@ -1,5 +1,5 @@
-﻿using PixelRenderer.Components; 
-namespace PixelRenderer
+﻿
+namespace pixel_renderer
 {
     public enum Direction { Left, Right, Up, Down };
     public static class Orientation

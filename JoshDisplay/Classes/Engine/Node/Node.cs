@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-namespace PixelRenderer.Components
+namespace pixel_renderer
 {
     public class Node
     {
@@ -16,7 +16,7 @@ namespace PixelRenderer.Components
         public Node[]? children;
         public Dictionary<Type, Component> Components { get; private set; } = new Dictionary<Type, Component>();
 
-        
+
         public void AddComponent(Component component)
         {
             Components.Add(component.GetType(), component);
@@ -56,8 +56,8 @@ namespace PixelRenderer.Components
         }
         public Node(string name, string gUID)
         {
-            this.UUID = gUID;
-            this.Name = name;
+            UUID = gUID;
+            Name = name;
         }
         public Node() { }
         public Node(string name, string gUID, Vec2 pos, Vec2 scale)
@@ -83,10 +83,10 @@ namespace PixelRenderer.Components
         // update - if(usingPhysics) Update(); every frame.
         public void FixedUpdate()
         {
-            OnFixedUpdateCalled?.Invoke(); 
+            OnFixedUpdateCalled?.Invoke();
             foreach (var component in Components)
             {
-                component.Value.FixedUpdate();  
+                component.Value.FixedUpdate();
             }
         }
 

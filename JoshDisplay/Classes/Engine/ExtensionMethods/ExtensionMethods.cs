@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PixelRenderer 
+﻿
+namespace pixel_renderer
 {
+    using System;
     public static class ExtensionMethods
     {
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
@@ -15,6 +11,6 @@ namespace PixelRenderer
         {
             return Math.Min(max, Math.Max(self, min));
         }
-     
+
     }
 }

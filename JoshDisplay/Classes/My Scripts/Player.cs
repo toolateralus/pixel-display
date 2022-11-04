@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using PixelRenderer;
-using PixelRenderer.Components;
-using Color = System.Drawing.Color; 
+﻿using pixel_renderer; 
+using Color = System.Drawing.Color;
 internal class Player : Component
 {
     Rigidbody rb;
-    Sprite sprite; 
-    public bool TakingInput { get; set; } = true;
+    Sprite sprite;
+    public bool takingInput = true; 
     public const float speed = 3f;
-    
+    int i = 0;
     public override void Awake()
     {
         rb = parentNode.GetComponent<Rigidbody>();
@@ -18,16 +15,10 @@ internal class Player : Component
         sprite.isCollider = true;
         sprite.DrawSquare(Vec2.one * 3, Color.AliceBlue, true);
     }
-    int i = 0;
     public override void FixedUpdate()
     {
-        i++;
-        if (i > 30)
-        {
-            RandomizeSpriteColor();
-            i = 0; 
-        }
-        if (!TakingInput) return;
+        if (!takingInput) return;
+        RandomizeSpriteColor();
         var move = Input.GetMoveVector(); 
         GetJumpInput(move);
         GetMove(move);
@@ -43,15 +34,20 @@ internal class Player : Component
     }
     private void RandomizeSpriteColor()
     {
-        int x = (int)sprite.size.x;
-        int y = (int)sprite.size.y;
-        var colorData = new Color[x, y];
-        for(int j = 0; j < y; j++)
-        for (int i = 0; i < x; i++)
+        i++;
+        if (i > 60)
         {
-            colorData[i, j] = JRandom.GetRandomColor();
+            i = 0;
+            int x = (int)sprite.size.x;
+            int y = (int)sprite.size.y;
+            var colorData = new Color[x, y];
+            for(int j = 0; j < y; j++)
+            for (int i = 0; i < x; i++)
+            {
+                colorData[i, j] = JRandom.GetRandomColor();
+            }
+            sprite.DrawSquare(sprite.size, colorData, true);
         }
-        sprite.DrawSquare(sprite.size, colorData, true);
     }
 
 }
