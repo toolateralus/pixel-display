@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<Platforms>AnyCPU;x64</Platforms>
+		<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\JoshDisplay\pixel_engine.csproj" />
+	</ItemGroup>
+
+</Project>

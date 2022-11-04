@@ -10,7 +10,6 @@ namespace pixel_renderer
         public string? Name { get; set; }
         public string? GUID { get; private set; }
 
-        // List of nodes within stage
         public Dictionary<string, Node> nodesByName { get; private set; } = new Dictionary<string, Node>();
         public Node[] nodes { get; private set; }
         public Node FindNode(string name)
@@ -34,12 +33,9 @@ namespace pixel_renderer
             foreach (Node node in nodes) node.FixedUpdate();
             Collision.CheckCollision(this);
         }
-        // Skybox image
         public Bitmap Background { get; set; }
-        // static members 
         public static Stage Empty => new Stage(Array.Empty<Node>());
         public static Stage New => new Stage("New Stage", new Bitmap(256, 256), Array.Empty<Node>());
-        // Constructors
         public Stage(Node[] nodes)
         {
             nodes = new Node[nodes.Length];
@@ -50,7 +46,6 @@ namespace pixel_renderer
             }
             RefreshStageDictionary();
         }
-
         public Stage(string Name, Bitmap Background, Node[] nodes)
         {
             this.Name = Name;
@@ -58,7 +53,6 @@ namespace pixel_renderer
             this.nodes = nodes;
             RefreshStageDictionary();
         }
-
         // Implementation for the GetEnumerator method.
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -72,27 +66,22 @@ namespace pixel_renderer
     public class NodeEnum : IEnumerator
     {
         public Node[] _stage;
-
         // Enumerators are positioned before the first element
         // until the first MoveNext() call.
         int position = -1;
-
         public NodeEnum(Node[] list)
         {
             _stage = list;
         }
-
         public bool MoveNext()
         {
             position++;
             return position < _stage.Length;
         }
-
         public void Reset()
         {
             position = -1;
         }
-
         object IEnumerator.Current
         {
             get
@@ -100,7 +89,6 @@ namespace pixel_renderer
                 return Current;
             }
         }
-
         public Node Current
         {
             get
