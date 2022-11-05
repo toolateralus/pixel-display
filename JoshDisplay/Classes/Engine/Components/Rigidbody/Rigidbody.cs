@@ -4,32 +4,39 @@ namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
+        public override string UUID { get; set; }
+        public override string Name { get; set; }
         private float _drag = 0.0f;
         public float drag = .2f;
         public bool usingGravity = true;
         public Vec2 velocity = new();
-        public Sprite sprite;
-
+        private Sprite? sprite;
+        private bool isCollider = false; 
         public override void Awake()
         {
-            sprite = parentNode.GetComponent<Sprite>();
             base.Awake();
+            sprite = parentNode.GetComponent<Sprite>();
+            if (sprite == null) throw new System.Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID{ parentNode.UUID}");
+            // do once to save a check on update.
+            isCollider = sprite.isCollider; 
         }
-        public override void FixedUpdate()
+        public override void FixedUpdate(float delta)
         {
             if (usingGravity) velocity.y += CMath.Gravity;
-            Collision.ViewportCollision(parentNode, sprite, this);
+            if (isCollider) Collision.ViewportCollision(parentNode);
             _drag = (float)GetDrag().Clamp(-drag, drag);
             ApplyVelocity();
             ApplyPosition();
 
         }
         const double dragCoefficient = 1;
+
+
         public double GetDrag()
         {
-            Sprite sprite = parentNode.GetComponent<Sprite>() ?? new Sprite(Vec2.one, JRandom.GetRandomColor(), true);
             double velocity = this.velocity.Length;
             double drag = velocity * velocity * dragCoefficient;
+            // maybe unneccesary negate?
             if (drag < 0) drag = -drag;
             return drag;
         }

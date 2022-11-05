@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -161,13 +162,14 @@ namespace pixel_renderer
             var cam = player.GetComponent<Camera>();
             var frame = Draw(cam, (Bitmap)runtime.stage.Background.Clone());
             Insert(frame);
-            DrawToImage(FrameBuffer.First(), output);
+            var renderFrame = FrameBuffer.First(); 
+            DrawToImage(ref renderFrame, output);
         }
         private static Bitmap Draw(Camera camera, Bitmap frame)
         {
             Stage stage = Runtime.Instance.stage;
             Vec2 camPos = camera.parentNode.position; 
-            foreach (var node in stage.nodes)
+            foreach (var node in stage.Nodes)
             {
                 var sprite = node.GetComponent<Sprite>();
                 if (sprite is null) continue; 
@@ -199,17 +201,24 @@ namespace pixel_renderer
             if (FrameBuffer.Count > 0) FrameBuffer.Dequeue();
             FrameBuffer.Enqueue(inputFrame);
         }
-        private static void DrawToImage(Bitmap inputFrame, Image renderImage)
+        private static void DrawToImage(ref Bitmap inputFrame, Image renderImage)
         {
             var bitmap = ConvertBitmapToBitmapImage.Convert(inputFrame);
             renderImage.Source = bitmap;
         }
     }
+    [Obsolete]
     public static class Debug
     {
-        // really sloppy quick implementation using the most wasteful string possible
-        public static string debug = "";
-        public static bool debugging;
+        // really sloppy quick implementation using the most wasteful string possible -- must be totally revised.
+        // crashes on any stage containing more than 10 nodes XD
+        [Obsolete("DO NOT USE ON STAGES CONTAINING MORE THAN 10 NODES! IT WILL CRASH!")]
+        public static string debug = ""; // move to Runtime class
+        [Obsolete("DO NOT USE ON STAGES CONTAINING MORE THAN 10 NODES! IT WILL CRASH!")]
+        public static bool debugging;  // move to Runtime class
+        // take a string, create label, populate label, insert to feed. 
+        // auto sizing XML grid could create a chat feed look with expandable fields
+        [Obsolete("DO NOT USE ON STAGES CONTAINING MORE THAN 10 NODES! IT WILL CRASH!")]
         public static void Log(TextBox outputTextBox)
         {
             var runtime = Runtime.Instance;
@@ -221,10 +230,10 @@ namespace pixel_renderer
             outputTextBox.Text +=
             "\n ===HIERARCHY===";
             outputTextBox.Text +=
-            $"\n\t Stage : {stage.Name} (Loaded Nodes : {stage.nodes.Count()}) \n";
+            $"\n\t Stage : {stage.Name} (Loaded Nodes : {stage.Nodes.Count()}) \n";
             // NODE HEIRARCHY
             outputTextBox.Text += "\n\n";
-            foreach (var node in stage.nodes)
+            foreach (var node in stage.Nodes)
             {
                 outputTextBox.Text +=
                 $" \n\t Node : \n\t  Name  : {node.Name} \n\t\t Position : {node.position.x} , {node.position.y} ";
@@ -253,109 +262,61 @@ namespace pixel_renderer
             if (point.y > topLeft.y + size.y) return false;
             return true;
         }
-        public static bool IsInside(Node thisNode, out Node[]? collision)
+        public static bool IsInside(this Node v, out Node[]? result)
         {
-            collision = null;  
-            
-            if (!thisNode.TryGetComponent(out Sprite sprite)) return false; 
-            
-            var size = sprite.size;
-            var topLeft = thisNode.position - sprite.size; 
+            result = null;
+            var hasCollision = Staging.TryCheckOccupant((Point)v.position, out Node comparison);
+            if (!hasCollision || comparison == null) return false; 
 
-            if (thisNode.position.x < topLeft.x)
+            if(comparison.TryGetComponent(out Sprite sprite)) return false; 
+            var size = sprite.size;
+            var topLeft = v.position - sprite.size; 
+
+            if (v.position.x < topLeft.x)
             {
                 return false;
             }
-            if (thisNode.position.x > topLeft.x + size.x)
+            if (v.position.x > topLeft.x + size.x)
             {
                 return false;
             }
-            if (thisNode.position.y < topLeft.y)
+            if (v.position.y < topLeft.y)
             {
                 return false;
             }
-            if (thisNode.position.y > topLeft.y + size.y)
+            if (v.position.y > topLeft.y + size.y)
             {
                 return false;
             }
             
             return true;
         }
-        public static void CheckCollision(Stage stage)
+        public static Dictionary<Vec2, Sprite> BroadPhase(Stage stage)
         {
-            for (int i = 0; i < stage.nodes.Length; i++)
+            var dictionary = new Dictionary<Vec2, Sprite>();
+            foreach (var node in stage)
             {
-                var node = stage.nodes[i];
-                if (!node.TryGetComponent(out Sprite sprite)) return;
-                if (sprite.isCollider)
+                if (!node.TryGetComponent(out Sprite? sprite) || sprite == null) continue;
+                var point = new Vec2()
                 {
-                    for (int j = i + 1; j < stage.nodes.Length; j++)
-                    {
-                        var collider = stage.nodes[j];
-                        var colliderSprite = collider.GetComponent<Sprite>();
-                        // make sure colliders are sprite and have collision enabled
-                        
-                        if (sprite is null) continue;
-                        if (!sprite.isCollider) continue;
-                        
-                        // check for intersecting sprites
-                        if (node.position.x + sprite.size.x < collider.position.x ||
-                            node.position.x > collider.position.x + colliderSprite.size.x) continue;
-                        
-                        if (node.position.y + sprite.size.y < collider.position.y ||
-                            node.position.y > collider.position.y + colliderSprite.size.y) continue;
-                        
-                        Vec2 position = new();
-                        
-                        // get 4 corners of collider
-                        
-                        for (int k = i + 1; k < 4; k++)
-                        {
-                            Vec2 point = new(node.position.x + sprite.size.x * k / 2, node.position.y + sprite.size.y * k % 2);
-                            if (IsInside(point, collider.position, colliderSprite.size))
-                            {
-                                if (point.x < collider.position.x) position.x = -1;
-                                if (point.x > collider.position.x + colliderSprite.size.x) position.y = 1;
-                                if (point.y < collider.position.y) position.y = -1;
-                                if (point.y > collider.position.y + colliderSprite.size.y) position.y = 1;
-                                break;
-                            }
-                        }
-                        
-                        var nodeRB = node.GetComponent<Rigidbody>(); 
-
-                        if (position.x > 0 && position.y == 0)
-                        {
-                            var center = (collider.position.x + colliderSprite.size.x - node.position.x) / 2 + collider.position.x + colliderSprite.size.x;
-                            nodeRB.parentNode.position.x = center;
-                            collider.position.x = center - colliderSprite.size.x;
-                        }
-                        if (position.x < 0 && position.y == 0)
-                        {
-                            var median = (collider.position.x + colliderSprite.size.x - node.position.x) / 2 + collider.position.x + colliderSprite.size.x;
-                            nodeRB.parentNode.position.x = median;
-                            collider.position.x = median - colliderSprite.size.x;
-                        }
-                        if (position.y > 0 && position.x == 0)
-                        {
-                            var median = (collider.position.y + colliderSprite.size.y - node.position.y) / 2 + collider.position.y + colliderSprite.size.y;
-                            nodeRB.parentNode.position.y = median;
-                            collider.position.y = median - colliderSprite.size.y;
-                        }
-                        if (position.y < 0 && position.x == 0)
-                        {
-                            var median = (collider.position.y + colliderSprite.size.y - node.position.x) / 2 + collider.position.y + colliderSprite.size.y;
-                            nodeRB.parentNode.position.y = median;
-                            collider.position.y = median - colliderSprite.size.y;
-                        }
-
-                    }
-                }
+                    x = (int)(node.position.x / sprite.size.x),
+                    y = (int)(node.position.y / sprite.size.y),
+                };
+                dictionary.Add(point, sprite);
             }
+            return dictionary; 
         }
-        public static void ViewportCollision(Node parentNode, Sprite sprite, Rigidbody rb)
+      
+        /// <summary>
+        /// Retains rigidbody within screen-size limit, called from rigidbody internally.
+        /// </summary>
+        /// <param name="parentNode"></param>
+        public static void ViewportCollision(Node parentNode)
         {
-            if (sprite != null && sprite.isCollider)
+            Sprite sprite = parentNode.GetComponent<Sprite>();
+            Rigidbody rb = parentNode.GetComponent<Rigidbody>();
+            if (sprite is null || rb is null) return; 
+            if (sprite.isCollider)
             {
                 if (parentNode.position.y > Constants.screenHeight - 4 - sprite.size.y)
                 {
@@ -382,7 +343,7 @@ namespace pixel_renderer
         public static void UpdateCurrentStage(Stage stage)
         {
             stage.RefreshStageDictionary();
-            stage.Update(delta: Env.lastFrameTime);
+            stage.FixedUpdate(delta: Env.lastFrameTime);
             if (Debug.debugging) Debug.debug = "";
             Env.frameCount++;
         }
@@ -390,17 +351,17 @@ namespace pixel_renderer
         {
             var nodes = new List<Node>();
             AddPlayer(nodes);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 65536; i++)
             {
                 AddDefaultNodes(nodes, i);
             }
-            SetCurrentStage(new Stage("Stage One!", Env.Backgrounds[0], nodes.ToArray()));
+            SetCurrentStage(new Stage("Default Stage", Env.Backgrounds[1], nodes.ToArray()));
             InitializeNodes();
             Env.stage.RefreshStageDictionary();
         }
         private static void InitializeNodes()
         {
-            foreach (Node node in Env.stage.nodes)
+            foreach (Node node in Env.stage.Nodes)
             {
                 node.parentStage = Env.stage;
                 foreach (var component in node.Components)
@@ -411,28 +372,30 @@ namespace pixel_renderer
         }
         private static void AddDefaultNodes(List<Node> nodes, int i)
         {
-            var node = new Node($"NODE {i}", UUID.NewUUID(), new Vec2(0, 0), new Vec2(0, 1));
-            var position = Vec2.one * JRandom.RandomInt(1, 3);
-            var wind = new Wind();
-            wind.direction = Direction.Down; 
-            node.AddComponent(wind); 
-            node.AddComponent(new Sprite(position, JRandom.GetRandomColor(), true));
+            var pos = JRandom.ScreenPosition();
+            var node = new Node($"NODE {i}", new Vec2(pos.x, pos.y), new Vec2(0, 1));
+            var position = Vec2.one * JRandom.Int(1, 3);
+            var wind = new Wind(Direction.Left);
+            node.AddComponent(wind);
+            node.AddComponent(new Sprite(position, JRandom.Color(), true));
             node.AddComponent(new Rigidbody());
             nodes.Add(node);
         }
+        public static Node lastSelected; 
         public static bool TryCheckOccupant(Point pos, out Node? result)
         {
             // round up number to improve click accuracy
             // todo = consider size of sprite to reliably get 
             // clicks that arent exactly on the corner of the object
+            // does not really work
+
+            Stage stage = Runtime.Instance.stage ?? Stage.Empty;
             pos = new Point()
             {
                 X = Math.Round(pos.X),
                 Y = Math.Round(pos.Y)
             };
-
-            Stage stage = Runtime.Instance.stage ?? Stage.Empty;
-            foreach (var node in stage.nodes)
+            foreach (var node in stage.Nodes)
             {
                 // round up number to improve click accuracy
                 Point pt = (Point)node.position;
@@ -447,7 +410,9 @@ namespace pixel_renderer
                  
                 if (xDelta + yDelta < maxClickDistance_InPixels)
                 {
+                    if (node == lastSelected) continue; 
                     result = node;
+                    lastSelected = node; 
                     return true;
                 }
             }
@@ -457,10 +422,10 @@ namespace pixel_renderer
         private static void AddPlayer(List<Node> nodes)
         {
             Vec2 playerStartPosition = new Vec2(3, 8);
-            Node playerNode = new("Player", UUID.NewUUID(), playerStartPosition , Vec2.one);
+            Node playerNode = new("Player", playerStartPosition , Vec2.one);
             
             Rigidbody rb = new();
-            Sprite sprite = new(Vec2.one* 14, JRandom.GetRandomColor(), true);
+            Sprite sprite = new(Vec2.one* 14, JRandom.Color(), true);
             
             Camera cam = new(); 
             

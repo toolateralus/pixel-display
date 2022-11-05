@@ -2,6 +2,8 @@
 using Color = System.Drawing.Color;
 internal class Player : Component
 {
+    public override string UUID { get; set; }
+    public override string Name { get; set; }
     Rigidbody rb;
     Sprite sprite;
     public bool takingInput = true; 
@@ -15,7 +17,7 @@ internal class Player : Component
         sprite.isCollider = true;
         sprite.DrawSquare(Vec2.one * 3, Color.AliceBlue, true);
     }
-    public override void FixedUpdate()
+    public override void FixedUpdate(float delta)
     {
         if (!takingInput) return;
         RandomizeSpriteColor();
@@ -44,7 +46,7 @@ internal class Player : Component
             for(int j = 0; j < y; j++)
             for (int i = 0; i < x; i++)
             {
-                colorData[i, j] = JRandom.GetRandomColor();
+                colorData[i, j] = JRandom.Color();
             }
             sprite.DrawSquare(sprite.size, colorData, true);
         }

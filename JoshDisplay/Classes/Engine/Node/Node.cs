@@ -9,14 +9,27 @@ namespace pixel_renderer
         public string Name { get; set; }
         public string UUID { get; private set; }
 
-        public Vec2 position = new Vec2();
-        public Vec2 scale = new Vec2();
+        public Vec2 position = new();
+        public Vec2 localPosition => GetLocalPosition(position);
+        public Vec2 GetLocalPosition(Vec2 position)
+        {
+            Vec2 local = new();
+            if (parentNode == null) return position;
+            local = parentNode.position - position; 
+            return local;
+        }
+        public Vec2 scale = new();
 
         public Node? parentNode;
         public Node[]? children;
+
         public Dictionary<Type, Component> Components { get; private set; } = new Dictionary<Type, Component>();
 
-
+        public T? GetComponent<T>()
+        {
+            var component = Components[typeof(T)];
+            return (T)Convert.ChangeType(component, typeof(T));
+        }
         public void AddComponent(Component component)
         {
             Components.Add(component.GetType(), component);
@@ -38,32 +51,31 @@ namespace pixel_renderer
             component = null;
             return false;
         }
-        public T? GetComponent<T>()
-        {
-            var component = Components[typeof(T)];
-            return (T)Convert.ChangeType(component, typeof(T));
-        }
+        
         // Constructors 
-        public Node(Stage parentStage, string name, string gUID, Vec2 position, Vec2 velocity, Vec2 scale, Node? parentNode, Node[]? children)
+        public Node(Stage parentStage, string name, Vec2 position, Vec2 scale, Node? parentNode, Node[]? children)
         {
             this.parentStage = parentStage;
             Name = name;
-            UUID = gUID;
+            UUID = pixel_renderer.UUID.NewUUID();
             this.position = position;
             this.scale = scale;
             this.parentNode = parentNode;
             this.children = children;
         }
-        public Node(string name, string gUID)
+        public Node(string name)
         {
-            UUID = gUID;
+            UUID = pixel_renderer.UUID.NewUUID();
             Name = name;
         }
-        public Node() { }
-        public Node(string name, string gUID, Vec2 pos, Vec2 scale)
+        public Node() 
+        {
+            UUID = pixel_renderer.UUID.NewUUID(); 
+        }
+        public Node(string name, Vec2 pos, Vec2 scale)
         {
             Name = name;
-            UUID = gUID;
+            UUID = pixel_renderer.UUID.NewUUID();
             position = pos;
             this.scale = scale;
         }
@@ -72,7 +84,7 @@ namespace pixel_renderer
         public event Action OnFixedUpdateCalled;
 
         // awake - to be called before first update; 
-        public void Awake(object? sender, EventArgs e)
+        public void Awake()
         {
             OnAwakeCalled?.Invoke();
             foreach (var component in Components)
@@ -81,14 +93,15 @@ namespace pixel_renderer
             }
         }
         // update - if(usingPhysics) Update(); every frame.
-        public void FixedUpdate()
+        public void FixedUpdate(float delta)
         {
             OnFixedUpdateCalled?.Invoke();
             foreach (var component in Components)
             {
-                component.Value.FixedUpdate();
+                component.Value.FixedUpdate(delta);
             }
         }
+        public static Node New = new("", Vec2.zero, Vec2.one); 
 
     }
 }

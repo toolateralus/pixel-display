@@ -20,7 +20,6 @@
         public float Length => (float)Math.Sqrt(x * x + y * y);
         public static Vec2 one = new Vec2(1, 1);
         public static Vec2 zero = new Vec2(0, 0);
-
         public Vec2(float x, float y)
         {
             this.x = x;
@@ -28,12 +27,10 @@
         }
         public Vec2()
         { }
-
         public static Vec2 operator +(Vec2 a, Vec2 b) { return new Vec2(a.x + b.x, a.y + b.y); }
         public static Vec2 operator -(Vec2 a, Vec2 b) { return new Vec2(a.x - b.x, a.y - b.y); }
         public static Vec2 operator /(Vec2 a, float b) { return new Vec2(a.x / b, a.y / b); }
         public static Vec2 operator *(Vec2 a, float b) { return new Vec2(a.x * b, a.y * b); }
-
         public static explicit operator Point(Vec2 v) => new()
         {
             X = v.x,
@@ -62,18 +59,30 @@
     }
     public static class JRandom
     {
-        public static Color GetRandomColor()
+        public static Vec2 ScreenPosition()
         {
-            byte r = RandomByte(),
-                g = RandomByte(),
-                b = RandomByte(),
-                a = RandomByte();
+            var pos = new Vec2();
 
-            return Color.FromArgb(r, g, b, a);
+            var xLimit = Constants.screenHeight;
+            var yLimit = Constants.screenWidth;
+
+            return new()
+            {
+                x = Int(0, xLimit),
+                y = Int(0, yLimit)
+            };
         }
-        public static byte RandomByte() => (byte)new Random().Next(0, 255);
-        public static int RandomInt(int min, int max) => new Random().Next(min, max);
+        public static Color Color()
+        {
+            byte r = Byte(),
+                g = Byte(),
+                b = Byte(),
+                a = Byte();
 
+            return System.Drawing.Color.FromArgb(r, g, b, a);
+        }
+        public static byte Byte() => (byte)new Random().Next(0, 255);
+        public static int Int(int min, int max) => new Random().Next(min, max);
     }
     public static class WaveForms
     {
@@ -110,7 +119,7 @@
         /// <returns>A Vertex position at a random point on a sine wave</returns>
         public static Vec2 GetPointOnSine()
         {
-            int vertexIndex = JRandom.RandomInt(0, vertices);
+            int vertexIndex = JRandom.Int(0, vertices);
             const float Tau = CMath.PI * 2;
             float progress = (float)vertexIndex / (vertices - 1);
             var x = CMath.Lerp(0, 1, progress);
@@ -168,6 +177,7 @@
             return new Vec2(rightMove - leftMove, upMove - downMove);
         }
     }
+
 }
 
 

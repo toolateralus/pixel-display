@@ -18,13 +18,19 @@ namespace pixel_renderer
     }
     internal class Wind : Component
     {
+        public Wind(Direction direction)
+        {
+            this.direction = direction; 
+        }
+        public override string UUID { get; set; }
+        public override string Name { get; set; }
         Rigidbody rb;
         public Direction direction = Direction.Up; 
         public override void Awake()
         {
             rb = parentNode.GetComponent<Rigidbody>();
         }
-        public override void FixedUpdate()
+        public override void FixedUpdate(float delta)
         {
             var windDir = Orientation.GetDirection(direction);
             float speed = -1 + WaveForms.Next.Length * 5;
