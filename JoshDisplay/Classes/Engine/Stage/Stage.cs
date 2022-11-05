@@ -52,7 +52,7 @@ namespace pixel_renderer
         /// </summary>
         public void Init()
         {
-            UUID = pixel_renderer.UUID.NewUUID(); 
+            UUID = pixel_renderer.UuID.NewUUID(); 
             RefreshStageDictionary();
             GetEvents();
         }

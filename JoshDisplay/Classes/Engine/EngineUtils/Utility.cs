@@ -10,8 +10,52 @@
     public static class Constants
     {
         public const int frameRateCheckThresh = 60;
-        public const int screenWidth = 255;
-        public const int screenHeight = 255;
+        public const int screenWidth = 256;
+        public const int screenHeight = 256;
+        public const int collisionCellSize = 4;
+        public const float depenetrationForce = 25f;
+    }
+    public class Vec3
+    {
+        public float x;
+        public float y;
+        public float z;
+        public float Magnitude => MathF.Sqrt(x * x + y * y + z * z);
+
+        public static Vec3 one = new Vec3(1, 1, 1);
+        public static Vec3 zero = new Vec3(0, 0, 0);
+
+        public Vec3()
+        {
+            x = 0;
+            y = 0;
+            z = 0;
+        }
+        public static Vec3 operator +(Vec3 a, Vec3 b) { return new Vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
+        public static Vec3 operator -(Vec3 a, Vec3 b) { return new Vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
+        public static Vec3 operator /(Vec3 a, Vec3 b) { return new Vec3(a.x / b.x, a.y / b.y, a.z / b.z); }
+        public static Vec3 operator *(Vec3 a, Vec3 b) { return new Vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
+        public static implicit operator Vec2(Vec3 v) => new()
+        {
+            x = v.x,
+            y = v.y
+        };
+        public static implicit operator Vec3(Vec2 v) => new()
+        {
+            x = v.x,
+            y = v.y,
+            z = 0
+        };
+
+
+
+
+        public Vec3(float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
     public class Vec2
     {
@@ -56,6 +100,19 @@
             }
             return output;
         }
+
+        internal static Vec2 Negate(Vec2 v) => new()
+        {
+            x = -v.x,
+            y = -v.y,
+        }; 
+        internal static Vec3 Negate(Vec3 v) => new()
+        {
+            x = -v.x,
+            y = -v.y,
+            z = -v.z
+        };
+           
     }
     public static class JRandom
     {

@@ -27,6 +27,7 @@
             <Label  FontFamily="MS Gothic Bold" Content="Debug Console: " Canvas.Left="99" Canvas.Top="46" HorizontalAlignment="Left" VerticalAlignment="Top" Width="279" Foreground="White" FontSize="14"/>
             <CheckBox x:Name="debugCheckbox" Content="" Canvas.Left="86" Canvas.Top="50" Background="#FF680700" BorderBrush="#FF00FF21" FontFamily="MS Gothic" Checked="DebugChecked" Unchecked="DebugUnchecked"/>
             <Image x:Name ="renderImage" Height="865" Canvas.Left="606" Canvas.Top="64" Width="1137" RenderOptions.BitmapScalingMode ="NearestNeighbor" />
+            <Label x:Name ="debugTextbox" Content="CollisionDict :" Canvas.Left="759" Canvas.Top="8" Height="50" Width="346" Background="White"/>
         </Canvas>
     </Viewbox>
 </Window>

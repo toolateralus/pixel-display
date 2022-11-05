@@ -1,7 +1,8 @@
-﻿using Color = System.Drawing.Color;
+﻿using System.Diagnostics.CodeAnalysis;
+using Color = System.Drawing.Color;
 
 namespace pixel_renderer
-{ 
+{
     public class Sprite : Component
     {
         public Vec2 size = new Vec2();
@@ -33,7 +34,10 @@ namespace pixel_renderer
         }
 
 
-
+        public override void Awake()
+        {
+            base.Awake();
+        }
         public Sprite()
         {
 

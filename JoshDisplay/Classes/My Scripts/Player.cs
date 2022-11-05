@@ -11,6 +11,7 @@ internal class Player : Component
     int i = 0;
     public override void Awake()
     {
+        base.Awake(); 
         rb = parentNode.GetComponent<Rigidbody>();
         sprite = parentNode.GetComponent<Sprite>();
         if (sprite == null || rb == null) return; 

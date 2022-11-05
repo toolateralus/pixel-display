@@ -57,7 +57,7 @@ namespace pixel_renderer
         {
             this.parentStage = parentStage;
             Name = name;
-            UUID = pixel_renderer.UUID.NewUUID();
+            UUID = pixel_renderer.UuID.NewUUID();
             this.position = position;
             this.scale = scale;
             this.parentNode = parentNode;
@@ -65,17 +65,17 @@ namespace pixel_renderer
         }
         public Node(string name)
         {
-            UUID = pixel_renderer.UUID.NewUUID();
+            UUID = pixel_renderer.UuID.NewUUID();
             Name = name;
         }
         public Node() 
         {
-            UUID = pixel_renderer.UUID.NewUUID(); 
+            UUID = pixel_renderer.UuID.NewUUID(); 
         }
         public Node(string name, Vec2 pos, Vec2 scale)
         {
             Name = name;
-            UUID = pixel_renderer.UUID.NewUUID();
+            UUID = pixel_renderer.UuID.NewUUID();
             position = pos;
             this.scale = scale;
         }

@@ -11,10 +11,13 @@ namespace pixel_renderer
         {
 
         }
-      
+        /// <summary>
+        /// Best Practice: call base.Awake at the beginning of this method override to get a UUID and ComponentName.
+        /// </summary>
         public virtual void Awake()
         {
-
+            UUID = UuID.NewUUID();
+            Name = parentNode.Name + $" {GetType()}"; 
         }
     }
 
