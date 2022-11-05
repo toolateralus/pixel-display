@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Buffers.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +17,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Bitmap = System.Drawing.Bitmap;
 
@@ -139,7 +141,7 @@ namespace pixel_renderer
             Staging.UpdateCurrentStage(stage);
             var collisionMap = Collision.BroadPhase(stage);
             var narrowMap = Collision.NarrowPhase(collisionMap);
-            Collision.Solve(narrowMap);
+            Collision.GetCollision(narrowMap);
         }
         public void Update(object? sender, EventArgs e)
         {
@@ -181,7 +183,6 @@ namespace pixel_renderer
         private static Bitmap Draw(Camera camera, Bitmap frame)
         {
             Stage stage = Runtime.Instance.stage;
-            Vec2 camPos = camera.parentNode.position;
             foreach (var node in stage.Nodes)
             {
                 var sprite = node.GetComponent<Sprite>();
@@ -268,9 +269,7 @@ namespace pixel_renderer
     public static class Collision
     {
         public static SpatialHash hash = new(Constants.screenWidth, Constants.screenHeight, Constants.collisionCellSize);
-                                                       
-                                                      
-        public static bool IsInside(this Node nodeA, Node nodeB)
+        public static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             Vec2 a = nodeA.position;
             Vec2 b = nodeB.position; 
@@ -284,12 +283,7 @@ namespace pixel_renderer
                     a.x + spriteSizeA.x > b.x && 
                     a.y < b.y + spriteSizeB.y && 
                     spriteSizeA.y + a.y > b.y)
-                    {
-                    // Collision detected!
-                        
-                        return true; 
-                    }
-                // No collision
+                    return true; 
             }
             return false; 
            
@@ -324,13 +318,18 @@ namespace pixel_renderer
                     foreach (var nodeB in cells)
                     {
                         if (nodeA.UUID.Equals(nodeB.UUID)) continue; 
-                        if (nodeA.IsInside(nodeB))
+                        if (nodeA.CheckOverlap(nodeB))
                         {
                             // continue or remove and proceed?
-                            if   (nodes.ContainsKey(nodeA)) nodes.Remove(nodeA);
-                            if   (nodes.ContainsKey(nodeB)) nodes.Remove(nodeB);
+                            // continue might be cheaper but might also continue to have to 
+                            // try and do the alreasdy done or false comparison 
+
+                            if (nodes.ContainsKey(nodeA)) nodes.Remove(nodeA);
+                            if (nodes.ContainsKey(nodeB)) nodes.Remove(nodeB);
+
                             if (nodes.ContainsValue(nodeA)) nodes.Remove(nodeA);
                             if (nodes.ContainsValue(nodeB)) nodes.Remove(nodeB);
+
                             nodes.Add(nodeA, nodeB);
                         }
                     }
@@ -361,50 +360,79 @@ namespace pixel_renderer
                 }
             }
         }
-        internal static void Solve(Dictionary<Node, Node> narrowMap)
+        internal static void GetCollision(Dictionary<Node, Node> narrowMap)
         {
-            foreach (KeyValuePair<Node, Node> colliders in narrowMap)
+            foreach (var collisionPair in narrowMap)
             {
-                Node a = colliders.Key;
-                Node b = colliders.Value; 
-                
-                Sprite spriteA = a.GetComponent<Sprite>(); 
-                Sprite spriteB = b.GetComponent<Sprite>();
-
-                Rigidbody rbA = a.GetComponent<Rigidbody>();
-                Rigidbody rbB = b.GetComponent<Rigidbody>();
-
-                Rigidbody submissive = null;
-                Rigidbody dominant = null;
-
-                Vec2 sizeA = spriteA.size;
-                Vec2 sizeB = spriteB.size;
-
-                Vec2 posA = a.position;
-                Vec2 posB = b.position;
-
-                Vec2 distance = posA + sizeA - posB + sizeB; 
-                if (rbA.velocity.Length >= rbB.velocity.Length)
-                {
-                    dominant = rbA; 
-                    submissive = rbB;
-                }
-                else
-                {
-                    dominant = rbB; 
-                    submissive = rbA;
-                }
-                if (submissive == null || dominant == null)
-                {
-                    submissive = rbB;
-                    dominant = rbA;
-                }
-                submissive.parentNode.position += distance; 
-                submissive.velocity += CMath.Negate(dominant.velocity * submissive.velocity.Length * 250); 
+                GetCollisionComponents(collisionPair, out Rigidbody rbA, out Rigidbody rbB);
+                GetDominantBody(rbA, rbB, out Rigidbody submissive, out Rigidbody dominant);
+                Collide(submissive, dominant);
             }
-            //hash = new(Constants.screenWidth, Constants.screenHeight, Constants.collisionCellSize);
         }
+        private static void Collide(Rigidbody submissive, Rigidbody dominant)
+        {
+            submissive.parentNode.position += dominant.velocity;
+        }
+        private static void GetDominantBody(Rigidbody rbA, Rigidbody rbB, out Rigidbody submissive, out Rigidbody dominant)
+        {
+            
+            if (rbA.velocity.Length >= rbB.velocity.Length)
+            {
+                dominant = rbA;
+                submissive = rbB;
+            }
+            else
+            {
+                dominant = rbB;
+                submissive = rbA;
+            }
+            if (rbA.usingGravity && !rbB.usingGravity)
+            {
+                dominant = rbA;
+                submissive = rbB;
+            }
+            else
+            {
+                dominant = rbB;
+                submissive = rbA;
+            }
+            if (submissive == null || dominant == null)
+            {
+                submissive = rbB;
+                dominant = rbA;
+            }
+        }
+        /// <summary>
+        /// Retrieves all relevant Node components to solve an already verified collision between two Nodes. 
+        /// </summary>
+        /// <param name="colliders"></param>
+        /// <param name="rbA"></param>
+        /// <param name="rbB"></param>
+        /// <param name="submissive"></param>
+        /// <param name="dominant"></param>
+        private static void GetCollisionComponents(KeyValuePair<Node, Node> colliders, out Rigidbody rbA, out Rigidbody rbB)
+        {
+            Node a = colliders.Key;
+            Node b = colliders.Value;
+            if (a.Name == "Floor" || b.Name == "Floor")
+            {
+                
+            }
+            Sprite spriteA = a.GetComponent<Sprite>();
+            Sprite spriteB = b.GetComponent<Sprite>();
+
+            rbA = a.GetComponent<Rigidbody>();
+            rbB = b.GetComponent<Rigidbody>();
+            
+            Vec2 sizeA = spriteA.size;
+            Vec2 sizeB = spriteB.size;
+
+            Vec2 posA = a.position;
+            Vec2 posB = b.position;
+        }
+           
     }
+
     public class SpatialHash
     {
         int rows;
@@ -435,7 +463,7 @@ namespace pixel_renderer
             List<int> cells = Hash(obj);
             foreach (var index in cells)
             {
-                if (index < 0 || index > rows * columns) continue;
+                if (index < 0 || index >= rows * columns) continue;
                 Buckets[index].Add(obj);
             }
         }
@@ -445,7 +473,7 @@ namespace pixel_renderer
             List<int> buckets = Hash(node);
             foreach (var index in buckets)
             {
-                if (index < 0 || index > rows * columns) continue;
+                if (index < 0 || index >= rows * columns) continue;
                 nodes.AddRange(Buckets[index]);
             }
             return nodes;
@@ -501,9 +529,12 @@ namespace pixel_renderer
         }
         public static void InitializeDefaultStage()
         {
-            var nodes = new List<Node>();
+            List<Node> nodes = new List<Node>();
+            
             AddPlayer(nodes);
-            for (int i = 0; i < 25; i++)
+            AddFloor(nodes);
+
+            for (int i = 0; i < 1000; i++)
             {
                 AddDefaultNodes(nodes, i);
             }
@@ -511,6 +542,27 @@ namespace pixel_renderer
             InitializeNodes();
             Env.stage.RefreshStageDictionary();
         }
+
+        private static void AddFloor(List<Node> nodes)
+        {
+            Vec2 startPos = new(2, Constants.screenHeight - 4);
+            Node floor = new("Floor", startPos, Vec2.one);
+            Sprite floorSprite = 
+                new(new Vec2(Constants.screenWidth - 4, 10),
+                System.Drawing.Color.FromArgb(255, 145, 210, 75),
+                true);
+           
+            Rigidbody floorRb = new()
+            {
+                usingGravity = false,
+                drag = 0,
+                Name = "Floor - Rigidbody"
+            };
+            floor.AddComponent(floorRb);
+            floor.AddComponent(floorSprite);
+            nodes.Add(floor);
+        }
+
         private static void InitializeNodes()
         {
             foreach (Node node in Env.stage.Nodes)
@@ -530,7 +582,10 @@ namespace pixel_renderer
             //var wind = new Wind(Direction.Left);
             //node.AddComponent(wind);
             node.AddComponent(new Sprite(position, JRandom.Color(), true));
-            node.AddComponent(new Rigidbody());
+            node.AddComponent(new Rigidbody()
+            {
+                usingGravity = JRandom.Bool()
+            });
             nodes.Add(node);
         }
         public static Node lastSelected;

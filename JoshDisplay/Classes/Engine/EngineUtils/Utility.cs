@@ -6,6 +6,7 @@
     using Random = System.Random;
     using Color = System.Drawing.Color;
     using System.Windows;
+    using System.Security.Cryptography.X509Certificates;
 
     public static class Constants
     {
@@ -31,10 +32,18 @@
             y = 0;
             z = 0;
         }
+        public Vec3(float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
         public static Vec3 operator +(Vec3 a, Vec3 b) { return new Vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
         public static Vec3 operator -(Vec3 a, Vec3 b) { return new Vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
         public static Vec3 operator /(Vec3 a, Vec3 b) { return new Vec3(a.x / b.x, a.y / b.y, a.z / b.z); }
         public static Vec3 operator *(Vec3 a, Vec3 b) { return new Vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
+        
         public static implicit operator Vec2(Vec3 v) => new()
         {
             x = v.x,
@@ -46,17 +55,8 @@
             y = v.y,
             z = 0
         };
-
-
-
-
-        public Vec3(float x, float y, float z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
     }
+
     public class Vec2
     {
         public float x;
@@ -64,6 +64,7 @@
         public float Length => (float)Math.Sqrt(x * x + y * y);
         public static Vec2 one = new Vec2(1, 1);
         public static Vec2 zero = new Vec2(0, 0);
+
         public Vec2(float x, float y)
         {
             this.x = x;
@@ -71,10 +72,23 @@
         }
         public Vec2()
         { }
-        public static Vec2 operator +(Vec2 a, Vec2 b) { return new Vec2(a.x + b.x, a.y + b.y); }
-        public static Vec2 operator -(Vec2 a, Vec2 b) { return new Vec2(a.x - b.x, a.y - b.y); }
-        public static Vec2 operator /(Vec2 a, float b) { return new Vec2(a.x / b, a.y / b); }
-        public static Vec2 operator *(Vec2 a, float b) { return new Vec2(a.x * b, a.y * b); }
+
+        public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y); 
+        public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y); 
+        public static Vec2 operator /(Vec2 a, float b) => new(a.x / b, a.y / b); 
+        public static Vec2 operator *(Vec2 a, float b) => new(a.x * b, a.y * b); 
+        public static Vec2 operator *(Vec2 a, Vec2 b) => new()
+        {
+             x = a.x * b.x,
+             y = a.y * b.y,
+        };
+        public static Vec2 operator /(Vec2 a, Vec2 b) => new()
+        {
+            x = a.x / b.x,
+            y = a.y / b.y,
+        };
+
+
         public static explicit operator Point(Vec2 v) => new()
         {
             X = v.x,
@@ -106,6 +120,7 @@
             x = -v.x,
             y = -v.y,
         }; 
+
         internal static Vec3 Negate(Vec3 v) => new()
         {
             x = -v.x,
@@ -132,14 +147,16 @@
         public static Color Color()
         {
             byte r = Byte(),
-                g = Byte(),
-                b = Byte(),
-                a = Byte();
+                 g = Byte(),
+                 b = Byte(),
+                 a = Byte();
 
             return System.Drawing.Color.FromArgb(r, g, b, a);
         }
-        public static byte Byte() => (byte)new Random().Next(0, 255);
+        public static byte Byte() => (byte)Int(0, 255);
         public static int Int(int min, int max) => new Random().Next(min, max);
+        public static bool Bool() => Int(-32000, 32000) > 0;
+        public static bool Bool(int odds) => Int(-odds, odds) > 0;
     }
     public static class WaveForms
     {
@@ -191,7 +208,6 @@
         {
             Key.W, Key.A, Key.S, Key.D, Key.Space, Key.Q
         };
-
         public static bool GetKeyDown(Key key)
         {
             if (KeyDown.ContainsKey(key))

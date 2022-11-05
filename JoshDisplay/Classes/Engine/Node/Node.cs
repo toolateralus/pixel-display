@@ -23,7 +23,7 @@ namespace pixel_renderer
         public Node? parentNode;
         public Node[]? children;
 
-        public Dictionary<Type, Component> Components { get; private set; } = new Dictionary<Type, Component>();
+        public Dictionary<Type, Component> Components { get; set; } = new Dictionary<Type, Component>();
 
         public T? GetComponent<T>()
         {
@@ -57,7 +57,7 @@ namespace pixel_renderer
         {
             this.parentStage = parentStage;
             Name = name;
-            UUID = pixel_renderer.UuID.NewUUID();
+            UUID = UuID.NewUUID();
             this.position = position;
             this.scale = scale;
             this.parentNode = parentNode;
@@ -65,17 +65,17 @@ namespace pixel_renderer
         }
         public Node(string name)
         {
-            UUID = pixel_renderer.UuID.NewUUID();
+            UUID = UuID.NewUUID();
             Name = name;
         }
         public Node() 
         {
-            UUID = pixel_renderer.UuID.NewUUID(); 
+            UUID = UuID.NewUUID(); 
         }
         public Node(string name, Vec2 pos, Vec2 scale)
         {
             Name = name;
-            UUID = pixel_renderer.UuID.NewUUID();
+            UUID = UuID.NewUUID();
             position = pos;
             this.scale = scale;
         }

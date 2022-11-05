@@ -17,17 +17,17 @@ namespace pixel_renderer
             base.Awake();
             sprite = parentNode.GetComponent<Sprite>();
             if (sprite == null) throw new System.Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID{ parentNode.UUID}");
-            // do once to save a check on update.
             isCollider = sprite.isCollider; 
         }
         public override void FixedUpdate(float delta)
         {
-            if (usingGravity) velocity.y += CMath.Gravity;
-            if (isCollider) Collision.ViewportCollision(parentNode);
-            _drag = (float)GetDrag().Clamp(-drag, drag);
-            ApplyVelocity();
-            ApplyPosition();
-
+            if (usingGravity)
+            {
+                _drag = (float)GetDrag().Clamp(-drag, drag);
+                velocity.y += CMath.Gravity;
+                ApplyVelocity();
+                ApplyPosition();
+            }
         }
         const double dragCoefficient = 1;
 
