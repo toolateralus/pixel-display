@@ -1,28 +1,15 @@
-﻿
-using System;
-using System.Buffers.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Mail;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
-using System.Threading.Tasks;
-using System.Timers;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
-using System.Windows.Media.Media3D;
-using System.Xml.Linq;
-using System.Xml.Serialization;
-using Bitmap = System.Drawing.Bitmap;
-
-namespace pixel_renderer
+﻿namespace pixel_renderer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Timers;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Media;
+    using Bitmap = System.Drawing.Bitmap;
+
     /// <summary>
     /// Main Entry-Point for App.
     /// </summary>
@@ -135,12 +122,14 @@ namespace pixel_renderer
             instance.InitializeBitmapCollection();
             Staging.InitializeDefaultStage();
         }
+        List<List<Node>> collisionMap = new();
+        Dictionary<Node, Node> narrowMap = new(); 
         public void FixedUpdate(object? sender, EventArgs e)
         {
             if (stage == null) return; 
             Staging.UpdateCurrentStage(stage);
-            var collisionMap = Collision.BroadPhase(stage);
-            var narrowMap = Collision.NarrowPhase(collisionMap);
+            Collision.BroadPhase(stage, collisionMap);
+            Collision.NarrowPhase(collisionMap, narrowMap);
             Collision.GetCollision(narrowMap);
         }
         public void Update(object? sender, EventArgs e)
@@ -165,7 +154,7 @@ namespace pixel_renderer
             var lastFrameTime = env.lastFrameTime;
             var frameCount = env.frameCount;
             var frameRate =
-                System.Math.Floor(1 /
+                Math.Floor(1 /
                 TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds
                 * frameCount);
             return frameRate;
@@ -180,6 +169,7 @@ namespace pixel_renderer
             var renderFrame = FrameBuffer.First();
             DrawToImage(ref renderFrame, output);
         }
+
         private static Bitmap Draw(Camera camera, Bitmap frame)
         {
             Stage stage = Runtime.Instance.stage;
@@ -288,9 +278,9 @@ namespace pixel_renderer
             return false; 
            
         }
-        public static List<List<Node>> BroadPhase(Stage stage)
+        public static void BroadPhase(Stage stage, List<List<Node>> broadMap)
         {
-            List<List<Node>> collisionMap = new(); 
+            broadMap.Clear(); 
             foreach (var node in stage)
             {
                 if (!node.TryGetComponent(out Sprite sprite) || !sprite.isCollider)
@@ -302,14 +292,13 @@ namespace pixel_renderer
             foreach (var node in stage)
             {
                List<Node> result = hash.GetNearby(node);
-               collisionMap.Add(result);
+               broadMap.Add(result);
             }
             hash.ClearBuckets();
-            return collisionMap; 
         }
-        public static Dictionary<Node, Node> NarrowPhase(List<List<Node>> collisionMap)
+        public static Dictionary<Node, Node> NarrowPhase(List<List<Node>> collisionMap, Dictionary<Node, Node> narrowMap)
         {
-            var nodes = new Dictionary<Node, Node>();
+            narrowMap.Clear(); 
             foreach (var cells in collisionMap)
             {
                 if(cells.Count <= 0) continue;
@@ -317,25 +306,33 @@ namespace pixel_renderer
                 {
                     foreach (var nodeB in cells)
                     {
+
+                        // check UUID instead of absolute value of somthing else
+                        // positions for more accurate and cheaper comparison
                         if (nodeA.UUID.Equals(nodeB.UUID)) continue; 
+
                         if (nodeA.CheckOverlap(nodeB))
                         {
+                            /* with  a 2D loop, each node is compared twice from each perspective
+                             and once against itself as well, because we use the entire node list
+                            in the stage for both loops*/  
+
                             // continue or remove and proceed?
                             // continue might be cheaper but might also continue to have to 
                             // try and do the alreasdy done or false comparison 
 
-                            if (nodes.ContainsKey(nodeA)) nodes.Remove(nodeA);
-                            if (nodes.ContainsKey(nodeB)) nodes.Remove(nodeB);
+                            if (narrowMap.ContainsKey(nodeA)) narrowMap.Remove(nodeA);
+                            if (narrowMap.ContainsKey(nodeB)) narrowMap.Remove(nodeB);
 
-                            if (nodes.ContainsValue(nodeA)) nodes.Remove(nodeA);
-                            if (nodes.ContainsValue(nodeB)) nodes.Remove(nodeB);
+                            if (narrowMap.ContainsValue(nodeA)) narrowMap.Remove(nodeA);
+                            if (narrowMap.ContainsValue(nodeB)) narrowMap.Remove(nodeB);
 
-                            nodes.Add(nodeA, nodeB);
+                            narrowMap.Add(nodeA, nodeB);
                         }
                     }
                 }
             }
-            return nodes; 
+            return narrowMap; 
         }
         public static void ViewportCollision(Node node)
         {
@@ -432,7 +429,6 @@ namespace pixel_renderer
         }
            
     }
-
     public class SpatialHash
     {
         int rows;
@@ -605,7 +601,7 @@ namespace pixel_renderer
             foreach (var node in stage.Nodes)
             {
                 // round up number to improve click accuracy
-                Point pt = (Point)node.position;
+                Point pt = node.position;
                 pt = new()
                 {
                     X = Math.Round(pt.X),

@@ -22,6 +22,7 @@
         public float y;
         public float z;
         public float Magnitude => MathF.Sqrt(x * x + y * y + z * z);
+        public float sqrMagnitude => x * x + y * y + z * z;
 
         public static Vec3 one = new Vec3(1, 1, 1);
         public static Vec3 zero = new Vec3(0, 0, 0);
@@ -62,6 +63,7 @@
         public float x;
         public float y;
         public float Length => (float)Math.Sqrt(x * x + y * y);
+        public float sqrMagnitude => x * x + y * y;
         public static Vec2 one = new Vec2(1, 1);
         public static Vec2 zero = new Vec2(0, 0);
 
@@ -89,7 +91,7 @@
         };
 
 
-        public static explicit operator Point(Vec2 v) => new()
+        public static implicit operator Point(Vec2 v) => new()
         {
             X = v.x,
             Y = v.y
