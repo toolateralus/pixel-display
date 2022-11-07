@@ -127,10 +127,10 @@
         public void FixedUpdate(object? sender, EventArgs e)
         {
             if (stage == null) return; 
-            Staging.UpdateCurrentStage(stage);
             Collision.BroadPhase(stage, collisionMap);
             Collision.NarrowPhase(collisionMap, narrowMap);
             Collision.GetCollision(narrowMap);
+            Staging.UpdateCurrentStage(stage);
         }
         public void Update(object? sender, EventArgs e)
         {
@@ -159,9 +159,9 @@
                 * frameCount);
             return frameRate;
         }
+        static Runtime runtime => Runtime.Instance;
         public static void Render(Image output)
         {
-            var runtime = Runtime.Instance;
             var player = runtime.stage.FindNode("Player");
             var cam = player.GetComponent<Camera>();
             var frame = Draw(cam, (Bitmap)runtime.stage.Background.Clone());
@@ -298,34 +298,43 @@
         }
         public static Dictionary<Node, Node> NarrowPhase(List<List<Node>> collisionMap, Dictionary<Node, Node> narrowMap)
         {
-            narrowMap.Clear(); 
-            foreach (var cells in collisionMap)
+            narrowMap.Clear();
+
+            if (collisionMap.Count <= 0 || collisionMap[0] == null) 
+                return narrowMap; 
+            
+            for(int i = 0; i < collisionMap.Count(); i++)
             {
-                if(cells.Count <= 0) continue;
-                foreach (var nodeA in cells)
+                var cell = collisionMap[i];
+                if(cell.Count <= 0) continue;
+
+                for (int j = 0; j < cell.Count; j++)
                 {
-                    foreach (var nodeB in cells)
+                    var nodeA = cell[j];
+                    if (nodeA is null) continue; 
+
+                    for (int k = 0; k < cell.Count; k++)
                     {
+                        var nodeB = cell[k];
+                        if (nodeB is null) continue;
 
                         // check UUID instead of absolute value of somthing else
-                        // positions for more accurate and cheaper comparison
                         if (nodeA.UUID.Equals(nodeB.UUID)) continue; 
 
                         if (nodeA.CheckOverlap(nodeB))
                         {
                             /* with  a 2D loop, each node is compared twice from each perspective
                              and once against itself as well, because we use the entire node list
-                            in the stage for both loops*/  
+                            in the stage for both loops*/
 
                             // continue or remove and proceed?
                             // continue might be cheaper but might also continue to have to 
                             // try and do the alreasdy done or false comparison 
 
-                            if (narrowMap.ContainsKey(nodeA)) narrowMap.Remove(nodeA);
-                            if (narrowMap.ContainsKey(nodeB)) narrowMap.Remove(nodeB);
-
-                            if (narrowMap.ContainsValue(nodeA)) narrowMap.Remove(nodeA);
-                            if (narrowMap.ContainsValue(nodeB)) narrowMap.Remove(nodeB);
+                            if (narrowMap.ContainsKey(nodeA))   continue;
+                            if (narrowMap.ContainsKey(nodeB))   continue;
+                            if (narrowMap.ContainsValue(nodeA)) continue;
+                            if (narrowMap.ContainsValue(nodeB)) continue;
 
                             narrowMap.Add(nodeA, nodeB);
                         }
@@ -514,14 +523,16 @@
     public static class Staging
     {
         private const int maxClickDistance_InPixels = 0;
-        static Runtime Env = Runtime.Instance;
-        public static void SetCurrentStage(Stage stage) => Env.stage = stage;
+        static Runtime runtime => Runtime.Instance;
+        public static Node lastSelected;
+
+        public static void SetCurrentStage(Stage stage) => runtime.stage = stage;
         public static void UpdateCurrentStage(Stage stage)
         {
             stage.RefreshStageDictionary();
-            stage.FixedUpdate(delta: Env.lastFrameTime);
+            stage.FixedUpdate(delta: runtime.lastFrameTime);
             if (Debug.debugging) Debug.debug = "";
-            Env.frameCount++;
+            runtime.frameCount++;
         }
         public static void InitializeDefaultStage()
         {
@@ -534,9 +545,9 @@
             {
                 AddDefaultNodes(nodes, i);
             }
-            SetCurrentStage(new Stage("Default Stage", Env.Backgrounds[0], nodes.ToArray()));
+            SetCurrentStage(new Stage("Default Stage", runtime.Backgrounds[0], nodes.ToArray()));
             InitializeNodes();
-            Env.stage.RefreshStageDictionary();
+            runtime.stage.RefreshStageDictionary();
         }
 
         private static void AddFloor(List<Node> nodes)
@@ -551,7 +562,7 @@
             Rigidbody floorRb = new()
             {
                 usingGravity = false,
-                drag = 0,
+                drag = 0f,
                 Name = "Floor - Rigidbody"
             };
             floor.AddComponent(floorRb);
@@ -561,9 +572,9 @@
 
         private static void InitializeNodes()
         {
-            foreach (Node node in Env.stage.Nodes)
+            foreach (Node node in runtime.stage.Nodes)
             {
-                node.parentStage = Env.stage;
+                node.parentStage = runtime.stage;
                 foreach (var component in node.Components)
                 {
                     component.Value.Awake();
@@ -575,16 +586,14 @@
             var pos = JRandom.ScreenPosition();
             var node = new Node($"NODE {i}", new Vec2(pos.x, pos.y), new Vec2(0, 1));
             var position = Vec2.one * JRandom.Int(1, 3);
-            //var wind = new Wind(Direction.Left);
-            //node.AddComponent(wind);
             node.AddComponent(new Sprite(position, JRandom.Color(), true));
             node.AddComponent(new Rigidbody()
             {
-                usingGravity = JRandom.Bool()
+                usingGravity = JRandom.Bool(25),
+                drag = .1f
             });
             nodes.Add(node);
         }
-        public static Node lastSelected;
         public static bool TryCheckOccupant(Point pos, out Node? result)
         {
             // round up number to improve click accuracy

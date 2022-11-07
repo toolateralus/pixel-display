@@ -11,25 +11,24 @@ namespace pixel_renderer
         public bool usingGravity = true;
         public Vec2 velocity = new();
         private Sprite? sprite;
-        private bool isCollider = false; 
+        const double dragCoefficient = 1;
+
         public override void Awake()
         {
             base.Awake();
             sprite = parentNode.GetComponent<Sprite>();
             if (sprite == null) throw new System.Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID{ parentNode.UUID}");
-            isCollider = sprite.isCollider; 
         }
         public override void FixedUpdate(float delta)
         {
             if (usingGravity)
             {
-                _drag = (float)GetDrag().Clamp(-drag, drag);
                 velocity.y += CMath.Gravity;
-                ApplyVelocity();
-                ApplyPosition();
             }
+            _drag = (float)GetDrag().Clamp(-drag, drag);
+            ApplyVelocity();
+            ApplyPosition();
         }
-        const double dragCoefficient = 1;
 
 
         public double GetDrag()
