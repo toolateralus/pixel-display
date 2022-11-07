@@ -7,7 +7,7 @@ internal class Player : Component
     Rigidbody rb;
     Sprite sprite;
     public bool takingInput = true; 
-    public const float speed = 3f;
+    public const float speed = 1f;
     int i = 0;
     public override void Awake()
     {
@@ -22,7 +22,7 @@ internal class Player : Component
     {
         if (!takingInput) return;
         RandomizeSpriteColor();
-        var move = Input.GetMoveVector(); 
+        var move = Input.GetMoveVector();
         GetJumpInput(move);
         GetMove(move);
     }
@@ -33,7 +33,7 @@ internal class Player : Component
     private void GetJumpInput(Vec2 moveVector)
     {
         if (moveVector.y == 0) return;
-        rb.velocity.y = moveVector.y * speed * 2; 
+        rb.velocity.y = moveVector.y * speed * 6; 
     }
     private void RandomizeSpriteColor()
     {

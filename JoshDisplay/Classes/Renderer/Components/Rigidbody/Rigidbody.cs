@@ -25,6 +25,7 @@ namespace pixel_renderer
             {
                 velocity.y += CMath.Gravity;
             }
+            //Collision.ViewportCollision(parentNode);
             _drag = (float)GetDrag().Clamp(-drag, drag);
             ApplyVelocity();
             ApplyPosition();
