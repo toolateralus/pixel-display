@@ -27,7 +27,7 @@
 
             for (int i = 0; i < 1000; i++)
             {
-                AddDefaultNodes(nodes, i);
+                AddNode(nodes, i);
             }
             SetCurrentStage(new Stage("Default Stage", runtime.Backgrounds[0], nodes.ToArray()));
             InitializeNodes();
@@ -36,7 +36,7 @@
 
         private static void AddFloor(List<Node> nodes)
         {
-            Vec2 startPos = new(2, Constants.screenHeight - 4);
+            Vec2 startPos = new(2, Constants.screenHeight - 16);
             Node floor = new("Floor", startPos, Vec2.one);
             Floor floorScript = new(); 
             Sprite floorSprite = 
@@ -67,7 +67,7 @@
                 }
             }
         }
-        private static void AddDefaultNodes(List<Node> nodes, int i)
+        private static void AddNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
             var node = new Node($"NODE {i}", new Vec2(pos.x, pos.y), new Vec2(0, 1));
@@ -75,8 +75,8 @@
             node.AddComponent(new Sprite(position, JRandom.Color(), true));
             node.AddComponent(new Rigidbody()
             {
-                usingGravity = JRandom.Bool(25),
-                drag = .1f
+                usingGravity = true,
+                drag = .01f
             });
             nodes.Add(node);
         }
@@ -119,11 +119,11 @@
         }
         private static void AddPlayer(List<Node> nodes)
         {
-            Vec2 playerStartPosition = new Vec2(3, 8);
+            Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
 
             Rigidbody rb = new();
-            Sprite sprite = new(Vec2.one * 14, JRandom.Color(), true);
+            Sprite sprite = new(Vec2.one * 45, JRandom.Color(), true);
 
             Camera cam = new();
 

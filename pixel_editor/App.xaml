@@ -1,7 +1,7 @@
 ﻿<Application x:Class="pixel_editor.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:pixel_editor"
+             xmlns:global="clr-namespace:pixel_editor"
              StartupUri="Main.xaml">
     <Application.Resources>
          

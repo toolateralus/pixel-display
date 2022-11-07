@@ -35,7 +35,9 @@ namespace pixel_editor
             InitializeComponent();
             engine = new();
             engine.Show();
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
+            inspector = new Inspector(inspectorObjName,
+                                      inspectorObjInfo,
+                                      inspectorChildGrid);
             GetEvents();
         }
 

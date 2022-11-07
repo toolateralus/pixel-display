@@ -19,11 +19,8 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
-            if (usingGravity)
-            {
-                velocity.y += CMath.Gravity;
-            }
-            //Collision.ViewportCollision(parentNode);
+            if (usingGravity) velocity.y += CMath.Gravity;
+            Collision.ViewportCollision(parentNode);
             _drag = (float)GetDrag().Clamp(-drag, drag);
             ApplyVelocity();
             ApplyPosition();
@@ -49,16 +46,6 @@ namespace pixel_renderer
         }
         void ApplyVelocity()
         {
-            if(!Constants.WithinTerminalVelocity(this))
-            { 
-                _drag = 0;
-                if (velocity.Sum() > 0f)
-                {
-                    velocity = Constants.TerminalVec2();
-                }
-                else velocity = CMath.Negate(Constants.TerminalVec2()); 
-                return;
-            }
             velocity.y *= _drag;
             velocity.x *= _drag;
         }

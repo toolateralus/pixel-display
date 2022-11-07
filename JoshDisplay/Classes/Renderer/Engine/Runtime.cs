@@ -82,13 +82,12 @@
             Staging.InitializeDefaultStage();
         }
         List<List<Node>> collisionMap = new();
-        Dictionary<Node, Node> narrowMap = new(); 
         public void FixedUpdate(object? sender, EventArgs e)
         {
             if (stage == null) return; 
             Collision.BroadPhase(stage, collisionMap);
-            Collision.NarrowPhase(collisionMap, narrowMap);
-            Collision.GetCollision(narrowMap);
+            Collision.NarrowPhase(collisionMap);
+            Collision.GetCollision();
             Staging.UpdateCurrentStage(stage);
         }
         public void Update(object? sender, EventArgs e)
