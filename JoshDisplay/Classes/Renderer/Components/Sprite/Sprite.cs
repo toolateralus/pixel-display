@@ -8,8 +8,6 @@ namespace pixel_renderer
         public Vec2 size = new Vec2();
         public Color[,] colorData;
         public bool isCollider = false;
-        public override string UUID { get; set; }
-        public override string Name { get; set; }
         public Sprite(Vec2 size, Color color, bool isCollider)
         {
             DrawSquare(size, color, isCollider);

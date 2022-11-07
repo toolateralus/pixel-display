@@ -4,8 +4,6 @@ namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
-        public override string UUID { get; set; }
-        public override string Name { get; set; }
         private float _drag = 0.0f;
         public float drag = .2f;
         public bool usingGravity = true;
@@ -51,13 +49,16 @@ namespace pixel_renderer
         }
         void ApplyVelocity()
         {
-            if (velocity.x > 15 || velocity.x < -15)
-            {
+            if(!Constants.WithinTerminalVelocity(this))
+            { 
                 _drag = 0;
-                velocity = Vec2.zero;
+                if (velocity.Sum() > 0f)
+                {
+                    velocity = Constants.TerminalVec2();
+                }
+                else velocity = CMath.Negate(Constants.TerminalVec2()); 
                 return;
             }
-
             velocity.y *= _drag;
             velocity.x *= _drag;
         }

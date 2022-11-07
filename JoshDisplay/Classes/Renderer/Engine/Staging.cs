@@ -38,6 +38,7 @@
         {
             Vec2 startPos = new(2, Constants.screenHeight - 4);
             Node floor = new("Floor", startPos, Vec2.one);
+            Floor floorScript = new(); 
             Sprite floorSprite = 
                 new(new Vec2(Constants.screenWidth - 4, 10),
                 System.Drawing.Color.FromArgb(255, 145, 210, 75),
@@ -45,12 +46,13 @@
            
             Rigidbody floorRb = new()
             {
-                usingGravity = false,
+                usingGravity = true,
                 drag = 0f,
                 Name = "Floor - Rigidbody"
             };
             floor.AddComponent(floorRb);
             floor.AddComponent(floorSprite);
+            floor.AddComponent(floorScript);
             nodes.Add(floor);
         }
 

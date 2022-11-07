@@ -1,11 +1,13 @@
 ﻿namespace pixel_renderer
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
 
     public static class Collision
     {
-        public static SpatialHash hash = new(Constants.screenWidth, Constants.screenHeight, Constants.collisionCellSize);
+        public readonly static SpatialHash hash = new(Constants.screenWidth, Constants.screenHeight, Constants.collisionCellSize);
         public static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             Vec2 a = nodeA.position;
@@ -25,9 +27,14 @@
             return false; 
            
         }
-        public static void BroadPhase(Stage stage, List<List<Node>> broadMap)
+        public static async Task BroadPhase(Stage stage, List<List<Node>> broadMap)
         {
+            hash.ClearBuckets();
             broadMap.Clear(); 
+            while (hash.busy)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(0.01f));
+            }
             foreach (var node in stage)
             {
                 if (!node.TryGetComponent(out Sprite sprite) || !sprite.isCollider)
@@ -41,7 +48,6 @@
                List<Node> result = hash.GetNearby(node);
                broadMap.Add(result);
             }
-            hash.ClearBuckets();
         }
         public static Dictionary<Node, Node> NarrowPhase(List<List<Node>> collisionMap, Dictionary<Node, Node> narrowMap)
         {
@@ -128,32 +134,14 @@
         }
         private static void GetDominantBody(Rigidbody rbA, Rigidbody rbB, out Rigidbody submissive, out Rigidbody dominant)
         {
-            
-            if (rbA.velocity.Length >= rbB.velocity.Length)
+            if (rbA.velocity.sqrMagnitude >= rbB.velocity.sqrMagnitude)
             {
                 dominant = rbA;
                 submissive = rbB;
+                return; 
             }
-            else
-            {
-                dominant = rbB;
-                submissive = rbA;
-            }
-            if (rbA.usingGravity && !rbB.usingGravity)
-            {
-                dominant = rbA;
-                submissive = rbB;
-            }
-            else
-            {
-                dominant = rbB;
-                submissive = rbA;
-            }
-            if (submissive == null || dominant == null)
-            {
-                submissive = rbB;
-                dominant = rbA;
-            }
+            dominant = rbB;
+            submissive = rbA;
         }
         /// <summary>
         /// Retrieves all relevant Node components to solve an already verified collision between two Nodes. 

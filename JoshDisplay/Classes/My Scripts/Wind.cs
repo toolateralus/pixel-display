@@ -22,8 +22,6 @@ namespace pixel_renderer
         {
             this.direction = direction; 
         }
-        public override string UUID { get; set; }
-        public override string Name { get; set; }
         Rigidbody rb;
         public Direction direction = Direction.Up; 
         public override void Awake()

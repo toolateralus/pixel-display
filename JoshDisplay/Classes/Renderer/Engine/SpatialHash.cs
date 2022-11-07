@@ -9,6 +9,7 @@
         int columns;
         int cellSize;
         List<List<Node>> Buckets = new List<List<Node>>();
+        internal bool busy;
 
         public SpatialHash(int screenWidth, int screenHeight, int cellSize)
         {
@@ -23,10 +24,12 @@
         }
         internal void ClearBuckets()
         {
+            busy = true;
             for (int i = 0; i < columns * rows; i++)
             {
                 Buckets[i].Clear();
             }
+            busy = false; 
         }
         internal void RegisterObject(Node obj)
         {

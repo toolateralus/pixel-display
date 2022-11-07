@@ -2,8 +2,6 @@
 using Color = System.Drawing.Color;
 internal class Player : Component
 {
-    public override string UUID { get; set; }
-    public override string Name { get; set; }
     Rigidbody rb;
     Sprite sprite;
     public bool takingInput = true; 
