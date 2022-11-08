@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Security;
     using System.Windows;
 
     public static class Staging
@@ -23,7 +24,7 @@
             List<Node> nodes = new List<Node>();
             
             AddPlayer(nodes);
-            AddFloor(nodes);
+            //AddFloor(nodes);
 
             for (int i = 0; i < 100; i++)
             {
@@ -43,9 +44,10 @@
                 new(new Vec2(Constants.screenWidth - 4, 10),
                 System.Drawing.Color.FromArgb(255, 145, 210, 75),
                 true);
-           
+
             Rigidbody floorRb = new()
             {
+                IsTrigger = false, 
                 usingGravity = true,
                 drag = 0f,
                 Name = "Floor - Rigidbody"
@@ -125,7 +127,10 @@
                 IsTrigger = false,
 
             };
-
+            Rigidbody trigger = new()
+            {
+                IsTrigger = true
+            };
             Sprite sprite = new(Vec2.one, JRandom.Color(), true);
 
             Camera cam = new();
@@ -136,7 +141,7 @@
             };
 
             playerNode.AddComponent(rb);
-            //playerNode.AddComponent(trigger);
+            playerNode.AddComponent(trigger);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);
             playerNode.AddComponent(cam);
@@ -144,4 +149,5 @@
         }
     }
 
+   
 }

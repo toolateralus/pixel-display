@@ -75,8 +75,7 @@
         }
         private static void DrawToImage(ref Bitmap inputFrame, Image renderImage)
         {
-            var bitmap = ConvertBitmapToBitmapImage.Convert(inputFrame);
-            renderImage.Source = bitmap;
+            CBitmap.Convert(inputFrame, renderImage);
         }
     }
 

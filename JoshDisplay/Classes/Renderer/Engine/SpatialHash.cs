@@ -46,7 +46,7 @@
             List<int> buckets = Hash(node);
             foreach (var index in buckets)
             {
-                if (index < 0 || index >= rows * columns) continue;
+                if (index < 0 || index >= rows * columns -1) continue;
                 nodes.AddRange(Buckets[index]);
             }
             return nodes;

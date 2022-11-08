@@ -86,9 +86,10 @@
         public void FixedUpdate(object? sender, EventArgs e)
         {
             if (stage == null) return; 
-            _ = Collision.BroadPhase(stage, collisionMap);
-            Collision.NarrowPhase(collisionMap);
-            Collision.GetCollision();
+            _ = Collision.RegisterColliders(stage);
+            Collision.GetBroadPhaseGroupings(stage, collisionMap);
+            Collision.GetNarrowPhaseGroupings(collisionMap);
+            Collision.ExecuteQueuedCollisonEvents();
             Staging.UpdateCurrentStage(stage);
         }
         public void Update(object? sender, EventArgs e)

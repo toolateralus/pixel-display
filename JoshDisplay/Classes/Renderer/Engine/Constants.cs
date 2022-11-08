@@ -5,7 +5,7 @@
         internal const int frameRateCheckThresh = 60;
         internal const int screenWidth = 256;
         internal const int screenHeight = 256;
-        internal const int collisionCellSize = 4;
+        internal const int collisionCellSize = 6;
 
         internal const float depenetrationForce = 25f;
 

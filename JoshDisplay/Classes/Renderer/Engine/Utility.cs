@@ -46,14 +46,17 @@
     }
     public class Vec2
     {
-        internal static float Distance(Vec2 start, Vec2 end)
-            => start.x - end.x * 2 + start.y - end.y * 2; 
         public float x;
         public float y;
         public float Length => (float)Math.Sqrt(x * x + y * y);
         public float sqrMagnitude => x * x + y * y;
         public static Vec2 one = new Vec2(1, 1);
         public static Vec2 zero = new Vec2(0, 0);
+        internal static Vec2 up = new(0, -1);
+        internal static Vec2 down = new(0, 1);
+        internal static Vec2 left = new(-1, 0);
+        internal static Vec2 right = new(1, 0);
+
         public Vec2(float x, float y)
         {
             this.x = x;

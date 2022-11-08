@@ -1,4 +1,5 @@
 ﻿using pixel_renderer;
+using System.Windows;
 using System.Windows.Documents;
 using Color = System.Drawing.Color;
 internal class Player : Component
@@ -20,7 +21,6 @@ internal class Player : Component
     public override void FixedUpdate(float delta)
     {
         if (!takingInput) return;
-        RandomizeSpriteColor();
         var move = Input.GetMoveVector();
         GetJumpInput(move);
         GetMove(move);
@@ -29,6 +29,10 @@ internal class Player : Component
     {
 
     }
+    public override void OnCollision(Rigidbody collider)
+    {
+        RandomizeSpriteColor(); 
+    }
     private void GetMove(Vec2 moveVector)
     {
         rb.velocity.x += moveVector.x * speed; 
@@ -36,24 +40,20 @@ internal class Player : Component
     private void GetJumpInput(Vec2 moveVector)
     {
         if (moveVector.y == 0) return;
-        rb.velocity.y = moveVector.y * speed * 6; 
+        rb.velocity.y = moveVector.y * speed * 25; 
     }
     private void RandomizeSpriteColor()
     {
-        i++;
-        if (i > 60)
+       
+        int x = (int)sprite.size.x;
+        int y = (int)sprite.size.y;
+        var colorData = new Color[x, y];
+        for(int j = 0; j < y; j++)
+        for (int i = 0; i < x; i++)
         {
-            i = 0;
-            int x = (int)sprite.size.x;
-            int y = (int)sprite.size.y;
-            var colorData = new Color[x, y];
-            for(int j = 0; j < y; j++)
-            for (int i = 0; i < x; i++)
-            {
-                colorData[i, j] = JRandom.Color();
-            }
-            sprite.DrawSquare(sprite.size, colorData, true);
+            colorData[i, j] = JRandom.Color();
         }
+        sprite.DrawSquare(sprite.size, colorData, true);
     }
 
 }

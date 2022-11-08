@@ -19,10 +19,9 @@ namespace pixel_renderer
             startPos = parentNode.position; 
             rb = parentNode.GetComponent<Rigidbody>();
         }
-
+    
         public override void FixedUpdate(float delta)
         {
-            rb.velocity = CMath.Negate(Constants.TerminalVec2());
             rb.parentNode.position = startPos; 
         }
     }

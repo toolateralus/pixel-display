@@ -39,7 +39,6 @@
         {
             Debug.debugging = true;
         }
-        public string x = ""; 
        
     }
 

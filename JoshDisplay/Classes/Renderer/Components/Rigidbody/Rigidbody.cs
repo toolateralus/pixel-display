@@ -11,10 +11,9 @@ namespace pixel_renderer
         public Vec2 velocity = new();
         private Sprite? sprite;
         const double dragCoefficient = 1;
-
         public bool IsTrigger { get; internal set; } = false; 
 
-        public event Action<Node> OnTriggerEnter;
+
 
         public override void Awake()
         {
@@ -40,16 +39,17 @@ namespace pixel_renderer
             if (drag < 0) drag = -drag;
             return drag;
         }
+        [Obsolete]
         public string GetDebugs()
         {
             return $" \n VELOCITY__X = {velocity.x} \n VELOCITY__Y = {velocity.y} \n POSITION__X = {parentNode.position.x} \n POSITION__Y {parentNode.position.y} \n NODE : {parentNode.Name}";
         }
-        void ApplyPosition()
+        private protected void ApplyPosition()
         {
             parentNode.position.y += velocity.y;
             parentNode.position.x += velocity.x;
         }
-        void ApplyVelocity()
+        private protected void ApplyVelocity()
         {
             velocity.y *= _drag;
             velocity.x *= _drag;

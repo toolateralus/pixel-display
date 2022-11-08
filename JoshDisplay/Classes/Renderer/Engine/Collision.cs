@@ -1,64 +1,95 @@
-﻿namespace pixel_renderer
-{
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading.Tasks;
-    using System.Windows.Documents;
-    using System.Xml.Linq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
+namespace pixel_renderer
+{
     public static class Collision
     {
-        public static async Task BroadPhase(Stage stage, List<List<Node>> broadMap)
+        private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new(); 
+        private readonly static SpatialHash hash = new(Constants.screenWidth, Constants.screenHeight, Constants.collisionCellSize);
+        private static bool CheckOverlap(this Node nodeA, Node nodeB)
+        {
+            Vec2 a = nodeA.position;
+            Vec2 b = nodeB.position;
+            Vec2 spriteSizeA = nodeA.GetComponent<Sprite>().size;
+            Vec2 spriteSizeB = nodeB.GetComponent<Sprite>().size;
+
+            if (spriteSizeA != null && spriteSizeB != null)
+            {
+                // messy if for box collision; 
+                if (a.x < b.x + spriteSizeB.y &&
+                    a.x + spriteSizeA.x > b.x &&
+                    a.y < b.y + spriteSizeB.y &&
+                    spriteSizeA.y + a.y > b.y)
+                    return true;
+            }
+            return false;
+        }
+        
+        public static void GetBroadPhaseGroupings(Stage stage, List<List<Node>> collisionCells)
+        {
+            collisionCells.Clear();
+            Parallel.ForEach(stage.Nodes, node =>
+            {
+                List<Node> result = hash.GetNearby(node);
+                collisionCells.Add(result);
+            });
+        }
+        public static void GetNarrowPhaseGroupings(List<List<Node>> collisionCells)
+        {
+            if (collisionCells.Count <= 0 ||
+                collisionCells[0] is null) 
+                return;
+
+            Parallel.For(0, collisionCells.Count(), i =>
+            {
+                if (i >= collisionCells.Count) return; 
+                var cell = collisionCells[i];
+                if (cell is null) return;
+                if (cell.Count <= 0) return;
+
+                Parallel.For(0, cell.Count, j =>
+                {
+                    var nodeA = cell[j];
+                    if (nodeA is null) return;
+                    var colliders = new List<Node>();
+                    Parallel.For(0, cell.Count, k =>
+                    {
+                        var nodeB = cell[k];
+                        if (nodeB is null) return;
+                        // compare node's UUID since each node could contain several colliders, 
+                        // todo : maybe implement intranodular collision
+                        if (nodeA.UUID.Equals(nodeB.UUID)) return;
+                        colliders.Add(nodeB);
+                    }); 
+                    RegisterCollisionEvent(nodeA, colliders.ToArray());
+                }); 
+            }); 
+        }
+        
+        public static async Task RegisterColliders(Stage stage)
         {
             hash.ClearBuckets();
-            broadMap.Clear();
+
             while (hash.busy)
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(0.01f));
             }
-            foreach (var node in stage)
+
+            Parallel.ForEach(stage.Nodes, node =>
             {
                 if (!node.TryGetComponent(out Sprite sprite) || !sprite.isCollider)
                 {
-                    continue;
+                    return;
                 }
                 hash.RegisterObject(node);
-            }
-            foreach (var node in stage)
-            {
-                List<Node> result = hash.GetNearby(node);
-                broadMap.Add(result);
-            }
+            });
         }
-        public static void NarrowPhase(List<List<Node>> collisionMap)
-        {
-            if (collisionMap.Count <= 0 || collisionMap[0] == null) return; 
-            for(int i = 0; i < collisionMap.Count(); i++)
-            {
-                if (i > collisionMap.Count) break; 
-                var cell = collisionMap[i];
-                if (cell is null) continue; 
-                if(cell.Count <= 0) continue;
-
-                for (int j = 0; j < cell.Count; j++)
-                {
-                    var nodeA = cell[j];
-                    if (nodeA is null) continue;
-                    var colliders = new List<Node>();
-                    for(int k = 0; k < cell.Count; k++)
-                    {
-                        var nodeB = cell[k];
-                        if (nodeB is null) continue;
-                        if (nodeA.UUID.Equals(nodeB.UUID)) continue;
-                        colliders.Add(nodeB);
-                    }
-                    RegisterCollisionEvent(nodeA, colliders.ToArray());
-                }
-            }
-        } 
+        
+        [Obsolete]
         public static void ViewportCollision(Node node)
         {
             Sprite sprite = node.GetComponent<Sprite>();
@@ -82,44 +113,7 @@
                 }
             }
         }
-        [STAThread]
-        public static void GetCollision()
-        {
-            foreach (var collisionPair in CollisionQueue)
-            {
-                Node A = collisionPair.Key;
-                Parallel.ForEach(collisionPair.Value, B =>
-                {
-                    if (!A.TryGetComponent(out Rigidbody rbA) ||
-                        !B.TryGetComponent(out Rigidbody rbB)) return;
-                    GetDominantBody(rbA, rbB, out Rigidbody submissive, out Rigidbody dominant);
-                    Collide(ref submissive, ref dominant);
-                    AttemptCallbacks(ref dominant, ref submissive);
-                }); 
-            }
-            CollisionQueue.Clear(); 
-        }
-        private readonly static SpatialHash hash = new(Constants.screenWidth, Constants.screenHeight, Constants.collisionCellSize);
-        private static bool CheckOverlap(this Node nodeA, Node nodeB)
-        {
-            Vec2 a = nodeA.position;
-            Vec2 b = nodeB.position;
-            Vec2 spriteSizeA = nodeA.GetComponent<Sprite>().size;
-            Vec2 spriteSizeB = nodeB.GetComponent<Sprite>().size;
 
-            if (spriteSizeA != null && spriteSizeB != null)
-            {
-                // messy if for box collision; 
-                if (a.x < b.x + spriteSizeB.y &&
-                    a.x + spriteSizeA.x > b.x &&
-                    a.y < b.y + spriteSizeB.y &&
-                    spriteSizeA.y + a.y > b.y)
-                    return true;
-            }
-            return false;
-
-        }
-        private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new(); 
         private static void RegisterCollisionEvent(Node A, Node[] colliders)
         {
             if (A is null) return;
@@ -132,46 +126,47 @@
                 }
             }
         }
+        public static void ExecuteQueuedCollisonEvents()
+        {
+            Parallel.ForEach(CollisionQueue, collisionPair =>
+            {
+                Node A = collisionPair.Key;
+                Parallel.ForEach(collisionPair.Value, B =>
+                {
+                    if (!A.TryGetComponent(out Rigidbody rbA) ||
+                        !B.TryGetComponent(out Rigidbody rbB)) return;
+
+                    Collide(ref rbA, ref rbB);
+                    AttemptCallbacks(ref rbA, ref rbB);
+                });
+            }); 
+            CollisionQueue.Clear(); 
+        }
+
         private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger)
             {
-                A.OnTrigger(B);
-                B.OnTrigger(A);
+                A.parentNode.OnTrigger(B);
+                B.parentNode.OnTrigger(A);
                 return;
             }
-            A.OnCollision(B);
-            B.OnCollision(A);
-
+            A.parentNode.OnCollision(B);
+            B.parentNode.OnCollision(A);
         }
-        private static void Collide(ref Rigidbody submissive, ref Rigidbody dominant)
+        private static void Collide(ref Rigidbody A, ref Rigidbody B)
         {
-            if (submissive.IsTrigger || dominant.IsTrigger) return;
+            if (A.IsTrigger || B.IsTrigger) return;
+            
+            var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
+            
+            Vec2 direction = (B.parentNode.position - A.parentNode.position).Normalize();
+            // make sure not NaN after possibly dividing by zero in Normalize();
+            direction = direction.sqrMagnitude is float.NaN ? Vec2.up : direction; 
 
-
-        }
-        private static void GetDominantBody(Rigidbody rbA, Rigidbody rbB, out Rigidbody submissive, out Rigidbody dominant)
-        {
-            if (rbA.velocity.sqrMagnitude >= rbB.velocity.sqrMagnitude)
-            {
-                if (!rbB.usingGravity)
-                {
-                    dominant = rbB;
-                    submissive = rbA;
-                    return;
-                }
-                dominant = rbA;
-                submissive = rbB;
-                return; 
-            }
-            if (!rbA.usingGravity)
-            {
-                dominant = rbA;
-                submissive = rbB;
-                return;
-            }
-            dominant = rbB;
-            submissive = rbA;
+            B.velocity += direction * velocityDifference;
+            A.velocity += CMath.Negate(direction * velocityDifference);
+            
         }
     }
 

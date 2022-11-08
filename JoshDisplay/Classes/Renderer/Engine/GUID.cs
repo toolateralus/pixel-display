@@ -2,7 +2,7 @@
 namespace pixel_renderer
 {
     using System;
-    public static class UuID
+    public static class UUID
     {
         public static string NewUUID()
         {

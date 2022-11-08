@@ -30,7 +30,7 @@ namespace pixel_renderer
         /// </summary>
         public virtual void Awake()
         {
-            UUID = UuID.NewUUID();
+            UUID = pixel_renderer.UUID.NewUUID();
             Name = parentNode.Name + $" {GetType()}"; 
         }
 
