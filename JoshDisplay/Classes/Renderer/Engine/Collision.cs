@@ -130,29 +130,23 @@
                 {
                     _ = CollisionQueue.GetOrAdd(key : A, value : colliders);
                 }
-
             }
         }
         private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
         {
-            if (A.IsTrigger)
+            if (A.IsTrigger || B.IsTrigger)
             {
-                B.OnTrigger(A);
                 A.OnTrigger(B);
+                B.OnTrigger(A);
                 return;
             }
-            if(!B.IsTrigger)
-            {
-                A.OnCollision(B);
-                B.OnCollision(A);
-            }
+            A.OnCollision(B);
+            B.OnCollision(A);
 
         }
         private static void Collide(ref Rigidbody submissive, ref Rigidbody dominant)
         {
             if (submissive.IsTrigger || dominant.IsTrigger) return;
-            
-
 
 
         }
