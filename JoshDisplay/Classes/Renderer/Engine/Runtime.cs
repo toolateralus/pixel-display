@@ -80,12 +80,13 @@
             }
             instance.InitializeBitmapCollection();
             Staging.InitializeDefaultStage();
+            
         }
         List<List<Node>> collisionMap = new();
         public void FixedUpdate(object? sender, EventArgs e)
         {
             if (stage == null) return; 
-            Collision.BroadPhase(stage, collisionMap);
+            _ = Collision.BroadPhase(stage, collisionMap);
             Collision.NarrowPhase(collisionMap);
             Collision.GetCollision();
             Staging.UpdateCurrentStage(stage);

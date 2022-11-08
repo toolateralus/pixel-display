@@ -1,4 +1,5 @@
-﻿using pixel_renderer; 
+﻿using pixel_renderer;
+using System.Windows.Documents;
 using Color = System.Drawing.Color;
 internal class Player : Component
 {
@@ -14,7 +15,7 @@ internal class Player : Component
         sprite = parentNode.GetComponent<Sprite>();
         if (sprite == null || rb == null) return; 
         sprite.isCollider = true;
-        sprite.DrawSquare(Vec2.one * 3, Color.AliceBlue, true);
+        sprite.DrawSquare(Vec2.one * 8, Color.AliceBlue, true);
     }
     public override void FixedUpdate(float delta)
     {
@@ -23,6 +24,10 @@ internal class Player : Component
         var move = Input.GetMoveVector();
         GetJumpInput(move);
         GetMove(move);
+    }
+    public override void OnTrigger(Rigidbody other)
+    {
+
     }
     private void GetMove(Vec2 moveVector)
     {

@@ -25,7 +25,7 @@
             AddPlayer(nodes);
             AddFloor(nodes);
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 AddNode(nodes, i);
             }
@@ -61,10 +61,7 @@
             foreach (Node node in runtime.stage.Nodes)
             {
                 node.parentStage = runtime.stage;
-                foreach (var component in node.Components)
-                {
-                    component.Value.Awake();
-                }
+                node.Awake(); 
             }
         }
         private static void AddNode(List<Node> nodes, int i)
@@ -75,8 +72,9 @@
             node.AddComponent(new Sprite(position, JRandom.Color(), true));
             node.AddComponent(new Rigidbody()
             {
+                IsTrigger = false,
                 usingGravity = true,
-                drag = .01f
+                drag = .1f
             });
             nodes.Add(node);
         }
@@ -122,8 +120,13 @@
             Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
 
-            Rigidbody rb = new();
-            Sprite sprite = new(Vec2.one * 45, JRandom.Color(), true);
+            Rigidbody rb = new()
+            {
+                IsTrigger = false,
+
+            };
+
+            Sprite sprite = new(Vec2.one, JRandom.Color(), true);
 
             Camera cam = new();
 
@@ -132,8 +135,9 @@
                 takingInput = true
             };
 
-            playerNode.AddComponent(player_obj);
             playerNode.AddComponent(rb);
+            //playerNode.AddComponent(trigger);
+            playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);
             playerNode.AddComponent(cam);
             nodes.Add(playerNode);

@@ -1,4 +1,5 @@
 ﻿using pixel_renderer;
+using System;
 
 namespace pixel_renderer
 {
@@ -10,6 +11,10 @@ namespace pixel_renderer
         public Vec2 velocity = new();
         private Sprite? sprite;
         const double dragCoefficient = 1;
+
+        public bool IsTrigger { get; internal set; } = false; 
+
+        public event Action<Node> OnTriggerEnter;
 
         public override void Awake()
         {

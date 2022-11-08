@@ -42,9 +42,12 @@
             y = v.y,
             z = 0
         };
+
     }
     public class Vec2
     {
+        internal static float Distance(Vec2 start, Vec2 end)
+            => start.x - end.x * 2 + start.y - end.y * 2; 
         public float x;
         public float y;
         public float Length => (float)Math.Sqrt(x * x + y * y);

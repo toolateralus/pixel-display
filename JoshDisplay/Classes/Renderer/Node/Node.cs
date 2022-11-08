@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+
 namespace pixel_renderer
 {
     public class Node
@@ -23,16 +25,25 @@ namespace pixel_renderer
         public Node? parentNode;
         public Node[]? children;
 
-        public Dictionary<Type, Component> Components { get; set; } = new Dictionary<Type, Component>();
+        public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
 
-        public T? GetComponent<T>()
+        public T? GetComponent<T>(int? index = 0) where T : Component
         {
-            var component = Components[typeof(T)];
-            return (T)Convert.ChangeType(component, typeof(T));
+            if(!Components.ContainsKey(typeof(T))) 
+            {
+                throw new MissingComponentException(); 
+            }
+            var component = Components[typeof(T)][index ?? 0] as T;
+            return component; 
         }
         public void AddComponent(Component component)
         {
-            Components.Add(component.GetType(), component);
+            var type = component.GetType(); 
+            if (!Components.ContainsKey(type))
+            {
+                Components.Add(type, new());
+            }
+            Components[type].Add(component);
             component.parentNode = this;
         }
         /// <summary>
@@ -41,15 +52,15 @@ namespace pixel_renderer
         /// <typeparam name="T"></typeparam>
         /// <param name="component"></param>
         /// <returns>A boolean signifying the success of the operation, and out<T> instance of specified Component </returns>
-        public bool TryGetComponent<T>(out T? component) where T : Component
+        public bool TryGetComponent<T>(out T? component, int? index = 0) where T : Component
         {
-            if (Components.ContainsKey(typeof(T)))
+            if (!Components.ContainsKey(typeof(T)))
             {
-                component = (T)Components[typeof(T)];
-                return true;
+                component = null; 
+                return false;
             }
-            component = null;
-            return false;
+            component = Components[typeof(T)][index ?? 0] as T;
+            return true; 
         }
         
         // Constructors 
@@ -80,26 +91,20 @@ namespace pixel_renderer
             this.scale = scale;
         }
 
-        public event Action OnAwakeCalled;
-        public event Action OnFixedUpdateCalled;
-
-        // awake - to be called before first update; 
         public void Awake()
         {
-            OnAwakeCalled?.Invoke();
-            foreach (var component in Components)
-            {
-                component.Value.Awake();
-            }
+            foreach (var list in Components.Values)
+                foreach(var component in list) component.Awake();
         }
-        // update - if(usingPhysics) Update(); every frame.
         public void FixedUpdate(float delta)
         {
-            OnFixedUpdateCalled?.Invoke();
-            foreach (var component in Components)
-            {
-                component.Value.FixedUpdate(delta);
-            }
+            foreach (var list in Components.Values)
+                foreach (var component in list) component.FixedUpdate(delta);
+        }
+        public void Update()
+        {
+            foreach (var list in Components.Values)
+                foreach (var component in list) component.Update();
         }
         public static Node New = new("", Vec2.zero, Vec2.one); 
 
