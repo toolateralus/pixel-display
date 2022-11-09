@@ -11,15 +11,14 @@
     {
         private const float PhysicsRefreshInterval = 0.1f;
 
-        // main entry point for application
+
         public EngineInstance()
         {
             InitializeComponent();
             Runtime.Awake(this);
-            AssetPipeline.BeginImport();
-            AssetLibrary.Sync(); 
+            
         }
-        // start / stop button on UI.
+
         public void Accept_Clicked(object sender, RoutedEventArgs e)
         {
             Runtime env = Runtime.Instance;
