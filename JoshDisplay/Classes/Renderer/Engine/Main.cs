@@ -9,11 +9,15 @@
     /// </summary>
     public partial class EngineInstance : Window
     {
+        private const float PhysicsRefreshInterval = 0.1f;
+
         // main entry point for application
         public EngineInstance()
         {
             InitializeComponent();
             Runtime.Awake(this);
+            AssetPipeline.BeginImport();
+            AssetLibrary.Sync(); 
         }
         // start / stop button on UI.
         public void Accept_Clicked(object sender, RoutedEventArgs e)
@@ -28,7 +32,7 @@
             }
             acceptButton.Background = Brushes.White;
             acceptButton.Foreground = Brushes.OrangeRed;
-            env.InitializeClocks(TimeSpan.FromSeconds(0.05f));
+            env.InitializeClocks(TimeSpan.FromSeconds(PhysicsRefreshInterval));
             env.running = true;
         }
         public void DebugUnchecked(object sender, RoutedEventArgs e)

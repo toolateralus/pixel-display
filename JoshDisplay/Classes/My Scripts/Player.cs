@@ -6,6 +6,7 @@ internal class Player : Component
 {
     Rigidbody rb;
     Sprite sprite;
+    
     public bool takingInput = true; 
     public const float speed = 1f;
     int i = 0;
@@ -17,6 +18,7 @@ internal class Player : Component
         if (sprite == null || rb == null) return; 
         sprite.isCollider = true;
         sprite.DrawSquare(Vec2.one * 8, Color.AliceBlue, true);
+        
     }
     public override void FixedUpdate(float delta)
     {
@@ -27,7 +29,7 @@ internal class Player : Component
     }
     public override void OnTrigger(Rigidbody other)
     {
-
+        
     }
     public override void OnCollision(Rigidbody collider)
     {

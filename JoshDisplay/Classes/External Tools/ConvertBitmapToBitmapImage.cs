@@ -15,11 +15,11 @@ public static class CBitmap
           new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
           System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
          source.Source = BitmapSource.Create(
-           bitmapData.Width, bitmapData.Height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+           bitmapData.Width, bitmapData.Height, 2, 2, System.Windows.Media.PixelFormats.Bgr24, null,
            bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
             bmp.UnlockBits(bitmapData);
             // clean up unmanaged resource? i think?
-            DeleteObject(bitmapData.Scan0);
+             DeleteObject(bitmapData.Scan0);
     }
 
 }

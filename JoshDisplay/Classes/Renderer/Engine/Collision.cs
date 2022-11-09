@@ -29,7 +29,7 @@ namespace pixel_renderer
             return false;
         }
         
-        public static void GetBroadPhaseGroupings(Stage stage, List<List<Node>> collisionCells)
+        public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
             Parallel.ForEach(stage.Nodes, node =>
@@ -38,7 +38,7 @@ namespace pixel_renderer
                 collisionCells.Add(result);
             });
         }
-        public static void GetNarrowPhaseGroupings(List<List<Node>> collisionCells)
+        public static void NarrowPhase(List<List<Node>> collisionCells)
         {
             if (collisionCells.Count <= 0 ||
                 collisionCells[0] is null) 
@@ -55,7 +55,7 @@ namespace pixel_renderer
                 {
                     var nodeA = cell[j];
                     if (nodeA is null) return;
-                    var colliders = new List<Node>();
+                    var colliders = new List<Node>(32);
                     Parallel.For(0, cell.Count, k =>
                     {
                         var nodeB = cell[k];
@@ -63,13 +63,12 @@ namespace pixel_renderer
                         // compare node's UUID since each node could contain several colliders, 
                         // todo : maybe implement intranodular collision
                         if (nodeA.UUID.Equals(nodeB.UUID)) return;
-                        colliders.Add(nodeB);
+                            colliders.Add(nodeB);
                     }); 
                     RegisterCollisionEvent(nodeA, colliders.ToArray());
                 }); 
             }); 
         }
-        
         public static async Task RegisterColliders(Stage stage)
         {
             hash.ClearBuckets();
@@ -88,7 +87,6 @@ namespace pixel_renderer
                 hash.RegisterObject(node);
             });
         }
-        
         [Obsolete]
         public static void ViewportCollision(Node node)
         {
@@ -113,7 +111,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         private static void RegisterCollisionEvent(Node A, Node[] colliders)
         {
             if (A is null) return;
@@ -126,7 +123,7 @@ namespace pixel_renderer
                 }
             }
         }
-        public static void ExecuteQueuedCollisonEvents()
+        public static void Execute()
         {
             Parallel.ForEach(CollisionQueue, collisionPair =>
             {
@@ -142,7 +139,6 @@ namespace pixel_renderer
             }); 
             CollisionQueue.Clear(); 
         }
-
         private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger)

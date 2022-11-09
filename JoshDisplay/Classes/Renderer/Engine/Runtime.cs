@@ -71,15 +71,18 @@
         }
         public static void Awake(EngineInstance mainWnd)
         {
-            instance.mainWnd = mainWnd;
             var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             instance.ImageDirectory = appdata + "\\Pixel\\Images";
             if (!Directory.Exists(instance.ImageDirectory))
             {
                 Directory.CreateDirectory(instance.ImageDirectory);
             }
+
+            instance.mainWnd = mainWnd;
+            
             instance.InitializeBitmapCollection();
             Staging.InitializeDefaultStage();
+            FontAssetFactory.InitializeDefaultFont(); 
             
         }
         List<List<Node>> collisionMap = new();
@@ -87,9 +90,9 @@
         {
             if (stage == null) return; 
             _ = Collision.RegisterColliders(stage);
-            Collision.GetBroadPhaseGroupings(stage, collisionMap);
-            Collision.GetNarrowPhaseGroupings(collisionMap);
-            Collision.ExecuteQueuedCollisonEvents();
+            Collision.BroadPhase(stage, collisionMap);
+            Collision.NarrowPhase(collisionMap);
+            Collision.Execute();
             Staging.UpdateCurrentStage(stage);
         }
         public void Update(object? sender, EventArgs e)

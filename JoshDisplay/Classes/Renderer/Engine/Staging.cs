@@ -121,7 +121,7 @@
         {
             Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
-
+            
             Rigidbody rb = new()
             {
                 IsTrigger = false,
@@ -139,13 +139,22 @@
             {
                 takingInput = true
             };
-
+            Text text = new() 
+            {
+                
+            };
+            playerNode.AddComponent(text);
             playerNode.AddComponent(rb);
             playerNode.AddComponent(trigger);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);
             playerNode.AddComponent(cam);
+            playerNode.AddComponent(cam);
             nodes.Add(playerNode);
+
+            // create asset of type script because the player is an example of a
+            // user-created script; 
+          
         }
     }
 
