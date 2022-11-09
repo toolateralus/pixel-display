@@ -31,7 +31,7 @@ namespace pixel_renderer
             this.fileType = fileType;
             this.runtimeType = runtimeType; 
             UUID = pixel_renderer.UUID.NewUUID();
-            AssetPipeline.Register(GetType(), this);
+            AssetLibrary.Register(GetType(), this);
         }
     }
 
@@ -126,6 +126,7 @@ namespace pixel_renderer
         {
             var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var path = appdata + "\\Pixel\\Images\\Font";
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             IEnumerable<string> files = Directory.GetFiles(path);
             int i = 0; 
             foreach (string file in files)
@@ -135,8 +136,8 @@ namespace pixel_renderer
                     bitmap = new(file),
                     Name = $"{'a' + i}"
                 };
-                i++; 
-                AssetPipeline.Register(typeof(BitmapAsset), bitmap);
+                i++;
+                AssetLibrary.Register(typeof(BitmapAsset), bitmap);
             }
         }
     }
@@ -202,27 +203,27 @@ namespace pixel_renderer
     public static class AssetPipeline
     {
         public static string Path => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel\\Assets";
-        public static void Register(Type type, Asset asset) => AssetLibrary.Register(type, asset);
-        public static bool BeginImport()
+        public static void ImportAsync()
         {
+            var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OK);
             if (!Directory.Exists(Path))
             {
-                Directory.CreateDirectory(Path);
-                return false;
+                Directory.CreateDirectory(Path); 
             }
-            var result = Parallel.ForEach(Directory.GetFiles(Path), thisPath =>
+            
+            foreach(var thisPath in Directory.GetFiles(Path))
             {
                 var asset = Import(thisPath);
                 if (asset is not null)
                     AssetLibrary.Register(asset.GetType(), asset);
-            });
-            return result.IsCompleted; 
+            };
+            var msg2 = MessageBox.Show("Import complete! :D.", "Asset Importer", MessageBoxButton.OK);
+
         }
         public static Asset? Import(string path)
         {
             if (File.Exists(path)) return null; 
             return AssetIO.ReadAssetFile(path);
-           
         }
 
     }
@@ -254,19 +255,19 @@ namespace pixel_renderer
         /// <summary>
         /// Save the currently loaded asset database.
         /// </summary>
-        internal static void Sync()
+        public static void Sync()
         {
+            bool wasPaused = false; 
             var library = GetLibrary();
             if (library is null) return; 
-            // pause game while saving assets
             if (Runtime.Instance.running)
             {
                 Runtime.Instance.mainWnd.Accept_Clicked(new(), new()); 
+                wasPaused = true;
             }
             AssetIO.skippingOperation = false; 
             foreach (var asset in library) AssetIO.SaveAsset(asset, asset.Name);
-            // unpause it when done.
-            if (!Runtime.Instance.running)
+            if (!Runtime.Instance.running && wasPaused)
             {
                 Runtime.Instance.mainWnd.Accept_Clicked(new(), new());
             }
@@ -275,12 +276,9 @@ namespace pixel_renderer
         {
             List<Asset> library = new();  
             foreach (var key in LoadedAssets)
-            {
                 foreach (var item in key.Value)
-                {
                     library.Add(item);
-                }
-            }
+
             return library; 
         }
         internal static void Register(Type type, Asset asset)
