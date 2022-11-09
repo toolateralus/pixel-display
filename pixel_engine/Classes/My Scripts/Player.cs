@@ -27,18 +27,9 @@ internal class Player : Component
         GetJumpInput(move);
         GetMove(move);
     }
-    public override void OnTrigger(Rigidbody other)
-    {
-        
-    }
-    public override void OnCollision(Rigidbody collider)
-    {
-        RandomizeSpriteColor(); 
-    }
-    private void GetMove(Vec2 moveVector)
-    {
-        rb.velocity.x += moveVector.x * speed; 
-    }
+    public override void OnTrigger(Rigidbody other){}
+    public override void OnCollision(Rigidbody collider) => RandomizeSpriteColor();
+    private void GetMove(Vec2 moveVector) => rb.velocity.x += moveVector.x * speed; 
     private void GetJumpInput(Vec2 moveVector)
     {
         if (moveVector.y == 0) return;
@@ -46,7 +37,6 @@ internal class Player : Component
     }
     private void RandomizeSpriteColor()
     {
-       
         int x = (int)sprite.size.x;
         int y = (int)sprite.size.y;
         var colorData = new Color[x, y];
