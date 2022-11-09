@@ -156,7 +156,7 @@ namespace pixel_editor
         private Label name;
         private Label objInfo;
         private Grid componentGrid;
-        private Dictionary<Type, Component> components = new();
+        private Dictionary<Type, List<Component>> components = new();
 
         public event Action OnObjectSelected;
         public event Action OnObjectDeselected;
@@ -187,15 +187,18 @@ namespace pixel_editor
             var thickness = new Thickness(0, 0, 0, 0);
             
             int index = 0;
-            foreach (var component in components.Values)
+            foreach (var componentType in components.Values)
             {
-                string info = GetComponentInfo(component);
-                TextBlock block = CreateBlock(info, thickness);
-                AddToInspector(index, block, info.Split(' ').Length);
-                componentGrid.Children.Add(block);
-                componentGrid.UpdateLayout();
-                currentInspector.Add(block);
-                index++;
+                foreach (var component in componentType)
+                {
+                    string info = GetComponentInfo(component);
+                    TextBlock block = CreateBlock(info, thickness);
+                    AddToInspector(index, block, info.Split(' ').Length);
+                    componentGrid.Children.Add(block);
+                    componentGrid.UpdateLayout();
+                    currentInspector.Add(block);
+                    index++;
+                }
             }
             
             OnInspectorUpdated?.Invoke();

@@ -41,7 +41,8 @@ namespace pixel_renderer
         public Node? parentNode;
         public Node[]? children;
 
-        private Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
+        // goal - make private
+        public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
 
         public T? GetComponent<T>(int? index = 0) where T : Component
         {
