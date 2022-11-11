@@ -16,7 +16,7 @@ namespace pixel_renderer
         public override void Awake()
         {
             base.Awake();
-            startPos = parentNode.position; 
+            startPos = parentNode.position;
             rb = parentNode.GetComponent<Rigidbody>();
         }
     

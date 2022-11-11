@@ -38,6 +38,8 @@ namespace pixel_editor
             inspector = new Inspector(inspectorObjName,
                                       inspectorObjInfo,
                                       inspectorChildGrid);
+            var page = new ImportPage(this); 
+            importFrame.Navigate(page);
             GetEvents();
         }
 
@@ -78,7 +80,7 @@ namespace pixel_editor
         private void IncrementRenderState()
         {
             renderStateIndex++;
-            if (renderStateIndex == sizeof(RenderState))
+            if (renderStateIndex == sizeof(RenderState) - 1)
             {
                 renderStateIndex = 0;
             }

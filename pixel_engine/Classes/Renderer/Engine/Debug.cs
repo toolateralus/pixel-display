@@ -20,33 +20,8 @@
         {
             var runtime = Runtime.Instance;
             Stage stage = runtime.stage;
-            outputTextBox.Text =
-            $" ===STATS===: \n\t {Rendering.FrameRate()} Frames Per Second \n PLAYER STATS : {stage.FindNode("Player").GetComponent<Rigidbody>().GetDebugs()}\t " +
-            $"\n RB_DRAG :{stage.FindNode("Player").GetComponent<Rigidbody>().GetDrag()}" +
-            $"\n\t Current Room : {runtime.BackroundIndex}";
-            outputTextBox.Text +=
-            "\n ===HIERARCHY===";
-            outputTextBox.Text +=
-            $"\n\t Stage : {stage.Name} (Loaded Nodes : {stage.Nodes.Count()}) \n";
-            // NODE HEIRARCHY
-            outputTextBox.Text += "\n\n";
-            foreach (var node in stage.Nodes)
-            {
-                outputTextBox.Text +=
-                $" \n\t Node : \n\t  Name  : {node.Name} \n\t\t Position : {node.position.x} , {node.position.y} ";
-
-                if (node.TryGetComponent(out Sprite sprite))
-                {
-                    outputTextBox.Text +=
-                    $"\n\t isSprite : {sprite} \n\t\t";
-                }
-                if (node.TryGetComponent(out Rigidbody rb))
-                {
-                    outputTextBox.Text +=
-                    $" isRigidbody : {rb} \n\t Velocity : {rb.velocity.x} , {rb.velocity.y}\n ";
-                }
-            }
-            outputTextBox.Text += $" \n {debug} \n";
+            outputTextBox.Text =$" {Rendering.FrameRate()} Frames Per Second"; 
+            
         }
     }
 

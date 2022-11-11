@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using Newtonsoft.Json;
 using Color = System.Drawing.Color;
 
@@ -44,7 +45,7 @@ namespace pixel_renderer
         }
         public static Bitmap BitmapFromColorArray(Color[,] colors)
         {
-            Bitmap bitmap = new Bitmap(64, 64);  
+            Bitmap bitmap = new(64, 64);  
             for (int i = 0; i < bitmap.Width; i++)
             {
                 for (int j = 0; j < bitmap.Height; j++)
@@ -80,7 +81,7 @@ namespace pixel_renderer
     {
         public static FontAsset CreateFont(int start, int end, Bitmap[] characters)
         {
-            FontAsset fontAsset = new FontAsset();
+            FontAsset fontAsset = new();
             char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
             for (int i = start; i < end; i++)
             {
@@ -157,7 +158,7 @@ namespace pixel_renderer
                 if (!skippingOperation)
                 {
                     var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
-                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning,
+                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Asterisk,
                                              MessageBoxResult.No, MessageBoxOptions.RtlReading);
                     var doForAllResult = MessageBox.Show($"Do for all (uses last choice)",
                                             "", MessageBoxButton.YesNo, MessageBoxImage.Warning,
@@ -177,27 +178,26 @@ namespace pixel_renderer
             json.Serialize(writer, data);
             writer.Close();
         }
-        public static Asset ReadAssetFile(string layoutSaveName)
+        public static Asset? ReadAssetFile(string fileName)
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/pbTracker/layouts";
-            if (!Directory.Exists(path))
+            if (!Directory.Exists(Path))
             {
-                throw new Exception("File path not found.. Try again!");
+                Directory.CreateDirectory(Path);
+                return null; 
             }
-            JsonSerializer serializer = new JsonSerializer();
-            StreamReader reader = new StreamReader(path + "/" + layoutSaveName);
-            Asset asset = new Asset();
-            using (JsonTextReader json = new JsonTextReader(reader))
+            JsonSerializer serializer = new();
+            StreamReader reader = new(fileName);
+            Asset asset = new();
+            using JsonTextReader json = new(reader);
+            try
             {
-                try
-                {
-                    asset = serializer.Deserialize<Asset>(json);
-                }
-                catch (Exception e)
-                {
-                }
-                return asset;
+                asset = serializer.Deserialize<Asset>(json) ?? null;
             }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return asset;
         }
     }
     public static class AssetPipeline
@@ -205,7 +205,14 @@ namespace pixel_renderer
         public static string Path => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel\\Assets";
         public static void ImportAsync()
         {
-            var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OK);
+            if (Runtime.Instance.running)
+            {
+                var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OK);
+                if (msg == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+            }
             if (!Directory.Exists(Path))
             {
                 Directory.CreateDirectory(Path); 
@@ -217,15 +224,15 @@ namespace pixel_renderer
                 if (asset is not null)
                     AssetLibrary.Register(asset.GetType(), asset);
             };
-            var msg2 = MessageBox.Show("Import complete! :D.", "Asset Importer", MessageBoxButton.OK);
+            _ = MessageBox.Show("Import complete!", "Asset Importer", MessageBoxButton.OK);
+            
 
         }
         public static Asset? Import(string path)
         {
-            if (File.Exists(path)) return null; 
+            if (!File.Exists(path)) return null; 
             return AssetIO.ReadAssetFile(path);
         }
-
     }
     public static class AssetLibrary
     {
@@ -257,20 +264,10 @@ namespace pixel_renderer
         /// </summary>
         public static void Sync()
         {
-            bool wasPaused = false; 
             var library = GetLibrary();
             if (library is null) return; 
-            if (Runtime.Instance.running)
-            {
-                Runtime.Instance.mainWnd.Accept_Clicked(new(), new()); 
-                wasPaused = true;
-            }
             AssetIO.skippingOperation = false; 
             foreach (var asset in library) AssetIO.SaveAsset(asset, asset.Name);
-            if (!Runtime.Instance.running && wasPaused)
-            {
-                Runtime.Instance.mainWnd.Accept_Clicked(new(), new());
-            }
         }
         internal static  List<Asset>? GetLibrary()
         {

@@ -21,10 +21,8 @@
             Runtime env = Runtime.Instance;
             var lastFrameTime = env.lastFrameTime;
             var frameCount = env.frameCount;
-            var frameRate =
-                Math.Floor(1 /
-                TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds
-                * frameCount);
+            var frameRate = Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds * frameCount);
+               
             return frameRate;
         }
         static Runtime runtime => Runtime.Instance;

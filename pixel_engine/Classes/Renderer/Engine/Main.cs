@@ -1,4 +1,4 @@
-﻿    namespace pixel_renderer
+﻿namespace pixel_renderer
 {
     using System;
     using System.Windows;
