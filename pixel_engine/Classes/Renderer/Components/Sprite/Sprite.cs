@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Linq;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer
@@ -66,8 +67,8 @@ namespace pixel_renderer
 
         private List<BitmapAsset> charImgAssets = new(); 
         private List<Bitmap> chars = new();
-        private Dictionary<Bitmap, Vec2> characters = new();
-        private List<Sprite> sprites = new(); 
+        private List<KeyValuePair<Bitmap, Vec2>> characters = new();
+        private List<KeyValuePair<Sprite, Node>> sprites = new(); 
         public override void Awake()
         {
             base.Awake();
@@ -82,20 +83,29 @@ namespace pixel_renderer
                 chars.Add(file.bitmap);
             }
             asset = FontAssetFactory.CreateFont(0, 23, chars.ToArray());
-            AssetPipeline.Register(typeof(FontAsset), asset);
-            characters = FontAssetFactory.ToString(asset, text);
-            for (int i = 0; i < characters.Count; i++)
+            AssetLibrary.Register(typeof(FontAsset), asset);
+            characters = FontAssetFactory.ToString(asset, text).ToList();
+            int j = 0;
+            foreach (var image in chars)
             {
+                var parent = parentNode; 
+                var bmp = characters[j].Key;
+                Node node = new()
+                {
+                    position = characters[j].Value,
+                    scale = Vec2.one,
+                    parentNode = parent,
+                };
                 Sprite sprite = new()
                 {
-                    image = chars[i],
+                    image = bmp,
                     dirty = true,
-                    size = new Vec2(chars[i].Width, chars[i].Height),
-                    isSolidColor = false
+                    size = new Vec2(bmp.Width, bmp.Height),
+                    isSolidColor = false,
                 };
-                sprites.Add(sprite);
+                node.AddComponent(sprite);
+                sprites.Add(KeyValuePair.Create(sprite, node));
             }
-            
         }
         
         public override void FixedUpdate(float delta)

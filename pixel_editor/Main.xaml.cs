@@ -136,6 +136,15 @@ namespace pixel_editor
         }
         #endregion
 
+        private void OnImportBtnPressed(object sender, RoutedEventArgs e)
+        {
+            AssetPipeline.ImportAsync(); 
+        }
+
+        private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
+        {
+            AssetLibrary.Sync();
+        }
     }
     public class Inspector
     {
@@ -236,7 +245,6 @@ namespace pixel_editor
             string output = $"\b {component.GetType().Name} Properties : \n";
             // todo = add field and property values to an editable text box aside the label,
             // once changed send event to update property accordingly.
-            // todo = make individual labels / text boxes for each field / property
             foreach (var property in properties)
             {
                 output += $"\t{property.Name} {property.PropertyType}\n";

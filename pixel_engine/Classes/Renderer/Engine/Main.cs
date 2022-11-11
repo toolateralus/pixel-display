@@ -1,4 +1,4 @@
-﻿namespace pixel_renderer
+﻿    namespace pixel_renderer
 {
     using System;
     using System.Windows;
@@ -16,7 +16,7 @@
         {
             InitializeComponent();
             Runtime.Awake(this);
-            
+            AssetPipeline.ImportAsync();
         }
 
         public void Accept_Clicked(object sender, RoutedEventArgs e)
