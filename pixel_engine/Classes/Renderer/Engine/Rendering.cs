@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Windows.Controls;
     using Bitmap = System.Drawing.Bitmap;
 
@@ -45,11 +46,20 @@
                 var sprite = node.GetComponent<Sprite>();
                 if (sprite is null) continue;
 
+                // cull off screen nodes so they don't try to be written outside of the bounds of the render image
+
+                if(node.position.x + sprite.size.x >= Constants.ScreenWidth) continue;
+                if(node.position.y + sprite.size.y >= Constants.ScreenHeight) continue;
+                if(node.position.x - sprite.size.x < 0) continue;
+                if(node.position.y - sprite.size.y < 0) continue; 
+
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
+
                         var offsetX = node.position.x + x;
                         var offsetY = node.position.y + y;
+
                         if (offsetX < 0) continue;
                         if (offsetY < 0) continue;
 

@@ -116,6 +116,9 @@ namespace pixel_editor
             // if rendering to game view and the game view window is hidden or loaded, create new and show.
             if (Rendering.State == RenderState.Game)
             {
+                var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
+                if (msg != MessageBoxResult.Yes)
+                    return; 
                 Runtime.Instance.mainWnd = new();  
                 Runtime.Instance.mainWnd.Show(); 
             }

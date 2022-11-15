@@ -87,7 +87,7 @@
             Y = v.y
         };
     }
-    public enum RenderState { Off, Game, Scene }
+    public enum RenderState { Game, Scene, Off}
 }
 
 

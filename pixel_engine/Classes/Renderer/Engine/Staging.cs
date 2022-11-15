@@ -29,7 +29,7 @@
             List<Node> nodes = new List<Node>();
 
             AddPlayer(nodes);
-            //AddFloor(nodes);
+            AddFloor(nodes);
 
             for (int i = 0; i < 100; i++)
             {
@@ -62,9 +62,9 @@
             Node floor = new("Floor", startPos, Vec2.one);
             Floor floorScript = new(); 
             Sprite floorSprite = 
-                new(new Vec2(Constants.ScreenHeight - 4, 10),
-                System.Drawing.Color.FromArgb(255, 145, 210, 75),
-                true);
+                new(new Vec2(Constants.ScreenHeight - 4, 10)
+                         , Color.FromArgb(255, 145, 210, 75)
+                         , true);
 
             Rigidbody floorRb = new()
             {
@@ -99,12 +99,7 @@
                 usingGravity = true,
                 drag = .1f
             });
-            node.AddComponent(new Rigidbody()
-            {
-                IsTrigger = true,
-                usingGravity = false,
-                drag = 0
-            });
+          
             nodes.Add(node);
         }
         public static bool TryCheckOccupant(Point pos, out Node? result)
@@ -148,20 +143,11 @@
         {
             Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
-            
             Rigidbody rb = new()
             {
                 IsTrigger = false,
-
-            };
-            Rigidbody trigger = new()
-            {
-                IsTrigger = true
             };
             Sprite sprite = new(Vec2.one, JRandom.Color(), true);
-
-            Camera cam = new();
-
             Player player_obj = new()
             {
                 takingInput = true
@@ -170,13 +156,11 @@
             {
                 
             };
-            playerNode.AddComponent(text);
+
+            //playerNode.AddComponent(text);
             playerNode.AddComponent(rb);
-            playerNode.AddComponent(trigger);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);
-            playerNode.AddComponent(cam);
-            playerNode.AddComponent(cam);
             nodes.Add(playerNode);
 
             // create asset of type script because the player is an example of a

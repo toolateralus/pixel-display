@@ -115,11 +115,15 @@ namespace pixel_renderer
             position = pos;
             this.scale = scale;
         }
-
+        /// <summary>
+        /// Init called to avoid having to implement base.Awake calls for boiler plate component init code
+        /// </summary>
         public void Awake()
         {
             foreach (var list in Components.Values)
-                foreach(var component in list) component.Awake();
+                foreach (var component in list)
+                    component.Init();
+                    
         }
         public void FixedUpdate(float delta)
         {

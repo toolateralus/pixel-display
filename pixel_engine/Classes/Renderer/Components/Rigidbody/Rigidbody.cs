@@ -9,13 +9,13 @@ namespace pixel_renderer
         public float drag = .2f;
         public bool usingGravity = true;
         public Vec2 velocity = new();
-        private Sprite? sprite;
+        public Sprite? sprite;
         const double dragCoefficient = 1;
         public bool IsTrigger { get; internal set; } = false; 
 
         public override void Awake()
         {
-            base.Awake();
+             
             sprite = parentNode.GetComponent<Sprite>();
             if (sprite == null) throw new Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID{ parentNode.UUID}");
         }

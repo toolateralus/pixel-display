@@ -14,7 +14,6 @@ namespace pixel_renderer
         public Color[,] colorData;
 
         public bool isCollider = false;
-        public bool isSolidColor = true;
         public bool dirty = false; 
 
         public Sprite(Vec2 size, Color color, bool isCollider)
@@ -22,6 +21,37 @@ namespace pixel_renderer
             DrawSquare(size, color, isCollider);
         }
 
+        
+        public void DrawSquare(Vec2 size, Color[,] color, bool isCollider)
+        {
+            colorData = color;
+            this.size = size;
+            this.isCollider = isCollider;
+        }
+
+        public override void Update()
+        {
+            if (image is not null && dirty)
+            {
+                size = new Vec2(image.Width, image.Height); 
+                colorData = BitmapAsset.ColorArrayFromBitmap(image);
+            }
+        }
+        public override void Awake()
+        {
+             
+
+        }
+        public Sprite()
+        {
+
+        }
+
+        public Sprite(int x, int y)
+        {
+            Vec2 size = new(x, y);
+            this.size = size; 
+        }
         public void DrawSquare(Vec2 size, Color color, bool isCollider)
         {
             colorData = new Color[(int)size.x, (int)size.y];
@@ -32,29 +62,6 @@ namespace pixel_renderer
                 }
             this.size = size;
             this.isCollider = isCollider;
-        }
-        public void DrawSquare(Vec2 size, Color[,] color, bool isCollider)
-        {
-            colorData = color;
-            this.size = size;
-            this.isCollider = isCollider;
-        }
-
-        public override void Update()
-        {
-            if (!isSolidColor && image is not null && dirty)
-            {
-                colorData = BitmapAsset.ColorArrayFromBitmap(image);
-            }
-        }
-        public override void Awake()
-        {
-            base.Awake();
-
-        }
-        public Sprite()
-        {
-
         }
     }
 
@@ -72,7 +79,7 @@ namespace pixel_renderer
         public override void Awake()
         {
             return; 
-            base.Awake();
+             
             for (int i = 0; i < 25; i++)
             {
                 if(!AssetLibrary.TryFindAsset($"bit{i}", out BitmapAsset value)) return;
@@ -102,7 +109,6 @@ namespace pixel_renderer
                     image = bmp,
                     dirty = true,
                     size = new Vec2(bmp.Width, bmp.Height),
-                    isSolidColor = false,
                 };
                 node.AddComponent(sprite);
                 sprites.Add(KeyValuePair.Create(sprite, node));

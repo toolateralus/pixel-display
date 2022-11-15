@@ -15,12 +15,12 @@ namespace pixel_renderer
         Vec2 startPos = new(); 
         public override void Awake()
         {
-            base.Awake();
+             
             startPos = parentNode.position;
             rb = parentNode.GetComponent<Rigidbody>();
         }
     
-        public override void FixedUpdate(float delta)
+        public override void Update()
         {
             rb.parentNode.position = startPos; 
         }

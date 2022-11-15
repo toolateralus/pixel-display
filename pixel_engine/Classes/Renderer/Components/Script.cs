@@ -1,10 +1,11 @@
-﻿using pixel_renderer;
-
-public class ScriptAsset : Asset
+﻿namespace pixel_renderer
 {
-    public Component component;
-    public ScriptAsset(Component c)
+    public class ScriptAsset : Asset
     {
-        component = c; 
+        public Component component;
+        public ScriptAsset(Component c)
+        {
+            component = c; 
+        }
     }
 }

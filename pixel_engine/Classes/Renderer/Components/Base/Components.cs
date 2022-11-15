@@ -29,13 +29,26 @@ namespace pixel_renderer
         {
             
         }
+
        
         public virtual void Awake()
         {
-            UUID = pixel_renderer.UUID.NewUUID();
-            Name = parentNode.Name + $" {GetType()}"; 
+            
         }
 
+        internal void Init()
+        {
+            UUID = pixel_renderer.UUID.NewUUID();
+            Name = parentNode.Name + $" {GetType()}";
+            Awake(); 
+        }
+        /// <summary>
+        /// Performs a 'Get Component' call on the Parent node object of the component this is called from.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="index"></param>
+        /// <returns>A component of specified type and parent</returns>
+        public T GetComponent<T>(int? index = 0) where T : Component => parentNode.GetComponent<T>(index);
     }
 
 }

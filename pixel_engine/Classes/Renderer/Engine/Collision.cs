@@ -68,10 +68,10 @@ namespace pixel_renderer
 
             Parallel.ForEach(stage.Nodes, _node =>
             {
-                if (_node.TryGetComponent(out Rigidbody _))
-                    if (_node.TryGetComponent(out Sprite sprite))
-                        if (sprite.isCollider) colliderNodes.Add(_node);
-                           
+                if (_node.TryGetComponent<Rigidbody>(out _))
+                    if (_node.TryGetComponent<Sprite>(out var sprite))
+                        if (sprite.isCollider)
+                            colliderNodes.Add(_node);
             });
 
             Parallel.ForEach(colliderNodes, node =>

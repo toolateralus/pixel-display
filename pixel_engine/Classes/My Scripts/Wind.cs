@@ -26,7 +26,7 @@ namespace pixel_renderer
         public Direction direction = Direction.Up; 
         public override void Awake()
         {
-            base.Awake(); 
+              
             rb = parentNode.GetComponent<Rigidbody>();
         }
         public override void FixedUpdate(float delta)
