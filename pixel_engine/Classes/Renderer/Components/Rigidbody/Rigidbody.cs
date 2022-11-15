@@ -23,6 +23,7 @@ namespace pixel_renderer
         {
             if (usingGravity) velocity.y += CMath.Gravity;
             Collision.ViewportCollision(parentNode);
+            
             ApplyDrag();
             ApplyVelocity();
         }

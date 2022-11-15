@@ -163,11 +163,11 @@ namespace pixel_renderer
                 if (!skippingOperation)
                 {
                     var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
-                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Asterisk,
-                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
+                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Error,
+                                             MessageBoxResult.No, MessageBoxOptions.DefaultDesktopOnly);
                     var doForAllResult = MessageBox.Show($"Do for all (uses last choice)",
-                                            "", MessageBoxButton.YesNo, MessageBoxImage.Warning,
-                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
+                                            "", MessageBoxButton.YesNo, MessageBoxImage.Error,
+                                             MessageBoxResult.No, MessageBoxOptions.DefaultDesktopOnly);
                     if (doForAllResult == MessageBoxResult.Yes)
                     {
                         skippingOperation = true; 
@@ -190,25 +190,27 @@ namespace pixel_renderer
                 Directory.CreateDirectory(Path);
                 return null; 
             }
+            
             JsonSerializer serializer = new();
+            
             StreamReader reader = new(fileName);
-            Asset asset = new();
+            
+            Asset asset = new(); 
+
             using JsonTextReader json = new(reader);
             try
             {
                 asset = serializer.Deserialize<Asset>(json) ?? null;
             }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            catch (Exception _) { throw; };
+               
             return asset;
         }
     }
 
     public static class AssetPipeline
     {
-        public static string Path => Constants.Appdata + Constants.AssetsDirectory;
+        public static string Path => Constants.WorkingDirectory + Constants.AssetsDirectory;
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>
@@ -236,10 +238,10 @@ namespace pixel_renderer
                   
                 };
             }
-            var syncResult = MessageBox.Show("Import complete! Do you want to sync?", "Asset Importer", MessageBoxButton.YesNo);
-            if (syncResult == MessageBoxResult.Yes)
+            if (!Runtime.Instance.IsRunning)
             {
-                AssetLibrary.Sync(); 
+                var syncResult = MessageBox.Show("Import complete! Do you want to sync?", "Asset Importer", MessageBoxButton.YesNo);
+                if (syncResult == MessageBoxResult.Yes) AssetLibrary.Sync();
             }
 
         }

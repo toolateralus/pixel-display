@@ -17,6 +17,8 @@
         public static void SetCurrentStage(Stage stage) => runtime.stage = stage;
         public static void UpdateCurrentStage(Stage stage)
         {
+            // instead of refreshing the whole stage hierarchy each frame, we could just add events that queue an update, even of just that member, but
+            // probably all of them since the hierarchy is a relationship
             stage.RefreshStageDictionary();
             stage.FixedUpdate(delta: runtime.lastFrameTime);
             if (Debug.debugging) Debug.debug = "";
@@ -31,7 +33,7 @@
 
             for (int i = 0; i < 100; i++)
             {
-                AddNode(nodes, i);
+                CreateGenericNode(nodes, i);
             }
 
             Bitmap background = GetFallbackBackground();
@@ -85,7 +87,7 @@
                 node.Awake(); 
             }
         }
-        private static void AddNode(List<Node> nodes, int i)
+        private static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
             var node = new Node($"NODE {i}", new Vec2(pos.x, pos.y), new Vec2(0, 1));
@@ -96,6 +98,12 @@
                 IsTrigger = false,
                 usingGravity = true,
                 drag = .1f
+            });
+            node.AddComponent(new Rigidbody()
+            {
+                IsTrigger = true,
+                usingGravity = false,
+                drag = 0
             });
             nodes.Add(node);
         }

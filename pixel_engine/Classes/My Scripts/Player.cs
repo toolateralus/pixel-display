@@ -32,7 +32,12 @@ internal class Player : Component
         GetMove(move);
     }
 
-    public override void OnTrigger(Rigidbody other) { }
+    public override void OnTrigger(Rigidbody other) 
+    {
+        if (sprite.size.x < 24)
+            sprite.size += Vec2.one * 2;
+        else sprite.size = new Vec2(1, 1);
+    }
 
     public override void OnCollision(Rigidbody collider) => RandomizeSpriteColor();
 
@@ -41,7 +46,8 @@ internal class Player : Component
     private void GetJumpInput(Vec2 moveVector)
     {
         if (moveVector.y == 0) return;
-        rb.velocity.y = moveVector.y * speed; 
+        var jumpVel = speed * 15f; 
+        rb.velocity.y = moveVector.y * jumpVel; 
     }
 
     private void RandomizeSpriteColor()

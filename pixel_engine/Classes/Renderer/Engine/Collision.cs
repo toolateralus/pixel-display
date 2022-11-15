@@ -8,6 +8,7 @@ namespace pixel_renderer
 {
     public static class Collision
     {
+        static ConcurrentBag<Node> colliderNodes = new();
         private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new(); 
         private readonly static SpatialHash hash = new(Constants.ScreenHeight, Constants.ScreenWidth, Constants.CollisionCellSize);
         
@@ -58,7 +59,22 @@ namespace pixel_renderer
         public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
-            Parallel.ForEach(stage.Nodes, node =>
+
+            colliderNodes.Clear(); 
+            
+            // could look for a more graceful solution, but as of right now nodes that
+            // don't have both a Sprite and a Rigidbody can't participate in collision events
+            // check if node has rigidbody, then if has sprite, then if is collider, so proceed.
+
+            Parallel.ForEach(stage.Nodes, _node =>
+            {
+                if (_node.TryGetComponent(out Rigidbody _))
+                    if (_node.TryGetComponent(out Sprite sprite))
+                        if (sprite.isCollider) colliderNodes.Add(_node);
+                           
+            });
+
+            Parallel.ForEach(colliderNodes, node =>
             {
                 List<Node> result = hash.GetNearby(node);
                 collisionCells.Add(result);
@@ -67,9 +83,8 @@ namespace pixel_renderer
 
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
-            if (collisionCells.Count <= 0 ||
-                collisionCells[0] is null) 
-                return;
+            if (collisionCells.Count <= 0 || collisionCells[0] is null) return;
+              
 
             Parallel.For(0, collisionCells.Count, i =>
             {

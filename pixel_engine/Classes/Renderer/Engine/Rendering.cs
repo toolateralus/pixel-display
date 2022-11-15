@@ -28,14 +28,16 @@
         static Runtime runtime => Runtime.Instance;
         public static void Render(Image output)
         {
-            var player = runtime.stage.FindNode("Player");
-            var cam = player.GetComponent<Camera>();
-            var frame = Draw(cam, (Bitmap)runtime.stage.Background.Clone());
-            Insert(frame);
-            var renderFrame = FrameBuffer.First();
-            DrawToImage(ref renderFrame, output);
+            // if we could avoid cloning this object
+            // and instead cache the original colors during changes and rewrite them back
+            // it would save a very significant amount of memory
+            // and CPU
+
+            var clonedBackground = (Bitmap)runtime.stage.Background.Clone();
+            var frame = Draw(clonedBackground);
+            DrawToImage(ref frame, output);
         }
-        private static Bitmap Draw(Camera camera, Bitmap frame)
+        private static Bitmap Draw(Bitmap frame)
         {
             Stage stage = Runtime.Instance.stage;
             foreach (var node in stage.Nodes)
@@ -64,11 +66,6 @@
                     }
             }
             return frame;
-        }
-        private static void Insert(Bitmap inputFrame)
-        {
-            if (FrameBuffer.Count > 0) FrameBuffer.Dequeue();
-            FrameBuffer.Enqueue(inputFrame);
         }
         private static void DrawToImage(ref Bitmap inputFrame, Image renderImage)
         {

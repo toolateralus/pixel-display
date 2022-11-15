@@ -65,7 +65,7 @@
         }
         private List<int> Hash(Node obj)
         {
-            Sprite sprite = obj.GetComponent<Sprite>(); 
+            if(!obj.TryGetComponent(out Sprite sprite)) return new(); 
             List<int> bucketsObjIsIn = new List<int>();
             Vec2 min = new Vec2(
                 obj.position.x,
