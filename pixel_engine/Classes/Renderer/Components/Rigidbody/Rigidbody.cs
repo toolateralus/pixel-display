@@ -36,12 +36,6 @@ namespace pixel_renderer
             return drag;
         }
 
-        [Obsolete]
-        public string GetDebugs()
-        {
-            return $" \n VELOCITY__X = {velocity.x} \n VELOCITY__Y = {velocity.y} \n POSITION__X = {parentNode.position.x} \n POSITION__Y {parentNode.position.y} \n NODE : {parentNode.Name}";
-        }
-
         private protected void ApplyVelocity()
         {
             parentNode.position.y += velocity.y;
