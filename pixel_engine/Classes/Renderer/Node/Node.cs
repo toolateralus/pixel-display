@@ -29,7 +29,7 @@ namespace pixel_renderer
             }
         }
 
-    public Vec2 GetLocalPosition(Vec2 position)
+        public Vec2 GetLocalPosition(Vec2 position)
         {
             Vec2 local = new();
             if (parentNode == null) return position;

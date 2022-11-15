@@ -27,8 +27,8 @@
         public static Vec2 GetPointOnSine(float startPosition = 0, float endPosition = 1, float Tau = CMath.PI * 2, int vertexIndex = 0)
         {
             float progress = (float)vertexIndex / (vertices - 1);
-            float x = CMath.Lerp(startPosition, endPosition, progress);
-            float y = (float)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.frameCount * movementSpeed));
+            int x = (int)CMath.Lerp(startPosition, endPosition, progress);
+            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
         /// <summary>
@@ -40,8 +40,8 @@
             int vertexIndex = JRandom.Int(0, vertices);
             const float Tau = CMath.PI * 2;
             float progress = (float)vertexIndex / (vertices - 1);
-            var x = CMath.Lerp(0, 1, progress);
-            float y = (float)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.frameCount * movementSpeed));
+            int x = (int)CMath.Lerp(0, 1, progress);
+            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
     }

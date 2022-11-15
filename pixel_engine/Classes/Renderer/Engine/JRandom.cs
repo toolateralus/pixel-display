@@ -9,8 +9,8 @@
         {
             var pos = new Vec2();
 
-            var xLimit = Constants.screenHeight;
-            var yLimit = Constants.screenWidth;
+            var xLimit = Constants.ScreenWidth;
+            var yLimit = Constants.ScreenHeight;
 
             return new()
             {

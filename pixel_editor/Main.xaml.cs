@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer;
+using System.Runtime.InteropServices;
 #endregion
 
 namespace pixel_editor
@@ -21,85 +22,6 @@ namespace pixel_editor
     /// </summary>
     public partial class Main : Window
     {
-        static EngineInstance engine; 
-        Inspector inspector;
-        public double ScaleValue
-        {
-            get => (double)GetValue(ScaleValueProperty);
-            set => SetValue(ScaleValueProperty, value);
-        }
-        private static int renderStateIndex = 0; 
-        // main entry point for application
-        public Main()
-        {
-            InitializeComponent();
-            engine = new();
-            engine.Show();
-            inspector = new Inspector(inspectorObjName,
-                                      inspectorObjInfo,
-                                      inspectorChildGrid);
-            var page = new ImportPage(this); 
-            importFrame.Navigate(page);
-            GetEvents();
-        }
-
-        private void GetEvents()
-        {
-            CompositionTarget.Rendering += Update;
-            Closing += OnDisable;
-            image.MouseLeftButtonDown += Mouse0;
-        }
-        private void Update(object? sender, EventArgs e)
-        {
-            inspector.Update(sender, e);
-            if (!Runtime.Instance.running 
-                || Rendering.State != RenderState.Scene) return; 
-
-            Rendering.Render(image); 
-        }
-        /// <summary>
-        /// Called on program close
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnDisable(object? sender, EventArgs e)
-        {
-            engine.Close();
-        }
-        private void OnViewChanged(object sender, RoutedEventArgs e)
-        {
-            IncrementRenderState();
-        }
-        private void OnPlay(object sender, RoutedEventArgs e)
-        {
-            if (!Runtime.Instance.running)
-            {
-                engine.Accept_Clicked(sender, e); 
-            }
-        }
-        private void IncrementRenderState()
-        {
-            renderStateIndex++;
-            if (renderStateIndex == sizeof(RenderState) - 1)
-            {
-                renderStateIndex = 0;
-            }
-            Rendering.State = (RenderState)renderStateIndex;
-            viewBtn.Content = Rendering.State.ToString();
-        }
-        private void Mouse0(object sender, MouseButtonEventArgs e)
-        {
-            Point pos = e.GetPosition(sender as Image);
-            if (Runtime.Instance.running)
-            {
-                inspector.DeselectNode();
-                if (Staging.TryCheckOccupant(pos, out Node node))
-                {
-                    inspector.SelectNode(node);
-                }
-            }
-        }
-
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged),new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
@@ -137,12 +59,85 @@ namespace pixel_editor
             CalculateScale();
         }
         #endregion
+        Inspector inspector;
+        /// <summary>
+        /// keep this reference of the engine just to close the background window on editor exit.
+        /// </summary>
+        internal static EngineInstance? engine; 
+        public double ScaleValue
+        {
+            get => (double)GetValue(ScaleValueProperty);
+            set => SetValue(ScaleValueProperty, value);
+        }
+        private static int renderStateIndex = 0; 
+        // main entry point for application
+        public Main()
+        {
+            InitializeComponent();
+            engine = new();
+            inspector = new Inspector(inspectorObjName,
+                                      inspectorObjInfo,
+                                      inspectorChildGrid);
+            GetEvents();
+        }
+        private void GetEvents()
+        {
+            CompositionTarget.Rendering += Update;
+            Closing += OnDisable;
+            image.MouseLeftButtonDown += Mouse0;
+        }
+        private void Update(object? sender, EventArgs e)
+        {
+            inspector.Update(sender, e);
+            if (!Runtime.Instance.IsRunning 
+                || Rendering.State != RenderState.Scene) return; 
 
+            Rendering.Render(image); 
+        }
+        /// <summary>
+        /// Called on program close
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnDisable(object? sender, EventArgs e) => engine.Close();
+        private void OnViewChanged(object sender, RoutedEventArgs e) =>  IncrementRenderState();
+        private void OnPlay(object sender, RoutedEventArgs e) => Runtime.Instance.Toggle();
+        private void IncrementRenderState()
+        {
+            renderStateIndex++;
+            // subtract one from the enum size otherwise an empty member of the enum appears for some reason I don't understand.
+            if (renderStateIndex == sizeof(RenderState) - 1)
+            {
+                renderStateIndex = 0;
+            }
+            Rendering.State = (RenderState)renderStateIndex;
+            viewBtn.Content = Rendering.State.ToString();
+
+            // if rendering to game view and the game view window is hidden or loaded, create new and show.
+            if (Rendering.State == RenderState.Game)
+            {
+                Runtime.Instance.mainWnd = new();  
+                Runtime.Instance.mainWnd.Show(); 
+            }
+        }
+        private void Mouse0(object sender, MouseButtonEventArgs e)
+        {
+            // this cast could be causing erroneous behavior
+            Point pos = e.GetPosition(sender as Image);
+
+            if (Runtime.Instance.IsRunning)
+            {
+                inspector.DeselectNode();
+                if (Staging.TryCheckOccupant(pos, out Node node))
+                {
+                    inspector.SelectNode(node);
+                }
+            }
+        }
         private void OnImportBtnPressed(object sender, RoutedEventArgs e)
         {
             AssetPipeline.ImportAsync(); 
         }
-
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
             AssetLibrary.Sync();
@@ -163,7 +158,7 @@ namespace pixel_editor
             Awake(); 
         }
         public Node? loadedNode;
-        private List<TextBlock> currentInspector = new(); 
+        private List<TextBlock> activeControls = new(); 
         private Label name;
         private Label objInfo;
         private Grid componentGrid;
@@ -172,6 +167,7 @@ namespace pixel_editor
         public event Action OnObjectSelected;
         public event Action OnObjectDeselected;
         public event Action OnInspectorUpdated;
+
         public event Action OnComponentAdded;
         public event Action OnComponentRemoved;
 
@@ -186,32 +182,38 @@ namespace pixel_editor
         {
      
         }
-        /// <summary>
-        /// If a Node is loaded, get Node and Component info and assemble a UI based on gathered info.
-        /// </summary>
         private void Refresh()
         {
             if (loadedNode == null) return;
             name.Content = loadedNode.Name;
-            objInfo.Content = $"{loadedNode.Components.Count} Components";
             components = loadedNode.Components;
+            objInfo.Content = $"#{components.Count} Components";
+
             var thickness = new Thickness(0, 0, 0, 0);
-            
             int index = 0;
+
             foreach (var componentType in components.Values)
             {
                 foreach (var component in componentType)
                 {
                     string info = GetComponentInfo(component);
+
                     TextBlock block = CreateBlock(info, thickness);
-                    AddToInspector(index, block, info.Split(' ').Length);
+
+                    // provides undesirable spacing, really ugly
+                    int rowSpan = info.Split(' ').Length;
+
+                    AddToInspector(index, block, rowSpan);
+
                     componentGrid.Children.Add(block);
                     componentGrid.UpdateLayout();
-                    currentInspector.Add(block);
+
+                    activeControls.Add(block);
+
                     index++;
                 }
             }
-            
+
             OnInspectorUpdated?.Invoke();
         }
         public void DeselectNode()
@@ -219,11 +221,11 @@ namespace pixel_editor
             if (loadedNode != null)
             {
                 loadedNode = null;
-                foreach (var control in currentInspector)
+                foreach (var control in activeControls)
                 {
                     componentGrid.Children.Remove(control);
                 }
-                currentInspector.Clear(); 
+                activeControls.Clear(); 
                 OnObjectDeselected?.Invoke();
             }
         }
@@ -235,9 +237,9 @@ namespace pixel_editor
 
         public static void AddToInspector(int i, TextBlock component, int rowSpan)
         {
-            component.SetValue(Grid.RowSpanProperty, rowSpan - 3);
+            component.SetValue(Grid.RowSpanProperty, rowSpan);
             component.SetValue(Grid.ColumnSpanProperty, 8);
-            component.SetValue(Grid.RowProperty, i * 2);
+            component.SetValue(Grid.RowProperty, i);
             component.SetValue(Grid.ColumnProperty, 6);
         }
         public static string GetComponentInfo(Component component)

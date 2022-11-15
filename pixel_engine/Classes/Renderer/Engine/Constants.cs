@@ -1,16 +1,27 @@
-﻿namespace pixel_renderer
+﻿using System;
+
+namespace pixel_renderer
 {
     public static class Constants
     {
-        internal const int frameRateCheckThresh = 60;
-        internal const int screenWidth = 256;
-        internal const int screenHeight = 256;
-        internal const int collisionCellSize = 6;
-
+        public const int FramesBetweenFramerateChecks = 60;
+        public const int ScreenHeight = 256;
+        public const int ScreenWidth = 256;
+        public const int CollisionCellSize = 6;
+        /// <summary>
+        /// FixedUpdate / Physics refresh interval.
+        /// </summary>
+        public const float PhysicsRefreshInterval = 0.01f;
+        
+        public const string FontDirectory = ImagesDirectory + "\\Font";
+        public const string ImagesDirectory = AssetsDirectory + "\\Images";
+        public const string AssetsDirectory = "\\Pixel\\Assets";
+        
+        public static string Appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData); 
         internal const float depenetrationForce = 25f;
-
         // Not fully implemented, not used ATM.
-        internal static float terminalVelocity = .1f;
+
+        internal static int terminalVelocity = 4;
         internal static Vec2 TerminalVec2()
         {
             return new Vec2()

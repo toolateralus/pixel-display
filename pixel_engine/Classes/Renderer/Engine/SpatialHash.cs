@@ -54,8 +54,8 @@
         private void AddBucket(Vec2 vector, float width, List<int> bucket)
         {
             int cellPosition = (int)(
-                       (Math.Floor(vector.x / cellSize)) +
-                       (Math.Floor(vector.y / cellSize)) *
+                       Math.Floor((double)vector.x / cellSize) +
+                       Math.Floor((double)vector.y / cellSize) *
                        width
             );
 
@@ -73,7 +73,7 @@
             Vec2 max = new Vec2(
                 obj.position.x + sprite.size.x,
                 obj.position.y + sprite.size.y);
-            float width = Constants.screenWidth / cellSize;
+            float width = Constants.ScreenHeight / cellSize;
             
             //TopLeft
             AddBucket(min, width, bucketsObjIsIn);

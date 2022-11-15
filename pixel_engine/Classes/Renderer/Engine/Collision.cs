@@ -9,7 +9,33 @@ namespace pixel_renderer
     public static class Collision
     {
         private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new(); 
-        private readonly static SpatialHash hash = new(Constants.screenWidth, Constants.screenHeight, Constants.collisionCellSize);
+        private readonly static SpatialHash hash = new(Constants.ScreenHeight, Constants.ScreenWidth, Constants.CollisionCellSize);
+        
+        [Obsolete]
+        public static void ViewportCollision(Node node)
+        {
+            Sprite sprite = node.GetComponent<Sprite>();
+            Rigidbody rb = node.GetComponent<Rigidbody>();
+            if (sprite is null || rb is null) return;
+            if (sprite.isCollider)
+            {
+                if (node.position.y > Constants.ScreenWidth - 4 - sprite.size.y)
+                {
+                    node.position.y = Constants.ScreenWidth - 4 - sprite.size.y;
+                }
+                if (node.position.x > Constants.ScreenHeight - sprite.size.x)
+                {
+                    node.position.x = Constants.ScreenHeight - sprite.size.x; 
+                    rb.velocity.x = 0;
+                }
+                if (node.position.x < 0)
+                {
+                    node.position.x = 0;
+                    rb.velocity.x = 0;
+                }
+            }
+        }
+
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             Vec2 a = nodeA.position;
@@ -38,13 +64,14 @@ namespace pixel_renderer
                 collisionCells.Add(result);
             });
         }
+
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
             if (collisionCells.Count <= 0 ||
                 collisionCells[0] is null) 
                 return;
 
-            Parallel.For(0, collisionCells.Count(), i =>
+            Parallel.For(0, collisionCells.Count, i =>
             {
                 if (i >= collisionCells.Count) return; 
                 var cell = collisionCells[i];
@@ -69,6 +96,7 @@ namespace pixel_renderer
                 }); 
             }); 
         }
+       
         public static async Task RegisterColliders(Stage stage)
         {
             hash.ClearBuckets();
@@ -87,30 +115,8 @@ namespace pixel_renderer
                 hash.RegisterObject(node);
             });
         }
-        [Obsolete]
-        public static void ViewportCollision(Node node)
-        {
-            Sprite sprite = node.GetComponent<Sprite>();
-            Rigidbody rb = node.GetComponent<Rigidbody>();
-            if (sprite is null || rb is null) return;
-            if (sprite.isCollider)
-            {
-                if (node.position.y > Constants.screenHeight - 4 - sprite.size.y)
-                {
-                    node.position.y = Constants.screenHeight - 4 - sprite.size.y;
-                }
-                if (node.position.x > Constants.screenWidth - sprite.size.x)
-                {
-                    node.position.x = Constants.screenWidth - sprite.size.x; 
-                    rb.velocity.x = 0;
-                }
-                if (node.position.x < 0)
-                {
-                    node.position.x = 0;
-                    rb.velocity.x = 0;
-                }
-            }
-        }
+
+
         private static void RegisterCollisionEvent(Node A, Node[] colliders)
         {
             if (A is null) return;
@@ -123,6 +129,7 @@ namespace pixel_renderer
                 }
             }
         }
+        
         public static void Execute()
         {
             Parallel.ForEach(CollisionQueue, collisionPair =>
@@ -139,6 +146,7 @@ namespace pixel_renderer
             }); 
             CollisionQueue.Clear(); 
         }
+      
         private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger)
@@ -150,6 +158,7 @@ namespace pixel_renderer
             A.parentNode.OnCollision(B);
             B.parentNode.OnCollision(A);
         }
+        
         private static void Collide(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger) return;

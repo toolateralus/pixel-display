@@ -4,7 +4,7 @@
 
     public static class CMath
     {
-        public const float Gravity = 3f;
+        public const int Gravity = 3;
         public const float PI = MathF.PI;
         public const float Tau = MathF.PI * 2;
         public static float Lerp(float a, float b, float t)
@@ -20,7 +20,6 @@
             }
             return output;
         }
-
         internal static Vec2 Negate(Vec2 v) => new()
         {
             x = -v.x,

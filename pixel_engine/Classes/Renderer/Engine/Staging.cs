@@ -2,8 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Security;
     using System.Windows;
+    using System.Xaml;
+    using Point = System.Windows.Point;
 
     public static class Staging
     {
@@ -22,7 +25,7 @@
         public static void InitializeDefaultStage()
         {
             List<Node> nodes = new List<Node>();
-            
+
             AddPlayer(nodes);
             //AddFloor(nodes);
 
@@ -30,18 +33,34 @@
             {
                 AddNode(nodes, i);
             }
-            SetCurrentStage(new Stage("Default Stage", runtime.Backgrounds[0], nodes.ToArray()));
+
+            Bitmap background = GetFallbackBackground();
+            if (runtime.Backgrounds.Count >= 0)
+            {
+                background = runtime.Backgrounds[0];
+            }
+
+            SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
             InitializeNodes();
             runtime.stage.RefreshStageDictionary();
         }
 
+        private static Bitmap GetFallbackBackground()
+        {
+            Bitmap FallbackBitmap = new(256, 256);
+            for (int i = 0; i < 256; i++)
+                for (int j = 0; j < 256; j++)
+                    FallbackBitmap.SetPixel(i, j, JRandom.Color());
+            return FallbackBitmap;
+        }
+
         private static void AddFloor(List<Node> nodes)
         {
-            Vec2 startPos = new(2, Constants.screenHeight - 16);
+            Vec2 startPos = new(2, Constants.ScreenWidth - 16);
             Node floor = new("Floor", startPos, Vec2.one);
             Floor floorScript = new(); 
             Sprite floorSprite = 
-                new(new Vec2(Constants.screenWidth - 4, 10),
+                new(new Vec2(Constants.ScreenHeight - 4, 10),
                 System.Drawing.Color.FromArgb(255, 145, 210, 75),
                 true);
 

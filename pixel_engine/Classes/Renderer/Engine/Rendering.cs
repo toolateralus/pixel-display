@@ -35,7 +35,6 @@
             var renderFrame = FrameBuffer.First();
             DrawToImage(ref renderFrame, output);
         }
-
         private static Bitmap Draw(Camera camera, Bitmap frame)
         {
             Stage stage = Runtime.Instance.stage;
@@ -52,8 +51,8 @@
                         if (offsetX < 0) continue;
                         if (offsetY < 0) continue;
 
-                        if (offsetX >= Constants.screenWidth) continue;
-                        if (offsetY >= Constants.screenHeight) continue;
+                        if (offsetX >= Constants.ScreenWidth) continue;
+                        if (offsetY >= Constants.ScreenHeight) continue;
 
                         var color = sprite.colorData[x, y];
                         var position = new Vec2((int)offsetX, (int)offsetY);
@@ -73,7 +72,7 @@
         }
         private static void DrawToImage(ref Bitmap inputFrame, Image renderImage)
         {
-            CBitmap.Convert(inputFrame, renderImage);
+            CBit.Convert(inputFrame, renderImage);
         }
     }
 

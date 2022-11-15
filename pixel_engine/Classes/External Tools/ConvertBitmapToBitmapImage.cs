@@ -4,7 +4,7 @@ using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
 using System.Drawing.Imaging;
 using Image = System.Windows.Controls.Image; 
-public static class CBitmap
+public static class CBit
 {
     [System.Runtime.InteropServices.DllImport("gdi32.dll")]
     public static extern bool DeleteObject(IntPtr intPtr);

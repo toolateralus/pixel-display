@@ -71,16 +71,17 @@ namespace pixel_renderer
         private List<KeyValuePair<Sprite, Node>> sprites = new(); 
         public override void Awake()
         {
+            return; 
             base.Awake();
             for (int i = 0; i < 25; i++)
             {
-                if(!AssetLibrary.TryFetch($"bit{i}", out BitmapAsset value)) return;
+                if(!AssetLibrary.TryFindAsset($"bit{i}", out BitmapAsset value)) return;
                 charImgAssets.Add(value);
             }
             foreach (var file in charImgAssets)
             {
                 if (file == null) continue;
-                chars.Add(file.bitmap);
+                chars.Add(file.currentValue);
             }
             asset = FontAssetFactory.CreateFont(0, 23, chars.ToArray());
             AssetLibrary.Register(typeof(FontAsset), asset);
