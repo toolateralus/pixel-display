@@ -42,27 +42,31 @@
         }
         internal List<Node> GetNearby(Node node)
         {
-            List<Node> nodes = new List<Node>();
+            
+            List<Node> nodes = new List<Node>(256);
             List<int> buckets = Hash(node);
             foreach (var index in buckets)
             {
                 if (index < 0 || index >= rows * columns -1) continue;
+
+                if (Buckets[index].Count > nodes.Capacity)
+                    nodes.Capacity = Buckets[index].Count;
+
                 nodes.AddRange(Buckets[index]);
             }
             return nodes;
         }
+
         private void AddBucket(Vec2 vector, float width, List<int> bucket)
         {
-            int cellPosition = (int)(
-                       Math.Floor((double)vector.x / cellSize) +
-                       Math.Floor((double)vector.y / cellSize) *
-                       width
-            );
+            int cellPosition = (int)
+                (Math.Floor((double)vector.x / cellSize) +
+                 Math.Floor((double)vector.y / cellSize) * width);
 
             if (!bucket.Contains(cellPosition))
                 bucket.Add(cellPosition);
-
         }
+
         private List<int> Hash(Node obj)
         {
             if(!obj.TryGetComponent(out Sprite sprite)) return new(); 

@@ -58,25 +58,27 @@
 
         private static void AddFloor(List<Node> nodes)
         {
-            Vec2 startPos = new(2, Constants.ScreenWidth - 16);
-            Node floor = new("Floor", startPos, Vec2.one);
-            Floor floorScript = new(); 
-            Sprite floorSprite = 
-                new(new Vec2(Constants.ScreenHeight - 4, 10)
-                         , Color.FromArgb(255, 145, 210, 75)
-                         , true);
-
-            Rigidbody floorRb = new()
+            Vec2 pos = new(2, Constants.ScreenWidth - 4);
+            Node node = new("Floor", pos, Vec2.one);
+            Floor floor = new(); 
+            Sprite sprite = new( new(Constants.ScreenWidth - 20, 10), JRandom.Color(), true);
+                   
+                
+            Rigidbody rb = new()
             {
                 IsTrigger = false, 
                 usingGravity = true,
                 drag = 0f,
-                Name = "Floor - Rigidbody"
+                Name = "Floor Rigidbody"
             };
-            floor.AddComponent(floorRb);
-            floor.AddComponent(floorSprite);
-            floor.AddComponent(floorScript);
-            nodes.Add(floor);
+
+            node.AddComponent(rb);
+
+            node.AddComponent(sprite);
+
+            node.AddComponent(floor);
+
+            nodes.Add(node);
         }
 
         private static void InitializeNodes()
@@ -90,7 +92,7 @@
         private static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
-            var randomScale = Vec2.one * JRandom.Int(5, 20);
+            var randomScale = Vec2.one * 5;
             var node = new Node($"NODE {i}", pos, Vec2.one);
             node.AddComponent(new Sprite(randomScale, JRandom.Color(), true));
             node.AddComponent(new Rigidbody()
@@ -99,8 +101,8 @@
                 usingGravity = true,
                 drag = .1f
             });
-            var randomDirection = JRandom.Direction(); 
-            node.AddComponent(new Wind(randomDirection));
+            //var randomDirection = JRandom.Direction(); 
+            //node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
         public static bool TryCheckOccupant(Point pos, out Node? result)

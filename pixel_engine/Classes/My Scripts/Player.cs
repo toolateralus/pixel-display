@@ -23,7 +23,7 @@ internal class Player : Component
         Move(move);
     }
     public override void OnTrigger(Rigidbody other) {}
-    public override void OnCollision(Rigidbody collider) => RandomizeSpriteColor();
+    public override void OnCollision(Rigidbody collider) => sprite.Randomize();
 
     private void Move(Vec2 moveVector) => rb.velocity.x += moveVector.x * speed; 
     
@@ -33,17 +33,6 @@ internal class Player : Component
         rb.velocity.y = moveVector.y * jumpVel; 
     }
     
-    private void RandomizeSpriteColor()
-    {
-        int x = (int)sprite.size.x;
-        int y = (int)sprite.size.y;
-
-        var colorData = new Color[x, y];
-        for (int j = 0; j < y; j++)
-            for (int i = 0; i < x; i++)
-                colorData[i, j] = JRandom.Color();
-
-        sprite.DrawSquare(sprite.size, colorData, sprite.isCollider);
-    }
+    
 
 }

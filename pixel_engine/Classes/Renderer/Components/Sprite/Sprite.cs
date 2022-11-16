@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
+using System.Security.Policy;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer
@@ -20,8 +21,18 @@ namespace pixel_renderer
         {
             DrawSquare(size, color, isCollider);
         }
+        public void Randomize()
+        {
+            int x = (int)size.x;
+            int y = (int)size.y;
 
-        
+            var colorData = new Color[x, y];
+            for (int j = 0; j < y; j++)
+                for (int i = 0; i < x; i++)
+                    colorData[i, j] = JRandom.Color();
+            DrawSquare(size, colorData, isCollider);
+        }
+
         public void DrawSquare(Vec2 size, Color[,] color, bool isCollider)
         {
             colorData = color;

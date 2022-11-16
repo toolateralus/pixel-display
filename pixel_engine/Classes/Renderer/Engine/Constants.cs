@@ -10,7 +10,7 @@ namespace pixel_renderer
         
         public const int ScreenWidth = 256;
         
-        public const int CollisionCellSize = 6;
+        public const int CollisionCellSize = 16;
         /// <summary>
         /// FixedUpdate / Physics refresh interval,
         /// NOTE: for some reason this seems to have absolutely no effect other than it cannot be zero. 
@@ -26,7 +26,7 @@ namespace pixel_renderer
         
         public static string WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData); 
         
-        internal const float depenetrationForce = 25f;
+        internal const float MaxDepenetrationForce = 3f;
         // Not fully implemented, not used ATM.
 
         internal static int terminalVelocity = 4;

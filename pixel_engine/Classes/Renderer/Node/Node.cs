@@ -12,7 +12,7 @@ namespace pixel_renderer
         public string Name { get; set; }
 
         private string _uuid = "";
-        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
+        public string UUID { get { return _uuid; } set { } }
 
         public Vec2 position = new();
         public Vec2 localPosition
@@ -88,7 +88,7 @@ namespace pixel_renderer
         {
             this.parentStage = parentStage;
             Name = name;
-           
+            _uuid = pixel_renderer.UUID.NewUUID();
             this.position = position;
             this.scale = scale;
             this.parentNode = parentNode;
@@ -98,10 +98,13 @@ namespace pixel_renderer
         public Node(string name)
         {
             Name = name;
+            _uuid = pixel_renderer.UUID.NewUUID();
+
         }
-        public Node() { }
+        public Node() { _uuid = pixel_renderer.UUID.NewUUID(); }
         public Node(string name, Vec2 pos, Vec2 scale)
         {
+            _uuid = pixel_renderer.UUID.NewUUID();
             Name = name;
             position = pos;
             this.scale = scale;
@@ -126,13 +129,11 @@ namespace pixel_renderer
             foreach (var list in Components.Values)
                 foreach (var component in list) component.Update();
         }
-
         internal void OnCollision(Rigidbody otherBody)
         {
             foreach (var list in Components.Values)
                 foreach (var component in list) component.OnCollision(otherBody);
         }
-
         internal void OnTrigger(Rigidbody otherBody)
         {
             foreach (var list in Components.Values)

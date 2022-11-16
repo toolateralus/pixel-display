@@ -15,14 +15,12 @@ namespace pixel_renderer
 
         public override void Awake()
         {
-             
             sprite = parentNode.GetComponent<Sprite>();
             if (sprite == null) throw new Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID{ parentNode.UUID}");
         }
         public override void FixedUpdate(float delta)
         {
             if (usingGravity) velocity.y += CMath.Gravity;
-            Collision.ViewportCollision(parentNode);
             
             ApplyDrag();
             ApplyVelocity();

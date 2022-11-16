@@ -8,7 +8,6 @@ namespace pixel_renderer
 {
     public static class Collision
     {
-        static ConcurrentBag<Node> colliderNodes = new();
         private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new(); 
         private readonly static SpatialHash hash = new(Constants.ScreenHeight, Constants.ScreenWidth, Constants.CollisionCellSize);
         
@@ -55,33 +54,43 @@ namespace pixel_renderer
             return false;
         }
 
-        public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
+        public static void BroadPhase(Stage stage, ConcurrentBag<ConcurrentBag<Node>> collisionCells)
         {
             collisionCells.Clear();
             Parallel.ForEach(stage.Nodes, node =>
             {
                 List<Node> result = hash.GetNearby(node);
-                collisionCells.Add(result);
+                ConcurrentBag<Node> nodes = new();
+
+                foreach (var _node in result) nodes.Add(_node);
+
+                collisionCells.Add(nodes);
             });
         }
 
-        public static void NarrowPhase(List<List<Node>> collisionCells)
+        public static void NarrowPhase(ConcurrentBag<ConcurrentBag<Node>> collisionCells)
         {
-            if (collisionCells.Count <= 0 || collisionCells[0] is null) return;
 
             Parallel.For(0, collisionCells.Count, i =>
             {
-                if (i >= collisionCells.Count) return; 
-                var cell = collisionCells[i];
-                if (cell is null) return;
-                if (cell.Count <= 0) return;
+                if (i >= collisionCells.Count) return;
+                
+                var cellArray = collisionCells.ToArray();
 
-                Parallel.For(0, cell.Count, j =>
+                if (i >= cellArray.Length) return; 
+
+                var cell = cellArray[i].ToArray();
+                
+                if (cell is null) return;
+                
+                if (cell.Length <= 0) return;
+
+                Parallel.For(0, cell.Length, j =>
                 {
                     var nodeA = cell[j];
                     if (nodeA is null) return;
-                    var colliders = new List<Node>(0);
-                    Parallel.For(0, cell.Count, k =>
+                    var colliders = new ConcurrentBag<Node>();
+                    Parallel.For(0, cell.Length, k =>
                     {
                         var nodeB = cell[k];
                         if (nodeB is null) return;
@@ -164,11 +173,16 @@ namespace pixel_renderer
             var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
             
             Vec2 direction = (B.parentNode.position - A.parentNode.position).Normalize();
-            // make sure not NaN after possibly dividing by zero in Normalize();
-            direction = direction.sqrMagnitude is float.NaN ? Vec2.up : direction; 
 
-            B.velocity += direction * velocityDifference;
-            A.velocity += CMath.Negate(direction * velocityDifference);
+            // make sure not NaN after possibly dividing by zero in Normalize();
+            direction = direction.sqrMagnitude is float.NaN ? Vec2.zero : direction;
+
+            var depenetrationForce = direction * velocityDifference * .5f;
+
+            Vec2.Clamp(depenetrationForce, Vec2.zero, Vec2.one * Constants.MaxDepenetrationForce);
+
+            B.velocity += depenetrationForce;
+            A.velocity += CMath.Negate(depenetrationForce);
             
         }
     }

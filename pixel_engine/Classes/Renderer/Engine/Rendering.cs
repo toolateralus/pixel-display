@@ -45,13 +45,6 @@
                 var sprite = node.GetComponent<Sprite>();
                 if (sprite is null) continue;
 
-                // cull off screen nodes so they don't try to be written outside of the bounds of the render image
-
-                if(node.position.x + (sprite.size.x / 2) >= Constants.ScreenWidth) continue;
-                if(node.position.y + (sprite.size.y / 2) >= Constants.ScreenHeight) continue;
-                if(node.position.x - (sprite.size.x / 2) < 0) continue;
-                if(node.position.y - (sprite.size.y / 2) < 0) continue; 
-
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {

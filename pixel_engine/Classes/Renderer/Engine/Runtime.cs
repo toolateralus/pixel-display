@@ -1,6 +1,7 @@
 ﻿namespace pixel_renderer
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.IO;
     using System.Timers;
@@ -31,7 +32,7 @@
         public bool IsRunning = false; 
         public string ImageDirectory;
 
-        List<List<Node>> collisionMap = new();
+        ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
 
         public static void Awake(EngineInstance mainWnd)
         {
@@ -160,6 +161,7 @@
             Collision.BroadPhase(stage, collisionMap);
             Collision.NarrowPhase(collisionMap);
             Collision.Execute();
+
             Staging.UpdateCurrentStage(stage);
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)

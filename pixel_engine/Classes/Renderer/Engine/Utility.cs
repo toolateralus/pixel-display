@@ -86,6 +86,19 @@
             X = v.x,
             Y = v.y
         };
+        /// <summary>
+        /// Clamp each value of the vector component-wise;
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        internal static void Clamp(Vec2 value, Vec2 min, Vec2 max)
+        {
+            if (value.x < min.x) value.x = min.x;
+            if (value.x > max.x) value.x = max.x;
+            if (value.y < min.y) value.y = min.y;
+            if (value.y > max.y) value.y = max.y;
+        }
     }
     public enum RenderState { Game, Scene, Off}
 }
