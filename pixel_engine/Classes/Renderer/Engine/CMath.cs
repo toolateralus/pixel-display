@@ -4,7 +4,7 @@
 
     public static class CMath
     {
-        public const int Gravity = 3;
+        public const int Gravity = 1;
         public const float PI = MathF.PI;
         public const float Tau = MathF.PI * 2;
         public static float Lerp(float a, float b, float t)

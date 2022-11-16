@@ -2,7 +2,7 @@
 
 namespace pixel_renderer
 {
-    public static class Constants
+    public static class Settings
     {
         public const int FramesBetweenFramerateChecks = 60;
         
@@ -10,6 +10,9 @@ namespace pixel_renderer
         
         public const int ScreenWidth = 256;
         
+        /// <summary>
+        /// this value determines the area of a Broad Collision Cell, which segments the worlds physics into chunks. The area of the largest Object in the stage must be smaller than this value.
+        /// </summary>
         public const int CollisionCellSize = 16;
         /// <summary>
         /// FixedUpdate / Physics refresh interval,
@@ -17,18 +20,21 @@ namespace pixel_renderer
         /// this is preventing us from implementing a time scale.
         /// </summary>
         public const float PhysicsRefreshInterval = .01f;
-        
+
+        // Font Images asset directory (Probably shouldnt be a constant, for text rendering.)
         public const string FontDirectory = ImagesDirectory + "\\Font";
-        
+
+        // Images Import folder (temporary solution until assets are done, for importing backgrounds)
         public const string ImagesDirectory = AssetsDirectory + "\\Images";
-        
+
+        // Asset resources (user - created)
         public const string AssetsDirectory = "\\Pixel\\Assets";
-        
+
+        // Root directory for resources
         public static string WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData); 
         
         internal const float MaxDepenetrationForce = 3f;
-        // Not fully implemented, not used ATM.
-
+        
         internal static int terminalVelocity = 4;
 
         internal static Vec2 TerminalVec2()
@@ -39,7 +45,6 @@ namespace pixel_renderer
                 y = terminalVelocity,
             };
         }
-        
         internal static Vec3 TerminalVec3()
         {
             return new Vec3()
@@ -49,7 +54,6 @@ namespace pixel_renderer
                 z = terminalVelocity,
             };
         }
-        
         internal static bool WithinTerminalVelocity(Vec2 velocity)
         {
             if (velocity.x > terminalVelocity || velocity.x < -terminalVelocity || 
@@ -58,7 +62,6 @@ namespace pixel_renderer
             }
             return true; 
         }
-        
         internal static bool WithinTerminalVelocity(Vec3 velocity)
         {
             if (velocity.x > terminalVelocity || velocity.x < -terminalVelocity ||
@@ -68,16 +71,8 @@ namespace pixel_renderer
             }
             return true;
         }
+        internal static bool WithinTerminalVelocity(Rigidbody rigidbody) => WithinTerminalVelocity(rigidbody.velocity);
         
-        internal static bool WithinTerminalVelocity(Rigidbody rigidbody)
-        {
-            if (rigidbody.velocity.x > terminalVelocity || rigidbody.velocity.x < -terminalVelocity ||
-                rigidbody.velocity.y > terminalVelocity || rigidbody.velocity.y < -terminalVelocity)
-            {
-                return false;
-            }
-            return true;
-        }
     }
 
 }

@@ -9,6 +9,9 @@
         int columns;
         int cellSize;
         List<List<Node>> Buckets = new List<List<Node>>();
+        /// <summary>
+        /// emits a busy signal while invalid operations are very likely
+        /// </summary>
         internal bool busy;
 
         public SpatialHash(int screenWidth, int screenHeight, int cellSize)
@@ -77,7 +80,7 @@
             Vec2 max = new Vec2(
                 obj.position.x + sprite.size.x,
                 obj.position.y + sprite.size.y);
-            float width = Constants.ScreenHeight / cellSize;
+            float width = Settings.ScreenHeight / cellSize;
             
             //TopLeft
             AddBucket(min, width, bucketsObjIsIn);

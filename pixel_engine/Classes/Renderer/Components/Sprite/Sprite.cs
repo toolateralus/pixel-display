@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Security.Policy;
 using Color = System.Drawing.Color;
 
@@ -16,6 +17,7 @@ namespace pixel_renderer
 
         public bool isCollider = false;
         public bool dirty = false; 
+        dynamic? cachedColor = new Color(); 
 
         public Sprite(Vec2 size, Color color, bool isCollider)
         {
@@ -25,11 +27,33 @@ namespace pixel_renderer
         {
             int x = (int)size.x;
             int y = (int)size.y;
-
+            cachedColor = this.colorData; 
             var colorData = new Color[x, y];
             for (int j = 0; j < y; j++)
                 for (int i = 0; i < x; i++)
                     colorData[i, j] = JRandom.Color();
+            DrawSquare(size, colorData, isCollider);
+        }
+        public void RestoreCachedColor(bool nullifyCache)
+        {
+            if (cachedColor == null) Randomize(); 
+            DrawSquare(size, cachedColor, isCollider);
+            if (nullifyCache) cachedColor = null; 
+        }
+        public void Highlight(Color borderColor)
+        {
+            int x = (int)size.x;
+            int y = (int)size.y;
+            cachedColor = this.colorData;  
+            var colorData = new Color[x, y];
+            for (int i = 0; i < y; i++)
+                for (int j = 0; j < x; j++)
+                {
+                    if (colorData.Length < i && colorData.Length < j)
+                        if (j == 0 || j == x &&  i == 0 || i == y)
+                            colorData[i,j] = borderColor;
+                    
+                }
             DrawSquare(size, colorData, isCollider);
         }
 

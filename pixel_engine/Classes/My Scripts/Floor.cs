@@ -11,14 +11,8 @@ namespace pixel_renderer
     /// </summary>
     internal class Floor : Component
     {
-        Vec2 startPos = new(2, Constants.ScreenWidth - 4);
-        public override void Update()
-        {
-           parentNode.position = startPos; 
-        }
-        public override void OnCollision(Rigidbody collider)
-        {
-            GetComponent<Sprite>().Randomize(); 
-        }
+        public Vec2 startPos = new(256, 256);
+        public override void Update() => parentNode.position = startPos; 
+        public override void OnCollision(Rigidbody collider) => GetComponent<Sprite>().Randomize();
     }
 }

@@ -55,8 +55,8 @@
                         if (offsetX < 0) continue;
                         if (offsetY < 0) continue;
 
-                        if (offsetX >= Constants.ScreenWidth) continue;
-                        if (offsetY >= Constants.ScreenHeight) continue;
+                        if (offsetX >= Settings.ScreenWidth) continue;
+                        if (offsetY >= Settings.ScreenHeight) continue;
 
                         var color = sprite.colorData[x, y];
                         var position = new Vec2((int)offsetX, (int)offsetY);

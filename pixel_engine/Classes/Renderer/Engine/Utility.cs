@@ -2,7 +2,7 @@
 {
     using System;
     using System.Windows;
-    public class Vec3
+    public struct Vec3
     {
         public float x;
         public float y;
@@ -44,7 +44,7 @@
         };
 
     }
-    public class Vec2
+    public struct Vec2
     {
         public float x;
         public float y;
@@ -63,7 +63,10 @@
             this.y = y;
         }
         public Vec2()
-        { }
+        { 
+            x = new();
+            y = new(); 
+        }
 
         public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y); 
         public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y); 

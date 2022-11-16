@@ -11,18 +11,23 @@ internal class Player : Component
     {
         sprite = GetComponent<Sprite>(); 
         rb = GetComponent<Rigidbody>();
-        sprite.isCollider = true; 
 
-        sprite.DrawSquare(Vec2.one * 8, Color.NavajoWhite, true);
+        sprite.isCollider = true; 
+        sprite.DrawSquare(new Vec2(10,10), Color.NavajoWhite, true);
     }
+
     public override void FixedUpdate(float delta)
     {
         if (!takingInput) return;
         var move = Input.GetMoveVector();
+        
         Jump(move);
+
         Move(move);
     }
+
     public override void OnTrigger(Rigidbody other) {}
+
     public override void OnCollision(Rigidbody collider) => sprite.Randomize();
 
     private void Move(Vec2 moveVector) => rb.velocity.x += moveVector.x * speed; 

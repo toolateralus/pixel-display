@@ -16,12 +16,11 @@ namespace pixel_renderer
         public override void Awake()
         {
             sprite = parentNode.GetComponent<Sprite>();
-            if (sprite == null) throw new Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID{ parentNode.UUID}");
+            if (sprite == null) throw new Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID { parentNode.UUID}");
         }
         public override void FixedUpdate(float delta)
         {
             if (usingGravity) velocity.y += CMath.Gravity;
-            
             ApplyDrag();
             ApplyVelocity();
         }
@@ -31,6 +30,8 @@ namespace pixel_renderer
             double velocity = this.velocity.Length;
             double drag = velocity * velocity * dragCoefficient;
             // maybe unneccesary negate?
+            // breakpoint has never been hit despite
+            // running in debug for dozens of hours
             if (drag < 0) drag = -drag;
             return drag;
         }

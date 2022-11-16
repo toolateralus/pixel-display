@@ -9,8 +9,8 @@
 
         public static Vec2 ScreenPosition() => new()
         {
-            x = Int(0, Constants.ScreenWidth),
-            y = Int(0, Constants.ScreenHeight)
+            x = Int(0, Settings.ScreenWidth),
+            y = Int(0, Settings.ScreenHeight)
         };
             
         public static Color Color()

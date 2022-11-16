@@ -121,7 +121,7 @@ namespace pixel_renderer
         internal static void InitializeDefaultFont()
         {
             var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var path = appdata + Constants.FontDirectory;
+            var path = appdata + Settings.FontDirectory;
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             IEnumerable<string> files = Directory.GetFiles(path);
             int i = 0; 
@@ -203,7 +203,7 @@ namespace pixel_renderer
 
     public static class AssetPipeline
     {
-        public static string Path => Constants.WorkingDirectory + Constants.AssetsDirectory;
+        public static string Path => Settings.WorkingDirectory + Settings.AssetsDirectory;
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>

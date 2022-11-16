@@ -2,9 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Drawing;
+    using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Security;
     using System.Windows;
+    using System.Windows.Xps.Serialization;
     using System.Xaml;
     using Point = System.Windows.Point;
 
@@ -12,9 +16,13 @@
     {
         private const int maxClickDistance_InPixels = 0;
         static Runtime runtime => Runtime.Instance;
+
+        // this variable is used by the inspector to
+        // ensure user'a click grabs a new node each time 
         public static Node lastSelected;
 
         public static void SetCurrentStage(Stage stage) => runtime.stage = stage;
+        
         public static void UpdateCurrentStage(Stage stage)
         {
             // instead of refreshing the whole stage hierarchy each frame, we could just add events that queue an update, even of just that member, but
@@ -24,6 +32,7 @@
             if (Debug.debugging) Debug.debug = "";
             runtime.frameCount++;
         }
+
         public static void InitializeDefaultStage()
         {
             List<Node> nodes = new List<Node>();
@@ -32,53 +41,39 @@
             AddFloor(nodes);
 
             for (int i = 0; i < 100; i++)
-            {
                 CreateGenericNode(nodes, i);
-            }
 
-            Bitmap background = GetFallbackBackground();
-            if (runtime.Backgrounds.Count >= 0)
-            {
-                background = runtime.Backgrounds[0];
-            }
+            var background = runtime.Backgrounds[0] ?? GetFallbackBackground();
 
-            SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
+            SetCurrentStage(new Stage("Default Stage", background , nodes.ToArray()));
             InitializeNodes();
             runtime.stage.RefreshStageDictionary();
         }
-
+        
         private static Bitmap GetFallbackBackground()
         {
-            Bitmap FallbackBitmap = new(256, 256);
+            Bitmap bmp = new(256, 256);
             for (int i = 0; i < 256; i++)
                 for (int j = 0; j < 256; j++)
-                    FallbackBitmap.SetPixel(i, j, JRandom.Color());
-            return FallbackBitmap;
+                    bmp.SetPixel(i, j, JRandom.Color());
+            return bmp;
         }
-
+        
         private static void AddFloor(List<Node> nodes)
         {
-            Vec2 pos = new(2, Constants.ScreenWidth - 4);
-            Node node = new("Floor", pos, Vec2.one);
-            Floor floor = new(); 
-            Sprite sprite = new( new(Constants.ScreenWidth - 20, 10), JRandom.Color(), true);
-                   
-                
-            Rigidbody rb = new()
+            var staticNodes = new List<Node>(); 
+           for (int i = 0; i < 24; i++)
+               CreateGenericNode(staticNodes, i);
+            foreach (var node in staticNodes)
             {
-                IsTrigger = false, 
-                usingGravity = true,
-                drag = 0f,
-                Name = "Floor Rigidbody"
-            };
+                var randomDrag = JRandom.Bool() ? 0 : 1;
+                var x = node.GetComponent<Rigidbody>();
+                x.usingGravity = JRandom.Bool();
+                x.drag = randomDrag;
 
-            node.AddComponent(rb);
+            }
+            nodes.AddRange(staticNodes);
 
-            node.AddComponent(sprite);
-
-            node.AddComponent(floor);
-
-            nodes.Add(node);
         }
 
         private static void InitializeNodes()
@@ -89,6 +84,7 @@
                 node.Awake(); 
             }
         }
+        
         private static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
@@ -105,6 +101,7 @@
             //node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
+        
         public static bool TryCheckOccupant(Point pos, out Node? result)
         {
             // round up number to improve click accuracy
@@ -135,13 +132,25 @@
                 {
                     if (node == lastSelected) continue;
                     result = node;
+                    if (lastSelected != null)
+                    {
+                        if (lastSelected.TryGetComponent(out Sprite sprite))
+                        {
+                            sprite.RestoreCachedColor(false);
+                        }
+                    }
                     lastSelected = node;
+                    if (node.TryGetComponent(out Sprite sprite_))
+                    {
+                        sprite_.Highlight(Color.White); 
+                    }
                     return true;
                 }
             }
             result = null;
             return false;
         }
+        
         private static void AddPlayer(List<Node> nodes)
         {
             Vec2 playerStartPosition = new Vec2(12, 24);
@@ -164,11 +173,10 @@
             playerNode.AddComponent(sprite);
             nodes.Add(playerNode);
 
-            // create asset of type script because the player is an example of a
-            // user-created script; 
+         
           
         }
-    }
 
-   
+    }
+  
 }

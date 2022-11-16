@@ -58,7 +58,7 @@
 
         private void InitializePhysics()
         {
-            var interval = TimeSpan.FromSeconds(Constants.PhysicsRefreshInterval);
+            var interval = TimeSpan.FromSeconds(Settings.PhysicsRefreshInterval);
             physicsTimer = new Timer(interval.TotalSeconds);
             physicsTimer.Elapsed += GlobalFixedUpdateRoot;
             physicsTimer.Start();
@@ -88,7 +88,7 @@
         }
         private void GetFramerate()
         {
-            if (framesUntilCheck >= Constants.FramesBetweenFramerateChecks)
+            if (framesUntilCheck >= Settings.FramesBetweenFramerateChecks)
             {
                 lastFrameTime = DateTime.Now.Ticks;
                 framesUntilCheck = 0;
