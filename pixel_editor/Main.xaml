@@ -72,8 +72,9 @@
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
             </Grid>
-            <Label  FontSize="3"  FontFamily="MS Gothic" Grid.Column="11" Grid.Row="0" Grid.RowSpan="4" Grid.ColumnSpan="3"  x:Name="inspectorObjName" Content="Object Name"  />
-            <Label  FontSize="3"  FontFamily="MS Gothic" Grid.Column="10" Grid.Row="0" Grid.RowSpan="4" Grid.ColumnSpan="3"  x:Name="inspectorObjInfo" Content="Object Details"  />
+            <Label  FontSize="4.5" FontWeight="Bold" FontFamily="MS Gothic" Grid.Column="11" Grid.Row="0" Grid.RowSpan="4" Grid.ColumnSpan="3"  x:Name="inspectorObjName" Content="Object Name"  />
+            <Label  FontSize="4.5" FontWeight="Bold" FontFamily="MS Gothic" Grid.Column="10" Grid.Row="0" Grid.RowSpan="4" Grid.ColumnSpan="3"  x:Name="inspectorObjInfo" Content="Object Details"  />
+            <Label  FontSize="4.5" FontWeight="Bold" FontFamily="MS Gothic" Grid.Column="7" Grid.Row="0" Grid.RowSpan="4" Grid.ColumnSpan="3"  x:Name="gcAllocText" Content="GC Alloc:"  />
             <Image x:Name="image" RenderOptions.BitmapScalingMode ="NearestNeighbor" HorizontalAlignment="Stretch" Margin="15,15,0,0" Grid.RowSpan="11" VerticalAlignment="Stretch" Grid.ColumnSpan="7"/>
             <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="View" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="1" Click="OnViewChanged" x:Name="viewBtn"/>
             <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="Play" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="0" Click="OnPlay"  x:Name="playBtn"      />

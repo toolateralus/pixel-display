@@ -19,23 +19,16 @@ namespace pixel_renderer
     {
         public string pathFromRoot = "";
         public string fileSize = "";
-        public string fileType = "";
-        public Type runtimeType;
+
         private string _uuid = "";
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
         public string Name = "NewAsset";
-        public Asset() { }
+        public Asset() { AssetLibrary.Register(GetType(), this); }
         public Asset(string name)
         {
             Name = name; 
         }
-        public Asset(string pathFromRoot, string fileType, Type runtimeType)
-        {
-            this.pathFromRoot = pathFromRoot;
-            this.fileType = fileType;
-            this.runtimeType = runtimeType; 
-            AssetLibrary.Register(GetType(), this);
-        }
+    
     }
     
     public class BitmapAsset : Asset

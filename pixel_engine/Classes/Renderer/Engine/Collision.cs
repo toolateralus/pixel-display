@@ -54,26 +54,11 @@ namespace pixel_renderer
             }
             return false;
         }
-        
+
         public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
-
-            colliderNodes.Clear(); 
-            
-            // could look for a more graceful solution, but as of right now nodes that
-            // don't have both a Sprite and a Rigidbody can't participate in collision events
-            // check if node has rigidbody, then if has sprite, then if is collider, so proceed.
-
-            Parallel.ForEach(stage.Nodes, _node =>
-            {
-                if (_node.TryGetComponent<Rigidbody>(out _))
-                    if (_node.TryGetComponent<Sprite>(out var sprite))
-                        if (sprite.isCollider)
-                            colliderNodes.Add(_node);
-            });
-
-            Parallel.ForEach(colliderNodes, node =>
+            Parallel.ForEach(stage.Nodes, node =>
             {
                 List<Node> result = hash.GetNearby(node);
                 collisionCells.Add(result);
@@ -121,7 +106,8 @@ namespace pixel_renderer
 
             Parallel.ForEach(stage.Nodes, node =>
             {
-                if (!node.TryGetComponent(out Sprite sprite) || !sprite.isCollider)
+                if (!node.TryGetComponent<Sprite>(out _) 
+                || !node.TryGetComponent<Rigidbody>(out _))
                 {
                     return;
                 }

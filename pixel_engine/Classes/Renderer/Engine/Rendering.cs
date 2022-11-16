@@ -76,6 +76,27 @@
             }
             return frame;
         }
+
+        static string cachedGCValue = "";
+        
+        const int framesUntilGC_Check = 20;
+        private static int framesSinceGC_Check = 0;
+
+        public static string GetGCStats()
+        {
+            if (framesSinceGC_Check < framesUntilGC_Check)
+            {
+                framesSinceGC_Check++;
+                return cachedGCValue;
+            }
+            framesSinceGC_Check = 0;
+
+            var bytes = GC.GetTotalMemory(true) + 1;
+            var megaBytes = bytes / 1048576;
+            cachedGCValue = $"GC Alloc:{megaBytes} mB";
+
+            return cachedGCValue;
+        }
         private static void DrawToImage(ref Bitmap inputFrame, Image renderImage)
         {
             CBit.Convert(inputFrame, renderImage);

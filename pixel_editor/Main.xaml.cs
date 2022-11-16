@@ -89,11 +89,18 @@ namespace pixel_editor
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
-            if (!Runtime.Instance.IsRunning 
-                || Rendering.State != RenderState.Scene) return; 
+            if (Runtime.Instance.IsRunning
+                && Rendering.State == RenderState.Scene)
+                {
+                    Rendering.Render(image);
+                    gcAllocText.Content = Rendering.GetGCStats(); 
+                }
 
-            Rendering.Render(image); 
+           
         }
+        
+       
+
         /// <summary>
         /// Called on program close
         /// </summary>

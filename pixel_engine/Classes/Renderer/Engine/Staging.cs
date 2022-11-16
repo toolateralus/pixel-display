@@ -90,16 +90,17 @@
         private static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
-            var node = new Node($"NODE {i}", new Vec2(pos.x, pos.y), new Vec2(0, 1));
-            var position = Vec2.one * JRandom.Int(1, 3);
-            node.AddComponent(new Sprite(position, JRandom.Color(), true));
+            var randomScale = Vec2.one * JRandom.Int(5, 20);
+            var node = new Node($"NODE {i}", pos, Vec2.one);
+            node.AddComponent(new Sprite(randomScale, JRandom.Color(), true));
             node.AddComponent(new Rigidbody()
             {
                 IsTrigger = false,
                 usingGravity = true,
                 drag = .1f
             });
-          
+            var randomDirection = JRandom.Direction(); 
+            node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
         public static bool TryCheckOccupant(Point pos, out Node? result)

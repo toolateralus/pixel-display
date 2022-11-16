@@ -5,19 +5,14 @@
 
     public static class JRandom
     {
-        public static Vec2 ScreenPosition()
+        public static Direction Direction ()  =>  (Direction) Int(0, sizeof(Direction) - 1);
+
+        public static Vec2 ScreenPosition() => new()
         {
-            var pos = new Vec2();
-
-            var xLimit = Constants.ScreenWidth;
-            var yLimit = Constants.ScreenHeight;
-
-            return new()
-            {
-                x = Int(0, xLimit),
-                y = Int(0, yLimit)
-            };
-        }
+            x = Int(0, Constants.ScreenWidth),
+            y = Int(0, Constants.ScreenHeight)
+        };
+            
         public static Color Color()
         {
             byte r = Byte(),
