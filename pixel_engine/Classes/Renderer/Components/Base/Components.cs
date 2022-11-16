@@ -7,38 +7,18 @@ namespace pixel_renderer
     public abstract class Component
     {
         public Node parentNode = new();
-        public string UUID { get; set; }
+        private string _uuid = ""; 
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID();}
         public string Name { get; set; }
-        
-        public virtual void OnTrigger(Rigidbody other)
-        {
 
-        }
-
-        public virtual void OnCollision(Rigidbody collider)
-        {
-
-        }
-
-        public virtual void FixedUpdate(float delta)
-        {
-
-        }
-
-        public virtual void Update()
-        {
-            
-        }
-
-       
-        public virtual void Awake()
-        {
-            
-        }
+        public virtual void OnTrigger(Rigidbody other) {}
+        public virtual void OnCollision(Rigidbody collider) {}
+        public virtual void FixedUpdate(float delta) {}
+        public virtual void Update() {}
+        public virtual void Awake() {}
 
         internal void Init()
         {
-            UUID = pixel_renderer.UUID.NewUUID();
             Name = parentNode.Name + $" {GetType()}";
             Awake(); 
         }

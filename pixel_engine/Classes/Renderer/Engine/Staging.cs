@@ -152,12 +152,10 @@
             {
                 takingInput = true
             };
-            Text text = new() 
-            {
-                
-            };
+            Text text = new(); 
+           
 
-            //playerNode.AddComponent(text);
+            playerNode.AddComponent(text);
             playerNode.AddComponent(rb);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);

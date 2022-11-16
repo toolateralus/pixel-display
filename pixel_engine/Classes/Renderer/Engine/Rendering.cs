@@ -16,7 +16,6 @@
         /// Controlled and read externally, serves as a reference to what is currently being rendered; 
         /// </summary>
         public static RenderState State = RenderState.Game;
-        public static Queue<Bitmap> FrameBuffer = new Queue<Bitmap>();
         public static double FrameRate()
         {
             Runtime env = Runtime.Instance;
@@ -48,10 +47,10 @@
 
                 // cull off screen nodes so they don't try to be written outside of the bounds of the render image
 
-                if(node.position.x + sprite.size.x >= Constants.ScreenWidth) continue;
-                if(node.position.y + sprite.size.y >= Constants.ScreenHeight) continue;
-                if(node.position.x - sprite.size.x < 0) continue;
-                if(node.position.y - sprite.size.y < 0) continue; 
+                if(node.position.x + (sprite.size.x / 2) >= Constants.ScreenWidth) continue;
+                if(node.position.y + (sprite.size.y / 2) >= Constants.ScreenHeight) continue;
+                if(node.position.x - (sprite.size.x / 2) < 0) continue;
+                if(node.position.y - (sprite.size.y / 2) < 0) continue; 
 
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)

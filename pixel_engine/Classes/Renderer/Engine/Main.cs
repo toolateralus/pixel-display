@@ -10,7 +10,7 @@
         public EngineInstance()
         {
             InitializeComponent();
-            AssetPipeline.ImportAsync();
+            AssetPipeline.ImportAsync(false);
             Runtime.Awake(this);
         }
     }

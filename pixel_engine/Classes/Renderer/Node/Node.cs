@@ -10,22 +10,18 @@ namespace pixel_renderer
         // Node Info
         public Stage parentStage { get; set; }
         public string Name { get; set; }
-        public string UUID { get; private set; }
+
+        private string _uuid = "";
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
 
         public Vec2 position = new();
         public Vec2 localPosition
         {
-            get
-            {
-                var lPos = GetLocalPosition(position);
-                if (lPos.sqrMagnitude is float.NaN)
-                {
-                    throw new NotFiniteNumberException();
-                }
-                return lPos; 
-            }
+            get => GetLocalPosition(position); 
+           
             set
             { 
+
             }
         }
 
@@ -86,13 +82,13 @@ namespace pixel_renderer
         /// Nameless, Position of (0,0), Scale of (1,1);
         /// </summary>
         public static Node New = new("", Vec2.zero, Vec2.one);
-        public string tag = ""; 
+        public string tag = "untagged"; 
 
         public Node(Stage parentStage, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, Node[]? children)
         {
             this.parentStage = parentStage;
             Name = name;
-            UUID = pixel_renderer.UUID.NewUUID();
+           
             this.position = position;
             this.scale = scale;
             this.parentNode = parentNode;
@@ -101,17 +97,12 @@ namespace pixel_renderer
         }
         public Node(string name)
         {
-            UUID = pixel_renderer.UUID.NewUUID();
             Name = name;
         }
-        public Node() 
-        {
-            UUID = pixel_renderer.UUID.NewUUID(); 
-        }
+        public Node() { }
         public Node(string name, Vec2 pos, Vec2 scale)
         {
             Name = name;
-            UUID = pixel_renderer.UUID.NewUUID();
             position = pos;
             this.scale = scale;
         }

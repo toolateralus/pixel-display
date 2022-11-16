@@ -82,7 +82,6 @@
             {
                 if (Rendering.State == RenderState.Game) 
                     Rendering.Render(mainWnd.renderImage);
-
                 Input.Refresh();
             }
         }

@@ -139,7 +139,7 @@ namespace pixel_editor
         }
         private void OnImportBtnPressed(object sender, RoutedEventArgs e)
         {
-            AssetPipeline.ImportAsync(); 
+            AssetPipeline.ImportAsync(true); 
         }
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {

@@ -20,8 +20,9 @@ namespace pixel_renderer
         public string pathFromRoot = "";
         public string fileSize = "";
         public string fileType = "";
-        public Type runtimeType; 
-        public string UUID = "";
+        public Type runtimeType;
+        private string _uuid = "";
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
         public string Name = "NewAsset";
         public Asset() { }
         public Asset(string name)
@@ -33,7 +34,6 @@ namespace pixel_renderer
             this.pathFromRoot = pathFromRoot;
             this.fileType = fileType;
             this.runtimeType = runtimeType; 
-            UUID = pixel_renderer.UUID.NewUUID();
             AssetLibrary.Register(GetType(), this);
         }
     }
@@ -214,14 +214,15 @@ namespace pixel_renderer
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>
-        public static void ImportAsync()
+        public static void ImportAsync(bool showMessage)
         {
             if (Runtime.Instance.IsRunning)
             {
-                var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OK);
-                if (msg == MessageBoxResult.Cancel)
+                if (showMessage)
                 {
-                    return;
+                    var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OK);
+                    if (msg == MessageBoxResult.Cancel)
+                        return;
                 }
             }
             if (!Directory.Exists(Path))
@@ -235,15 +236,16 @@ namespace pixel_renderer
                     var asset = Import(file);
                     if (asset is not null)
                         AssetLibrary.Register(asset.GetType(), asset);
-                  
                 };
             }
             if (!Runtime.Instance.IsRunning)
             {
-                var syncResult = MessageBox.Show("Import complete! Do you want to sync?", "Asset Importer", MessageBoxButton.YesNo);
-                if (syncResult == MessageBoxResult.Yes) AssetLibrary.Sync();
+                if (showMessage)
+                {
+                    var syncResult = MessageBox.Show("Import complete! Do you want to sync?", "Asset Importer", MessageBoxButton.YesNo);
+                    if (syncResult == MessageBoxResult.Yes) AssetLibrary.Sync();
+                }
             }
-
         }
         /// <summary>
         /// Read and deserialize a single file from Path"
@@ -255,6 +257,8 @@ namespace pixel_renderer
             if (!File.Exists(path)) return null; 
             return AssetIO.ReadAssetFile(path);
         }
+
+      
     }
     
     /// <summary>

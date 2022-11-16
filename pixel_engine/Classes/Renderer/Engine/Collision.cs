@@ -12,7 +12,6 @@ namespace pixel_renderer
         private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new(); 
         private readonly static SpatialHash hash = new(Constants.ScreenHeight, Constants.ScreenWidth, Constants.CollisionCellSize);
         
-        [Obsolete]
         public static void ViewportCollision(Node node)
         {
             Sprite sprite = node.GetComponent<Sprite>();
@@ -84,7 +83,6 @@ namespace pixel_renderer
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
             if (collisionCells.Count <= 0 || collisionCells[0] is null) return;
-              
 
             Parallel.For(0, collisionCells.Count, i =>
             {
@@ -97,7 +95,7 @@ namespace pixel_renderer
                 {
                     var nodeA = cell[j];
                     if (nodeA is null) return;
-                    var colliders = new List<Node>(32);
+                    var colliders = new List<Node>(0);
                     Parallel.For(0, cell.Count, k =>
                     {
                         var nodeB = cell[k];
@@ -130,7 +128,6 @@ namespace pixel_renderer
                 hash.RegisterObject(node);
             });
         }
-
 
         private static void RegisterCollisionEvent(Node A, Node[] colliders)
         {

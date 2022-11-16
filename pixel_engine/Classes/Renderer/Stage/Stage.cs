@@ -2,16 +2,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace pixel_renderer
 {
     public class Stage : IEnumerable
     {
         public string Name { get; set; }
-        public string UUID { get; private set; }
+        private string _uuid = "";
+        
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
+
         public event Action OnHierarchyChanged;
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
         public Node[] Nodes { get; private set; }
+        public Node[] FindNodesByTag(string tag)
+        {
+            IEnumerable<Node> x = Nodes.Where(node => node.tag == tag);
+            return x.ToArray();
+        }
+
+        public Node FindNodeByTag(string tag) 
+         =>  Nodes .Where(node => node.tag == tag) .ToArray<Node>() [0];
+                       
+                        
+        
         public Node FindNode(string name)
         {
             if (NodesByName.ContainsKey(name))
@@ -52,7 +67,6 @@ namespace pixel_renderer
         /// </summary>
         public void Init()
         {
-            UUID = pixel_renderer.UUID.NewUUID(); 
             RefreshStageDictionary();
             GetEvents();
         }
