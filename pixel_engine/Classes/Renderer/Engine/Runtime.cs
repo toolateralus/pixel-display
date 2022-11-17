@@ -4,6 +4,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading.Tasks;
     using System.Timers;
     using System.Windows;
     using System.Windows.Controls.Primitives;
@@ -17,9 +18,16 @@
         /// <summary>
         /// Set to true when the Physics session is initialized.
         /// </summary>
-        public bool Initialized { get; internal set; } = false; 
+        public bool Initialized { get; internal set; } = false;
+        public event Action<InspectorEvent> InspectorEventRaised;
 
         public EngineInstance mainWnd;
+        /// <summary>
+        /// used to signify whether the engine is being witnessed by an inspector or not,
+        /// useful for throwing errors directly to inspector
+        /// </summary>
+        public static object? inspector = null; 
+
         public Timer? physicsTimer;
         public Stage stage;
         public List<Bitmap> Backgrounds = new List<Bitmap>();
@@ -33,13 +41,15 @@
         public string ImageDirectory;
 
         ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
+       
 
         public static void Awake(EngineInstance mainWnd)
         {
+       
             /// Do not change any code below this comment ///
             ImageDirectorySetup();
 
-            Instance.InitializeBitmapCollection();
+            //Instance.InitializeBitmapCollection();
 
             Instance.LoadBackgroundCollection();
             
@@ -57,6 +67,8 @@
             //FontAssetFactory.InitializeDefaultFont();
 
         }
+
+       
 
         private void InitializePhysics()
         {
@@ -86,6 +98,7 @@
                 if (Rendering.State == RenderState.Game) 
                     Rendering.Render(mainWnd.renderImage);
                 Input.Refresh();
+               
             }
         }
         private void GetFramerate()
@@ -130,7 +143,7 @@
             foreach (var bitmap in Backgrounds)
             {
                 i++;
-                AssetLibrary.Register(typeof(BitmapAsset), new BitmapAsset() { currentValue = bitmap, Name = $"Background{i}" });
+                AssetLibrary.Register(typeof(BitmapAsset), new BitmapAsset("", typeof(Bitmap)) { currentValue = bitmap, Name = $"Background{i}" });
             }
         }
 
@@ -140,7 +153,7 @@
             List<Bitmap> bitmaps = new();
 
             // parses pre loaded json objects from the asset library (runtime dictionary containing all assets used and unused.)
-            if (AssetLibrary.GetAssetsOfType<BitmapAsset>(out var bmpAssets))
+            if (AssetLibrary.Fetch<BitmapAsset>(out List<object> bmpAssets))
             {
                 foreach (var bmpAsset in bmpAssets)
                 {
@@ -175,6 +188,11 @@
         {
             GetFramerate();
             Execute();
+        }
+
+        internal void RaiseInspectorEvent(InspectorEvent e)
+        {
+            InspectorEventRaised?.Invoke(e); 
         }
     }
 

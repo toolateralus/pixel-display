@@ -109,26 +109,35 @@ namespace pixel_renderer
 
         private List<BitmapAsset> charImgAssets = new(); 
         private List<Bitmap> chars = new();
+
         private List<KeyValuePair<Bitmap, Vec2>> characters = new();
         private List<KeyValuePair<Sprite, Node>> sprites = new(); 
+        
         public override void Awake()
         {
             return; 
-             
-            for (int i = 0; i < 25; i++)
+            if (!AssetLibrary.Fetch<BitmapAsset>(out List<object> imageObjects))
             {
-                if(!AssetLibrary.TryFindAsset($"bit{i}", out BitmapAsset value)) return;
-                charImgAssets.Add(value);
+                
             }
+
+            foreach (var img in imageObjects) charImgAssets.Add((BitmapAsset) img);
+           
+            
             foreach (var file in charImgAssets)
             {
                 if (file == null) continue;
                 chars.Add(file.currentValue);
             }
+
             asset = FontAssetFactory.CreateFont(0, 23, chars.ToArray());
+            
             AssetLibrary.Register(typeof(FontAsset), asset);
+            
             characters = FontAssetFactory.ToString(asset, text).ToList();
+            
             int j = 0;
+
             foreach (var image in chars)
             {
                 var parent = parentNode; 
@@ -147,7 +156,9 @@ namespace pixel_renderer
                 };
                 node.AddComponent(sprite);
                 sprites.Add(KeyValuePair.Create(sprite, node));
+
             }
+
         }
         
         public override void FixedUpdate(float delta)

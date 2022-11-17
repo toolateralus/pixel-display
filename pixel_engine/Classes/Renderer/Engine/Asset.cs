@@ -1,13 +1,19 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Xml.Linq;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Color = System.Drawing.Color;
 
@@ -24,18 +30,37 @@ namespace pixel_renderer
 
         private string _uuid = "";
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
-        public string Name = "NewAsset";
-        public Asset() { AssetLibrary.Register(GetType(), this); }
-        public Asset(string name)
+        public string Name = "New Asset";
+        public Type fileType;
+
+        public Asset(string name, Type fileType)
         {
-            Name = name; 
+            Name = name;
+            this.fileType = fileType; 
         }
     
     }
     
     public class BitmapAsset : Asset
     {
-        public Bitmap currentValue; 
+        public Bitmap currentValue;
+
+        public BitmapAsset(string name, Type fileType) : base(name, fileType)
+        {
+
+        }
+        public static BitmapAsset BitmapToAsset(string fileName)
+        {
+            Bitmap? bmp = new(fileName);
+
+            BitmapAsset asset = new("BitmapAsset", typeof(Bitmap));
+            
+            if (bmp != null)
+                asset.currentValue = bmp;
+            
+            return asset;
+        }
+
         public Color[,] colors 
         {
             get  => ColorArrayFromBitmap(currentValue);
@@ -71,6 +96,10 @@ namespace pixel_renderer
     {
         new public string Name = "NewFontAsset";
         public Dictionary<char, Bitmap> characters = new();
+
+        public FontAsset(string name, Type fileType) : base(name, fileType)
+        {
+        }
     }
 
     public static class FontAssetFactory
@@ -78,7 +107,7 @@ namespace pixel_renderer
 
         public static FontAsset CreateFont(int start, int end, Bitmap[] characters)
         {
-            FontAsset fontAsset = new();
+            FontAsset fontAsset = new($"fontAsset{start}", typeof(pixel_renderer.FontAsset));
             char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
             for (int i = start; i < end; i++)
             {
@@ -129,10 +158,10 @@ namespace pixel_renderer
             int i = 0; 
             foreach (string file in files)
             {
-                BitmapAsset bitmap = new()
+                BitmapAsset bitmap = new($"{'a' + i}", typeof(Bitmap))
                 {
                     currentValue = new(file),
-                    Name = $"{'a' + i}"
+                   
                 };
                 i++;
                 AssetLibrary.Register(bitmap.GetType(), bitmap);
@@ -190,7 +219,7 @@ namespace pixel_renderer
             
             StreamReader reader = new(fileName);
             
-            Asset asset = new(); 
+            Asset asset = new("", null); 
 
             using JsonTextReader json = new(reader);
             try
@@ -201,6 +230,26 @@ namespace pixel_renderer
                
             return asset;
         }
+        public static Asset? TryDeserializeNonAssetFile(string fileName, Type type)
+        {
+            switch (type)
+            {
+                case var _ when type == typeof(Bitmap):
+
+                    BitmapAsset bmpAsset = BitmapAsset.BitmapToAsset(fileName);
+                    if (bmpAsset == null) return null;
+                    bmpAsset.fileType = typeof(Bitmap); 
+                    return bmpAsset;
+
+                case var _ when type == typeof(JsonObject):
+                    var asset = ReadAssetFile(fileName);
+                    return asset; 
+
+
+                default: return null;
+            }
+        }
+
     }
 
     public static class AssetPipeline
@@ -215,7 +264,7 @@ namespace pixel_renderer
             {
                 if (showMessage)
                 {
-                    var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OK);
+                    var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OKCancel);
                     if (msg == MessageBoxResult.Cancel)
                         return;
                 }
@@ -228,9 +277,11 @@ namespace pixel_renderer
             {
                 foreach(var file in Directory.GetFiles(dir))
                 {
-                    var asset = Import(file);
+                    var typeString = file.Split('.')[1];
+                    var typeRef = IsTypeSupported(typeString); 
+                    var asset = Import(file, typeRef);
                     if (asset is not null)
-                        AssetLibrary.Register(asset.GetType(), asset);
+                        AssetLibrary.Register(asset.fileType ?? Type.EmptyTypes[0], asset);
                 };
             }
             if (!Runtime.Instance.IsRunning)
@@ -247,15 +298,27 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
         /// <returns></returns>
-        public static Asset? Import(string path)
+        public static Asset? Import(string path, Type type)
         {
             if (!File.Exists(path)) return null; 
-            return AssetIO.ReadAssetFile(path);
+            return AssetIO.TryDeserializeNonAssetFile(path, type);
         }
 
-      
+        /// <summary>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>type if supported, else returns null</returns>
+        public static Type? IsTypeSupported(string type) => type switch
+        {
+            "json" => typeof(JsonObject),
+            "bmp" => typeof(Bitmap),
+            _ => null,
+        };
+
+
+
     }
-    
+
     /// <summary>
     /// A Runtime static class that allows access to cached, deserialized json objects. 
     /// </summary>
@@ -268,7 +331,26 @@ namespace pixel_renderer
         /// <param name="type"></param>
         /// <param name="path"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public static bool TryFindAsset<T>(string name, out T result) where T : Asset
+        /// 
+        
+        public static bool Fetch<T>(out T result) where T : Asset
+        {
+            result = null;
+            if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
+            {
+                foreach (var _asset in found)
+                {
+                    if (_asset is null) continue;
+                    result = _asset as T;
+
+
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public static bool Fetch<T>(string name, out T result) where T : Asset
         {
             result = null; 
             if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
@@ -286,45 +368,8 @@ namespace pixel_renderer
             }
             return false;
         }
-        /// <summary>
-        /// Save the currently loaded asset database.
-        /// </summary>
-        public static void Sync()
-        {
-            var library = GetLibrary();
-            if (library is null) return; 
-            AssetIO.skippingOperation = false; 
-            foreach (var asset in library) AssetIO.SaveAsset(asset, asset.Name);
-        }
-        internal static  List<Asset>? GetLibrary()
-        {
-            List<Asset> library = new();  
-            foreach (var key in LoadedAssets)
-                foreach (var item in key.Value)
-                    library.Add(item);
-
-            return library; 
-        }
-        internal static void Register(Type type, Asset asset)
-        {
-            if (!LoadedAssets.ContainsKey(type))
-            {
-                LoadedAssets.Add(type, new List<Asset>());
-            }
-            LoadedAssets[type].Add(asset);
-        }
-        internal static void Unregister(Type type, string Name)
-        {
-            foreach (var asset in LoadedAssets[type])
-            {
-                if (asset.Name.Equals(Name))
-                {
-                    LoadedAssets[type].Remove(asset);
-                }
-            }
-        }
-
-        internal static bool GetAssetsOfType<T>(out List<object> output)
+       
+        public static bool Fetch<T>(out List<object> output)
         {
             output = new List<object>();  
             foreach (var pair in LoadedAssets)
@@ -339,5 +384,54 @@ namespace pixel_renderer
             }
             return false; 
         }
+        
+        /// <summary>
+        /// Save the currently loaded asset Library to the disk.
+        /// </summary>
+        public static void Sync()
+        {
+            var library = Clone();
+            
+            if (library is null) return; 
+            
+            AssetIO.skippingOperation = false; 
+
+            foreach (var asset in library)
+                AssetIO.SaveAsset(asset, asset.Name);
+        }
+        /// <summary>
+        /// Clone the current Asset Library into a List.
+        /// </summary>
+        /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
+        public static  List<Asset>? Clone()
+        {
+            List<Asset> library = new();  
+
+            foreach (var key in LoadedAssets)
+                foreach (var item in key.Value)
+                    library.Add(item);
+
+            return library; 
+        }
+
+        public static void Register(Type type, Asset asset)
+        {
+            if (!LoadedAssets.ContainsKey(type))
+            {
+                LoadedAssets.Add(type, new List<Asset>());
+            }
+            LoadedAssets[type].Add(asset);
+        }
+        public static void Unregister(Type type, string Name)
+        {
+            foreach (var asset in LoadedAssets[type])
+            {
+                if (asset.Name.Equals(Name))
+                {
+                    LoadedAssets[type].Remove(asset);
+                }
+            }
+        }
+        
     }
 }

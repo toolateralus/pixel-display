@@ -13,6 +13,13 @@ using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
+using Microsoft.Win32;
+using System.IO;
+using System.Text.Json.Nodes;
+using System.Windows.Media.Imaging;
+using System.Drawing;
 #endregion
 
 namespace pixel_editor
@@ -69,15 +76,30 @@ namespace pixel_editor
             get => (double)GetValue(ScaleValueProperty);
             set => SetValue(ScaleValueProperty, value);
         }
+        public void HandleInspectorEvents(InspectorEvent e)
+        {
+            switch (e)
+            {
+                case InspectorEvent.MISSING_FILE:
+                    OnImportFileButtonPressed(null, null);
+                    break;
+                case InspectorEvent.NULL_REFERENCE:
+                    break;
+                case InspectorEvent.ENGINE_CRASH:
+                    break;
+            }
+        }
+
         private static int renderStateIndex = 0; 
         // main entry point for application
         public Main()
         {
             InitializeComponent();
-            engine = new();
             inspector = new Inspector(inspectorObjName,
                                       inspectorObjInfo,
                                       inspectorChildGrid);
+            Runtime.inspector = inspector; 
+            engine = new();
             GetEvents();
         }
         private void GetEvents()
@@ -85,6 +107,7 @@ namespace pixel_editor
             CompositionTarget.Rendering += Update;
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
+            Runtime.Instance.InspectorEventRaised += HandleInspectorEvents;
         }
         private void Update(object? sender, EventArgs e)
         {
@@ -133,16 +156,18 @@ namespace pixel_editor
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
             // this cast could be causing erroneous behavior
-            Point pos = e.GetPosition(sender as Image);
+            Point pos = e.GetPosition((Image)sender);
 
             if (Runtime.Instance.IsRunning)
             {
                 inspector.DeselectNode();
                 if (Staging.TryCheckOccupant(pos, out Node node))
-                {
                     inspector.SelectNode(node);
-                }
             }
+        }
+        private async Task Wait()
+        {
+            Sprite sprite = new() { };
         }
         private void OnImportBtnPressed(object sender, RoutedEventArgs e)
         {
@@ -152,6 +177,30 @@ namespace pixel_editor
         {
             AssetLibrary.Sync();
         }
+
+        private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new();
+            Nullable<bool> result = fileDialog.ShowDialog();
+            // Get the selected file name and display in a TextBox.
+            // Load content of file in a TextBlock
+            if (result == true)
+            {
+                var name = fileDialog.FileName;
+                var typeString = name.Split('.')[1];
+                var typeRef = AssetPipeline.IsTypeSupported(typeString); 
+                if (typeRef != null)
+                {
+                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+                    
+                    if (asset == null) return; 
+
+                    AssetLibrary.Register(asset.GetType(), asset);
+                }
+            }
+        }
+
+        
     }
     public class Inspector
     {
@@ -211,7 +260,7 @@ namespace pixel_editor
                     TextBlock block = CreateBlock(info, thickness);
 
                     // provides undesirable spacing, really ugly
-                    int rowSpan = info.Split(' ').Length;
+                    int rowSpan = info.Split('\n').Length * 2;
 
                     AddToInspector(index, block, rowSpan);
 
@@ -249,30 +298,31 @@ namespace pixel_editor
         {
             component.SetValue(Grid.RowSpanProperty, rowSpan);
             component.SetValue(Grid.ColumnSpanProperty, 8);
-            component.SetValue(Grid.RowProperty, i);
+            component.SetValue(Grid.RowProperty, i + i + i);
             component.SetValue(Grid.ColumnProperty, 6);
         }
         public static string GetComponentInfo(Component component)
         {
-            IEnumerable<PropertyInfo> properties = component.GetType().GetRuntimeProperties();
             IEnumerable<FieldInfo> fields = component.GetType().GetRuntimeFields();
-            string output = $"\b {component.GetType().Name} Properties : \n";
-            // todo = add field and property values to an editable text box aside the label,
-            // once changed send event to update property accordingly.
+            string output = $"\b {component.GetType().Name} Properties : ";
+           
+            IEnumerable<PropertyInfo> properties = component.GetType().GetRuntimeProperties();
             foreach (var property in properties)
             {
-                output += $"\t{property.Name} {property.PropertyType}\n";
+                var value = property.GetValue(component, null);
+                output += $" \n \t{property.Name} {property.PropertyType} {value}";
             }
+            
             foreach (var field in fields)
             {
-                output += $"\t{field}\n";
+                var value = field.GetValue(component);
+                output += $" \n \t{field} {value}";
             }
             return output;
         }
         
         public static Label CreateLabel(string componentInfo, Thickness margin)
         {
-            margin.Bottom = componentInfo.Split(' ').Length;
             return new Label
             {
                 Content = componentInfo,
@@ -281,14 +331,13 @@ namespace pixel_editor
                 Foreground = Brushes.White, 
                 Margin = margin,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Top,
+                VerticalAlignment = VerticalAlignment.Center,
                 FontFamily = new System.Windows.Media.FontFamily("MS Gothic")
             };
         }
         public static TextBlock CreateBlock(string componentInfo, Thickness margin)
         {
-            margin.Bottom = componentInfo.Split(' ').Length + 5;
-            return new TextBlock()
+            return new()
             {
                 Text = componentInfo,
                 FontSize = 2.25f,
@@ -296,11 +345,11 @@ namespace pixel_editor
                 TextWrapping = TextWrapping.Wrap,
                 Background = Brushes.DarkGray,
                 Foreground = Brushes.White,
-                
                 Margin = margin,
-                
+                Height = double.NaN,
+                Width = double.NaN,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Top,
+                VerticalAlignment = VerticalAlignment.Center,
             };
         }
         public static Button CreateButton(string content, Thickness margin) => new Button()

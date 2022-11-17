@@ -13,16 +13,16 @@ namespace pixel_renderer
         
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
         public event Action OnQueryMade; 
-        public event Action OnHierarchyChanged;
+
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+
         public Node[] Nodes { get; private set; }
         public Node[] FindNodesByTag(string tag)
         {
             OnQueryMade?.Invoke(); 
-            IEnumerable<Node> x = Nodes.Where(node => node.tag == tag);
-            return x.ToArray();
+            IEnumerable<Node> matchingNodes = Nodes.Where(node => node.tag == tag);
+            return matchingNodes.ToArray();
         }
-
         public Node FindNodeByTag(string tag)
         {
             OnQueryMade?.Invoke();
@@ -30,23 +30,18 @@ namespace pixel_renderer
                     .Where(node => node.tag == tag)
                     .First();
         }
-
         public Node FindNode(string name)
         {
             OnQueryMade?.Invoke();
-            if (NodesByName.ContainsKey(name))
-            {
-                return NodesByName[name];
-            }
-            return null;
+            return Nodes
+                    .Where(node => node.Name == name)
+                    .First();
         }
         public void RefreshStageDictionary()
         {
             foreach (Node node in Nodes)
-            {
                 if (!NodesByName.ContainsKey(node.Name))
                     NodesByName.Add(node.Name, node);
-            }
         }
 
 
@@ -55,13 +50,15 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="delta"></param>
         public void FixedUpdate(float delta)
-        {
-            foreach (Node node in Nodes) node.FixedUpdate(delta);
-        }
+        { foreach (Node node in Nodes) node.FixedUpdate(delta); }
         public void Awake()
         {
             OnQueryMade += RefreshStageDictionary;
-            foreach (Node node in Nodes) node.Awake(); 
+            foreach (Node node in Nodes)
+            {
+                node.parentStage ??= this; 
+                node.Awake();
+            }
         }
            
 
@@ -71,15 +68,8 @@ namespace pixel_renderer
         /// <summary>
         /// Called on constructor initialization
         /// </summary>
-        public void Init()
-        {
-            RefreshStageDictionary();
-            GetEvents();
-        }
-        private void GetEvents()
-        {
-            OnHierarchyChanged += RefreshStageDictionary;
-        }
+       
+      
         public Stage(Node[] nodes)
         {
             nodes = new Node[nodes.Length];
@@ -87,14 +77,12 @@ namespace pixel_renderer
             {
                 nodes[i] = nodes[i];
             }
-            Init(); 
         }
         public Stage(string Name, Bitmap Background, Node[] nodes)
         {
             this.Name = Name;
             this.Background = Background;
             Nodes = nodes;
-            Init();
         }
 
         // for IEnumerator implementation;

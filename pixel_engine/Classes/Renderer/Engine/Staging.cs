@@ -7,10 +7,13 @@
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Security;
+    using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Automation;
     using System.Windows.Xps.Serialization;
     using System.Xaml;
     using Point = System.Windows.Point;
+    public enum InspectorEvent { MISSING_FILE, NULL_REFERENCE, ENGINE_CRASH }
 
     public static class Staging
     {
@@ -25,10 +28,7 @@
         
         public static void UpdateCurrentStage(Stage stage)
         {
-            // instead of refreshing the whole stage hierarchy each frame, we could just add events that queue an update, even of just that member, but
-            // probably all of them since the hierarchy is a relationship
             stage.FixedUpdate(delta: runtime.lastFrameTime);
-            if (Debug.debugging) Debug.debug = "";
             runtime.frameCount++;
         }
 
@@ -37,15 +37,35 @@
             List<Node> nodes = new List<Node>();
 
             AddPlayer(nodes);
-            AddFloor(nodes);
+            //AddFloor(nodes);
 
             for (int i = 0; i < 100; i++)
                 CreateGenericNode(nodes, i);
 
-            var background = runtime.Backgrounds[JRandom.Int(0, runtime.Backgrounds.Count)] ?? GetFallbackBackground();
+            var randomIndex = JRandom.Int(0, runtime.Backgrounds.Count);
+            
+            var background = new Bitmap(24, 24);
+
+            if (randomIndex > runtime.Backgrounds.Count || runtime.Backgrounds.Count == 0)
+            {
+                background = GetFallbackBackground(); 
+                // WIP Inspector notifications
+
+                //if (Runtime.inspector != null)
+                //{
+                //    Runtime.Instance.RaiseInspectorEvent(InspectorEvent.MISSING_FILE);
+                //    while (true)
+                //    {
+                //        Task.Delay(TimeSpan.FromSeconds(0.1f));
+                //    }
+                //}
+            }
+            else background = runtime.Backgrounds[randomIndex] ??= GetFallbackBackground();
 
             SetCurrentStage(new Stage("Default Stage", background , nodes.ToArray()));
+            
             InitializeNodes();
+        
             runtime.stage.RefreshStageDictionary();
         }
         
@@ -61,7 +81,7 @@
         private static void AddFloor(List<Node> nodes)
         {
             var staticNodes = new List<Node>(); 
-           for (int i = 0; i < 24; i++)
+           for (int i = 0; i < 240; i++)
                CreateGenericNode(staticNodes, i);
             foreach (var node in staticNodes)
             {
@@ -71,18 +91,14 @@
                 x.drag = randomDrag;
 
             }
+
+
             nodes.AddRange(staticNodes);
 
         }
 
-        private static void InitializeNodes()
-        {
-            foreach (Node node in runtime.stage.Nodes)
-            {
-                node.parentStage = runtime.stage;
-                node.Awake(); 
-            }
-        }
+        private static void InitializeNodes() => 
+            runtime.stage.Awake(); 
         
         private static void CreateGenericNode(List<Node> nodes, int i)
         {
@@ -96,8 +112,8 @@
                 usingGravity = true,
                 drag = .1f
             });
-            //var randomDirection = JRandom.Direction(); 
-            //node.AddComponent(new Wind(randomDirection));
+            var randomDirection = JRandom.Direction(); 
+            node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
         

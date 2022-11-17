@@ -72,7 +72,7 @@
 
         static string cachedGCValue = "";
         
-        const int framesUntilGC_Check = 20;
+        const int framesUntilGC_Check = 600;
         private static int framesSinceGC_Check = 0;
 
         public static string GetGCStats()
@@ -84,9 +84,9 @@
             }
             framesSinceGC_Check = 0;
 
-            var bytes = GC.GetTotalMemory(true) + 1;
+            var bytes = GC.GetTotalMemory(false) + 1;
             var megaBytes = bytes / 1048576;
-            cachedGCValue = $"GC Alloc:{megaBytes} mB";
+            cachedGCValue = $"GC Alloc:{megaBytes} MB";
 
             return cachedGCValue;
         }

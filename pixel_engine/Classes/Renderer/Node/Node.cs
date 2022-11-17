@@ -18,19 +18,14 @@ namespace pixel_renderer
         public Vec2 localPosition
         {
             get => GetLocalPosition(position); 
-           
-            set
-            { 
-
-            }
+            set { }
         }
 
         public Vec2 GetLocalPosition(Vec2 position)
         {
-            Vec2 local = new();
-            if (parentNode == null) return position;
-            local = parentNode.position - position; 
-            return local;
+            if (parentNode == null)
+                return position;
+            return parentNode.position - position;
         }
         public Vec2 scale = new();
 

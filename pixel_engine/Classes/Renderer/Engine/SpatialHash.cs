@@ -25,6 +25,7 @@
                 Buckets.Add(new List<Node>());
             }
         }
+
         internal void ClearBuckets()
         {
             busy = true;
@@ -34,6 +35,7 @@
             }
             busy = false; 
         }
+
         internal void RegisterObject(Node obj)
         {
             List<int> cells = Hash(obj);
@@ -47,6 +49,7 @@
         {
             
             List<Node> nodes = new List<Node>(256);
+
             List<int> buckets = Hash(node);
             foreach (var index in buckets)
             {

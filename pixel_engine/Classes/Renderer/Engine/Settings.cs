@@ -34,7 +34,7 @@ namespace pixel_renderer
         public static string WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData); 
         
         internal const float MaxDepenetrationForce = 3f;
-        
+
         internal static int terminalVelocity = 4;
 
         internal static Vec2 TerminalVec2()

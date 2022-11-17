@@ -2,7 +2,6 @@
 using System.IO;
 using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
-using System.Drawing.Imaging;
 using Image = System.Windows.Controls.Image; 
 public static class CBit
 {

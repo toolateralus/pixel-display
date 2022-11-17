@@ -8,10 +8,10 @@ namespace pixel_renderer
         {
             switch (direction)
             {
-                case Direction.Left: return new Vec2(-1, 0);
+                case Direction.Left:  return new Vec2(-1, 0);
                 case Direction.Right: return new Vec2(1, 0);
-                case Direction.Up: return new Vec2(0,-1);
-                case Direction.Down: return new Vec2(0,1);
+                case Direction.Up:    return new Vec2(0,-1);
+                case Direction.Down:  return new Vec2(0,1);
                 default: return Vec2.one;
             };
         }

@@ -11,7 +11,7 @@ namespace pixel_renderer
         {
         }
 
-        public NullStageException(string? message) : base(message + "=> Stage Not Found.")
+        public NullStageException(string? message) : base(message + "Stage Not Found.")
         {
             Application.Current.MainWindow.Close(); 
         }
