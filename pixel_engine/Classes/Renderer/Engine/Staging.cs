@@ -27,7 +27,6 @@
         {
             // instead of refreshing the whole stage hierarchy each frame, we could just add events that queue an update, even of just that member, but
             // probably all of them since the hierarchy is a relationship
-            stage.RefreshStageDictionary();
             stage.FixedUpdate(delta: runtime.lastFrameTime);
             if (Debug.debugging) Debug.debug = "";
             runtime.frameCount++;
@@ -43,7 +42,7 @@
             for (int i = 0; i < 100; i++)
                 CreateGenericNode(nodes, i);
 
-            var background = runtime.Backgrounds[0] ?? GetFallbackBackground();
+            var background = runtime.Backgrounds[JRandom.Int(0, runtime.Backgrounds.Count)] ?? GetFallbackBackground();
 
             SetCurrentStage(new Stage("Default Stage", background , nodes.ToArray()));
             InitializeNodes();
@@ -52,7 +51,7 @@
         
         private static Bitmap GetFallbackBackground()
         {
-            Bitmap bmp = new(256, 256);
+            Bitmap bmp = new(Settings.ScreenWidth ,Settings.ScreenWidth);
             for (int i = 0; i < 256; i++)
                 for (int j = 0; j < 256; j++)
                     bmp.SetPixel(i, j, JRandom.Color());

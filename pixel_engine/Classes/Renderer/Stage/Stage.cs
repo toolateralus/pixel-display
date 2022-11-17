@@ -12,23 +12,28 @@ namespace pixel_renderer
         private string _uuid = "";
         
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
-
+        public event Action OnQueryMade; 
         public event Action OnHierarchyChanged;
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
         public Node[] Nodes { get; private set; }
         public Node[] FindNodesByTag(string tag)
         {
+            OnQueryMade?.Invoke(); 
             IEnumerable<Node> x = Nodes.Where(node => node.tag == tag);
             return x.ToArray();
         }
 
-        public Node FindNodeByTag(string tag) 
-         =>  Nodes .Where(node => node.tag == tag) .ToArray<Node>() [0];
-                       
-                        
-        
+        public Node FindNodeByTag(string tag)
+        {
+            OnQueryMade?.Invoke();
+            return Nodes
+                    .Where(node => node.tag == tag)
+                    .First();
+        }
+
         public Node FindNode(string name)
         {
+            OnQueryMade?.Invoke();
             if (NodesByName.ContainsKey(name))
             {
                 return NodesByName[name];
@@ -54,7 +59,8 @@ namespace pixel_renderer
             foreach (Node node in Nodes) node.FixedUpdate(delta);
         }
         public void Awake()
-        { 
+        {
+            OnQueryMade += RefreshStageDictionary;
             foreach (Node node in Nodes) node.Awake(); 
         }
            

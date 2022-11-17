@@ -1,4 +1,5 @@
 ﻿using pixel_renderer;
+using Key = System.Windows.Input.Key;
 using Color = System.Drawing.Color;
 internal class Player : Component
 {
@@ -19,10 +20,12 @@ internal class Player : Component
     public override void FixedUpdate(float delta)
     {
         if (!takingInput) return;
+        if (Input.GetKeyDown(Key.Q))
+        {
+            Staging.InitializeDefaultStage(); 
+        }
         var move = Input.GetMoveVector();
-        
         Jump(move);
-
         Move(move);
     }
 

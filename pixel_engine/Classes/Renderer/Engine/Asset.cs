@@ -1,7 +1,9 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
@@ -41,7 +43,7 @@ namespace pixel_renderer
       
         public static Bitmap BitmapFromColorArray(Color[,] colors)
         {
-            Bitmap bitmap = new(64, 64);  
+            Bitmap bitmap = new(colors.GetLength(0) , colors.GetLength(1));  
             for (int i = 0; i < bitmap.Width; i++)
             {
                 for (int j = 0; j < bitmap.Height; j++)
@@ -157,10 +159,10 @@ namespace pixel_renderer
                 {
                     var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
                                             "", MessageBoxButton.YesNoCancel, MessageBoxImage.Error,
-                                             MessageBoxResult.No, MessageBoxOptions.DefaultDesktopOnly);
+                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
                     var doForAllResult = MessageBox.Show($"Do for all (uses last choice)",
                                             "", MessageBoxButton.YesNo, MessageBoxImage.Error,
-                                             MessageBoxResult.No, MessageBoxOptions.DefaultDesktopOnly);
+                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
                     if (doForAllResult == MessageBoxResult.Yes)
                     {
                         skippingOperation = true; 
@@ -322,15 +324,17 @@ namespace pixel_renderer
             }
         }
 
-        internal static bool GetAssetsOfType<T>(out List<T> output)
+        internal static bool GetAssetsOfType<T>(out List<object> output)
         {
-            output = new();  
-            foreach (var type in LoadedAssets)
+            output = new List<object>();  
+            foreach (var pair in LoadedAssets)
             {
-                if (type.Key.GetType() == typeof(T))
+                var type = pair.Key;
+                if (type == typeof(T))
                 {
-                    output = type.Value as List<T>;
-                    return true; 
+                    foreach (var asset in pair.Value)
+                        output.Add(asset);
+                    return true;
                 }
             }
             return false; 

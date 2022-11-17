@@ -123,8 +123,8 @@ namespace pixel_renderer
             {
                 if (!node.TryGetComponent<Sprite>(out _)
                     || !node.TryGetComponent<Rigidbody>(out _)) return;
-                        
-                    
+                // apply Viewport collision seperately since it doesn't use spatial hashing
+                ViewportCollision(node);
                 hash.RegisterObject(node);
             });
         }

@@ -39,6 +39,8 @@
             /// Do not change any code below this comment ///
             ImageDirectorySetup();
 
+            Instance.InitializeBitmapCollection();
+
             Instance.LoadBackgroundCollection();
             
             Instance.mainWnd = mainWnd;
@@ -135,19 +137,24 @@
         private void LoadBackgroundCollection()
         {
 
-            InitializeBitmapCollection();
             List<Bitmap> bitmaps = new();
 
-            // parses pre loaded json objects from the asset library (runtime dictioary containing all assets used and unused.)
+            // parses pre loaded json objects from the asset library (runtime dictionary containing all assets used and unused.)
             if (AssetLibrary.GetAssetsOfType<BitmapAsset>(out var bmpAssets))
             {
-                foreach (var bitmapAsset in bmpAssets)
-                    bitmaps.Add(BitmapAsset.BitmapFromColorArray(bitmapAsset.colors));
+                foreach (var bmpAsset in bmpAssets)
+                {
+                    if (bmpAsset as BitmapAsset == null) continue;
+                    var asset = bmpAsset as BitmapAsset;
+                    var colors = asset.colors;
+                    var bitmap = BitmapAsset.BitmapFromColorArray(colors); 
+                    if (bitmap.Height == Settings.ScreenHeight
+                        && bitmap.Width == Settings.ScreenWidth)
+                            bitmaps.Add(bitmap);
+                }
+                if (bitmaps.Count == 0) return; 
+                Backgrounds = bitmaps;
             }
-
-            if(Backgrounds.Count == 0 
-                && bitmaps.Count != 0)
-                    Backgrounds = bitmaps;
         }
 
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
