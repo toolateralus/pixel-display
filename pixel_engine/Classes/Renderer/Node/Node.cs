@@ -1,7 +1,10 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Xml.Linq;
 
 namespace pixel_renderer
 {
@@ -55,6 +58,16 @@ namespace pixel_renderer
             Components[type].Add(component);
             component.parentNode = this;
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns> A list of components matching typeof(T), otherwise an empty list of same type </returns>
+        internal List<T> GetComponents<T>() => Components[typeof(T)] as List<T> ?? new();
+            
+               
+            
 
         /// <summary>
         /// Attempts to look for a component and push out if found.
@@ -134,5 +147,7 @@ namespace pixel_renderer
             foreach (var list in Components.Values)
                 foreach (var component in list) component.OnTrigger(otherBody);
         }
+
+       
     }
 }

@@ -2,18 +2,17 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Drawing;
-    using System.Linq;
-    using System.Runtime.InteropServices;
-    using System.Security;
     using System.Threading.Tasks;
-    using System.Windows;
-    using System.Windows.Automation;
-    using System.Windows.Xps.Serialization;
-    using System.Xaml;
     using Point = System.Windows.Point;
-    public enum InspectorEvent { MISSING_FILE, NULL_REFERENCE, ENGINE_CRASH }
+    
+    public abstract class InspectorEvent 
+    {
+        public string message;
+        public object sender;
+        public Action expression = () => { };
+        public object[] expressionArgs = new object[] { };
+    }
 
     public static class Staging
     {
@@ -32,43 +31,36 @@
             runtime.frameCount++;
         }
 
-        public static void InitializeDefaultStage()
+        public static async Task InitializeDefaultStage()
         {
             List<Node> nodes = new List<Node>();
 
-            AddPlayer(nodes);
-            //AddFloor(nodes);
+            await InitializeGenericNodes(nodes);
 
+            Bitmap background = TryGetBackground();
+
+            SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
+        }
+
+        private static Bitmap TryGetBackground()
+        {
+            var randomIndex = JRandom.Int(0, runtime.Backgrounds.Count);
+
+            if (runtime.Backgrounds.Count == 0 || runtime.Backgrounds.Count < randomIndex)
+                throw new NullReferenceException();
+
+            var background = runtime.Backgrounds[randomIndex];
+            return background;
+        }
+
+        private static async Task InitializeGenericNodes(List<Node> nodes)
+        {
+            AddPlayer(nodes);
+            AddFloor(nodes);
             for (int i = 0; i < 100; i++)
                 CreateGenericNode(nodes, i);
-
-            var randomIndex = JRandom.Int(0, runtime.Backgrounds.Count);
-            
-            var background = new Bitmap(24, 24);
-
-            if (randomIndex > runtime.Backgrounds.Count || runtime.Backgrounds.Count == 0)
-            {
-                background = GetFallbackBackground(); 
-                // WIP Inspector notifications
-
-                //if (Runtime.inspector != null)
-                //{
-                //    Runtime.Instance.RaiseInspectorEvent(InspectorEvent.MISSING_FILE);
-                //    while (true)
-                //    {
-                //        Task.Delay(TimeSpan.FromSeconds(0.1f));
-                //    }
-                //}
-            }
-            else background = runtime.Backgrounds[randomIndex] ??= GetFallbackBackground();
-
-            SetCurrentStage(new Stage("Default Stage", background , nodes.ToArray()));
-            
-            InitializeNodes();
-        
-            runtime.stage.RefreshStageDictionary();
         }
-        
+
         private static Bitmap GetFallbackBackground()
         {
             Bitmap bmp = new(Settings.ScreenWidth ,Settings.ScreenWidth);
@@ -97,8 +89,7 @@
 
         }
 
-        private static void InitializeNodes() => 
-            runtime.stage.Awake(); 
+    
         
         private static void CreateGenericNode(List<Node> nodes, int i)
         {

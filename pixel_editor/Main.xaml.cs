@@ -20,6 +20,7 @@ using System.IO;
 using System.Text.Json.Nodes;
 using System.Windows.Media.Imaging;
 using System.Drawing;
+using System.Windows.Navigation;
 #endregion
 
 namespace pixel_editor
@@ -65,31 +66,18 @@ namespace pixel_editor
         {
             CalculateScale();
         }
-        #endregion
-        Inspector inspector;
-        /// <summary>
-        /// keep this reference of the engine just to close the background window on editor exit.
-        /// </summary>
-        internal static EngineInstance? engine; 
         public double ScaleValue
         {
             get => (double)GetValue(ScaleValueProperty);
             set => SetValue(ScaleValueProperty, value);
         }
-        public void HandleInspectorEvents(InspectorEvent e)
-        {
-            switch (e)
-            {
-                case InspectorEvent.MISSING_FILE:
-                    OnImportFileButtonPressed(null, null);
-                    break;
-                case InspectorEvent.NULL_REFERENCE:
-                    break;
-                case InspectorEvent.ENGINE_CRASH:
-                    break;
-            }
-        }
+        #endregion
 
+        Inspector inspector;
+        /// <summary>
+        /// keep this reference of the engine just to close the background window on editor exit.
+        /// </summary>
+        internal static EngineInstance? engine; 
         private static int renderStateIndex = 0; 
         // main entry point for application
         public Main()
@@ -107,7 +95,6 @@ namespace pixel_editor
             CompositionTarget.Rendering += Update;
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
-            Runtime.Instance.InspectorEventRaised += HandleInspectorEvents;
         }
         private void Update(object? sender, EventArgs e)
         {
@@ -121,9 +108,6 @@ namespace pixel_editor
 
            
         }
-        
-       
-
         /// <summary>
         /// Called on program close
         /// </summary>
@@ -142,7 +126,6 @@ namespace pixel_editor
             }
             Rendering.State = (RenderState)renderStateIndex;
             viewBtn.Content = Rendering.State.ToString();
-
             // if rendering to game view and the game view window is hidden or loaded, create new and show.
             if (Rendering.State == RenderState.Game)
             {
@@ -165,36 +148,25 @@ namespace pixel_editor
                     inspector.SelectNode(node);
             }
         }
-        private async Task Wait()
-        {
-            Sprite sprite = new() { };
-        }
-        private void OnImportBtnPressed(object sender, RoutedEventArgs e)
-        {
-            AssetPipeline.ImportAsync(true); 
-        }
-        private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
-        {
-            AssetLibrary.Sync();
-        }
-
+        private void OnImportBtnPressed(object sender, RoutedEventArgs e) => AssetPipeline.ImportAsync(true); 
+        private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => AssetLibrary.Sync();
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new();
-            Nullable<bool> result = fileDialog.ShowDialog();
-            // Get the selected file name and display in a TextBox.
-            // Load content of file in a TextBlock
+
+            bool? result = fileDialog.ShowDialog();
+          
             if (result == true)
             {
                 var name = fileDialog.FileName;
-                var typeString = name.Split('.')[1];
-                var typeRef = AssetPipeline.IsTypeSupported(typeString); 
+                
+                var fileExtension = name.Split('.')[1];
+                var typeRef = AssetPipeline.TypeFromExtension(fileExtension); 
+
                 if (typeRef != null)
                 {
                     var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
-                    
                     if (asset == null) return; 
-
                     AssetLibrary.Register(asset.GetType(), asset);
                 }
             }
@@ -216,6 +188,19 @@ namespace pixel_editor
 
             Awake(); 
         }
+        public void HandleEvent(InspectorEvent e, Action expression)
+        {
+            var msg = MessageBox.Show(e.message, expression.ToString(), MessageBoxButton.YesNo);
+            if (msg != MessageBoxResult.Yes) return;
+            var dialog = new OpenFileDialog();
+            var result = dialog.ShowDialog() ?? false; 
+            if (result)
+            {
+                var type = AssetPipeline.TypeFromExtension(dialog.FileName.Split('.')[1]);
+                AssetIO.TryDeserializeNonAssetFile(dialog.FileName, type);
+            }
+
+        }
         public Node? loadedNode;
         private List<TextBlock> activeControls = new(); 
         private Label name;
@@ -229,13 +214,15 @@ namespace pixel_editor
 
         public event Action OnComponentAdded;
         public event Action OnComponentRemoved;
-
+        
         public void Awake()
         {
               OnObjectSelected += Refresh;
             OnObjectDeselected += Refresh;
               OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
+
+            Runtime.Instance.InspectorEventRaised +=  HandleEvent;
         }
         public void Update(object? sender, EventArgs e)
         {
@@ -259,7 +246,6 @@ namespace pixel_editor
 
                     TextBlock block = CreateBlock(info, thickness);
 
-                    // provides undesirable spacing, really ugly
                     int rowSpan = info.Split('\n').Length * 2;
 
                     AddToInspector(index, block, rowSpan);
@@ -272,7 +258,6 @@ namespace pixel_editor
                     index++;
                 }
             }
-
             OnInspectorUpdated?.Invoke();
         }
         public void DeselectNode()

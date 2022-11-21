@@ -31,11 +31,15 @@ namespace pixel_renderer
         public const string AssetsDirectory = "\\Pixel\\Assets";
 
         // Root directory for resources
-        public static string WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData); 
+        public static string Appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData); 
         
+        // pxad {Pixel Asset Data}
+        public const string AssetsFileExtension = ".pxad";
+
         internal const float MaxDepenetrationForce = 3f;
 
         internal static int terminalVelocity = 4;
+
 
         internal static Vec2 TerminalVec2()
         {

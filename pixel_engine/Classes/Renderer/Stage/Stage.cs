@@ -53,6 +53,7 @@ namespace pixel_renderer
         { foreach (Node node in Nodes) node.FixedUpdate(delta); }
         public void Awake()
         {
+            RefreshStageDictionary(); 
             OnQueryMade += RefreshStageDictionary;
             foreach (Node node in Nodes)
             {
@@ -77,12 +78,16 @@ namespace pixel_renderer
             {
                 nodes[i] = nodes[i];
             }
+            Awake();
+            RefreshStageDictionary();
         }
         public Stage(string Name, Bitmap Background, Node[] nodes)
         {
             this.Name = Name;
             this.Background = Background;
             Nodes = nodes;
+            Awake();
+            RefreshStageDictionary(); 
         }
 
         // for IEnumerator implementation;

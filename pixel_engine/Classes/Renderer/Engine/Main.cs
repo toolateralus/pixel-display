@@ -1,5 +1,6 @@
 ﻿namespace pixel_renderer
 {
+    using System;
     using System.Windows;
 
     /// <summary>
@@ -9,9 +10,11 @@
     {
         public EngineInstance()
         {
-            AssetPipeline.ImportAsync(false);
             InitializeComponent();
-            Runtime.Awake(this);
+
+            _ = Runtime.Awake(this);
         }
+
+      
     }
 }

@@ -110,16 +110,10 @@ namespace pixel_renderer
         private List<BitmapAsset> charImgAssets = new(); 
         private List<Bitmap> chars = new();
 
-        private List<KeyValuePair<Bitmap, Vec2>> characters = new();
-        private List<KeyValuePair<Sprite, Node>> sprites = new(); 
         
         public override void Awake()
         {
-            return; 
-            if (!AssetLibrary.Fetch<BitmapAsset>(out List<object> imageObjects))
-            {
-                
-            }
+            if (!AssetLibrary.Fetch<BitmapAsset>(out List<object> imageObjects)) return; 
 
             foreach (var img in imageObjects) charImgAssets.Add((BitmapAsset) img);
            
@@ -127,43 +121,44 @@ namespace pixel_renderer
             foreach (var file in charImgAssets)
             {
                 if (file == null) continue;
-                chars.Add(file.currentValue);
+                chars.Add(file.RuntimeValue);
             }
 
             asset = FontAssetFactory.CreateFont(0, 23, chars.ToArray());
             
             AssetLibrary.Register(typeof(FontAsset), asset);
             
-            characters = FontAssetFactory.ToString(asset, text).ToList();
-            
-            int j = 0;
+            var imgs = FontAsset.GetCharacterImages(asset, text);
 
-            foreach (var image in chars)
+            for(int i = 0; i < imgs.Count; i++)
+                asset.characters.Add(text[i], imgs[i]);
+            
+
+            foreach (var x in asset.characters)
             {
-                var parent = parentNode; 
-                var bmp = characters[j].Key;
-                Node node = new()
-                {
-                    position = characters[j].Value,
-                    scale = Vec2.one,
-                    parentNode = parent,
-                };
+                var bmp = x.Value;
                 Sprite sprite = new()
                 {
                     image = bmp,
                     dirty = true,
                     size = new Vec2(bmp.Width, bmp.Height),
                 };
-                node.AddComponent(sprite);
-                sprites.Add(KeyValuePair.Create(sprite, node));
-
+                parentNode.AddComponent(sprite);
             }
+
 
         }
         
         public override void FixedUpdate(float delta)
         {
-         
+            var components = parentNode.GetComponents<Sprite>(); 
+            if (components.Count > 0)
+            {
+                var positions = FontAsset.GetCharacterPosition(asset); 
+
+                for (int i = 0; i < components.Count; i++)
+                    components[i].parentNode.position = positions[i];
+            }
         }
 
         public override void OnCollision(Rigidbody collider)

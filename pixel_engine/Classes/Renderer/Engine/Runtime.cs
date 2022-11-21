@@ -9,6 +9,7 @@
     using System.Windows;
     using System.Windows.Controls.Primitives;
     using System.Windows.Media;
+    using System.Windows.Media.Imaging;
     using Bitmap = System.Drawing.Bitmap;
 
     public class Runtime
@@ -19,7 +20,7 @@
         /// Set to true when the Physics session is initialized.
         /// </summary>
         public bool Initialized { get; internal set; } = false;
-        public event Action<InspectorEvent> InspectorEventRaised;
+        public event Action<InspectorEvent, Action> InspectorEventRaised;
 
         public EngineInstance mainWnd;
         /// <summary>
@@ -28,7 +29,7 @@
         /// </summary>
         public static object? inspector = null; 
 
-        public Timer? physicsTimer;
+        public Timer? physicsClock;
         public Stage stage;
         public List<Bitmap> Backgrounds = new List<Bitmap>();
 
@@ -42,55 +43,38 @@
 
         ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
        
-
-        public static void Awake(EngineInstance mainWnd)
+        public static async Task Awake(EngineInstance mainWnd)
         {
-       
-            /// Do not change any code below this comment ///
-            ImageDirectorySetup();
+            // changes made to the code below can and will likely cause massive errors or failure
 
-            //Instance.InitializeBitmapCollection();
+            Instance.mainWnd = mainWnd;
+
+            await AssetPipeline.ImportAsync(false);
+
+            CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
 
             Instance.LoadBackgroundCollection();
-            
-            Instance.mainWnd = mainWnd;
-            
-            CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
 
             Instance.InitializePhysics();
 
             Instance.Initialized = true;
-            /// Do not change any code above this comment ///
 
-            Staging.InitializeDefaultStage();
-            
-            //FontAssetFactory.InitializeDefaultFont();
+            await Staging.InitializeDefaultStage();
 
+            FontAssetFactory.InitializeDefaultFont();
+
+            // changes made to the code above can and will likely cause massive errors or failure
         }
-
-       
 
         private void InitializePhysics()
         {
             var interval = TimeSpan.FromSeconds(Settings.PhysicsRefreshInterval);
-            physicsTimer = new Timer(interval.TotalSeconds);
-            physicsTimer.Elapsed += GlobalFixedUpdateRoot;
-            physicsTimer.Start();
+            physicsClock = new Timer(interval.TotalSeconds);
+            physicsClock.Elapsed += GlobalFixedUpdateRoot;
+            physicsClock.Start();
             IsRunning = true; 
         }
-
-        private static void ImageDirectorySetup()
-        {
-            var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-            Instance.ImageDirectory = appdata + "\\Pixel\\Images";
-
-            if (!Directory.Exists(Instance.ImageDirectory))
-            {
-                Directory.CreateDirectory(Instance.ImageDirectory);
-            }
-        }
-
+       
         private void Execute()
         {
             if (IsRunning)
@@ -118,33 +102,21 @@
         
         public void Toggle()
         {
-            if (physicsTimer == null)
+            if (physicsClock == null)
             {
-                throw new NullReferenceException("Physics timer is not set to an Instance of an object. " +
-                    "NOTE: Source code may be corrupted or missing," +
-                    " Clean your repository and rebuild the engine.");
+                throw new NullReferenceException("Physics Clock is not set to an instance of an object. " +
+                    "NOTE: Source code may be corrupted or partially missing," +
+                    " Clean your repository and rebuild the engine, or fix the Clock XD");
             }
-            if (!physicsTimer.Enabled)
+            if (!physicsClock.Enabled)
             {
-                physicsTimer.Start();
+                physicsClock.Start();
                 IsRunning = true;
                 return;
             }
-            physicsTimer.Stop();
+            physicsClock.Stop();
             IsRunning = false;
             return;
-        }
-        public void InitializeBitmapCollection()
-        {
-            int i = 0;
-
-            foreach (var file in Directory.GetFiles(ImageDirectory)) Backgrounds.Add(new Bitmap(file));
-               
-            foreach (var bitmap in Backgrounds)
-            {
-                i++;
-                AssetLibrary.Register(typeof(BitmapAsset), new BitmapAsset("", typeof(Bitmap)) { currentValue = bitmap, Name = $"Background{i}" });
-            }
         }
 
         private void LoadBackgroundCollection()
@@ -153,19 +125,25 @@
             List<Bitmap> bitmaps = new();
 
             // parses pre loaded json objects from the asset library (runtime dictionary containing all assets used and unused.)
-            if (AssetLibrary.Fetch<BitmapAsset>(out List<object> bmpAssets))
+
+            if (AssetLibrary.Fetch<BitmapAsset>(out List<object> bitmapAssetCollection))
             {
-                foreach (var bmpAsset in bmpAssets)
+                foreach (var asset in bitmapAssetCollection)
                 {
-                    if (bmpAsset as BitmapAsset == null) continue;
-                    var asset = bmpAsset as BitmapAsset;
-                    var colors = asset.colors;
-                    var bitmap = BitmapAsset.BitmapFromColorArray(colors); 
+                    if (asset as BitmapAsset == null) continue;
+                    var bitmapAsset = asset as BitmapAsset;
+                    
+                    var colors = bitmapAsset.Colors;
+                    
+                    var bitmap = BitmapAsset.BitmapFromColorArray(colors);
+
                     if (bitmap.Height == Settings.ScreenHeight
                         && bitmap.Width == Settings.ScreenWidth)
                             bitmaps.Add(bitmap);
                 }
+
                 if (bitmaps.Count == 0) return; 
+                
                 Backgrounds = bitmaps;
             }
         }
@@ -192,7 +170,7 @@
 
         internal void RaiseInspectorEvent(InspectorEvent e)
         {
-            InspectorEventRaised?.Invoke(e); 
+            InspectorEventRaised?.Invoke(e , e.expression); 
         }
     }
 
