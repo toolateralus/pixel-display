@@ -302,14 +302,16 @@ namespace pixel_renderer
                 foreach (var file in Directory.GetFiles(dir))
                 {
                     var typeString = file.Split('.')[1];
+
                     var typeRef = TypeFromExtension(typeString);
 
                     var asset = TryPullObject(file, typeRef);
 
                     if (asset is not null)
                     {
-                        if (asset.fileType == null)
+                        if (asset.fileType is null)
                             asset.fileType = typeof(Asset);
+
                         AssetLibrary.Register(asset.fileType, asset);
                     }
                 };
@@ -336,6 +338,25 @@ namespace pixel_renderer
                 "bmp" => typeof(Bitmap),
                 _ => typeof(object),
             };
+        }
+        public static void ImportFileDialog()
+        {
+            OpenFileDialog fileDialog = new();
+            bool? result = fileDialog.ShowDialog();
+            if (result == true)
+            {
+                var name = fileDialog.FileName;
+
+                var fileExtension = name.Split('.')[1];
+                var typeRef = AssetPipeline.TypeFromExtension(fileExtension);
+
+                if (typeRef != null)
+                {
+                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+                    if (asset == null) return;
+                    AssetLibrary.Register(asset.GetType(), asset);
+                }
+            }
         }
     }
     /// <summary>

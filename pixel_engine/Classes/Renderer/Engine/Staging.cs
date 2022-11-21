@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Linq;
     using System.Threading.Tasks;
     using Point = System.Windows.Point;
     
@@ -13,7 +14,7 @@
         public Action expression = () => { };
         public object[] expressionArgs = new object[] { };
     }
-
+  
     public static class Staging
     {
         private const int maxClickDistance_InPixels = 0;
@@ -31,45 +32,21 @@
             runtime.frameCount++;
         }
 
-        public static async Task InitializeDefaultStage()
+        public static void InitializeDefaultStage()
         {
-            List<Node> nodes = new List<Node>();
-
-            await InitializeGenericNodes(nodes);
-
-            Bitmap background = TryGetBackground();
-
+            var nodes = new List<Node>(); 
+            InitializeGenericNodes(nodes);
+            Bitmap background = new(256, 256);
             SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
         }
 
-        private static Bitmap TryGetBackground()
-        {
-            var randomIndex = JRandom.Int(0, runtime.Backgrounds.Count);
-
-            if (runtime.Backgrounds.Count == 0 || runtime.Backgrounds.Count < randomIndex)
-                throw new NullReferenceException();
-
-            var background = runtime.Backgrounds[randomIndex];
-            return background;
-        }
-
-        private static async Task InitializeGenericNodes(List<Node> nodes)
+        private static void InitializeGenericNodes(List<Node> nodes)
         {
             AddPlayer(nodes);
             AddFloor(nodes);
-            for (int i = 0; i < 100; i++)
-                CreateGenericNode(nodes, i);
+            for (int i = 0; i < 1000; i++) CreateGenericNode(nodes, i);
         }
 
-        private static Bitmap GetFallbackBackground()
-        {
-            Bitmap bmp = new(Settings.ScreenWidth ,Settings.ScreenWidth);
-            for (int i = 0; i < 256; i++)
-                for (int j = 0; j < 256; j++)
-                    bmp.SetPixel(i, j, JRandom.Color());
-            return bmp;
-        }
-        
         private static void AddFloor(List<Node> nodes)
         {
             var staticNodes = new List<Node>(); 
@@ -89,8 +66,6 @@
 
         }
 
-    
-        
         private static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();

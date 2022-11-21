@@ -119,14 +119,12 @@ namespace pixel_editor
         private void IncrementRenderState()
         {
             renderStateIndex++;
-            // subtract one from the enum size otherwise an empty member of the enum appears for some reason I don't understand.
             if (renderStateIndex == sizeof(RenderState) - 1)
             {
                 renderStateIndex = 0;
             }
             Rendering.State = (RenderState)renderStateIndex;
             viewBtn.Content = Rendering.State.ToString();
-            // if rendering to game view and the game view window is hidden or loaded, create new and show.
             if (Rendering.State == RenderState.Game)
             {
                 var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
@@ -152,27 +150,10 @@ namespace pixel_editor
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => AssetLibrary.Sync();
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog fileDialog = new();
-
-            bool? result = fileDialog.ShowDialog();
-          
-            if (result == true)
-            {
-                var name = fileDialog.FileName;
-                
-                var fileExtension = name.Split('.')[1];
-                var typeRef = AssetPipeline.TypeFromExtension(fileExtension); 
-
-                if (typeRef != null)
-                {
-                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
-                    if (asset == null) return; 
-                    AssetLibrary.Register(asset.GetType(), asset);
-                }
-            }
+            AssetPipeline.ImportFileDialog();
         }
 
-        
+       
     }
     public class Inspector
     {

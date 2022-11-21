@@ -53,17 +53,14 @@
 
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
 
-            Instance.LoadBackgroundCollection();
-
             Instance.InitializePhysics();
-
+            
             Instance.Initialized = true;
-
-            await Staging.InitializeDefaultStage();
-
-            FontAssetFactory.InitializeDefaultFont();
-
             // changes made to the code above can and will likely cause massive errors or failure
+
+            Instance.LoadBackgroundCollection();
+            FontAssetFactory.InitializeDefaultFont();
+            Staging.InitializeDefaultStage();
         }
 
         private void InitializePhysics()
