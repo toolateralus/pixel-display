@@ -163,9 +163,7 @@ namespace pixel_renderer
                     RuntimeValue = new(file),
                     fileType = typeof(Bitmap)
                 };
-                
                 AssetLibrary.Register(typeof(BitmapAsset), bitmap);
-                
                 i++;
             }
         }
@@ -232,7 +230,7 @@ namespace pixel_renderer
 
             StreamReader reader = new(fileName);
 
-            Asset asset = new(" ", typeof(Asset)); 
+            Asset asset = new("" + fileName, typeof(Asset)); 
 
             using JsonTextReader json = new(reader);
 
@@ -241,7 +239,7 @@ namespace pixel_renderer
                 asset = jsonSerializer.Deserialize<Asset>(json) ?? null;
             }
             catch (Exception e) { MessageBox.Show("File read error - Fked Up Big Time"); };
-               
+            asset.Name += asset.fileType ?? null; 
             return asset;
         }
         public static Asset? TryDeserializeNonAssetFile(string fileName, Type type)
@@ -252,7 +250,7 @@ namespace pixel_renderer
 
                     BitmapAsset bmpAsset = BitmapAsset.BitmapToAsset(fileName);
                     if (bmpAsset == null) return null;
-                    bmpAsset.fileType = typeof(Bitmap); 
+                    bmpAsset.fileType = typeof(Bitmap);
                     return bmpAsset;
 
                 case var _ when type == typeof(JsonObject):
@@ -355,6 +353,27 @@ namespace pixel_renderer
                     var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
                     if (asset == null) return;
                     AssetLibrary.Register(asset.GetType(), asset);
+                }
+            }
+        }
+        public static void ImportFileDialog(out Asset? outObject)
+        {
+            outObject = null; 
+            OpenFileDialog fileDialog = new();
+            bool? result = fileDialog.ShowDialog();
+            if (result == true)
+            {
+                var name = fileDialog.FileName;
+
+                var fileExtension = name.Split('.')[1];
+                var typeRef = AssetPipeline.TypeFromExtension(fileExtension);
+
+                if (typeRef != null)
+                {
+                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+                    if (asset == null) return;
+                    AssetLibrary.Register(asset.GetType(), asset);
+                    outObject = asset; 
                 }
             }
         }

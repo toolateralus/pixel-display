@@ -66,7 +66,7 @@
 
         }
 
-        private static void CreateGenericNode(List<Node> nodes, int i)
+        public static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
             var randomScale = Vec2.one * 5;
@@ -158,6 +158,7 @@
           
         }
 
+     
     }
   
 }

@@ -61,9 +61,9 @@ namespace pixel_renderer
                 node.Awake();
             }
         }
-           
 
-        public Bitmap Background { get; set; }
+
+        public Bitmap Background;
         public static Stage Empty => new(Array.Empty<Node>());
         public static Stage New => new("New Stage", new Bitmap(256, 256), Array.Empty<Node>());
         /// <summary>

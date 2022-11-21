@@ -45,6 +45,7 @@
        
         public static async Task Awake(EngineInstance mainWnd)
         {
+
             // changes made to the code below can and will likely cause massive errors or failure
 
             Instance.mainWnd = mainWnd;
@@ -55,12 +56,15 @@
 
             Instance.InitializePhysics();
             
+            Instance.LoadBackgroundCollection();
+
+            FontAssetFactory.InitializeDefaultFont();
+            
+            Staging.InitializeDefaultStage();
+
             Instance.Initialized = true;
             // changes made to the code above can and will likely cause massive errors or failure
 
-            Instance.LoadBackgroundCollection();
-            FontAssetFactory.InitializeDefaultFont();
-            Staging.InitializeDefaultStage();
         }
 
         private void InitializePhysics()

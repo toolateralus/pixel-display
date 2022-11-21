@@ -78,7 +78,9 @@ namespace pixel_editor
         /// keep this reference of the engine just to close the background window on editor exit.
         /// </summary>
         internal static EngineInstance? engine; 
-        private static int renderStateIndex = 0; 
+        private static int renderStateIndex = 0;
+        private StageWnd stageWindow;
+
         // main entry point for application
         public Main()
         {
@@ -99,7 +101,7 @@ namespace pixel_editor
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
-            if (Runtime.Instance.IsRunning
+            if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null
                 && Rendering.State == RenderState.Scene)
                 {
                     Rendering.Render(image);
@@ -118,6 +120,11 @@ namespace pixel_editor
         private void OnPlay(object sender, RoutedEventArgs e) => Runtime.Instance.Toggle();
         private void IncrementRenderState()
         {
+            if (Runtime.Instance.stage is null)
+            {
+                Rendering.State = RenderState.Off;
+                viewBtn.Content = "Stage null.";
+            }
             renderStateIndex++;
             if (renderStateIndex == sizeof(RenderState) - 1)
             {
@@ -152,8 +159,17 @@ namespace pixel_editor
         {
             AssetPipeline.ImportFileDialog();
         }
+        private void OnStagePressed(object sender, RoutedEventArgs e)
+        {
+            stageWindow = new StageWnd();
+            stageWindow.Show();
+            stageWindow.Closed += Wnd_Closed;
+           
+        }
 
-       
+        private void Wnd_Closed(object? sender, EventArgs e) => 
+            stageWindow = null; 
+
     }
     public class Inspector
     {

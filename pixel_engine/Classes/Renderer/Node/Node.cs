@@ -37,6 +37,17 @@ namespace pixel_renderer
 
         // goal - make private
         public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
+        public List<Component> ComponentsList 
+        { 
+            get 
+            {
+                var list = new List<Component>();
+                foreach (var componentType in Components)
+                    foreach (var component in componentType.Value)
+                        list.Add(component);
+                return list ?? new();
+            }
+        }
 
         public T GetComponent<T>(int? index = 0) where T : Component
         {

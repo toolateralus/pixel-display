@@ -81,6 +81,7 @@
             <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="Load Assets" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="2" Click="OnImportBtnPressed"  x:Name="importBtn"      />
             <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="Save/Sync Assets" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="3" Click="OnSyncBtnPressed"  x:Name="syncBtn"      />
             <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="Import" Background="CadetBlue" BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="4" Click="OnImportFileButtonPressed"  x:Name="importFileBtn"      />
+            <Button HorizontalAlignment="Stretch" VerticalAlignment="Top" MaxWidth="250" MaxHeight="25" TextBlock.FontFamily="MS Gothic" TextBlock.FontSize="4" Content="Stage Wizard" Background="IndianRed" BorderBrush="White" BorderThickness="1" Grid.Row="0" Grid.Column="0" Margin="0,8,0,0" Click="OnStagePressed"  x:Name="stageBtn"      />
         </Grid>
     </Grid>
 </Window>

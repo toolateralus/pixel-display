@@ -22,18 +22,30 @@
             var lastFrameTime = env.lastFrameTime;
             var frameCount = env.frameCount;
             var frameRate = Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds * frameCount);
-               
+
             return frameRate;
         }
         static Runtime runtime => Runtime.Instance;
+
+        static Bitmap fallback;
+        public static Bitmap FallBack
+        {
+            get => fallback ??= new(256, 256);
+        }
+    
         public static void Render(Image output)
         {
             // if we could avoid cloning this object
             // and instead cache the original colors during changes and rewrite them back
             // it would save a very significant amount of memory
             // and CPU
-
-            var clonedBackground = (Bitmap)runtime.stage.Background.Clone();
+            if (runtime.stage is null)
+            {
+                runtime.IsRunning = false;
+                return; 
+            }
+            var background = runtime.stage.Background ?? FallBack;
+            var clonedBackground = (Bitmap)background.Clone();
             var frame = Draw(clonedBackground);
             DrawToImage(ref frame, output);
         }
@@ -42,9 +54,8 @@
             Stage stage = Runtime.Instance.stage;
             foreach (var node in stage.Nodes)
             {
-                var sprite = node.GetComponent<Sprite>();
+                if (node.TryGetComponent(out Sprite sprite)) continue;
                 if (sprite is null) continue;
-
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
