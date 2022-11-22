@@ -1,20 +1,12 @@
-﻿using pixel_editor;
+﻿using Microsoft.Win32;
 using pixel_renderer;
-using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
+using System.Security.Permissions;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+
 
 namespace pixel_editor
 {
@@ -23,7 +15,10 @@ namespace pixel_editor
     /// </summary>
     public partial class StageWnd : Window
     {
-     
+        bool usingStarterAssets = false;
+        
+        Bitmap? background; 
+
         public StageWnd()
         {
             InitializeComponent();
@@ -47,23 +42,37 @@ namespace pixel_editor
                 background = image;
             }
         }
-        bool usingStarterAssets = false;
-        Bitmap background; 
-        private void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
+       
+        private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
-            var count = int.Parse(nodeCtTxt.Text);
-            var name = stageNameTxt.Text;
+            int count = nodeCtTxt.Text.ToInt(); 
+
+            var name = stageNameTxt.Text.ToFileNameFormat();
+
             List<Node> nodes = new();
+
             for (int i = 0; i < count; i++)
                 Staging.CreateGenericNode(nodes, i);
 
+            if (usingStarterAssets) Staging.AddPlayer(nodes);
+            if (background is null)
+            {
+                var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
+                await Task.Run(AssetPipeline.ImportFileDialog);
+                if (background is null) return; 
+            }
             var stage = new Stage(name, background, nodes.ToArray());
-            var x = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?",MessageBoxButton.YesNo);
-            if (x == MessageBoxResult.Yes)
+
+            var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
+
+            if (msgResult == MessageBoxResult.Yes)
             {
                 Staging.SetCurrentStage(stage);
+                var asset = new StageAsset(stage.Name, null, stage);
+                AssetLibrary.Register(typeof(Stage), asset);
             }
         }
+       
 
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets; 
     }

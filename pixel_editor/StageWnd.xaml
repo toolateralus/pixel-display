@@ -5,14 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:pixel_editor"
         mc:Ignorable="d"
+        Background="Black"
         Title="StageWnd" Height="450" Width="400">
     <Grid>
         <Grid x:Name="s" Height="Auto" Width="Auto">
             <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
@@ -52,23 +49,18 @@
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <Button 
                 TextBlock.FontFamily="MS Gothic"
                 TextBlock.FontSize="6"
                 Grid.Column="0"
+                BorderBrush="White"
+                BorderThickness="1"
                 Grid.RowSpan="1" 
                 Grid.ColumnSpan="3"
                 Content="Set Background" 
                 HorizontalAlignment="Stretch" 
-                Grid.Row="0" 
+                Grid.Row="1" 
                 VerticalAlignment="Stretch" 
                 Click="SetBackgroundClicked"
             />
@@ -77,54 +69,64 @@
                 TextBlock.FontFamily="MS Gothic"
                 Grid.Column="3"
                 Grid.RowSpan="1" 
+                BorderBrush="White"
+                BorderThickness="1"
                 Grid.ColumnSpan="3"
                 Content="Create New Stage" 
                 HorizontalAlignment="Stretch" 
-                Grid.Row="0" 
+                Grid.Row="1" 
                 VerticalAlignment="Stretch" 
                 Click="CreateNewStageButtonPressed"
             />
             <TextBox
                 x:Name="stageNameTxt"
                 Text="Stage Name"
-                TextBlock.FontSize="5"
+                BorderBrush="White"
+                BorderThickness="1"
+                
+                TextBlock.FontSize="10"
                 TextBlock.FontStyle="Italic"
-                TextBlock.TextAlignment="Center"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Grid.Column="0"
-                Grid.Row="1"
-                Grid.RowSpan="1"
-                Grid.ColumnSpan="6"
-                Background="BlanchedAlmond"
-                />
-            <TextBox
-                x:Name="nodeCtTxt"
-                Text="Number of Nodes"
-                TextBlock.FontStyle="Italic"
-                TextBlock.FontSize="5"
                 TextBlock.TextAlignment="Center"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Grid.Column="0"
                 Grid.Row="2"
                 Grid.RowSpan="1"
-                Grid.ColumnSpan="6"
-                Background="BlanchedAlmond"
+                Grid.ColumnSpan="12"
+                Background="Gray"
+                />
+            <TextBox
+                x:Name="nodeCtTxt"
+                Text="Node Count (Must be Integer Value eg. 0 , 1000)"
+                TextBlock.FontStyle="Italic"
+                BorderBrush="White"
+                BorderThickness="1"
+                TextBlock.FontSize="10"
+                TextBlock.TextAlignment="Center"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Grid.Column="0"
+                Grid.Row="3"
+                Grid.RowSpan="1"
+                Grid.ColumnSpan="12"
+                Background="Gray"
                 />
             <CheckBox 
                 HorizontalAlignment="Left" 
                 VerticalAlignment="Center"
-                Grid.ColumnSpan="7"
-                Grid.RowSpan="1"
-                Grid.Row="0"
+                Grid.ColumnSpan="5"
+                BorderBrush="White"
+                BorderThickness="1"
+                Grid.Row="1"
+                Background="Black"
+                Foreground="LimeGreen"
                 Grid.Column="6" 
                 Content="Spawn starter assets?"
                 TextBlock.FontSize="7"
                 TextBlock.FontFamily="MS Gothic"
-                Click="OnStarterAssetsButtonClicked"
+                Click="OnStarterAssetsButtonClicked" Margin="5,0,0,0"
                 />
-            
+
 
         </Grid>
     </Grid>

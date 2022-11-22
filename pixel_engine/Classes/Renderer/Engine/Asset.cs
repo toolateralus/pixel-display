@@ -32,11 +32,14 @@ namespace pixel_renderer
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
         public string Name = "New Asset";
         public Type fileType;
+        [JsonConstructor]
         public Asset(string name, Type fileType)
         {
             Name = name;
             this.fileType = fileType; 
         }
+        public Asset() { }
+
     }
     public class BitmapAsset : Asset
     {
@@ -119,6 +122,28 @@ namespace pixel_renderer
         {
         }
     }
+    public class StageAsset : Asset
+    {
+        public Stage RuntimeValue;
+        public StageAsset(string name, Type? fileType, Stage runtimeValue) : base(name, fileType)
+        {
+            this.fileType = typeof(Stage);
+            this.Name = name;
+            this.RuntimeValue = runtimeValue;
+        }
+    }
+
+    public class NodeAsset : Asset
+    {
+        public Node RuntimeValue;
+        public NodeAsset(string name, Node runtimeValue)
+        {
+            RuntimeValue = runtimeValue;
+            Name = name;
+            fileType = typeof(Node);
+        }
+    }
+
     public static class FontAssetFactory
     {
         public static FontAsset CreateFont(int start, int end, Bitmap[] characters)
@@ -200,7 +225,7 @@ namespace pixel_renderer
                 }
             }
 
-            using TextWriter writer = new StreamWriter(Path + "/" + fileName + ".json");
+            using TextWriter writer = new StreamWriter(Path + "/" + fileName + Settings.AssetsFileExtension);
 
             var settings = new JsonSerializerSettings
             {
@@ -296,23 +321,18 @@ namespace pixel_renderer
         }
         private static void ImportTask()
         {
-            foreach (var dir in Directory.GetDirectories(Path))
-                foreach (var file in Directory.GetFiles(dir))
-                {
-                    var typeString = file.Split('.')[1];
-
-                    var typeRef = TypeFromExtension(typeString);
-
-                    var asset = TryPullObject(file, typeRef);
-
-                    if (asset is not null)
-                    {
-                        if (asset.fileType is null)
-                            asset.fileType = typeof(Asset);
-
-                        AssetLibrary.Register(asset.fileType, asset);
-                    }
-                };
+            foreach (var asset in from dir in Directory.GetDirectories(Path)
+                                  from file in Directory.GetFiles(dir)
+                                  let typeString = file.Split('.')[1]
+                                  let typeRef = TypeFromExtension(typeString)
+                                  let asset = TryPullObject(file, typeRef)
+                                  where asset is not null
+                                  select asset)
+                                    {
+                                        if (asset.fileType is null)
+                                            asset.fileType = typeof(Asset);
+                                        AssetLibrary.Register(asset.fileType, asset);
+                                    };
         }
         /// <summary>
         /// Read and deserialize a single file from Path"
@@ -360,22 +380,21 @@ namespace pixel_renderer
         {
             outObject = null; 
             OpenFileDialog fileDialog = new();
+            
             bool? result = fileDialog.ShowDialog();
-            if (result == true)
-            {
-                var name = fileDialog.FileName;
+            if (result is not true) return;
 
-                var fileExtension = name.Split('.')[1];
-                var typeRef = AssetPipeline.TypeFromExtension(fileExtension);
+            string name = fileDialog.FileName;
+            string fileExtension = name.Split('.')[1];
+            
+            Type typeRef = TypeFromExtension(fileExtension);
+            if (typeRef is null) return; 
 
-                if (typeRef != null)
-                {
-                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
-                    if (asset == null) return;
-                    AssetLibrary.Register(asset.GetType(), asset);
-                    outObject = asset; 
-                }
-            }
+            var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+            if (asset is null) return;
+            
+            AssetLibrary.Register(asset.GetType(), asset);
+            outObject = asset; 
         }
     }
     /// <summary>
@@ -419,17 +438,17 @@ namespace pixel_renderer
         }
         public static bool Fetch<T>(out List<object> output)
         {
-            output = new List<object>();  
-            foreach (var pair in LoadedAssets)
+            output = new List<object>();
+            foreach (var pair in from pair in LoadedAssets
+                                 let type = pair.Key
+                                 where type == typeof(T)
+                                 select pair)
             {
-                var type = pair.Key;
-                if (type == typeof(T))
-                {
-                    foreach (var asset in pair.Value)
-                        output.Add(asset);
-                    return true;
-                }
+                output.AddRange(from asset in pair.Value
+                                select asset);
+                return true;
             }
+
             return false; 
         }
         /// <summary>
@@ -464,20 +483,17 @@ namespace pixel_renderer
         public static void Register(Type type, Asset asset)
         {
             if (!LoadedAssets.ContainsKey(type))
-            {
                 LoadedAssets.Add(type, new List<Asset>());
-            }
 
             LoadedAssets[type].Add(asset);
         }
         public static void Unregister(Type type, string Name)
         {
-            foreach (var asset in LoadedAssets[type])
+            foreach (var asset in from asset in LoadedAssets[type]
+                                  where asset.Name.Equals(Name)
+                                  select asset)
             {
-                if (asset.Name.Equals(Name))
-                {
-                    LoadedAssets[type].Remove(asset);
-                }
+                LoadedAssets[type].Remove(asset);
             }
         }
     }

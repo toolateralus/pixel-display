@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json;
 using System;
 
 namespace pixel_renderer
@@ -6,6 +7,7 @@ namespace pixel_renderer
 
     public abstract class Component
     {
+        [JsonIgnore]
         public Node parentNode = new();
         private string _uuid = ""; 
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID();}

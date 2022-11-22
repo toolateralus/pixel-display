@@ -1,15 +1,15 @@
-﻿namespace pixel_renderer
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
+using Timer = System.Timers.Timer; 
+using System.Windows.Media;
+namespace pixel_renderer
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading.Tasks;
-    using System.Timers;
-    using System.Windows;
-    using System.Windows.Controls.Primitives;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
+ 
     using Bitmap = System.Drawing.Bitmap;
 
     public class Runtime
@@ -20,7 +20,7 @@
         /// Set to true when the Physics session is initialized.
         /// </summary>
         public bool Initialized { get; internal set; } = false;
-        public event Action<InspectorEvent, Action> InspectorEventRaised;
+        public event Action<InspectorEvent> InspectorEventRaised;
 
         public EngineInstance mainWnd;
         /// <summary>
@@ -55,10 +55,12 @@
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
 
             Instance.InitializePhysics();
-            
+
+            await Task.Delay(TimeSpan.FromSeconds(5));
+
             Instance.LoadBackgroundCollection();
 
-            FontAssetFactory.InitializeDefaultFont();
+            //FontAssetFactory.InitializeDefaultFont();
             
             Staging.InitializeDefaultStage();
 
@@ -107,7 +109,7 @@
             {
                 throw new NullReferenceException("Physics Clock is not set to an instance of an object. " +
                     "NOTE: Source code may be corrupted or partially missing," +
-                    " Clean your repository and rebuild the engine, or fix the Clock XD");
+                    " Clean your repository and rebuild the engine,");
             }
             if (!physicsClock.Enabled)
             {
@@ -143,24 +145,22 @@
                             bitmaps.Add(bitmap);
                 }
 
-                if (bitmaps.Count == 0) return; 
-                
+                if (bitmaps.Count == 0) return;
                 Backgrounds = bitmaps;
             }
         }
-
+        public class MissingStageEvent : InspectorEvent
+        {
+           
+        }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            if (stage == null)
-            {
-                return; 
-            }
+            if (stage is null) stage = Stage.New; 
 
             _ = Collision.RegisterColliders(stage);
             Collision.BroadPhase(stage, collisionMap);
             Collision.NarrowPhase(collisionMap);
             Collision.Execute();
-
             Staging.UpdateCurrentStage(stage);
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
@@ -168,11 +168,7 @@
             GetFramerate();
             Execute();
         }
-
-        internal void RaiseInspectorEvent(InspectorEvent e)
-        {
-            InspectorEventRaised?.Invoke(e , e.expression); 
-        }
+        public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
     }
 
 }

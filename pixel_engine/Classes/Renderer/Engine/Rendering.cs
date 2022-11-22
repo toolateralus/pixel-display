@@ -2,13 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Threading;
+    using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Input;
+    using System.Windows.Media.Imaging;
     using Bitmap = System.Drawing.Bitmap;
+    using Image =System.Drawing.Image;
 
     public static class Rendering
-    {
+    { 
         /// <summary>
         /// Game = Build;
         /// Scene = Inspector;
@@ -32,30 +38,41 @@
         {
             get => fallback ??= new(256, 256);
         }
-    
-        public static void Render(Image output)
+
+        public static void Render(System.Windows.Controls.Image output)
         {
             // if we could avoid cloning this object
             // and instead cache the original colors during changes and rewrite them back
             // it would save a very significant amount of memory
             // and CPU
+
             if (runtime.stage is null)
             {
                 runtime.IsRunning = false;
-                return; 
+                return;
             }
             var background = runtime.stage.Background ?? FallBack;
             var clonedBackground = (Bitmap)background.Clone();
             var frame = Draw(clonedBackground);
             DrawToImage(ref frame, output);
         }
+
+        [DllImport("PIXELRENDERER", CallingConvention = CallingConvention.StdCall)]
+        public static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
+
         private static Bitmap Draw(Bitmap frame)
         {
+            //var hbit = GetHBITMAP(frame.GetHbitmap(), 255, 255, 255);
+            //frame = Image.FromHbitmap(hbit);
+            //return frame;
+
+            /// NORMAL RENDERING BELOW;
             Stage stage = Runtime.Instance.stage;
             foreach (var node in stage.Nodes)
             {
-                if (node.TryGetComponent(out Sprite sprite)) continue;
+                if (!node.TryGetComponent(out Sprite sprite)) continue;
                 if (sprite is null) continue;
+
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
@@ -101,10 +118,10 @@
 
             return cachedGCValue;
         }
-        private static void DrawToImage(ref Bitmap inputFrame, Image renderImage)
-        {
-            CBit.Convert(inputFrame, renderImage);
-        }
+        private static void DrawToImage(ref Bitmap inputFrame, System.Windows.Controls.Image renderImage)=>  CBit.Convert(inputFrame, renderImage);
+         
+        
+        
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,9 @@ namespace pixel_renderer
     public class Node
     {
         // Node Info
+        [JsonIgnore]
         public Stage parentStage { get; set; }
+
         public string Name { get; set; }
 
         private string _uuid = "";

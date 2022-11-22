@@ -117,13 +117,12 @@ namespace pixel_renderer
             hash.ClearBuckets();
 
             while (hash.busy)
-                await Task.Delay(TimeSpan.FromMilliseconds(0.01f));
+                await Task.Delay(TimeSpan.FromMilliseconds(1));
 
             Parallel.ForEach(stage.Nodes, node =>
             {
                 if (!node.TryGetComponent<Sprite>(out _)
                     || !node.TryGetComponent<Rigidbody>(out _)) return;
-                // apply Viewport collision seperately since it doesn't use spatial hashing
                 ViewportCollision(node);
                 hash.RegisterObject(node);
             });

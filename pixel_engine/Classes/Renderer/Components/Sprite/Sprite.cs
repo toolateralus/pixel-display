@@ -113,6 +113,7 @@ namespace pixel_renderer
         
         public override void Awake()
         {
+            return; 
             if (!AssetLibrary.Fetch<BitmapAsset>(out List<object> imageObjects)) return; 
 
             foreach (var img in imageObjects) charImgAssets.Add((BitmapAsset) img);

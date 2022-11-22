@@ -1,37 +1,34 @@
-﻿namespace pixel_renderer
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
+using Point = System.Windows.Point;
+
+namespace pixel_renderer
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Point = System.Windows.Point;
-    
     public abstract class InspectorEvent 
     {
         public string message;
         public object sender;
-        public Action expression = () => { };
-        public object[] expressionArgs = new object[] { };
+        public Action<object?, object?, object?, object?> expression = (object? arg1, object? arg2 , object? arg3, object? arg4) => { };
+        public object[] expressionArgs = new object[3];
     }
   
     public static class Staging
     {
         private const int maxClickDistance_InPixels = 0;
         static Runtime runtime => Runtime.Instance;
-
         // this variable is used by the inspector to
         // ensure user'a click grabs a new node each time 
         public static Node lastSelected;
-
         public static void SetCurrentStage(Stage stage) => runtime.stage = stage;
-        
         public static void UpdateCurrentStage(Stage stage)
         {
             stage.FixedUpdate(delta: runtime.lastFrameTime);
             runtime.frameCount++;
         }
-
         public static void InitializeDefaultStage()
         {
             var nodes = new List<Node>(); 
@@ -39,14 +36,12 @@
             Bitmap background = new(256, 256);
             SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
         }
-
         private static void InitializeGenericNodes(List<Node> nodes)
         {
             AddPlayer(nodes);
             AddFloor(nodes);
             for (int i = 0; i < 1000; i++) CreateGenericNode(nodes, i);
         }
-
         private static void AddFloor(List<Node> nodes)
         {
             var staticNodes = new List<Node>(); 
@@ -65,13 +60,12 @@
             nodes.AddRange(staticNodes);
 
         }
-
         public static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
-            var randomScale = Vec2.one * 5;
+            var five = Vec2.one * 5;
             var node = new Node($"NODE {i}", pos, Vec2.one);
-            node.AddComponent(new Sprite(randomScale, JRandom.Color(), true));
+            node.AddComponent(new Sprite(five, JRandom.Color(), true));
             node.AddComponent(new Rigidbody()
             {
                 IsTrigger = false,
@@ -82,7 +76,6 @@
             node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
-        
         public static bool TryCheckOccupant(Point pos, out Node? result)
         {
             // round up number to improve click accuracy
@@ -131,8 +124,7 @@
             result = null;
             return false;
         }
-        
-        private static void AddPlayer(List<Node> nodes)
+        public static void AddPlayer(List<Node> nodes)
         {
             Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
@@ -157,8 +149,6 @@
          
           
         }
-
-     
     }
   
 }

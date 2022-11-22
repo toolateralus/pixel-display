@@ -21,6 +21,8 @@ using System.Text.Json.Nodes;
 using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.Windows.Navigation;
+using System.Linq.Expressions;
+using System.Windows.Shell;
 #endregion
 
 namespace pixel_editor
@@ -107,8 +109,6 @@ namespace pixel_editor
                     Rendering.Render(image);
                     gcAllocText.Content = Rendering.GetGCStats(); 
                 }
-
-           
         }
         /// <summary>
         /// Called on program close
@@ -166,7 +166,6 @@ namespace pixel_editor
             stageWindow.Closed += Wnd_Closed;
            
         }
-
         private void Wnd_Closed(object? sender, EventArgs e) => 
             stageWindow = null; 
 
@@ -185,19 +184,7 @@ namespace pixel_editor
 
             Awake(); 
         }
-        public void HandleEvent(InspectorEvent e, Action expression)
-        {
-            var msg = MessageBox.Show(e.message, expression.ToString(), MessageBoxButton.YesNo);
-            if (msg != MessageBoxResult.Yes) return;
-            var dialog = new OpenFileDialog();
-            var result = dialog.ShowDialog() ?? false; 
-            if (result)
-            {
-                var type = AssetPipeline.TypeFromExtension(dialog.FileName.Split('.')[1]);
-                AssetIO.TryDeserializeNonAssetFile(dialog.FileName, type);
-            }
-
-        }
+       
         public Node? loadedNode;
         private List<TextBlock> activeControls = new(); 
         private Label name;
@@ -219,8 +206,16 @@ namespace pixel_editor
               OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
 
-            Runtime.Instance.InspectorEventRaised +=  HandleEvent;
+            Runtime.Instance.InspectorEventRaised += Instance_InspectorEventRaised;
         }
+        private void Instance_InspectorEventRaised(InspectorEvent e)
+        {
+            var msg = MessageBox.Show(e.expression.ToString(), e.message , MessageBoxButton.YesNo);
+            var args = e.expressionArgs;
+            if (args.Length < 4) return; 
+            e.expression(args[0], args[1] ?? null, args[2] ?? null, args[3] ?? null);
+        }
+
         public void Update(object? sender, EventArgs e)
         {
      

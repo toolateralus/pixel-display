@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -6,6 +7,8 @@ using System.Linq;
 
 namespace pixel_renderer
 {
+  
+
     public class Stage : IEnumerable
     {
         public string Name { get; set; }
@@ -43,7 +46,12 @@ namespace pixel_renderer
                 if (!NodesByName.ContainsKey(node.Name))
                     NodesByName.Add(node.Name, node);
         }
-
+        public void CreateNode(Node? template)
+        {
+            var list = Nodes.ToList();
+            list.Add(template ?? Node.New);
+            Nodes = list.ToArray(); 
+        }
 
         /// <summary>
         /// update loop, fixed to the framerate of the rendering stage; 
