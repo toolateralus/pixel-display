@@ -2,12 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Threading;
+    using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Input;
+    using System.Windows.Media.Imaging;
     using Bitmap = System.Drawing.Bitmap;
+    using Image =System.Drawing.Image;
 
     public static class Rendering
-    {
+    { 
         /// <summary>
         /// Game = Build;
         /// Scene = Inspector;
@@ -15,47 +22,69 @@
         /// Controlled and read externally, serves as a reference to what is currently being rendered; 
         /// </summary>
         public static RenderState State = RenderState.Game;
-        public static Queue<Bitmap> FrameBuffer = new Queue<Bitmap>();
         public static double FrameRate()
         {
             Runtime env = Runtime.Instance;
             var lastFrameTime = env.lastFrameTime;
             var frameCount = env.frameCount;
-            var frameRate =
-                Math.Floor(1 /
-                TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds
-                * frameCount);
+            var frameRate = Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds * frameCount);
+
             return frameRate;
         }
         static Runtime runtime => Runtime.Instance;
-        public static void Render(Image output)
+
+        static Bitmap fallback;
+        public static Bitmap FallBack
         {
-            var player = runtime.stage.FindNode("Player");
-            var cam = player.GetComponent<Camera>();
-            var frame = Draw(cam, (Bitmap)runtime.stage.Background.Clone());
-            Insert(frame);
-            var renderFrame = FrameBuffer.First();
-            DrawToImage(ref renderFrame, output);
+            get => fallback ??= new(256, 256);
         }
 
-        private static Bitmap Draw(Camera camera, Bitmap frame)
+        public static void Render(System.Windows.Controls.Image output)
         {
+            // if we could avoid cloning this object
+            // and instead cache the original colors during changes and rewrite them back
+            // it would save a very significant amount of memory
+            // and CPU
+
+            if (runtime.stage is null)
+            {
+                runtime.IsRunning = false;
+                return;
+            }
+            var background = runtime.stage.Background ?? FallBack;
+            var clonedBackground = (Bitmap)background.Clone();
+            var frame = Draw(clonedBackground);
+            DrawToImage(ref frame, output);
+        }
+
+        [DllImport("PIXELRENDERER", CallingConvention = CallingConvention.StdCall)]
+        public static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
+
+        private static Bitmap Draw(Bitmap frame)
+        {
+            //var hbit = GetHBITMAP(frame.GetHbitmap(), 255, 255, 255);
+            //frame = Image.FromHbitmap(hbit);
+            //return frame;
+
+            /// NORMAL RENDERING BELOW;
             Stage stage = Runtime.Instance.stage;
             foreach (var node in stage.Nodes)
             {
-                var sprite = node.GetComponent<Sprite>();
+                if (!node.TryGetComponent(out Sprite sprite)) continue;
                 if (sprite is null) continue;
 
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
+
                         var offsetX = node.position.x + x;
                         var offsetY = node.position.y + y;
+
                         if (offsetX < 0) continue;
                         if (offsetY < 0) continue;
 
-                        if (offsetX >= Constants.screenWidth) continue;
-                        if (offsetY >= Constants.screenHeight) continue;
+                        if (offsetX >= Settings.ScreenWidth) continue;
+                        if (offsetY >= Settings.ScreenHeight) continue;
 
                         var color = sprite.colorData[x, y];
                         var position = new Vec2((int)offsetX, (int)offsetY);
@@ -68,15 +97,31 @@
             }
             return frame;
         }
-        private static void Insert(Bitmap inputFrame)
+
+        static string cachedGCValue = "";
+        
+        const int framesUntilGC_Check = 600;
+        private static int framesSinceGC_Check = 0;
+
+        public static string GetGCStats()
         {
-            if (FrameBuffer.Count > 0) FrameBuffer.Dequeue();
-            FrameBuffer.Enqueue(inputFrame);
+            if (framesSinceGC_Check < framesUntilGC_Check)
+            {
+                framesSinceGC_Check++;
+                return cachedGCValue;
+            }
+            framesSinceGC_Check = 0;
+
+            var bytes = GC.GetTotalMemory(false) + 1;
+            var megaBytes = bytes / 1048576;
+            cachedGCValue = $"GC Alloc:{megaBytes} MB";
+
+            return cachedGCValue;
         }
-        private static void DrawToImage(ref Bitmap inputFrame, Image renderImage)
-        {
-            CBitmap.Convert(inputFrame, renderImage);
-        }
+        private static void DrawToImage(ref Bitmap inputFrame, System.Windows.Controls.Image renderImage)=>  CBit.Convert(inputFrame, renderImage);
+         
+        
+        
     }
 
 }

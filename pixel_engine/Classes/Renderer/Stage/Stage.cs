@@ -1,65 +1,84 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace pixel_renderer
 {
+  
+
     public class Stage : IEnumerable
     {
         public string Name { get; set; }
-        public string UUID { get; private set; }
-        public event Action OnHierarchyChanged;
+        private string _uuid = "";
+        
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
+        public event Action OnQueryMade; 
+
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+
         public Node[] Nodes { get; private set; }
+        public Node[] FindNodesByTag(string tag)
+        {
+            OnQueryMade?.Invoke(); 
+            IEnumerable<Node> matchingNodes = Nodes.Where(node => node.tag == tag);
+            return matchingNodes.ToArray();
+        }
+        public Node FindNodeByTag(string tag)
+        {
+            OnQueryMade?.Invoke();
+            return Nodes
+                    .Where(node => node.tag == tag)
+                    .First();
+        }
         public Node FindNode(string name)
         {
-            if (NodesByName.ContainsKey(name))
-            {
-                return NodesByName[name];
-            }
-            return null;
+            OnQueryMade?.Invoke();
+            return Nodes
+                    .Where(node => node.Name == name)
+                    .First();
         }
         public void RefreshStageDictionary()
         {
             foreach (Node node in Nodes)
-            {
                 if (!NodesByName.ContainsKey(node.Name))
                     NodesByName.Add(node.Name, node);
-            }
         }
-
+        public void CreateNode(Node? template)
+        {
+            var list = Nodes.ToList();
+            list.Add(template ?? Node.New);
+            Nodes = list.ToArray(); 
+        }
 
         /// <summary>
         /// update loop, fixed to the framerate of the rendering stage; 
         /// </summary>
         /// <param name="delta"></param>
         public void FixedUpdate(float delta)
-        {
-            foreach (Node node in Nodes) node.FixedUpdate(delta);
-        }
+        { foreach (Node node in Nodes) node.FixedUpdate(delta); }
         public void Awake()
-        { 
-            foreach (Node node in Nodes) node.Awake(); 
+        {
+            RefreshStageDictionary(); 
+            OnQueryMade += RefreshStageDictionary;
+            foreach (Node node in Nodes)
+            {
+                node.parentStage ??= this; 
+                node.Awake();
+            }
         }
-           
 
-        public Bitmap Background { get; set; }
+
+        public Bitmap Background;
         public static Stage Empty => new(Array.Empty<Node>());
         public static Stage New => new("New Stage", new Bitmap(256, 256), Array.Empty<Node>());
         /// <summary>
         /// Called on constructor initialization
         /// </summary>
-        public void Init()
-        {
-            UUID = pixel_renderer.UUID.NewUUID(); 
-            RefreshStageDictionary();
-            GetEvents();
-        }
-        private void GetEvents()
-        {
-            OnHierarchyChanged += RefreshStageDictionary;
-        }
+       
+      
         public Stage(Node[] nodes)
         {
             nodes = new Node[nodes.Length];
@@ -67,14 +86,16 @@ namespace pixel_renderer
             {
                 nodes[i] = nodes[i];
             }
-            Init(); 
+            Awake();
+            RefreshStageDictionary();
         }
         public Stage(string Name, Bitmap Background, Node[] nodes)
         {
             this.Name = Name;
             this.Background = Background;
             Nodes = nodes;
-            Init();
+            Awake();
+            RefreshStageDictionary(); 
         }
 
         // for IEnumerator implementation;

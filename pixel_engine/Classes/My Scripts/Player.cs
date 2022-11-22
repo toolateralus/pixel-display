@@ -1,51 +1,46 @@
 ﻿using pixel_renderer;
-using System.Windows;
-using System.Windows.Documents;
+using Key = System.Windows.Input.Key;
 using Color = System.Drawing.Color;
 internal class Player : Component
 {
-    Rigidbody rb;
-    Sprite sprite;
-    
     public bool takingInput = true; 
-    public const float speed = 1f;
-    int i = 0;
+    public int speed = 2;
+    Sprite sprite = new();
+    Rigidbody rb = new(); 
+
     public override void Awake()
     {
-        base.Awake(); 
-        rb = parentNode.GetComponent<Rigidbody>();
-        sprite = parentNode.GetComponent<Sprite>();
-        if (sprite == null || rb == null) return; 
-        sprite.isCollider = true;
-        sprite.DrawSquare(Vec2.one * 8, Color.AliceBlue, true);
-        
+        sprite = GetComponent<Sprite>(); 
+        rb = GetComponent<Rigidbody>();
+
+        sprite.isCollider = true; 
+        sprite.DrawSquare(new Vec2(10,10), Color.NavajoWhite, true);
     }
+
     public override void FixedUpdate(float delta)
     {
         if (!takingInput) return;
-        var move = Input.GetMoveVector();
-        GetJumpInput(move);
-        GetMove(move);
-    }
-    public override void OnTrigger(Rigidbody other){}
-    public override void OnCollision(Rigidbody collider) => RandomizeSpriteColor();
-    private void GetMove(Vec2 moveVector) => rb.velocity.x += moveVector.x * speed; 
-    private void GetJumpInput(Vec2 moveVector)
-    {
-        if (moveVector.y == 0) return;
-        rb.velocity.y = moveVector.y * speed * 25; 
-    }
-    private void RandomizeSpriteColor()
-    {
-        int x = (int)sprite.size.x;
-        int y = (int)sprite.size.y;
-        var colorData = new Color[x, y];
-        for(int j = 0; j < y; j++)
-        for (int i = 0; i < x; i++)
+        if (Input.GetKeyDown(Key.Q))
         {
-            colorData[i, j] = JRandom.Color();
+            Staging.InitializeDefaultStage(); 
         }
-        sprite.DrawSquare(sprite.size, colorData, true);
+        var move = Input.GetMoveVector();
+        Jump(move);
+        Move(move);
     }
+
+    public override void OnTrigger(Rigidbody other) {}
+
+    public override void OnCollision(Rigidbody collider) => sprite.Randomize();
+
+    private void Move(Vec2 moveVector) => rb.velocity.x += moveVector.x * speed; 
+    
+    private void Jump(Vec2 moveVector)
+    {
+        var jumpVel = speed * 2;
+        rb.velocity.y = moveVector.y * jumpVel; 
+    }
+    
+    
 
 }

@@ -2,7 +2,7 @@
 {
     using System;
     using System.Windows;
-    public class Vec3
+    public struct Vec3
     {
         public float x;
         public float y;
@@ -44,7 +44,7 @@
         };
 
     }
-    public class Vec2
+    public struct Vec2
     {
         public float x;
         public float y;
@@ -63,7 +63,10 @@
             this.y = y;
         }
         public Vec2()
-        { }
+        { 
+            x = new();
+            y = new(); 
+        }
 
         public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y); 
         public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y); 
@@ -86,8 +89,21 @@
             X = v.x,
             Y = v.y
         };
+        /// <summary>
+        /// Clamp each value of the vector component-wise;
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        internal static void Clamp(Vec2 value, Vec2 min, Vec2 max)
+        {
+            if (value.x < min.x) value.x = min.x;
+            if (value.x > max.x) value.x = max.x;
+            if (value.y < min.y) value.y = min.y;
+            if (value.y > max.y) value.y = max.y;
+        }
     }
-    public enum RenderState { Off, Game, Scene }
+    public enum RenderState { Game, Scene, Off}
 }
 
 

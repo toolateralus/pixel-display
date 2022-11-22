@@ -12,6 +12,17 @@ using System.Windows.Media;
 using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
+using Microsoft.Win32;
+using System.IO;
+using System.Text.Json.Nodes;
+using System.Windows.Media.Imaging;
+using System.Drawing;
+using System.Windows.Navigation;
+using System.Linq.Expressions;
+using System.Windows.Shell;
 #endregion
 
 namespace pixel_editor
@@ -21,83 +32,6 @@ namespace pixel_editor
     /// </summary>
     public partial class Main : Window
     {
-        static EngineInstance engine; 
-        Inspector inspector;
-        public double ScaleValue
-        {
-            get => (double)GetValue(ScaleValueProperty);
-            set => SetValue(ScaleValueProperty, value);
-        }
-        private static int renderStateIndex = 0; 
-        // main entry point for application
-        public Main()
-        {
-            InitializeComponent();
-            engine = new();
-            engine.Show();
-            inspector = new Inspector(inspectorObjName,
-                                      inspectorObjInfo,
-                                      inspectorChildGrid);
-            GetEvents();
-        }
-
-        private void GetEvents()
-        {
-            CompositionTarget.Rendering += Update;
-            Closing += OnDisable;
-            image.MouseLeftButtonDown += Mouse0;
-        }
-        private void Update(object? sender, EventArgs e)
-        {
-            inspector.Update(sender, e);
-            if (!Runtime.Instance.running 
-                || Rendering.State != RenderState.Scene) return; 
-
-            Rendering.Render(image); 
-        }
-        /// <summary>
-        /// Called on program close
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnDisable(object? sender, EventArgs e)
-        {
-            engine.Close();
-        }
-        private void OnViewChanged(object sender, RoutedEventArgs e)
-        {
-            IncrementRenderState();
-        }
-        private void OnPlay(object sender, RoutedEventArgs e)
-        {
-            if (!Runtime.Instance.running)
-            {
-                engine.Accept_Clicked(sender, e); 
-            }
-        }
-        private void IncrementRenderState()
-        {
-            renderStateIndex++;
-            if (renderStateIndex == sizeof(RenderState))
-            {
-                renderStateIndex = 0;
-            }
-            Rendering.State = (RenderState)renderStateIndex;
-            viewBtn.Content = Rendering.State.ToString();
-        }
-        private void Mouse0(object sender, MouseButtonEventArgs e)
-        {
-            Point pos = e.GetPosition(sender as Image);
-            if (Runtime.Instance.running)
-            {
-                inspector.DeselectNode();
-                if (Staging.TryCheckOccupant(pos, out Node node))
-                {
-                    inspector.SelectNode(node);
-                }
-            }
-        }
-
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged),new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
@@ -134,17 +68,107 @@ namespace pixel_editor
         {
             CalculateScale();
         }
+        public double ScaleValue
+        {
+            get => (double)GetValue(ScaleValueProperty);
+            set => SetValue(ScaleValueProperty, value);
+        }
         #endregion
 
-        private void OnImportBtnPressed(object sender, RoutedEventArgs e)
-        {
-            AssetPipeline.ImportAsync(); 
-        }
+        Inspector inspector;
+        /// <summary>
+        /// keep this reference of the engine just to close the background window on editor exit.
+        /// </summary>
+        internal static EngineInstance? engine; 
+        private static int renderStateIndex = 0;
+        private StageWnd stageWindow;
 
-        private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
+        // main entry point for application
+        public Main()
         {
-            AssetLibrary.Sync();
+            InitializeComponent();
+            inspector = new Inspector(inspectorObjName,
+                                      inspectorObjInfo,
+                                      inspectorChildGrid);
+            Runtime.inspector = inspector; 
+            engine = new();
+            GetEvents();
         }
+        private void GetEvents()
+        {
+            CompositionTarget.Rendering += Update;
+            Closing += OnDisable;
+            image.MouseLeftButtonDown += Mouse0;
+        }
+        private void Update(object? sender, EventArgs e)
+        {
+            inspector.Update(sender, e);
+            if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null
+                && Rendering.State == RenderState.Scene)
+                {
+                    Rendering.Render(image);
+                    gcAllocText.Content = Rendering.GetGCStats(); 
+                }
+        }
+        /// <summary>
+        /// Called on program close
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnDisable(object? sender, EventArgs e) => engine.Close();
+        private void OnViewChanged(object sender, RoutedEventArgs e) =>  IncrementRenderState();
+        private void OnPlay(object sender, RoutedEventArgs e) => Runtime.Instance.Toggle();
+        private void IncrementRenderState()
+        {
+            if (Runtime.Instance.stage is null)
+            {
+                Rendering.State = RenderState.Off;
+                viewBtn.Content = "Stage null.";
+            }
+            renderStateIndex++;
+            if (renderStateIndex == sizeof(RenderState) - 1)
+            {
+                renderStateIndex = 0;
+            }
+            Rendering.State = (RenderState)renderStateIndex;
+            viewBtn.Content = Rendering.State.ToString();
+            if (Rendering.State == RenderState.Game)
+            {
+                var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
+                if (msg != MessageBoxResult.Yes)
+                    return; 
+                Runtime.Instance.mainWnd = new();  
+                Runtime.Instance.mainWnd.Show(); 
+            }
+        }
+        private void Mouse0(object sender, MouseButtonEventArgs e)
+        {
+            // this cast could be causing erroneous behavior
+            Point pos = e.GetPosition((Image)sender);
+
+            if (Runtime.Instance.IsRunning)
+            {
+                inspector.DeselectNode();
+                if (Staging.TryCheckOccupant(pos, out Node node))
+                    inspector.SelectNode(node);
+            }
+        }
+        private void OnImportBtnPressed(object sender, RoutedEventArgs e) => AssetPipeline.ImportAsync(true); 
+        private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => AssetLibrary.Sync();
+        private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
+        {
+            AssetPipeline.ImportFileDialog();
+        }
+        private void OnStagePressed(object sender, RoutedEventArgs e)
+        {
+            stageWindow = new StageWnd();
+            stageWindow.Show();
+            stageWindow.Closed += Wnd_Closed;
+           
+        }
+        private void Wnd_Closed(object? sender, EventArgs e) => 
+            stageWindow = null; 
+
     }
     public class Inspector
     {
@@ -160,8 +184,9 @@ namespace pixel_editor
 
             Awake(); 
         }
+       
         public Node? loadedNode;
-        private List<TextBlock> currentInspector = new(); 
+        private List<TextBlock> activeControls = new(); 
         private Label name;
         private Label objInfo;
         private Grid componentGrid;
@@ -170,46 +195,61 @@ namespace pixel_editor
         public event Action OnObjectSelected;
         public event Action OnObjectDeselected;
         public event Action OnInspectorUpdated;
+
         public event Action OnComponentAdded;
         public event Action OnComponentRemoved;
-
+        
         public void Awake()
         {
               OnObjectSelected += Refresh;
             OnObjectDeselected += Refresh;
               OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
+
+            Runtime.Instance.InspectorEventRaised += Instance_InspectorEventRaised;
         }
+        private void Instance_InspectorEventRaised(InspectorEvent e)
+        {
+            var msg = MessageBox.Show(e.expression.ToString(), e.message , MessageBoxButton.YesNo);
+            var args = e.expressionArgs;
+            if (args.Length < 4) return; 
+            e.expression(args[0], args[1] ?? null, args[2] ?? null, args[3] ?? null);
+        }
+
         public void Update(object? sender, EventArgs e)
         {
      
         }
-        /// <summary>
-        /// If a Node is loaded, get Node and Component info and assemble a UI based on gathered info.
-        /// </summary>
         private void Refresh()
         {
             if (loadedNode == null) return;
             name.Content = loadedNode.Name;
-            objInfo.Content = $"{loadedNode.Components.Count} Components";
             components = loadedNode.Components;
+            objInfo.Content = $"#{components.Count} Components";
+
             var thickness = new Thickness(0, 0, 0, 0);
-            
             int index = 0;
+
             foreach (var componentType in components.Values)
             {
                 foreach (var component in componentType)
                 {
                     string info = GetComponentInfo(component);
+
                     TextBlock block = CreateBlock(info, thickness);
-                    AddToInspector(index, block, info.Split(' ').Length);
+
+                    int rowSpan = info.Split('\n').Length * 2;
+
+                    AddToInspector(index, block, rowSpan);
+
                     componentGrid.Children.Add(block);
                     componentGrid.UpdateLayout();
-                    currentInspector.Add(block);
+
+                    activeControls.Add(block);
+
                     index++;
                 }
             }
-            
             OnInspectorUpdated?.Invoke();
         }
         public void DeselectNode()
@@ -217,11 +257,11 @@ namespace pixel_editor
             if (loadedNode != null)
             {
                 loadedNode = null;
-                foreach (var control in currentInspector)
+                foreach (var control in activeControls)
                 {
                     componentGrid.Children.Remove(control);
                 }
-                currentInspector.Clear(); 
+                activeControls.Clear(); 
                 OnObjectDeselected?.Invoke();
             }
         }
@@ -233,32 +273,33 @@ namespace pixel_editor
 
         public static void AddToInspector(int i, TextBlock component, int rowSpan)
         {
-            component.SetValue(Grid.RowSpanProperty, rowSpan - 3);
+            component.SetValue(Grid.RowSpanProperty, rowSpan);
             component.SetValue(Grid.ColumnSpanProperty, 8);
-            component.SetValue(Grid.RowProperty, i * 2);
+            component.SetValue(Grid.RowProperty, i + i + i);
             component.SetValue(Grid.ColumnProperty, 6);
         }
         public static string GetComponentInfo(Component component)
         {
-            IEnumerable<PropertyInfo> properties = component.GetType().GetRuntimeProperties();
             IEnumerable<FieldInfo> fields = component.GetType().GetRuntimeFields();
-            string output = $"\b {component.GetType().Name} Properties : \n";
-            // todo = add field and property values to an editable text box aside the label,
-            // once changed send event to update property accordingly.
+            string output = $"\b {component.GetType().Name} Properties : ";
+           
+            IEnumerable<PropertyInfo> properties = component.GetType().GetRuntimeProperties();
             foreach (var property in properties)
             {
-                output += $"\t{property.Name} {property.PropertyType}\n";
+                var value = property.GetValue(component, null);
+                output += $" \n \t{property.Name} {property.PropertyType} {value}";
             }
+            
             foreach (var field in fields)
             {
-                output += $"\t{field}\n";
+                var value = field.GetValue(component);
+                output += $" \n \t{field} {value}";
             }
             return output;
         }
         
         public static Label CreateLabel(string componentInfo, Thickness margin)
         {
-            margin.Bottom = componentInfo.Split(' ').Length;
             return new Label
             {
                 Content = componentInfo,
@@ -267,14 +308,13 @@ namespace pixel_editor
                 Foreground = Brushes.White, 
                 Margin = margin,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Top,
+                VerticalAlignment = VerticalAlignment.Center,
                 FontFamily = new System.Windows.Media.FontFamily("MS Gothic")
             };
         }
         public static TextBlock CreateBlock(string componentInfo, Thickness margin)
         {
-            margin.Bottom = componentInfo.Split(' ').Length + 5;
-            return new TextBlock()
+            return new()
             {
                 Text = componentInfo,
                 FontSize = 2.25f,
@@ -282,11 +322,11 @@ namespace pixel_editor
                 TextWrapping = TextWrapping.Wrap,
                 Background = Brushes.DarkGray,
                 Foreground = Brushes.White,
-                
                 Margin = margin,
-                
+                Height = double.NaN,
+                Width = double.NaN,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Top,
+                VerticalAlignment = VerticalAlignment.Center,
             };
         }
         public static Button CreateButton(string content, Thickness margin) => new Button()

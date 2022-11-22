@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json;
 using System;
 
 namespace pixel_renderer
@@ -6,34 +7,30 @@ namespace pixel_renderer
 
     public abstract class Component
     {
+        [JsonIgnore]
         public Node parentNode = new();
-        public string UUID { get; set; }
+        private string _uuid = ""; 
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID();}
         public string Name { get; set; }
-        public virtual void OnTrigger(Rigidbody other)
-        {
 
-        }
-        public virtual void OnCollision(Rigidbody collider)
-        {
+        public virtual void OnTrigger(Rigidbody other) {}
+        public virtual void OnCollision(Rigidbody collider) {}
+        public virtual void FixedUpdate(float delta) {}
+        public virtual void Update() {}
+        public virtual void Awake() {}
 
-        }
-        public virtual void FixedUpdate(float delta)
+        internal void Init()
         {
-
-        }
-        public virtual void Update()
-        {
-            
+            Name = parentNode.Name + $" {GetType()}";
+            Awake(); 
         }
         /// <summary>
-        /// Best Practice: call base.Awake at the beginning of this method override to get a UUID and ComponentName.
+        /// Performs a 'Get Component' call on the Parent node object of the component this is called from.
         /// </summary>
-        public virtual void Awake()
-        {
-            UUID = pixel_renderer.UUID.NewUUID();
-            Name = parentNode.Name + $" {GetType()}"; 
-        }
-
+        /// <typeparam name="T"></typeparam>
+        /// <param name="index"></param>
+        /// <returns>A component of specified type and parent</returns>
+        public T GetComponent<T>(int? index = 0) where T : Component => parentNode.GetComponent<T>(index);
     }
 
 }

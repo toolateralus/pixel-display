@@ -1,83 +1,79 @@
-﻿namespace pixel_renderer
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Security;
-    using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
+using Point = System.Windows.Point;
 
+namespace pixel_renderer
+{
+    public abstract class InspectorEvent 
+    {
+        public string message;
+        public object sender;
+        public Action<object?, object?, object?, object?> expression = (object? arg1, object? arg2 , object? arg3, object? arg4) => { };
+        public object[] expressionArgs = new object[3];
+    }
+  
     public static class Staging
     {
         private const int maxClickDistance_InPixels = 0;
         static Runtime runtime => Runtime.Instance;
+        // this variable is used by the inspector to
+        // ensure user'a click grabs a new node each time 
         public static Node lastSelected;
-
         public static void SetCurrentStage(Stage stage) => runtime.stage = stage;
         public static void UpdateCurrentStage(Stage stage)
         {
-            stage.RefreshStageDictionary();
             stage.FixedUpdate(delta: runtime.lastFrameTime);
-            if (Debug.debugging) Debug.debug = "";
             runtime.frameCount++;
         }
         public static void InitializeDefaultStage()
         {
-            List<Node> nodes = new List<Node>();
-            
-            AddPlayer(nodes);
-            //AddFloor(nodes);
-
-            for (int i = 0; i < 100; i++)
-            {
-                AddNode(nodes, i);
-            }
-            SetCurrentStage(new Stage("Default Stage", runtime.Backgrounds[0], nodes.ToArray()));
-            InitializeNodes();
-            runtime.stage.RefreshStageDictionary();
+            var nodes = new List<Node>(); 
+            InitializeGenericNodes(nodes);
+            Bitmap background = new(256, 256);
+            SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
         }
-
+        private static void InitializeGenericNodes(List<Node> nodes)
+        {
+            AddPlayer(nodes);
+            AddFloor(nodes);
+            for (int i = 0; i < 1000; i++) CreateGenericNode(nodes, i);
+        }
         private static void AddFloor(List<Node> nodes)
         {
-            Vec2 startPos = new(2, Constants.screenHeight - 16);
-            Node floor = new("Floor", startPos, Vec2.one);
-            Floor floorScript = new(); 
-            Sprite floorSprite = 
-                new(new Vec2(Constants.screenWidth - 4, 10),
-                System.Drawing.Color.FromArgb(255, 145, 210, 75),
-                true);
-
-            Rigidbody floorRb = new()
+            var staticNodes = new List<Node>(); 
+           for (int i = 0; i < 240; i++)
+               CreateGenericNode(staticNodes, i);
+            foreach (var node in staticNodes)
             {
-                IsTrigger = false, 
-                usingGravity = true,
-                drag = 0f,
-                Name = "Floor - Rigidbody"
-            };
-            floor.AddComponent(floorRb);
-            floor.AddComponent(floorSprite);
-            floor.AddComponent(floorScript);
-            nodes.Add(floor);
-        }
+                var randomDrag = JRandom.Bool() ? 0 : 1;
+                var x = node.GetComponent<Rigidbody>();
+                x.usingGravity = JRandom.Bool();
+                x.drag = randomDrag;
 
-        private static void InitializeNodes()
-        {
-            foreach (Node node in runtime.stage.Nodes)
-            {
-                node.parentStage = runtime.stage;
-                node.Awake(); 
             }
+
+
+            nodes.AddRange(staticNodes);
+
         }
-        private static void AddNode(List<Node> nodes, int i)
+        public static void CreateGenericNode(List<Node> nodes, int i)
         {
             var pos = JRandom.ScreenPosition();
-            var node = new Node($"NODE {i}", new Vec2(pos.x, pos.y), new Vec2(0, 1));
-            var position = Vec2.one * JRandom.Int(1, 3);
-            node.AddComponent(new Sprite(position, JRandom.Color(), true));
+            var five = Vec2.one * 5;
+            var node = new Node($"NODE {i}", pos, Vec2.one);
+            node.AddComponent(new Sprite(five, JRandom.Color(), true));
             node.AddComponent(new Rigidbody()
             {
                 IsTrigger = false,
                 usingGravity = true,
                 drag = .1f
             });
+            var randomDirection = JRandom.Direction(); 
+            node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
         public static bool TryCheckOccupant(Point pos, out Node? result)
@@ -110,53 +106,49 @@
                 {
                     if (node == lastSelected) continue;
                     result = node;
+                    if (lastSelected != null)
+                    {
+                        if (lastSelected.TryGetComponent(out Sprite sprite))
+                        {
+                            sprite.RestoreCachedColor(false);
+                        }
+                    }
                     lastSelected = node;
+                    if (node.TryGetComponent(out Sprite sprite_))
+                    {
+                        sprite_.Highlight(Color.White); 
+                    }
                     return true;
                 }
             }
             result = null;
             return false;
         }
-        private static void AddPlayer(List<Node> nodes)
+        public static void AddPlayer(List<Node> nodes)
         {
             Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
-            
             Rigidbody rb = new()
             {
                 IsTrigger = false,
-
-            };
-            Rigidbody trigger = new()
-            {
-                IsTrigger = true
             };
             Sprite sprite = new(Vec2.one, JRandom.Color(), true);
-
-            Camera cam = new();
-
             Player player_obj = new()
             {
                 takingInput = true
             };
-            Text text = new() 
-            {
-                
-            };
+            Text text = new(); 
+           
+
             playerNode.AddComponent(text);
             playerNode.AddComponent(rb);
-            playerNode.AddComponent(trigger);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);
-            playerNode.AddComponent(cam);
-            playerNode.AddComponent(cam);
             nodes.Add(playerNode);
 
-            // create asset of type script because the player is an example of a
-            // user-created script; 
+         
           
         }
     }
-
-   
+  
 }

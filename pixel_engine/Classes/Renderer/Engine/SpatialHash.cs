@@ -9,6 +9,9 @@
         int columns;
         int cellSize;
         List<List<Node>> Buckets = new List<List<Node>>();
+        /// <summary>
+        /// emits a busy signal while invalid operations are very likely
+        /// </summary>
         internal bool busy;
 
         public SpatialHash(int screenWidth, int screenHeight, int cellSize)
@@ -22,6 +25,7 @@
                 Buckets.Add(new List<Node>());
             }
         }
+
         internal void ClearBuckets()
         {
             busy = true;
@@ -31,6 +35,7 @@
             }
             busy = false; 
         }
+
         internal void RegisterObject(Node obj)
         {
             List<int> cells = Hash(obj);
@@ -42,30 +47,35 @@
         }
         internal List<Node> GetNearby(Node node)
         {
-            List<Node> nodes = new List<Node>();
+            
+            List<Node> nodes = new List<Node>(256);
+
             List<int> buckets = Hash(node);
             foreach (var index in buckets)
             {
                 if (index < 0 || index >= rows * columns -1) continue;
+
+                if (Buckets[index].Count > nodes.Capacity)
+                    nodes.Capacity = Buckets[index].Count;
+
                 nodes.AddRange(Buckets[index]);
             }
             return nodes;
         }
+
         private void AddBucket(Vec2 vector, float width, List<int> bucket)
         {
-            int cellPosition = (int)(
-                       (Math.Floor(vector.x / cellSize)) +
-                       (Math.Floor(vector.y / cellSize)) *
-                       width
-            );
+            int cellPosition = (int)
+                (Math.Floor((double)vector.x / cellSize) +
+                 Math.Floor((double)vector.y / cellSize) * width);
 
             if (!bucket.Contains(cellPosition))
                 bucket.Add(cellPosition);
-
         }
+
         private List<int> Hash(Node obj)
         {
-            Sprite sprite = obj.GetComponent<Sprite>(); 
+            if(!obj.TryGetComponent(out Sprite sprite)) return new(); 
             List<int> bucketsObjIsIn = new List<int>();
             Vec2 min = new Vec2(
                 obj.position.x,
@@ -73,7 +83,7 @@
             Vec2 max = new Vec2(
                 obj.position.x + sprite.size.x,
                 obj.position.y + sprite.size.y);
-            float width = Constants.screenWidth / cellSize;
+            float width = Settings.ScreenHeight / cellSize;
             
             //TopLeft
             AddBucket(min, width, bucketsObjIsIn);

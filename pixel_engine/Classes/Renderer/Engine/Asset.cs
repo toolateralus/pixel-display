@@ -1,50 +1,71 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Security.Permissions;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Interop;
+using System.Xml.Linq;
+using Microsoft.Win32;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer
 {
     /// <summary>
-    /// base class for all pixel_engine asset references; 
+    /// Base class for all Pixel_engine Assets
     /// </summary>
     public class Asset
     {
         public string pathFromRoot = "";
         public string fileSize = "";
-        public string fileType = "";
-        public Type runtimeType; 
-        public string UUID = "";
-        public string Name = "NewAsset";
+        private string _uuid = "";
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
+        public string Name = "New Asset";
+        public Type fileType;
+        [JsonConstructor]
+        public Asset(string name, Type fileType)
+        {
+            Name = name;
+            this.fileType = fileType; 
+        }
         public Asset() { }
-        public Asset(string name)
-        {
-            Name = name; 
-        }
-        public Asset(string pathFromRoot, string fileType, Type runtimeType)
-        {
-            this.pathFromRoot = pathFromRoot;
-            this.fileType = fileType;
-            this.runtimeType = runtimeType; 
-            UUID = pixel_renderer.UUID.NewUUID();
-            AssetLibrary.Register(GetType(), this);
-        }
-    }
 
+    }
     public class BitmapAsset : Asset
     {
-        public Bitmap bitmap; 
-        public Color[,] colors 
+        public Bitmap? RuntimeValue = null; 
+        public BitmapAsset(string name) : base(name, typeof(Bitmap))
         {
-            get  => ColorArrayFromBitmap(bitmap);
+
+        }
+        public static BitmapAsset BitmapToAsset(string fileName)
+        {
+            Bitmap? bmp = new(fileName);
+
+            BitmapAsset asset = new("BitmapAsset");
+            
+            if (bmp != null)
+                asset.RuntimeValue = bmp;
+            
+            return asset;
+        }
+        public Color[,] Colors
+        {
+            get  => ColorArrayFromBitmap(RuntimeValue);
         }
         public static Bitmap BitmapFromColorArray(Color[,] colors)
         {
-            Bitmap bitmap = new Bitmap(64, 64);  
+            Bitmap bitmap = new(colors.GetLength(0) , colors.GetLength(1));  
             for (int i = 0; i < bitmap.Width; i++)
             {
                 for (int j = 0; j < bitmap.Height; j++)
@@ -67,20 +88,67 @@ namespace pixel_renderer
             return s;
         }
     }
-
     public class FontAsset : Asset 
     {
-        new public string Name = "NewFontAsset";
+        new public string Name = "New Font Asset";
         public Dictionary<char, Bitmap> characters = new();
+        internal static List<Bitmap> GetCharacterImages(FontAsset asset, string text)
+        {
+            List<Bitmap> output = new();
+            int i = 0;
 
-       
+            foreach (char character in text)
+            {
+                var x = character;
+                if (char.IsLower(character))
+                {
+                    x = char.ToUpper(character);
+                }
+                var img = (Bitmap)asset.characters[x].Clone();
+                output.Add(img);
+                i++;
+            }
+            return output;
+        }
+        internal static List<Vec2> GetCharacterPosition(FontAsset asset)
+        {
+            List<Vec2> positions = new();
+            foreach (var x in asset.characters.Values)
+                positions.Add(new(x.Width, x.Height));
+
+            return positions; 
+        }
+        public FontAsset(string name, Type fileType) : base(name, fileType)
+        {
+        }
+    }
+    public class StageAsset : Asset
+    {
+        public Stage RuntimeValue;
+        public StageAsset(string name, Type? fileType, Stage runtimeValue) : base(name, fileType)
+        {
+            this.fileType = typeof(Stage);
+            this.Name = name;
+            this.RuntimeValue = runtimeValue;
+        }
+    }
+
+    public class NodeAsset : Asset
+    {
+        public Node RuntimeValue;
+        public NodeAsset(string name, Node runtimeValue)
+        {
+            RuntimeValue = runtimeValue;
+            Name = name;
+            fileType = typeof(Node);
+        }
     }
 
     public static class FontAssetFactory
     {
         public static FontAsset CreateFont(int start, int end, Bitmap[] characters)
         {
-            FontAsset fontAsset = new FontAsset();
+            FontAsset fontAsset = new($"fontAsset{start}", typeof(pixel_renderer.FontAsset));
             char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
             for (int i = start; i < end; i++)
             {
@@ -97,51 +165,34 @@ namespace pixel_renderer
             }
             return fontAsset; 
         }
-
         /// <summary>
-        /// Really expensive text rendering; 
+        ///
         /// </summary>
         /// <param name="asset"></param>
         /// <param name="text"></param>
-        /// <returns></returns>
-        internal static Dictionary<Bitmap, Vec2> ToString(FontAsset asset, string text)
-        {
-            Dictionary<Bitmap, Vec2> output = new();
-            int i = 0;
-            foreach (char character in text)
-            {
-                var x = character;
-                if (char.IsLower(character))
-                {
-                     x = char.ToUpper(character); 
-                }
-                var img = (Bitmap)asset.characters[x].Clone(); 
-                output.Add(img, new Vec2(i + img.Width, 0));
-                i++;
-            }
-            return output; 
-        }
-
+        /// <returns> a List of Bitmap objects ordered by their Character value in accordance to the Text passed in.</returns>
         internal static void InitializeDefaultFont()
         {
-            var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var path = appdata + "\\Pixel\\Images\\Font";
+            var path = Settings.Appdata + Settings.FontDirectory;
+
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
             IEnumerable<string> files = Directory.GetFiles(path);
+
             int i = 0; 
+
             foreach (string file in files)
             {
-                BitmapAsset bitmap = new()
+                BitmapAsset bitmap = new($"{'a' + i}")
                 {
-                    bitmap = new(file),
-                    Name = $"{'a' + i}"
+                    RuntimeValue = new(file),
+                    fileType = typeof(Bitmap)
                 };
-                i++;
                 AssetLibrary.Register(typeof(BitmapAsset), bitmap);
+                i++;
             }
         }
     }
-
     public static class AssetIO
     {
         public static bool skippingOperation = false; 
@@ -152,15 +203,16 @@ namespace pixel_renderer
             {
                 Directory.CreateDirectory(Path);
             }
-            if (File.Exists(Path + "/" + fileName + ".json"))
+            
+            if (File.Exists(Path + "/" + fileName + Settings.AssetsFileExtension))
             {
                 if (!skippingOperation)
                 {
                     var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
-                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning,
+                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Error,
                                              MessageBoxResult.No, MessageBoxOptions.RtlReading);
                     var doForAllResult = MessageBox.Show($"Do for all (uses last choice)",
-                                            "", MessageBoxButton.YesNo, MessageBoxImage.Warning,
+                                            "", MessageBoxButton.YesNo, MessageBoxImage.Error,
                                              MessageBoxResult.No, MessageBoxOptions.RtlReading);
                     if (doForAllResult == MessageBoxResult.Yes)
                     {
@@ -172,61 +224,182 @@ namespace pixel_renderer
                     }
                 }
             }
-            TextWriter writer = new StreamWriter(Path + "/" + fileName + ".json");
-            var json = JsonSerializer.Create();
-            json.Serialize(writer, data);
+
+            using TextWriter writer = new StreamWriter(Path + "/" + fileName + Settings.AssetsFileExtension);
+
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+            };
+
+            var jsonSerializer = JsonSerializer.Create(settings);
+            
+            jsonSerializer.Serialize(writer, data);
+            
             writer.Close();
         }
-        public static Asset ReadAssetFile(string layoutSaveName)
+        public static Asset? ReadAssetFile(string fileName)
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/pbTracker/layouts";
-            if (!Directory.Exists(path))
+            if (!Directory.Exists(Path))
             {
-                throw new Exception("File path not found.. Try again!");
+                Directory.CreateDirectory(Path);
+                return null; 
             }
-            JsonSerializer serializer = new JsonSerializer();
-            StreamReader reader = new StreamReader(path + "/" + layoutSaveName);
-            Asset asset = new Asset();
-            using (JsonTextReader json = new JsonTextReader(reader))
+
+            var settings = new JsonSerializerSettings
             {
-                try
-                {
-                    asset = serializer.Deserialize<Asset>(json);
-                }
-                catch (Exception e)
-                {
-                }
-                return asset;
+                Formatting = Formatting.Indented,
+            };
+
+            var jsonSerializer = JsonSerializer.Create(settings);
+
+            StreamReader reader = new(fileName);
+
+            Asset asset = new("" + fileName, typeof(Asset)); 
+
+            using JsonTextReader json = new(reader);
+
+            try
+            {
+                asset = jsonSerializer.Deserialize<Asset>(json) ?? null;
+            }
+            catch (Exception e) { MessageBox.Show("File read error - Fked Up Big Time"); };
+            asset.Name += asset.fileType ?? null; 
+            return asset;
+        }
+        public static Asset? TryDeserializeNonAssetFile(string fileName, Type type)
+        {
+            switch (type)
+            {
+                case var _ when type == typeof(Bitmap):
+
+                    BitmapAsset bmpAsset = BitmapAsset.BitmapToAsset(fileName);
+                    if (bmpAsset == null) return null;
+                    bmpAsset.fileType = typeof(Bitmap);
+                    return bmpAsset;
+
+                case var _ when type == typeof(JsonObject):
+                    var asset = ReadAssetFile(fileName);
+                    return asset; 
+
+
+                default: return null;
             }
         }
     }
     public static class AssetPipeline
     {
-        public static string Path => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel\\Assets";
-        public static void ImportAsync()
+        public static string Path => Settings.Appdata + Settings.AssetsDirectory;
+        /// <summary>
+        /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
+        /// </summary>
+        public static async Task ImportAsync(bool showMessage = false)
         {
-            var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OK);
+            if (Runtime.Instance.IsRunning)
+                if (showMessage)
+                {
+                    var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OKCancel);
+                    if (msg == MessageBoxResult.Cancel)
+                        return;
+                }
+
             if (!Directory.Exists(Path))
-            {
-                Directory.CreateDirectory(Path); 
-            }
-            
-            foreach(var thisPath in Directory.GetFiles(Path))
-            {
-                var asset = Import(thisPath);
-                if (asset is not null)
-                    AssetLibrary.Register(asset.GetType(), asset);
-            };
-            var msg2 = MessageBox.Show("Import complete! :D.", "Asset Importer", MessageBoxButton.OK);
+                Directory.CreateDirectory(Path);
 
+            await Task.Run(ImportTask);
+
+            if (!Runtime.Instance.IsRunning)
+                if (showMessage)
+                {
+                    var syncResult = MessageBox
+                        .Show("Import complete! Do you want to sync?",
+                        "Asset Importer",
+                        MessageBoxButton.YesNo);
+
+                    if (syncResult == MessageBoxResult.Yes) AssetLibrary.Sync();
+                }
         }
-        public static Asset? Import(string path)
+        private static void ImportTask()
         {
-            if (File.Exists(path)) return null; 
-            return AssetIO.ReadAssetFile(path);
+            foreach (var asset in from dir in Directory.GetDirectories(Path)
+                                  from file in Directory.GetFiles(dir)
+                                  let typeString = file.Split('.')[1]
+                                  let typeRef = TypeFromExtension(typeString)
+                                  let asset = TryPullObject(file, typeRef)
+                                  where asset is not null
+                                  select asset)
+                                    {
+                                        if (asset.fileType is null)
+                                            asset.fileType = typeof(Asset);
+                                        AssetLibrary.Register(asset.fileType, asset);
+                                    };
         }
+        /// <summary>
+        /// Read and deserialize a single file from Path"
+        /// </summary>
+        /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
+        /// <returns>Asset if it exists at path, else null.</returns>
+        public static Asset? TryPullObject(string path, Type type)
+        {
+            if (!File.Exists(path)) return null; 
+            return AssetIO.TryDeserializeNonAssetFile(path, type);
+        }
+        /// <summary>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>type if supported, else returns typeof(object) (generic) </returns>
+        public static Type TypeFromExtension(string type)
+        {
+            return type switch
+            {
+                "pxad" => typeof(Asset),
+                "bmp" => typeof(Bitmap),
+                _ => typeof(object),
+            };
+        }
+        public static void ImportFileDialog()
+        {
+            OpenFileDialog fileDialog = new();
+            bool? result = fileDialog.ShowDialog();
+            if (result == true)
+            {
+                var name = fileDialog.FileName;
 
+                var fileExtension = name.Split('.')[1];
+                var typeRef = AssetPipeline.TypeFromExtension(fileExtension);
+
+                if (typeRef != null)
+                {
+                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+                    if (asset == null) return;
+                    AssetLibrary.Register(asset.GetType(), asset);
+                }
+            }
+        }
+        public static void ImportFileDialog(out Asset? outObject)
+        {
+            outObject = null; 
+            OpenFileDialog fileDialog = new();
+            
+            bool? result = fileDialog.ShowDialog();
+            if (result is not true) return;
+
+            string name = fileDialog.FileName;
+            string fileExtension = name.Split('.')[1];
+            
+            Type typeRef = TypeFromExtension(fileExtension);
+            if (typeRef is null) return; 
+
+            var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+            if (asset is null) return;
+            
+            AssetLibrary.Register(asset.GetType(), asset);
+            outObject = asset; 
+        }
     }
+    /// <summary>
+    /// A Runtime static class that allows access to cached, deserialized json objects. 
+    /// </summary>
     public static class AssetLibrary
     {
         public static Dictionary<Type, List<Asset>> LoadedAssets = new();
@@ -236,67 +409,91 @@ namespace pixel_renderer
         /// <param name="type"></param>
         /// <param name="path"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public static bool TryFetch<T>(string name, out T result) where T : Asset
+        /// 
+        public static bool Fetch<T>(out T result) where T : Asset
         {
-            result = null; 
+            result = null;
             if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
             {
                 foreach (var _asset in found)
                 {
-                    if (_asset.Name.Equals(name))
-                    {
-                        result = _asset as T; 
-                    }
+                    if (_asset is null) continue;
+                    result = _asset as T;
+
+
                 }
                 return true;
             }
             return false;
         }
+        public static bool Fetch<T>(string name, out T result) where T : Asset
+        {
+            result = null; 
+            if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
+            {
+                result = (T)found.Where(x => x.Name.Equals(name));
+                return true;
+            }
+            return false;
+        }
+        public static bool Fetch<T>(out List<object> output)
+        {
+            output = new List<object>();
+            foreach (var pair in from pair in LoadedAssets
+                                 let type = pair.Key
+                                 where type == typeof(T)
+                                 select pair)
+            {
+                output.AddRange(from asset in pair.Value
+                                select asset);
+                return true;
+            }
+
+            return false; 
+        }
         /// <summary>
-        /// Save the currently loaded asset database.
+        /// Save the currently loaded asset Library to the disk.
         /// </summary>
         public static void Sync()
         {
-            bool wasPaused = false; 
-            var library = GetLibrary();
+            var library = Clone();
+            
             if (library is null) return; 
-            if (Runtime.Instance.running)
-            {
-                Runtime.Instance.mainWnd.Accept_Clicked(new(), new()); 
-                wasPaused = true;
-            }
+            
             AssetIO.skippingOperation = false; 
-            foreach (var asset in library) AssetIO.SaveAsset(asset, asset.Name);
-            if (!Runtime.Instance.running && wasPaused)
-            {
-                Runtime.Instance.mainWnd.Accept_Clicked(new(), new());
-            }
+
+            foreach (var asset in library)
+                AssetIO.SaveAsset(asset, asset.Name);
         }
-        internal static  List<Asset>? GetLibrary()
+        /// <summary>
+        /// Clone the current Asset Library into a List.
+        /// </summary>
+        /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
+        public static  List<Asset>? Clone()
         {
             List<Asset> library = new();  
+
             foreach (var key in LoadedAssets)
                 foreach (var item in key.Value)
                     library.Add(item);
 
             return library; 
         }
-        internal static void Register(Type type, Asset asset)
+
+        public static void Register(Type type, Asset asset)
         {
             if (!LoadedAssets.ContainsKey(type))
-            {
                 LoadedAssets.Add(type, new List<Asset>());
-            }
+
             LoadedAssets[type].Add(asset);
         }
-        internal static void Unregister(Type type, string Name)
+        public static void Unregister(Type type, string Name)
         {
-            foreach (var asset in LoadedAssets[type])
+            foreach (var asset in from asset in LoadedAssets[type]
+                                  where asset.Name.Equals(Name)
+                                  select asset)
             {
-                if (asset.Name.Equals(Name))
-                {
-                    LoadedAssets[type].Remove(asset);
-                }
+                LoadedAssets[type].Remove(asset);
             }
         }
     }

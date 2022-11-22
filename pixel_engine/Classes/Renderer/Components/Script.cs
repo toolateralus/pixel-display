@@ -1,10 +1,13 @@
-﻿using pixel_renderer;
+﻿using System;
 
-public class ScriptAsset : Asset
+namespace pixel_renderer
 {
-    public Component component;
-    public ScriptAsset(Component c)
+    public class ScriptAsset : Asset
     {
-        component = c; 
+        public Component component;
+        public ScriptAsset(Component c, string name, Type type) : base (name, type)
+        {
+            component = c; 
+        }
     }
 }

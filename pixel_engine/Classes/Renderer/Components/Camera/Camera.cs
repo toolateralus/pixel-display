@@ -5,7 +5,7 @@ namespace pixel_renderer
     {
         public override void Awake()
         {
-            base.Awake();
+             
         }
 
         public Vec2 rect = new()

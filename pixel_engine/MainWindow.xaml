@@ -9,25 +9,7 @@
         Title="Pixel Display" Height="600" Width="800" BorderBrush="White" BorderThickness="10" >
     <Viewbox x:Name="viewbox" Height="Auto" Width="Auto">
         <Canvas x:Name="canvas" Height="943" Width="1762">
-            <Button  FontSize="25" Foreground="LimeGreen" 
-                     x:Name="acceptButton" Background="DarkSlateGray" Content="⏯" HorizontalAlignment="Center" VerticalAlignment="Center" Height="41" Width="70" Click="Accept_Clicked" Canvas.Left="510" Canvas.Top="25" />
-            <TextBox FontFamily="MS Gothic Bold" x:Name="updateTickBox" HorizontalAlignment="Left" Grid.Row="4" TextWrapping="Wrap" Text="0.05" VerticalAlignment="Top" Width="39" Canvas.Left="541" Height="17" Canvas.Top="3"/>
-            <TextBox VerticalScrollBarVisibility="Auto" IsReadOnly="True" FontFamily ="MS Gothic Bold" x:Name="outputTextBox" Foreground="White"  BorderThickness="6" BorderBrush="DarkSlateGray" Background="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Height="879" Width="574" Grid.RowSpan="300" Canvas.Top="75" Canvas.Left="4" RenderTransformOrigin="0.5,0.5">
-                <TextBox.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform AngleX="0.048"/>
-                        <RotateTransform/>
-                        <TranslateTransform X="0.37"/>
-                    </TransformGroup>
-                </TextBox.RenderTransform>
-            </TextBox>
-            <Label   FontFamily="MS Gothic Bold"  Foreground="Black" Background="White" FontSize="8" x:Name="TimeSpanLabel" Content="Time between refresh (in seconds)" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" Width="167" Canvas.Left="369" Height="17" Canvas.Top="3"/>
-
-            <Label  FontFamily="MS Gothic Bold" Content="Debug Console: " Canvas.Left="99" Canvas.Top="46" HorizontalAlignment="Left" VerticalAlignment="Top" Width="279" Foreground="White" FontSize="14"/>
-            <CheckBox x:Name="debugCheckbox" Content="" Canvas.Left="86" Canvas.Top="50" Background="#FF680700" BorderBrush="#FF00FF21" FontFamily="MS Gothic" Checked="DebugChecked" Unchecked="DebugUnchecked"/>
             <Image x:Name ="renderImage" Height="865" Canvas.Left="606" Canvas.Top="64" Width="1137" RenderOptions.BitmapScalingMode ="NearestNeighbor" />
-            <Label x:Name ="debugTextbox" Content="CollisionDict :" Canvas.Left="759" Canvas.Top="8" Height="50" Width="346" Background="White"/>
         </Canvas>
     </Viewbox>
 </Window>
