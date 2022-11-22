@@ -1,22 +1,13 @@
-﻿using System;
-using System.CodeDom;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Security.Permissions;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Interop;
-using System.Xml.Linq;
-using Microsoft.Win32;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer
@@ -36,14 +27,14 @@ namespace pixel_renderer
         public Asset(string name, Type fileType)
         {
             Name = name;
-            this.fileType = fileType; 
+            this.fileType = fileType;
         }
         public Asset() { }
 
     }
     public class BitmapAsset : Asset
     {
-        public Bitmap? RuntimeValue = null; 
+        public Bitmap? RuntimeValue = null;
         public BitmapAsset(string name) : base(name, typeof(Bitmap))
         {
 
@@ -53,42 +44,14 @@ namespace pixel_renderer
             Bitmap? bmp = new(fileName);
 
             BitmapAsset asset = new("BitmapAsset");
-            
+
             if (bmp != null)
                 asset.RuntimeValue = bmp;
-            
+
             return asset;
         }
-        public Color[,] Colors
-        {
-            get  => ColorArrayFromBitmap(RuntimeValue);
-        }
-        public static Bitmap BitmapFromColorArray(Color[,] colors)
-        {
-            Bitmap bitmap = new(colors.GetLength(0) , colors.GetLength(1));  
-            for (int i = 0; i < bitmap.Width; i++)
-            {
-                for (int j = 0; j < bitmap.Height; j++)
-                {
-                    bitmap.SetPixel(i, j, colors[i, j]);
-                }
-            }
-            return bitmap;
-        }
-        public static Color[,] ColorArrayFromBitmap(Bitmap bitmap)
-        {
-            Color[,] s = new Color[bitmap.Width, bitmap.Height];
-            for (int i = 0; i < bitmap.Width; i++)
-            {
-                for (int j = 0; j < bitmap.Height; j++)
-                {
-                    s[i, j] = bitmap.GetPixel(i, j);
-                }
-            }
-            return s;
-        }
     }
-    public class FontAsset : Asset 
+    public class FontAsset : Asset
     {
         new public string Name = "New Font Asset";
         public Dictionary<char, Bitmap> characters = new();
@@ -116,7 +79,7 @@ namespace pixel_renderer
             foreach (var x in asset.characters.Values)
                 positions.Add(new(x.Width, x.Height));
 
-            return positions; 
+            return positions;
         }
         public FontAsset(string name, Type fileType) : base(name, fileType)
         {
@@ -155,7 +118,7 @@ namespace pixel_renderer
                 if (i > alpha.Length || i > characters.Length)
                 {
                     MessageBox.Show("Font asset could not be created, Index out of range.");
-                    return null; 
+                    return null;
                 }
                 fontAsset.characters.Add(alpha[i], characters[i]);
             }
@@ -163,7 +126,7 @@ namespace pixel_renderer
             {
                 MessageBox.Show("Font is empty.");
             }
-            return fontAsset; 
+            return fontAsset;
         }
         /// <summary>
         ///
@@ -179,7 +142,7 @@ namespace pixel_renderer
 
             IEnumerable<string> files = Directory.GetFiles(path);
 
-            int i = 0; 
+            int i = 0;
 
             foreach (string file in files)
             {
@@ -195,7 +158,7 @@ namespace pixel_renderer
     }
     public static class AssetIO
     {
-        public static bool skippingOperation = false; 
+        public static bool skippingOperation = false;
         public static string Path => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel\\Assets";
         public static void SaveAsset(Asset data, string fileName)
         {
@@ -203,7 +166,7 @@ namespace pixel_renderer
             {
                 Directory.CreateDirectory(Path);
             }
-            
+
             if (File.Exists(Path + "/" + fileName + Settings.AssetsFileExtension))
             {
                 if (!skippingOperation)
@@ -216,11 +179,11 @@ namespace pixel_renderer
                                              MessageBoxResult.No, MessageBoxOptions.RtlReading);
                     if (doForAllResult == MessageBoxResult.Yes)
                     {
-                        skippingOperation = true; 
+                        skippingOperation = true;
                     }
                     if (overwriteWarningResult != MessageBoxResult.Yes)
                     {
-                        return; 
+                        return;
                     }
                 }
             }
@@ -233,9 +196,9 @@ namespace pixel_renderer
             };
 
             var jsonSerializer = JsonSerializer.Create(settings);
-            
+
             jsonSerializer.Serialize(writer, data);
-            
+
             writer.Close();
         }
         public static Asset? ReadAssetFile(string fileName)
@@ -243,7 +206,7 @@ namespace pixel_renderer
             if (!Directory.Exists(Path))
             {
                 Directory.CreateDirectory(Path);
-                return null; 
+                return null;
             }
 
             var settings = new JsonSerializerSettings
@@ -255,7 +218,7 @@ namespace pixel_renderer
 
             StreamReader reader = new(fileName);
 
-            Asset asset = new("" + fileName, typeof(Asset)); 
+            Asset asset = new("" + fileName, typeof(Asset));
 
             using JsonTextReader json = new(reader);
 
@@ -263,8 +226,8 @@ namespace pixel_renderer
             {
                 asset = jsonSerializer.Deserialize<Asset>(json) ?? null;
             }
-            catch (Exception e) { MessageBox.Show("File read error - Fked Up Big Time"); };
-            asset.Name += asset.fileType ?? null; 
+            catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
+            asset.Name += asset.fileType ?? null;
             return asset;
         }
         public static Asset? TryDeserializeNonAssetFile(string fileName, Type type)
@@ -280,7 +243,7 @@ namespace pixel_renderer
 
                 case var _ when type == typeof(JsonObject):
                     var asset = ReadAssetFile(fileName);
-                    return asset; 
+                    return asset;
 
 
                 default: return null;
@@ -328,11 +291,10 @@ namespace pixel_renderer
                                   let asset = TryPullObject(file, typeRef)
                                   where asset is not null
                                   select asset)
-                                    {
-                                        if (asset.fileType is null)
-                                            asset.fileType = typeof(Asset);
-                                        AssetLibrary.Register(asset.fileType, asset);
-                                    };
+            {
+                asset.fileType ??= typeof(Asset);
+                AssetLibrary.Register(asset.fileType, asset);
+            };
         }
         /// <summary>
         /// Read and deserialize a single file from Path"
@@ -341,8 +303,7 @@ namespace pixel_renderer
         /// <returns>Asset if it exists at path, else null.</returns>
         public static Asset? TryPullObject(string path, Type type)
         {
-            if (!File.Exists(path)) return null; 
-            return AssetIO.TryDeserializeNonAssetFile(path, type);
+            return !File.Exists(path) ? null : AssetIO.TryDeserializeNonAssetFile(path, type);
         }
         /// <summary>
         /// </summary>
@@ -378,23 +339,23 @@ namespace pixel_renderer
         }
         public static void ImportFileDialog(out Asset? outObject)
         {
-            outObject = null; 
+            outObject = null;
             OpenFileDialog fileDialog = new();
-            
+
             bool? result = fileDialog.ShowDialog();
             if (result is not true) return;
 
             string name = fileDialog.FileName;
             string fileExtension = name.Split('.')[1];
-            
+
             Type typeRef = TypeFromExtension(fileExtension);
-            if (typeRef is null) return; 
+            if (typeRef is null) return;
 
             var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
             if (asset is null) return;
-            
+
             AssetLibrary.Register(asset.GetType(), asset);
-            outObject = asset; 
+            outObject = asset;
         }
     }
     /// <summary>
@@ -428,7 +389,7 @@ namespace pixel_renderer
         }
         public static bool Fetch<T>(string name, out T result) where T : Asset
         {
-            result = null; 
+            result = null;
             if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
             {
                 result = (T)found.Where(x => x.Name.Equals(name));
@@ -449,7 +410,7 @@ namespace pixel_renderer
                 return true;
             }
 
-            return false; 
+            return false;
         }
         /// <summary>
         /// Save the currently loaded asset Library to the disk.
@@ -457,10 +418,10 @@ namespace pixel_renderer
         public static void Sync()
         {
             var library = Clone();
-            
-            if (library is null) return; 
-            
-            AssetIO.skippingOperation = false; 
+
+            if (library is null) return;
+
+            AssetIO.skippingOperation = false;
 
             foreach (var asset in library)
                 AssetIO.SaveAsset(asset, asset.Name);
@@ -469,15 +430,15 @@ namespace pixel_renderer
         /// Clone the current Asset Library into a List.
         /// </summary>
         /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
-        public static  List<Asset>? Clone()
+        public static List<Asset>? Clone()
         {
-            List<Asset> library = new();  
+            List<Asset> library = new();
 
             foreach (var key in LoadedAssets)
                 foreach (var item in key.Value)
                     library.Add(item);
 
-            return library; 
+            return library;
         }
 
         public static void Register(Type type, Asset asset)

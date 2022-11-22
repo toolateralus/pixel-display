@@ -24,7 +24,7 @@
         {
             x = -v.x,
             y = -v.y,
-        }; 
+        };
 
         internal static Vec3 Negate(Vec3 v) => new()
         {
@@ -32,7 +32,7 @@
             y = -v.y,
             z = -v.z
         };
-           
+
     }
 
 }

@@ -1,6 +1,5 @@
 ﻿
 using Newtonsoft.Json;
-using System;
 
 namespace pixel_renderer
 {
@@ -9,20 +8,20 @@ namespace pixel_renderer
     {
         [JsonIgnore]
         public Node parentNode = new();
-        private string _uuid = ""; 
-        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID();}
+        private string _uuid = "";
+        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
         public string Name { get; set; }
 
-        public virtual void OnTrigger(Rigidbody other) {}
-        public virtual void OnCollision(Rigidbody collider) {}
-        public virtual void FixedUpdate(float delta) {}
-        public virtual void Update() {}
-        public virtual void Awake() {}
+        public virtual void OnTrigger(Rigidbody other) { }
+        public virtual void OnCollision(Rigidbody collider) { }
+        public virtual void FixedUpdate(float delta) { }
+        public virtual void Update() { }
+        public virtual void Awake() { }
 
         internal void Init()
         {
             Name = parentNode.Name + $" {GetType()}";
-            Awake(); 
+            Awake();
         }
         /// <summary>
         /// Performs a 'Get Component' call on the Parent node object of the component this is called from.

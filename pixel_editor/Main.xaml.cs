@@ -12,17 +12,6 @@ using System.Windows.Media;
 using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
-using Microsoft.Win32;
-using System.IO;
-using System.Text.Json.Nodes;
-using System.Windows.Media.Imaging;
-using System.Drawing;
-using System.Windows.Navigation;
-using System.Linq.Expressions;
-using System.Windows.Shell;
 #endregion
 
 namespace pixel_editor
@@ -33,13 +22,11 @@ namespace pixel_editor
     public partial class Main : Window
     {
         #region Window Scaling
-        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged),new CoerceValueCallback(OnCoerceScaleValue)));
+        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
         {
             Main mainWindow = o as Main;
-            if (mainWindow != null)
-                return mainWindow.OnCoerceScaleValue((double)value);
-            else return value;
+            return mainWindow != null ? mainWindow.OnCoerceScaleValue((double)value) : value;
         }
         private static void OnScaleValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
@@ -79,7 +66,7 @@ namespace pixel_editor
         /// <summary>
         /// keep this reference of the engine just to close the background window on editor exit.
         /// </summary>
-        internal static EngineInstance? engine; 
+        internal static EngineInstance? engine;
         private static int renderStateIndex = 0;
         private StageWnd stageWindow;
 
@@ -90,7 +77,7 @@ namespace pixel_editor
             inspector = new Inspector(inspectorObjName,
                                       inspectorObjInfo,
                                       inspectorChildGrid);
-            Runtime.inspector = inspector; 
+            Runtime.inspector = inspector;
             engine = new();
             GetEvents();
         }
@@ -105,10 +92,10 @@ namespace pixel_editor
             inspector.Update(sender, e);
             if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null
                 && Rendering.State == RenderState.Scene)
-                {
-                    Rendering.Render(image);
-                    gcAllocText.Content = Rendering.GetGCStats(); 
-                }
+            {
+                Rendering.Render(image);
+                gcAllocText.Content = Rendering.GetGCStats();
+            }
         }
         /// <summary>
         /// Called on program close
@@ -116,7 +103,7 @@ namespace pixel_editor
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OnDisable(object? sender, EventArgs e) => engine.Close();
-        private void OnViewChanged(object sender, RoutedEventArgs e) =>  IncrementRenderState();
+        private void OnViewChanged(object sender, RoutedEventArgs e) => IncrementRenderState();
         private void OnPlay(object sender, RoutedEventArgs e) => Runtime.Instance.Toggle();
         private void IncrementRenderState()
         {
@@ -136,9 +123,9 @@ namespace pixel_editor
             {
                 var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
                 if (msg != MessageBoxResult.Yes)
-                    return; 
-                Runtime.Instance.mainWnd = new();  
-                Runtime.Instance.mainWnd.Show(); 
+                    return;
+                Runtime.Instance.mainWnd = new();
+                Runtime.Instance.mainWnd.Show();
             }
         }
         private void Mouse0(object sender, MouseButtonEventArgs e)
@@ -153,7 +140,7 @@ namespace pixel_editor
                     inspector.SelectNode(node);
             }
         }
-        private void OnImportBtnPressed(object sender, RoutedEventArgs e) => AssetPipeline.ImportAsync(true); 
+        private void OnImportBtnPressed(object sender, RoutedEventArgs e) => AssetPipeline.ImportAsync(true);
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => AssetLibrary.Sync();
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
@@ -164,10 +151,10 @@ namespace pixel_editor
             stageWindow = new StageWnd();
             stageWindow.Show();
             stageWindow.Closed += Wnd_Closed;
-           
+
         }
-        private void Wnd_Closed(object? sender, EventArgs e) => 
-            stageWindow = null; 
+        private void Wnd_Closed(object? sender, EventArgs e) =>
+            stageWindow = null;
 
     }
     public class Inspector
@@ -182,11 +169,11 @@ namespace pixel_editor
             this.objInfo.Content = "Object Info";
             // TODO : implement awake event or message call, not calling a method xD
 
-            Awake(); 
+            Awake();
         }
-       
+
         public Node? loadedNode;
-        private List<TextBlock> activeControls = new(); 
+        private List<TextBlock> activeControls = new();
         private Label name;
         private Label objInfo;
         private Grid componentGrid;
@@ -198,27 +185,27 @@ namespace pixel_editor
 
         public event Action OnComponentAdded;
         public event Action OnComponentRemoved;
-        
+
         public void Awake()
         {
-              OnObjectSelected += Refresh;
+            OnObjectSelected += Refresh;
             OnObjectDeselected += Refresh;
-              OnComponentAdded += Refresh;
+            OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
 
             Runtime.Instance.InspectorEventRaised += Instance_InspectorEventRaised;
         }
         private void Instance_InspectorEventRaised(InspectorEvent e)
         {
-            var msg = MessageBox.Show(e.expression.ToString(), e.message , MessageBoxButton.YesNo);
+            var msg = MessageBox.Show(e.expression.ToString(), e.message, MessageBoxButton.YesNo);
             var args = e.expressionArgs;
-            if (args.Length < 4) return; 
+            if (args.Length < 4) return;
             e.expression(args[0], args[1] ?? null, args[2] ?? null, args[3] ?? null);
         }
 
         public void Update(object? sender, EventArgs e)
         {
-     
+
         }
         private void Refresh()
         {
@@ -261,7 +248,7 @@ namespace pixel_editor
                 {
                     componentGrid.Children.Remove(control);
                 }
-                activeControls.Clear(); 
+                activeControls.Clear();
                 OnObjectDeselected?.Invoke();
             }
         }
@@ -282,14 +269,14 @@ namespace pixel_editor
         {
             IEnumerable<FieldInfo> fields = component.GetType().GetRuntimeFields();
             string output = $"\b {component.GetType().Name} Properties : ";
-           
+
             IEnumerable<PropertyInfo> properties = component.GetType().GetRuntimeProperties();
             foreach (var property in properties)
             {
                 var value = property.GetValue(component, null);
                 output += $" \n \t{property.Name} {property.PropertyType} {value}";
             }
-            
+
             foreach (var field in fields)
             {
                 var value = field.GetValue(component);
@@ -297,7 +284,7 @@ namespace pixel_editor
             }
             return output;
         }
-        
+
         public static Label CreateLabel(string componentInfo, Thickness margin)
         {
             return new Label
@@ -305,7 +292,7 @@ namespace pixel_editor
                 Content = componentInfo,
                 FontSize = 2.25f,
                 Background = Brushes.DarkGray,
-                Foreground = Brushes.White, 
+                Foreground = Brushes.White,
                 Margin = margin,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Center,

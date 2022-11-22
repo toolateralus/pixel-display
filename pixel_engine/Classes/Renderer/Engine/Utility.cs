@@ -30,7 +30,7 @@
         public static Vec3 operator -(Vec3 a, Vec3 b) { return new Vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
         public static Vec3 operator /(Vec3 a, Vec3 b) { return new Vec3(a.x / b.x, a.y / b.y, a.z / b.z); }
         public static Vec3 operator *(Vec3 a, Vec3 b) { return new Vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
-        
+
         public static implicit operator Vec2(Vec3 v) => new()
         {
             x = v.x,
@@ -63,19 +63,19 @@
             this.y = y;
         }
         public Vec2()
-        { 
+        {
             x = new();
-            y = new(); 
+            y = new();
         }
 
-        public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y); 
-        public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y); 
-        public static Vec2 operator /(Vec2 a, float b) => new(a.x / b, a.y / b); 
-        public static Vec2 operator *(Vec2 a, float b) => new(a.x * b, a.y * b); 
+        public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y);
+        public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y);
+        public static Vec2 operator /(Vec2 a, float b) => new(a.x / b, a.y / b);
+        public static Vec2 operator *(Vec2 a, float b) => new(a.x * b, a.y * b);
         public static Vec2 operator *(Vec2 a, Vec2 b) => new()
         {
-             x = a.x * b.x,
-             y = a.y * b.y,
+            x = a.x * b.x,
+            y = a.y * b.y,
         };
         public static Vec2 operator /(Vec2 a, Vec2 b) => new()
         {
@@ -103,7 +103,7 @@
             if (value.y > max.y) value.y = max.y;
         }
     }
-    public enum RenderState { Game, Scene, Off}
+    public enum RenderState { Game, Scene, Off }
 }
 
 

@@ -1,18 +1,18 @@
 ﻿namespace pixel_renderer
 {
-    using Random = System.Random;
     using Color = System.Drawing.Color;
+    using Random = System.Random;
 
     public static class JRandom
     {
-        public static Direction Direction ()  =>  (Direction) Int(0, sizeof(Direction) - 1);
+        public static Direction Direction() => (Direction)Int(0, sizeof(Direction) - 1);
 
         public static Vec2 ScreenPosition() => new()
         {
             x = Int(0, Settings.ScreenWidth),
             y = Int(0, Settings.ScreenHeight)
         };
-            
+
         public static Color Color()
         {
             byte r = Byte(),

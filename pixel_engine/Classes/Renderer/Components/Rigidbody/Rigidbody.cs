@@ -1,5 +1,4 @@
-﻿using pixel_renderer;
-using System;
+﻿using System;
 
 namespace pixel_renderer
 {
@@ -11,12 +10,12 @@ namespace pixel_renderer
         public Vec2 velocity = new();
         public Sprite? sprite;
         const double dragCoefficient = 1;
-        public bool IsTrigger { get; internal set; } = false; 
+        public bool IsTrigger { get; internal set; } = false;
 
         public override void Awake()
         {
             sprite = parentNode.GetComponent<Sprite>();
-            if (sprite == null) throw new Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID { parentNode.UUID}");
+            if (sprite == null) throw new Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID {parentNode.UUID}");
         }
         public override void FixedUpdate(float delta)
         {
@@ -44,7 +43,7 @@ namespace pixel_renderer
 
         private protected void ApplyDrag()
         {
-            _drag = (float)GetDrag().Clamp(-drag, drag);  
+            _drag = (float)GetDrag().Clamp(-drag, drag);
             velocity.y *= _drag;
             velocity.x *= _drag;
         }

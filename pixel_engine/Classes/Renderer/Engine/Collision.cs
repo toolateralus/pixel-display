@@ -2,16 +2,15 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace pixel_renderer
 {
     public static class Collision
     {
-        private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new(); 
+        private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
         private readonly static SpatialHash hash = new(Settings.ScreenHeight, Settings.ScreenWidth, Settings.CollisionCellSize);
-        
+
         public static void ViewportCollision(Node node)
         {
             Sprite sprite = node.GetComponent<Sprite>();
@@ -25,7 +24,7 @@ namespace pixel_renderer
                 }
                 if (node.position.x > Settings.ScreenHeight - sprite.size.x)
                 {
-                    node.position.x = Settings.ScreenHeight - sprite.size.x; 
+                    node.position.x = Settings.ScreenHeight - sprite.size.x;
                     rb.velocity.x = 0;
                 }
                 if (node.position.x < 0)
@@ -43,7 +42,7 @@ namespace pixel_renderer
 
             Sprite spriteA = nodeA.GetComponent<Sprite>();
             Sprite spriteB = nodeB.GetComponent<Sprite>();
-            
+
             Vec2 spriteSizeA = spriteA.size;
             Vec2 spriteSizeB = spriteB.size;
 
@@ -82,15 +81,15 @@ namespace pixel_renderer
             Parallel.For(0, collisionCells.Count, i =>
             {
                 if (i >= collisionCells.Count) return;
-                
+
                 var cellArray = collisionCells.ToArray();
 
-                if (i >= cellArray.Length) return; 
+                if (i >= cellArray.Length) return;
 
                 var cell = cellArray[i].ToArray();
-                
+
                 if (cell is null) return;
-                
+
                 if (cell.Length <= 0) return;
 
                 Parallel.For(0, cell.Length, j =>
@@ -105,13 +104,13 @@ namespace pixel_renderer
                         // compare node's UUID since each node could contain several colliders, 
                         // todo : maybe implement intranodular collision
                         if (nodeA.UUID.Equals(nodeB.UUID)) return;
-                            if(!colliders.Contains(nodeB)) colliders.Add(nodeB);
-                    }); 
+                        if (!colliders.Contains(nodeB)) colliders.Add(nodeB);
+                    });
                     RegisterCollisionEvent(nodeA, colliders.ToArray());
-                }); 
-            }); 
+                });
+            });
         }
-       
+
         public static async Task RegisterColliders(Stage stage)
         {
             hash.ClearBuckets();
@@ -136,11 +135,11 @@ namespace pixel_renderer
                 if (colliders[i] is null) continue;
                 if (A.CheckOverlap(colliders[i]))
                 {
-                    _ = CollisionQueue.GetOrAdd(key : A, value : colliders);
+                    _ = CollisionQueue.GetOrAdd(key: A, value: colliders);
                 }
             }
         }
-        
+
         public static void Execute()
         {
             Parallel.ForEach(CollisionQueue, collisionPair =>
@@ -154,10 +153,10 @@ namespace pixel_renderer
                     Collide(ref rbA, ref rbB);
                     AttemptCallbacks(ref rbA, ref rbB);
                 });
-            }); 
-            CollisionQueue.Clear(); 
+            });
+            CollisionQueue.Clear();
         }
-      
+
         private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger)
@@ -169,17 +168,17 @@ namespace pixel_renderer
             A.parentNode.OnCollision(B);
             B.parentNode.OnCollision(A);
         }
-        
+
         private static void Collide(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger) return;
-            
+
             var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
             if (velocityDifference < 0.1f)
             {
-                velocityDifference = 1f; 
+                velocityDifference = 1f;
             }
-            
+
             Vec2 direction = (B.parentNode.position - A.parentNode.position).Normalize();
 
             // make sure not NaN after possibly dividing by zero in Normalize();
@@ -195,10 +194,10 @@ namespace pixel_renderer
             B.parentNode.position += depenetrationForce;
             A.parentNode.position += CMath.Negate(depenetrationForce);
 
-            depenetrationForce *= 0.5f; 
-            
-            if(A.usingGravity && A.drag != 0) A.velocity += CMath.Negate(depenetrationForce);
-            if(B.usingGravity && B.drag != 0) B.velocity += depenetrationForce;
+            depenetrationForce *= 0.5f;
+
+            if (A.usingGravity && A.drag != 0) A.velocity += CMath.Negate(depenetrationForce);
+            if (B.usingGravity && B.drag != 0) B.velocity += depenetrationForce;
         }
     }
 

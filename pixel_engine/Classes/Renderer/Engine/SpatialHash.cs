@@ -16,7 +16,7 @@
 
         public SpatialHash(int screenWidth, int screenHeight, int cellSize)
         {
-            Buckets = new List<List<Node>>(); 
+            Buckets = new List<List<Node>>();
             rows = screenHeight / cellSize;
             columns = screenWidth / cellSize;
             this.cellSize = cellSize;
@@ -33,7 +33,7 @@
             {
                 Buckets[i].Clear();
             }
-            busy = false; 
+            busy = false;
         }
 
         internal void RegisterObject(Node obj)
@@ -47,13 +47,13 @@
         }
         internal List<Node> GetNearby(Node node)
         {
-            
+
             List<Node> nodes = new List<Node>(256);
 
             List<int> buckets = Hash(node);
             foreach (var index in buckets)
             {
-                if (index < 0 || index >= rows * columns -1) continue;
+                if (index < 0 || index >= rows * columns - 1) continue;
 
                 if (Buckets[index].Count > nodes.Capacity)
                     nodes.Capacity = Buckets[index].Count;
@@ -75,7 +75,7 @@
 
         private List<int> Hash(Node obj)
         {
-            if(!obj.TryGetComponent(out Sprite sprite)) return new(); 
+            if (!obj.TryGetComponent(out Sprite sprite)) return new();
             List<int> bucketsObjIsIn = new List<int>();
             Vec2 min = new Vec2(
                 obj.position.x,
@@ -84,7 +84,7 @@
                 obj.position.x + sprite.size.x,
                 obj.position.y + sprite.size.y);
             float width = Settings.ScreenHeight / cellSize;
-            
+
             //TopLeft
             AddBucket(min, width, bucketsObjIsIn);
             //TopRight

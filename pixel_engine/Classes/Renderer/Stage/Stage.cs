@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,22 +6,22 @@ using System.Linq;
 
 namespace pixel_renderer
 {
-  
+
 
     public class Stage : IEnumerable
     {
         public string Name { get; set; }
         private string _uuid = "";
-        
+
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
-        public event Action OnQueryMade; 
+        public event Action OnQueryMade;
 
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
 
         public Node[] Nodes { get; private set; }
         public Node[] FindNodesByTag(string tag)
         {
-            OnQueryMade?.Invoke(); 
+            OnQueryMade?.Invoke();
             IEnumerable<Node> matchingNodes = Nodes.Where(node => node.tag == tag);
             return matchingNodes.ToArray();
         }
@@ -50,7 +49,7 @@ namespace pixel_renderer
         {
             var list = Nodes.ToList();
             list.Add(template ?? Node.New);
-            Nodes = list.ToArray(); 
+            Nodes = list.ToArray();
         }
 
         /// <summary>
@@ -61,11 +60,11 @@ namespace pixel_renderer
         { foreach (Node node in Nodes) node.FixedUpdate(delta); }
         public void Awake()
         {
-            RefreshStageDictionary(); 
+            RefreshStageDictionary();
             OnQueryMade += RefreshStageDictionary;
             foreach (Node node in Nodes)
             {
-                node.parentStage ??= this; 
+                node.parentStage ??= this;
                 node.Awake();
             }
         }
@@ -77,8 +76,8 @@ namespace pixel_renderer
         /// <summary>
         /// Called on constructor initialization
         /// </summary>
-       
-      
+
+
         public Stage(Node[] nodes)
         {
             nodes = new Node[nodes.Length];
@@ -95,7 +94,7 @@ namespace pixel_renderer
             this.Background = Background;
             Nodes = nodes;
             Awake();
-            RefreshStageDictionary(); 
+            RefreshStageDictionary();
         }
 
         // for IEnumerator implementation;

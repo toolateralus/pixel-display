@@ -12,20 +12,16 @@
         };
         public static bool GetKeyDown(Key key)
         {
-            if (KeyDown.ContainsKey(key))
-            {
-                return KeyDown[key];
-            }
-            return false;
+            return KeyDown.ContainsKey(key) && KeyDown[key];
         }
         public static void SetKey(Key key, bool result)
         {
             if (!KeyDown.ContainsKey(key))
-                   KeyDown.Add(key, result);
+                KeyDown.Add(key, result);
 
             else KeyDown[key] = result;
         }
-        public static void Refresh() 
+        public static void Refresh()
         {
             foreach (Key key in keys)
                 SetKey(key, Keyboard.IsKeyDown(key));

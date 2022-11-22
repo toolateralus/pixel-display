@@ -11,11 +11,11 @@ namespace pixel_renderer
 
         }
 
-        public MissingComponentException( Node node, Type typeOfComponent, 
+        public MissingComponentException(Node node, Type typeOfComponent,
             string message = "GetComponent called on a Node that does not have a component of provided type attached")
             : base(message)
         {
-            
+
         }
 
         public MissingComponentException(string? message, Exception? innerException) : base(message, innerException)

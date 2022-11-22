@@ -1,11 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Windows;
-using System.Xml.Linq;
 
 namespace pixel_renderer
 {
@@ -23,15 +18,13 @@ namespace pixel_renderer
         public Vec2 position = new();
         public Vec2 localPosition
         {
-            get => GetLocalPosition(position); 
+            get => GetLocalPosition(position);
             set { }
         }
 
         public Vec2 GetLocalPosition(Vec2 position)
         {
-            if (parentNode == null)
-                return position;
-            return parentNode.position - position;
+            return parentNode == null ? position : parentNode.position - position;
         }
         public Vec2 scale = new();
 
@@ -40,9 +33,9 @@ namespace pixel_renderer
 
         // goal - make private
         public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
-        public List<Component> ComponentsList 
-        { 
-            get 
+        public List<Component> ComponentsList
+        {
+            get
             {
                 var list = new List<Component>();
                 foreach (var componentType in Components)
@@ -51,20 +44,18 @@ namespace pixel_renderer
                 return list ?? new();
             }
         }
-
         public T GetComponent<T>(int? index = 0) where T : Component
         {
-            if(!Components.ContainsKey(typeof(T))) 
+            if (!Components.ContainsKey(typeof(T)))
             {
-                throw new MissingComponentException(); 
+                throw new MissingComponentException();
             }
             T? component = Components[typeof(T)][index ?? 0] as T;
-            return component; 
+            return component;
         }
-        
         public void AddComponent(Component component)
         {
-            var type = component.GetType(); 
+            var type = component.GetType();
             if (!Components.ContainsKey(type))
             {
                 Components.Add(type, new());
@@ -72,17 +63,12 @@ namespace pixel_renderer
             Components[type].Add(component);
             component.parentNode = this;
         }
-
         /// <summary>
         ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns> A list of components matching typeof(T), otherwise an empty list of same type </returns>
         internal List<T> GetComponents<T>() => Components[typeof(T)] as List<T> ?? new();
-            
-               
-            
-
         /// <summary>
         /// Attempts to look for a component and push out if found.
         /// </summary>
@@ -93,18 +79,17 @@ namespace pixel_renderer
         {
             if (!Components.ContainsKey(typeof(T)))
             {
-                component = null; 
+                component = null;
                 return false;
             }
             component = Components[typeof(T)][index ?? 0] as T;
-            return true; 
+            return true;
         }
-        
         /// <summary>
         /// Nameless, Position of (0,0), Scale of (1,1);
         /// </summary>
         public static Node New = new("", Vec2.zero, Vec2.one);
-        public string tag = "untagged"; 
+        public string tag = "untagged";
 
         public Node(Stage parentStage, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, Node[]? children)
         {
@@ -115,7 +100,7 @@ namespace pixel_renderer
             this.scale = scale;
             this.parentNode = parentNode;
             this.children = children;
-            this.tag = tag; 
+            this.tag = tag;
         }
         public Node(string name)
         {
@@ -139,7 +124,7 @@ namespace pixel_renderer
             foreach (var list in Components.Values)
                 foreach (var component in list)
                     component.Init();
-                    
+
         }
         public void FixedUpdate(float delta)
         {
@@ -161,7 +146,5 @@ namespace pixel_renderer
             foreach (var list in Components.Values)
                 foreach (var component in list) component.OnTrigger(otherBody);
         }
-
-       
     }
 }

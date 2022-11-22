@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
-using Timer = System.Timers.Timer; 
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Timer = System.Timers.Timer;
 namespace pixel_renderer
 {
- 
+
     using Bitmap = System.Drawing.Bitmap;
 
     public class Runtime
@@ -27,7 +25,7 @@ namespace pixel_renderer
         /// used to signify whether the engine is being witnessed by an inspector or not,
         /// useful for throwing errors directly to inspector
         /// </summary>
-        public static object? inspector = null; 
+        public static object? inspector = null;
 
         public Timer? physicsClock;
         public Stage stage;
@@ -38,11 +36,11 @@ namespace pixel_renderer
         public int framesUntilCheck = 50;
         public int frameCount;
 
-        public bool IsRunning = false; 
+        public bool IsRunning = false;
         public string ImageDirectory;
 
         ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
-       
+
         public static async Task Awake(EngineInstance mainWnd)
         {
 
@@ -61,7 +59,7 @@ namespace pixel_renderer
             Instance.LoadBackgroundCollection();
 
             //FontAssetFactory.InitializeDefaultFont();
-            
+
             Staging.InitializeDefaultStage();
 
             Instance.Initialized = true;
@@ -75,17 +73,17 @@ namespace pixel_renderer
             physicsClock = new Timer(interval.TotalSeconds);
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
             physicsClock.Start();
-            IsRunning = true; 
+            IsRunning = true;
         }
-       
+
         private void Execute()
         {
             if (IsRunning)
             {
-                if (Rendering.State == RenderState.Game) 
+                if (Rendering.State == RenderState.Game)
                     Rendering.Render(mainWnd.renderImage);
                 Input.Refresh();
-               
+
             }
         }
         private void GetFramerate()
@@ -102,7 +100,7 @@ namespace pixel_renderer
         /// Toggle Updating of Physics on and off (also affects FixedUpdate, since they are called in tandem.)
         /// </summary>
         /// <exception  cref="NullReferenceException"> </exception>  
-        
+
         public void Toggle()
         {
             if (physicsClock == null)
@@ -135,14 +133,11 @@ namespace pixel_renderer
                 {
                     if (asset as BitmapAsset == null) continue;
                     var bitmapAsset = asset as BitmapAsset;
-                    
-                    var colors = bitmapAsset.Colors;
-                    
-                    var bitmap = BitmapAsset.BitmapFromColorArray(colors);
+                    var bitmap = bitmapAsset.RuntimeValue; 
 
                     if (bitmap.Height == Settings.ScreenHeight
                         && bitmap.Width == Settings.ScreenWidth)
-                            bitmaps.Add(bitmap);
+                        bitmaps.Add(bitmap);
                 }
 
                 if (bitmaps.Count == 0) return;
@@ -151,11 +146,11 @@ namespace pixel_renderer
         }
         public class MissingStageEvent : InspectorEvent
         {
-           
+
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            if (stage is null) stage = Stage.New; 
+            stage ??= Stage.New;
 
             _ = Collision.RegisterColliders(stage);
             Collision.BroadPhase(stage, collisionMap);

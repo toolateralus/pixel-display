@@ -1,9 +1,6 @@
-﻿using Microsoft.Win32;
-using pixel_renderer;
+﻿using pixel_renderer;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Security.Permissions;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -16,8 +13,8 @@ namespace pixel_editor
     public partial class StageWnd : Window
     {
         bool usingStarterAssets = false;
-        
-        Bitmap? background; 
+
+        Bitmap? background;
 
         public StageWnd()
         {
@@ -26,26 +23,26 @@ namespace pixel_editor
 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
-           
+
             AssetPipeline.ImportFileDialog(out Asset result);
-            
+
             if (result is null) return;
 
             if (result as BitmapAsset is null) return;
-            
+
             var bmpAsset = result as BitmapAsset;
-            
-            var image = BitmapAsset.BitmapFromColorArray(bmpAsset.Colors);
-            
+
+            var image = bmpAsset.RuntimeValue ?? new(256,256); 
+
             if (image is not null)
             {
                 background = image;
             }
         }
-       
+
         private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
-            int count = nodeCtTxt.Text.ToInt(); 
+            int count = nodeCtTxt.Text.ToInt();
 
             var name = stageNameTxt.Text.ToFileNameFormat();
 
@@ -59,7 +56,7 @@ namespace pixel_editor
             {
                 var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
                 await Task.Run(AssetPipeline.ImportFileDialog);
-                if (background is null) return; 
+                if (background is null) return;
             }
             var stage = new Stage(name, background, nodes.ToArray());
 
@@ -72,9 +69,9 @@ namespace pixel_editor
                 AssetLibrary.Register(typeof(Stage), asset);
             }
         }
-       
 
-        private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets; 
+
+        private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;
     }
 }
 
@@ -88,7 +85,7 @@ public class InspectorProperty
     //    List<InspectorProperty> properties = new();
     //    foreach (var component in node.ComponentsList)
     //    {
-            // deserialize component info
+    // deserialize component info
     //    }
     //}
 }

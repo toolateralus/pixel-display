@@ -1,7 +1,6 @@
 ﻿namespace pixel_renderer
 {
     using System;
-    using System.Linq;
     using System.Windows.Controls;
 
     [Obsolete]
@@ -20,8 +19,8 @@
         {
             var runtime = Runtime.Instance;
             Stage stage = runtime.stage;
-            outputTextBox.Text =$" {Rendering.FrameRate()} Frames Per Second"; 
-            
+            outputTextBox.Text = $" {Rendering.FrameRate()} Frames Per Second";
+
         }
     }
 

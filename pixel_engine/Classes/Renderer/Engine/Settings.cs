@@ -26,7 +26,7 @@ namespace pixel_renderer
         // Asset resources (user - created)
         public const string AssetsDirectory = "\\Pixel\\Assets";
         // Root directory for resources
-        public static string Appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData); 
+        public static string Appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         // pxad {Pixel Asset Data}
         public const string AssetsFileExtension = ".pxad";
         internal const float MaxDepenetrationForce = 3f;
@@ -51,23 +51,17 @@ namespace pixel_renderer
         }
         internal static bool WithinTerminalVelocity(Vec2 velocity)
         {
-            if (velocity.x > terminalVelocity || velocity.x < -terminalVelocity || 
-                velocity.y > terminalVelocity || velocity.y < -terminalVelocity) { 
-                return false;
-            }
-            return true; 
+            return velocity.x <= terminalVelocity && velocity.x >= -terminalVelocity &&
+                velocity.y <= terminalVelocity && velocity.y >= -terminalVelocity;
         }
         internal static bool WithinTerminalVelocity(Vec3 velocity)
         {
-            if (velocity.x > terminalVelocity || velocity.x < -terminalVelocity ||
-                velocity.y > terminalVelocity || velocity.y < -terminalVelocity ||
-                 velocity.z > terminalVelocity || velocity.z < -terminalVelocity){
-                return false;
-            }
-            return true;
+            return velocity.x <= terminalVelocity && velocity.x >= -terminalVelocity &&
+                velocity.y <= terminalVelocity && velocity.y >= -terminalVelocity &&
+                 velocity.z <= terminalVelocity && velocity.z >= -terminalVelocity;
         }
         internal static bool WithinTerminalVelocity(Rigidbody rigidbody) => WithinTerminalVelocity(rigidbody.velocity);
-        
+
     }
 
 }

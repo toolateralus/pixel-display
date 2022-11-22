@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace pixel_editor.Source.Attributes
+﻿namespace pixel_editor.Source.Attributes
 {
 
 }

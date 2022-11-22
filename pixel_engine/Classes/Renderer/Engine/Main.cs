@@ -1,6 +1,5 @@
 ﻿namespace pixel_renderer
 {
-    using System;
     using System.Windows;
 
     /// <summary>
@@ -14,6 +13,6 @@
             _ = Runtime.Awake(this);
         }
 
-      
+
     }
 }

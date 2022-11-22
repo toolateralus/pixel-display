@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Windows; 
 using System.Runtime.Serialization;
+using System.Windows;
 
 namespace pixel_renderer
 {
@@ -13,7 +13,7 @@ namespace pixel_renderer
 
         public NullStageException(string? message) : base(message + "Stage Not Found.")
         {
-            Application.Current.MainWindow.Close(); 
+            Application.Current.MainWindow.Close();
         }
 
         public NullStageException(string? message, Exception? innerException) : base(message, innerException)

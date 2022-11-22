@@ -2,19 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Drawing;
     using System.Linq;
     using System.Runtime.InteropServices;
-    using System.Threading;
-    using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Input;
-    using System.Windows.Media.Imaging;
     using Bitmap = System.Drawing.Bitmap;
-    using Image =System.Drawing.Image;
 
     public static class Rendering
-    { 
+    {
         /// <summary>
         /// Game = Build;
         /// Scene = Inspector;
@@ -52,6 +45,8 @@
                 return;
             }
             var background = runtime.stage.Background ?? FallBack;
+            var pallete = background.Palette;
+            
             var clonedBackground = (Bitmap)background.Clone();
             var frame = Draw(clonedBackground);
             DrawToImage(ref frame, output);
@@ -62,23 +57,33 @@
 
         private static Bitmap Draw(Bitmap frame)
         {
+
+           //unsafe bitmap draw [C# native code]
+           //CBit.Draw(runtime.stage, frame);
+           //return frame;
+
+            // from DLL (not importing, maybe needs library for GetDIBits/SetDIBits) [C++ native code] )
             //var hbit = GetHBITMAP(frame.GetHbitmap(), 255, 255, 255);
             //frame = Image.FromHbitmap(hbit);
             //return frame;
 
-            /// NORMAL RENDERING BELOW;
+            // NORMAL RENDERING BELOW;
             Stage stage = Runtime.Instance.stage;
-            foreach (var node in stage.Nodes)
+            // do 2 component calls with discard cuz idk if that or making a new object is less expensive?
+            IEnumerable<Sprite> sprites = from Node node in stage.Nodes
+                                          where  node.TryGetComponent<Sprite>(out _)
+                                          select  node.GetComponent<Sprite>() ; 
+            
+            foreach (var sprite in sprites)
             {
-                if (!node.TryGetComponent(out Sprite sprite)) continue;
-                if (sprite is null) continue;
+                if (!sprite.isCollider) continue; 
 
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
 
-                        var offsetX = node.position.x + x;
-                        var offsetY = node.position.y + y;
+                        var offsetX = sprite.parentNode.position.x + x;
+                        var offsetY = sprite.parentNode.position.y + y;
 
                         if (offsetX < 0) continue;
                         if (offsetY < 0) continue;
@@ -99,7 +104,7 @@
         }
 
         static string cachedGCValue = "";
-        
+
         const int framesUntilGC_Check = 600;
         private static int framesSinceGC_Check = 0;
 
@@ -118,10 +123,10 @@
 
             return cachedGCValue;
         }
-        private static void DrawToImage(ref Bitmap inputFrame, System.Windows.Controls.Image renderImage)=>  CBit.Convert(inputFrame, renderImage);
-         
-        
-        
+        private static void DrawToImage(ref Bitmap inputFrame, System.Windows.Controls.Image renderImage)
+        {
+            CBit.BitmapToSource(inputFrame, renderImage);
+        }
     }
 
 }

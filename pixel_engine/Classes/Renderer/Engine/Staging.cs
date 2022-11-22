@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Media.Media3D;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
 {
-    public abstract class InspectorEvent 
+    public abstract class InspectorEvent
     {
         public string message;
         public object sender;
-        public Action<object?, object?, object?, object?> expression = (object? arg1, object? arg2 , object? arg3, object? arg4) => { };
+        public Action<object?, object?, object?, object?> expression = (object? arg1, object? arg2, object? arg3, object? arg4) => { };
         public object[] expressionArgs = new object[3];
     }
-  
+
     public static class Staging
     {
         private const int maxClickDistance_InPixels = 0;
@@ -31,7 +28,7 @@ namespace pixel_renderer
         }
         public static void InitializeDefaultStage()
         {
-            var nodes = new List<Node>(); 
+            var nodes = new List<Node>();
             InitializeGenericNodes(nodes);
             Bitmap background = new(256, 256);
             SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
@@ -44,9 +41,9 @@ namespace pixel_renderer
         }
         private static void AddFloor(List<Node> nodes)
         {
-            var staticNodes = new List<Node>(); 
-           for (int i = 0; i < 240; i++)
-               CreateGenericNode(staticNodes, i);
+            var staticNodes = new List<Node>();
+            for (int i = 0; i < 240; i++)
+                CreateGenericNode(staticNodes, i);
             foreach (var node in staticNodes)
             {
                 var randomDrag = JRandom.Bool() ? 0 : 1;
@@ -72,7 +69,7 @@ namespace pixel_renderer
                 usingGravity = true,
                 drag = .1f
             });
-            var randomDirection = JRandom.Direction(); 
+            var randomDirection = JRandom.Direction();
             node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
@@ -116,7 +113,7 @@ namespace pixel_renderer
                     lastSelected = node;
                     if (node.TryGetComponent(out Sprite sprite_))
                     {
-                        sprite_.Highlight(Color.White); 
+                        sprite_.Highlight(Color.White);
                     }
                     return true;
                 }
@@ -137,8 +134,8 @@ namespace pixel_renderer
             {
                 takingInput = true
             };
-            Text text = new(); 
-           
+            Text text = new();
+
 
             playerNode.AddComponent(text);
             playerNode.AddComponent(rb);
@@ -146,9 +143,9 @@ namespace pixel_renderer
             playerNode.AddComponent(sprite);
             nodes.Add(playerNode);
 
-         
-          
+
+
         }
     }
-  
+
 }
