@@ -55,7 +55,7 @@
         [DllImport("PIXELRENDERER", CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
 
-        private static Bitmap Draw(Bitmap frame)
+        private static Bitmap Draw(Bitmap bmp)
         {
             //unsafe bitmap draw[C# native code]
             //CBit.Draw(runtime.stage, frame);
@@ -71,35 +71,25 @@
             Sprite sprite_ = new(0, 0);
             IEnumerable<Sprite> sprites = from Node node in stage.Nodes
                                                                where  node.TryGetComponent(out sprite_)
+                                                               where sprite_.isCollider
                                                                select  sprite_ ; 
             
             foreach (var sprite in sprites)
             {
-                if (!sprite.isCollider) continue; 
-
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
-
                         var offsetX = sprite.parentNode.position.x + x;
                         var offsetY = sprite.parentNode.position.y + y;
 
-                        if (offsetX < 0) continue;
-                        if (offsetY < 0) continue;
-
-                        if (offsetX >= Settings.ScreenWidth) continue;
-                        if (offsetY >= Settings.ScreenHeight) continue;
-
+                        if (offsetX is < 0 or >= Settings.ScreenWidth 
+                            || offsetY is < 0 or >= Settings.ScreenHeight) continue;
                         var color = sprite.colorData[x, y];
-                        var position = new Vec2((int)offsetX, (int)offsetY);
 
-                        var pixelOffsetX = (int)position.x;
-                        var pixelOffsetY = (int)position.y;
-
-                        frame.SetPixel(pixelOffsetX, pixelOffsetY, color);
+                        bmp.SetPixel((int)offsetX, (int)offsetY, color);
                     }
             }
-            return frame;
+            return bmp;
         }
 
         static string cachedGCValue = "";
