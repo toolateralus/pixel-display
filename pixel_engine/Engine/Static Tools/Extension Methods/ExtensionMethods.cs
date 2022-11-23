@@ -41,7 +41,7 @@ namespace pixel_renderer
             string intResult = "";
 
             foreach (var x in input)
-                if (Settings.int_chars_array.Contains(x)) intResult += x;
+                if (Settings.int_chars.Contains(x)) intResult += x;
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }
@@ -55,7 +55,7 @@ namespace pixel_renderer
             var output = "";
             foreach (var _char in input)
             {
-                if (!Settings.unsupported_char_array.Contains(_char)) output += _char;
+                if (!Settings.unsupported_chars.Contains(_char)) output += _char;
             }
             return output;
         }

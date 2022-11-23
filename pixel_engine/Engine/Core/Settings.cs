@@ -4,63 +4,62 @@ namespace pixel_renderer
 {
     public  class Settings
     {
-        public const int FramesBetweenFramerateChecks = 60;
-        public const int ScreenHeight = 256;
-        public static char[] unsupported_char_array = { '_', '-', '.', '`' };
-        public static char[] int_chars_array = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', };
-        public const int ScreenWidth = 256;
-        /// <summary>
-        /// this value determines the area of a Broad Collision Cell, which segments the worlds physics into chunks. The area of the largest Object in the stage must be smaller than this value.
-        /// </summary>
-        public const int CollisionCellSize = 16;
         /// <summary>
         /// FixedUpdate / Physics refresh interval,
         /// NOTE: for some reason this seems to have absolutely no effect other than it cannot be zero. 
-        /// this is preventing us from implementing a time scale.
+        /// this is in the way of implementing a time scale.
         /// </summary>
         public const float PhysicsRefreshInterval = .01f;
-        // Font Images asset directory (Probably shouldnt be a constant, for text rendering.)
-        public const string FontDirectory = ImagesDirectory + "\\Font";
-        // Images Import folder (temporary solution until assets are done, for importing backgrounds)
-        public const string ImagesDirectory = AssetsDirectory + "\\Images";
-        // Asset resources (user - created)
-        public const string AssetsDirectory = "\\Pixel\\Assets";
-        // Root directory for resources
-        public static string Appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        // pxad {Pixel Asset Data}
-        public const string AssetsFileExtension = ".pxad";
-        internal const float MaxDepenetrationForce = 3f;
-        internal static int terminalVelocity = 4;
-
-        internal static Vec2 TerminalVec2()
+        public const float MaxDepenetrationForce = 3f;
+        public static int TerminalVelocity = 4;
+        public const int CollisionCellSize = 16; // this value determines the area of a Broad Collision Cell, which segments the worlds physics into chunks. The area of the largest Object in the stage must be smaller than this value.
+        public static Vec2 TerminalVec2()
         {
             return new Vec2()
             {
-                x = terminalVelocity,
-                y = terminalVelocity,
+                x = TerminalVelocity,
+                y = TerminalVelocity,
             };
         }
-        internal static Vec3 TerminalVec3()
+        public static Vec3 TerminalVec3()
         {
             return new Vec3()
             {
-                x = terminalVelocity,
-                y = terminalVelocity,
-                z = terminalVelocity,
+                x = TerminalVelocity,
+                y = TerminalVelocity,
+                z = TerminalVelocity,
             };
         }
-        internal static bool WithinTerminalVelocity(Vec2 velocity)
+        public static bool WithinTerminalVelocity(Vec2 velocity)
         {
-            return velocity.x <= terminalVelocity && velocity.x >= -terminalVelocity &&
-                velocity.y <= terminalVelocity && velocity.y >= -terminalVelocity;
+            return velocity.x <= TerminalVelocity && velocity.x >= -TerminalVelocity &&
+                velocity.y <= TerminalVelocity && velocity.y >= -TerminalVelocity;
         }
-        internal static bool WithinTerminalVelocity(Vec3 velocity)
+        public static bool WithinTerminalVelocity(Vec3 velocity)
         {
-            return velocity.x <= terminalVelocity && velocity.x >= -terminalVelocity &&
-                velocity.y <= terminalVelocity && velocity.y >= -terminalVelocity &&
-                 velocity.z <= terminalVelocity && velocity.z >= -terminalVelocity;
+            return velocity.x <= TerminalVelocity && velocity.x >= -TerminalVelocity &&
+                velocity.y <= TerminalVelocity && velocity.y >= -TerminalVelocity &&
+                 velocity.z <= TerminalVelocity && velocity.z >= -TerminalVelocity;
         }
-        internal static bool WithinTerminalVelocity(Rigidbody rigidbody) => WithinTerminalVelocity(rigidbody.velocity);
+        public static bool WithinTerminalVelocity(Rigidbody rigidbody) => WithinTerminalVelocity(rigidbody.velocity);
+
+        public const int FramerateSampleThreshold = 60;
+        public const int ScreenH = 256;
+        public const int ScreenW = 256;
+
+        public static char[] unsupported_chars = { '_', '-', '.', '`'};
+        public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', };
+
+        public const string FontsDir = ImagesDir + "\\Font";  // Font Images asset directory (Probably shouldnt be a constant, for text rendering.)
+        public const string ImagesDir = AssetsDir + "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
+        public const string ProjectsDir = AssetsDir + "\\Projects";
+        public const string AssetsDir = "\\Pixel\\Assets";   // Asset resources (user - created)
+        public static string AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);    // Root directory for resources
+        
+        public const string AssetsFileExtension = ".pxad";  // pxad {Pixel Asset Data}
+        public const string ProjectFileExtension = ".pxpj";   // pxpj {Pixel Project}
+
+
 
     }
 

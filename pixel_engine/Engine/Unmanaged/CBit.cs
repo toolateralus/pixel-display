@@ -66,7 +66,7 @@ namespace pixel_renderer
             int length = colorBytes.Length; 
             IntPtr destination = bmd.Scan0; 
 
-            if (!length.Equals(Settings.ScreenWidth * Settings.ScreenHeight))
+            if (!length.Equals(Settings.ScreenW * Settings.ScreenH))
                 throw new InvalidOperationException("Color array is not the appropriate size.");
 
             Marshal.Copy(colorBytes, start, destination, length);
@@ -77,7 +77,7 @@ namespace pixel_renderer
 
         internal  static Color[] ColorGraph(IEnumerable<Sprite> sprites)
         {
-            var colors = new Color[Settings.ScreenWidth * Settings.ScreenHeight];
+            var colors = new Color[Settings.ScreenW * Settings.ScreenH];
             foreach (Sprite sprite in sprites)
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
@@ -88,8 +88,8 @@ namespace pixel_renderer
                         if (offsetX < 0) continue;
                         if (offsetY < 0) continue;
 
-                        if (offsetX >= Settings.ScreenWidth) continue;
-                        if (offsetY >= Settings.ScreenHeight) continue;
+                        if (offsetX >= Settings.ScreenW) continue;
+                        if (offsetY >= Settings.ScreenH) continue;
 
                         var color = sprite.colorData[x, y];
 

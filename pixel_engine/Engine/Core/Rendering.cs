@@ -83,8 +83,8 @@
                         var offsetX = sprite.parentNode.position.x + x;
                         var offsetY = sprite.parentNode.position.y + y;
 
-                        if (offsetX is < 0 or >= Settings.ScreenWidth 
-                            || offsetY is < 0 or >= Settings.ScreenHeight) continue;
+                        if (offsetX is < 0 or >= Settings.ScreenW 
+                            || offsetY is < 0 or >= Settings.ScreenH) continue;
                         var color = sprite.colorData[x, y];
 
                         bmp.SetPixel((int)offsetX, (int)offsetY, color);

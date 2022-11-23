@@ -9,7 +9,7 @@ namespace pixel_renderer
     public static class Collision
     {
         private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
-        private readonly static SpatialHash hash = new(Settings.ScreenHeight, Settings.ScreenWidth, Settings.CollisionCellSize);
+        private readonly static SpatialHash hash = new(Settings.ScreenH, Settings.ScreenW, Settings.CollisionCellSize);
 
         public static void ViewportCollision(Node node)
         {
@@ -18,13 +18,13 @@ namespace pixel_renderer
             if (sprite is null || rb is null) return;
             if (sprite.isCollider)
             {
-                if (node.position.y > Settings.ScreenWidth - 4 - sprite.size.y)
+                if (node.position.y > Settings.ScreenW - 4 - sprite.size.y)
                 {
-                    node.position.y = Settings.ScreenWidth - 4 - sprite.size.y;
+                    node.position.y = Settings.ScreenW - 4 - sprite.size.y;
                 }
-                if (node.position.x > Settings.ScreenHeight - sprite.size.x)
+                if (node.position.x > Settings.ScreenH - sprite.size.x)
                 {
-                    node.position.x = Settings.ScreenHeight - sprite.size.x;
+                    node.position.x = Settings.ScreenH - sprite.size.x;
                     rb.velocity.x = 0;
                 }
                 if (node.position.x < 0)

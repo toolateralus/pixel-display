@@ -83,7 +83,7 @@
             Vec2 max = new Vec2(
                 obj.position.x + sprite.size.x,
                 obj.position.y + sprite.size.y);
-            float width = Settings.ScreenHeight / cellSize;
+            float width = Settings.ScreenH / cellSize;
 
             //TopLeft
             AddBucket(min, width, bucketsObjIsIn);

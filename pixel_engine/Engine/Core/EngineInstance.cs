@@ -1,6 +1,7 @@
 ﻿namespace pixel_renderer
 {
     using pixel_renderer.Assets;
+    using pixel_renderer.Projects;
     using System.Windows;
 
     /// <summary>
@@ -11,13 +12,11 @@
         public EngineInstance()
         {
             InitializeComponent();
-            Project project = LoadOrCreateProject();
+            Project project = Project.LoadProject();
+            ProjectIO.SaveProject(project);
             _ = Runtime.Awake(this, project);
         }
 
-        private static Project LoadOrCreateProject()
-        {
-            return new("NewProject") { };
-        }
+        
     }
 }

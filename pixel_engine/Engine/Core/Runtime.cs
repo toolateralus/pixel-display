@@ -88,7 +88,7 @@ namespace pixel_renderer
         }
         private void GetFramerate()
         {
-            if (framesUntilCheck >= Settings.FramesBetweenFramerateChecks)
+            if (framesUntilCheck >= Settings.FramerateSampleThreshold)
             {
                 lastFrameTime = DateTime.Now.Ticks;
                 framesUntilCheck = 0;
@@ -135,8 +135,8 @@ namespace pixel_renderer
                     var bitmapAsset = asset as BitmapAsset;
                     var bitmap = bitmapAsset.RuntimeValue; 
 
-                    if (bitmap.Height == Settings.ScreenHeight
-                        && bitmap.Width == Settings.ScreenWidth)
+                    if (bitmap.Height == Settings.ScreenH
+                        && bitmap.Width == Settings.ScreenW)
                         bitmaps.Add(bitmap);
                 }
 

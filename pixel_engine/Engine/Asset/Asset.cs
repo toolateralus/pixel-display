@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json;
+using pixel_renderer.Assets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,10 +35,10 @@ namespace pixel_renderer.Assets
         new public Type GetType() => fileType;
 
     }
-    public class IO
+    public class AssetIO
     {
         public static bool skippingOperation = false;
-        public static string Path => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel\\Assets";
+        public static string Path => Settings.AppDataDir + Settings.AssetsDir; 
         public static void SaveAsset(Asset data, string fileName)
         {
             if (!Directory.Exists(Path))
@@ -99,9 +100,9 @@ namespace pixel_renderer.Assets
                 asset = jsonSerializer.Deserialize<Asset>(json);
             }
             catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
-            asset.Name += asset.GetType() ?? null;
             return asset;
         }
+
         public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
         {
             Asset? _asset = ReadAssetFile(name);
@@ -130,9 +131,46 @@ namespace pixel_renderer.Assets
             }
         }
     }
+    public class Dialog
+    {
+        public Type type;
+        public string fileName;
+        public string fileExtension;
+        public string name; 
+        public Dialog(Type type, string name, string fileName, string fileExtension)
+        {
+            this.type = type;
+            this.name = name; 
+            this.fileName = fileName;
+            this.fileExtension = fileExtension;
+        }
+        public Dialog()
+        {
+            type = null;
+            name = "";
+            fileName = "";
+            fileExtension = "";
+        }
+        public static Dialog ImportFileDialog()
+        {
+            OpenFileDialog fileDialog = new();
+            bool? result = fileDialog.ShowDialog();
+            Dialog dlg = new();
+            if (result == true)
+            {
+                var name = fileDialog.FileName;
+                var split = name.Split('.');
+                var ext = split.Last();
+                var type = Importer.TypeFromExtension(ext);
+                var fileName = split[0].Split("\\").Last();
+                dlg = new(type, name, fileName, ext);
+            }
+            return dlg;
+        }
+    }
     public class Importer
     {
-        public static string Path => Settings.Appdata + Settings.AssetsDirectory;
+        public static string Path => Settings.AppDataDir + Settings.AssetsDir;
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>
@@ -184,7 +222,7 @@ namespace pixel_renderer.Assets
         /// <returns>Asset if it exists at path, else null.</returns>
         public static Asset? TryPullObject(string path, Type type, string newName)
         {
-            return !File.Exists(path) ? null : IO.TryDeserializeNonAssetFile(path, type, newName);
+            return !File.Exists(path) ? null : AssetIO.TryDeserializeNonAssetFile(path, type, newName);
         }
         /// <summary>
         /// </summary>
@@ -195,27 +233,19 @@ namespace pixel_renderer.Assets
             return type switch
             {
                 "pxad" => typeof(Asset),
+                "pxpj" => typeof(Project),
                 "bmp" => typeof(Bitmap),
-                _ => typeof(object),
+                 _ => typeof(object),
             };
         }
-        public static void ImportFileDialog()
+        public static void ImportAssetDialog()
         {
-            OpenFileDialog fileDialog = new();
-            bool? result = fileDialog.ShowDialog();
-            if (result == true)
+            Dialog dialog = Dialog.ImportFileDialog();
+            if (dialog.type != null)
             {
-                var name = fileDialog.FileName;
-                var split = name.Split('.');
-                var fileExtension = split[1];
-                var typeRef = Importer.TypeFromExtension(fileExtension);
-                var newFileName = split[0].Split("\\").Last(); 
-                if (typeRef != null)
-                {
-                    var asset = IO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
-                    if (asset == null) return;
-                    Library.Register(asset.GetType(), asset);
-                }
+                var asset = AssetIO.TryDeserializeNonAssetFile(dialog.name, dialog.type, dialog.fileName);
+                if (asset == null) return;
+                Library.Register(asset.GetType(), asset);
             }
         }
         public static void ImportFileDialog(out Asset? outObject)
@@ -235,10 +265,10 @@ namespace pixel_renderer.Assets
             if (typeRef is null) return;
             if (typeRef == typeof(Asset))
             {
-                IO.TryDeserializeAssetFIle(ref outObject, name);
+                AssetIO.TryDeserializeAssetFIle(ref outObject, name);
                 return;
             }
-            var asset = IO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
+            var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
             if (asset is null) return;
 
             Library.Register(asset.GetType(), asset);
@@ -305,10 +335,10 @@ namespace pixel_renderer.Assets
 
             if (library is null) return;
 
-            IO.skippingOperation = false;
+            AssetIO.skippingOperation = false;
 
             foreach (var asset in library)
-                IO.SaveAsset(asset, asset.Name);
+                AssetIO.SaveAsset(asset, asset.Name);
         }
         /// <summary>
         /// Clone the current Asset Library into a List.
@@ -342,4 +372,72 @@ namespace pixel_renderer.Assets
             }
         }
     }
+}
+namespace pixel_renderer.Projects
+{
+    public class ProjectIO
+    {
+        public static string Path => Settings.AppDataDir + Settings.ProjectsDir;
+        public static void SaveProject(Project project)
+        {
+            if (!Directory.Exists(Path))
+                Directory.CreateDirectory(Path);
+            if (File.Exists(Path + "/" + project.Name + Settings.ProjectFileExtension))
+            {
+                    var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite Project {project.Name}.pxpj ? \n found at {Path}",
+                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning,
+                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
+                    if (overwriteWarningResult != MessageBoxResult.Yes)
+                    {
+                        return;
+                    }
+            }
+            using TextWriter writer = new StreamWriter(Path + "/" + project.Name + Settings.ProjectFileExtension);
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+            };
+            var jsonSerializer = JsonSerializer.Create(settings);
+            jsonSerializer.Serialize(writer, project);
+            writer.Close();
+        }
+        public static Project ReadProjectFile(string fileName)
+        {
+            if (!Directory.Exists(Path))
+            {
+                Directory.CreateDirectory(Path);
+                throw new Exception($"Path not found, A Directory was created at {Path}. please try placing data within this directory and try the operation again.");
+            }
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+            };
+            var jsonSerializer = JsonSerializer.Create(settings);
+            StreamReader reader = new(Path + "\\" + fileName + Settings.ProjectFileExtension);
+            Project  project = new(fileName);
+            using JsonTextReader json = new(reader);
+            try
+            {
+                project = jsonSerializer.Deserialize<Project>(json);
+            }
+            catch (Exception) 
+            {
+                MessageBox.Show("File read error - Fked Up Big Time"); 
+            };
+
+            if (project is null) 
+                throw new NullReferenceException(); 
+            return project;
+        }
+        public static void TryFetchProject(out Project? outObject, string name)
+        {
+            outObject = new("Null"); 
+            Project project = ReadProjectFile(name);
+            if (project is null) return;
+            outObject = project;
+            return;
+        }
+    }
+
+
 }

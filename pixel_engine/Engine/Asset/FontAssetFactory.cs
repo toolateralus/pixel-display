@@ -34,7 +34,7 @@ namespace pixel_renderer.Assets
         /// <returns> a List of Bitmap objects ordered by their Character value in accordance to the Text passed in.</returns>
         internal static void InitializeDefaultFont()
         {
-            var path = Settings.Appdata + Settings.FontDirectory;
+            var path = Settings.AppDataDir + Settings.FontsDir;
 
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 

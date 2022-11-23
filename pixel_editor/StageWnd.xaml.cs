@@ -40,23 +40,20 @@ namespace pixel_editor
                 background = image;
             }
         }
-
         private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
             int count = nodeCtTxt.Text.ToInt();
-
             var name = stageNameTxt.Text.ToFileNameFormat();
 
             List<Node> nodes = new();
-
             for (int i = 0; i < count; i++)
-                Staging.CreateGenericNode(nodes, i);
+                Node.CreateGenericNode(nodes, i);
 
             if (usingStarterAssets) Staging.AddPlayer(nodes);
             if (background is null)
             {
                 var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
-                await Task.Run(Importer.ImportFileDialog);
+                await Task.Run(Importer.ImportAssetDialog);
                 if (background is null) return;
             }
             var stage = new Stage(name, background, nodes.ToArray());
@@ -66,12 +63,10 @@ namespace pixel_editor
             if (msgResult == MessageBoxResult.Yes)
             {
                 Staging.SetCurrentStage(stage);
-                var asset = new StageAsset(stage.Name, null, stage);
+                var asset = new StageAsset(stage.Name, stage);
                 Library.Register(typeof(Stage), asset);
             }
         }
-
-
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;
     }
 }

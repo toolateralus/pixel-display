@@ -145,7 +145,7 @@ namespace pixel_editor
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => Library.Sync();
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
-            Importer.ImportFileDialog();
+            Importer.ImportAssetDialog();
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
