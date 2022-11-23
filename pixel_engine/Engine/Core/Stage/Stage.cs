@@ -95,8 +95,10 @@ namespace pixel_renderer
             Nodes = nodes;
             Awake();
             RefreshStageDictionary();
+            _init = this; 
         }
-
+        // ref to initial identity for resetting stage;
+        private readonly Stage _init;
         // for IEnumerator implementation;
         public NodeEnum GetEnumerator()
         {
@@ -105,6 +107,12 @@ namespace pixel_renderer
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        internal Stage Reset()
+        {
+            if (_init is not null) return _init; 
+            throw new NullStageException("Stage not found on reset call"); 
         }
     }
     public class NodeEnum : IEnumerator

@@ -16,7 +16,7 @@ namespace pixel_renderer
 
     public static class Staging
     {
-        private const int maxClickDistance_InPixels = 0;
+        private const int maxClickDistance_InPixels = 25;
         static Runtime runtime => Runtime.Instance;
         // this variable is used by the inspector to
         // ensure user'a click grabs a new node each time 
@@ -29,27 +29,27 @@ namespace pixel_renderer
         }
         public static void ReloadCurrentStage()
         {
-            SetCurrentStage(runtime.stage);
+            var reset = runtime.stage.Reset();
+            if (reset is null) 
+                throw new NullStageException("Resetting stage failed"); 
+            SetCurrentStage(reset);
         }
 
         public static Stage InitializeDefault()
         {
             var nodes = new List<Node>();
-            InitializeGenericNodes(nodes);
+            AddPlayer(nodes);
+            AddFloor(nodes);
+            for (int i = 0; i < 1000; i++) Node.CreateGenericNode(nodes, i);
             Bitmap background = new(256, 256);
             return new Stage("Default Stage", background, nodes.ToArray());
         }
-        private static void InitializeGenericNodes(List<Node> nodes)
-        {
-            AddPlayer(nodes);
-            AddFloor(nodes);
-            for (int i = 0; i < 1000; i++) CreateGenericNode(nodes, i);
-        }
+      
         private static void AddFloor(List<Node> nodes)
         {
             var staticNodes = new List<Node>();
             for (int i = 0; i < 240; i++)
-                CreateGenericNode(staticNodes, i);
+                Node.CreateGenericNode(staticNodes, i);
             foreach (var node in staticNodes)
             {
                 var randomDrag = JRandom.Bool() ? 0 : 1;
@@ -59,23 +59,8 @@ namespace pixel_renderer
             }
             nodes.AddRange(staticNodes);
         }
-        public static void CreateGenericNode(List<Node> nodes, int i)
-        {
-            var pos = JRandom.ScreenPosition();
-            var five = Vec2.one * 5;
-            var node = new Node($"NODE {i}", pos, Vec2.one);
-            node.AddComponent(new Sprite(five, JRandom.Color(), true));
-            node.AddComponent(new Rigidbody()
-            {
-                IsTrigger = false,
-                usingGravity = true,
-                drag = .1f
-            });
-            var randomDirection = JRandom.Direction();
-            node.AddComponent(new Wind(randomDirection));
-            nodes.Add(node);
-        }
-        public static bool TryCheckOccupant(Point pos, out Node? result)
+       
+        public static bool GetNodeAtPoint(Point pos, out Node? result)
         {
             // round up number to improve click accuracy
             // todo = consider size of sprite to reliably get 
@@ -97,28 +82,31 @@ namespace pixel_renderer
                     X = Math.Round(pt.X),
                     Y = Math.Round(pt.Y)
                 };
-                // (200 == 250) == true;
+                
                 var xDelta = pt.X - pos.X;
                 var yDelta = pt.Y - pos.Y;
 
-                if (xDelta + yDelta < maxClickDistance_InPixels)
+                if (xDelta < 0) xDelta = CMath.Negate(xDelta);
+                if (yDelta < 0) yDelta = CMath.Negate(yDelta);
+
+                if (xDelta > maxClickDistance_InPixels) continue;
+                if (yDelta > maxClickDistance_InPixels) continue;
+
+                if (node == lastSelected) continue;
+                result = node;
+                if (lastSelected != null)
                 {
-                    if (node == lastSelected) continue;
-                    result = node;
-                    if (lastSelected != null)
+                    if (lastSelected.TryGetComponent(out Sprite sprite))
                     {
-                        if (lastSelected.TryGetComponent(out Sprite sprite))
-                        {
-                            sprite.RestoreCachedColor(false);
-                        }
+                        sprite.RestoreCachedColor(false);
                     }
-                    lastSelected = node;
-                    if (node.TryGetComponent(out Sprite sprite_))
-                    {
-                        sprite_.Highlight(Color.White);
-                    }
-                    return true;
                 }
+                lastSelected = node;
+                if (node.TryGetComponent(out Sprite sprite_))
+                {
+                    sprite_.Highlight(Color.White);
+                }
+                return true;
             }
             result = null;
             return false;

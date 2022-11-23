@@ -137,7 +137,7 @@ namespace pixel_editor
             if (Runtime.Instance.IsRunning)
             {
                 inspector.DeselectNode();
-                if (Staging.TryCheckOccupant(pos, out Node node))
+                if (Staging.GetNodeAtPoint(pos, out Node node))
                     inspector.SelectNode(node);
             }
         }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing.Imaging;
     using System.Linq;
     using System.Runtime.InteropServices;
     using Bitmap = System.Drawing.Bitmap;
@@ -47,9 +48,9 @@
                 return;
             }
             var background = runtime.stage.Background ?? FallBack;
-            var clonedBackground = (Bitmap)background.Clone();
-            var frame = Draw(clonedBackground);
-            DrawToImage(ref frame, output);
+            var frame = Draw(background);
+            CBit.Render(ref frame, output); 
+
         }
 
         [DllImport("PIXELRENDERER", CallingConvention = CallingConvention.StdCall)]
@@ -58,8 +59,8 @@
         private static Bitmap Draw(Bitmap bmp)
         {
             //unsafe bitmap draw[C# native code]
-            //CBit.Draw(runtime.stage, frame);
-            //return frame;
+            // CBit.Draw(runtime.stage, bmp);
+            //return bmp;
 
             // from DLL (not importing, maybe needs library for GetDIBits/SetDIBits) [C++ native code] )
             //var hbit = GetHBITMAP(frame.GetHbitmap(), 255, 255, 255);
@@ -112,10 +113,7 @@
 
             return cachedGCValue;
         }
-        private static void DrawToImage(ref Bitmap inputFrame, System.Windows.Controls.Image renderImage)
-        {
-            CBit.BitmapToSource(inputFrame, renderImage);
+        
         }
     }
 
-}

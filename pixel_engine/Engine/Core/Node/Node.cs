@@ -10,7 +10,7 @@ namespace pixel_renderer
         // Node Info
         [JsonIgnore]
         public Stage parentStage { get; set; }
-
+     
         public string Name { get; set; }
 
         private string _uuid = "";
@@ -33,6 +33,7 @@ namespace pixel_renderer
 
         // goal - make private
         public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
+       
         public List<Component> ComponentsList
         {
             get
@@ -155,5 +156,20 @@ namespace pixel_renderer
             foreach (var list in Components.Values)
                 foreach (var component in list) component.OnTrigger(otherBody);
         }
+    public static void CreateGenericNode(List<Node> nodes, int i)
+    {
+        var pos = JRandom.ScreenPosition();
+        var node = new Node($"NODE {i}", pos, Vec2.one);
+        node.AddComponent(new Sprite(JRandom.Vec2(Vec2.one, Vec2.one * 15f), JRandom.Color(), JRandom.Bool()));
+        node.AddComponent(new Rigidbody()
+        {
+            IsTrigger = false,
+            usingGravity = true,
+            drag = .1f
+        });
+        var randomDirection = JRandom.Direction();
+        node.AddComponent(new Wind(randomDirection));
+        nodes.Add(node);
+    }
     }
 }

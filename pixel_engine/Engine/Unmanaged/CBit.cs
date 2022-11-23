@@ -18,12 +18,12 @@ namespace pixel_renderer
     public unsafe static class CBit
     {
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr intPtr);
+        internal static extern bool DeleteObject(IntPtr intPtr);
 
         [DllImport("PIXELRENDERER")]
-        public unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
+        internal unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
 
-        public unsafe static void BitmapToSource(Bitmap bmp, Image source)
+        internal unsafe static void Render(ref Bitmap bmp, Image source)
         {
             var bitmapData = bmp.LockBits(
               new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
@@ -36,7 +36,7 @@ namespace pixel_renderer
             DeleteObject(bitmapData.Scan0);
         }
         [STAThread]
-        public unsafe static void Draw(Stage stage, Bitmap bitmap)
+        internal unsafe static void Draw(Stage stage, Bitmap bitmap)
         {
             Bitmap bmp = bitmap;
 
@@ -50,12 +50,12 @@ namespace pixel_renderer
                                   System.Drawing.Imaging.ImageLockMode.WriteOnly,
                                   bmp.PixelFormat);
 
-            Color[] colors = SpriteArrayToScreenSpaceColorGraph( sprites);
+            Color[] colors = ColorGraph( sprites);
             // draw sprite data to bitmap unmanaged
             byte[] colorBytes = new byte[bmd.Width * bmd.Height];
             for (var i = 0; i < bmd.Width; ++i)
             {
-                var offset = i * 4;
+                var offset = i;
                 colorBytes[offset + 0] = colors[offset].B;
                 colorBytes[offset + 1] = colors[offset].G;
                 colorBytes[offset + 2] = colors[offset].R;
@@ -63,15 +63,19 @@ namespace pixel_renderer
             }
 
             int start = 0;
-            int length = colorBytes.Length; // should always equal screenWidth * screenHeight
-            IntPtr destination = bmd.Scan0; // points  to first address in bitmap
+            int length = colorBytes.Length; 
+            IntPtr destination = bmd.Scan0; 
+
+            if (!length.Equals(Settings.ScreenWidth * Settings.ScreenHeight))
+                throw new InvalidOperationException("Color array is not the appropriate size.");
+
             Marshal.Copy(colorBytes, start, destination, length);
 
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
 
-        private static Color[] SpriteArrayToScreenSpaceColorGraph(IEnumerable<Sprite> sprites)
+        internal  static Color[] ColorGraph(IEnumerable<Sprite> sprites)
         {
             var colors = new Color[Settings.ScreenWidth * Settings.ScreenHeight];
             foreach (Sprite sprite in sprites)

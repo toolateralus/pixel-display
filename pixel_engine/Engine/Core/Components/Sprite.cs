@@ -35,6 +35,10 @@ namespace pixel_renderer
             DrawSquare(size, cachedColor, isCollider);
             if (nullifyCache) cachedColor = null;
         }
+        /// <summary>
+        /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
+        /// </summary>
+        /// <param name="borderColor"></param>
         public void Highlight(Color borderColor)
         {
             int x = (int)size.x;
@@ -70,7 +74,7 @@ namespace pixel_renderer
         }
         public Sprite()
         {
-
+            colorData = new Color[0,0]; 
         }
 
         public Sprite(int x, int y)

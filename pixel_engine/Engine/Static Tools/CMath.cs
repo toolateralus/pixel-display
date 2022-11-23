@@ -20,6 +20,7 @@
             }
             return output;
         }
+        internal static double Negate(double v) => -v;
         internal static Vec2 Negate(Vec2 v) => new()
         {
             x = -v.x,
