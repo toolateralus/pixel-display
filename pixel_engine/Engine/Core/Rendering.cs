@@ -58,8 +58,8 @@
         private static Bitmap Draw(Bitmap frame)
         {
             //unsafe bitmap draw[C# native code]
-            CBit.Draw(runtime.stage, frame);
-            return frame;
+            //CBit.Draw(runtime.stage, frame);
+            //return frame;
 
             // from DLL (not importing, maybe needs library for GetDIBits/SetDIBits) [C++ native code] )
             //var hbit = GetHBITMAP(frame.GetHbitmap(), 255, 255, 255);
