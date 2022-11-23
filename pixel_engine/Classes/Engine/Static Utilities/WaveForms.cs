@@ -1,6 +1,7 @@
 ﻿namespace pixel_renderer
 {
     using System;
+    using pixel_renderer;
 
     public static class WaveForms
     {

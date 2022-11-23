@@ -6,6 +6,7 @@
     using System.Runtime.InteropServices;
     using Bitmap = System.Drawing.Bitmap;
 
+    public enum RenderState { Game, Scene, Off }
     public static class Rendering
     {
         /// <summary>

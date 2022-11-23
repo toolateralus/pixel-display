@@ -140,11 +140,11 @@ namespace pixel_editor
                     inspector.SelectNode(node);
             }
         }
-        private void OnImportBtnPressed(object sender, RoutedEventArgs e) => AssetPipeline.ImportAsync(true);
-        private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => AssetLibrary.Sync();
+        private void OnImportBtnPressed(object sender, RoutedEventArgs e) => Importer.ImportAsync(true);
+        private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => Library.Sync();
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
-            AssetPipeline.ImportFileDialog();
+            Importer.ImportFileDialog();
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {

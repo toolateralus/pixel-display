@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using pixel_renderer;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer

@@ -1,5 +1,4 @@
-﻿
-namespace pixel_renderer
+﻿namespace pixel_renderer
 {
     using System;
     public static class UUID

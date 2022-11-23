@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using pixel_renderer;
+using pixel_renderer.Assets; 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -54,7 +56,7 @@ namespace pixel_renderer
             // changes made to the code below  will likely cause failure or seriously erroneous behaviour
             Instance.project = project; 
             Instance.mainWnd = mainWnd;
-            await AssetPipeline.ImportAsync(false);
+            await Importer.ImportAsync(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.InitializePhysics();
             await Task.Delay(TimeSpan.FromSeconds(5));
@@ -125,7 +127,7 @@ namespace pixel_renderer
 
             // parses pre loaded json objects from the asset library (runtime dictionary containing all assets used and unused.)
 
-            if (AssetLibrary.Fetch<BitmapAsset>(out List<object> bitmapAssetCollection))
+            if (Library.Fetch<BitmapAsset>(out List<object> bitmapAssetCollection))
             {
                 foreach (var asset in bitmapAssetCollection)
                 {

@@ -17,7 +17,7 @@
         private static ProjectAsset LoadOrCreateProject()
         {
             ProjectAsset project = null;
-            AssetPipeline.ImportFileDialog(out Asset? asset);
+            Importer.ImportFileDialog(out Asset? asset);
             if (asset is not null)
             {
                 if (asset.GetType().Equals(typeof(ProjectAsset)))
@@ -29,8 +29,8 @@
             {
                 project = new("Default Projekt");
             }
-            AssetLibrary.Register(typeof(ProjectAsset),project);
-            AssetLibrary.Sync();
+            Library.Register(typeof(ProjectAsset),project);
+            Library.Sync();
             return project;
         }
     }

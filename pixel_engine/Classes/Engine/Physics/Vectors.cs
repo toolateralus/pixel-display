@@ -103,7 +103,6 @@
             if (value.y > max.y) value.y = max.y;
         }
     }
-    public enum RenderState { Game, Scene, Off }
 }
 
 

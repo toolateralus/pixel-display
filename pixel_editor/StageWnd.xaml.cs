@@ -24,7 +24,7 @@ namespace pixel_editor
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
 
-            AssetPipeline.ImportFileDialog(out Asset result);
+            Importer.ImportFileDialog(out Asset result);
 
             if (result is null) return;
 
@@ -55,7 +55,7 @@ namespace pixel_editor
             if (background is null)
             {
                 var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
-                await Task.Run(AssetPipeline.ImportFileDialog);
+                await Task.Run(Importer.ImportFileDialog);
                 if (background is null) return;
             }
             var stage = new Stage(name, background, nodes.ToArray());
@@ -66,7 +66,7 @@ namespace pixel_editor
             {
                 Staging.SetCurrentStage(stage);
                 var asset = new StageAsset(stage.Name, null, stage);
-                AssetLibrary.Register(typeof(Stage), asset);
+                Library.Register(typeof(Stage), asset);
             }
         }
 

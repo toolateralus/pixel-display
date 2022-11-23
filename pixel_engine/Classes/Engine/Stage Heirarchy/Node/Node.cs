@@ -16,17 +16,16 @@ namespace pixel_renderer
         private string _uuid = "";
         public string UUID { get { return _uuid; } set { } }
 
+        public bool Enabled { get { return _enabled; } }
+        private bool _enabled = true; 
+        public void SetActive(bool value)=>_enabled = value; 
+
         public Vec2 position = new();
         public Vec2 localPosition
         {
-            get => GetLocalPosition(position);
-            set { }
+            get => parentNode == null ? position : parentNode.position - position;
         }
 
-        public Vec2 GetLocalPosition(Vec2 position)
-        {
-            return parentNode == null ? position : parentNode.position - position;
-        }
         public Vec2 scale = new();
 
         public Node? parentNode;

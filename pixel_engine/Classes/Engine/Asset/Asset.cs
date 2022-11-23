@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -9,7 +10,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace pixel_renderer
+namespace pixel_renderer.Assets
 {
     /// <summary>
     /// Base class for all Pixel_engine Assets
@@ -33,150 +34,7 @@ namespace pixel_renderer
         new public Type GetType() => fileType;
 
     }
-    public class BitmapAsset : Asset
-    {
-        public Bitmap? RuntimeValue = null;
-        public BitmapAsset(string name) : base(name, typeof(Bitmap))
-        {
-            Name = name;
-            fileType = typeof(Bitmap);
-        }
-        public static BitmapAsset BitmapToAsset(string fileName, string assetName)
-        {
-            Bitmap? bmp = new(fileName);
-            BitmapAsset asset = new(assetName);
-            if (bmp != null)
-                asset.RuntimeValue = bmp;
-            return asset;
-        }
-    }
-    public class FontAsset : Asset
-    {
-        new public string Name = "New Font Asset";
-        public Dictionary<char, Bitmap> characters = new();
-        internal static List<Bitmap> GetCharacterImages(FontAsset asset, string text)
-        {
-            List<Bitmap> output = new();
-            int i = 0;
-
-            foreach (char character in text)
-            {
-                // cache here to force uppercase without modifying the asset.
-                var _char = character;
-                
-                if (char.IsLower(character))
-                    _char = char.ToUpper(character);
-
-                if (asset.characters.ContainsKey(_char))
-                {
-                    var img = (Bitmap)asset.characters[_char].Clone();
-                    output.Add(img);
-                }
-                i++;
-            }
-            return output;
-        }
-        internal static List<Vec2> GetCharacterPosition(FontAsset asset)
-        {
-            List<Vec2> positions = new();
-            foreach (var x in asset.characters.Values)
-                positions.Add(new(x.Width, x.Height));
-
-            return positions;
-        }
-        public FontAsset(string name, Type fileType) : base(name, typeof(pixel_renderer.FontAsset))
-        {
-            fileType = typeof(FontAsset);
-            Name = name; 
-        }
-    }
-    public class StageAsset : Asset
-    {
-        public Stage RuntimeValue;
-        public StageAsset(string name, Type? fileType, Stage runtimeValue) : base(name, fileType)
-        {
-            this.fileType = typeof(Stage);
-            this.Name = name;
-            this.RuntimeValue = runtimeValue;
-        }
-    }
-    public class NodeAsset : Asset
-    {
-        public Node RuntimeValue;
-        public NodeAsset(string name, Node runtimeValue)
-        {
-            RuntimeValue = runtimeValue;
-            Name = name;
-            fileType = typeof(Node);
-        }
-    }
-    public class ProjectAsset :  Asset
-    {
-        public Settings settings; 
-        public Runtime runtime;
-        public List<StageAsset> stages; 
-        public int stageIndex;
-
-        public ProjectAsset(string name) : base(name, typeof(ProjectAsset))
-        {
-            Name = name;
-            fileSize = "";
-            settings = new();
-            runtime = Runtime.Instance;
-            stages = new(); 
-            stageIndex = 0; 
-        }
-    }
-    public static class FontAssetFactory
-    {
-        public static FontAsset CreateFont(int start, int end, Bitmap[] characters)
-        {
-            FontAsset fontAsset = new($"fontAsset{start}", typeof(pixel_renderer.FontAsset));
-            char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-            for (int i = start; i < end; i++)
-            {
-                if (i > alpha.Length || i > characters.Length)
-                {
-                    MessageBox.Show("Font asset could not be created, Index out of range.");
-                    return null;
-                }
-                fontAsset.characters.Add(alpha[i], characters[i]);
-            }
-            if (fontAsset.characters.Count <= 0)
-            {
-                MessageBox.Show("Font is empty.");
-            }
-            return fontAsset;
-        }
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <param name="text"></param>
-        /// <returns> a List of Bitmap objects ordered by their Character value in accordance to the Text passed in.</returns>
-        internal static void InitializeDefaultFont()
-        {
-            var path = Settings.Appdata + Settings.FontDirectory;
-
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-
-            IEnumerable<string> files = Directory.GetFiles(path);
-
-            int i = 0;
-
-            foreach (string file in files)
-            {
-                BitmapAsset bitmap = new($"{'a' + i}")
-                {
-                    RuntimeValue = new(file),
-                    fileType = typeof(Bitmap)
-                };
-                AssetLibrary.Register(typeof(BitmapAsset), bitmap);
-                i++;
-            }
-        }
-    }
-    public static class AssetIO
+    public class IO
     {
         public static bool skippingOperation = false;
         public static string Path => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel\\Assets";
@@ -228,20 +86,14 @@ namespace pixel_renderer
                 Directory.CreateDirectory(Path);
                 return null;
             }
-
             var settings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
             };
-
             var jsonSerializer = JsonSerializer.Create(settings);
-
             StreamReader reader = new(fileName);
-
             Asset asset = new("" + fileName, typeof(Asset));
-
             using JsonTextReader json = new(reader);
-
             try
             {
                 asset = jsonSerializer.Deserialize<Asset>(json);
@@ -255,7 +107,7 @@ namespace pixel_renderer
             Asset? _asset = ReadAssetFile(name);
             if (_asset is null) return;
             outObject = _asset;
-            AssetLibrary.Register(_asset.GetType(), _asset);
+            Library.Register(_asset.GetType(), _asset);
             return;
         }
         public static Asset? TryDeserializeNonAssetFile(string fileName, Type type, string assetName)
@@ -278,7 +130,7 @@ namespace pixel_renderer
             }
         }
     }
-    public static class AssetPipeline
+    public class Importer
     {
         public static string Path => Settings.Appdata + Settings.AssetsDirectory;
         /// <summary>
@@ -307,7 +159,7 @@ namespace pixel_renderer
                         "Asset Importer",
                         MessageBoxButton.YesNo);
 
-                    if (syncResult == MessageBoxResult.Yes) AssetLibrary.Sync();
+                    if (syncResult == MessageBoxResult.Yes) Library.Sync();
                 }
         }
         private static void ImportTask()
@@ -322,7 +174,7 @@ namespace pixel_renderer
                                   select asset)
             {
                 asset.fileType ??= typeof(Asset);
-                AssetLibrary.Register(asset.fileType, asset);
+                Library.Register(asset.fileType, asset);
             };
         }
         /// <summary>
@@ -332,7 +184,7 @@ namespace pixel_renderer
         /// <returns>Asset if it exists at path, else null.</returns>
         public static Asset? TryPullObject(string path, Type type, string newName)
         {
-            return !File.Exists(path) ? null : AssetIO.TryDeserializeNonAssetFile(path, type, newName);
+            return !File.Exists(path) ? null : IO.TryDeserializeNonAssetFile(path, type, newName);
         }
         /// <summary>
         /// </summary>
@@ -356,13 +208,13 @@ namespace pixel_renderer
                 var name = fileDialog.FileName;
                 var split = name.Split('.');
                 var fileExtension = split[1];
-                var typeRef = AssetPipeline.TypeFromExtension(fileExtension);
+                var typeRef = Importer.TypeFromExtension(fileExtension);
                 var newFileName = split[0].Split("\\").Last(); 
                 if (typeRef != null)
                 {
-                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
+                    var asset = IO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
                     if (asset == null) return;
-                    AssetLibrary.Register(asset.GetType(), asset);
+                    Library.Register(asset.GetType(), asset);
                 }
             }
         }
@@ -383,17 +235,17 @@ namespace pixel_renderer
             if (typeRef is null) return;
             if (typeRef == typeof(Asset))
             {
-                AssetIO.TryDeserializeAssetFIle(ref outObject, name);
+                IO.TryDeserializeAssetFIle(ref outObject, name);
                 return;
             }
-            var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
+            var asset = IO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
             if (asset is null) return;
 
-            AssetLibrary.Register(asset.GetType(), asset);
+            Library.Register(asset.GetType(), asset);
             outObject = asset;
         }
     }
-    public static class AssetLibrary
+    public class Library
     {
         public static Dictionary<Type, List<Asset>> LoadedAssets = new();
         /// <summary>
@@ -453,10 +305,10 @@ namespace pixel_renderer
 
             if (library is null) return;
 
-            AssetIO.skippingOperation = false;
+            IO.skippingOperation = false;
 
             foreach (var asset in library)
-                AssetIO.SaveAsset(asset, asset.Name);
+                IO.SaveAsset(asset, asset.Name);
         }
         /// <summary>
         /// Clone the current Asset Library into a List.

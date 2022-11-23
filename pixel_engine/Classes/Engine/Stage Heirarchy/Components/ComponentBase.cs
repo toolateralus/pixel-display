@@ -10,8 +10,8 @@ namespace pixel_renderer
         public Node parentNode = new();
         private string _uuid = "";
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
-        public string Name { get; set; }
-
+        public string Name { get; set; } = ""; 
+        public bool Enabled = true; 
         public virtual void OnTrigger(Rigidbody other) { }
         public virtual void OnCollision(Rigidbody collider) { }
         public virtual void FixedUpdate(float delta) { }
