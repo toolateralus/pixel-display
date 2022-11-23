@@ -110,7 +110,6 @@ namespace pixel_renderer
             fileType = typeof(Node);
         }
     }
-  
     public class ProjectAsset :  Asset
     {
         public Settings settings; 
@@ -245,7 +244,7 @@ namespace pixel_renderer
 
             try
             {
-                asset = jsonSerializer.Deserialize<Asset>(json) ?? null;
+                asset = jsonSerializer.Deserialize<Asset>(json);
             }
             catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
             asset.Name += asset.GetType() ?? null;
@@ -253,13 +252,12 @@ namespace pixel_renderer
         }
         public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
         {
-            Asset? _asset = AssetIO.ReadAssetFile(name);
+            Asset? _asset = ReadAssetFile(name);
             if (_asset is null) return;
             outObject = _asset;
             AssetLibrary.Register(_asset.GetType(), _asset);
             return;
         }
-
         public static Asset? TryDeserializeNonAssetFile(string fileName, Type type, string assetName)
         {
             switch (type)
@@ -279,7 +277,6 @@ namespace pixel_renderer
                 default: return null;
             }
         }
-    
     }
     public static class AssetPipeline
     {
