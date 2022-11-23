@@ -94,21 +94,44 @@ namespace pixel_renderer
     public class Text : Component
     {
 
-        public string text = "a";
+        public string text = "TextRendering";
         public FontAsset asset;
 
 
+        private List<Sprite> sprites = new List<Sprite>();
         private List<BitmapAsset> charImgAssets = new();
         private List<Bitmap> chars = new();
 
 
         public override void Awake()
         {
-            return;
+            return; 
+            if (asset == null)
+            {
+                // first try load, then create fallback.
+                if (!AssetLibrary.Fetch<FontAsset>(out List<object> fontAssetObjects)) return;
+
+            }
+            foreach (var x in asset.characters)
+            {
+                var bmp = x.Value;
+                Sprite sprite = new()
+                {
+                    image = bmp,
+                    dirty = true,
+                    size = new Vec2(bmp.Width, bmp.Height),
+                };
+                parentNode.AddComponent(sprite);
+            }
+            var components = parentNode.GetComponents<Sprite>();
+            foreach (var component in components)
+            sprites.Add(component ?? new(0, 0));
+        }
+        public void CreateFontAsset()
+        {
             if (!AssetLibrary.Fetch<BitmapAsset>(out List<object> imageObjects)) return;
 
             foreach (var img in imageObjects) charImgAssets.Add((BitmapAsset)img);
-
 
             foreach (var file in charImgAssets)
             {
@@ -125,31 +148,18 @@ namespace pixel_renderer
             for (int i = 0; i < imgs.Count; i++)
                 asset.characters.Add(text[i], imgs[i]);
 
-
-            foreach (var x in asset.characters)
-            {
-                var bmp = x.Value;
-                Sprite sprite = new()
-                {
-                    image = bmp,
-                    dirty = true,
-                    size = new Vec2(bmp.Width, bmp.Height),
-                };
-                parentNode.AddComponent(sprite);
-            }
-
-
         }
 
         public override void FixedUpdate(float delta)
         {
-            var components = parentNode.GetComponents<Sprite>();
-            if (components.Count > 0)
+            return; 
+            var positions = FontAsset.GetCharacterPosition(asset);
+            int i = 0;
+            foreach (var x in sprites)
             {
-                var positions = FontAsset.GetCharacterPosition(asset);
-
-                for (int i = 0; i < components.Count; i++)
-                    components[i].parentNode.position = positions[i];
+                if (positions.Count <= i) continue; 
+                x.parentNode.position = positions[i];
+                ++i; 
             }
         }
 

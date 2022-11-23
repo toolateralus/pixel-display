@@ -41,12 +41,11 @@
 
             if (runtime.stage is null)
             {
+                // render loop shutoff
                 runtime.IsRunning = false;
                 return;
             }
             var background = runtime.stage.Background ?? FallBack;
-            var pallete = background.Palette;
-            
             var clonedBackground = (Bitmap)background.Clone();
             var frame = Draw(clonedBackground);
             DrawToImage(ref frame, output);
@@ -57,10 +56,9 @@
 
         private static Bitmap Draw(Bitmap frame)
         {
-
-           //unsafe bitmap draw [C# native code]
-           //CBit.Draw(runtime.stage, frame);
-           //return frame;
+            //unsafe bitmap draw[C# native code]
+            //CBit.Draw(runtime.stage, frame);
+            //return frame;
 
             // from DLL (not importing, maybe needs library for GetDIBits/SetDIBits) [C++ native code] )
             //var hbit = GetHBITMAP(frame.GetHbitmap(), 255, 255, 255);
@@ -69,10 +67,10 @@
 
             // NORMAL RENDERING BELOW;
             Stage stage = Runtime.Instance.stage;
-            // do 2 component calls with discard cuz idk if that or making a new object is less expensive?
+            Sprite sprite_ = new(0, 0);
             IEnumerable<Sprite> sprites = from Node node in stage.Nodes
-                                          where  node.TryGetComponent<Sprite>(out _)
-                                          select  node.GetComponent<Sprite>() ; 
+                                                               where  node.TryGetComponent(out sprite_)
+                                                               select  sprite_ ; 
             
             foreach (var sprite in sprites)
             {

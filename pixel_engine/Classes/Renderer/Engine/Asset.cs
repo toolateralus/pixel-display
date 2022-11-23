@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
-using Color = System.Drawing.Color;
 
 namespace pixel_renderer
 {
@@ -31,23 +30,23 @@ namespace pixel_renderer
         }
         public Asset() { }
 
+        new public Type GetType() => fileType;
+
     }
     public class BitmapAsset : Asset
     {
         public Bitmap? RuntimeValue = null;
         public BitmapAsset(string name) : base(name, typeof(Bitmap))
         {
-
+            Name = name;
+            fileType = typeof(Bitmap);
         }
-        public static BitmapAsset BitmapToAsset(string fileName)
+        public static BitmapAsset BitmapToAsset(string fileName, string assetName)
         {
             Bitmap? bmp = new(fileName);
-
-            BitmapAsset asset = new("BitmapAsset");
-
+            BitmapAsset asset = new(assetName);
             if (bmp != null)
                 asset.RuntimeValue = bmp;
-
             return asset;
         }
     }
@@ -62,13 +61,17 @@ namespace pixel_renderer
 
             foreach (char character in text)
             {
-                var x = character;
+                // cache here to force uppercase without modifying the asset.
+                var _char = character;
+                
                 if (char.IsLower(character))
+                    _char = char.ToUpper(character);
+
+                if (asset.characters.ContainsKey(_char))
                 {
-                    x = char.ToUpper(character);
+                    var img = (Bitmap)asset.characters[_char].Clone();
+                    output.Add(img);
                 }
-                var img = (Bitmap)asset.characters[x].Clone();
-                output.Add(img);
                 i++;
             }
             return output;
@@ -81,8 +84,10 @@ namespace pixel_renderer
 
             return positions;
         }
-        public FontAsset(string name, Type fileType) : base(name, fileType)
+        public FontAsset(string name, Type fileType) : base(name, typeof(pixel_renderer.FontAsset))
         {
+            fileType = typeof(FontAsset);
+            Name = name; 
         }
     }
     public class StageAsset : Asset
@@ -95,7 +100,6 @@ namespace pixel_renderer
             this.RuntimeValue = runtimeValue;
         }
     }
-
     public class NodeAsset : Asset
     {
         public Node RuntimeValue;
@@ -106,7 +110,24 @@ namespace pixel_renderer
             fileType = typeof(Node);
         }
     }
+  
+    public class ProjectAsset :  Asset
+    {
+        public Settings settings; 
+        public Runtime runtime;
+        public List<StageAsset> stages; 
+        public int stageIndex;
 
+        public ProjectAsset(string name) : base(name, typeof(ProjectAsset))
+        {
+            Name = name;
+            fileSize = "";
+            settings = new();
+            runtime = Runtime.Instance;
+            stages = new(); 
+            stageIndex = 0; 
+        }
+    }
     public static class FontAssetFactory
     {
         public static FontAsset CreateFont(int start, int end, Bitmap[] characters)
@@ -227,16 +248,25 @@ namespace pixel_renderer
                 asset = jsonSerializer.Deserialize<Asset>(json) ?? null;
             }
             catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
-            asset.Name += asset.fileType ?? null;
+            asset.Name += asset.GetType() ?? null;
             return asset;
         }
-        public static Asset? TryDeserializeNonAssetFile(string fileName, Type type)
+        public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
+        {
+            Asset? _asset = AssetIO.ReadAssetFile(name);
+            if (_asset is null) return;
+            outObject = _asset;
+            AssetLibrary.Register(_asset.GetType(), _asset);
+            return;
+        }
+
+        public static Asset? TryDeserializeNonAssetFile(string fileName, Type type, string assetName)
         {
             switch (type)
             {
                 case var _ when type == typeof(Bitmap):
 
-                    BitmapAsset bmpAsset = BitmapAsset.BitmapToAsset(fileName);
+                    BitmapAsset bmpAsset = BitmapAsset.BitmapToAsset(fileName, assetName);
                     if (bmpAsset == null) return null;
                     bmpAsset.fileType = typeof(Bitmap);
                     return bmpAsset;
@@ -249,6 +279,7 @@ namespace pixel_renderer
                 default: return null;
             }
         }
+    
     }
     public static class AssetPipeline
     {
@@ -284,11 +315,12 @@ namespace pixel_renderer
         }
         private static void ImportTask()
         {
+            var randomIntString = JRandom.Int(0, 250).ToString(); 
             foreach (var asset in from dir in Directory.GetDirectories(Path)
                                   from file in Directory.GetFiles(dir)
                                   let typeString = file.Split('.')[1]
                                   let typeRef = TypeFromExtension(typeString)
-                                  let asset = TryPullObject(file, typeRef)
+                                  let asset = TryPullObject(file, typeRef, typeString + randomIntString)
                                   where asset is not null
                                   select asset)
             {
@@ -301,9 +333,9 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
         /// <returns>Asset if it exists at path, else null.</returns>
-        public static Asset? TryPullObject(string path, Type type)
+        public static Asset? TryPullObject(string path, Type type, string newName)
         {
-            return !File.Exists(path) ? null : AssetIO.TryDeserializeNonAssetFile(path, type);
+            return !File.Exists(path) ? null : AssetIO.TryDeserializeNonAssetFile(path, type, newName);
         }
         /// <summary>
         /// </summary>
@@ -325,13 +357,13 @@ namespace pixel_renderer
             if (result == true)
             {
                 var name = fileDialog.FileName;
-
-                var fileExtension = name.Split('.')[1];
+                var split = name.Split('.');
+                var fileExtension = split[1];
                 var typeRef = AssetPipeline.TypeFromExtension(fileExtension);
-
+                var newFileName = split[0].Split("\\").Last(); 
                 if (typeRef != null)
                 {
-                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+                    var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
                     if (asset == null) return;
                     AssetLibrary.Register(asset.GetType(), asset);
                 }
@@ -346,21 +378,24 @@ namespace pixel_renderer
             if (result is not true) return;
 
             string name = fileDialog.FileName;
-            string fileExtension = name.Split('.')[1];
+            var split = name.Split('.');
+            string fileExtension = split[1];
+            var newFileName = split[0].Split("\\").Last();
 
             Type typeRef = TypeFromExtension(fileExtension);
             if (typeRef is null) return;
-
-            var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef);
+            if (typeRef == typeof(Asset))
+            {
+                AssetIO.TryDeserializeAssetFIle(ref outObject, name);
+                return;
+            }
+            var asset = AssetIO.TryDeserializeNonAssetFile(name, typeRef, newFileName);
             if (asset is null) return;
 
             AssetLibrary.Register(asset.GetType(), asset);
             outObject = asset;
         }
     }
-    /// <summary>
-    /// A Runtime static class that allows access to cached, deserialized json objects. 
-    /// </summary>
     public static class AssetLibrary
     {
         public static Dictionary<Type, List<Asset>> LoadedAssets = new();

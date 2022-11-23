@@ -26,12 +26,15 @@ namespace pixel_renderer
             stage.FixedUpdate(delta: runtime.lastFrameTime);
             runtime.frameCount++;
         }
-        public static void InitializeDefaultStage()
+        public static void ReloadCurrentStage() =>
+            SetCurrentStage(runtime.stage);
+
+        public static Stage InitializeDefault()
         {
             var nodes = new List<Node>();
             InitializeGenericNodes(nodes);
             Bitmap background = new(256, 256);
-            SetCurrentStage(new Stage("Default Stage", background, nodes.ToArray()));
+            return new Stage("Default Stage", background, nodes.ToArray());
         }
         private static void InitializeGenericNodes(List<Node> nodes)
         {

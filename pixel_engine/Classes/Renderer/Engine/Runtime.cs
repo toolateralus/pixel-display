@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Timer = System.Timers.Timer;
+
 namespace pixel_renderer
 {
 
@@ -19,8 +20,13 @@ namespace pixel_renderer
         /// </summary>
         public bool Initialized { get; internal set; } = false;
         public event Action<InspectorEvent> InspectorEventRaised;
-
+        
+        [JsonIgnore]
         public EngineInstance mainWnd;
+
+        [JsonIgnore]
+        public ProjectAsset? project = null; 
+        
         /// <summary>
         /// used to signify whether the engine is being witnessed by an inspector or not,
         /// useful for throwing errors directly to inspector
@@ -28,7 +34,8 @@ namespace pixel_renderer
         public static object? inspector = null;
 
         public Timer? physicsClock;
-        public Stage stage;
+        private protected static Stage STAGE_FALLBACK = Staging.InitializeDefault();
+        public Stage? stage;
         public List<Bitmap> Backgrounds = new List<Bitmap>();
 
         public long lastFrameTime = 0;
@@ -41,29 +48,21 @@ namespace pixel_renderer
 
         ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
 
-        public static async Task Awake(EngineInstance mainWnd)
+        public static async Task Awake(EngineInstance mainWnd, ProjectAsset project)
         {
 
-            // changes made to the code below can and will likely cause massive errors or failure
-
+            // changes made to the code below  will likely cause failure or seriously erroneous behaviour
+            Instance.project = project; 
             Instance.mainWnd = mainWnd;
-
             await AssetPipeline.ImportAsync(false);
-
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
-
             Instance.InitializePhysics();
-
             await Task.Delay(TimeSpan.FromSeconds(5));
-
             Instance.LoadBackgroundCollection();
-
-            //FontAssetFactory.InitializeDefaultFont();
-
-            Staging.InitializeDefaultStage();
-
+            FontAssetFactory.InitializeDefaultFont();
+            Staging.SetCurrentStage(Instance.stage ?? STAGE_FALLBACK);
             Instance.Initialized = true;
-            // changes made to the code above can and will likely cause massive errors or failure
+            // changes made to the code below  will likely cause failure or seriously erroneous behaviour
 
         }
 
@@ -83,7 +82,6 @@ namespace pixel_renderer
                 if (Rendering.State == RenderState.Game)
                     Rendering.Render(mainWnd.renderImage);
                 Input.Refresh();
-
             }
         }
         private void GetFramerate()

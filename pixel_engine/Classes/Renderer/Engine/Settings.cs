@@ -2,7 +2,7 @@
 
 namespace pixel_renderer
 {
-    public static class Settings
+    public  class Settings
     {
         public const int FramesBetweenFramerateChecks = 60;
         public const int ScreenHeight = 256;

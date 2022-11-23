@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace pixel_renderer
 {
@@ -68,7 +69,16 @@ namespace pixel_renderer
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns> A list of components matching typeof(T), otherwise an empty list of same type </returns>
-        internal List<T> GetComponents<T>() => Components[typeof(T)] as List<T> ?? new();
+        internal List<T> GetComponents<T>() where T : Component
+        {
+            List<T> output = new(); 
+           foreach (var component in ComponentsList)
+            {
+                if (component.GetType().Equals(typeof(T)))
+                    output.Add((T)component);
+            }
+            return output; 
+        }
         /// <summary>
         /// Attempts to look for a component and push out if found.
         /// </summary>

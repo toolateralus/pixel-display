@@ -197,6 +197,7 @@ namespace pixel_editor
         }
         private void Instance_InspectorEventRaised(InspectorEvent e)
         {
+            Runtime.Instance.IsRunning = false; 
             var msg = MessageBox.Show(e.expression.ToString(), e.message, MessageBoxButton.YesNo);
             var args = e.expressionArgs;
             if (args.Length < 4) return;

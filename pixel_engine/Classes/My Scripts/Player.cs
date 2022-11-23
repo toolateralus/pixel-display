@@ -22,7 +22,7 @@ internal class Player : Component
         if (!takingInput) return;
         if (Input.GetKeyDown(Key.Q))
         {
-            Staging.InitializeDefaultStage();
+            Staging.InitializeDefault();
         }
         var move = Input.GetMoveVector();
         Jump(move);
