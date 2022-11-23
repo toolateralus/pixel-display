@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer;
+using pixel_renderer.Assets;
 #endregion
 
 namespace pixel_editor

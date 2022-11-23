@@ -1,5 +1,6 @@
 ﻿namespace pixel_renderer
 {
+    using pixel_renderer.Assets;
     using System.Windows;
 
     /// <summary>

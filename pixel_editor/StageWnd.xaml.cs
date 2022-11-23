@@ -1,4 +1,5 @@
 ﻿using pixel_renderer;
+using pixel_renderer.Assets;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;

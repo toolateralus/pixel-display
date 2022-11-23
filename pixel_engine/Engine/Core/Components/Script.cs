@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace pixel_renderer
+namespace pixel_renderer.Assets
 {
     public class ScriptAsset : Asset
     {
