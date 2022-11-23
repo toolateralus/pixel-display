@@ -45,21 +45,41 @@ namespace pixel_renderer
             IEnumerable<Sprite> sprites = from Node node in stage.Nodes
                                           where node.TryGetComponent<Sprite>(out sprite)
                                           select sprite;
-       
+
             BitmapData bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
-                                  System.Drawing.Imaging.ImageLockMode.ReadWrite,
+                                  System.Drawing.Imaging.ImageLockMode.WriteOnly,
                                   bmp.PixelFormat);
 
-            // massively expensive, causes total hangups 
-            var colors = new Color[Settings.ScreenWidth + Settings.ScreenHeight];
+            Color[] colors = SpriteArrayToScreenSpaceColorGraph( sprites);
+            // draw sprite data to bitmap unmanaged
+            byte[] colorBytes = new byte[bmd.Width * bmd.Height];
+            for (var i = 0; i < bmd.Width; ++i)
+            {
+                var offset = i * 4;
+                colorBytes[offset + 0] = colors[offset].B;
+                colorBytes[offset + 1] = colors[offset].G;
+                colorBytes[offset + 2] = colors[offset].R;
+                colorBytes[offset + 3] = colors[offset].A;
+            }
 
-            // get sprite data in color array;
-            foreach (Node node in stage.Nodes)
+            int start = 0;
+            int length = colorBytes.Length; // should always equal screenWidth * screenHeight
+            IntPtr destination = bmd.Scan0; // points  to first address in bitmap
+            Marshal.Copy(colorBytes, start, destination, length);
+
+            bmp.UnlockBits(bmd);
+            DeleteObject(bmd.Scan0);
+        }
+
+        private static Color[] SpriteArrayToScreenSpaceColorGraph(IEnumerable<Sprite> sprites)
+        {
+            var colors = new Color[Settings.ScreenWidth * Settings.ScreenHeight];
+            foreach (Sprite sprite in sprites)
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
-                        var offsetX = node.position.x + x;
-                        var offsetY = node.position.y + y;
+                        var offsetX = sprite.parentNode.position.x + x;
+                        var offsetY = sprite.parentNode.position.y + y;
 
                         if (offsetX < 0) continue;
                         if (offsetY < 0) continue;
@@ -74,25 +94,8 @@ namespace pixel_renderer
 
                         colors[pixelOffsetX + pixelOffsetY] = color;
                     }
-                     // draw sprite data to bitmap unmanaged
-                    byte[] row_ = new byte[bmd.Width * 4];
-                    foreach (var pixel in colors)
-                    {
-                        for (var i = 0; i < bmp.Width; ++i)
-                        {
-                            var offset = i * 4;
-                            row_[offset + 0] = pixel.B;
-                            row_[offset + 1] = pixel.G;
-                            row_[offset + 2] = pixel.R;
-                            row_[offset + 3] = pixel.A;
-                        }
 
-                        for (var i = 0; i < bmd.Height; ++i)
-                            Marshal.Copy(row_, 0, bmd.Scan0 + (i * bmd.Stride), row_.Length);
-                    }
-
-                    bmp.UnlockBits(bmd);
-                    DeleteObject(bmd.Scan0);
+            return colors;
         }
     }
 }

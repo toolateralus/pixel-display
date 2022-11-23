@@ -5,6 +5,7 @@ namespace pixel_renderer
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
+    using System.Runtime.InteropServices;
 
     public static class ExtensionMethods
     {
@@ -71,6 +72,7 @@ namespace pixel_renderer
                     result.Add(x);
                 return result.ToArray(); 
          }
+      
 
     }
 }

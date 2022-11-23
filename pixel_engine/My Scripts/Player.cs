@@ -21,9 +21,8 @@ internal class Player : Component
     {
         if (!takingInput) return;
         if (Input.GetKeyDown(Key.Q))
-        {
-            Staging.InitializeDefault();
-        }
+            Staging.ReloadCurrentStage(); 
+
         var move = Input.GetMoveVector();
         Jump(move);
         Move(move);

@@ -15,7 +15,7 @@ namespace pixel_renderer
 
     public class Runtime
     {
-        private static Runtime instance = new();
+        private protected static Runtime instance = new();
         public static Runtime Instance { get { return instance; } }
         /// <summary>
         /// Set to true when the Physics session is initialized.
@@ -36,8 +36,8 @@ namespace pixel_renderer
         public static object? inspector = null;
 
         public Timer? physicsClock;
-        private protected static Stage STAGE_FALLBACK = Staging.InitializeDefault();
         public Stage? stage;
+        public StageAsset _stage; 
         public List<Bitmap> Backgrounds = new List<Bitmap>();
 
         public long lastFrameTime = 0;
@@ -62,7 +62,7 @@ namespace pixel_renderer
             await Task.Delay(TimeSpan.FromSeconds(5));
             Instance.LoadBackgroundCollection();
             FontAssetFactory.InitializeDefaultFont();
-            Staging.SetCurrentStage(Instance.stage ?? STAGE_FALLBACK);
+            Staging.SetCurrentStage(Instance.stage ?? Stage.New);
             Instance.Initialized = true;
             // changes made to the code below  will likely cause failure or seriously erroneous behaviour
 
@@ -150,8 +150,8 @@ namespace pixel_renderer
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            stage ??= Stage.New;
-
+            // prevents errors from loading a null stage, 
+            stage ??= Stage.New;  
             _ = Collision.RegisterColliders(stage);
             Collision.BroadPhase(stage, collisionMap);
             Collision.NarrowPhase(collisionMap);

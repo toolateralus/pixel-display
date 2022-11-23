@@ -27,8 +27,10 @@ namespace pixel_renderer
             stage.FixedUpdate(delta: runtime.lastFrameTime);
             runtime.frameCount++;
         }
-        public static void ReloadCurrentStage() =>
+        public static void ReloadCurrentStage()
+        {
             SetCurrentStage(runtime.stage);
+        }
 
         public static Stage InitializeDefault()
         {
@@ -54,12 +56,8 @@ namespace pixel_renderer
                 var x = node.GetComponent<Rigidbody>();
                 x.usingGravity = JRandom.Bool();
                 x.drag = randomDrag;
-
             }
-
-
             nodes.AddRange(staticNodes);
-
         }
         public static void CreateGenericNode(List<Node> nodes, int i)
         {
