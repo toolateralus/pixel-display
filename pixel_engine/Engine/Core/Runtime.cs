@@ -27,7 +27,7 @@ namespace pixel_renderer
         public EngineInstance mainWnd;
 
         [JsonIgnore]
-        public ProjectAsset? project = null; 
+        public Project? project = null; 
         
         /// <summary>
         /// used to signify whether the engine is being witnessed by an inspector or not,
@@ -50,7 +50,7 @@ namespace pixel_renderer
 
         ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
 
-        public static async Task Awake(EngineInstance mainWnd, ProjectAsset project)
+        public static async Task Awake(EngineInstance mainWnd, Project project)
         {
 
             // changes made to the code below  will likely cause failure or seriously erroneous behaviour

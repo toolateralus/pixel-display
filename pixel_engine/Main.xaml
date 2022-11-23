@@ -8,8 +8,6 @@
         Background="Black"
         Title="Pixel Display" Height="600" Width="800" BorderBrush="White" BorderThickness="10" >
     <Viewbox x:Name="viewbox" Height="Auto" Width="Auto">
-        <Canvas x:Name="canvas" Height="943" Width="1762">
-            <Image x:Name ="renderImage" Height="865" Canvas.Left="606" Canvas.Top="64" Width="1137" RenderOptions.BitmapScalingMode ="NearestNeighbor" />
-        </Canvas>
+        <Image x:Name ="renderImage"  Height="1156" Width="1556" RenderOptions.BitmapScalingMode ="NearestNeighbor" />
     </Viewbox>
 </Window>

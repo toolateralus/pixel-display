@@ -18,7 +18,7 @@ namespace pixel_renderer
 
         public override void Awake()
         {
-            if (!enabled) return; 
+            if (!Enabled) return; 
             if (asset == null)
             {
                 // first try load, then create fallback.
