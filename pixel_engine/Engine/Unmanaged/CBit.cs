@@ -45,22 +45,31 @@ namespace pixel_renderer
             IEnumerable<Sprite> sprites = from Node node in stage.Nodes
                                           where node.TryGetComponent<Sprite>(out sprite)
                                           select sprite;
-
             BitmapData bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
                                   System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                                  bmp.PixelFormat);
+                                  PixelFormat.Format32bppArgb);
 
             Color[] colors = ColorGraph( sprites);
             // draw sprite data to bitmap unmanaged
             byte[] colorBytes = new byte[bmd.Width * bmd.Height];
-            for (var i = 0; i < bmd.Width; ++i)
+
+            for (var i = 0; i < bmd.Width * bmd.Height ; ++i)
             {
-                var offset = i;
-                colorBytes[offset + 0] = colors[offset].B;
-                colorBytes[offset + 1] = colors[offset].G;
-                colorBytes[offset + 2] = colors[offset].R;
-                colorBytes[offset + 3] = colors[offset].A;
+                var offset = i * 4;
+                colorBytes[offset + 0] =255;
+                colorBytes[offset + 1] =255;
+                colorBytes[offset + 2] =255;
+                colorBytes[offset + 3] = 255;
             }
+
+            //for (var i = 0; i < bmd.Width; ++i)
+            //{
+            //    var offset = i * 4;
+            //    colorBytes[offset + 0] = colors[offset].B;
+            //    colorBytes[offset + 1] = colors[offset].G;
+            //    colorBytes[offset + 2] = colors[offset].R;
+            //    colorBytes[offset + 3] = colors[offset].A;
+            //}
 
             int start = 0;
             int length = colorBytes.Length; 
@@ -71,13 +80,14 @@ namespace pixel_renderer
 
             Marshal.Copy(colorBytes, start, destination, length);
 
+          
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
 
         internal  static Color[] ColorGraph(IEnumerable<Sprite> sprites)
         {
-            var colors = new Color[Settings.ScreenW * Settings.ScreenH];
+            var colors = new Color[Settings.ScreenW *  Settings.ScreenH];
             foreach (Sprite sprite in sprites)
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
@@ -85,20 +95,11 @@ namespace pixel_renderer
                         var offsetX = sprite.parentNode.position.x + x;
                         var offsetY = sprite.parentNode.position.y + y;
 
-                        if (offsetX < 0) continue;
-                        if (offsetY < 0) continue;
+                        if (offsetX is < 0 or >= Settings.ScreenW
+                            || offsetY is < 0 or >= Settings.ScreenH) continue;
 
-                        if (offsetX >= Settings.ScreenW) continue;
-                        if (offsetY >= Settings.ScreenH) continue;
-
-                        var color = sprite.colorData[x, y];
-
-                        var pixelOffsetY = (int)offsetY;
-                        var pixelOffsetX = (int)offsetX;
-
-                        colors[pixelOffsetX + pixelOffsetY] = color;
+                        colors[(int)(offsetY * 255  + offsetX)] =  sprite.colorData[x, y];
                     }
-
             return colors;
         }
     }

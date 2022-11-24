@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO.Packaging;
+using System.Windows;
 
 namespace pixel_renderer
 {
@@ -11,7 +13,6 @@ namespace pixel_renderer
         public Sprite? sprite;
         const double dragCoefficient = 1;
         public bool IsTrigger { get; internal set; } = false;
-
         public override void Awake()
         {
             sprite = parentNode.GetComponent<Sprite>();
