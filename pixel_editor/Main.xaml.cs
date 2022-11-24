@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer;
 using pixel_renderer.Assets;
+using pixel_renderer.Projects;
 #endregion
 
 namespace pixel_editor
@@ -142,7 +143,12 @@ namespace pixel_editor
             }
         }
         private void OnImportBtnPressed(object sender, RoutedEventArgs e) => Importer.ImportAsync(true);
-        private void OnSyncBtnPressed(object sender, RoutedEventArgs e) => Library.Sync();
+        private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
+        {
+            ProjectIO.SaveProject(Runtime.Instance.LoadedProject);
+            Library.Sync();
+        }
+
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
             Importer.ImportAssetDialog();

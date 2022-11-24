@@ -37,27 +37,19 @@ namespace pixel_renderer
 
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
-            Vec2 posA = nodeA.position;
-            Vec2 posB = nodeB.position;
+            var A = nodeA.TryGetComponent(out Sprite spriteA); 
+            var B = nodeB.TryGetComponent(out Sprite spriteB);
+            return A && B
+                && GetBoxCollision(nodeA, nodeB, spriteA, spriteB);
+        }
 
-            Sprite spriteA = nodeA.GetComponent<Sprite>();
-            Sprite spriteB = nodeB.GetComponent<Sprite>();
-
-            Vec2 spriteSizeA = spriteA.size;
-            Vec2 spriteSizeB = spriteB.size;
-
-
-            if (spriteA != null && spriteB != null)
-            {
-                // messy if for box collision; 
-                if (posA.x < posB.x + spriteSizeB.x &&
-                    posA.y < posB.y + spriteSizeB.y &&
-
-                    spriteSizeA.x + posA.x > posB.x &&
-                    spriteSizeA.y + posA.y > posB.y)
-
-                    return true;
-            }
+        private static bool GetBoxCollision(Node nodeA, Node nodeB, Sprite spriteA, Sprite spriteB)
+        {
+            if (nodeA.position.x < nodeB.position.x + spriteB.size.x &&
+                nodeA.position.y < nodeB.position.y + spriteB.size.y &&
+                       spriteA.size.x + nodeA.position.x > nodeB.position.x &&
+                       spriteA.size.y + nodeA.position.y > nodeB.position.y)
+                return true;
             return false;
         }
 

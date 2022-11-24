@@ -35,7 +35,7 @@ namespace pixel_renderer
             SetCurrentStage(reset);
         }
 
-        public static Stage InitializeDefault()
+        public static Stage Default()
         {
             var nodes = new List<Node>();
             AddPlayer(nodes);

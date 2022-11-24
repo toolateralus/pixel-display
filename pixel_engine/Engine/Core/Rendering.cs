@@ -8,14 +8,8 @@
     using Bitmap = System.Drawing.Bitmap;
 
     public enum RenderState { Game, Scene, Off }
-    public static class Rendering
+    public  class Rendering
     {
-        /// <summary>
-        /// Game = Build;
-        /// Scene = Inspector;
-        /// Off = Off; 
-        /// Controlled and read externally, serves as a reference to what is currently being rendered; 
-        /// </summary>
         public static RenderState State = RenderState.Game;
         public static double FrameRate()
         {
@@ -26,55 +20,42 @@
 
             return frameRate;
         }
-        static Runtime runtime => Runtime.Instance;
 
-        static Bitmap fallback;
-        public static Bitmap FallBack
+        private static Runtime runtime => Runtime.Instance;
+        private static Bitmap? bmp_cached = null; 
+        private static IEnumerable<Sprite> sprites_cached; 
+
+        private static Bitmap fallback;
+        private static Bitmap FallBack
         {
             get => fallback ??= new(256, 256);
         }
 
+        public static void Clear() =>  bmp_cached = runtime.stage.Background.Clone() as Bitmap ?? FallBack.Clone() as Bitmap;
+          
         public static void Render(System.Windows.Controls.Image output)
         {
-            // if we could avoid cloning this object
-            // and instead cache the original colors during changes and rewrite them back
-            // it would save a very significant amount of memory
-            // and CPU
-
             if (runtime.stage is null)
             {
-                // render loop shutoff
+                State = RenderState.Off;
                 runtime.IsRunning = false;
                 return;
             }
-            var background = runtime.stage.Background ?? FallBack;
-            var frame = Draw(background);
+            sprites_cached = Runtime.Instance.stage.GetSprites();
+            Clear(); 
+            var frame = Draw(bmp_cached, sprites_cached);
             CBit.Render(ref frame, output); 
-
         }
 
-        [DllImport("PIXELRENDERER", CallingConvention = CallingConvention.StdCall)]
-        public static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
-
-        private static Bitmap Draw(Bitmap bmp)
+        /// <summary>
+        /// Very rudimentary way to draw sprite data over top a background.  
+        /// Rather inefficient yet absolutely sufficient for light use, and easy to modify.
+        /// </summary>
+        /// <param name="bmp"></param>
+        /// <param name="sprites"></param>
+        /// <returns></returns>
+        private static Bitmap Draw(Bitmap bmp, IEnumerable<Sprite> sprites)
         {
-            //unsafe bitmap draw[C# native code]
-             CBit.Draw(runtime.stage, bmp);
-            return bmp;
-
-            // from DLL (not importing, maybe needs library for GetDIBits/SetDIBits) [C++ native code] )
-            //var hbit = GetHBITMAP(frame.GetHbitmap(), 255, 255, 255);
-            //frame = Image.FromHbitmap(hbit);
-            //return frame;
-
-            // NORMAL RENDERING BELOW;
-            Stage stage = Runtime.Instance.stage;
-            Sprite sprite_ = new(0, 0);
-            IEnumerable<Sprite> sprites = from Node node in stage.Nodes
-                                                               where  node.TryGetComponent(out sprite_)
-                                                               where sprite_.isCollider
-                                                               select  sprite_ ; 
-            
             foreach (var sprite in sprites)
             {
                 for (int x = 0; x < sprite.size.x; x++)
@@ -83,7 +64,7 @@
                         var offsetX = sprite.parentNode.position.x + x;
                         var offsetY = sprite.parentNode.position.y + y;
 
-                        if (offsetX is < 0 or >= Settings.ScreenW 
+                        if (offsetX is < 0 or >= Settings.ScreenW
                             || offsetY is < 0 or >= Settings.ScreenH) continue;
                         var color = sprite.colorData[x, y];
 
@@ -93,6 +74,7 @@
             return bmp;
         }
 
+        
         static string cachedGCValue = "";
 
         const int framesUntilGC_Check = 600;
