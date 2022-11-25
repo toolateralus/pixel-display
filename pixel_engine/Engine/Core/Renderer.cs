@@ -4,7 +4,7 @@
     using System.Windows.Controls;
     using Bitmap = System.Drawing.Bitmap;
 
-    public class CPRender : RendererBase
+    public class CRenderer : RendererBase
     {
         public static Bitmap? bmp_cached = null;
         public static IEnumerable<Sprite> sprites_cached;

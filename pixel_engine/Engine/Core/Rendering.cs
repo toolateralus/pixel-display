@@ -2,27 +2,15 @@
 {
     using Image = System.Windows.Controls.Image; 
     using System;
-    using System.Runtime.InteropServices;
 
     public enum RenderState { Game, Scene, Off , Error}
-
     public class Rendering
     {
         public static RenderState State = RenderState.Game;
-        public static double FrameRate()
-        {
-            Runtime env = Runtime.Instance;
-            var lastFrameTime = env.lastFrameTime;
-            var frameCount = env.frameCount;
-            var frameRate = Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds * frameCount);
-
-            return frameRate;
-        }
-
         private static Runtime runtime => Runtime.Instance;
-        private static CPRender? m_renderer = new(); 
-            
-    
+        private static RendererBase? m_renderer = new CRenderer();
+        public static RendererBase GetRenderer() => m_renderer; 
+        public static void SetRenderer(RendererBase renderer) => m_renderer= renderer;
         public static void Render( Image output)
         {
             if (runtime.stage is null || m_renderer is null)
@@ -48,13 +36,13 @@
             m_renderer.Draw();
             m_renderer.Render(output);
         }
+       
     }
     public class PixelGC
     {
         static string cachedGCValue = "";
         const int framesUntilGC_Check = 600;
         private static int framesSinceGC_Check = 0;
-
         public static string GetTotalMemory()
         {
             if (framesSinceGC_Check < framesUntilGC_Check)
@@ -69,6 +57,18 @@
             cachedGCValue = $"GC Alloc:{megaBytes} MB";
 
             return cachedGCValue;
+        }
+    }
+    public class RenderStats
+    {
+        public static double FrameRate()
+        {
+            Runtime env = Runtime.Instance;
+            var lastFrameTime = env.lastFrameTime;
+            var frameCount = env.frameCount;
+            var frameRate = Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds * frameCount);
+
+            return frameRate;
         }
     }
 }
