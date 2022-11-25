@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Policy;
 
 namespace pixel_renderer
 {
@@ -103,6 +105,14 @@ namespace pixel_renderer
         public NodeEnum GetEnumerator()
         {
             return new NodeEnum(Nodes);
+        }
+        public IEnumerable<Sprite> GetSprites()
+        {
+            Sprite sprite = new();
+            IEnumerable<Sprite> sprites =(from Node node in Nodes
+                                          where node.TryGetComponent(out sprite)
+                                          select sprite);
+            return sprites; 
         }
         IEnumerator IEnumerable.GetEnumerator()
         {

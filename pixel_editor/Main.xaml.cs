@@ -96,7 +96,7 @@ namespace pixel_editor
                 && Rendering.State == RenderState.Scene)
             {
                 Rendering.Render(image);
-                gcAllocText.Content = Rendering.GetGCStats();
+                gcAllocText.Content = PixelGC.GetTotalMemory();
             }
         }
         /// <summary>
