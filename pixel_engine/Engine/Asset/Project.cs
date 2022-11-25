@@ -33,7 +33,7 @@ namespace pixel_renderer.Assets
             Name = name;
             settings = new();
             runtime = Runtime.Instance;
-            var stage = Staging.InitializeDefault(); 
+            var stage = Staging.Default(); 
             StageAsset asset = new("",  stage);
             stageIndex = 0;
             stages = new()

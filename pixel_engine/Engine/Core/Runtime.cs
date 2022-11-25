@@ -27,7 +27,7 @@ namespace pixel_renderer
         public EngineInstance mainWnd;
 
         [JsonIgnore]
-        public Project? project = null; 
+        public Project? LoadedProject = null; 
         
         /// <summary>
         /// used to signify whether the engine is being witnessed by an inspector or not,
@@ -54,7 +54,7 @@ namespace pixel_renderer
         {
 
             // changes made to the code below  will likely cause failure or seriously erroneous behaviour
-            Instance.project = project; 
+            Instance.LoadedProject = project; 
             Instance.mainWnd = mainWnd;
             await Importer.ImportAsync(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
