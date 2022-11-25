@@ -7,12 +7,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using Timer = System.Timers.Timer;
+using Bitmap = System.Drawing.Bitmap;
 
 namespace pixel_renderer
 {
-
-    using Bitmap = System.Drawing.Bitmap;
-
     public class Runtime
     {
         private protected static Runtime instance = new();
@@ -52,14 +50,13 @@ namespace pixel_renderer
 
         public static async Task Awake(EngineInstance mainWnd, Project project)
         {
-
             // changes made to the code below  will likely cause failure or seriously erroneous behaviour
             Instance.LoadedProject = project; 
             Instance.mainWnd = mainWnd;
             await Importer.ImportAsync(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.InitializePhysics();
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(0.1f));
             Instance.LoadBackgroundCollection();
             FontAssetFactory.InitializeDefaultFont();
             Staging.SetCurrentStage(Instance.stage ?? Stage.New);
@@ -67,40 +64,6 @@ namespace pixel_renderer
             // changes made to the code below  will likely cause failure or seriously erroneous behaviour
 
         }
-
-        private void InitializePhysics()
-        {
-            var interval = TimeSpan.FromSeconds(Settings.PhysicsRefreshInterval);
-            physicsClock = new Timer(interval.TotalSeconds);
-            physicsClock.Elapsed += GlobalFixedUpdateRoot;
-            physicsClock.Start();
-            IsRunning = true;
-        }
-
-        private void Execute()
-        {
-            if (IsRunning)
-            {
-                if (Rendering.State == RenderState.Game)
-                    Rendering.Render(mainWnd.renderImage);
-                Input.Refresh();
-            }
-        }
-        private void GetFramerate()
-        {
-            if (framesUntilCheck >= Settings.FramerateSampleThreshold)
-            {
-                lastFrameTime = DateTime.Now.Ticks;
-                framesUntilCheck = 0;
-                frameCount = 0;
-            }
-            framesUntilCheck++;
-        }
-        /// <summary>
-        /// Toggle Updating of Physics on and off (also affects FixedUpdate, since they are called in tandem.)
-        /// </summary>
-        /// <exception  cref="NullReferenceException"> </exception>  
-
         public void Toggle()
         {
             if (physicsClock == null)
@@ -119,14 +82,27 @@ namespace pixel_renderer
             IsRunning = false;
             return;
         }
-
+        private void InitializePhysics()
+        {
+            var interval = TimeSpan.FromSeconds(Settings.PhysicsRefreshInterval);
+            physicsClock = new Timer(interval.TotalSeconds);
+            physicsClock.Elapsed += GlobalFixedUpdateRoot;
+            physicsClock.Start();
+            IsRunning = true;
+        }
+        private void ExecuteFrame()
+        {
+            if (IsRunning)
+            {
+                if (Rendering.State == RenderState.Game)
+                    Rendering.Render(mainWnd.renderImage);
+                Input.Refresh();
+            }
+        }
         private void LoadBackgroundCollection()
         {
-
             List<Bitmap> bitmaps = new();
-
             // parses pre loaded json objects from the asset library (runtime dictionary containing all assets used and unused.)
-
             if (Library.Fetch<BitmapAsset>(out List<object> bitmapAssetCollection))
             {
                 foreach (var asset in bitmapAssetCollection)
@@ -144,13 +120,8 @@ namespace pixel_renderer
                 Backgrounds = bitmaps;
             }
         }
-        public class MissingStageEvent : InspectorEvent
-        {
-
-        }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            // prevents errors from loading a null stage, 
             stage ??= Stage.New;  
             _ = Collision.RegisterColliders(stage);
             Collision.BroadPhase(stage, collisionMap);
@@ -158,12 +129,7 @@ namespace pixel_renderer
             Collision.Execute();
             Staging.UpdateCurrentStage(stage);
         }
-        public void GlobalUpdateRoot(object? sender, EventArgs e)
-        {
-            GetFramerate();
-            Execute();
-        }
+        public void GlobalUpdateRoot(object? sender, EventArgs e)  => ExecuteFrame();
         public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
     }
-
 }

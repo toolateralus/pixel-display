@@ -1,8 +1,6 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json;
-using pixel_renderer.Assets;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -10,12 +8,11 @@ using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
-
+using pixel_renderer;
+using pixel_renderer.IO; 
+using pixel_renderer.Assets; 
 namespace pixel_renderer.Assets
 {
-    /// <summary>
-    /// Base class for all Pixel_engine Assets
-    /// </summary>
     public class Asset
     {
         public string pathFromRoot = "";
@@ -34,102 +31,6 @@ namespace pixel_renderer.Assets
 
         new public Type GetType() => fileType;
 
-    }
-    public class AssetIO
-    {
-        public static bool skippingOperation = false;
-        public static string Path => Settings.AppDataDir + Settings.AssetsDir; 
-        public static void SaveAsset(Asset data, string fileName)
-        {
-            if (!Directory.Exists(Path))
-            {
-                Directory.CreateDirectory(Path);
-            }
-
-            if (File.Exists(Path + "/" + fileName + Settings.AssetsFileExtension))
-            {
-                if (!skippingOperation)
-                {
-                    var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
-                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Error,
-                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
-                    var doForAllResult = MessageBox.Show($"Do for all (uses last choice)",
-                                            "", MessageBoxButton.YesNo, MessageBoxImage.Error,
-                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
-                    if (doForAllResult == MessageBoxResult.Yes)
-                    {
-                        skippingOperation = true;
-                    }
-                    if (overwriteWarningResult != MessageBoxResult.Yes)
-                    {
-                        return;
-                    }
-                }
-            }
-
-            using TextWriter writer = new StreamWriter(Path + "/" + fileName + Settings.AssetsFileExtension);
-
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-            };
-
-            var jsonSerializer = JsonSerializer.Create(settings);
-
-            jsonSerializer.Serialize(writer, data);
-
-            writer.Close();
-        }
-        public static Asset? ReadAssetFile(string fileName)
-        {
-            if (!Directory.Exists(Path))
-            {
-                Directory.CreateDirectory(Path);
-                return null;
-            }
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-            };
-            var jsonSerializer = JsonSerializer.Create(settings);
-            StreamReader reader = new(fileName);
-            Asset asset = new("" + fileName, typeof(Asset));
-            using JsonTextReader json = new(reader);
-            try
-            {
-                asset = jsonSerializer.Deserialize<Asset>(json);
-            }
-            catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
-            return asset;
-        }
-
-        public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
-        {
-            Asset? _asset = ReadAssetFile(name);
-            if (_asset is null) return;
-            outObject = _asset;
-            Library.Register(_asset.GetType(), _asset);
-            return;
-        }
-        public static Asset? TryDeserializeNonAssetFile(string fileName, Type type, string assetName)
-        {
-            switch (type)
-            {
-                case var _ when type == typeof(Bitmap):
-
-                    BitmapAsset bmpAsset = BitmapAsset.BitmapToAsset(fileName, assetName);
-                    if (bmpAsset == null) return null;
-                    bmpAsset.fileType = typeof(Bitmap);
-                    return bmpAsset;
-
-                case var _ when type == typeof(JsonObject):
-                    var asset = ReadAssetFile(fileName);
-                    return asset;
-
-
-                default: return null;
-            }
-        }
     }
     public class Dialog
     {
@@ -373,7 +274,7 @@ namespace pixel_renderer.Assets
         }
     }
 }
-namespace pixel_renderer.Projects
+namespace pixel_renderer.IO
 {
     public class ProjectIO
     {
@@ -438,6 +339,145 @@ namespace pixel_renderer.Projects
             return;
         }
     }
+    public class AssetIO
+    {
+        public static bool skippingOperation = false;
+        public static string Path => Settings.AppDataDir + Settings.AssetsDir; 
+        public static void SaveAsset(Asset data, string fileName)
+        {
+            if (!Directory.Exists(Path))
+            {
+                Directory.CreateDirectory(Path);
+            }
 
+            if (File.Exists(Path + "/" + fileName + Settings.AssetsFileExtension))
+            {
+                if (!skippingOperation)
+                {
+                    var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
+                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Error,
+                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
+                    var doForAllResult = MessageBox.Show($"Do for all (uses last choice)",
+                                            "", MessageBoxButton.YesNo, MessageBoxImage.Error,
+                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
+                    if (doForAllResult == MessageBoxResult.Yes)
+                    {
+                        skippingOperation = true;
+                    }
+                    if (overwriteWarningResult != MessageBoxResult.Yes)
+                    {
+                        return;
+                    }
+                }
+            }
+
+            using TextWriter writer = new StreamWriter(Path + "/" + fileName + Settings.AssetsFileExtension);
+
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+            };
+
+            var jsonSerializer = JsonSerializer.Create(settings);
+
+            jsonSerializer.Serialize(writer, data);
+
+            writer.Close();
+        }
+        public static Asset? ReadAssetFile(string fileName)
+        {
+            if (!Directory.Exists(Path))
+            {
+                Directory.CreateDirectory(Path);
+                return null;
+            }
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+            };
+            var jsonSerializer = JsonSerializer.Create(settings);
+            StreamReader reader = new(fileName);
+            Asset asset = new("" + fileName, typeof(Asset));
+            using JsonTextReader json = new(reader);
+            try
+            {
+                asset = jsonSerializer.Deserialize<Asset>(json);
+            }
+            catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
+            return asset;
+        }
+
+        public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
+        {
+            Asset? _asset = ReadAssetFile(name);
+            if (_asset is null) return;
+            outObject = _asset;
+            Library.Register(_asset.GetType(), _asset);
+            return;
+        }
+        public static Asset? TryDeserializeNonAssetFile(string fileName, Type type, string assetName)
+        {
+            switch (type)
+            {
+                case var _ when type == typeof(Bitmap):
+
+                    BitmapAsset bmpAsset = BitmapAsset.BitmapToAsset(fileName, assetName);
+                    if (bmpAsset == null) return null;
+                    bmpAsset.fileType = typeof(Bitmap);
+                    return bmpAsset;
+
+                case var _ when type == typeof(JsonObject):
+                    var asset = ReadAssetFile(fileName);
+                    return asset;
+
+
+                default: return null;
+            }
+        }
+    }
 
 }
+    public class Project
+    {
+        public static Project LoadProject()
+        {
+            Project project = new("Default");
+            Dialog dlg = Dialog.ImportFileDialog();
+
+            if (dlg.type is null)
+                return project;
+
+            if (dlg.type.Equals(typeof(Project)))
+            {
+                project = ProjectIO.ReadProjectFile(dlg.fileName);
+                if (project is not null)
+                    return project;
+            }
+            return project;
+        }
+        public Settings settings;
+        public Runtime runtime;
+        public List<StageAsset> stages;
+        public int stageIndex;
+        public int fileSize = 0;
+
+        public Project(string name)
+        {
+            Name = name;
+            settings = new();
+            runtime = Runtime.Instance;
+            var stage = Staging.Default();
+            StageAsset asset = new("", stage);
+            stageIndex = 0;
+            stages = new()
+            {
+                asset
+            };
+
+            stageIndex = 0;
+            fileSize = 10;
+        }
+
+        public string Name { get; }
+
+    }

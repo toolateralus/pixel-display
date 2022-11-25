@@ -13,14 +13,11 @@ using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer;
 using pixel_renderer.Assets;
-using pixel_renderer.Projects;
+using pixel_renderer.IO; 
 #endregion
 
 namespace pixel_editor
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class Main : Window
     {
         #region Window Scaling
@@ -65,9 +62,6 @@ namespace pixel_editor
         #endregion
 
         Inspector inspector;
-        /// <summary>
-        /// keep this reference of the engine just to close the background window on editor exit.
-        /// </summary>
         internal static EngineInstance? engine;
         private static int renderStateIndex = 0;
         private StageWnd stageWindow;
@@ -76,9 +70,7 @@ namespace pixel_editor
         public Main()
         {
             InitializeComponent();
-            inspector = new Inspector(inspectorObjName,
-                                      inspectorObjInfo,
-                                      inspectorChildGrid);
+            inspector = new Inspector(inspectorObjName,  inspectorObjInfo,  inspectorChildGrid);
             Runtime.inspector = inspector;
             engine = new();
             GetEvents();
@@ -99,11 +91,6 @@ namespace pixel_editor
                 gcAllocText.Content = PixelGC.GetTotalMemory();
             }
         }
-        /// <summary>
-        /// Called on program close
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void OnDisable(object? sender, EventArgs e) => engine.Close();
         private void OnViewChanged(object sender, RoutedEventArgs e) => IncrementRenderState();
         private void OnPlay(object sender, RoutedEventArgs e) => Runtime.Instance.Toggle();
@@ -148,7 +135,6 @@ namespace pixel_editor
             ProjectIO.SaveProject(Runtime.Instance.LoadedProject);
             Library.Sync();
         }
-
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
             Importer.ImportAssetDialog();
@@ -162,7 +148,6 @@ namespace pixel_editor
         }
         private void Wnd_Closed(object? sender, EventArgs e) =>
             stageWindow = null;
-
     }
     public class Inspector
     {
