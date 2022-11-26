@@ -328,7 +328,7 @@ namespace pixel_renderer.IO
                 throw new NullReferenceException(); 
             return project;
         }
-        public static void TryFetchProject(out Project? outObject, string name)
+        public static void TryFetchProject(out Project? outObject, string name) 
         {
             outObject = new("Null"); 
             Project project = ReadProjectFile(name);
