@@ -174,7 +174,7 @@ namespace pixel_renderer
             node.AddComponent(new Wind(randomDirection));
             nodes.Add(node);
         }
-        internal NodeAsset ToAsset() => new(Name, this);
+        internal NodeAsset ToAsset() => new(this);
            
     }
 }

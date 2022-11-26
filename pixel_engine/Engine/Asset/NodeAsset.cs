@@ -23,7 +23,7 @@ namespace pixel_renderer.Assets
             this.nodeName = nodeName;
             this.nodeUUID = nodeUUID;
         }
-        public NodeAsset(string name, Node runtimeValue)
+        public NodeAsset(Node runtimeValue)
         {
             nodeName = runtimeValue.Name;
             UUID = runtimeValue.UUID;
