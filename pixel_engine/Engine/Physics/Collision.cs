@@ -167,9 +167,7 @@ namespace pixel_renderer
 
             var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
             if (velocityDifference < 0.1f)
-            {
                 velocityDifference = 1f;
-            }
 
             Vec2 direction = (B.parentNode.position - A.parentNode.position).Normalize();
 
@@ -187,7 +185,8 @@ namespace pixel_renderer
             A.parentNode.position += CMath.Negate(depenetrationForce);
 
             depenetrationForce *= 0.5f;
-
+            return; 
+            // remove bounciness from collision resolution
             if (A.usingGravity && A.drag != 0) A.velocity += CMath.Negate(depenetrationForce);
             if (B.usingGravity && B.drag != 0) B.velocity += depenetrationForce;
         }

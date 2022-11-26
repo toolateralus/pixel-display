@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace pixel_editor.Source.Attributes
 {
     public class Asdf
     {
-        [Test("poopcicle")] public object asdf; 
+        [Test] public object asdf; 
 
     }
 
     [AttributeUsage(AttributeTargets.Field, AllowMultiple =false) ]
     public class TestAttribute : Attribute
     {
-        public string name = "asd"; 
-        public TestAttribute(string name)
+        public TestAttribute()
         {
-            this.name = name;
+            
         }
     }
 }

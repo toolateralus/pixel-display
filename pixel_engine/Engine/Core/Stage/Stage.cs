@@ -1,17 +1,15 @@
 ﻿using Newtonsoft.Json;
+using pixel_renderer.Assets;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Security.Policy;
 
 namespace pixel_renderer
 {
 
 
-    public class Stage : IEnumerable
+    public class Stage
     {
         public string Name { get; set; }
         private string _uuid = "";
@@ -22,7 +20,7 @@ namespace pixel_renderer
         [JsonIgnore]
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
 
-        public Node[] Nodes { get; private set; }
+        public List<Node> Nodes { get; private set; } = new(); 
         public Node[] FindNodesByTag(string tag)
         {
             OnQueryMade?.Invoke();
@@ -46,15 +44,14 @@ namespace pixel_renderer
         public void RefreshStageDictionary()
         {
             foreach (Node node in Nodes)
+            {
+                if(node.Name is null) continue;
                 if (!NodesByName.ContainsKey(node.Name))
                     NodesByName.Add(node.Name, node);
+            }
+               
         }
-        public void CreateNode(Node? template)
-        {
-            var list = Nodes.ToList();
-            list.Add(template ?? Node.New);
-            Nodes = list.ToArray();
-        }
+        public void AddNode(Node node) => Nodes.Add(node);
         public void FixedUpdate(float delta)
         { foreach (Node node in Nodes) node.FixedUpdate(delta); }
         public void Awake()
@@ -67,91 +64,40 @@ namespace pixel_renderer
                 node.Awake();
             }
         }
-
-        public Bitmap Background;
-        public static Stage Empty => new(Array.Empty<Node>());
-        public static Stage New => new("New Stage", new Bitmap(256, 256), Array.Empty<Node>());
-        public Stage(Node[] nodes)
-        {
-            nodes = new Node[nodes.Length];
-            for (int i = 0; i < nodes.Length; i++)
-            {
-                nodes[i] = nodes[i];
-            }
-            Awake();
-            RefreshStageDictionary();
-        }
-        public Stage(string Name, Bitmap Background, Node[] nodes)
+        public BitmapAsset Background = new("");
+        public static Stage New => new("New Stage", new Bitmap(256, 256), new());
+        public StageSettings Settings => new(Name, this.UUID);
+        [JsonConstructor]
+        public Stage(string Name, Bitmap Background, List<Node> nodes)
         {
             this.Name = Name;
-            this.Background = Background;
+            this.Background = new($"{Name} Background");
+            this.Background.RuntimeValue = Background;
             Nodes = nodes;
             Awake();
             RefreshStageDictionary();
         }
-        // ref to initial identity for resetting stage;
-        private readonly Stage _init;
-
-        public NodeEnum GetEnumerator()
-        {
-            return new NodeEnum(Nodes);
-        }
         public IEnumerable<Sprite> GetSprites()
         {
-            Sprite sprite = new();
+            var sprite = new Sprite(); 
             IEnumerable<Sprite> sprites =(from Node node in Nodes
                                           where node.TryGetComponent(out sprite)
                                           select sprite);
             return sprites; 
         }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
         public Stage Reset()
         {
-            if (_init is not null) return _init; 
+            List<StageAsset> stageAssets = Runtime.Instance.LoadedProject.stages;
+            foreach (StageAsset asset in stageAssets)
+                if (asset.settings.UUID.Equals(UUID) 
+                    && asset.settings is not null)
+                {
+                    var x = asset.Copy();
+                    return x; 
+                }
+
             throw new NullStageException("Stage not found on reset call"); 
         }
     }
-    public class NodeEnum : IEnumerator
-    {
-        int position = -1;
-        public Node[] _stage;
-        public NodeEnum(Node[] list)
-        {
-            _stage = list;
-        }
-        public bool MoveNext()
-        {
-            position++;
-            return position < _stage.Length;
-        }
-        public void Reset()
-        {
-            position = -1;
-        }
-        object IEnumerator.Current
-        {
-            get
-            {
-                return Current;
-            }
-        }
-        public Node Current
-        {
-            get
-            {
-                try
-                {
-                    return _stage[position];
-                }
-                catch (IndexOutOfRangeException)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
-    }
-
+   
 }

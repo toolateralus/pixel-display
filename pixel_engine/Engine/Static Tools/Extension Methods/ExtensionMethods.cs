@@ -1,10 +1,12 @@
 ﻿
 namespace pixel_renderer
 {
+    using pixel_renderer.Assets;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
+    using System.Printing;
     using System.Runtime.InteropServices;
 
     public static class ExtensionMethods
@@ -72,6 +74,21 @@ namespace pixel_renderer
                     result.Add(x);
                 return result.ToArray(); 
          }
+         public static List<NodeAsset> ToNodeAssets(this List<Node> input)
+         {
+            List<NodeAsset> output = new(); 
+            foreach (var node in input)
+                output.Add(node.ToAsset());
+            return output; 
+         }
+         public static List<Node> ToNodeList(this List<NodeAsset> input)
+         {
+            List<Node> output = new();
+            foreach (var asset in input)
+                output.Add(asset.Copy());
+            return output; 
+         }
+
       
 
     }

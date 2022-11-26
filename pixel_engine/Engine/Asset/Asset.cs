@@ -11,9 +11,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using pixel_renderer;
 using pixel_renderer.IO; 
-using pixel_renderer.Assets; 
+using pixel_renderer.Assets;
+using System.Runtime.CompilerServices;
+
 namespace pixel_renderer.Assets
 {
+    [JsonObject]
     public class Asset
     {
         public string pathFromRoot = "";
@@ -207,7 +210,7 @@ namespace pixel_renderer.Assets
         public static bool Fetch<T>(string name, out T result) where T : Asset
         {
             result = null;
-            if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
+            if (LoadedAssets.TryGetValue(typeof(T), out var found))
             {
                 result = (T)found.Where(x => x.Name.Equals(name));
                 return true;
@@ -320,7 +323,6 @@ namespace pixel_renderer.IO
             Project  project = new(fileName);
             using JsonTextReader json = new(reader);
                 project = jsonSerializer.Deserialize<Project>(json);
-                MessageBox.Show("File read error - Fked Up Big Time"); 
 
             if (project is null) 
                 throw new NullReferenceException(); 

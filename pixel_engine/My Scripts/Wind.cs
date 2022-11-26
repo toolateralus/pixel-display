@@ -18,6 +18,7 @@ namespace pixel_renderer
     }
     internal class Wind : Component
     {
+        public Wind() { }
         public Wind(Direction direction)
         {
             this.direction = direction;

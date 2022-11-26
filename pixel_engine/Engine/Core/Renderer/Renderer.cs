@@ -6,8 +6,8 @@
 
     public class CRenderer : RendererBase
     {
-        public static Bitmap? bmp_cached = null;
-        public static IEnumerable<Sprite> sprites_cached;
+        Bitmap? bmp_cached = null;
+        IEnumerable<Sprite>? sprites_cached = null; 
         public override Bitmap Draw()
         {
             sprites_cached = Runtime.Instance.stage.GetSprites();
@@ -28,7 +28,22 @@
             return bmp_cached;
         }
         public override void Render(Image output) =>  CBit.Render(ref bmp_cached, output);
-        public override void Dispose()  => bmp_cached = Runtime.Instance.stage.Background.Clone() as Bitmap ?? FallBack.Clone() as Bitmap;
-    }               
+        public override void Dispose()
+        {
+            Bitmap backgroundFromAsset = new(1,1);
+            if (Runtime.Instance.stage != null && Runtime.Instance.stage.Background != null)
+                if (Runtime.Instance.stage.Background.RuntimeValue != null)
+                {
+                   backgroundFromAsset = Runtime.Instance.stage.Background.RuntimeValue.Clone() as Bitmap;
+                }
+
+            if (backgroundFromAsset is not null)
+            {
+                bmp_cached = backgroundFromAsset;
+                return;
+            }
+            bmp_cached = FallBack.Clone() as Bitmap;
+        }
     }
+}
 

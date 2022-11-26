@@ -108,9 +108,9 @@ namespace pixel_renderer
                 foreach (var asset in bitmapAssetCollection)
                 {
                     if (asset as BitmapAsset == null) continue;
+
                     var bitmapAsset = asset as BitmapAsset;
                     var bitmap = bitmapAsset.RuntimeValue; 
-
                     if (bitmap.Height == Settings.ScreenH
                         && bitmap.Width == Settings.ScreenW)
                         bitmaps.Add(bitmap);
