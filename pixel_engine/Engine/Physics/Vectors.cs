@@ -1,13 +1,16 @@
 ﻿namespace pixel_renderer
 {
     using System;
+    using System.Text.Json.Serialization;
     using System.Windows;
     public struct Vec3
     {
         public float x;
         public float y;
         public float z;
+        [JsonIgnore]
         public float Magnitude => MathF.Sqrt(x * x + y * y + z * z);
+        [JsonIgnore]
         public float sqrMagnitude => x * x + y * y + z * z;
 
         public static Vec3 one = new Vec3(1, 1, 1);
@@ -48,7 +51,9 @@
     {
         public float x;
         public float y;
+        [JsonIgnore]
         public float Length => (float)Math.Sqrt(x * x + y * y);
+        [JsonIgnore]
         public float sqrMagnitude => x * x + y * y;
         public static Vec2 one = new Vec2(1, 1);
         public static Vec2 zero = new Vec2(0, 0);
