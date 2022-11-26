@@ -27,7 +27,7 @@ namespace pixel_renderer
 
         public double GetDrag()
         {
-            double velocity = this.velocity.Length;
+            double velocity = this.velocity.Length();
             double drag = velocity * velocity * dragCoefficient;
             // maybe unneccesary negate?
             // breakpoint has never been hit despite

@@ -21,14 +21,14 @@ namespace pixel_renderer
         public static Vec2 WithScale(this Vec2 v, int x = 1, int y = 1) { return new Vec2(v.x * x, v.y * y); }
         public static double Sum(this Vec2 v) => v.x + v.y;
         public static double Sum(this Vec3 v) => v.x + v.y + v.z;
-        public static float Distance(this Vec2 v, Vec2 end) => (v - end).Length;
+        public static float Distance(this Vec2 v, Vec2 end) => (v - end).Length();
         /// <summary>
         ///  TODO: fix possible  'divide by zero'
         ///   Normalize a vector
         /// </summary>
         /// <param name="v"></param>
         /// <returns>A normalized Vector from the length of the current</returns>
-        public static Vec2 Normalize(this Vec2 v) => v / v.Length;
+        public static Vec2 Normalize(this Vec2 v) => v / v.Length();
         #endregion
 
         #region Strings

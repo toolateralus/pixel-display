@@ -33,7 +33,7 @@ namespace pixel_renderer
         public override void FixedUpdate(float delta)
         {
             var windDir = Orientation.GetDirection(direction);
-            float speed = -1 + WaveForms.Next.Length * 5;
+            float speed = -1 + WaveForms.Next.Length() * 5;
             rb.velocity += windDir * speed;
 
         }

@@ -172,7 +172,7 @@ namespace pixel_renderer
             Vec2 direction = (B.parentNode.position - A.parentNode.position).Normalize();
 
             // make sure not NaN after possibly dividing by zero in Normalize();
-            direction = direction.sqrMagnitude is float.NaN ? Vec2.zero : direction;
+            direction = direction.SqrMagnitude() is float.NaN ? Vec2.zero : direction;
 
             var depenetrationForce = direction * velocityDifference * 0.5f;
 
