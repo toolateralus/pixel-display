@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -178,6 +179,7 @@ namespace pixel_renderer.Assets
     }
     public class Library
     {
+
         public static Dictionary<Type, List<Asset>> LoadedAssets = new();
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
@@ -317,14 +319,8 @@ namespace pixel_renderer.IO
             StreamReader reader = new(Path + "\\" + fileName + Settings.ProjectFileExtension);
             Project  project = new(fileName);
             using JsonTextReader json = new(reader);
-            try
-            {
                 project = jsonSerializer.Deserialize<Project>(json);
-            }
-            catch (Exception) 
-            {
                 MessageBox.Show("File read error - Fked Up Big Time"); 
-            };
 
             if (project is null) 
                 throw new NullReferenceException(); 
@@ -450,24 +446,24 @@ namespace pixel_renderer.IO
             if (dlg.type.Equals(typeof(Project)))
             {
                 project = ProjectIO.ReadProjectFile(dlg.fileName);
+
                 if (project is not null)
                     return project;
+                    else return new("Default"); 
             }
             return project;
         }
-        public Settings settings;
-        public Runtime runtime;
         public List<StageAsset> stages;
+        public Library library;
         public int stageIndex;
         public int fileSize = 0;
 
         public Project(string name)
         {
             Name = name;
-            settings = new();
-            runtime = Runtime.Instance;
             var stage = Staging.Default();
             StageAsset asset = new("", stage);
+
             stageIndex = 0;
             stages = new()
             {

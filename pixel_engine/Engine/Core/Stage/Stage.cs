@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,6 +19,7 @@ namespace pixel_renderer
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
         public event Action OnQueryMade;
 
+        [JsonIgnore]
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
 
         public Node[] Nodes { get; private set; }
@@ -53,11 +55,6 @@ namespace pixel_renderer
             list.Add(template ?? Node.New);
             Nodes = list.ToArray();
         }
-
-        /// <summary>
-        /// update loop, fixed to the framerate of the rendering stage; 
-        /// </summary>
-        /// <param name="delta"></param>
         public void FixedUpdate(float delta)
         { foreach (Node node in Nodes) node.FixedUpdate(delta); }
         public void Awake()
@@ -71,15 +68,9 @@ namespace pixel_renderer
             }
         }
 
-
         public Bitmap Background;
         public static Stage Empty => new(Array.Empty<Node>());
         public static Stage New => new("New Stage", new Bitmap(256, 256), Array.Empty<Node>());
-        /// <summary>
-        /// Called on constructor initialization
-        /// </summary>
-
-
         public Stage(Node[] nodes)
         {
             nodes = new Node[nodes.Length];
@@ -97,11 +88,10 @@ namespace pixel_renderer
             Nodes = nodes;
             Awake();
             RefreshStageDictionary();
-            _init = this; 
         }
         // ref to initial identity for resetting stage;
         private readonly Stage _init;
-        // for IEnumerator implementation;
+
         public NodeEnum GetEnumerator()
         {
             return new NodeEnum(Nodes);
@@ -118,8 +108,7 @@ namespace pixel_renderer
         {
             return GetEnumerator();
         }
-
-        internal Stage Reset()
+        public Stage Reset()
         {
             if (_init is not null) return _init; 
             throw new NullStageException("Stage not found on reset call"); 
