@@ -260,7 +260,6 @@ namespace pixel_renderer.Assets
 
             return library;
         }
-
         public static void Register(Type type, Asset asset)
         {
             if (!LoadedAssets.ContainsKey(type))
