@@ -1,9 +1,9 @@
 ﻿
 using Newtonsoft.Json;
+using pixel_renderer.Assets;
 
 namespace pixel_renderer
 {
-
     public abstract class Component
     {
         [JsonIgnore]
@@ -17,7 +17,7 @@ namespace pixel_renderer
         public virtual void FixedUpdate(float delta) { }
         public virtual void Update() { }
         public virtual void Awake() { }
-
+        public ComponentAsset ToAsset() => new(Name, this, GetType());
         internal void Init()
         {
             Name = parentNode.Name + $" {GetType()}";

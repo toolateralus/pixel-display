@@ -32,6 +32,10 @@ namespace pixel_renderer
             var reset = runtime.stage.Reset();
             if (reset is null) 
                 throw new NullStageException("Resetting stage failed"); 
+            if (Rendering.State is not RenderState.Off)
+            {
+                Runtime.Instance.Toggle(); 
+            }
             SetCurrentStage(reset);
         }
 
@@ -42,7 +46,8 @@ namespace pixel_renderer
             AddFloor(nodes);
             for (int i = 0; i < 1000; i++) Node.CreateGenericNode(nodes, i);
             Bitmap background = new(256, 256);
-            return new Stage("Default Stage", background, nodes.ToArray());
+            if (nodes is null) nodes = new(); 
+            return new Stage("Default Stage", background, nodes);
         }
       
         private static void AddFloor(List<Node> nodes)
@@ -67,7 +72,7 @@ namespace pixel_renderer
             // clicks that arent exactly on the corner of the object
             // does not really work
 
-            Stage stage = Runtime.Instance.stage ?? Stage.Empty;
+            Stage stage = Runtime.Instance.stage ?? Stage.New;
             pos = new Point()
             {
                 X = Math.Round(pos.X),

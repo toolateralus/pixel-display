@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using pixel_renderer;
 using pixel_renderer.IO; 
-using pixel_renderer.Assets; 
+using pixel_renderer.Assets;
+using System.Runtime.CompilerServices;
+
 namespace pixel_renderer.Assets
 {
+    [JsonObject]
     public class Asset
     {
         public string pathFromRoot = "";
@@ -178,6 +182,7 @@ namespace pixel_renderer.Assets
     }
     public class Library
     {
+
         public static Dictionary<Type, List<Asset>> LoadedAssets = new();
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
@@ -205,7 +210,7 @@ namespace pixel_renderer.Assets
         public static bool Fetch<T>(string name, out T result) where T : Asset
         {
             result = null;
-            if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
+            if (LoadedAssets.TryGetValue(typeof(T), out var found))
             {
                 result = (T)found.Where(x => x.Name.Equals(name));
                 return true;
@@ -317,20 +322,13 @@ namespace pixel_renderer.IO
             StreamReader reader = new(Path + "\\" + fileName + Settings.ProjectFileExtension);
             Project  project = new(fileName);
             using JsonTextReader json = new(reader);
-            try
-            {
                 project = jsonSerializer.Deserialize<Project>(json);
-            }
-            catch (Exception) 
-            {
-                MessageBox.Show("File read error - Fked Up Big Time"); 
-            };
 
             if (project is null) 
                 throw new NullReferenceException(); 
             return project;
         }
-        public static void TryFetchProject(out Project? outObject, string name)
+        public static void TryFetchProject(out Project? outObject, string name) 
         {
             outObject = new("Null"); 
             Project project = ReadProjectFile(name);
@@ -450,24 +448,24 @@ namespace pixel_renderer.IO
             if (dlg.type.Equals(typeof(Project)))
             {
                 project = ProjectIO.ReadProjectFile(dlg.fileName);
+
                 if (project is not null)
                     return project;
+                    else return new("Default"); 
             }
             return project;
         }
-        public Settings settings;
-        public Runtime runtime;
         public List<StageAsset> stages;
+        public Library library;
         public int stageIndex;
         public int fileSize = 0;
 
         public Project(string name)
         {
             Name = name;
-            settings = new();
-            runtime = Runtime.Instance;
             var stage = Staging.Default();
             StageAsset asset = new("", stage);
+
             stageIndex = 0;
             stages = new()
             {

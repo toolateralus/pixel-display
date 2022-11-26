@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json;
+using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Printing;
 
 namespace pixel_renderer
 {
@@ -156,20 +159,22 @@ namespace pixel_renderer
             foreach (var list in Components.Values)
                 foreach (var component in list) component.OnTrigger(otherBody);
         }
-    public static void CreateGenericNode(List<Node> nodes, int i)
-    {
-        var pos = JRandom.ScreenPosition();
-        var node = new Node($"NODE {i}", pos, Vec2.one);
-        node.AddComponent(new Sprite(JRandom.Vec2(Vec2.one, Vec2.one * 15f), JRandom.Color(), JRandom.Bool()));
-        node.AddComponent(new Rigidbody()
+        public static void CreateGenericNode(List<Node> nodes, int i)
         {
-            IsTrigger = false,
-            usingGravity = true,
-            drag = .1f
-        });
-        var randomDirection = JRandom.Direction();
-        node.AddComponent(new Wind(randomDirection));
-        nodes.Add(node);
-    }
+            var pos = JRandom.ScreenPosition();
+            var node = new Node($"NODE {i}", pos, Vec2.one);
+            node.AddComponent(new Sprite(JRandom.Vec2(Vec2.one, Vec2.one * 15f), JRandom.Color(), JRandom.Bool()));
+            node.AddComponent(new Rigidbody()
+            {
+                IsTrigger = false,
+                usingGravity = true,
+                drag = .1f
+            });
+            var randomDirection = JRandom.Direction();
+            node.AddComponent(new Wind(randomDirection));
+            nodes.Add(node);
+        }
+        internal NodeAsset ToAsset() => new(Name, this);
+           
     }
 }

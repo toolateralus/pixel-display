@@ -56,14 +56,19 @@ namespace pixel_editor
                 await Task.Run(Importer.ImportAssetDialog);
                 if (background is null) return;
             }
-            var stage = new Stage(name, background, nodes.ToArray());
+            var stage = new Stage(name, background, nodes);
 
             var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
 
             if (msgResult == MessageBoxResult.Yes)
             {
                 Staging.SetCurrentStage(stage);
-                var asset = new StageAsset(stage.Name, stage);
+
+                var asset = new StageAsset("", Stage.New);
+                if(stage is not null)
+                    if(stage.Nodes is not null)
+                        asset = new StageAsset(stage.Name, stage);
+
                 Library.Register(typeof(Stage), asset);
             }
         }
