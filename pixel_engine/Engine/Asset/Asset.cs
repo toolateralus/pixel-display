@@ -182,7 +182,6 @@ namespace pixel_renderer.Assets
     }
     public class Library
     {
-
         public static Dictionary<Type, List<Asset>> LoadedAssets = new();
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
@@ -229,7 +228,6 @@ namespace pixel_renderer.Assets
                                 select asset);
                 return true;
             }
-
             return false;
         }
         /// <summary>

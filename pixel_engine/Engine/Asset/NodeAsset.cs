@@ -14,12 +14,14 @@ namespace pixel_renderer.Assets
         public List<NodeAsset> children;
 
         [JsonConstructor]
-        public NodeAsset(Components components, Vec2 pos, Vec2 scale, List<NodeAsset> children)
+        public NodeAsset(string nodeUUID, string nodeName , Components components, Vec2 pos, Vec2 scale, List<NodeAsset> children)
         {
             Components = components;
             this.pos = pos;
             this.scale = scale;
             this.children = children;
+            this.nodeName = nodeName;
+            this.nodeUUID = nodeUUID;
         }
         public NodeAsset(string name, Node runtimeValue)
         {
