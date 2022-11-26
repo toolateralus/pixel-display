@@ -1,20 +1,19 @@
-﻿#region Reassigned
+﻿using System;
+using System.Reflection;
+using System.Collections.Generic;
+
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
 using Image = System.Windows.Controls.Image;
-#endregion 
-#region Usings
-using System;
-using System.Collections.Generic;
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Reflection;
 using System.Windows.Input;
+
 using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.IO; 
-#endregion
 
 namespace pixel_editor
 {
