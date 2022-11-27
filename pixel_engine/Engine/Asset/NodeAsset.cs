@@ -53,7 +53,7 @@ namespace pixel_renderer.Assets
             Name = name;
         }
         [JsonConstructor]
-        public ComponentAsset(string name, Type type, string UUID) : base(name, type, UUID)
+        public ComponentAsset(string name, Type fileType, string UUID) : base(name, fileType, UUID)
         {
         }
     }
