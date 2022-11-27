@@ -22,7 +22,7 @@ namespace pixel_renderer.Assets
         public string pathFromRoot = "";
         public string fileSize = "";
         private string _uuid = "";
-        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
+        public string UUID { get { if (_uuid is null || _uuid == "") _uuid = pixel_renderer.UUID.NewUUID();  return _uuid; }}
         public string Name = "New Asset";
         public Type fileType;
         [JsonConstructor]
