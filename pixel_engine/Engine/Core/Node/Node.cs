@@ -17,7 +17,6 @@ namespace pixel_renderer
         public bool Enabled { get { return _enabled; } }
         private bool _enabled = true; 
         public void SetActive(bool value)=>_enabled = value; 
-
         public Vec2 position = new();
         public Vec2 localPosition
         {

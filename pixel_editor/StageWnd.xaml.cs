@@ -1,5 +1,6 @@
 ﻿using pixel_renderer;
 using pixel_renderer.Assets;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -21,6 +22,46 @@ namespace pixel_editor
         {
             InitializeComponent();
         }
+        #region Window Scaling
+        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(StageWnd), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
+        private static object OnCoerceScaleValue(DependencyObject o, object value)
+        {
+            StageWnd mainWindow = o as StageWnd;
+            return mainWindow != null ? mainWindow.OnCoerceScaleValue((double)value) : value;
+        }
+        private static void OnScaleValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+        {
+            StageWnd mainWindow = o as StageWnd;
+            if (mainWindow != null)
+                mainWindow.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
+        }
+        protected virtual double OnCoerceScaleValue(double value)
+        {
+            if (double.IsNaN(value))
+                return 1.0f;
+
+            value = Math.Max(0.1, value);
+            return value;
+        }
+        protected virtual void OnScaleValueChanged(double oldValue, double newValue) { }
+        private void CalculateScale()
+        {
+            double yScale = ActualHeight / 250f;
+            double xScale = ActualWidth / 200f;
+            double value = Math.Min(xScale, yScale);
+
+            ScaleValue = (double)OnCoerceScaleValue(this, value);
+        }
+        public void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            CalculateScale();
+        }
+        public double ScaleValue
+        {
+            get => (double)GetValue(ScaleValueProperty);
+            set => SetValue(ScaleValueProperty, value);
+        }
+        #endregion
 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {

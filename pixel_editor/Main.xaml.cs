@@ -259,22 +259,32 @@ namespace pixel_editor
         }
         public static string GetComponentInfo(Component component)
         {
-            IEnumerable<FieldInfo> fields = component.GetType().GetRuntimeFields();
+            IEnumerable<FieldInfo> fields;
+            IEnumerable<PropertyInfo> properties;
+            GetComponentRuntimeInfo(component, out fields, out properties);
             string output = $"\b {component.GetType().Name} Properties : ";
-
-            IEnumerable<PropertyInfo> properties = component.GetType().GetRuntimeProperties();
             foreach (var property in properties)
             {
                 var value = property.GetValue(component, null);
                 output += $" \n \t{property.Name} {property.PropertyType} {value}";
             }
-
             foreach (var field in fields)
             {
                 var value = field.GetValue(component);
                 output += $" \n \t{field} {value}";
             }
             return output;
+        }
+
+        private static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
+        {
+            fields = component.GetType().GetRuntimeFields();
+            properties = component.GetType().GetRuntimeProperties();
+        }
+        private static void GetComponentInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
+        {
+            fields = component.GetType().GetFields();
+            properties = component.GetType().GetProperties();
         }
 
         public static Label CreateLabel(string componentInfo, Thickness margin)
