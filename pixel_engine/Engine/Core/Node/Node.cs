@@ -2,9 +2,6 @@
 using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Printing;
 
 namespace pixel_renderer
 {
@@ -12,7 +9,7 @@ namespace pixel_renderer
     {
         // Node Info
         [JsonIgnore]
-        public Stage parentStage { get; set; }
+        public Stage ParentStage { get; set; }
      
         public string Name { get; set; }
 
@@ -106,7 +103,7 @@ namespace pixel_renderer
 
         public Node(Stage parentStage, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, Node[]? children)
         {
-            this.parentStage = parentStage;
+            this.ParentStage = parentStage;
             Name = name;
             _uuid = pixel_renderer.UUID.NewUUID();
             this.position = position;

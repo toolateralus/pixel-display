@@ -60,7 +60,7 @@ namespace pixel_renderer
             OnQueryMade += RefreshStageDictionary;
             foreach (Node node in Nodes)
             {
-                node.parentStage ??= this;
+                node.ParentStage ??= this;
                 node.Awake();
             }
         }
