@@ -44,7 +44,7 @@ namespace pixel_renderer
             var nodes = new List<Node>();
             AddPlayer(nodes);
             AddFloor(nodes);
-            for (int i = 0; i < 1000; i++) Node.CreateGenericNode(nodes, i);
+            for (int i = 0; i < 1; i++) Node.CreateGenericNode(nodes, i);
             Bitmap background = new(256, 256);
             if (nodes is null) nodes = new(); 
             return new Stage("Default Stage", background, nodes);

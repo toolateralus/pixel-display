@@ -2,10 +2,10 @@
 using Key = System.Windows.Input.Key;
 internal class Player : Component
 {
-    public bool takingInput = true;
-    public int speed = 2;
-    Sprite sprite = new();
-    Rigidbody rb = new();
+    [Field] public bool takingInput = true;
+    [Field] public int speed = 2;
+    [Field] Sprite sprite = new();
+    [Field] Rigidbody rb = new();
     public override void Awake()
     {
         sprite = GetComponent<Sprite>();
@@ -17,7 +17,7 @@ internal class Player : Component
         if (Input.GetKeyDown(Key.Q))
             Staging.ReloadCurrentStage(); 
 
-        var move = Input.GetMoveVector() * delta;
+        var move = Input.GetMoveVector();
         Jump(move);
         Move(move);
     }

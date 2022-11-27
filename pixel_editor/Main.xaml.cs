@@ -13,7 +13,9 @@ using System.Windows.Input;
 
 using pixel_renderer;
 using pixel_renderer.Assets;
-using pixel_renderer.IO; 
+using pixel_renderer.IO;
+using System.Runtime.CompilerServices;
+using System.Linq;
 
 namespace pixel_editor
 {
@@ -259,15 +261,8 @@ namespace pixel_editor
         }
         public static string GetComponentInfo(Component component)
         {
-            IEnumerable<FieldInfo> fields;
-            IEnumerable<PropertyInfo> properties;
-            GetComponentRuntimeInfo(component, out fields, out properties);
-            string output = $"\b {component.GetType().Name} Properties : ";
-            foreach (var property in properties)
-            {
-                var value = property.GetValue(component, null);
-                output += $" \n \t{property.Name} {property.PropertyType} {value}";
-            }
+            IEnumerable<FieldInfo> fields = component.GetSerializedFields(); 
+            string output = $"\b {component.Name} ";
             foreach (var field in fields)
             {
                 var value = field.GetValue(component);
@@ -280,7 +275,11 @@ namespace pixel_editor
         {
             fields = component.GetType().GetRuntimeFields();
             properties = component.GetType().GetRuntimeProperties();
+
         }
+        
+          
+               
         public static void GetComponentInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetFields();

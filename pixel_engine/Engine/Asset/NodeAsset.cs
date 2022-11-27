@@ -45,16 +45,31 @@ namespace pixel_renderer.Assets
 
     public class ComponentAsset : Asset
     {
-        //public Component runtimeValue;
-        public ComponentAsset(string name, Component component, Type type)
+        public List<Type> fieldTypes = new();
+        public List<object> fieldValues = new();
+
+        public void GetFields(Component component)
         {
-           // runtimeValue = component;
-            fileType = type;
-            Name = name;
+            var fields = component.GetSerializedFields();
+            foreach (var field in fields)
+            {
+                fieldValues.Add(field.GetValue(component));
+                fieldTypes.Add(field.FieldType);
+            }
         }
         [JsonConstructor]
-        public ComponentAsset(string name, Type fileType, string UUID) : base(name, fileType, UUID)
+        public ComponentAsset(List<object> fieldValues, List<Type> fieldTypes, string name, Type fileType, string UUID) : base(name, fileType, UUID)
         {
+            this.fieldValues = fieldValues;
+            this.fieldTypes = fieldTypes;
+        }
+        public ComponentAsset(string name, Component component, Type type)
+        {
+            fileType = type;
+            Name = name;
+            GetFields(component); 
         }
     }
+  
+  
 }

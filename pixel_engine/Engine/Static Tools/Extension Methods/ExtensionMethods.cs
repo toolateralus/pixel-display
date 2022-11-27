@@ -7,6 +7,7 @@ namespace pixel_renderer
     using System.Drawing;
     using System.Linq;
     using System.Printing;
+    using System.Reflection;
     using System.Runtime.InteropServices;
 
     public static class ExtensionMethods
@@ -74,7 +75,12 @@ namespace pixel_renderer
                     result.Add(x);
                 return result.ToArray(); 
          }
-         public static List<NodeAsset> ToNodeAssets(this List<Node> input)
+        public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
+            from FieldInfo field in component.GetType().GetRuntimeFields()
+            from CustomAttributeData data in field.CustomAttributes
+            where data.AttributeType == typeof(FieldAttribute)
+            select field;
+        public static List<NodeAsset> ToNodeAssets(this List<Node> input)
          {
             List<NodeAsset> output = new(); 
             foreach (var node in input)
