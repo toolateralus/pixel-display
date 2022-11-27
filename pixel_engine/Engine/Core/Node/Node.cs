@@ -10,12 +10,9 @@ namespace pixel_renderer
         // Node Info
         [JsonIgnore]
         public Stage ParentStage { get; set; }
-     
         public string Name { get; set; }
-
         private string _uuid = "";
         public string UUID { get { return _uuid; } set { } }
-
         public bool Enabled { get { return _enabled; } }
         private bool _enabled = true; 
         public void SetActive(bool value)=>_enabled = value; 
