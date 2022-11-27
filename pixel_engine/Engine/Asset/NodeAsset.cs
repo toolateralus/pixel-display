@@ -14,7 +14,7 @@ namespace pixel_renderer.Assets
         public List<NodeAsset> children;
 
         [JsonConstructor]
-        public NodeAsset(string nodeUUID, string nodeName , Components components, Vec2 pos, Vec2 scale, List<NodeAsset> children)
+        public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, Components components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
         {
             Components = components;
             this.pos = pos;
