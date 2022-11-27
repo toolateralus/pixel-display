@@ -26,7 +26,8 @@ namespace pixel_renderer.Assets
         public NodeAsset(Node runtimeValue)
         {
             nodeName = runtimeValue.Name;
-            UUID = runtimeValue.UUID;
+            nodeUUID = runtimeValue.UUID;
+            children = runtimeValue.children.ToNodeAssets() ;
             pos = runtimeValue.position;
             scale = runtimeValue.scale;
             fileType = typeof(Node);

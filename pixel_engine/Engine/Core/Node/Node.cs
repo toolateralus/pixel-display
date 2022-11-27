@@ -26,7 +26,7 @@ namespace pixel_renderer
         public Vec2 scale = new();
 
         public Node? parentNode;
-        public Node[]? children;
+        public List<Node> children= new() ;
 
         // goal - make private
         public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
@@ -97,12 +97,12 @@ namespace pixel_renderer
         /// </summary>
         public static Node New = new("", Vec2.zero, Vec2.one);
         public string tag = "untagged";
-
-        public Node(Stage parentStage, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, Node[]? children)
+        [JsonConstructor]
+        public Node(Stage parentStage, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, List<Node> children, string nodeUUID)
         {
             this.ParentStage = parentStage;
             Name = name;
-            _uuid = pixel_renderer.UUID.NewUUID();
+            _uuid = nodeUUID;
             this.position = position;
             this.scale = scale;
             this.parentNode = parentNode;
