@@ -79,6 +79,7 @@ namespace pixel_editor
             if (image is not null)
             {
                 background = image;
+                CBit.Render(ref image, imgPreview);
             }
         }
         private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
