@@ -11,6 +11,7 @@ namespace pixel_renderer
         [JsonIgnore]
         public Stage ParentStage { get; set; }
         public string Name { get; set; }
+
         private string _uuid = "";
         public string UUID { get { return _uuid; } set { } }
         public bool Enabled { get { return _enabled; } }
