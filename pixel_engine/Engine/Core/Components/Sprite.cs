@@ -63,6 +63,7 @@ namespace pixel_renderer
             this.isCollider = isCollider;
         }
 
+
         public override void Update()
         {
      
@@ -92,6 +93,16 @@ namespace pixel_renderer
                 }
             this.size = size;
             this.isCollider = isCollider;
+        }
+        public static Color[,] SolidColorSquare(Vec2 size, Color color)
+        {
+            var colorData = new Color[(int)size.x, (int)size.y];
+            for (int x = 0; x < size.x; x++)
+                for (int y = 0; y < size.y; y++)
+                {
+                    colorData[x, y] = color;
+                }
+            return colorData; 
         }
     }
 
