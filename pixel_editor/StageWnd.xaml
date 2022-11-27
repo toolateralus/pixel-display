@@ -126,14 +126,13 @@
                 />
             <Image 
                 Grid.Column="1" 
-                Grid.ColumnSpan="11" 
+                Grid.ColumnSpan="12" 
                 HorizontalAlignment="Left" 
-                Height="163" 
-                Margin="10,5,0,0" 
+                Height="200" 
                 Grid.RowSpan="6" 
                 Grid.Row="2" 
                 VerticalAlignment="Top" 
-                Width="290"
+                Width="300"
                 x:Name="imgPreview"/>
 
         </Grid>
