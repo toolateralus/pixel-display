@@ -387,7 +387,6 @@ namespace pixel_renderer.IO
             Library.Register(_asset.GetType(), _asset);
             return;
         }
-
         public static Asset? ReadAssetFile(string fileName)
         {
             if (!Directory.Exists(Path))
