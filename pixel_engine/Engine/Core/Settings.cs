@@ -52,7 +52,7 @@ namespace pixel_renderer
 
         public const string FontsDir = ImagesDir + "\\Font";  // Font Images asset directory (Probably shouldnt be a constant, for text rendering.)
         public const string ImagesDir = AssetsDir + "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
-        public const string ProjectsDir = AssetsDir + "\\Projects";
+        public const string ProjectsDir = "\\Projects";
         public const string AssetsDir = "\\Pixel\\Assets";   // Asset resources (user - created)
         public static string AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);    // Root directory for resources
         
