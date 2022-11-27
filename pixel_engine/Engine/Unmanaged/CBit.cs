@@ -23,7 +23,7 @@ namespace pixel_renderer
         [DllImport("PIXELRENDERER")]
         internal unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
 
-        internal unsafe static void Render(ref Bitmap bmp, Image source)
+        public unsafe static void Render(ref Bitmap bmp, Image source)
         {
             var bitmapData = bmp.LockBits(
               new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
