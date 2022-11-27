@@ -25,11 +25,11 @@ namespace pixel_renderer.Assets
         public string UUID { get { if (_uuid is null || _uuid == "") _uuid = pixel_renderer.UUID.NewUUID();  return _uuid; }}
         public string Name = "New Asset";
         public Type fileType;
-        [JsonConstructor]
-        public Asset(string name, Type fileType)
+        public Asset(string name, Type fileType, string? UUID = null)
         {
             Name = name;
             this.fileType = fileType;
+            _uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
         }
         public Asset() { }
 
@@ -392,7 +392,7 @@ namespace pixel_renderer.IO
             };
             var jsonSerializer = JsonSerializer.Create(settings);
             StreamReader reader = new(fileName);
-            Asset asset = new("" + fileName, typeof(Asset));
+            Asset asset = new("" + fileName, typeof(Asset), "");
             using JsonTextReader json = new(reader);
             try
             {
