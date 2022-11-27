@@ -44,11 +44,7 @@ namespace pixel_renderer.Assets
 
             foreach (string file in files)
             {
-                BitmapAsset bitmap = new($"{'a' + i}")
-                {
-                    RuntimeValue = new(file),
-                    fileType = typeof(Bitmap)
-                };
+                BitmapAsset bitmap = new($"{'a' + i}", new(file));
                 Library.Register(typeof(BitmapAsset), bitmap);
                 i++;
             }

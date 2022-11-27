@@ -22,7 +22,7 @@ namespace pixel_renderer
         // this variable is used by the inspector to
         // ensure user'a click grabs a new node each time 
         public static Node lastSelected;
-        public static void SetCurrentStage(StageAsset stage) => runtime._stage = stage;
+        public static void SetCurrentStage(StageAsset stage) => Runtime.Instance.SetStageAsset(stage);
         public static void UpdateCurrentStage(Stage stage)
         {
             stage.FixedUpdate(delta: runtime.lastFrameTime);
@@ -40,25 +40,10 @@ namespace pixel_renderer
         {
             var nodes = new List<Node>();
             AddPlayer(nodes);
-            AddFloor(nodes);
-            for (int i = 0; i < 1; i++) Node.CreateGenericNode(nodes, i);
-            Bitmap background = new(256, 256);
-            return new Stage("Default Stage", background, nodes);
+            Node.CreateGenericNode(nodes, 0);
+            return new Stage("Default Stage", new(256, 256), nodes);
         }
-        private static void AddFloor(List<Node> nodes)
-        {
-            var staticNodes = new List<Node>();
-            for (int i = 0; i < 240; i++)
-                Node.CreateGenericNode(staticNodes, i);
-            foreach (var node in staticNodes)
-            {
-                var randomDrag = JRandom.Bool() ? 0 : 1;
-                var x = node.GetComponent<Rigidbody>();
-                x.usingGravity = JRandom.Bool();
-                x.drag = randomDrag;
-            }
-            nodes.AddRange(staticNodes);
-        }
+     
         public static bool GetNodeAtPoint(Point pos, out Node? result)
         {
             // round up number to improve click accuracy

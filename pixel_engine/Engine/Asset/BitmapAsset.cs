@@ -13,34 +13,37 @@ namespace pixel_renderer.Assets
     {
         [JsonIgnore]
         public Bitmap RuntimeValue;
-
-        public List<List<Color>> Colors 
+        private Color[,] _colors; 
+        public Color[,] Colors 
         { 
             get 
             {
-                List<List<Color>> colors = new();
-                for (int i = 0; i< RuntimeValue.Width; i++)
+                if (_colors is null && RuntimeValue is not null)
                 {
-                    List <Color> color = new List<Color>();
-                    for (int j = 0; j < RuntimeValue.Height; j++)
-                            color.Add(RuntimeValue.GetPixel(i, j));
-                    colors.Add(color); 
-                }
-
-                return colors; 
+                     _colors = new Color[RuntimeValue.Width, RuntimeValue.Height];
+                    for (int i = 0; i < _colors.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < _colors.GetLength(1); j++)
+                            _colors[i, j] = RuntimeValue.GetPixel(i, j);
+                    }
+                    return _colors;
+                }   
+                else if (_colors is not null)
+                return _colors;
+                throw new NullReferenceException("Couldnt get colors from bitmap");
             }
+            set =>  _colors = value; 
+              
         }
-
-        public BitmapAsset(string name) : base(name, typeof(Bitmap))
+        public BitmapAsset(string name, Bitmap runtimeValue) : base(name, typeof(Bitmap))
         {
+            this.RuntimeValue = runtimeValue;
             Name = name;
         }
         public static BitmapAsset BitmapToAsset(string fileName, string assetName)
         {
             Bitmap bmp = new(fileName);
-            BitmapAsset asset = new(assetName);
-            if (bmp != null)
-                asset.RuntimeValue = bmp;
+            BitmapAsset asset = new(assetName, bmp);
             return asset;
         }
     }

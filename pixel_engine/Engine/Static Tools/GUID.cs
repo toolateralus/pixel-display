@@ -1,12 +1,18 @@
 ﻿namespace pixel_renderer
 {
     using System;
-    public static class UUID
+    public class UUID
     {
+        static int index = 0; 
+        static int[] uuid_hashmap= new int[2500];
+
         public static string NewUUID()
         {
-            var guid = Guid.NewGuid().ToString();
-            return guid;
+            var id = Guid.NewGuid().ToString();
+            Cache(id);
+            return id; 
         }
-    }
+        private static void Cache(string UUID) => uuid_hashmap[index] = UUID.GetHashCode();  
+          
+        }
 }

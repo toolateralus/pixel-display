@@ -64,15 +64,14 @@ namespace pixel_renderer
                 node.Awake();
             }
         }
-        public BitmapAsset Background = new("");
+        public BitmapAsset Background = new("", null);
         public static Stage New => new("New Stage", new Bitmap(256, 256), new());
         public StageSettings Settings => new(Name, this.UUID);
         [JsonConstructor]
         public Stage(string Name, Bitmap Background, List<Node> nodes)
         {
             this.Name = Name;
-            this.Background = new($"{Name} Background");
-            this.Background.RuntimeValue = Background;
+            this.Background = new($"{Name} Background", Background);
             Nodes = nodes;
             Awake();
             RefreshStageDictionary();

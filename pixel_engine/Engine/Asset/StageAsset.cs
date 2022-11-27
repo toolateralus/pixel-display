@@ -10,6 +10,11 @@ namespace pixel_renderer.Assets
         public List<NodeAsset> nodes;
         public BitmapAsset background;
         public StageSettings settings = new("","");
+
+            
+        public static StageAsset? Default => new StageAsset("Default Stage", Staging.Default());
+
+
         /// <summary>
         /// Copies the settings, background, and nodes from the asset to a usable runtime instance.
         /// </summary>

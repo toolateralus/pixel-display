@@ -34,8 +34,21 @@ namespace pixel_renderer
         public static object? inspector = null;
 
         public Timer? physicsClock;
-        public Stage? stage => _stage.Copy(); 
-        public StageAsset _stage; 
+        public Stage? stage
+        {
+            get
+            {
+                if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
+                if (m_stage is null) m_stage = m_stageAsset.Copy();
+                return m_stage;
+            }
+        }
+        private Stage m_stage; 
+        private StageAsset m_stageAsset; 
+        public void SetStageAsset(StageAsset stageAsset)
+        {
+            m_stageAsset= stageAsset;
+        }
         public List<Bitmap> Backgrounds = new List<Bitmap>();
 
         public long lastFrameTime = 0;
