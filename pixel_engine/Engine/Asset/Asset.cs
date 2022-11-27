@@ -16,7 +16,6 @@ using System.Runtime.CompilerServices;
 
 namespace pixel_renderer.Assets
 {
-    [JsonObject]
     public class Asset
     {
         public string pathFromRoot = "";
@@ -32,9 +31,7 @@ namespace pixel_renderer.Assets
             _uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
         }
         public Asset() { }
-
         new public Type GetType() => fileType;
-
     }
     public class Dialog
     {
@@ -457,14 +454,12 @@ namespace pixel_renderer.IO
         {
             Name = name;
             var stage = Staging.Default();
-            StageAsset asset = new("", stage);
-
+            StageAsset asset = new("", stage);  
             stageIndex = 0;
             stages = new()
             {
                 asset
             };
-
             stageIndex = 0;
             fileSize = 10;
         }

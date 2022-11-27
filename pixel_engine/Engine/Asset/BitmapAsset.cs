@@ -3,7 +3,6 @@ using System.Drawing;
 
 namespace pixel_renderer.Assets
 {
-    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class BitmapAsset : Asset
     {
         public Bitmap RuntimeValue;
