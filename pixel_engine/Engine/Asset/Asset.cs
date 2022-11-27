@@ -379,6 +379,15 @@ namespace pixel_renderer.IO
 
             writer.Close();
         }
+        public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
+        {
+            Asset? _asset = ReadAssetFile(name);
+            if (_asset is null) return;
+            outObject = _asset;
+            Library.Register(_asset.GetType(), _asset);
+            return;
+        }
+
         public static Asset? ReadAssetFile(string fileName)
         {
             if (!Directory.Exists(Path))
@@ -400,15 +409,6 @@ namespace pixel_renderer.IO
             }
             catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
             return asset;
-        }
-
-        public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
-        {
-            Asset? _asset = ReadAssetFile(name);
-            if (_asset is null) return;
-            outObject = _asset;
-            Library.Register(_asset.GetType(), _asset);
-            return;
         }
         public static Asset? TryDeserializeNonAssetFile(string fileName, Type type, string assetName)
         {
