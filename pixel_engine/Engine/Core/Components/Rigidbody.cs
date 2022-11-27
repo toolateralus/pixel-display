@@ -7,10 +7,10 @@ namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
-       private float _drag = 0.0f;
-       public float drag = .2f;
-       public bool usingGravity = true;
-       public Vec2 velocity = new();
+        private float _drag = 0.0f;
+        public float drag = .2f;
+        public bool usingGravity = true;
+        public Vec2 velocity = new();
         public Sprite? sprite;
         const double dragCoefficient = 1;
         public bool IsTrigger { get; internal set; } = false;
