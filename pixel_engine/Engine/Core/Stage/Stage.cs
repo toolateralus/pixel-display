@@ -92,8 +92,6 @@ namespace pixel_renderer
                 if (asset.settings.UUID.Equals(UUID) 
                     && asset.settings is not null)
                      return asset.Copy();
-                   
-
             throw new NullStageException("Stage not found on reset call"); 
         }
     }
