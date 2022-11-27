@@ -9,14 +9,14 @@ namespace pixel_renderer.Assets
     {
         public string nodeName;
         public string nodeUUID; 
-        public Components Components = new();
+        public List<ComponentAsset> components = new();
         public Vec2 pos, scale;
         public List<NodeAsset> children;
 
         [JsonConstructor]
-        public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, Components components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
+        public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<ComponentAsset> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
         {
-            Components = components;
+            this.components = components;
             this.pos = pos;
             this.scale = scale;
             this.children = children;
@@ -32,33 +32,29 @@ namespace pixel_renderer.Assets
             scale = runtimeValue.scale;
             fileType = typeof(Node);
             foreach (var comp in runtimeValue.ComponentsList)
-            Components.Add(comp.ToAsset());
+            components.Add(comp.ToAsset());
         }
         public Node Copy()
         {
-            Node node = new Node();
-            foreach (var comp in Components)
+            Node node = new Node(nodeName, pos, scale, UUID);
+            foreach (var comp in components)
                 node.AddComponent((Component)Activator.CreateInstance(comp.fileType));
-            node.Name = nodeName;
-            node.UUID = nodeUUID;
-            node.position = pos;
-            node.scale = scale;
             return node; 
         }
     }
 
     public class ComponentAsset : Asset
     {
-        public Component runtimeValue;
+        //public Component runtimeValue;
         public ComponentAsset(string name, Component component, Type type)
         {
-            runtimeValue = component;
-            fileType = type; 
+           // runtimeValue = component;
+            fileType = type;
             Name = name;
         }
+        [JsonConstructor]
+        public ComponentAsset(string name, Type type, string UUID) : base(name, type, UUID)
+        {
+        }
     }
-    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    [JsonArray]
-    public class Components : List<ComponentAsset>
-    { }
 }

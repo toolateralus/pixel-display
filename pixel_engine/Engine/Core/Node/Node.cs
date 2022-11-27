@@ -123,6 +123,12 @@ namespace pixel_renderer
             Name = name;
             position = pos;
             this.scale = scale;
+        }public Node(string name, Vec2 pos, Vec2 scale, string UUID)
+        {
+            _uuid = UUID;
+            Name = name;
+            position = pos;
+            this.scale = scale;
         }
         /// <summary>
         /// Init called to avoid having to implement base.Awake calls for boiler plate component init code
