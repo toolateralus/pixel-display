@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using pixel_renderer;
+using pixel_renderer.Assets;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
@@ -21,7 +22,7 @@ namespace pixel_renderer
         // this variable is used by the inspector to
         // ensure user'a click grabs a new node each time 
         public static Node lastSelected;
-        public static void SetCurrentStage(Stage stage) => runtime.stage = stage;
+        public static void SetCurrentStage(StageAsset stage) => runtime._stage = stage;
         public static void UpdateCurrentStage(Stage stage)
         {
             stage.FixedUpdate(delta: runtime.lastFrameTime);
@@ -33,12 +34,8 @@ namespace pixel_renderer
             if (reset is null) 
                 throw new NullStageException("Resetting stage failed"); 
             if (Rendering.State is not RenderState.Off)
-            {
                 Runtime.Instance.Toggle(); 
-            }
-            SetCurrentStage(reset);
         }
-
         public static Stage Default()
         {
             var nodes = new List<Node>();
@@ -46,10 +43,8 @@ namespace pixel_renderer
             AddFloor(nodes);
             for (int i = 0; i < 1; i++) Node.CreateGenericNode(nodes, i);
             Bitmap background = new(256, 256);
-            if (nodes is null) nodes = new(); 
             return new Stage("Default Stage", background, nodes);
         }
-      
         private static void AddFloor(List<Node> nodes)
         {
             var staticNodes = new List<Node>();
@@ -64,7 +59,6 @@ namespace pixel_renderer
             }
             nodes.AddRange(staticNodes);
         }
-       
         public static bool GetNodeAtPoint(Point pos, out Node? result)
         {
             // round up number to improve click accuracy

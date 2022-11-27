@@ -104,7 +104,6 @@ namespace pixel_editor
 
             if (msgResult == MessageBoxResult.Yes)
             {
-                Staging.SetCurrentStage(stage);
 
                 var asset = new StageAsset("", Stage.New);
                 if(stage is not null)
@@ -112,6 +111,7 @@ namespace pixel_editor
                         asset = new StageAsset(stage.Name, stage);
 
                 Library.Register(typeof(Stage), asset);
+                Staging.SetCurrentStage(asset);
             }
         }
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;

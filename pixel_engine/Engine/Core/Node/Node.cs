@@ -2,6 +2,7 @@
 using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace pixel_renderer
 {
@@ -54,10 +55,13 @@ namespace pixel_renderer
         public void AddComponent(Component component)
         {
             var type = component.GetType();
+
+            if (type.BaseType != typeof(Component)) 
+                throw new InvalidOperationException("Cannot add generic type Component to node."); 
+
             if (!Components.ContainsKey(type))
-            {
                 Components.Add(type, new());
-            }
+
             Components[type].Add(component);
             component.parentNode = this;
         }
@@ -134,30 +138,39 @@ namespace pixel_renderer
         /// </summary>
         public void Awake()
         {
-            foreach (var list in Components.Values)
-                foreach (var component in list)
-                    component.Init();
-
+            foreach (var component in from list in Components.Values
+                                      from component in list
+                                      select component) 
+                component.Init();
         }
+
         public void FixedUpdate(float delta)
         {
-            foreach (var list in Components.Values)
-                foreach (var component in list) component.FixedUpdate(delta);
+            foreach (var component in from list in Components.Values
+                                      from component in list
+                                      select component)
+                component.FixedUpdate(delta);
         }
         public void Update()
         {
-            foreach (var list in Components.Values)
-                foreach (var component in list) component.Update();
+            foreach (var component in from list in Components.Values
+                                      from component in list
+                                      select component)
+           component.Update();
         }
         internal void OnCollision(Rigidbody otherBody)
         {
-            foreach (var list in Components.Values)
-                foreach (var component in list) component.OnCollision(otherBody);
+            foreach (var component in from list in Components.Values
+                                      from component in list
+                                      select component)
+            component.OnCollision(otherBody);
         }
         internal void OnTrigger(Rigidbody otherBody)
         {
-            foreach (var list in Components.Values)
-                foreach (var component in list) component.OnTrigger(otherBody);
+            foreach (var component in from list in Components.Values
+                                      from component in list
+                                      select component)
+            component.OnTrigger(otherBody);
         }
         public static void CreateGenericNode(List<Node> nodes, int i)
         {
@@ -175,6 +188,23 @@ namespace pixel_renderer
             nodes.Add(node);
         }
         internal NodeAsset ToAsset() => new(this);
-           
+
+        internal void RemoveComponent(Component component)
+        {
+            var type = component.GetType();
+            if (ComponentsList.Contains(component))
+            {
+                var compList = Components[type];
+                var toRemove = new Component(); 
+                foreach (var comp in from comp in compList
+                                     where comp is not null &&
+                                     comp.UUID.Equals(component.UUID)
+                                     select comp)
+                    toRemove = comp; 
+
+                if(toRemove is not null)
+                 compList.Remove(toRemove);
+            }
+        }
     }
 }

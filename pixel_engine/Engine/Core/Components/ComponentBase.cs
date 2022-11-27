@@ -1,6 +1,7 @@
 ﻿
 using Newtonsoft.Json;
 using pixel_renderer.Assets;
+using System;
 
 namespace pixel_renderer
 {
@@ -22,6 +23,7 @@ namespace pixel_renderer
         internal void Init()
         {
             Name = parentNode.Name + $" {GetType()}";
+    
             Awake();
         }
         /// <summary>

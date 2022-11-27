@@ -34,7 +34,7 @@ namespace pixel_renderer
         public static object? inspector = null;
 
         public Timer? physicsClock;
-        public Stage? stage;
+        public Stage? stage => _stage.Copy(); 
         public StageAsset _stage; 
         public List<Bitmap> Backgrounds = new List<Bitmap>();
 
@@ -59,7 +59,7 @@ namespace pixel_renderer
             await Task.Delay(TimeSpan.FromSeconds(0.1f));
             Instance.LoadBackgroundCollection();
             FontAssetFactory.InitializeDefaultFont();
-            Staging.SetCurrentStage(Instance.stage ?? Stage.New);
+            Staging.SetCurrentStage(project.stages[0]);
             Instance.Initialized = true;
             // changes made to the code below  will likely cause failure or seriously erroneous behaviour
 
@@ -122,7 +122,7 @@ namespace pixel_renderer
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            stage ??= Stage.New;  
+            var stage = this.stage ?? Stage.New;  
             _ = Collision.RegisterColliders(stage);
             Collision.BroadPhase(stage, collisionMap);
             Collision.NarrowPhase(collisionMap);
