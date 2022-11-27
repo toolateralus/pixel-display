@@ -4,7 +4,8 @@ using pixel_renderer.Assets;
 
 namespace pixel_renderer
 {
-    public abstract class Component
+    [JsonObject(MemberSerialization.OptOut)]
+    public class Component
     {
         [JsonIgnore]
         public Node parentNode = new();

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Windows.Documents;
 
 namespace pixel_renderer.Assets
@@ -45,29 +46,17 @@ namespace pixel_renderer.Assets
 
     public class ComponentAsset : Asset
     {
-        public List<Type> fieldTypes = new();
-        public List<object> fieldValues = new();
-
-        public void GetFields(Component component)
-        {
-            var fields = component.GetSerializedFields();
-            foreach (var field in fields)
-            {
-                fieldValues.Add(field.GetValue(component));
-                fieldTypes.Add(field.FieldType);
-            }
-        }
+        public Component runtimeComponent;
         [JsonConstructor]
-        public ComponentAsset(List<object> fieldValues, List<Type> fieldTypes, string name, Type fileType, string UUID) : base(name, fileType, UUID)
+        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, fileType, UUID)
         {
-            this.fieldValues = fieldValues;
-            this.fieldTypes = fieldTypes;
+            this.runtimeComponent = runtimeComponent;
         }
         public ComponentAsset(string name, Component component, Type type)
         {
+            runtimeComponent = component;
             fileType = type;
             Name = name;
-            GetFields(component); 
         }
     }
   

@@ -1,17 +1,17 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.IO.Packaging;
 using System.Windows;
 
 namespace pixel_renderer
 {
-    
     public class Rigidbody : Component
     {
-        [Field] private float _drag = 0.0f;
-        [Field] public float drag = .2f;
-        [Field] public bool usingGravity = true;
-        [Field] public Vec2 velocity = new();
-        [Field] public Sprite? sprite;
+       private float _drag = 0.0f;
+       public float drag = .2f;
+       public bool usingGravity = true;
+       public Vec2 velocity = new();
+        public Sprite? sprite;
         const double dragCoefficient = 1;
         public bool IsTrigger { get; internal set; } = false;
         public override void Awake()
