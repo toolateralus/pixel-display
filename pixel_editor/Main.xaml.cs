@@ -276,12 +276,12 @@ namespace pixel_editor
             return output;
         }
 
-        private static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
+        public static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetRuntimeFields();
             properties = component.GetType().GetRuntimeProperties();
         }
-        private static void GetComponentInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
+        public static void GetComponentInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetFields();
             properties = component.GetType().GetProperties();
