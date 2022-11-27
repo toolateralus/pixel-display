@@ -443,14 +443,11 @@ namespace pixel_renderer.IO
                 return project;
 
             if (dlg.type.Equals(typeof(Project)))
-            {
                 project = ProjectIO.ReadProjectFile(dlg.fileName);
 
                 if (project is not null)
                     return project;
                     else return new("Default"); 
-            }
-            return project;
         }
         public List<StageAsset> stages;
         public Library library;

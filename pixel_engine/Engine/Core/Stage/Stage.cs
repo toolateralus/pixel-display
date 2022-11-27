@@ -91,10 +91,8 @@ namespace pixel_renderer
             foreach (StageAsset asset in stageAssets)
                 if (asset.settings.UUID.Equals(UUID) 
                     && asset.settings is not null)
-                {
-                    var x = asset.Copy();
-                    return x; 
-                }
+                     return asset.Copy();
+                   
 
             throw new NullStageException("Stage not found on reset call"); 
         }
