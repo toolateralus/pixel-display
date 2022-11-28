@@ -20,24 +20,20 @@ namespace pixel_renderer
         /// </summary>
         public bool Initialized { get; internal set; } = false;
         public event Action<InspectorEvent> InspectorEventRaised;
-        
         [JsonIgnore]
         public EngineInstance mainWnd;
-
         [JsonIgnore]
         public Project? LoadedProject = null; 
-        
         /// <summary>
         /// used to signify whether the engine is being witnessed by an inspector or not,
         /// useful for throwing errors directly to inspector
         /// </summary>
         public static object? inspector = null;
-
         public Timer? physicsClock;
         public Stage? stage
         {
             get
-            {
+            { 
                 if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
                 if (m_stage is null) m_stage = m_stageAsset.Copy();
                 return m_stage;
@@ -45,10 +41,7 @@ namespace pixel_renderer
         }
         private Stage m_stage; 
         private StageAsset m_stageAsset; 
-        public void SetStageAsset(StageAsset stageAsset)
-        {
-            m_stageAsset= stageAsset;
-        }
+        public void SetStageAsset(StageAsset stageAsset) => m_stageAsset = stageAsset;
         public List<Bitmap> Backgrounds = new List<Bitmap>();
 
         public long lastFrameTime = 0;
@@ -109,6 +102,7 @@ namespace pixel_renderer
             {
                 if (Rendering.State == RenderState.Game)
                     Rendering.Render(mainWnd.renderImage);
+
                 Input.Refresh();
             }
         }

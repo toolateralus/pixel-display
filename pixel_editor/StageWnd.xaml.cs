@@ -105,7 +105,7 @@ namespace pixel_editor
             if (msgResult == MessageBoxResult.Yes)
             {
 
-                var asset = new StageAsset("", Stage.New);
+                var asset = new StageAsset("", Staging.Default());
                 if(stage is not null)
                     if(stage.Nodes is not null)
                         asset = new StageAsset(stage.Name, stage);

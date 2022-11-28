@@ -94,8 +94,19 @@ namespace pixel_renderer
                 output.Add(asset.Copy());
             return output; 
          }
+        public static Bitmap ToBitmap(this Color [,] colors)
+        {
+            int sizeX = colors.GetLength(0);
+            int sizeY = colors.GetLength(1);
 
-      
+            var bitmap = new Bitmap(sizeX, sizeY);
+
+            for (int x = 0; x < sizeX; x++)
+                for (int y = 0; y < sizeY; y++)
+                    bitmap.SetPixel(x, y, colors[x, y]);
+
+            return bitmap;
+        }
 
     }
 }

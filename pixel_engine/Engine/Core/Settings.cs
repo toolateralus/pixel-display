@@ -59,6 +59,8 @@ namespace pixel_renderer
         public const string AssetsFileExtension = ".pxad";  // pxad {Pixel Asset Data}
         public const string ProjectFileExtension = ".pxpj";   // pxpj {Pixel Project}
         public static string AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);    // Root directory for resources
+
+        public static Vec2 ScreenVec => new Vec2(ScreenW, ScreenH);
     }
 
 }

@@ -453,7 +453,7 @@ namespace pixel_renderer.IO
         public Project(string name)
         {
             Name = name;
-            StageAsset asset = new("", Stage.New);  
+            StageAsset asset = new("", Staging.Default());  
             stageIndex = 0;
             stages = new()
             {
