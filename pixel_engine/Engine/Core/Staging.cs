@@ -34,7 +34,7 @@ namespace pixel_renderer
                 Runtime.Instance.Toggle(); 
         }
         public static Stage Default()
-        {
+        {   
             var nodes = new List<Node>();
             AddPlayer(nodes);
             Node.CreateGenericNode(nodes, 0);
