@@ -75,6 +75,7 @@ namespace pixel_renderer
             Awake();
             RefreshStageDictionary();
         }
+
         public IEnumerable<Sprite> GetSprites()
         {
             var sprite = new Sprite(); 
