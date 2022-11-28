@@ -41,7 +41,7 @@ namespace pixel_renderer
             var nodes = new List<Node>();
             AddPlayer(nodes);
             Node.CreateGenericNode(nodes, 0);
-            return new Stage("Default Stage", new(256, 256), nodes);
+            return new Stage("Default Stage", new("",new(256, 256)), nodes);
         }
      
         public static bool GetNodeAtPoint(Point pos, out Node? result)

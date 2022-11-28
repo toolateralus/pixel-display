@@ -135,7 +135,6 @@ namespace pixel_renderer
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            var stage = this.stage ?? Stage.New;  
             _ = Collision.RegisterColliders(stage);
             Collision.BroadPhase(stage, collisionMap);
             Collision.NarrowPhase(collisionMap);
