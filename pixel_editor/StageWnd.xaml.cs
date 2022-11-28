@@ -98,7 +98,7 @@ namespace pixel_editor
                 await Task.Run(Importer.ImportAssetDialog);
                 if (background is null) return;
             }
-            var stage = new Stage(name, background, nodes);
+            var stage = new Stage(name, new("",background), nodes);
 
             var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
 
