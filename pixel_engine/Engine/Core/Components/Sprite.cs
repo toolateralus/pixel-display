@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using pixel_renderer;
 using Color = System.Drawing.Color;
 
@@ -94,6 +95,21 @@ namespace pixel_renderer
             this.size = size;
             this.isCollider = isCollider;
         }
+        public static Bitmap SolidColorBitmap(Vec2 size, Color color)
+        {
+            var colors = SolidColorSquare(size, color);
+            
+            int x = (int)size.x;
+            int y = (int)size.y; 
+
+            var bitmap = new Bitmap(x, y);
+            
+            for(int i = 0; i < colors.GetLength(0); i++)
+                for (int j = 0; j < colors.GetLength(1); j++) 
+                    bitmap.SetPixel(i, j, colors[i, j]);
+
+            return bitmap;
+        }
         public static Color[,] SolidColorSquare(Vec2 size, Color color)
         {
             var colorData = new Color[(int)size.x, (int)size.y];
@@ -104,6 +120,8 @@ namespace pixel_renderer
                 }
             return colorData; 
         }
+
+        
     }
 
 

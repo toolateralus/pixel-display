@@ -1,6 +1,7 @@
 ﻿
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Xml.Linq;
 
 namespace pixel_renderer.Assets
@@ -19,7 +20,7 @@ namespace pixel_renderer.Assets
         /// Copies the settings, background, and nodes from the asset to a usable runtime instance.
         /// </summary>
         /// <returns> A copy of the stage asset as an instance of Stage</returns>
-        public Stage Copy() { return new(settings.name, background.RuntimeValue, nodes.ToNodeList() ); }
+        public Stage Copy() { return new(settings.name, background.Colors.ToBitmap(), nodes.ToNodeList() ); }
         public StageAsset(string name, Stage runtimeValue) : base(name, typeof(Stage))
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();

@@ -14,13 +14,10 @@ namespace pixel_renderer
         public Action<object?, object?, object?, object?> expression = (object? arg1, object? arg2, object? arg3, object? arg4) => { };
         public object[] expressionArgs = new object[3];
     }
-
     public static class Staging
     {
         private const int maxClickDistance_InPixels = 25;
         static Runtime runtime => Runtime.Instance;
-        // this variable is used by the inspector to
-        // ensure user'a click grabs a new node each time 
         public static Node lastSelected;
         public static void SetCurrentStage(StageAsset stage) => Runtime.Instance.SetStageAsset(stage);
         public static void UpdateCurrentStage(Stage stage)
@@ -41,7 +38,7 @@ namespace pixel_renderer
             var nodes = new List<Node>();
             AddPlayer(nodes);
             Node.CreateGenericNode(nodes, 0);
-            return new Stage("Default Stage", new(256, 256), nodes);
+            return new Stage("Default Stage", Sprite.SolidColorBitmap(Settings.ScreenVec, Color.Black), nodes);
         }
      
         public static bool GetNodeAtPoint(Point pos, out Node? result)
@@ -51,7 +48,7 @@ namespace pixel_renderer
             // clicks that arent exactly on the corner of the object
             // does not really work
 
-            Stage stage = Runtime.Instance.stage ?? Stage.New;
+            Stage stage = Runtime.Instance.stage;
             pos = new Point()
             {
                 X = Math.Round(pos.X),

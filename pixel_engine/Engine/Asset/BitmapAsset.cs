@@ -40,6 +40,11 @@ namespace pixel_renderer.Assets
             this.RuntimeValue = runtimeValue;
             Name = name;
         }
+        [JsonConstructor]
+        public BitmapAsset(string Name, Color[,] Colors, string UUID) : base(Name, typeof(Bitmap), UUID)
+        {
+            _colors = Colors;
+        }
         public static BitmapAsset BitmapToAsset(string fileName, string assetName)
         {
             Bitmap bmp = new(fileName);

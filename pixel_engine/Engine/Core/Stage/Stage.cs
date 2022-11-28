@@ -65,7 +65,6 @@ namespace pixel_renderer
             }
         }
         public BitmapAsset Background = new("", null);
-        public static Stage New => new("New Stage", new Bitmap(256, 256), new());
         public StageSettings Settings => new(Name, this.UUID);
         [JsonConstructor]
         public Stage(string Name, Bitmap Background, List<Node> nodes)
