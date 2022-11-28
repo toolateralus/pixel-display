@@ -38,7 +38,7 @@ namespace pixel_renderer
             var nodes = new List<Node>();
             AddPlayer(nodes);
             Node.CreateGenericNode(nodes, 0);
-            return new Stage("Default Stage", Sprite.SolidColorBitmap(Settings.ScreenVec, Color.Black), nodes);
+            return new Stage("Default Stage", new("Solid Color Background:", Sprite.SolidColorBitmap(Settings.ScreenVec, Color.Black)), nodes);
         }
      
         public static bool GetNodeAtPoint(Point pos, out Node? result)

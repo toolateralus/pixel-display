@@ -67,10 +67,10 @@ namespace pixel_renderer
         public BitmapAsset Background = new("", null);
         public StageSettings Settings => new(Name, this.UUID);
         [JsonConstructor]
-        public Stage(string Name, Bitmap Background, List<Node> nodes)
+        public Stage(string Name, BitmapAsset Background, List<Node> nodes)
         {
             this.Name = Name;
-            this.Background = new($"{Name} Background", Background);
+            this.Background = Background;
             Nodes = nodes;
             Awake();
             RefreshStageDictionary();
