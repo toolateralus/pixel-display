@@ -172,21 +172,6 @@ namespace pixel_renderer
                                       select component)
             component.OnTrigger(otherBody);
         }
-        public static void CreateGenericNode(List<Node> nodes, int i)
-        {
-            var pos = JRandom.ScreenPosition();
-            var node = new Node($"NODE {i}", pos, Vec2.one);
-            node.AddComponent(new Sprite(JRandom.Vec2(Vec2.one, Vec2.one * 15f), JRandom.Color(), JRandom.Bool()));
-            node.AddComponent(new Rigidbody()
-            {
-                IsTrigger = false,
-                usingGravity = true,
-                drag = .1f
-            });
-            var randomDirection = JRandom.Direction();
-            node.AddComponent(new Wind(randomDirection));
-            nodes.Add(node);
-        }
         internal NodeAsset ToAsset() => new(this);
 
         internal void RemoveComponent(Component component)

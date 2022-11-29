@@ -89,7 +89,7 @@ namespace pixel_editor
 
             List<Node> nodes = new();
             for (int i = 0; i < count; i++)
-                Node.CreateGenericNode(nodes, i);
+                Runtime.Instance.stage.CreateGenericNode();
 
             if (usingStarterAssets) Staging.AddPlayer(nodes);
             if (background is null)
@@ -104,14 +104,9 @@ namespace pixel_editor
 
             if (msgResult == MessageBoxResult.Yes)
             {
-
-                var asset = new StageAsset("", Staging.Default());
-                if(stage is not null)
-                    if(stage.Nodes is not null)
-                        asset = new StageAsset(stage.Name, stage);
-
+                var asset = new StageAsset(stage.Name, stage);
                 Library.Register(typeof(Stage), asset);
-                Staging.SetCurrentStage(asset);
+                Runtime.Instance.SetStageAsset(asset);
             }
         }
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;

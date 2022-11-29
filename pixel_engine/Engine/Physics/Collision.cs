@@ -56,13 +56,15 @@ namespace pixel_renderer
         public static void BroadPhase(Stage stage, ConcurrentBag<ConcurrentBag<Node>> collisionCells)
         {
             collisionCells.Clear();
+            
+            if(stage.Nodes is null ||
+                stage.Nodes.Count == 0) return;
+                
             Parallel.ForEach(stage.Nodes, node =>
             {
                 List<Node> result = hash.GetNearby(node);
                 ConcurrentBag<Node> nodes = new();
-
                 foreach (var _node in result) nodes.Add(_node);
-
                 collisionCells.Add(nodes);
             });
         }

@@ -19,7 +19,6 @@ namespace pixel_renderer
         private const int maxClickDistance_InPixels = 25;
         static Runtime runtime => Runtime.Instance;
         public static Node lastSelected;
-        public static void SetCurrentStage(StageAsset stage) => Runtime.Instance.SetStageAsset(stage);
         public static void UpdateCurrentStage(Stage stage)
         {
             stage.FixedUpdate(delta: runtime.lastFrameTime);
@@ -27,18 +26,21 @@ namespace pixel_renderer
         }
         public static void ReloadCurrentStage()
         {
-            var reset = runtime.stage.Reset();
+            var reset = runtime.GetStageAsset();
             if (reset is null) 
                 throw new NullStageException("Resetting stage failed"); 
             if (Rendering.State is not RenderState.Off)
-                Runtime.Instance.Toggle(); 
+                Runtime.Instance.Toggle();
+            Runtime.Instance.SetStageAsset(reset);
         }
         public static Stage Default()
         {   
             var nodes = new List<Node>();
             AddPlayer(nodes);
-            Node.CreateGenericNode(nodes, 0);
-            return new Stage("Default Stage", new("Solid Color Background:", Sprite.SolidColorBitmap(Settings.ScreenVec, Color.Black)), nodes);
+            BitmapAsset bmpAsset = new("Solid Color Background:", Sprite.SolidColorBitmap(Settings.ScreenVec, Color.Black)); 
+            var stage =  new Stage( "Default Stage", bmpAsset, nodes);
+            stage.CreateGenericNode();
+            return stage; 
         }
      
         public static bool GetNodeAtPoint(Point pos, out Node? result)
@@ -78,14 +80,12 @@ namespace pixel_renderer
                 if (lastSelected != null)
                 {
                     if (lastSelected.TryGetComponent(out Sprite sprite))
-                    {
                         sprite.RestoreCachedColor(false);
-                    }
                 }
                 lastSelected = node;
                 if (node.TryGetComponent(out Sprite sprite_))
                 {
-                    sprite_.Highlight(Color.White);
+                    sprite_.Highlight(Color.Black);
                 }
                 return true;
             }
@@ -106,8 +106,6 @@ namespace pixel_renderer
                 takingInput = true
             };
             Text text = new();
-
-
             playerNode.AddComponent(text);
             playerNode.AddComponent(rb);
             playerNode.AddComponent(player_obj);

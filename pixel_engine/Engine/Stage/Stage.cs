@@ -19,7 +19,6 @@ namespace pixel_renderer
 
         [JsonIgnore]
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
-
         public List<Node> Nodes { get; private set; } = new(); 
         public Node[] FindNodesByTag(string tag)
         {
@@ -41,6 +40,27 @@ namespace pixel_renderer
                     .Where(node => node.Name == name)
                     .First();
         }
+        public void CreateGenericNode()
+        {
+            // index used just to create offset from randomly placed nodes;
+            int i = JRandom.Int(0,255); 
+            var pos = JRandom.ScreenPosition();
+            var node = new Node($"NODE {i}", pos, Vec2.one);
+            var r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
+            var r_color = JRandom.Color();
+            var r_bool = JRandom.Bool();
+            var sprite = new Sprite(r_vec, r_color, r_bool); 
+            node.AddComponent(sprite);
+            node.AddComponent(new Rigidbody()
+            {
+                IsTrigger = false,
+                usingGravity = true,
+                drag = .1f
+            });
+            var randomDirection = JRandom.Direction();
+            node.AddComponent(new Wind(randomDirection));
+            AddNode(node);
+        }
         public void RefreshStageDictionary()
         {
             foreach (Node node in Nodes)
@@ -60,7 +80,7 @@ namespace pixel_renderer
             OnQueryMade += RefreshStageDictionary;
             foreach (Node node in Nodes)
             {
-                node.ParentStage ??= this;
+                node.ParentStage = this;
                 node.Awake();
             }
         }
@@ -75,7 +95,6 @@ namespace pixel_renderer
             Awake();
             RefreshStageDictionary();
         }
-
         public IEnumerable<Sprite> GetSprites()
         {
             var sprite = new Sprite(); 
@@ -92,6 +111,11 @@ namespace pixel_renderer
                     && asset.settings is not null)
                      return asset.Copy();
             throw new NullStageException("Stage not found on reset call"); 
+        }
+        internal void Dispose()
+        {
+            NodesByName.Clear();
+            Nodes.Clear();
         }
     }
    
