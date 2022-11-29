@@ -9,8 +9,10 @@ namespace pixel_renderer
     public static class Collision
     {
         private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
+        public static bool HasTasks => CollisionQueue.Count > 0;
+        public static bool AllowEntries { get; private set; }
+        public static void SetActive(bool value) => AllowEntries = value;
         private readonly static SpatialHash hash = new(Settings.ScreenH, Settings.ScreenW, Settings.CollisionCellSize);
-
         public static void ViewportCollision(Node node)
         {
             Sprite sprite = node.GetComponent<Sprite>();
@@ -34,7 +36,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             var A = nodeA.TryGetComponent(out Sprite spriteA); 
@@ -42,7 +43,6 @@ namespace pixel_renderer
             return A && B
                 && GetBoxCollision(nodeA, nodeB, spriteA, spriteB);
         }
-
         private static bool GetBoxCollision(Node nodeA, Node nodeB, Sprite spriteA, Sprite spriteB)
         {
             if (nodeA.position.x < nodeB.position.x + spriteB.size.x &&
@@ -52,7 +52,6 @@ namespace pixel_renderer
                 return true;
             return false;
         }
-
         public static void BroadPhase(Stage stage, ConcurrentBag<ConcurrentBag<Node>> collisionCells)
         {
             collisionCells.Clear();
@@ -68,7 +67,6 @@ namespace pixel_renderer
                 collisionCells.Add(nodes);
             });
         }
-
         public static void NarrowPhase(ConcurrentBag<ConcurrentBag<Node>> collisionCells)
         {
 
@@ -104,7 +102,6 @@ namespace pixel_renderer
                 });
             });
         }
-
         public static async Task RegisterColliders(Stage stage)
         {
             hash.ClearBuckets();
@@ -120,7 +117,6 @@ namespace pixel_renderer
                 hash.RegisterObject(node);
             });
         }
-
         private static void RegisterCollisionEvent(Node A, Node[] colliders)
         {
             if (A is null) return;
@@ -133,8 +129,7 @@ namespace pixel_renderer
                 }
             }
         }
-
-        public static void Execute()
+        public static void FinalPhase()
         {
             Parallel.ForEach(CollisionQueue, collisionPair =>
             {
@@ -150,7 +145,6 @@ namespace pixel_renderer
             });
             CollisionQueue.Clear();
         }
-
         private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger)
@@ -162,7 +156,20 @@ namespace pixel_renderer
             A.parentNode.OnCollision(B);
             B.parentNode.OnCollision(A);
         }
-
+        private static ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
+        public static void Run()
+        {
+            if (!AllowEntries)
+            {
+                if(HasTasks) FinalPhase();
+                return; 
+            }
+            var stage = Runtime.Instance.stage; 
+            _ = RegisterColliders(stage);
+            BroadPhase(stage, collisionMap);
+            NarrowPhase(collisionMap);
+            FinalPhase(); 
+        }
         private static void Collide(ref Rigidbody A, ref Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger) return;

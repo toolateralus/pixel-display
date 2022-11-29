@@ -19,18 +19,18 @@ using System.Linq;
 
 namespace pixel_editor
 {
-    public partial class Main : Window
+    public partial class Editor : Window
     {
         #region Window Scaling
-        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Main), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
+        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Editor), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
         {
-            Main mainWindow = o as Main;
+            Editor mainWindow = o as Editor;
             return mainWindow != null ? mainWindow.OnCoerceScaleValue((double)value) : value;
         }
         private static void OnScaleValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            Main mainWindow = o as Main;
+            Editor mainWindow = o as Editor;
             if (mainWindow != null)
                 mainWindow.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
         }
@@ -62,13 +62,16 @@ namespace pixel_editor
         }
         #endregion
 
-        Inspector inspector;
+        private  Inspector inspector;
+        
         internal static EngineInstance? engine;
+
         private static int renderStateIndex = 0;
+        
         private StageWnd stageWindow;
 
         // main entry point for application
-        public Main()
+        public Editor()
         {
             InitializeComponent();
             inspector = new Inspector(inspectorObjName,  inspectorObjInfo,  inspectorChildGrid);
@@ -94,7 +97,16 @@ namespace pixel_editor
         }
         private void OnDisable(object? sender, EventArgs e) => engine.Close();
         private void OnViewChanged(object sender, RoutedEventArgs e) => IncrementRenderState();
-        private void OnPlay(object sender, RoutedEventArgs e) => Runtime.Instance.Toggle();
+        private void OnPlay(object sender, RoutedEventArgs e)
+        {
+            Runtime.Instance.Toggle();  
+            if (Runtime.Instance.IsRunning)
+            {
+                playBtn.Background = Brushes.LightGreen;
+            }
+            else playBtn.Background = Brushes.LightPink; 
+        }
+
         private void IncrementRenderState()
         {
             if (Runtime.Instance.stage is null)
@@ -142,13 +154,20 @@ namespace pixel_editor
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
-            stageWindow = new StageWnd();
+            stageWindow = new StageWnd(this);
             stageWindow.Show();
             stageWindow.Closed += Wnd_Closed;
 
         }
         private void Wnd_Closed(object? sender, EventArgs e) =>
             stageWindow = null;
+
+        private async void OnLoadProjectPressed(object sender, RoutedEventArgs e)
+        {
+            Project project = Project.LoadProject();
+            if (project is not null)
+                Runtime.Instance.SetProject(project);
+        }
     }
     public class Inspector
     {

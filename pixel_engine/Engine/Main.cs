@@ -11,8 +11,7 @@
         public EngineInstance()
         {
             InitializeComponent();
-            Project project = Project.LoadProject();
-            _ = Runtime.Awake(this, project);
+            _ = Runtime.Awake(this, new(""));
         }
 
         

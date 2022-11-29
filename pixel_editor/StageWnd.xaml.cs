@@ -18,9 +18,14 @@ namespace pixel_editor
 
         Bitmap? background;
 
-        public StageWnd()
+        public StageWnd(Editor mainWnd)
         {
+            mainWnd.Closing += MainWnd_Closing;  
             InitializeComponent();
+        }
+        private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Close(); 
         }
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(StageWnd), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
@@ -62,20 +67,13 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
-
             Importer.ImportFileDialog(out Asset result);
-
             if (result is null) return;
-
             if (result as BitmapAsset is null) return;
-
             var bmpAsset = result as BitmapAsset;
-
             var image = bmpAsset.RuntimeValue ?? new(256,256); 
-
             if (image is not null)
             {
                 background = image;
@@ -88,9 +86,8 @@ namespace pixel_editor
             var name = stageNameTxt.Text.ToFileNameFormat();
 
             List<Node> nodes = new();
-            for (int i = 0; i < count; i++)
-                Runtime.Instance.stage.CreateGenericNode();
 
+                
             if (usingStarterAssets) Staging.AddPlayer(nodes);
             if (background is null)
             {
@@ -98,32 +95,20 @@ namespace pixel_editor
                 await Task.Run(Importer.ImportAssetDialog);
                 if (background is null) return;
             }
+
             var stage = new Stage(name, new("",background), nodes);
+            for (int i = 0; i < count; i++) stage.CreateGenericNode();
 
             var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
 
-            if (msgResult == MessageBoxResult.Yes)
-            {
                 var asset = new StageAsset(stage.Name, stage);
                 Library.Register(typeof(Stage), asset);
+         
+            if (msgResult == MessageBoxResult.Yes)
                 Runtime.Instance.SetStageAsset(asset);
-            }
+
+            Close(); 
         }
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;
     }
-}
-
-public class InspectorProperty
-{
-    public string Type { get; set; }
-    public string Name { get; set; }
-    public string Value { get; set; }
-    //public static List<InspectorProperty> GetForNode(Node node)
-    //{
-    //    List<InspectorProperty> properties = new();
-    //    foreach (var component in node.ComponentsList)
-    //    {
-    // deserialize component info
-    //    }
-    //}
 }

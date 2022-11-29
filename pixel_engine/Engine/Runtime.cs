@@ -57,11 +57,8 @@ namespace pixel_renderer
         public int frameCount;
 
         public bool PhysicsInitialized { get; private set; }
-
         public bool IsRunning = false;
         public string ImageDirectory;
-
-        ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
 
         public static async Task Awake(EngineInstance mainWnd, Project project)
         {
@@ -76,7 +73,7 @@ namespace pixel_renderer
         }
         public void Toggle()
         {
-            if (!PhysicsInitialized) Instance.InitializePhysics();
+            if (!PhysicsInitialized) InitializePhysics();
             if (!physicsClock.Enabled)
             {
                 physicsClock.Start();
@@ -104,13 +101,16 @@ namespace pixel_renderer
       
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            _ = Collision.RegisterColliders(stage);
-            Collision.BroadPhase(stage, collisionMap);
-            Collision.NarrowPhase(collisionMap);
-            Collision.Execute();
-            Staging.UpdateCurrentStage(stage);
+            Collision.Run(); 
+            Staging.Update(stage);
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)  => ExecuteFrame();
         public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
+
+        public void SetProject(Project project)
+        {
+            LoadedProject = project;
+            SetStageAsset(project.stages[0]);
+        }
     }
 }

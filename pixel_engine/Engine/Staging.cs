@@ -19,7 +19,7 @@ namespace pixel_renderer
         private const int maxClickDistance_InPixels = 25;
         static Runtime runtime => Runtime.Instance;
         public static Node lastSelected;
-        public static void UpdateCurrentStage(Stage stage)
+        public static void Update(Stage stage)
         {
             stage.FixedUpdate(delta: runtime.lastFrameTime);
             runtime.frameCount++;
@@ -30,8 +30,8 @@ namespace pixel_renderer
             if (reset is null) 
                 throw new NullStageException("Resetting stage failed"); 
             if (Rendering.State is not RenderState.Off)
-                Runtime.Instance.Toggle();
-            Runtime.Instance.SetStageAsset(reset);
+               runtime.Toggle();
+            runtime.SetStageAsset(reset);
         }
         public static Stage Default()
         {   
@@ -42,7 +42,6 @@ namespace pixel_renderer
             stage.CreateGenericNode();
             return stage; 
         }
-     
         public static bool GetNodeAtPoint(Point pos, out Node? result)
         {
             // round up number to improve click accuracy
@@ -50,7 +49,7 @@ namespace pixel_renderer
             // clicks that arent exactly on the corner of the object
             // does not really work
 
-            Stage stage = Runtime.Instance.stage;
+            Stage stage = runtime.stage;
             pos = new Point()
             {
                 X = Math.Round(pos.X),
@@ -111,9 +110,6 @@ namespace pixel_renderer
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);
             nodes.Add(playerNode);
-
-
-
         }
     }
 
