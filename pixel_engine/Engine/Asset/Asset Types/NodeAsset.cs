@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.Reflection;
 using System.Windows.Documents;
 
@@ -39,7 +40,9 @@ namespace pixel_renderer.Assets
         {
             Node node = new Node(nodeName, pos, scale, UUID);
             foreach (var comp in components)
-                node.AddComponent((Component)Activator.CreateInstance(comp.fileType));
+            {
+                node.AddComponent(comp.runtimeComponent);
+            }
             return node; 
         }
     }

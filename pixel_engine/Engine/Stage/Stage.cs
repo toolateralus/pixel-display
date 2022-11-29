@@ -40,16 +40,26 @@ namespace pixel_renderer
                     .Where(node => node.Name == name)
                     .First();
         }
-        public void CreateGenericNode()
+        /// <summary>
+        /// ordered as follows : 0 = Int, 1 =  ScreenPos Vec2, 2 =  1-15 Vec2,  3 = Color, 4 = Bool, 5 = direction;  
+        /// </summary>
+        /// <returns></returns>
+        public object[] IVVCBD_Random()
         {
-            // index used just to create offset from randomly placed nodes;
-            int i = JRandom.Int(0,255); 
-            var pos = JRandom.ScreenPosition();
-            var node = new Node($"NODE {i}", pos, Vec2.one);
+            int r_int = JRandom.Int(0,255);
+            var r_pos = JRandom.ScreenPosition();
             var r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
             var r_color = JRandom.Color();
             var r_bool = JRandom.Bool();
-            var sprite = new Sprite(r_vec, r_color, r_bool); 
+            var r_dir = JRandom.Direction();
+            return new object[] { r_int, r_pos, r_vec, r_color, r_bool, r_dir }; 
+        }
+        public void CreateGenericNode()
+        {
+            // random variables used here;
+            object[] args = IVVCBD_Random(); 
+            var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
+            var sprite = new Sprite((Vec2)args[2], (Color)args[3], (bool)args[4]); 
             node.AddComponent(sprite);
             node.AddComponent(new Rigidbody()
             {
@@ -57,8 +67,7 @@ namespace pixel_renderer
                 usingGravity = true,
                 drag = .1f
             });
-            var randomDirection = JRandom.Direction();
-            node.AddComponent(new Wind(randomDirection));
+            node.AddComponent(new Wind((Direction)args[5]));
             AddNode(node);
         }
         public void RefreshStageDictionary()

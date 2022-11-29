@@ -60,16 +60,13 @@ namespace pixel_renderer
         public bool IsRunning = false;
         public string ImageDirectory;
 
-        public static async Task Awake(EngineInstance mainWnd, Project project)
+        public static async Task AwakeAsync(EngineInstance mainWnd, Project project)
         {
-            // changes made to the code below  will likely cause failure or seriously erroneous behaviour
             Instance.LoadedProject = project; 
             Instance.mainWnd = mainWnd;
             await Importer.ImportAsync(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.Initialized = true;
-            // changes made to the code below  will likely cause failure or seriously erroneous behaviour
-
         }
         public void Toggle()
         {
@@ -93,9 +90,15 @@ namespace pixel_renderer
         }
         private void ExecuteFrame()
         {
-            if (!IsRunning || Rendering.State is RenderState.Off) return; 
-            if(Rendering.State is RenderState.Error) throw new Exception("Rendering error");
-            if (Rendering.State is RenderState.Game) Rendering.Render(mainWnd.renderImage);
+            if (!IsRunning ||
+                Rendering.State is RenderState.Off)
+                return; 
+            
+            if(Rendering.State is RenderState.Error)
+                throw new Exception("Rendering error");
+             
+            if (Rendering.State is RenderState.Game) 
+                Rendering.Render(mainWnd.renderImage);
              Input.Refresh();
         }
       

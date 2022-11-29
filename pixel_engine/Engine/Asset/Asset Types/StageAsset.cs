@@ -16,7 +16,8 @@ namespace pixel_renderer.Assets
         /// Copies the settings, background, and nodes from the asset to a usable runtime instance.
         /// </summary>
         /// <returns> A copy of the stage asset as an instance of Stage</returns>
-        public Stage Copy() { return new(settings.name, new("Copied Bitmap Background",background.Colors.ToBitmap()), nodes.ToNodeList() ); }
+        /// 
+        public Stage Copy()=> new("_IGNORE", background, nodes.ToNodeList());
          public StageAsset(string name, Stage runtimeValue) : base(name, typeof(Stage))
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();

@@ -11,7 +11,7 @@
         public EngineInstance()
         {
             InitializeComponent();
-            _ = Runtime.Awake(this, new(""));
+            _ = Runtime.AwakeAsync(this, new(""));
         }
 
         

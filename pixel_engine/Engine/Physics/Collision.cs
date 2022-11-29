@@ -102,7 +102,7 @@ namespace pixel_renderer
                 });
             });
         }
-        public static async Task RegisterColliders(Stage stage)
+        public static async Task RegisterCollidersAsync(Stage stage)
         {
             hash.ClearBuckets();
 
@@ -165,7 +165,7 @@ namespace pixel_renderer
                 return; 
             }
             var stage = Runtime.Instance.stage; 
-            _ = RegisterColliders(stage);
+            _ = RegisterCollidersAsync(stage);
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
             FinalPhase(); 
