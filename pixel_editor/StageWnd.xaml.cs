@@ -88,7 +88,7 @@ namespace pixel_editor
             List<Node> nodes = new();
 
                 
-            if (usingStarterAssets) Staging.AddPlayer(nodes);
+            if (usingStarterAssets) StagingHost.AddPlayer(nodes);
             if (background is null)
             {
                 var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
@@ -105,7 +105,7 @@ namespace pixel_editor
                 Library.Register(typeof(Stage), asset);
          
             if (msgResult == MessageBoxResult.Yes)
-                Runtime.Instance.SetStageAsset(asset);
+                Runtime.                Instance.SetStageAsset(asset);
 
             Close(); 
         }

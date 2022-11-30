@@ -23,7 +23,6 @@ namespace pixel_renderer
         internal void Init()
         {
             Name = parentNode.Name + $" {GetType()}";
-    
             Awake();
         }
         /// <summary>

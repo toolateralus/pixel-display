@@ -9,66 +9,75 @@ using System.Windows.Media;
 using Timer = System.Timers.Timer;
 using Bitmap = System.Drawing.Bitmap;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace pixel_renderer
 {
     public class Runtime
     {
+
         public EngineInstance mainWnd;
-        public Project? LoadedProject = null; 
-        private protected static Runtime instance = new();
-        public static Runtime Instance { get { return instance; } }
-        /// <summary>
-        /// Set to true when the Physics session is initialized.
-        /// </summary>
-        public bool Initialized { get; internal set; } = false;
-        public event Action<InspectorEvent> InspectorEventRaised;
-        /// <summary>
-        /// used to signify whether the engine is being witnessed by an inspector or not,
-        /// useful for throwing errors directly to inspector
-        /// </summary>
-        public static object? inspector = null;
         public Timer? physicsClock;
+
+        public static object? inspector = null;
+        public event Action<InspectorEvent> InspectorEventRaised;
+
+        public RenderHost? renderHost = new();
+
+        public Project? LoadedProject = null;
+        public StagingHost? stagingHost = new();
+        private StageAsset? m_stageAsset;
         public Stage? stage
         {
             get
-            { 
+            {
                 if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
                 if (m_stage is null) m_stage = m_stageAsset.Copy();
                 return m_stage;
             }
             set => m_stage = value;
         }
-        public RenderHost? renderHost;
-        private Stage m_stage; 
-        private StageAsset m_stageAsset;
-        public void SetStageAsset(StageAsset stageAsset)
-        {
-            if (IsRunning) Toggle(); 
-            stage.Dispose(); 
-            m_stageAsset = stageAsset;
-            _ = stage; 
-        }
-
-        public StageAsset? GetStageAsset() => m_stageAsset;
-
-        public long lastFrameTime = 0;
-        public int BackroundIndex = 0;
-        public int framesUntilCheck = 50;
-        public int frameCount;
+        private Stage? m_stage;
 
         public bool PhysicsInitialized { get; private set; }
         public bool IsRunning = false;
-        public string ImageDirectory;
+        public bool Initialized { get; internal set; } = false;
+        
+        public static Runtime Instance
+        {
+            get
+            {
+                if (instance is not null)
+                    return instance;
+                else instance = new();
+                return instance;
+            }
+        }
+        private protected static Runtime instance = new();
 
         public static async Task AwakeAsync(EngineInstance mainWnd, Project project)
         {
-            Instance.LoadedProject = project; 
+            Instance.LoadedProject = project;
             Instance.mainWnd = mainWnd;
             await Importer.ImportAsync(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.Initialized = true;
         }
+        
+        public void SetProject(Project project)
+        {
+            LoadedProject = project;
+            if (project.stages.Count > 0)
+              SetStageAsset(project.stages[0]);
+        }
+        public void SetStageAsset(StageAsset stageAsset)
+        {
+            if (IsRunning) Toggle();
+            m_stageAsset = stageAsset;
+            _ = stage;
+        }
+        public StageAsset? GetStageAsset() => m_stageAsset;
+
         public void Toggle()
         {
             if (!PhysicsInitialized) InitializePhysics();
@@ -87,9 +96,15 @@ namespace pixel_renderer
             var interval = TimeSpan.FromSeconds(Settings.PhysicsRefreshInterval);
             physicsClock = new Timer(interval.TotalSeconds);
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
-            PhysicsInitialized = true; 
+            PhysicsInitialized = true;
         }
-        private void ExecuteFrame()
+        
+        public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
+        {
+            Collision.Run();
+            StagingHost.Update(stage);
+        }
+        public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
             if (!IsRunning ||
                 renderHost.State is RenderState.Off)
@@ -99,22 +114,11 @@ namespace pixel_renderer
                 throw new Exception("Rendering error");
              
             if (renderHost.State is RenderState.Game) 
-                renderHost.Render(mainWnd.renderImage);
-             Input.Refresh();
+                renderHost.Render(mainWnd.renderImage, this);
+            Input.Refresh();
         }
-      
-        public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
-        {
-            Collision.Run(); 
-            Staging.Update(stage);
-        }
-        public void GlobalUpdateRoot(object? sender, EventArgs e)  => ExecuteFrame();
+        
+        // NYI, probably wont be implemented as is anyway.
         public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
-
-        public void SetProject(Project project)
-        {
-            LoadedProject = project;
-            SetStageAsset(project.stages[0]);
-        }
     }
 }

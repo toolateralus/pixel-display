@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Documents;
 
@@ -41,9 +42,39 @@ namespace pixel_renderer.Assets
             Node node = new Node(nodeName, pos, scale, UUID);
             foreach (var comp in components)
             {
-                node.AddComponent(comp.runtimeComponent);
+                var name = comp.fileType.Name;
+                switch(name)
+                {
+                    case "Text":
+                        node.AddComponent(comp.runtimeComponent as Text);
+                        break;
+                    case "Player":
+                        node.AddComponent(comp.runtimeComponent as Player);
+                        break;
+                    case "Rigidbody":
+                        node.AddComponent(comp.runtimeComponent as Rigidbody);
+                        break;
+                    case "Sprite":
+                        node.AddComponent(comp.runtimeComponent as Sprite);
+                        break;
+                    case "Wind":
+                        node.AddComponent(comp.runtimeComponent as Wind);
+                        break;
+                    default: 
+                        throw new MissingComponentException();
+
+                }
+                 
             }
-            return node; 
+            return node;
+        }
+
+        private static List<Type> GetInheritedTypesFromBase<T>()
+        {
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+               .SelectMany(domainAssembly => domainAssembly.GetTypes())
+               .Where(type => typeof(T).IsAssignableFrom(type)).ToList();
+            return types; 
         }
     }
 

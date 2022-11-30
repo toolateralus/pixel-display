@@ -6,6 +6,7 @@ namespace pixel_renderer
 {
     public  class Settings
     {
+        #region Physics / Collision Constants
         /// <summary>
         /// FixedUpdate / Physics refresh interval,
         /// NOTE: for some reason this seems to have absolutely no effect other than it cannot be zero. 
@@ -44,14 +45,19 @@ namespace pixel_renderer
                  velocity.z <= TerminalVelocity && velocity.z >= -TerminalVelocity;
         }
         public static bool WithinTerminalVelocity(Rigidbody rigidbody) => WithinTerminalVelocity(rigidbody.velocity);
-
+        #endregion
+        #region General Constants
         public const int FramerateSampleThreshold = 60;
         public const int ScreenH = 256;
         public const int ScreenW = 256;
-            
+        public const byte maxClickDistanceInPixels = 25; 
+        public static Vec2 ScreenVec => new Vec2(ScreenW, ScreenH);
+        #endregion
+        #region File IO and String/Char Constants
         public static char[] unsupported_chars = { '_', '-', '.', '`'};
         public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-            
+        #endregion
+        #region Paths and Directories
         public const string FontsDir = ImagesDir + "\\Font";  // Font Images asset directory (Probably shouldnt be a constant, for text rendering.)
         public const string ImagesDir = AssetsDir + "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
         public const string ProjectsDir = "\\Pixel\\Projects"; // Project files 
@@ -59,8 +65,7 @@ namespace pixel_renderer
         public const string AssetsFileExtension = ".pxad";  // pxad {Pixel Asset Data}
         public const string ProjectFileExtension = ".pxpj";   // pxpj {Pixel Project}
         public static string AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);    // Root directory for resources
-
-        public static Vec2 ScreenVec => new Vec2(ScreenW, ScreenH);
+        #endregion
     }
 
 }

@@ -8,9 +8,10 @@ namespace pixel_renderer
 {
     public static class Collision
     {
-        private static ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
+        private volatile static ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
+        private volatile static ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
-        public static bool AllowEntries { get; private set; }
+        public static bool AllowEntries { get; private set; } = true; 
         public static void SetActive(bool value) => AllowEntries = value;
         private readonly static SpatialHash hash = new(Settings.ScreenH, Settings.ScreenW, Settings.CollisionCellSize);
         public static void ViewportCollision(Node node)
@@ -156,7 +157,6 @@ namespace pixel_renderer
             A.parentNode.OnCollision(B);
             B.parentNode.OnCollision(A);
         }
-        private static ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
         public static void Run()
         {
             if (!AllowEntries)
