@@ -2,6 +2,7 @@
 using pixel_renderer;
 using pixel_renderer.IO;
 using pixel_renderer.Assets;
+using System.DirectoryServices.ActiveDirectory;
 
 public class Project
     {
@@ -28,7 +29,7 @@ public class Project
         public Project(string name)
         {
             Name = name;
-            StageAsset asset = new("", Staging.Default());  
+            StageAsset asset = StageAsset.Default; 
             stageIndex = 0;
             stages = new()
             {

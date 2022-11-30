@@ -1,13 +1,8 @@
-﻿using Microsoft.VisualBasic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
-using System.Windows.Documents;
-using System.Windows.Media.Imaging;
 
 namespace pixel_renderer.Assets
 {
@@ -41,14 +36,6 @@ namespace pixel_renderer.Assets
             _colors = CBit.ColorArrayFromBitmapData(bmd, stride, data);
             return _colors;
         }
-      
-        /// <summary>
-        /// clones the current Bitmap stored in the Asset object and returns out BitmapData from that copy.
-        /// </summary>
-        /// <param name="bmd"></param>
-        /// <param name="stride"></param>
-        /// <param name="data"></param>
-       
 
         public BitmapAsset(string name, Bitmap runtimeValue) : base(name, typeof(Bitmap))
         {
@@ -56,9 +43,10 @@ namespace pixel_renderer.Assets
             Name = name;
         }
         [JsonConstructor]
-        public BitmapAsset(string Name, Color[,] Colors, string UUID) : base(Name, typeof(Bitmap), UUID)
+        public BitmapAsset(string Name, Color[,] Colors, string UUID, Bitmap runtimeValue) : base(Name, typeof(Bitmap), UUID)
         {
             _colors = Colors;
+            this.RuntimeValue = runtimeValue; 
         }
         public static BitmapAsset PathToAsset(string filePath, string assetName)
         {

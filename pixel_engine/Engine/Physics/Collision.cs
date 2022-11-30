@@ -107,7 +107,7 @@ namespace pixel_renderer
             hash.ClearBuckets();
 
             while (hash.busy)
-                await Task.Delay(TimeSpan.FromMilliseconds(1));
+                await Task.Delay(10);
 
             Parallel.ForEach(stage.Nodes, node =>
             {

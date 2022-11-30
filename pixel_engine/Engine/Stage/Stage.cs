@@ -85,7 +85,6 @@ namespace pixel_renderer
         { foreach (Node node in Nodes) node.FixedUpdate(delta); }
         public void Awake()
         {
-            RefreshStageDictionary();
             OnQueryMade += RefreshStageDictionary;
             foreach (Node node in Nodes)
             {
@@ -96,13 +95,12 @@ namespace pixel_renderer
         public BitmapAsset Background = new("", null);
         public StageSettings Settings => new(Name, this.UUID);
         [JsonConstructor]
-        public Stage(string Name, BitmapAsset Background, List<Node> nodes)
+        public Stage(string Name, BitmapAsset Background, List<NodeAsset> nodes)
         {
             this.Name = Name;
             this.Background = Background;
-            Nodes = nodes;
+            Nodes = nodes.ToNodeList();
             Awake();
-            RefreshStageDictionary();
         }
         public IEnumerable<Sprite> GetSprites()
         {
@@ -110,7 +108,7 @@ namespace pixel_renderer
             IEnumerable<Sprite> sprites =(from Node node in Nodes
                                           where node.TryGetComponent(out sprite)
                                           select sprite);
-            return sprites; 
+            return sprites;  
         }
         public Stage Reset()
         {
@@ -124,7 +122,7 @@ namespace pixel_renderer
         internal void Dispose()
         {
             NodesByName.Clear();
-            Nodes.Clear();
+            Nodes.Clear(); 
         }
     }
    

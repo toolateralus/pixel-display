@@ -17,7 +17,7 @@ namespace pixel_renderer.Assets
         /// </summary>
         /// <returns> A copy of the stage asset as an instance of Stage</returns>
         /// 
-        public Stage Copy()=> new("_IGNORE", background, nodes.ToNodeList());
+        public Stage Copy()=> new("_IGNORE", background, nodes);
          public StageAsset(string name, Stage runtimeValue) : base(name, typeof(Stage))
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();

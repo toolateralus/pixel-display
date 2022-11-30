@@ -19,7 +19,7 @@ namespace pixel_renderer
     {
         [DllImport("PIXELRENDERER")] internal unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
         [DllImport("gdi32.dll")] internal static extern bool DeleteObject(IntPtr intPtr);
-        public unsafe static void ReadonlyBitmapData( in Bitmap bmp ,out BitmapData bmd, out int stride, out byte[] data)
+        public unsafe static void ReadonlyBitmapData(in Bitmap bmp ,out BitmapData bmd, out int stride, out byte[] data)
         {
             Bitmap copy = bmp.Clone() as Bitmap;
             Rectangle rect = new(0, 0, copy.Width, copy.Height);
@@ -52,13 +52,8 @@ namespace pixel_renderer
         /// <param name="bmp"></param>
         /// <exception cref="InvalidOperationException"></exception>
         /// <returns> A modified input Bitmap that holds all the rendered data from the Stage</returns>
-        internal unsafe static void Draw(Stage stage, Bitmap bmp)
+        internal unsafe static void Draw(IEnumerable<Sprite> sprites, Bitmap bmp)
         {
-            Sprite sprite = new();
-
-            IEnumerable<Sprite> sprites = from Node node in stage.Nodes
-                                          where node.TryGetComponent<Sprite>(out sprite)
-                                          select sprite;
             BitmapData bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
                                   System.Drawing.Imaging.ImageLockMode.WriteOnly,
                                   PixelFormat.Format32bppArgb);
@@ -67,23 +62,23 @@ namespace pixel_renderer
             // draw sprite data to bitmap unmanaged
             byte[] colorBytes = new byte[bmd.Width * bmd.Height];
 
-            // test loop to set all bytes to White; 
-            //for (var i = 0; i < bmd.Width * bmd.Height ; ++i)
-            //{
-            //    var offset = i * 4;
-            //    colorBytes[offset + 0] = 255;
-            //    colorBytes[offset + 1] = 255;
-            //    colorBytes[offset + 2] = 255;
-            //    colorBytes[offset + 3] = 255;
-            //}
             for (var i = 0; i < bmd.Width * bmd.Height; ++i)
             {
-                var offset = i * 4;
-                colorBytes[offset + 0] = colors[offset].B;
-                colorBytes[offset + 1] = colors[offset].G;
-                colorBytes[offset + 2] = colors[offset].R;
-                colorBytes[offset + 3] = colors[offset].A;
+                if (i >= colorBytes.Length - 4) continue; 
+                colorBytes[i + 0] = 255;
+                colorBytes[i + 1] = 15;
+                colorBytes[i + 2] = 15;
+                colorBytes[i + 3] = 15;
             }
+            //for (var i = 0; i < bmd.Width * bmd.Height; ++i)
+            //{
+            //    var offset = i * 4;
+            //    if (i > colors.Length + 4) continue; 
+            //    colorBytes[offset + 0] = colors[offset].B;
+            //    colorBytes[offset + 1] = colors[offset].G;
+            //    colorBytes[offset + 2] = colors[offset].R;
+            //    colorBytes[offset + 3] = colors[offset].A;
+            //}
 
             int start = 0;
             int length = colorBytes.Length; 
@@ -126,14 +121,14 @@ namespace pixel_renderer
 
             for (int y = 0; y < bmd.Height; y++)
             {
-                int curOffs = curRowOffs;
+                int byteOffset = curRowOffs;
                 for (int x = 0; x < bmd.Width; x++)
                 {
-                    byte b = data[curOffs];
-                    byte g = data[curOffs + 1];
-                    byte r = data[curOffs + 2];
-                    byte a = data[curOffs + 3];
-                    curOffs += 4;
+                    byte b = data[byteOffset];
+                    byte g = data[byteOffset + 1];
+                    byte r = data[byteOffset + 2];
+                    byte a = data[byteOffset + 3];
+                    byteOffset += 4;
                     _colors[x, y] = Color.FromArgb(a, r, g, b);
                 }
                 curRowOffs += stride;

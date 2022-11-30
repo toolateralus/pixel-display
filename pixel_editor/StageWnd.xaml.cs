@@ -96,7 +96,7 @@ namespace pixel_editor
                 if (background is null) return;
             }
 
-            var stage = new Stage(name, new("",background), nodes);
+            var stage = new Stage(name, new("",background), nodes.ToNodeAssets());
             for (int i = 0; i < count; i++) stage.CreateGenericNode();
 
             var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
