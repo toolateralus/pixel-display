@@ -110,13 +110,15 @@ namespace pixel_renderer
             while (hash.busy)
                 await Task.Delay(10);
 
+            await Task.Run(() =>
             Parallel.ForEach(stage.Nodes, node =>
             {
                 if (!node.TryGetComponent<Sprite>(out _)
                     || !node.TryGetComponent<Rigidbody>(out _)) return;
                 ViewportCollision(node);
                 hash.RegisterObject(node);
-            });
+            }));
+            
         }
         private static void RegisterCollisionEvent(Node A, Node[] colliders)
         {

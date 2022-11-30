@@ -1,6 +1,8 @@
 ﻿namespace pixel_renderer
 {
     using pixel_renderer.Assets;
+    using System;
+    using System.Threading.Tasks;
     using System.Windows;
 
     /// <summary>
@@ -8,12 +10,18 @@
     /// </summary>
     public partial class EngineInstance : Window
     {
+            Action StartEngine => delegate
+            {
+            };
+
+
         public EngineInstance()
         {
             InitializeComponent();
-            _ = Runtime.AwakeAsync(this, new(""));
+            _ =  Runtime.AwakeAsync(this, new(""));
+
         }
 
-        
+
     }
 }

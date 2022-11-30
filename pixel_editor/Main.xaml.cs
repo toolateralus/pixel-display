@@ -72,7 +72,7 @@ namespace pixel_editor
             inspector = new Inspector(inspectorObjName,  inspectorObjInfo,  inspectorChildGrid);
             Runtime.inspector = inspector;
             engine = new();
-            GetEvents();
+            GetEvents(); 
         }
         private void GetEvents()
         {

@@ -54,6 +54,8 @@ namespace pixel_renderer
         }
         public void AddComponent(Component component)
         {
+            if (component is null) return; 
+
             var type = component.GetType();
 
             if (type.BaseType != typeof(Component)) 

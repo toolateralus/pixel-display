@@ -122,7 +122,8 @@ namespace pixel_renderer
         internal void Dispose()
         {
             NodesByName.Clear();
-            Nodes.Clear(); 
+            Nodes.Clear();
+            Reset(); 
         }
     }
    

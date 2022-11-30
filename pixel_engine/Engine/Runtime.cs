@@ -32,7 +32,7 @@ namespace pixel_renderer
             get
             {
                 if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
-                if (m_stage is null) m_stage = m_stageAsset.Copy();
+                if (m_stage is null || m_stage.UUID != m_stageAsset.UUID) m_stage = m_stageAsset.Copy();
                 return m_stage;
             }
             set => m_stage = value;
@@ -63,12 +63,13 @@ namespace pixel_renderer
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.Initialized = true;
         }
-        
         public void SetProject(Project project)
         {
             LoadedProject = project;
-            if (project.stages.Count > 0)
-              SetStageAsset(project.stages[0]);
+            if (project.stages.Count <= 0)
+                project.stages.Add(new("", StagingHost.Default()));
+
+            SetStageAsset(project.stages[0]);
         }
         public void SetStageAsset(StageAsset stageAsset)
         {
@@ -106,15 +107,9 @@ namespace pixel_renderer
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
-            if (!IsRunning ||
-                renderHost.State is RenderState.Off)
-                return; 
-            
-            if(renderHost.State is RenderState.Error)
-                throw new Exception("Rendering error");
-             
-            if (renderHost.State is RenderState.Game) 
-                renderHost.Render(mainWnd.renderImage, this);
+            if (!IsRunning ||  renderHost.State is RenderState.Off)  return; 
+            if (renderHost.State is RenderState.Error)  throw new Exception("Rendering error");
+            if (renderHost.State is RenderState.Game)   renderHost.Render(mainWnd.renderImage, this);
             Input.Refresh();
         }
         
