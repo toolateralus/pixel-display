@@ -44,20 +44,20 @@ namespace pixel_renderer
         /// ordered as follows : 0 = Int, 1 =  ScreenPos Vec2, 2 =  1-15 Vec2,  3 = Color, 4 = Bool, 5 = direction;  
         /// </summary>
         /// <returns></returns>
-        public object[] IVVCBD_Random()
+        public object[] r_node_args()
         {
             int r_int = JRandom.Int(0,255);
-            var r_pos = JRandom.ScreenPosition();
-            var r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
-            var r_color = JRandom.Color();
-            var r_bool = JRandom.Bool();
-            var r_dir = JRandom.Direction();
+            Vec2 r_pos = JRandom.ScreenPosition();
+            Vec2 r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
+            Color r_color = JRandom.Color();
+            bool r_bool = JRandom.Bool();
+            Direction r_dir = JRandom.Direction();
             return new object[] { r_int, r_pos, r_vec, r_color, r_bool, r_dir }; 
         }
         public void CreateGenericNode()
         {
             // random variables used here;
-            object[] args = IVVCBD_Random(); 
+            object[] args = r_node_args(); 
             var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
             var sprite = new Sprite((Vec2)args[2], (Color)args[3], (bool)args[4]); 
             node.AddComponent(sprite);
