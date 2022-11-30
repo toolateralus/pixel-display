@@ -1,17 +1,19 @@
-﻿namespace pixel_renderer
-{
-    using Image = System.Windows.Controls.Image; 
+﻿using Image = System.Windows.Controls.Image; 
     using System;
+    using System.Collections.Generic; 
+namespace pixel_renderer
+{
 
     public enum RenderState { Game, Scene, Off , Error}
-    public class Rendering
+    public class RenderHost
     {
-        public static RenderState State = RenderState.Game;
-        private static Runtime runtime => Runtime.Instance;
-        private static RendererBase? m_renderer = new CRenderer();
-        public static RendererBase GetRenderer() => m_renderer; 
-        public static void SetRenderer(RendererBase renderer) => m_renderer= renderer;
-        public static void Render( Image output)
+        public RenderState State = RenderState.Game;
+        private Runtime runtime => Runtime.Instance;
+
+        private RendererBase? m_renderer = new CRenderer();
+        public RendererBase GetRenderer() => m_renderer; 
+        public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
+        public void Render(Image output)
         {
             if (runtime.stage is null || m_renderer is null)
             {
@@ -32,13 +34,16 @@
                 default:
                     throw new Exception("Invalid case passed into RenderState selection");
             }
+            Run(output);
+        }
+        private void Run(Image output)
+        {
             m_renderer.Dispose();
             m_renderer.Draw();
             m_renderer.Render(output);
         }
-       
     }
-    public class PixelGC
+    public class RenderInfo 
     {
         static string cachedGCValue = "";
         const int framesUntilGC_Check = 600;
@@ -51,16 +56,17 @@
                 return cachedGCValue;
             }
             framesSinceGC_Check = 0;
-
-            var bytes = GC.GetTotalMemory(false) + 1;
-            var megaBytes = bytes / 1048576;
-            cachedGCValue = $"GC Alloc:{megaBytes} MB";
+            update_gc_info();
 
             return cachedGCValue;
         }
-    }
-    public class RenderStats
-    {
+
+        private static void update_gc_info()
+        {
+            var bytes = GC.GetTotalMemory(false) + 0.1f;
+            var megaBytes = bytes / 1048576;
+            cachedGCValue = $"gc alloc : {megaBytes} MB";
+        }
         public static double FrameRate()
         {
             Runtime env = Runtime.Instance;
