@@ -39,6 +39,7 @@ namespace pixel_renderer
             }
             set => m_stage = value;
         }
+        public RenderHost? renderHost;
         private Stage m_stage; 
         private StageAsset m_stageAsset;
         public void SetStageAsset(StageAsset stageAsset)
@@ -91,14 +92,14 @@ namespace pixel_renderer
         private void ExecuteFrame()
         {
             if (!IsRunning ||
-                Rendering.State is RenderState.Off)
+                renderHost.State is RenderState.Off)
                 return; 
             
-            if(Rendering.State is RenderState.Error)
+            if(renderHost.State is RenderState.Error)
                 throw new Exception("Rendering error");
              
-            if (Rendering.State is RenderState.Game) 
-                Rendering.Render(mainWnd.renderImage);
+            if (renderHost.State is RenderState.Game) 
+                renderHost.Render(mainWnd.renderImage);
              Input.Refresh();
         }
       

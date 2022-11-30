@@ -29,7 +29,7 @@ namespace pixel_renderer
             var reset = runtime.GetStageAsset();
             if (reset is null) 
                 throw new NullStageException("Resetting stage failed"); 
-            if (Rendering.State is not RenderState.Off)
+            if (runtime.renderHost.State is not RenderState.Off)
                runtime.Toggle();
             runtime.SetStageAsset(reset);
         }

@@ -62,11 +62,11 @@ namespace pixel_editor
         }
         #endregion
 
-        private  Inspector inspector;
-        
-        internal static EngineInstance? engine;
+        private Inspector inspector;
+        internal EngineInstance? engine;
+        internal RenderHost? host => Runtime.Instance.renderHost;  
 
-        private static int renderStateIndex = 0;
+        private int renderStateIndex = 0;
         
         private StageWnd stageWindow;
 
@@ -89,10 +89,10 @@ namespace pixel_editor
         {
             inspector.Update(sender, e);
             if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null
-                && Rendering.State == RenderState.Scene)
+                && host.State == RenderState.Scene)
             {
-                Rendering.Render(image);
-                gcAllocText.Content = PixelGC.GetTotalMemory();
+                host.Render(image);
+                gcAllocText.Content = RenderInfo.GetTotalMemory();
             }
         }
         private void OnDisable(object? sender, EventArgs e) => engine.Close();
@@ -111,7 +111,7 @@ namespace pixel_editor
         {
             if (Runtime.Instance.stage is null)
             {
-                Rendering.State = RenderState.Off;
+                host.State = RenderState.Off;
                 viewBtn.Content = "Stage null.";
             }
             renderStateIndex++;
@@ -119,9 +119,9 @@ namespace pixel_editor
             {
                 renderStateIndex = 0;
             }
-            Rendering.State = (RenderState)renderStateIndex;
-            viewBtn.Content = Rendering.State.ToString();
-            if (Rendering.State == RenderState.Game)
+            host.State = (RenderState)renderStateIndex;
+            viewBtn.Content = host.State.ToString();
+            if (host.State == RenderState.Game)
             {
                 var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
                 if (msg != MessageBoxResult.Yes)
