@@ -31,7 +31,7 @@
         {
             float progress = (float)vertexIndex / (vertices - 1);
             int x = (int)CMath.Lerp(startPosition, endPosition, progress);
-            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.renderHost.RenderInfo.frameCount * movementSpeed));
+            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.renderHost.info.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
         /// <summary>
@@ -44,7 +44,7 @@
             const float Tau = CMath.PI * 2;
             float progress = (float)vertexIndex / (vertices - 1);
             int x = (int)CMath.Lerp(0, 1, progress);
-            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.renderHost.RenderInfo.frameCount * movementSpeed));
+            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.renderHost.info.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
     }

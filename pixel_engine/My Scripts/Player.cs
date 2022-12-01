@@ -8,8 +8,8 @@ internal class Player : Component
     [Field] Rigidbody rb = new();
     public override void Awake()
     {
-        sprite = GetComponent<Sprite>();
-        rb = GetComponent<Rigidbody>();
+       parentNode.TryGetComponent(out sprite);
+       parentNode.TryGetComponent(out rb);
     }
     public override void FixedUpdate(float delta)
     {

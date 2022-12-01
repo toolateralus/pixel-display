@@ -44,7 +44,7 @@ namespace pixel_renderer
         /// ordered as follows : 0 = Int, 1 =  ScreenPos Vec2, 2 =  1-15 Vec2,  3 = Color, 4 = Bool, 5 = direction;  
         /// </summary>
         /// <returns></returns>
-        public object[] r_node_args()
+        private object[] r_node_args()
         {
             int r_int = JRandom.Int(0,255);
             Vec2 r_pos = JRandom.ScreenPosition();
@@ -123,7 +123,6 @@ namespace pixel_renderer
         {
             NodesByName.Clear();
             Nodes.Clear();
-            Reset(); 
         }
     }
    

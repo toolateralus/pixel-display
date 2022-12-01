@@ -32,7 +32,7 @@ namespace pixel_renderer
             get
             {
                 if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
-                if (m_stage is null || m_stage.UUID != m_stageAsset.UUID) m_stage = m_stageAsset.Copy();
+                if (m_stage is null || m_stage.UUID != m_stageAsset.settings.UUID) m_stage = m_stageAsset.Copy();
                 return m_stage;
             }
             set => m_stage = value;
@@ -63,19 +63,17 @@ namespace pixel_renderer
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.Initialized = true;
         }
-        public void SetProject(Project project)
-        {
-            LoadedProject = project;
-            if (project.stages.Count <= 0)
-                project.stages.Add(new("", StagingHost.Default()));
-
-            SetStageAsset(project.stages[0]);
-        }
+        public void SetProject(Project project) =>  LoadedProject = project;
+          
         public void SetStageAsset(StageAsset stageAsset)
         {
-            if (IsRunning) Toggle();
-            m_stageAsset = stageAsset;
-            _ = stage;
+            lock (stage)
+            {
+                if (IsRunning) Toggle();
+                stage.Dispose(); 
+                m_stageAsset = stageAsset;
+                _ = stage;
+            }
         }
         public StageAsset? GetStageAsset() => m_stageAsset;
 
@@ -102,7 +100,7 @@ namespace pixel_renderer
         
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            Collision.Run();
+            Task.Run(() => Collision.Run());
             StagingHost.Update(stage);
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
@@ -115,5 +113,15 @@ namespace pixel_renderer
         
         // NYI, probably wont be implemented as is anyway.
         public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
+
+        public void TrySetStageAsset(int stageAssetIndex)
+        {
+            if (LoadedProject is null) return;
+            if (LoadedProject.stages is null) return;
+            if (LoadedProject.stages.Count <= stageAssetIndex) return;
+            if (LoadedProject.stages[stageAssetIndex] is null) return;
+            SetStageAsset(LoadedProject.stages[stageAssetIndex]);
+            stage.Reset();
+        }
     }
 }

@@ -16,8 +16,7 @@ namespace pixel_renderer
         public bool IsTrigger { get; internal set; } = false;
         public override void Awake()
         {
-            sprite = parentNode.GetComponent<Sprite>();
-            if (sprite == null) throw new Exception($"Cannot use a rigidbody without a sprite. NODE: {parentNode.Name} UUID {parentNode.UUID}");
+            parentNode.TryGetComponent(out sprite);
         }
         public override void FixedUpdate(float delta)
         {
@@ -25,7 +24,6 @@ namespace pixel_renderer
             ApplyDrag();
             ApplyVelocity();
         }
-
         public double GetDrag()
         {
             double velocity = this.velocity.Length();
@@ -36,13 +34,11 @@ namespace pixel_renderer
             if (drag < 0) drag = -drag;
             return drag;
         }
-
         private protected void ApplyVelocity()
         {
             parentNode.position.y += velocity.y;
             parentNode.position.x += velocity.x;
         }
-
         private protected void ApplyDrag()
         {
             _drag = (float)GetDrag().Clamp(-drag, drag);

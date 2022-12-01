@@ -7,7 +7,7 @@ namespace pixel_renderer
     public class RenderHost
     {
         private RendererBase? m_renderer = new CRenderer();
-        public RenderInfo RenderInfo = new(); 
+        public RenderInfo info = new(); 
         public RenderState State = RenderState.Game;
 
         public RendererBase GetRenderer() => m_renderer;

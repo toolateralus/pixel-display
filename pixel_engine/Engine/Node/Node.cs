@@ -3,6 +3,7 @@ using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Documents;
 
 namespace pixel_renderer
 {
@@ -12,26 +13,18 @@ namespace pixel_renderer
         [JsonIgnore]
         public Stage ParentStage { get; set; }
         public string Name { get; set; }
+        public string tag = "untagged - nyi";
+        public Vec2 position = new();
+        public Vec2 localPosition => parentNode == null ? position : parentNode.position - position;
+        public Vec2 scale = new();
+        public Node? parentNode;
+        public List<Node> children= new() ;
 
         private string _uuid = "";
         public string UUID { get { return _uuid; } set { } }
         public bool Enabled { get { return _enabled; } }
         private bool _enabled = true; 
-        public void SetActive(bool value)=>_enabled = value; 
-        public Vec2 position = new();
-        public Vec2 localPosition
-        {
-            get => parentNode == null ? position : parentNode.position - position;
-        }
-
-        public Vec2 scale = new();
-
-        public Node? parentNode;
-        public List<Node> children= new() ;
-
-        // goal - make private
         public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
-       
         public List<Component> ComponentsList
         {
             get
@@ -43,6 +36,9 @@ namespace pixel_renderer
                 return list ?? new();
             }
         }
+        public static Node New = new("", Vec2.zero, Vec2.one);
+
+        public void SetActive(bool value)=>_enabled = value; 
         public T GetComponent<T>(int? index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -54,18 +50,21 @@ namespace pixel_renderer
         }
         public void AddComponent(Component component)
         {
-            if (component is null) return; 
+            lock (Components)
+            {
+                if (component is null) return; 
 
-            var type = component.GetType();
+                var type = component.GetType();
 
-            if (type.BaseType != typeof(Component)) 
-                throw new InvalidOperationException("Cannot add generic type Component to node."); 
+                if (type.BaseType != typeof(Component)) 
+                    throw new InvalidOperationException("Cannot add generic type Component to node."); 
 
-            if (!Components.ContainsKey(type))
-                Components.Add(type, new());
+                if (!Components.ContainsKey(type))
+                    Components.Add(type, new());
 
-            Components[type].Add(component);
-            component.parentNode = this;
+                Components[type].Add(component);
+                component.parentNode = this;
+            }
         }
         /// <summary>
         ///
@@ -74,13 +73,16 @@ namespace pixel_renderer
         /// <returns> A list of components matching typeof(T), otherwise an empty list of same type </returns>
         internal List<T> GetComponents<T>() where T : Component
         {
-            List<T> output = new(); 
-           foreach (var component in ComponentsList)
+            lock (Components)
             {
-                if (component.GetType().Equals(typeof(T)))
-                    output.Add((T)component);
+                List<T> output = new();
+                foreach (var component in ComponentsList)
+                {
+                    if (component.GetType().Equals(typeof(T)))
+                        output.Add((T)component);
+                }
+                return output;
             }
-            return output; 
         }
         /// <summary>
         /// Attempts to look for a component and push out if found.
@@ -90,19 +92,18 @@ namespace pixel_renderer
         /// <returns>A boolean signifying the success of the operation, and out<T> instance of specified Component </returns>
         public bool TryGetComponent<T>(out T? component, int? index = 0) where T : Component
         {
-            if (!Components.ContainsKey(typeof(T)))
+            lock (Components)
             {
-                component = null;
-                return false;
+                if (!Components.ContainsKey(typeof(T)))
+                {
+                    component = null;
+                    return false;
+                }
+                component = Components[typeof(T)][index ?? 0] as T;
+                return true;
             }
-            component = Components[typeof(T)][index ?? 0] as T;
-            return true;
         }
-        /// <summary>
-        /// Nameless, Position of (0,0), Scale of (1,1);
-        /// </summary>
-        public static Node New = new("", Vec2.zero, Vec2.one);
-        public string tag = "untagged";
+        
         [JsonConstructor]
         public Node(Stage parentStage, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, List<Node> children, string nodeUUID)
         {
@@ -140,57 +141,50 @@ namespace pixel_renderer
         /// </summary>
         public void Awake()
         {
-            foreach (var component in from list in Components.Values
-                                      from component in list
-                                      select component) 
-                component.Init();
+            for (int i = 0; i < ComponentsList.Count; i++)
+                ComponentsList[i].Init();
         }
-
         public void FixedUpdate(float delta)
         {
-            foreach (var component in from list in Components.Values
-                                      from component in list
-                                      select component)
-                component.FixedUpdate(delta);
+            for (int i = 0; i < ComponentsList.Count; i++)
+                ComponentsList[i].FixedUpdate(delta);
         }
         public void Update()
         {
-            foreach (var component in from list in Components.Values
-                                      from component in list
-                                      select component)
-           component.Update();
+            for (int i = 0; i < ComponentsList.Count; i++)
+                     ComponentsList[i].Update();
         }
         internal void OnCollision(Rigidbody otherBody)
         {
-            foreach (var component in from list in Components.Values
-                                      from component in list
-                                      select component)
-            component.OnCollision(otherBody);
+            lock (Components)
+                for (int i = 0; i < ComponentsList.Count; i++)
+                    ComponentsList[i].OnCollision(otherBody);
         }
         internal void OnTrigger(Rigidbody otherBody)
         {
-            foreach (var component in from list in Components.Values
-                                      from component in list
-                                      select component)
-            component.OnTrigger(otherBody);
+            lock (Components)
+                for (int i = 0; i < ComponentsList.Count; i++)
+                    ComponentsList[i].OnTrigger(otherBody);
         }
         internal NodeAsset ToAsset() => new(this);
-
         internal void RemoveComponent(Component component)
         {
-            var type = component.GetType();
-            if (ComponentsList.Contains(component))
+            lock (Components)
             {
-                var compList = Components[type];
-                var toRemove = new Component(); 
-                foreach (var comp in from comp in compList
-                                     where comp is not null &&
-                                     comp.UUID.Equals(component.UUID)
-                                     select comp)
-                    toRemove = comp; 
+                var type = component.GetType();
+                if (ComponentsList.Contains(component))
+                {
+                    var compList = Components[type];
+                    var toRemove = new Component();
+                    foreach (var comp in from comp in compList
+                                         where comp is not null &&
+                                         comp.UUID.Equals(component.UUID)
+                                         select comp)
+                        toRemove = comp;
 
-                if(toRemove is not null)
-                 compList.Remove(toRemove);
+                    if (toRemove is not null)
+                        compList.Remove(toRemove);
+                }
             }
         }
     }

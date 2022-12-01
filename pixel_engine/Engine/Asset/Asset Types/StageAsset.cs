@@ -20,7 +20,7 @@ namespace pixel_renderer.Assets
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();
            background = runtimeValue.Background;
-           settings = runtimeValue.Settings; 
+            settings = new(runtimeValue.Name, runtimeValue.UUID);
         }
         [JsonConstructor]
         public StageAsset(string name, List<NodeAsset> nodes, BitmapAsset background, StageSettings settings, string UUID) : base(name, typeof(Stage), UUID)

@@ -8,7 +8,7 @@
         static Dictionary<Key, bool> KeyDown = new Dictionary<Key, bool>();
         static Key[] keys =
         {
-            Key.W, Key.A, Key.S, Key.D, Key.Space, Key.Q
+            Key.W, Key.A, Key.S, Key.D, Key.Space, Key.Q, Key.F1, Key.F2, Key.F3, Key.F4, Key.F5
         };
         public static bool GetKeyDown(Key key)
         {

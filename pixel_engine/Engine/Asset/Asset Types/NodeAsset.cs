@@ -42,6 +42,7 @@ namespace pixel_renderer.Assets
             Node node = new Node(nodeName, pos, scale, UUID);
             foreach (var comp in components)
             {
+
                 var name = comp.fileType.Name;
                 switch(name)
                 {

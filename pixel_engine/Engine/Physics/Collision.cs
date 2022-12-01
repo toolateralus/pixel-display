@@ -8,33 +8,32 @@ namespace pixel_renderer
 {
     public static class Collision
     {
-        private volatile static ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
-        private volatile static ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
+        private static readonly ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
+        private static readonly ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true; 
         public static void SetActive(bool value) => AllowEntries = value;
         private readonly static SpatialHash hash = new(Settings.ScreenH, Settings.ScreenW, Settings.CollisionCellSize);
         public static void ViewportCollision(Node node)
         {
-            Sprite sprite = node.GetComponent<Sprite>();
-            Rigidbody rb = node.GetComponent<Rigidbody>();
-            if (sprite is null || rb is null) return;
-            if (sprite.isCollider)
+             var hasSprite = node.TryGetComponent( out Sprite sprite);
+             var hasRb = node.TryGetComponent(out Rigidbody rb);
+            
+            if (!hasSprite || !hasRb || sprite.isCollider) return;
+
+            if (node.position.y > Settings.ScreenW - 4 - sprite.size.y)
             {
-                if (node.position.y > Settings.ScreenW - 4 - sprite.size.y)
-                {
-                    node.position.y = Settings.ScreenW - 4 - sprite.size.y;
-                }
-                if (node.position.x > Settings.ScreenH - sprite.size.x)
-                {
-                    node.position.x = Settings.ScreenH - sprite.size.x;
-                    rb.velocity.x = 0;
-                }
-                if (node.position.x < 0)
-                {
-                    node.position.x = 0;
-                    rb.velocity.x = 0;
-                }
+                node.position.y = Settings.ScreenW - 4 - sprite.size.y;
+            }
+            if (node.position.x > Settings.ScreenH - sprite.size.x)
+            {
+                node.position.x = Settings.ScreenH - sprite.size.x;
+                rb.velocity.x = 0;
+            }
+            if (node.position.x < 0)
+            {
+                node.position.x = 0;
+                rb.velocity.x = 0;
             }
         }
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
@@ -70,21 +69,14 @@ namespace pixel_renderer
         }
         public static void NarrowPhase(ConcurrentBag<ConcurrentBag<Node>> collisionCells)
         {
-
             Parallel.For(0, collisionCells.Count, i =>
             {
                 if (i >= collisionCells.Count) return;
-
                 var cellArray = collisionCells.ToArray();
-
                 if (i >= cellArray.Length) return;
-
                 var cell = cellArray[i].ToArray();
-
                 if (cell is null) return;
-
                 if (cell.Length <= 0) return;
-
                 Parallel.For(0, cell.Length, j =>
                 {
                     var nodeA = cell[j];
@@ -94,8 +86,6 @@ namespace pixel_renderer
                     {
                         var nodeB = cell[k];
                         if (nodeB is null) return;
-                        // compare node's UUID since each node could contain several colliders, 
-                        // todo : maybe implement intranodular collision
                         if (nodeA.UUID.Equals(nodeB.UUID)) return;
                         if (!colliders.Contains(nodeB)) colliders.Add(nodeB);
                     });
@@ -110,14 +100,14 @@ namespace pixel_renderer
             while (hash.busy)
                 await Task.Delay(10);
 
-            await Task.Run(() =>
-            Parallel.ForEach(stage.Nodes, node =>
+            await Task.Run(() => Parallel.ForEach(stage.Nodes, node =>
             {
                 if (!node.TryGetComponent<Sprite>(out _)
                     || !node.TryGetComponent<Rigidbody>(out _)) return;
                 ViewportCollision(node);
                 hash.RegisterObject(node);
             }));
+           
             
         }
         private static void RegisterCollisionEvent(Node A, Node[] colliders)
@@ -134,18 +124,18 @@ namespace pixel_renderer
         }
         public static void FinalPhase()
         {
-            Parallel.ForEach(CollisionQueue, collisionPair =>
-            {
-                Node A = collisionPair.Key;
-                Parallel.ForEach(collisionPair.Value, B =>
+                Parallel.ForEach(CollisionQueue, collisionPair =>
                 {
-                    if (!A.TryGetComponent(out Rigidbody rbA) ||
-                        !B.TryGetComponent(out Rigidbody rbB)) return;
+                    Node A = collisionPair.Key;
+                    Parallel.ForEach(collisionPair.Value, B =>
+                    {
+                        if (!A.TryGetComponent(out Rigidbody rbA) ||
+                            !B.TryGetComponent(out Rigidbody rbB)) return;
 
-                    Collide(ref rbA, ref rbB);
-                    AttemptCallbacks(ref rbA, ref rbB);
+                        Collide(ref rbA, ref rbB);
+                        AttemptCallbacks(ref rbA, ref rbB);
+                    });
                 });
-            });
             CollisionQueue.Clear();
         }
         private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
@@ -159,7 +149,7 @@ namespace pixel_renderer
             A.parentNode.OnCollision(B);
             B.parentNode.OnCollision(A);
         }
-        public static void Run()
+        public async static Task Run()
         {
             if (!AllowEntries)
             {
@@ -167,7 +157,7 @@ namespace pixel_renderer
                 return; 
             }
             var stage = Runtime.Instance.stage; 
-            _ = RegisterCollidersAsync(stage);
+            await Task.Run(() => RegisterCollidersAsync(stage));
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
             FinalPhase(); 
