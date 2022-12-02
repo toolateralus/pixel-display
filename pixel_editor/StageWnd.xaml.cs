@@ -105,7 +105,9 @@ namespace pixel_editor
                 Library.Register(typeof(Stage), asset);
          
             if (msgResult == MessageBoxResult.Yes)
-                Runtime.                Instance.SetStageAsset(asset);
+                Runtime.Instance.SetStageAsset(asset);
+                Runtime.Instance.AddStageToProject(asset);
+
 
             Close(); 
         }

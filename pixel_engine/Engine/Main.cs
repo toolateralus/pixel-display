@@ -10,18 +10,10 @@
     /// </summary>
     public partial class EngineInstance : Window
     {
-            Action StartEngine => delegate
-            {
-            };
-
-
         public EngineInstance()
         {
             InitializeComponent();
-            _ =  Runtime.AwakeAsync(this, new(""));
-
+            _ = Runtime.AwakeAsync(this, new(""));
         }
-
-
     }
 }

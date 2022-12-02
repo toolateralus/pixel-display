@@ -8,7 +8,9 @@ namespace pixel_renderer
 {
     public class StagingHost
     {
-        public Node lastSelected;
+        public Node? lastSelected;
+        static Runtime runtime => Runtime.Instance;
+        
         public bool GetNodeAtPoint(Stage stage, Point pos, out Node? result)
         {
             pos = new Point()
@@ -53,8 +55,26 @@ namespace pixel_renderer
             result = null;
             return false;
         }
-        
-        static Runtime runtime => Runtime.Instance;
+
+        public static Stage Default()
+        {
+            var nodes = new List<Node>();
+            
+            AddPlayer(nodes);
+
+            BitmapAsset bmpAsset =
+                    new("Solid Color Background:", 
+                    Sprite.SolidColorBitmap(Settings.ScreenVec, Color.FromArgb(0, 0, 0, 0)));
+
+            var stage =
+                new Stage("Default Stage", 
+                bmpAsset, nodes.ToNodeAssets());
+
+            for (int i = 0; i < 10; i++) 
+                stage.CreateGenericNode();
+
+            return stage;
+        }
         public static void Update(Stage stage)
         {
             var delta = runtime.renderHost.info.lastFrameTime;
@@ -91,25 +111,6 @@ namespace pixel_renderer
             playerNode.AddComponent(sprite);
             
             nodes.Add(playerNode);
-        }
-        public static Stage Default()
-        {
-            var nodes = new List<Node>();
-            
-            AddPlayer(nodes);
-
-            BitmapAsset bmpAsset =
-                    new("Solid Color Background:", 
-                    Sprite.SolidColorBitmap(Settings.ScreenVec, Color.White));
-
-            var stage =
-                new Stage("Default Stage", 
-                bmpAsset, nodes.ToNodeAssets());
-
-            for (int i = 0; i < 10; i++) 
-                stage.CreateGenericNode();
-
-            return stage;
         }
     }
 }

@@ -32,12 +32,12 @@ namespace pixel_renderer
             get
             {
                 if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
-                if (m_stage is null || m_stage.UUID != m_stageAsset.settings.UUID) m_stage = m_stageAsset.Copy();
+                if (m_stage is null || m_stage.UUID != m_stageAsset.settings.UUID) m_stage = m_stageAsset?.Copy();
                 return m_stage;
             }
             set => m_stage = value;
         }
-        private Stage? m_stage;
+        private volatile Stage? m_stage;
 
         public bool PhysicsInitialized { get; private set; }
         public bool IsRunning = false;
@@ -53,8 +53,10 @@ namespace pixel_renderer
                 return instance;
             }
         }
-        private protected static Runtime instance = new();
+        private protected volatile static Runtime instance = new();
 
+        public StageAsset? GetStageAsset() => m_stageAsset;
+        public void SetProject(Project project) =>  LoadedProject = project;
         public static async Task AwakeAsync(EngineInstance mainWnd, Project project)
         {
             Instance.LoadedProject = project;
@@ -63,20 +65,33 @@ namespace pixel_renderer
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.Initialized = true;
         }
-        public void SetProject(Project project) =>  LoadedProject = project;
-          
         public void SetStageAsset(StageAsset stageAsset)
         {
             lock (stage)
             {
                 if (IsRunning) Toggle();
-                stage.Dispose(); 
+                stage.Dispose();
                 m_stageAsset = stageAsset;
                 _ = stage;
             }
         }
-        public StageAsset? GetStageAsset() => m_stageAsset;
-
+        public void TrySetStageAsset(int stageAssetIndex)
+        {
+            if (LoadedProject is null) return;
+            if (LoadedProject.stages is null) return;
+            if (LoadedProject.stages.Count <= stageAssetIndex) return;
+            if (LoadedProject.stages[stageAssetIndex] is null) return;
+        
+            SetStageAsset(LoadedProject.stages[stageAssetIndex]);
+            stage.Reset();
+        }
+        public void AddStageToProject(StageAsset stageAsset)
+        {
+            if (LoadedProject is null) throw new NullReferenceException("Loaded Project reference to a null instance of an object");
+            if (LoadedProject.stages is null) LoadedProject.stages = new();
+            LoadedProject.stages.Add(stageAsset);
+            SetStageAsset(stageAsset);
+        }
         public void Toggle()
         {
             if (!PhysicsInitialized) InitializePhysics();
@@ -90,6 +105,7 @@ namespace pixel_renderer
             IsRunning = false;
             return;
         }
+        public void ResetCurrentStage()=> stage = m_stageAsset?.Copy(); 
         private void InitializePhysics()
         {
             var interval = TimeSpan.FromSeconds(Settings.PhysicsRefreshInterval);
@@ -97,7 +113,6 @@ namespace pixel_renderer
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
             PhysicsInitialized = true;
         }
-        
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
             Task.Run(() => Collision.Run());
@@ -110,18 +125,7 @@ namespace pixel_renderer
             if (renderHost.State is RenderState.Game)   renderHost.Render(mainWnd.renderImage, this);
             Input.Refresh();
         }
-        
         // NYI, probably wont be implemented as is anyway.
         public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
-
-        public void TrySetStageAsset(int stageAssetIndex)
-        {
-            if (LoadedProject is null) return;
-            if (LoadedProject.stages is null) return;
-            if (LoadedProject.stages.Count <= stageAssetIndex) return;
-            if (LoadedProject.stages[stageAssetIndex] is null) return;
-            SetStageAsset(LoadedProject.stages[stageAssetIndex]);
-            stage.Reset();
-        }
     }
 }
