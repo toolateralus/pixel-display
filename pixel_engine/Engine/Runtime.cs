@@ -70,9 +70,8 @@ namespace pixel_renderer
             lock (stage)
             {
                 if (IsRunning) Toggle();
-                this.stage.Dispose();
+                this.stage = null; 
                 m_stageAsset = stageAsset;
-                var stage = this.stage; 
             }
         }
         public void TrySetStageAsset(int stageAssetIndex)

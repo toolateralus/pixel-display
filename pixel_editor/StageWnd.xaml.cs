@@ -92,7 +92,7 @@ namespace pixel_editor
             }
 
             var stage = new Stage(name, new("",background), nodes.ToNodeAssets());
-            for (int i = 0; i < count; i++) stage.CreateGenericNode();
+            for (int i = 0; i < count; i++) stage.create_generic_node();
 
             var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
 

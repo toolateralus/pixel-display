@@ -71,7 +71,7 @@ namespace pixel_renderer
                 bmpAsset, nodes.ToNodeAssets());
 
             for (int i = 0; i < 10; i++) 
-                stage.CreateGenericNode();
+                stage.create_generic_node();
 
             return stage;
         }

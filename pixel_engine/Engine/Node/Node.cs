@@ -142,29 +142,29 @@ namespace pixel_renderer
         public void Awake()
         {
             for (int i = 0; i < ComponentsList.Count; i++)
-                ComponentsList[i].Init();
+                  ComponentsList[i].Init();
         }
         public void FixedUpdate(float delta)
         {
             for (int i = 0; i < ComponentsList.Count; i++)
-                ComponentsList[i].FixedUpdate(delta);
+                  ComponentsList[i].FixedUpdate(delta);
         }
         public void Update()
         {
             for (int i = 0; i < ComponentsList.Count; i++)
-                     ComponentsList[i].Update();
+                  ComponentsList[i].Update();
         }
         internal void OnCollision(Rigidbody otherBody)
         {
             lock (Components)
                 for (int i = 0; i < ComponentsList.Count; i++)
-                    ComponentsList[i].OnCollision(otherBody);
+                  ComponentsList[i].OnCollision(otherBody);
         }
         internal void OnTrigger(Rigidbody otherBody)
         {
             lock (Components)
                 for (int i = 0; i < ComponentsList.Count; i++)
-                    ComponentsList[i].OnTrigger(otherBody);
+                  ComponentsList[i].OnTrigger(otherBody);
         }
         internal NodeAsset ToAsset() => new(this);
         internal void RemoveComponent(Component component)

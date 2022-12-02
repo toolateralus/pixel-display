@@ -75,6 +75,15 @@ namespace pixel_editor
             GetEvents(); 
         }
 
+
+        private void GetEvents()
+        {
+           // HandleInputMediator();
+            CompositionTarget.Rendering += Update;
+            Closing += OnDisable;
+            image.MouseLeftButtonDown += Mouse0;
+        }
+        
         private InputMediator input; 
         Key[] keys = new Key[]
         {
@@ -84,14 +93,6 @@ namespace pixel_editor
             Key.F4,
             Key.F5,
         };
-
-        private void GetEvents()
-        {
-           // HandleInputMediator();
-            CompositionTarget.Rendering += Update;
-            Closing += OnDisable;
-            image.MouseLeftButtonDown += Mouse0;
-        }
         private void HandleInputMediator()
         {
             Action[] inputActions = new Action[]
@@ -105,6 +106,7 @@ namespace pixel_editor
 
             input = new(inputActions, inputs);
         }
+
         private void IncrementRenderState()
         {
             if (Runtime.Instance.stage is null)
@@ -124,21 +126,23 @@ namespace pixel_editor
                 var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
                 if (msg != MessageBoxResult.Yes)
                     return;
-                Runtime.                Instance.mainWnd = new();
-                Runtime.                Instance.mainWnd.Show();
+                Runtime.Instance.mainWnd = new();
+                Runtime.Instance.mainWnd.Show();
             }
         }
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
 
-            if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null  && host.State == RenderState.Scene)
-            {
-                host.Render(image);
-                gcAllocText.Content =
-                    $"{Runtime.Instance.renderHost.info.GetTotalMemory()}" +
-                    $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
-            }
+            if (Runtime.Instance.IsRunning 
+                && Runtime.Instance.stage is not null  
+                && host.State == RenderState.Scene)
+                {
+                    host.Render(image);
+                    gcAllocText.Content =
+                        $"{Runtime.Instance.renderHost.info.GetTotalMemory()}" +
+                        $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
+                }
 
             // Immediately stop reading input because the method in the body of the
             // case will get called dozens of times while app is in break mode w/ debugger without it.
@@ -148,34 +152,59 @@ namespace pixel_editor
                 {
                     case Key.F1:
                         if (Input.GetKeyDown(key))
+                        {
                             Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(0);
+                        }
                         break;                                                  
                     case Key.F2:                                             
-                        if (Input.GetKeyDown(key))                 
+                        if (Input.GetKeyDown(key))
+                        {
                             Input.SetKey(key, false);
-                            Runtime.Instance.TrySetStageAsset(1);
+                            if(Runtime.Instance.GetStageAsset() != null)
+                                Runtime.Instance.stage = Runtime.Instance.stage.Reset();
+                        }
                         break;                                                  
                     case Key.F3:                                             
-                        if (Input.GetKeyDown(key))                 
+                        if (Input.GetKeyDown(key))
+                        {
                             Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(2);
+                        }
                         break;                                               
                     case Key.F4:                                              
-                        if (Input.GetKeyDown(key))                  
+                        if (Input.GetKeyDown(key))
+                        {
                             Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(3);
+                        }
                         break;                                                  
                     case Key.F5:                                             
-                        if (Input.GetKeyDown(key))                 
+                        if (Input.GetKeyDown(key))
+                        {
                             Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(4);
+                        }
                         break;
                 }
         }
         private void Wnd_Closed(object? sender, EventArgs e) =>
             stageWnd = null;    
 
+
+        // WPF Control Events.
+        private void Mouse0(object sender, MouseButtonEventArgs e)
+        {
+            // this cast could be causing erroneous behavior
+            Point pos = e.GetPosition((Image)sender);
+
+            if (Runtime.Instance.IsRunning)
+            {
+                inspector.DeselectNode();
+                if (Runtime.Instance.stagingHost.GetNodeAtPoint(Runtime.Instance.stage, pos, out Node node))
+                    inspector.SelectNode(node);
+            }
+        }
         private void OnDisable(object? sender, EventArgs e)
         {
             stageWnd?.Close(); 
@@ -191,18 +220,6 @@ namespace pixel_editor
             else playBtn.Background = Brushes.LightPink; 
         }
         private void OnViewChanged(object sender, RoutedEventArgs e) => IncrementRenderState();
-        private void Mouse0(object sender, MouseButtonEventArgs e)
-        {
-            // this cast could be causing erroneous behavior
-            Point pos = e.GetPosition((Image)sender);
-
-            if (Runtime.Instance.IsRunning)
-            {
-                inspector.DeselectNode();
-                if (Runtime.Instance.stagingHost.GetNodeAtPoint(Runtime.Instance.stage, pos, out Node node))
-                    inspector.SelectNode(node);
-            }
-        }
         private void OnImportBtnPressed(object sender, RoutedEventArgs e) => _ = Importer.ImportAsync(true);
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
