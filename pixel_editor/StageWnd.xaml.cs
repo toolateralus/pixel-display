@@ -15,18 +15,7 @@ namespace pixel_editor
     public partial class StageWnd : Window
     {
         bool usingStarterAssets = false;
-
         Bitmap? background;
-
-        public StageWnd(Editor mainWnd)
-        {
-            mainWnd.Closing += MainWnd_Closing;  
-            InitializeComponent();
-        }
-        private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Close(); 
-        }
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(StageWnd), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
@@ -67,6 +56,12 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
+        public StageWnd(Editor mainWnd)
+        {
+            InitializeComponent();
+            mainWnd.Closing += MainWnd_Closing;  
+        }
+        private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
             Importer.ImportFileDialog(out Asset result);

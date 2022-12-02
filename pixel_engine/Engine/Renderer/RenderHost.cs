@@ -62,7 +62,7 @@ namespace pixel_renderer
     public class RenderInfo 
     {
          string cachedGCValue = "";
-        const int framesUntilGC_Check = 600;
+        const int framesUntilGC_Check = 120;
         private int framesSinceGC_Check = 0;
         public long lastFrameTime => (long)0.001f; 
         public int framesUntilCheck = 50;

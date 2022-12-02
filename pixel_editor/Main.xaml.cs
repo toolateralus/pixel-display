@@ -61,7 +61,7 @@ namespace pixel_editor
         #endregion
 
         internal EngineInstance? engine;
-        internal RenderHost? Host => Runtime.Instance.renderHost;  
+        internal RenderHost? host => Runtime.Instance.renderHost;  
 
         private readonly Inspector inspector;
         private StageWnd? stageWnd;
@@ -77,8 +77,7 @@ namespace pixel_editor
         }
         private void GetEvents()
         {
-            HandleInputMediator();
-
+           // HandleInputMediator();
             CompositionTarget.Rendering += Update;
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
@@ -89,12 +88,10 @@ namespace pixel_editor
             Action[] inputActions = new Action[]
             {
                 () => { Runtime.Instance.Toggle(); },
-                //() => { Runtime.Instance. },
             };
             Key[] inputs = new Key[]
             {
                 Key.F1,
-                //Key.F2, Key.F3, Key.F4, Key.F5
             };
 
             input = new(inputActions, inputs);
@@ -107,12 +104,13 @@ namespace pixel_editor
             Key.F4,
             Key.F5,
         };
+
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
-            if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null  && Host.State == RenderState.Scene)
+            if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null  && host.State == RenderState.Scene)
             {
-                Host.Render(image);
+                host.Render(image);
                 gcAllocText.Content =
                     $"{Runtime.Instance.renderHost.info.GetTotalMemory()}" +
                     $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
@@ -165,7 +163,7 @@ namespace pixel_editor
         {
             if (Runtime.Instance.stage is null)
             {
-                Host.State = RenderState.Off;
+                host.State = RenderState.Off;
                 viewBtn.Content = "Stage null.";
             }
             renderStateIndex++;
@@ -173,9 +171,9 @@ namespace pixel_editor
             {
                 renderStateIndex = 0;
             }
-            Host.State = (RenderState)renderStateIndex;
-            viewBtn.Content = Host.State.ToString();
-            if (Host.State == RenderState.Game)
+            host.State = (RenderState)renderStateIndex;
+            viewBtn.Content = host.State.ToString();
+            if (host.State == RenderState.Game)
             {
                 var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
                 if (msg != MessageBoxResult.Yes)

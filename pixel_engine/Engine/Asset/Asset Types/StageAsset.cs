@@ -9,13 +9,13 @@ namespace pixel_renderer.Assets
         public List<NodeAsset> nodes;
         public BitmapAsset background;
         public StageSettings settings = new("","");
-        public static StageAsset? Default => new StageAsset("Default Stage", StagingHost.Default());
         /// <summary>
         /// Copies the settings, background, and nodes from the asset to a usable runtime instance.
         /// </summary>
         /// <returns> A copy of the stage asset as an instance of Stage</returns>
         /// 
-        public Stage Copy()=> new("_IGNORE", background, nodes);
+        public Stage Copy()=> new("FROM_ASSET", background, nodes);
+        public static StageAsset? Default => new StageAsset("Default Stage", StagingHost.Default());
         public StageAsset(string name, Stage runtimeValue) : base(name, typeof(Stage))
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();
