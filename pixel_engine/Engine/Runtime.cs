@@ -81,14 +81,15 @@ namespace pixel_renderer
             if (LoadedProject.stages is null) return;
             if (LoadedProject.stages.Count <= stageAssetIndex) return;
             if (LoadedProject.stages[stageAssetIndex] is null) return;
-        
+
             SetStageAsset(LoadedProject.stages[stageAssetIndex]);
-            stage.Reset();
         }
         public void AddStageToProject(StageAsset stageAsset)
         {
-            if (LoadedProject is null) throw new NullReferenceException("Loaded Project reference to a null instance of an object");
-            if (LoadedProject.stages is null) LoadedProject.stages = new();
+            if (LoadedProject is null) 
+                throw new NullReferenceException("Loaded Project reference to a null instance of an object");
+            
+            LoadedProject.stages ??= new();
             LoadedProject.stages.Add(stageAsset);
             SetStageAsset(stageAsset);
         }
@@ -125,7 +126,6 @@ namespace pixel_renderer
             if (renderHost.State is RenderState.Game)   renderHost.Render(mainWnd.renderImage, this);
             Input.Refresh();
         }
-        // NYI, probably wont be implemented as is anyway.
         public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
     }
 }

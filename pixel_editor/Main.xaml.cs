@@ -66,7 +66,6 @@ namespace pixel_editor
         private readonly Inspector inspector;
         private StageWnd? stageWnd;
         private int renderStateIndex = 0;
-        private InputMediator input; 
         public Editor()
         {
             InitializeComponent();
@@ -75,6 +74,17 @@ namespace pixel_editor
             engine = new();
             GetEvents(); 
         }
+
+        private InputMediator input; 
+        Key[] keys = new Key[]
+        {
+            Key.F1,
+            Key.F2,
+            Key.F3,
+            Key.F4,
+            Key.F5,
+        };
+
         private void GetEvents()
         {
            // HandleInputMediator();
@@ -82,7 +92,6 @@ namespace pixel_editor
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
         }
-
         private void HandleInputMediator()
         {
             Action[] inputActions = new Action[]
@@ -95,69 +104,6 @@ namespace pixel_editor
             };
 
             input = new(inputActions, inputs);
-        }
-        Key[] keys = new Key[]
-        {
-            Key.F1,
-            Key.F2,
-            Key.F3,
-            Key.F4,
-            Key.F5,
-        };
-
-        private void Update(object? sender, EventArgs e)
-        {
-            inspector.Update(sender, e);
-            if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null  && host.State == RenderState.Scene)
-            {
-                host.Render(image);
-                gcAllocText.Content =
-                    $"{Runtime.Instance.renderHost.info.GetTotalMemory()}" +
-                    $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
-            }
-            foreach (var key in keys)
-            {
-                switch (key)
-                {
-                    case Key.F1:
-                        if (Input.GetKeyDown(key))
-                            Runtime.Instance.TrySetStageAsset(0);
-                        break;                                                  
-                    case Key.F2:                                             
-                        if (Input.GetKeyDown(key))                 
-                            Runtime.Instance.TrySetStageAsset(1);
-                        break;                                                  
-                    case Key.F3:                                             
-                        if (Input.GetKeyDown(key))                 
-                            Runtime.Instance.TrySetStageAsset(2);
-                            break;                                               
-                    case Key.F4:                                              
-                        if (Input.GetKeyDown(key))                  
-                            Runtime.Instance.TrySetStageAsset(3);
-                        break;                                                  
-                    case Key.F5:                                             
-                        if (Input.GetKeyDown(key))                 
-                            Runtime.Instance.TrySetStageAsset(4);
-                        break;
-                }
-            }
-
-        }
-        private void OnDisable(object? sender, EventArgs e)
-        {
-            stageWnd?.Close(); 
-            engine?.Close();
-        }
-
-        private void OnViewChanged(object sender, RoutedEventArgs e) => IncrementRenderState();
-        private void OnPlay(object sender, RoutedEventArgs e)
-        {
-            Runtime.            Instance.Toggle();  
-            if (Runtime.Instance.IsRunning)
-            {
-                playBtn.Background = Brushes.LightGreen;
-            }
-            else playBtn.Background = Brushes.LightPink; 
         }
         private void IncrementRenderState()
         {
@@ -182,6 +128,69 @@ namespace pixel_editor
                 Runtime.                Instance.mainWnd.Show();
             }
         }
+        private void Update(object? sender, EventArgs e)
+        {
+            inspector.Update(sender, e);
+
+            if (Runtime.Instance.IsRunning && Runtime.Instance.stage is not null  && host.State == RenderState.Scene)
+            {
+                host.Render(image);
+                gcAllocText.Content =
+                    $"{Runtime.Instance.renderHost.info.GetTotalMemory()}" +
+                    $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
+            }
+
+            // Immediately stop reading input because the method in the body of the
+            // case will get called dozens of times while app is in break mode w/ debugger without it.
+
+            foreach (var key in keys)
+                switch (key)
+                {
+                    case Key.F1:
+                        if (Input.GetKeyDown(key))
+                            Input.SetKey(key, false);
+                            Runtime.Instance.TrySetStageAsset(0);
+                        break;                                                  
+                    case Key.F2:                                             
+                        if (Input.GetKeyDown(key))                 
+                            Input.SetKey(key, false);
+                            Runtime.Instance.TrySetStageAsset(1);
+                        break;                                                  
+                    case Key.F3:                                             
+                        if (Input.GetKeyDown(key))                 
+                            Input.SetKey(key, false);
+                            Runtime.Instance.TrySetStageAsset(2);
+                        break;                                               
+                    case Key.F4:                                              
+                        if (Input.GetKeyDown(key))                  
+                            Input.SetKey(key, false);
+                            Runtime.Instance.TrySetStageAsset(3);
+                        break;                                                  
+                    case Key.F5:                                             
+                        if (Input.GetKeyDown(key))                 
+                            Input.SetKey(key, false);
+                            Runtime.Instance.TrySetStageAsset(4);
+                        break;
+                }
+        }
+        private void Wnd_Closed(object? sender, EventArgs e) =>
+            stageWnd = null;    
+
+        private void OnDisable(object? sender, EventArgs e)
+        {
+            stageWnd?.Close(); 
+            engine?.Close();
+        }
+        private void OnPlay(object sender, RoutedEventArgs e)
+        {
+            Runtime.Instance.Toggle();  
+            if (Runtime.Instance.IsRunning)
+            {
+                playBtn.Background = Brushes.LightGreen;
+            }
+            else playBtn.Background = Brushes.LightPink; 
+        }
+        private void OnViewChanged(object sender, RoutedEventArgs e) => IncrementRenderState();
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
             // this cast could be causing erroneous behavior
@@ -200,18 +209,16 @@ namespace pixel_editor
             ProjectIO.SaveProject(Runtime.Instance.LoadedProject);
             Library.Sync();
         }
-        private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
-        {
-            Importer.ImportAssetDialog();
-        }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
             stageWnd = new StageWnd(this);
             stageWnd.Show();
             stageWnd.Closed += Wnd_Closed;
         }
-        private void Wnd_Closed(object? sender, EventArgs e) =>
-            stageWnd = null;
+        private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
+        {
+            Importer.ImportAssetDialog();
+        }
         private void OnLoadProjectPressed(object sender, RoutedEventArgs e)
         {
             Project project = Project.LoadProject();
