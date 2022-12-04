@@ -23,25 +23,19 @@ namespace pixel_renderer
             if (m_renderer is null)
             {
                 State = RenderState.Error;
-                runtime.IsRunning = false;
+                if(runtime.IsRunning) runtime.Toggle();
                 return;
             }
             switch (State)
             {
-                case RenderState.Game:
+                // non erroneous states, no action neccessary
+                case RenderState.Game: break;
+                case RenderState.Scene: break;
 
-                    break;
-                case RenderState.Scene:
-
-                    break;
-                case RenderState.Off:
-
-                    return;
-
+                // stop or throw
+                case RenderState.Off: return;
                 case RenderState.Error:
-                    // replace this with some editor raising error if it's open or if it's in game view just kill the app or something.
                     throw new InvalidOperationException("Rendering failed");
-
                 default:
                     throw new Exception("Invalid case passed into RenderState selection");
             }
@@ -52,7 +46,7 @@ namespace pixel_renderer
         /// performs the rendering loop for one cycle or frame.
         /// </summary>
         /// <param name="renderSurface"></param>
-        private void Cycle(Image renderSurface)
+        private protected void Cycle(Image renderSurface)
         {
             m_renderer.Dispose();
             m_renderer.Draw();
@@ -61,12 +55,14 @@ namespace pixel_renderer
     }
     public class RenderInfo 
     {
-         string cachedGCValue = "";
+        string cachedGCValue = "";
         const int framesUntilGC_Check = 120;
         private int framesSinceGC_Check = 0;
         public long lastFrameTime => (long)0.001f; 
         public int framesUntilCheck = 50;
         public int frameCount;
+
+
         public double Framerate => Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds * frameCount);
         public string GetTotalMemory()
         {
@@ -85,7 +81,6 @@ namespace pixel_renderer
             var megaBytes = bytes / 1048576;
             cachedGCValue = $"gc alloc : {megaBytes} MB";
         }
-             
     }
 }
 

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO.Packaging;
+using System.Runtime.CompilerServices;
 using System.Windows;
 
 namespace pixel_renderer
@@ -9,22 +10,27 @@ namespace pixel_renderer
     {
         private float _drag = 0.0f;
         public float drag = .2f;
+        
         public bool usingGravity = true;
+        public bool IsTrigger = false;
+        
         public Vec2 velocity = new();
-        public Sprite? sprite;
+        public Sprite? sprite; 
+
         const double dragCoefficient = 1;
-        public bool IsTrigger { get; internal set; } = false;
-        public override void Awake()
+        
+        private protected void ApplyVelocity()
         {
-            parentNode.TryGetComponent(out sprite);
+            parent.position.y += velocity.y;
+            parent.position.x += velocity.x;
         }
-        public override void FixedUpdate(float delta)
+        private protected void ApplyDrag()
         {
-            if (usingGravity) velocity.y += CMath.Gravity;
-            ApplyDrag();
-            ApplyVelocity();
+            _drag = (float)GetDrag().Clamp(-drag, drag);
+            velocity.y *= _drag;
+            velocity.x *= _drag;
         }
-        public double GetDrag()
+        private protected double GetDrag()
         {
             double velocity = this.velocity.Length();
             double drag = velocity * velocity * dragCoefficient;
@@ -34,18 +40,17 @@ namespace pixel_renderer
             if (drag < 0) drag = -drag;
             return drag;
         }
-        private protected void ApplyVelocity()
-        {
-            parentNode.position.y += velocity.y;
-            parentNode.position.x += velocity.x;
-        }
-        private protected void ApplyDrag()
-        {
-            _drag = (float)GetDrag().Clamp(-drag, drag);
-            velocity.y *= _drag;
-            velocity.x *= _drag;
-        }
 
+        // Todo: prevent these methods from being overridden.
+        // Immutable Method attribute or something.
+        public override void Awake() => parent.TryGetComponent(out sprite);
+        public override void FixedUpdate(float delta)
+        {
+            if (usingGravity) velocity.y += CMath.Gravity;
+            ApplyDrag();
+            ApplyVelocity();
+        }
+        
     }
 }
 

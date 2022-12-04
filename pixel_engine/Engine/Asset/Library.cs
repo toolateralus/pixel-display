@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Accessibility;
 using pixel_renderer.IO;
 
 namespace pixel_renderer.Assets
@@ -76,20 +78,27 @@ namespace pixel_renderer.Assets
         public static List<Asset>? Clone()
         {
             List<Asset> library = new();
-
             foreach (var key in LoadedAssets)
                 foreach (var item in key.Value)
                     library.Add(item);
-
             return library;
         }
         public static void Register(Type type, Asset asset)
         {
             if (!LoadedAssets.ContainsKey(type))
                 LoadedAssets.Add(type, new List<Asset>());
-
             LoadedAssets[type].Add(asset);
         }
+        public static async Task RegisterAsync(Type type, Asset asset)
+        {
+            if (!LoadedAssets.ContainsKey(type))
+                LoadedAssets.Add(type, new List<Asset>());
+            await Task.Run(()=> m_register_asset?.Invoke(type, asset)); 
+        }
+
+
+        public static  Action<Type, Asset> m_register_asset => (o , e) => { LoadedAssets[o].Add(e); };
+      
         public static void Unregister(Type type, string Name)
         {
             foreach (var asset in from asset in LoadedAssets[type]

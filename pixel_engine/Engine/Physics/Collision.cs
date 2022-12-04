@@ -142,12 +142,12 @@ namespace pixel_renderer
         {
             if (A.IsTrigger || B.IsTrigger)
             {
-                A.parentNode.OnTrigger(B);
-                B.parentNode.OnTrigger(A);
+                A.parent.OnTrigger(B);
+                B.parent.OnTrigger(A);
                 return;
             }
-            A.parentNode.OnCollision(B);
-            B.parentNode.OnCollision(A);
+            A.parent.OnCollision(B);
+            B.parent.OnCollision(A);
         }
         public async static Task Run()
         {
@@ -156,7 +156,7 @@ namespace pixel_renderer
                 if(HasTasks) FinalPhase();
                 return; 
             }
-            var stage = Runtime.Instance.stage; 
+            var stage = Runtime.Instance.GetStage(); 
             await Task.Run(() => RegisterCollidersAsync(stage));
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
@@ -170,7 +170,7 @@ namespace pixel_renderer
             if (velocityDifference < 0.1f)
                 velocityDifference = 1f;
 
-            Vec2 direction = (B.parentNode.position - A.parentNode.position).Normalize();
+            Vec2 direction = (B.parent.position - A.parent.position).Normalize();
 
             // make sure not NaN after possibly dividing by zero in Normalize();
             direction = direction.SqrMagnitude() is float.NaN ? Vec2.zero : direction;
@@ -182,8 +182,8 @@ namespace pixel_renderer
             B.velocity = Vec2.zero;
             A.velocity = Vec2.zero;
 
-            B.parentNode.position += depenetrationForce;
-            A.parentNode.position += CMath.Negate(depenetrationForce);
+            B.parent.position += depenetrationForce;
+            A.parent.position += CMath.Negate(depenetrationForce);
 
             depenetrationForce *= 0.5f;
             return; 

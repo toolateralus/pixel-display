@@ -10,14 +10,14 @@
         IEnumerable<Sprite>? sprites_cached = null; 
         public override Bitmap Draw()
         {
-            sprites_cached = Runtime.Instance.stage.GetSprites();
+            sprites_cached = Runtime.Instance.GetStage().GetSprites();
             foreach (Sprite sprite in sprites_cached)
             {
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
-                        int offsetX =(int)sprite.parentNode.position.x + x;
-                        int offsetY =(int)sprite.parentNode.position.y + y;
+                        int offsetX =(int)sprite.parent.position.x + x;
+                        int offsetY =(int)sprite.parent.position.y + y;
 
                         if (offsetX is < 0 or >= Settings.ScreenW
                             || offsetY is < 0 or >= Settings.ScreenH) continue;
@@ -34,7 +34,7 @@
             get 
             {
                 if (_background is null)
-                    _background = Runtime.Instance.stage.Background.Colors.ToBitmap(); 
+                    _background = Runtime.Instance.GetStage().Background.Colors.ToBitmap(); 
                 return _background; 
             }
         }

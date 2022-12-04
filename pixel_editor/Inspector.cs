@@ -18,11 +18,8 @@ namespace pixel_editor
             this.name = name ?? new();
             this.objInfo = objInfo ?? new();
             this.componentGrid = componentGrid ?? new();
-
-            this.name.Content = "Object Name";
-            this.objInfo.Content = "Object Info";
-            // TODO : implement awake event or message call, not calling a method xD
-
+            this.name.Content = "_";
+            this.objInfo.Content = "_";
             Awake();
         }
 
@@ -31,10 +28,12 @@ namespace pixel_editor
         private Label name;
         private Label objInfo;
         private Grid componentGrid;
+        
         private Dictionary<Type, List<Component>> components = new();
 
         public event Action OnObjectSelected;
         public event Action OnObjectDeselected;
+        
         public event Action OnInspectorUpdated;
 
         public event Action OnComponentAdded;
@@ -46,23 +45,10 @@ namespace pixel_editor
             OnObjectDeselected += Refresh;
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
-
-            Runtime.
-            Instance.InspectorEventRaised += Instance_InspectorEventRaised;
+            Runtime.Instance.InspectorEventRaised += Instance_InspectorEventRaised;
         }
-        private void Instance_InspectorEventRaised(InspectorEvent e)
-        {
-            Runtime.            Instance.IsRunning = false; 
-            var msg = MessageBox.Show(e.expression.ToString(), e.message, MessageBoxButton.YesNo);
-            var args = e.expressionArgs;
-            if (args.Length < 4) return;
-            e.expression(args[0], args[1] ?? null, args[2] ?? null, args[3] ?? null);
-        }
-
-        public void Update(object? sender, EventArgs e)
-        {
-
-        }
+        public void Update(object? sender, EventArgs e) { }
+        
         private void Refresh()
         {
             if (loadedNode == null) return;
@@ -121,6 +107,7 @@ namespace pixel_editor
             component.SetValue(Grid.RowProperty, i + i + i);
             component.SetValue(Grid.ColumnProperty, 6);
         }
+
         public static string GetComponentInfo(Component component)
         {
             IEnumerable<FieldInfo> fields = component.GetSerializedFields(); 
@@ -132,16 +119,12 @@ namespace pixel_editor
             }
             return output;
         }
-
         public static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetRuntimeFields();
             properties = component.GetType().GetRuntimeProperties();
 
         }
-        
-          
-               
         public static void GetComponentInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetFields();
@@ -186,5 +169,20 @@ namespace pixel_editor
             BorderBrush = Brushes.Black,
             BorderThickness = new Thickness(1, 1, 1, 1),
         };
+        
+        private void Instance_InspectorEventRaised(InspectorEvent e)
+        {
+            if (Runtime.Instance.IsRunning) 
+                    Runtime.Instance.Toggle();  
+
+            var msg = MessageBox.Show(e.expression.ToString(),
+                                      e.message, 
+                                      MessageBoxButton.YesNo);
+
+            var args = e.expressionArgs;
+
+            if (args.Length < 4) return;
+                 e.expression(args[0], args[1] ?? null, args[2] ?? null, args[3] ?? null);
+        }
     }
 }

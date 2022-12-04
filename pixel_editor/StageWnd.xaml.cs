@@ -79,10 +79,7 @@ namespace pixel_editor
         {
             int count = nodeCtTxt.Text.ToInt();
             var name = stageNameTxt.Text.ToFileNameFormat();
-
             List<Node> nodes = new();
-
-                
             if (usingStarterAssets) StagingHost.AddPlayer(nodes);
             if (background is null)
             {
@@ -90,20 +87,16 @@ namespace pixel_editor
                 await Task.Run(Importer.ImportAssetDialog);
                 if (background is null) return;
             }
-
             var stage = new Stage(name, new("",background), nodes.ToNodeAssets());
             for (int i = 0; i < count; i++) stage.create_generic_node();
-
             var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
-
-                var asset = new StageAsset(stage.Name, stage);
-                Library.Register(typeof(Stage), asset);
-         
+            var asset = new StageAsset(stage.Name, stage);
+            Library.Register(typeof(Stage), asset);
             if (msgResult == MessageBoxResult.Yes)
+            {
                 Runtime.Instance.SetStageAsset(asset);
                 Runtime.Instance.AddStageToProject(asset);
-
-
+            }
             Close(); 
         }
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;

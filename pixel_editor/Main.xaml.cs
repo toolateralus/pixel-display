@@ -60,12 +60,6 @@ namespace pixel_editor
         }
         #endregion
 
-        internal EngineInstance? engine;
-        internal RenderHost? host => Runtime.Instance.renderHost;  
-
-        private readonly Inspector inspector;
-        private StageWnd? stageWnd;
-        private int renderStateIndex = 0;
         public Editor()
         {
             InitializeComponent();
@@ -74,18 +68,9 @@ namespace pixel_editor
             engine = new();
             GetEvents(); 
         }
-
-
-        private void GetEvents()
-        {
-           // HandleInputMediator();
-            CompositionTarget.Rendering += Update;
-            Closing += OnDisable;
-            image.MouseLeftButtonDown += Mouse0;
-        }
         
-        private InputMediator input; 
-        Key[] keys = new Key[]
+        private int renderStateIndex = 0;
+        private Key[] keys = new Key[]
         {
             Key.F1,
             Key.F2,
@@ -93,6 +78,14 @@ namespace pixel_editor
             Key.F4,
             Key.F5,
         };
+
+        private readonly Inspector inspector;
+        private StageWnd? stageWnd;
+        private InputMediator input; 
+
+        internal EngineInstance? engine;
+        internal RenderHost? host => Runtime.Instance.renderHost;  
+
         private void HandleInputMediator()
         {
             Action[] inputActions = new Action[]
@@ -106,10 +99,16 @@ namespace pixel_editor
 
             input = new(inputActions, inputs);
         }
-
+        private void GetEvents()
+        {
+           // HandleInputMediator();
+            CompositionTarget.Rendering += Update;
+            Closing += OnDisable;
+            image.MouseLeftButtonDown += Mouse0;
+        }
         private void IncrementRenderState()
         {
-            if (Runtime.Instance.stage is null)
+            if (Runtime.Instance.GetStage() is null)
             {
                 host.State = RenderState.Off;
                 viewBtn.Content = "Stage null.";
@@ -134,8 +133,9 @@ namespace pixel_editor
         {
             inspector.Update(sender, e);
 
+            // render and update gc alloc text in editor.
             if (Runtime.Instance.IsRunning 
-                && Runtime.Instance.stage is not null  
+                && Runtime.Instance.GetStage() is not null  
                 && host.State == RenderState.Scene)
                 {
                     host.Render(image);
@@ -146,7 +146,6 @@ namespace pixel_editor
 
             // Immediately stop reading input because the method in the body of the
             // case will get called dozens of times while app is in break mode w/ debugger without it.
-
             foreach (var key in keys)
                 switch (key)
                 {
@@ -156,15 +155,17 @@ namespace pixel_editor
                             Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(0);
                         }
-                        break;                                                  
+                        break;         
+                        
                     case Key.F2:                                             
                         if (Input.GetKeyDown(key))
                         {
                             Input.SetKey(key, false);
-                            if(Runtime.Instance.GetStageAsset() != null)
-                                Runtime.Instance.stage = Runtime.Instance.stage.Reset();
+                            if (Runtime.Instance.GetStageAsset() != null)
+                                Runtime.Instance.ResetCurrentStage();
                         }
                         break;                                                  
+
                     case Key.F3:                                             
                         if (Input.GetKeyDown(key))
                         {
@@ -172,6 +173,7 @@ namespace pixel_editor
                             Runtime.Instance.TrySetStageAsset(2);
                         }
                         break;                                               
+
                     case Key.F4:                                              
                         if (Input.GetKeyDown(key))
                         {
@@ -179,6 +181,7 @@ namespace pixel_editor
                             Runtime.Instance.TrySetStageAsset(3);
                         }
                         break;                                                  
+
                     case Key.F5:                                             
                         if (Input.GetKeyDown(key))
                         {
@@ -186,13 +189,12 @@ namespace pixel_editor
                             Runtime.Instance.TrySetStageAsset(4);
                         }
                         break;
+
                 }
         }
         private void Wnd_Closed(object? sender, EventArgs e) =>
             stageWnd = null;    
 
-
-        // WPF Control Events.
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
             // this cast could be causing erroneous behavior
@@ -201,7 +203,7 @@ namespace pixel_editor
             if (Runtime.Instance.IsRunning)
             {
                 inspector.DeselectNode();
-                if (Runtime.Instance.stagingHost.GetNodeAtPoint(Runtime.Instance.stage, pos, out Node node))
+                if (Runtime.Instance.stagingHost.GetNodeAtPoint(Runtime.Instance.GetStage(), pos, out Node node))
                     inspector.SelectNode(node);
             }
         }
@@ -244,12 +246,10 @@ namespace pixel_editor
         }
     }
     /// <summary>
-    ///  not done
+    ///  not done, serves as a crutch between engine and editor input, subscribing events to key presses. 
     /// </summary>
     internal class InputMediator
     {
-        public Dictionary<Key, Action> InputEvents = new Dictionary<Key, Action>();
-
         public InputMediator(Action[] events, Key[] keys)
         {
             foreach (var _key in keys)
@@ -261,7 +261,7 @@ namespace pixel_editor
 
             CompositionTarget.Rendering += Update;
         }
-
+        public Dictionary<Key, Action> InputEvents = new Dictionary<Key, Action>();
         private void Update(object? sender, EventArgs e)
         {
             foreach (var key in InputEvents.Keys)

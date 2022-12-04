@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace pixel_renderer.Assets
 {
-    public class Asset
+    public record Asset
     {
         public string pathFromRoot = "";
         public string fileSize = "";

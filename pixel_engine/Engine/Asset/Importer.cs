@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using pixel_renderer.IO;
+using System.Runtime.CompilerServices;
+using System.Windows.Media;
 
 namespace pixel_renderer.Assets
 {
@@ -18,6 +20,8 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static async Task ImportAsync(bool showMessage = false)
         {
+
+            
             if (Runtime.Instance.IsRunning)
                 if (showMessage)
                 {
@@ -29,7 +33,7 @@ namespace pixel_renderer.Assets
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
 
-            await Task.Run(ImportTask);
+              await ImportAsyncTask(); 
 
             if (!Runtime.Instance.IsRunning)
                 if (showMessage)
@@ -42,11 +46,11 @@ namespace pixel_renderer.Assets
                     if (syncResult == MessageBoxResult.Yes) Library.Sync();
                 }
         }
-        private static void ImportTask()
+        private static async Task ImportAsyncTask()
         {
             var randomIntString = JRandom.Int(0, 250).ToString(); 
-            foreach (var asset in from dir in Directory.GetDirectories(Path)
-                                  from file in Directory.GetFiles(dir)
+            foreach (var asset in from dir in Directory.EnumerateDirectories(Path)
+                                  from file in Directory.EnumerateFiles(dir)
                                   let typeString = file.Split('.')[1]
                                   let typeRef = TypeFromExtension(typeString)
                                   let asset = TryPullObject(file, typeRef, typeString + randomIntString)
@@ -54,7 +58,7 @@ namespace pixel_renderer.Assets
                                   select asset)
             {
                 asset.fileType ??= typeof(Asset);
-                Library.Register(asset.fileType, asset);
+                await Library.RegisterAsync(asset.fileType, asset);
             };
         }
         /// <summary>

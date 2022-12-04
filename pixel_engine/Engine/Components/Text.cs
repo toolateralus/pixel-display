@@ -34,9 +34,9 @@ namespace pixel_renderer
                     dirty = true,
                     size = new Vec2(bmp.Width, bmp.Height),
                 };
-                parentNode.AddComponent(sprite);
+                parent.AddComponent(sprite);
             }
-            var components = parentNode.GetComponents<Sprite>();
+            var components = parent.GetComponents<Sprite>();
             foreach (var component in components)
             sprites.Add(component ?? new(0, 0));
         }
@@ -71,7 +71,7 @@ namespace pixel_renderer
             foreach (var x in sprites)
             {
                 if (positions.Count <= i) continue; 
-                x.parentNode.position = positions[i];
+                x.parent.position = positions[i];
                 ++i; 
             }
         }

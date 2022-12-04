@@ -11,8 +11,18 @@ namespace pixel_renderer
 
     public class Stage
     {
+        [JsonIgnore]
+        public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+        [JsonConstructor]
+        public Stage(string Name, BitmapAsset Background, List<NodeAsset> nodes)
+        {
+            this.Name = Name;
+            this.Background = Background;
+            Nodes = nodes.ToNodeList();
+            Awake();
+        }
+       
         public string Name { get; set; }
-
         private string _uuid = "";
         public string UUID 
         { 
@@ -22,9 +32,7 @@ namespace pixel_renderer
             } 
             init => _uuid = pixel_renderer.UUID.NewUUID(); 
         }
-        
-        [JsonIgnore]
-        public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+
         public List<Node> Nodes { get; private set; } = new();
         public event Action OnQueryMade;
 
@@ -41,7 +49,6 @@ namespace pixel_renderer
                 node.Awake();
             }
         }
-        
         public void RefreshStageDictionary()
         {
             foreach (Node node in Nodes)
@@ -50,15 +57,6 @@ namespace pixel_renderer
                 if (!NodesByName.ContainsKey(node.Name))
                     NodesByName.Add(node.Name, node);
             }
-        }
-        
-        public IEnumerable<Sprite> GetSprites()
-        {
-            var sprite = new Sprite(); 
-            IEnumerable<Sprite> sprites =(from Node node in Nodes
-                                          where node.TryGetComponent(out sprite)
-                                          select sprite);
-            return sprites;  
         }
         public Node[] FindNodesByTag(string tag)
         {
@@ -80,6 +78,14 @@ namespace pixel_renderer
                     .Where(node => node.Name == name)
                     .First();
         }
+        public IEnumerable<Sprite> GetSprites()
+        {
+            var sprite = new Sprite(); 
+            IEnumerable<Sprite> sprites =(from Node node in Nodes
+                                          where node.TryGetComponent(out sprite)
+                                          select sprite);
+            return sprites;  
+        }
         
         public void AddNode(Node node) => Nodes.Add(node);
         public Stage Reset()
@@ -98,7 +104,9 @@ namespace pixel_renderer
            Nodes.Clear();
         }
 
-        // less permanent solution, python syntax to make it disgusting and unusuable 
+        /// <summary>
+        /// less permanent solution, python syntax to make it disgusting and unusuable 
+        /// </summary>
         public void create_generic_node()
         {
             // random variables used here;
@@ -112,9 +120,13 @@ namespace pixel_renderer
                 usingGravity = true,
                 drag = .1f
             });
-            node.AddComponent(new Wind((Direction)args[5]));
+            node.AddComponent(new Wind((Dir)args[5]));
             AddNode(node);
         }
+        /// <summary>
+        /// gets a random set of args for internal node creation
+        /// </summary>
+        /// <returns></returns>
         private object[] r_node_args()
         {
             int r_int = JRandom.Int(0,255);
@@ -122,21 +134,13 @@ namespace pixel_renderer
             Vec2 r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
             Color r_color = JRandom.Color();
             bool r_bool = JRandom.Bool();
-            Direction r_dir = JRandom.Direction();
+            Dir r_dir = JRandom.Direction();
             return new object[] { r_int, r_pos, r_vec, r_color, r_bool, r_dir }; 
         }
 
         public BitmapAsset Background;
-        public StageSettings Settings => new(Name, this.UUID);
+        public StageSettings Settings => new(Name, UUID);
         
-        [JsonConstructor]
-        public Stage(string Name, BitmapAsset Background, List<NodeAsset> nodes)
-        {
-            this.Name = Name;
-            this.Background = Background;
-            Nodes = nodes.ToNodeList();
-            Awake();
-        }
     }
    
 }

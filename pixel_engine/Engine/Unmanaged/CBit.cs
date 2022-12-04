@@ -18,7 +18,9 @@ namespace pixel_renderer
     public unsafe static class CBit
     {
         [DllImport("PIXELRENDERER")] internal unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
+        
         [DllImport("gdi32.dll")] internal static extern bool DeleteObject(IntPtr intPtr);
+        
         public unsafe static void ReadonlyBitmapData(in Bitmap bmp ,out BitmapData bmd, out int stride, out byte[] data)
         {
             Bitmap copy = bmp.Clone() as Bitmap;
@@ -29,6 +31,7 @@ namespace pixel_renderer
             Marshal.Copy(bmd.Scan0, data, 0, data.Length);
             copy.UnlockBits(bmd);
         }
+        
         /// <summary>
         /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
         /// </summary>
@@ -45,6 +48,7 @@ namespace pixel_renderer
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
+        
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
         /// </summary>
@@ -58,7 +62,6 @@ namespace pixel_renderer
                                   System.Drawing.Imaging.ImageLockMode.WriteOnly,
                                   PixelFormat.Format32bppArgb);
 
-            Color[] colors = ColorGraph( sprites);
             // draw sprite data to bitmap unmanaged
             byte[] colorBytes = new byte[bmd.Width * bmd.Height];
 
@@ -70,15 +73,6 @@ namespace pixel_renderer
                 colorBytes[i + 2] = 15;
                 colorBytes[i + 3] = 15;
             }
-            //for (var i = 0; i < bmd.Width * bmd.Height; ++i)
-            //{
-            //    var offset = i * 4;
-            //    if (i > colors.Length + 4) continue; 
-            //    colorBytes[offset + 0] = colors[offset].B;
-            //    colorBytes[offset + 1] = colors[offset].G;
-            //    colorBytes[offset + 2] = colors[offset].R;
-            //    colorBytes[offset + 3] = colors[offset].A;
-            //}
 
             int start = 0;
             int length = colorBytes.Length; 
@@ -92,6 +86,7 @@ namespace pixel_renderer
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
+        
         /// <summary>
         /// Takes a group of sprites and writes their individual color data arrays to a larger map to prepare for collision and drawing.
         /// </summary>
@@ -104,8 +99,8 @@ namespace pixel_renderer
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
-                        var offsetX = sprite.parentNode.position.x + x;
-                        var offsetY = sprite.parentNode.position.y + y;
+                        var offsetX = sprite.parent.position.x + x;
+                        var offsetY = sprite.parent.position.y + y;
 
                         if (offsetX is < 0 or >= Settings.ScreenW
                             || offsetY is < 0 or >= Settings.ScreenH) continue;
@@ -114,6 +109,7 @@ namespace pixel_renderer
                     }
             return colors;
         }
+        
         public static unsafe Color[,] ColorArrayFromBitmapData(BitmapData bmd, int stride, byte[] data)
         {
             int curRowOffs = 0;

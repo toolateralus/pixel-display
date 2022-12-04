@@ -14,9 +14,7 @@ namespace pixel_renderer.IO
         public static void SaveAsset(Asset data, string fileName)
         {
             if (!Directory.Exists(Path))
-            {
                 Directory.CreateDirectory(Path);
-            }
 
             if (File.Exists(Path + "/" + fileName + Settings.AssetsFileExtension))
             {
@@ -102,5 +100,4 @@ namespace pixel_renderer.IO
             }
         }
     }
-
 }

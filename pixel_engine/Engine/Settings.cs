@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.PerformanceData;
+using System.Linq;
 using System.Reflection.Metadata;
 
 namespace pixel_renderer
@@ -66,6 +68,14 @@ namespace pixel_renderer
         public const string ProjectFileExtension = ".pxpj";   // pxpj {Pixel Project}
         public static string AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);    // Root directory for resources
         #endregion
+        private static List<Type> GetInheritedTypesFromBase<T>()
+        {
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+               .SelectMany(domainAssembly => domainAssembly.GetTypes())
+               .Where(type => typeof(T).IsAssignableFrom(type)).ToList();
+            return types;
+        }
+
     }
 
 }

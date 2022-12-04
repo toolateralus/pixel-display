@@ -11,6 +11,7 @@ namespace pixel_renderer.IO
         {
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
+
             if (File.Exists(Path + "/" + project.Name + Settings.ProjectFileExtension))
             {
                     var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite Project {project.Name}.pxpj ? \n found at {Path}",
@@ -21,12 +22,15 @@ namespace pixel_renderer.IO
                         return;
                     }
             }
+            
             using TextWriter writer = new StreamWriter(Path + "/" + project.Name + Settings.ProjectFileExtension);
+            
             var settings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
             };
             var jsonSerializer = JsonSerializer.Create(settings);
+            
             jsonSerializer.Serialize(writer, project);
             writer.Close();
         }
@@ -60,5 +64,4 @@ namespace pixel_renderer.IO
             return;
         }
     }
-
 }

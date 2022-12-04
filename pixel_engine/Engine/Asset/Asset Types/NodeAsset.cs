@@ -8,7 +8,7 @@ using System.Windows.Documents;
 
 namespace pixel_renderer.Assets
 {
-    public class NodeAsset : Asset
+    public record NodeAsset : Asset
     {
         public string nodeName;
         public string nodeUUID; 
@@ -42,8 +42,7 @@ namespace pixel_renderer.Assets
             Node node = new Node(nodeName, pos, scale, UUID);
             foreach (var comp in components)
             {
-
-                var name = comp.fileType.Name;
+                string name = comp.fileType.Name;
                 switch(name)
                 {
                     case "Text":
@@ -70,29 +69,21 @@ namespace pixel_renderer.Assets
             return node;
         }
 
-        private static List<Type> GetInheritedTypesFromBase<T>()
-        {
-            var types = AppDomain.CurrentDomain.GetAssemblies()
-               .SelectMany(domainAssembly => domainAssembly.GetTypes())
-               .Where(type => typeof(T).IsAssignableFrom(type)).ToList();
-            return types; 
-        }
     }
 
-    public class ComponentAsset : Asset
+    public record ComponentAsset : Asset
     {
         public Component runtimeComponent;
-        [JsonConstructor]
-        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, fileType, UUID)
-        {
-            this.runtimeComponent = runtimeComponent;
-        }
+        
         public ComponentAsset(string name, Component component, Type type)
         {
             runtimeComponent = component;
             fileType = type;
             Name = name;
         }
+        
+        [JsonConstructor]
+        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, fileType, UUID) => this.runtimeComponent = runtimeComponent;
     }
   
   

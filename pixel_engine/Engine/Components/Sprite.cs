@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Newtonsoft.Json;
 using pixel_renderer;
 using Color = System.Drawing.Color;
 
@@ -7,6 +8,7 @@ namespace pixel_renderer
 {
     public class Sprite : Component
     {
+        [JsonIgnore]
         public Bitmap? image;
         public Vec2 size = new Vec2();
         public Color[,] colorData;
@@ -21,10 +23,7 @@ namespace pixel_renderer
 
 
         }
-        public override void Update()
-        {
-     
-        }
+        public override void Update(){}
       
         public void Randomize()
         {
@@ -104,22 +103,9 @@ namespace pixel_renderer
                     colorData[x, y] = color;
             return colorData; 
         }
-
-        public Sprite()
-        {
-            colorData = new Color[0,0]; 
-        }
-        public Sprite(int x, int y)
-        {
-            Vec2 size = new(x, y);
-            this.size = size;
-        }
-        public Sprite(Vec2 size, Color color, bool isCollider)
-        {
-            DrawSquare(size, color, isCollider);
-        }
-        
+             
+        public Sprite() => colorData = new Color[0,0];
+        public Sprite(int x, int y) => size = new(x, y);
+        public Sprite(Vec2 size, Color color, bool isCollider) => DrawSquare(size, color, isCollider);
     }
-
-
 }

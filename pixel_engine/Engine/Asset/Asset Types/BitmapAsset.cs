@@ -6,7 +6,7 @@ using System.Drawing.Imaging;
 
 namespace pixel_renderer.Assets
 {
-    public class BitmapAsset : Asset
+    public record BitmapAsset : Asset
     {
         [JsonIgnore]
         public Bitmap RuntimeValue;
