@@ -13,7 +13,7 @@ namespace pixel_renderer.Assets
     {
         public string nodeName;
         public string nodeUUID; 
-        public List<ComponentAsset> components = new();
+        public List<ComponentAsset> components = new();  
         public Vec2 pos, scale;
         public List<NodeAsset> children;
 

@@ -147,50 +147,35 @@ namespace pixel_editor
             // Immediately stop reading input because the method in the body of the
             // case will get called dozens of times while app is in break mode w/ debugger.
             foreach (var key in keys)
+            {
+                if (Input.GetKeyDown(key)) return;
+                    Input.SetKey(key, false);
+
                 switch (key)
                 {
                     case Key.F1:
-                        if (Input.GetKeyDown(key))
-                        {
-                            Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(0);
-                        }
                         break;         
                         
                     case Key.F2:                                             
-                        if (Input.GetKeyDown(key))
-                        {
-                            Input.SetKey(key, false);
                             if (Runtime.Instance.GetStageAsset() != null)
                                 Runtime.Instance.ResetCurrentStage();
-                        }
                         break;                                                  
 
                     case Key.F3:                                             
-                        if (Input.GetKeyDown(key))
-                        {
-                            Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(2);
-                        }
                         break;                                               
 
                     case Key.F4:                                              
-                        if (Input.GetKeyDown(key))
-                        {
-                            Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(3);
-                        }
                         break;                                                  
 
                     case Key.F5:                                             
-                        if (Input.GetKeyDown(key))
-                        {
-                            Input.SetKey(key, false);
                             Runtime.Instance.TrySetStageAsset(4);
-                        }
                         break;
 
                 }
+            }
         }
         private void Wnd_Closed(object? sender, EventArgs e) =>
             stageWnd = null;    
