@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace pixel_renderer.Assets
 {
-    public record FontAsset : Asset
+    public class FontAsset : Asset
     {
         new public string Name = "New Font Asset";
         public Dictionary<char, Bitmap> characters = new();

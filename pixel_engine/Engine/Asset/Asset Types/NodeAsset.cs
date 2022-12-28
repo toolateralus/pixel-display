@@ -5,10 +5,11 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Documents;
+using System.Xml.Linq;
 
 namespace pixel_renderer.Assets
 {
-    public record NodeAsset : Asset
+    public class NodeAsset : Asset
     {
         public string nodeName;
         public string nodeUUID; 
@@ -40,38 +41,11 @@ namespace pixel_renderer.Assets
         public Node Copy()
         {
             Node node = new Node(nodeName, pos, scale, UUID);
-            foreach (var comp in components)
-            {
-                string name = comp.fileType.Name;
-                switch(name)
-                {
-                    case "Text":
-                        node.AddComponent(comp.runtimeComponent as Text);
-                        break;
-                    case "Player":
-                        node.AddComponent(comp.runtimeComponent as Player);
-                        break;
-                    case "Rigidbody":
-                        node.AddComponent(comp.runtimeComponent as Rigidbody);
-                        break;
-                    case "Sprite":
-                        node.AddComponent(comp.runtimeComponent as Sprite);
-                        break;
-                    case "Wind":
-                        node.AddComponent(comp.runtimeComponent as Wind);
-                        break;
-                    default: 
-                        throw new MissingComponentException();
-
-                }
-                 
-            }
             return node;
         }
-
     }
 
-    public record ComponentAsset : Asset
+    public class ComponentAsset : Asset
     {
         public Component runtimeComponent;
         
@@ -81,9 +55,17 @@ namespace pixel_renderer.Assets
             fileType = type;
             Name = name;
         }
-        
+
         [JsonConstructor]
-        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, fileType, UUID) => this.runtimeComponent = runtimeComponent;
+        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, fileType, UUID) 
+        {
+            // somehow we need to keep a constant reference to the type and any data that needs to be saved; 
+            // we cannot instantiate a component of unknown type at runtime. 
+            // this is potentially the sole reason the scene seems to be empty when loading from an asset: the Components list and dict
+            // are always null after initializing from a file;
+            this.runtimeComponent = runtimeComponent; 
+        }
+        
     }
   
   

@@ -145,7 +145,7 @@ namespace pixel_editor
                 }
 
             // Immediately stop reading input because the method in the body of the
-            // case will get called dozens of times while app is in break mode w/ debugger without it.
+            // case will get called dozens of times while app is in break mode w/ debugger.
             foreach (var key in keys)
                 switch (key)
                 {

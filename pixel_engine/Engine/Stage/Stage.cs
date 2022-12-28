@@ -13,6 +13,7 @@ namespace pixel_renderer
     {
         [JsonIgnore]
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+        public Stage() { }
         [JsonConstructor]
         public Stage(string Name, BitmapAsset Background, List<NodeAsset> nodes)
         {
@@ -38,7 +39,8 @@ namespace pixel_renderer
 
         public void FixedUpdate(float delta)
         {
-            foreach (Node node in Nodes) node.FixedUpdate(delta); 
+            foreach (Node node in Nodes) 
+                node.FixedUpdate(delta); 
         }
         public void Awake()
         {
@@ -57,6 +59,14 @@ namespace pixel_renderer
                 if (!NodesByName.ContainsKey(node.Name))
                     NodesByName.Add(node.Name, node);
             }
+
+            List<Node> nodesToRemove = new();
+
+            foreach (var pair in NodesByName)
+                if (!Nodes.Contains(pair.Value))
+                    nodesToRemove.Add(pair.Value);
+
+            nodesToRemove.Clear();
         }
         public Node[] FindNodesByTag(string tag)
         {

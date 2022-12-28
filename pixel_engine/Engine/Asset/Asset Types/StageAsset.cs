@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace pixel_renderer.Assets
 {
-    public record StageAsset : Asset
+    public class StageAsset : Asset
     {
         /// <summary>
         /// Do not use this, this is open only for file reading purposes
@@ -30,12 +30,18 @@ namespace pixel_renderer.Assets
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();
            background = runtimeValue.Background;
-            settings = new(runtimeValue.Name, runtimeValue.UUID);
+           settings = new(runtimeValue.Name, runtimeValue.UUID);
         }
         public List<NodeAsset> nodes;
         public BitmapAsset background;
         public StageSettings settings;
         public static StageAsset? Default => new StageAsset("Default Stage", StagingHost.Default());
-        public Stage Copy()=> new("FROM_ASSET", background, nodes);
+        public Stage Copy()
+        {
+            background.RuntimeValue = background.BitmapFromColorArray();
+
+            var output =new Stage($"{Name} #FROM ASSET#", background, nodes);
+            return output;  
+        }
     }
 }

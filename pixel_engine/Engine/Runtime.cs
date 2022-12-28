@@ -63,7 +63,6 @@ namespace pixel_renderer
                 m_stage = m_stageAsset?.Copy();
             return m_stage;
         }
-        private protected void SetStage(Stage? value) => m_stage = value;
 
         public static async Task AwakeAsync(EngineInstance mainWnd, Project project)
         {
@@ -80,11 +79,25 @@ namespace pixel_renderer
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
             PhysicsInitialized = true;
         }
-        public void SetProject(Project project) =>  LoadedProject = project;
+        
         public StageAsset? GetStageAsset() => m_stageAsset;
-        public void ResetCurrentStage() => SetStage(m_stageAsset?.Copy()); 
-        public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
+        public void SetProject(Project project) =>  LoadedProject = project;
 
+        public void ResetCurrentStage()
+        {
+            if (IsRunning) Toggle();
+            SetStage(m_stageAsset?.Copy());
+            if (!IsRunning) Toggle();
+        }
+        public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
+        private protected void SetStage(Stage? value) 
+        {
+            if (IsRunning) Toggle();
+            m_stage = null; 
+            m_stage = value;
+            if (!IsRunning) Toggle();
+
+        }
         public void AddStageToProject(StageAsset stageAsset)
         {
             if (LoadedProject is null) 
@@ -101,17 +114,13 @@ namespace pixel_renderer
             if (LoadedProject.stages is null) return;
             if (LoadedProject.stages.Count <= stageAssetIndex) return;
             if (LoadedProject.stages[stageAssetIndex] is null) return;
-
-            SetStageAsset(LoadedProject.stages[stageAssetIndex]);
+                SetStageAsset(LoadedProject.stages[stageAssetIndex]);
         }
         public void SetStageAsset(StageAsset stageAsset)
         {
-            lock (m_stage)
-            {
-                if (IsRunning) Toggle();
-                SetStage(null); 
-                m_stageAsset = stageAsset;
-            }
+            if (IsRunning) Toggle();
+            m_stageAsset = stageAsset;
+            if (!IsRunning) Toggle();
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
