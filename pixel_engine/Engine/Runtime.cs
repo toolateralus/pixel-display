@@ -85,9 +85,14 @@ namespace pixel_renderer
 
         public void ResetCurrentStage()
         {
-            if (IsRunning) Toggle();
+            bool wasPaused = false;
+            if (IsRunning)
+            {
+                wasPaused = true;
+                Toggle();
+            }
             SetStage(m_stageAsset?.Copy());
-            if (!IsRunning) Toggle();
+            if (!IsRunning && wasPaused) Toggle();
         }
         public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
         private protected void SetStage(Stage? value) 

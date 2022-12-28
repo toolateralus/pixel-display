@@ -201,9 +201,7 @@ namespace pixel_editor
         {
             Runtime.Instance.Toggle();  
             if (Runtime.Instance.IsRunning)
-            {
                 playBtn.Background = Brushes.LightGreen;
-            }
             else playBtn.Background = Brushes.LightPink; 
         }
         private void OnViewChanged(object sender, RoutedEventArgs e) => IncrementRenderState();

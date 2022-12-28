@@ -31,12 +31,14 @@ namespace pixel_renderer.Assets
         {
             nodeName = runtimeValue.Name;
             nodeUUID = runtimeValue.UUID;
-            children = runtimeValue.children.ToNodeAssets() ;
+            children = runtimeValue.children.ToNodeAssets();
+
             pos = runtimeValue.position;
             scale = runtimeValue.scale;
             fileType = typeof(Node);
+
             foreach (var comp in runtimeValue.ComponentsList)
-            components.Add(comp.ToAsset());
+                components.Add(comp.ToAsset());
         }
         public Node Copy()
         {

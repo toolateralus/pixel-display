@@ -1,17 +1,17 @@
 ﻿
 namespace pixel_renderer
 {
-    public enum Dir { Left, Right, Up, Down };
+    public enum Direction { Left, Right, Up, Down };
     public static class Orientation
     {
-        public static Vec2 GetDirection(Dir direction)
+        public static Vec2 GetDirection(Direction direction)
         {
             return direction switch
             {
-                Dir.Left => new Vec2(-1, 0),
-                Dir.Right => new Vec2(1, 0),
-                Dir.Up => new Vec2(0, -1),
-                Dir.Down => new Vec2(0, 1),
+                Direction.Left => new Vec2(-1, 0),
+                Direction.Right => new Vec2(1, 0),
+                Direction.Up => new Vec2(0, -1),
+                Direction.Down => new Vec2(0, 1),
                 _ => Vec2.zero,
             };
         }
@@ -19,10 +19,10 @@ namespace pixel_renderer
     internal class Wind : Component
     {
         public Wind() { }
-        public Wind(Dir direction) => this.direction = direction;
+        public Wind(Direction direction) => this.direction = direction;
         
         private Rigidbody rb;
-        public Dir direction = Dir.Up;
+        public Direction direction = Direction.Up;
         
         public override void Awake() => rb = parent.GetComponent<Rigidbody>();
         public override void FixedUpdate(float delta)

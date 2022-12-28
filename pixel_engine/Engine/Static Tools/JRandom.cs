@@ -6,7 +6,7 @@
     public static class JRandom
     {
 
-        public static Dir Direction() => (Dir)Int(0, sizeof(Dir) - 1);
+        public static Direction Direction() => (Direction)Int(0, sizeof(Direction) - 1);
 
         public static Vec2 ScreenPosition() => new()
         {

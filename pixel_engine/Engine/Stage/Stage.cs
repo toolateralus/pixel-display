@@ -130,7 +130,7 @@ namespace pixel_renderer
                 usingGravity = true,
                 drag = .1f
             });
-            node.AddComponent(new Wind((Dir)args[5]));
+            node.AddComponent(new Wind((Direction)args[5]));
             AddNode(node);
         }
         /// <summary>
@@ -144,7 +144,7 @@ namespace pixel_renderer
             Vec2 r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
             Color r_color = JRandom.Color();
             bool r_bool = JRandom.Bool();
-            Dir r_dir = JRandom.Direction();
+            Direction r_dir = JRandom.Direction();
             return new object[] { r_int, r_pos, r_vec, r_color, r_bool, r_dir }; 
         }
 
