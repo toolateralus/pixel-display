@@ -35,7 +35,7 @@ namespace pixel_renderer
         }
 
         public List<Node> Nodes { get; private set; } = new();
-        public event Action OnQueryMade;
+        public event Action OnNodeQueryMade;
 
         public void FixedUpdate(float delta)
         {
@@ -44,7 +44,7 @@ namespace pixel_renderer
         }
         public void Awake()
         {
-            OnQueryMade += RefreshStageDictionary;
+            OnNodeQueryMade += RefreshStageDictionary;
             foreach (Node node in Nodes)
             {
                 node.ParentStage = this;
@@ -70,20 +70,20 @@ namespace pixel_renderer
         }
         public Node[] FindNodesByTag(string tag)
         {
-            OnQueryMade?.Invoke();
+            OnNodeQueryMade?.Invoke();
             IEnumerable<Node> matchingNodes = Nodes.Where(node => node.tag == tag);
             return matchingNodes.ToArray();
         }
         public Node FindNodeByTag(string tag)
         {
-            OnQueryMade?.Invoke();
+            OnNodeQueryMade?.Invoke();
             return Nodes
                     .Where(node => node.tag == tag)
                     .First();
         }
         public Node FindNode(string name)
         {
-            OnQueryMade?.Invoke();
+            OnNodeQueryMade?.Invoke();
             return Nodes
                     .Where(node => node.Name == name)
                     .First();

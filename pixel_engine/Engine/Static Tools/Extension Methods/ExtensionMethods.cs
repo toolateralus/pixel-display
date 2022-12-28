@@ -12,11 +12,10 @@ namespace pixel_renderer
 
     public static class ExtensionMethods
     {
-        #region Float, Double, Int, etc (Numbers)
+        #region Numbers
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
         #endregion
-
         #region Vectors
         public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.x); }
         public static Vec2 WithScale(this Vec2 v, int x = 1, int y = 1) { return new Vec2(v.x * x, v.y * y); }
@@ -31,7 +30,6 @@ namespace pixel_renderer
         /// <returns>A normalized Vector from the length of the current</returns>
         public static Vec2 Normalize(this Vec2 v) => v / v.Length();
         #endregion
-
         #region Strings
         /// <summary>
         /// Takes a string of any format and returns a numerical value. If the string contains no number chars, it will return -1.
@@ -63,50 +61,53 @@ namespace pixel_renderer
             return output;
         }
         #endregion
+        #region Arrays
         /// <summary>
         /// 
         /// </summary>
         /// <param name="colors"></param>
         /// <returns> A one dimensional array containing all the elements of the two-dimensional array passed in.</returns>
-         public static Color[] Flatten(this Color[,] colors)
-         {
-                List<Color> result = new(colors.GetLength(0) + colors.GetLength(1));
-                foreach (var x in colors)
-                    result.Add(x);
-                return result.ToArray(); 
-         }
+        public static T[] Flatten<T>(this T[,] array)
+     {
+            List<T> result = new(array.GetLength(0) + array.GetLength(1));
+            foreach (var x in array)
+                result.Add(x);
+            return result.ToArray(); 
+     }
+        #endregion
+        #region Node
+        public static List<NodeAsset> ToNodeAssets(this List<Node> input)
+        {
+        List<NodeAsset> output = new(); 
+        foreach (var node in input)
+            output.Add(node.ToAsset());
+        return output; 
+        }
+        public static List<Node> ToNodeList(this List<NodeAsset> input)
+        {
+        List<Node> output = new();
+        foreach (var asset in input)
+            output.Add(asset.Copy());
+        return output; 
+        }
+        #endregion
         public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
             from FieldInfo field in component.GetType().GetRuntimeFields()
             from CustomAttributeData data in field.CustomAttributes
             where data.AttributeType == typeof(FieldAttribute)
             select field;
-        public static List<NodeAsset> ToNodeAssets(this List<Node> input)
-         {
-            List<NodeAsset> output = new(); 
-            foreach (var node in input)
-                output.Add(node.ToAsset());
-            return output; 
-         }
-         public static List<Node> ToNodeList(this List<NodeAsset> input)
-         {
-            List<Node> output = new();
-            foreach (var asset in input)
-                output.Add(asset.Copy());
-            return output; 
-         }
         public static Bitmap ToBitmap(this Color [,] colors)
-        {
-            int sizeX = colors.GetLength(0);
-            int sizeY = colors.GetLength(1);
+    {
+        int sizeX = colors.GetLength(0);
+        int sizeY = colors.GetLength(1);
 
-            var bitmap = new Bitmap(sizeX, sizeY);
+        var bitmap = new Bitmap(sizeX, sizeY);
 
-            for (int x = 0; x < sizeX; x++)
-                for (int y = 0; y < sizeY; y++)
-                    bitmap.SetPixel(x, y, colors[x, y]);
+        for (int x = 0; x < sizeX; x++)
+            for (int y = 0; y < sizeY; y++)
+                bitmap.SetPixel(x, y, colors[x, y]);
 
-            return bitmap;
-        }
-
+        return bitmap;
+    }
     }
 }
