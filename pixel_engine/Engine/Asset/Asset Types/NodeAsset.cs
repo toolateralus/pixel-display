@@ -13,8 +13,10 @@ namespace pixel_renderer.Assets
     {
         public string nodeName;
         public string nodeUUID; 
-        public List<ComponentAsset> components = new();  
+        
         public Vec2 pos, scale;
+
+        public List<ComponentAsset> components = new();  
         public List<NodeAsset> children;
 
         [JsonConstructor]
@@ -49,6 +51,7 @@ namespace pixel_renderer.Assets
 
     public class ComponentAsset : Asset
     {
+        [JsonIgnore]
         public Component runtimeComponent;
         
         public ComponentAsset(string name, Component component, Type type)

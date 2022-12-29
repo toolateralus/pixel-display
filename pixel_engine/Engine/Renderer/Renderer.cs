@@ -8,6 +8,8 @@
     {
         Bitmap? bmp_cached = null;
         IEnumerable<Sprite>? sprites_cached = null; 
+        
+
         public override Bitmap Draw()
         {
             sprites_cached = Runtime.Instance.GetStage().GetSprites();
@@ -16,8 +18,8 @@
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
-                        int offsetX =(int)sprite.parent.position.x + x;
-                        int offsetY =(int)sprite.parent.position.y + y;
+                        int offsetX = (int)sprite.parent.position.x + x;
+                        int offsetY = (int)sprite.parent.position.y + y;
 
                         if (offsetX is < 0 or >= Settings.ScreenW
                             || offsetY is < 0 or >= Settings.ScreenH) continue;
@@ -29,7 +31,7 @@
         }
         public override void Render(Image output) =>  CBit.Render(ref bmp_cached, output);
           
-        public Bitmap background 
+        public Bitmap Background 
         {
             get 
             {
@@ -42,9 +44,9 @@
 
         public override void Dispose()
         {
-            if (background is not null)
+            if (Background is not null)
             {
-                bmp_cached = background.Clone() as Bitmap;
+                bmp_cached = Background.Clone() as Bitmap;
                 return;
             }
             bmp_cached = FallBack.Clone() as Bitmap;

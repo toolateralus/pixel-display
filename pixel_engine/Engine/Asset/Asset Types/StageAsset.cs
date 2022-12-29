@@ -33,13 +33,13 @@ namespace pixel_renderer.Assets
            settings = new(runtimeValue.Name, runtimeValue.UUID);
         }
         public List<NodeAsset> nodes;
+        [JsonIgnore]
         public BitmapAsset background;
         public StageSettings settings;
         public static StageAsset? Default => new StageAsset("Default Stage", StagingHost.Default());
         public Stage Copy()
         {
             background.RuntimeValue = background.BitmapFromColorArray();
-
             var output =new Stage($"{Name} #FROM ASSET#", background, nodes);
             return output;  
         }

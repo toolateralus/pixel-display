@@ -30,6 +30,7 @@ namespace pixel_renderer
             data = new byte[stride * copy.Height];
             Marshal.Copy(bmd.Scan0, data, 0, data.Length);
             copy.UnlockBits(bmd);
+            DeleteObject(bmd.Scan0);
         }
         
         /// <summary>
@@ -88,7 +89,7 @@ namespace pixel_renderer
         }
         
         /// <summary>
-        /// Takes a group of sprites and writes their individual color data arrays to a larger map to prepare for collision and drawing.
+        /// Takes a group of sprites and writes their individual color data arrays to a larger map as positions to prepare for collision and drawing.
         /// </summary>
         /// <param name="sprites"></param>
         /// <returns></returns>

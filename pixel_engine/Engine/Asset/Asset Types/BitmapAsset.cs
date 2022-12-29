@@ -37,11 +37,13 @@ namespace pixel_renderer.Assets
         }
         public Bitmap BitmapFromColorArray()
         {
+            if (Colors is null) throw new NullReferenceException("Colors not found");
+
             var w = Colors.GetLength(0);
             var h = Colors.GetLength(1);
+
             Bitmap output = new(w, h);
 
-            if (Colors is null) throw new NullReferenceException("Colors not found");
                 for (int x = 0; x < w; ++x)
                     for (int y = 0; y < h; ++y)
                         output.SetPixel(x,y, Colors[x, y]);

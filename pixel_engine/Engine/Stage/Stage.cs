@@ -24,6 +24,7 @@ namespace pixel_renderer
         }
        
         public string Name { get; set; }
+
         private string _uuid = "";
         public string UUID 
         { 
