@@ -91,8 +91,6 @@ namespace pixel_editor
                         $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
                 }
         }
-       
-
         private void GetEvents()
         {
            // HandleInputMediator();
@@ -223,11 +221,15 @@ namespace pixel_editor
 
     public class EditorMessage : InspectorEvent
     {
+        public EditorMessage(string message) : base(message)
+        {
+        }
+
         public static EditorMessage New(string message, object? sender = null, object[]? args = null, Action<object[]>? action = null)
         {
-            return new()
+            message = DateTime.Now.ToLocalTime().ToShortTimeString() + " " + message; 
+            return new(message)
             {
-                message = DateTime.Now.ToLocalTime().ToShortTimeString() + " " + message,
                 expression = action,
                 args = args,
                 sender = sender,

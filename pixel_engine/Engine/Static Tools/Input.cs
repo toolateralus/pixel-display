@@ -202,26 +202,15 @@ namespace pixel_renderer
                         return;
                     }
                     action?.Invoke();
-                    EditorMessage msg = new("$editor Debug.Log('Message') $end");
-                    Runtime.RaiseInspectorEvent(msg);
+                    Runtime.Log("logs");
                 }
         }
     }
-    public class EditorMessage : InspectorEvent
-    {
-        public EditorMessage(string msg)
-        {
-            message = msg;
-        }
-    }
-
     public class InputAction
     {
         internal readonly bool ExecuteAsynchronously = false;
         internal Key Key; 
-        
         private ValueTuple<Action<object[]?>, object[]?> Action_Args = new();
-        
         internal void Invoke() => Action_Args.Item1?.Invoke(Action_Args.Item2);
         internal async Task InvokeAsync(float? delay = null)
         {
@@ -229,7 +218,6 @@ namespace pixel_renderer
                 await Task.Delay((int)delay);
              await Task.Run(() => Action_Args.Item1?.Invoke(Action_Args.Item2));
         }
-        
         public InputAction(bool async, Action<object[]?> expression, object[] args, Key key)
         {
             ExecuteAsynchronously = async;
