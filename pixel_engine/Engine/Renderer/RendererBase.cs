@@ -10,7 +10,7 @@
         {
             get => fallback ??= new(256, 256);
         }
-        public abstract  void Render(Image output);
+        public abstract void Render(Image output);
         public abstract Bitmap Draw();
         public abstract void Dispose();
     }
