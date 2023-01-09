@@ -15,7 +15,7 @@ namespace pixel_editor
             var e = EditorMessage.New(msg);
             Runtime.RaiseInspectorEvent(e);
         }
-        public static void Error(object? o)
+        public static void Error(object? o = null, float? delay = null)
         {
             var msg = o.ToString();
             var e = EditorMessage.New(msg);
@@ -23,19 +23,38 @@ namespace pixel_editor
 
             if (inspector is not null)
             {
-                Action<object?> a = inspector.RedText(null);
-                Action<object?> b = inspector.BlackText(null);
-                Action<object?> c = async (o) =>
+                if (delay is not null and not 0 and < int.MaxValue and > int.MinValue)
                 {
-                   a.Invoke(null);  
-                   await Task.Delay(500);
-                   b.Invoke(null);
-                };
-                e.expression = c; 
+                    Action<object[]?> c = RedTextForSeconds(inspector, (int)delay);
+                    e.expression = c;
+                }
+                else
+                {
+                    Action<object?> a = inspector.RedText(null);
+                    Action<object?> b = inspector.BlackText(null);
+                    Action<object?> c = (o) =>
+                    {
+                        a.Invoke(null);
+                        b.Invoke(null);
+                    };
+                    e.expression = c;
+                }
             }
-
             Runtime.RaiseInspectorEvent(e);
         }
-
+        private static Action<object[]?> RedTextForSeconds(Inspector? inspector, int delay)
+        {
+            Action<object?> a = inspector.RedText(null);
+            Action<object?> b = inspector.BlackText(null);
+            Action<object?> c = async (o) =>
+            {
+                a.Invoke(null);
+                Print($"A Invoked {DateTime.Now.ToLocalTime()}");
+                await Task.Delay(delay);
+                Print($"B Invoked after Wait {DateTime.Now.ToLocalTime()}");
+                b.Invoke(null);
+            };
+            return c;
+        }
     }
 }

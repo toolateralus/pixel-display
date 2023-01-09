@@ -125,8 +125,7 @@ namespace pixel_editor
                         break;                                               
 
                     case Key.F4:
-                        Console.Error(Runtime.Instance.GetHashCode());    
-                    
+                        Console.Error($"Stage Number {Runtime.Instance.GetStage().Name}");
                         break;                                                  
 
                     case Key.F5:

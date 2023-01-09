@@ -170,7 +170,11 @@ namespace pixel_editor
         };
         private void Instance_InspectorEventRaised(InspectorEvent e)
         {
-            if(e.GetType() == typeof(EditorMessage)) LogConsole(e);
+            if (e.GetType() == typeof(EditorMessage))
+            {
+                e.expression?.Invoke(null);
+                LogConsole(e);
+            }
         }
         private void LogConsole(InspectorEvent e)
         {
