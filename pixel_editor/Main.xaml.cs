@@ -108,7 +108,7 @@ namespace pixel_editor
                 if (!Input.GetKeyDown(key)) 
                     continue; 
 
-                Input.SetKey(key, false);
+                Input.SetKeyDown(key, false);
                 switch (key)
                 {
                     case Key.F1:
@@ -125,7 +125,7 @@ namespace pixel_editor
                         break;                                               
 
                     case Key.F4:
-                        Console.Error($"Stage Number {Runtime.Instance.GetStage().Name}");
+                        Console.Error($"stage name: {Runtime.Instance.GetStage().Name}", 1250);
                         break;                                                  
 
                     case Key.F5:
@@ -271,7 +271,7 @@ namespace pixel_editor
                 foreach (var _event in events)
                 {
                     InputEvents.Add(_key, _event);
-                    Input.SetKey(_key, false);
+                    Input.SetKeyDown(_key, false);
                 }
 
             CompositionTarget.Rendering += Update;
