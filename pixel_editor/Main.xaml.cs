@@ -65,7 +65,7 @@ namespace pixel_editor
             InitializeComponent();
             inspector = new Inspector(inspectorObjName,  inspectorObjInfo,  inspectorChildGrid, editorMessages);
             Runtime.inspector = inspector;
-            engine = new();
+            engine = new(new Project(""));
             GetEvents(); 
         }
         
