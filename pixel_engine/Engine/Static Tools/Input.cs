@@ -10,6 +10,7 @@
         static Dictionary<Key, bool> KeyDown = new Dictionary<Key, bool>();
         static Dictionary<Key, bool> KeyUp = new Dictionary<Key, bool>();
         static Dictionary<Key, bool> KeyToggled = new Dictionary<Key, bool>();
+
         static Key[] keys =
         {
             Key.W, 
@@ -32,6 +33,7 @@
             { "left", Key.A },
             { "right", Key.D },
         };
+        
         public static void Refresh()
         {
             foreach (Key key in keys)

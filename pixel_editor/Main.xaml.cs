@@ -108,7 +108,6 @@ namespace pixel_editor
                 if (!Input.GetKeyDown(key)) 
                     continue; 
 
-                Input.SetKeyDown(key, false);
                 switch (key)
                 {
                     case Key.F1:
@@ -271,7 +270,6 @@ namespace pixel_editor
                 foreach (var _event in events)
                 {
                     InputEvents.Add(_key, _event);
-                    Input.SetKeyDown(_key, false);
                 }
 
             CompositionTarget.Rendering += Update;
