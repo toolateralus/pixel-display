@@ -68,20 +68,10 @@ namespace pixel_editor
             engine = new();
             GetEvents(); 
         }
-        
         private int renderStateIndex = 0;
-        private Key[] keys = new Key[]
-        {
-            Key.F1,
-            Key.F2,
-            Key.F3,
-            Key.F4,
-            Key.F5,
-        };
 
         private readonly Inspector inspector;
         private StageWnd? stageWnd;
-        private InputMediator input; 
 
         internal EngineInstance? engine;
         internal RenderHost? host => Runtime.Instance.renderHost;  
@@ -100,62 +90,44 @@ namespace pixel_editor
                         $"{Runtime.Instance.renderHost.info.GetTotalMemory()}" +
                         $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
                 }
-
-            // Immediately stop reading input because the method in the body of the
-            // case will get called dozens of times while app is in break mode w/ debugger.
-            foreach (var key in keys)
-            {
-                if (!Input.GetKeyDown(key)) 
-                    continue; 
-
-                switch (key)
-                {
-                    case Key.F1:
-                            Runtime.Instance.TrySetStageAsset(0);
-                        break;         
-                        
-                    case Key.F2:                                             
-                            if (Runtime.Instance.GetStageAsset() != null)
-                                Runtime.Instance.ResetCurrentStage();
-                        break;                                                  
-
-                    case Key.F3:                                             
-                            Runtime.Instance.TrySetStageAsset(1);
-                        break;                                               
-
-                    case Key.F4:
-                        Console.Error($"stage name: {Runtime.Instance.GetStage().Name}", 1250);
-                        break;                                                  
-
-                    case Key.F5:
-                        Console.Print(Runtime.Instance.GetStageAsset());
-                        break;
-
-                }
-            }
         }
        
 
-        private void HandleInputMediator()
-        {
-            Action[] inputActions = new Action[]
-            {
-                () => { Runtime.Instance.Toggle(); },
-            };
-
-            Key[] inputs = new Key[]
-            {
-                Key.F1,
-            };
-
-            input = new(inputActions, inputs);
-        }
         private void GetEvents()
         {
            // HandleInputMediator();
             CompositionTarget.Rendering += Update;
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
+
+            var args = new object[]
+            {
+                   inspector,
+                   Runtime.Instance,
+            };
+            Action<object[]?> expr = (o) =>
+            {
+                Console.Print("Action called");
+
+                var inspector = o[0] as Inspector;
+                var run = o[1] as Runtime;
+
+                run.TrySetStageAsset(0);
+                inspector.RedText(null)?.Invoke(null);
+            };      
+
+            InputAction action = new(false, expr, args, Key.G);
+
+            Input.RegisterAction(action, Input.InputEventType.KeyDown);
+        }
+        private static Point ViewportPoint(Image img, Point pos)
+        {
+            pos.X /= img.ActualWidth;
+            pos.Y /= img.ActualHeight;
+
+            pos.X *= img.Width;
+            pos.Y *= img.Height;
+            return pos;
         }
         private void IncrementRenderState()
         {
@@ -199,15 +171,6 @@ namespace pixel_editor
             if (foundNode)
                 inspector.SelectNode(node);
         }
-        private static Point ViewportPoint(Image img, Point pos)
-        {
-            pos.X /= img.ActualWidth;
-            pos.Y /= img.ActualHeight;
-
-            pos.X *= img.Width;
-            pos.Y *= img.Height;
-            return pos;
-        }
 
         private void OnDisable(object? sender, EventArgs e)
         {
@@ -226,13 +189,11 @@ namespace pixel_editor
             e.Handled = true;
             IncrementRenderState();
         }
-
         private void OnImportBtnPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
             Importer.Import(true);
         }
-
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true; 
@@ -258,30 +219,6 @@ namespace pixel_editor
             if (project is not null)
                 Runtime.Instance.SetProject(project);
         }
-    }
-    /// <summary>
-    ///  not done, serves as a crutch between engine and editor input, subscribing events to key presses. 
-    /// </summary>
-    internal class InputMediator
-    {
-        public InputMediator(Action[] events, Key[] keys)
-        {
-            foreach (var _key in keys)
-                foreach (var _event in events)
-                {
-                    InputEvents.Add(_key, _event);
-                }
-
-            CompositionTarget.Rendering += Update;
-        }
-        public Dictionary<Key, Action> InputEvents = new Dictionary<Key, Action>();
-        private void Update(object? sender, EventArgs e)
-        {
-            foreach (var key in InputEvents.Keys)
-                if (Input.GetKeyDown(key))
-                    ExecuteEvents(InputEvents[key]); 
-        } 
-        public static void ExecuteEvents(Action action) =>action.Invoke();
     }
 
     public class EditorMessage : InspectorEvent

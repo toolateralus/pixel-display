@@ -1,27 +1,35 @@
-﻿namespace pixel_renderer
+﻿using System.Collections.Generic;
+using System;
+using System.Security.Principal;
+
+namespace pixel_renderer
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Windows.Controls;
     using System.Windows.Input;
     using static System.Runtime.CompilerServices.RuntimeHelpers;
 
     public static class Input
     {
+        public enum InputEventType { KeyDown, KeyUp, KeyToggle };
         static Dictionary<Key, bool> KeyDown = new Dictionary<Key, bool>();
         static Dictionary<Key, bool> KeyUp = new Dictionary<Key, bool>();
         static Dictionary<Key, bool> KeyToggled = new Dictionary<Key, bool>();
 
         readonly static Key[] keys =
         {
-            Key.W, 
+            Key.W,
             Key.S,
             Key.A,
             Key.D,
-            
+
             Key.Space,
             Key.Q,
             Key.F1,
-            Key.F2, 
+            Key.F2,
             Key.F3,
             Key.F4,
             Key.F5
@@ -33,7 +41,31 @@
             { "left", Key.A },
             { "right", Key.D },
         };
-        
+
+        /// 101 keys on US Standard Keyboard.
+        static List<InputAction> InputActions_KeyDown = new(101);
+        static List<InputAction> InputActions_KeyUp = new(101);
+        static List<InputAction> InputActions_KeyToggle = new(101);
+
+        public static void RegisterAction(InputAction action, InputEventType type)
+        {
+            switch (type)
+            {
+                case InputEventType.KeyDown:
+                    InputActions_KeyDown.Add(action);
+                    break;
+
+                case InputEventType.KeyUp:
+                    throw new NotImplementedException();
+
+                case InputEventType.KeyToggle:
+                    throw new NotImplementedException();
+
+            }
+        }
+
+        public static event Action<Key> OnKeyDown;
+
         public static void Refresh()
         {
             foreach (Key key in keys)
@@ -43,10 +75,12 @@
             foreach (Key key in keys)
                 SetKeyToggled(key, Keyboard.IsKeyToggled(key));
         }
-        
+
         public static bool GetKeyDown(Key key)
         {
-            return KeyDown.ContainsKey(key) && KeyDown[key];
+            var result = KeyDown.ContainsKey(key) && KeyDown[key];
+
+            return result;
         }
         public static bool GetKeyUp(Key key)
         {
@@ -59,9 +93,17 @@
 
         public static bool GetKeyDown(string keycode)
         {
-            if (!s_keys.ContainsKey(keycode)) return false;
+            if (!s_keys.ContainsKey(keycode))
+                return false;
+
             Key key = s_keys[keycode];
-            return KeyDown.ContainsKey(key) && KeyDown[key];
+
+            var result = KeyDown.ContainsKey(key) && KeyDown[key];
+
+            if (result)
+                OnKeyDown?.Invoke(key);
+
+            return result;
         }
         public static bool GetKeyUp(string keycode)
         {
@@ -80,6 +122,8 @@
         {
             if (!KeyDown.ContainsKey(key))
                 KeyDown.Add(key, result);
+            if (result)
+                OnKeyDown?.Invoke(key);
             else KeyDown[key] = result;
         }
         private static void SetKeyToggled(Key key, bool result)
@@ -94,7 +138,9 @@
                 KeyUp.Add(key, result);
             else KeyUp[key] = result;
         }
-        
+
+
+
         /// <summary>
         /// Get a Vec2 representing WASD input values, with a vector max range of -1 to 1 
         /// </summary>
@@ -113,8 +159,48 @@
 
             return new Vec2(left - right, down - up);
         }
+
+        internal static void Awake()
+        {
+            OnKeyDown += Input_OnKeyDown;
+            
+        }
+
+        private static void Input_OnKeyDown(Key key)
+        {
+            foreach (InputAction action in InputActions_KeyDown)
+                if (action.Key.Equals(key))
+                {
+                    if (action.ExecuteAsynchronously)
+                    {
+                        action?.InvokeAsync();
+                        return;
+                    }
+                    action?.Invoke();
+                }
+        }
     }
-
+    public class InputAction
+    {
+        internal readonly bool ExecuteAsynchronously = false;
+        internal Key Key; 
+        
+        private ValueTuple<Action<object[]?>, object[]?> Action_Args = new();
+        
+        internal void Invoke() => Action_Args.Item1?.Invoke(Action_Args.Item2);
+        internal async Task InvokeAsync(float? delay = null)
+        {
+            if (delay is not null)
+                await Task.Delay((int)delay);
+             await Task.Run(() => Action_Args.Item1?.Invoke(Action_Args.Item2));
+        }
+        
+        public InputAction(bool async, Action<object[]?> expression, object[] args, Key key)
+        {
+            ExecuteAsynchronously = async;
+            Action_Args.Item1 = expression;
+            Action_Args.Item2 = args;
+            Key = key; 
+        }
+    }
 }
-
-
