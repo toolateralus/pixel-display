@@ -2,7 +2,7 @@
 
 namespace pixel_renderer.IO
 {
-    public class Metadata
+    public class Metadata<T>
     {
         public string Name = "Object Metadata";
         public string fullPath = "C:\\\\Users\\Josh\\Appdata\\Roaming\\Pixel\\Assets\\Metadata\\Error";

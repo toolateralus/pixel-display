@@ -11,6 +11,7 @@ public class Project
     public int stageIndex;
     public List<StageAsset> stages;
     public string Name { get; }
+    
     public static Project LoadProject()
     {
         Project project = new("Default");
@@ -30,6 +31,7 @@ public class Project
     {
         return filePath.Replace(Constants.AppDataDir + "\\Pixel", "");
     }
+
     /// <summary>
     /// use this for new projects and overwrite the default stage data, this prevents lockups
     /// </summary>
