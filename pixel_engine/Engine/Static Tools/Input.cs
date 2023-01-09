@@ -11,7 +11,7 @@
         static Dictionary<Key, bool> KeyUp = new Dictionary<Key, bool>();
         static Dictionary<Key, bool> KeyToggled = new Dictionary<Key, bool>();
 
-        static Key[] keys =
+        readonly static Key[] keys =
         {
             Key.W, 
             Key.S,
@@ -26,7 +26,7 @@
             Key.F4,
             Key.F5
         };
-        static Dictionary<string, Key> s_keys = new()
+        readonly static Dictionary<string, Key> s_keys = new()
         {
             { "up", Key.W },
             { "down", Key.S },
