@@ -8,21 +8,21 @@ namespace pixel_renderer
     [JsonObject(MemberSerialization.OptIn)]
     public class Component
     {
+        public Component()
+        {
+            _uuid = pixel_renderer.UUID.NewUUID(); 
+        }
         public Node parent { get { return _parent; } set { _parent = value; } }
         [JsonProperty] public bool Enabled = true;
-
         private protected Node _parent = null;
+        public string UUID => _uuid; 
         [JsonProperty] private string _uuid = "";
-        public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
         [JsonProperty] public string Name { get; set; } = "";
-
         public virtual void Awake() { }
         public virtual void Update() { }
         public virtual void FixedUpdate(float delta) { }
-
         public virtual void OnTrigger(Rigidbody other) { }
         public virtual void OnCollision(Rigidbody collider) { }
-
         public ComponentAsset ToAsset() => new(Name, this, GetType());  
         /// <summary>
         /// Performs a 'Get Component' call on the Parent node object of the component this is called from.
