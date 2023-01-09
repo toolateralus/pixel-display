@@ -82,20 +82,22 @@ namespace pixel_renderer
      }
         #endregion
         #region Node
+        
         public static List<NodeAsset> ToNodeAssets(this List<Node> input)
         {
-        List<NodeAsset> output = new(); 
-        foreach (var node in input)
-            output.Add(node.ToAsset());
-        return output; 
+            List<NodeAsset> output = new(); 
+            foreach (var node in input)
+                output.Add(node.ToAsset());
+            return output; 
         }
         public static List<Node> ToNodeList(this List<NodeAsset> input)
         {
-        List<Node> output = new();
-        foreach (var asset in input)
-            output.Add(asset.Copy());
-        return output; 
+            List<Node> output = new();
+            foreach (var asset in input)
+                output.Add(asset.Copy());
+            return output; 
         }
+
         #endregion
         public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
             from FieldInfo field in component.GetType().GetRuntimeFields()

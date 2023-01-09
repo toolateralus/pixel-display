@@ -53,12 +53,11 @@ namespace pixel_renderer
         string cachedGCValue = "";
         const int framesUntilGC_Check = 120;
         private int framesSinceGC_Check = 0;
-        public long lastFrameTime => (long)0.001f; 
         public int framesUntilCheck = 50;
         public int frameCount;
+        public static long LastFrameTime => (long)0.01f; 
 
-
-        public double Framerate => Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - lastFrameTime).TotalSeconds * frameCount);
+        public double Framerate => Math.Floor(1 / TimeSpan.FromTicks(DateTime.Now.Ticks - LastFrameTime).TotalSeconds * frameCount);
         public string GetTotalMemory()
         {
             if (framesSinceGC_Check < framesUntilGC_Check)

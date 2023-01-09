@@ -17,20 +17,20 @@ namespace pixel_editor
     public partial class StageWnd : Window
     {
         bool usingStarterAssets = false;
+        
         Metadata? m_background;
         Bitmap? image; 
+
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(StageWnd), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
         {
-            StageWnd mainWindow = o as StageWnd;
-            return mainWindow != null ? mainWindow.OnCoerceScaleValue((double)value) : value;
+            return o is StageWnd mainWindow ? mainWindow.OnCoerceScaleValue((double)value) : value;
         }
         private static void OnScaleValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             StageWnd mainWindow = o as StageWnd;
-            if (mainWindow != null)
-                mainWindow.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
+            mainWindow?.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
         }
         protected virtual double OnCoerceScaleValue(double value)
         {

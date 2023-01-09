@@ -9,8 +9,7 @@ namespace pixel_renderer.IO
         public string extension = ""; 
         public string pathFromProjectRoot = "";
         private string _uuid = "";
-        public string UUID { get { if (_uuid is null || _uuid == "") 
-                    _uuid = pixel_renderer.UUID.NewUUID(); return _uuid; } }
+        public string UUID => _uuid;
 
         public Metadata(string name, string fullPath, string extension)
         {

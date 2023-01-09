@@ -9,8 +9,9 @@ namespace pixel_renderer.IO
         public string filePath = "C:\\Users\\";
 
         public string fileSize = "";
+        public string UUID => _uuid;
         private string _uuid = "";
-        public string UUID { get { if (_uuid is null || _uuid == "") _uuid = pixel_renderer.UUID.NewUUID();  return _uuid; }}
+
         public Type fileType;
 
         new public Type GetType() => fileType;
@@ -21,7 +22,7 @@ namespace pixel_renderer.IO
             this.pathFromRoot = Project.GetPathFromRoot(filePath);
             this.fileType = fileType;
             this.Name = Name;
-            this._uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
+            _uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
         }
         public Asset() 
         {
