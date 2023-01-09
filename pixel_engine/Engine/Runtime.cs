@@ -68,9 +68,10 @@ namespace pixel_renderer
 
         public static void Awake(EngineInstance mainWnd, Project? project = null)
         {
-            if (project != null) Instance.LoadedProject = project;
-            Instance.mainWnd = mainWnd;
+            if (project != null) 
+                Instance.LoadedProject = project;
 
+            Instance.mainWnd = mainWnd;
             Importer.Import(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Input.Awake();

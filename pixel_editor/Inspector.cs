@@ -172,7 +172,8 @@ namespace pixel_editor
         }
         private void LogConsole(InspectorEvent e)
         {
-            messagesQueue.Text += $"\n{e.message} \n - - - - - - - - - - - - - - - - - - -";
+            messagesQueue.Text +=
+            $"\n{e.message} \n - - - - - - - - - - - - - - - - - - -";
 
             string[] lines = messagesQueue.Text.Split('\n');
             int length = lines.Length;

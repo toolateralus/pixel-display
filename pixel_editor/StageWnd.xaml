@@ -15,66 +15,66 @@
                         ScaleX="{Binding ElementName=window, Path=ScaleValue}"
                         ScaleY="{Binding ElementName=window, Path=ScaleValue}" />
         </Grid.LayoutTransform>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
-            <Button 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="28.571"/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button 
                 TextBlock.FontFamily="MS Gothic"
                 TextBlock.FontSize="5"
                 TextBlock.FontStyle="Oblique"
-                Grid.RowSpan="1" 
-                Grid.ColumnSpan="2"
-                Grid.Row="5" 
-                Grid.Column="0"
+                Grid.RowSpan="2" 
+                Grid.ColumnSpan="6"
+                Grid.Row="2" 
+                Grid.Column="1"
                 Content="Set Background" 
                 Background="White" 
                 Click="SetBackgroundClicked" 
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
+                VerticalAlignment="Center" Height="15" Width="156"
             />
-            <Button 
+        <Button 
                 TextBlock.FontSize="5"
                 TextBlock.FontFamily="MS Gothic"
                 TextBlock.FontStyle="Oblique"
-                Grid.Column="1"
+                Grid.Column="4"
                 Grid.RowSpan="1" 
-                Grid.ColumnSpan="1"
+                Grid.ColumnSpan="3"
                 Grid.Row="9" 
                 Content="Done" 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center" 
-                Click="CreateNewStageButtonPressed"
+                Click="CreateNewStageButtonPressed" Height="15" Width="56"
             />
-            <TextBox
+        <TextBox
                 x:Name="stageNameTxt"
                 Text="Stage Name"
                 TextBlock.FontSize="5"
@@ -82,13 +82,13 @@
                 TextBlock.TextAlignment="Center"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Grid.Column="0"
-                Grid.Row="7"
-                Grid.RowSpan="1"
-                Grid.ColumnSpan="2"
-                Background="FloralWhite"
+                Grid.Column="1"
+                Grid.Row="5"
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="6"
+                Background="FloralWhite" Height="15" Width="130"
                 />
-            <TextBox
+        <TextBox
                 x:Name="nodeCtTxt"
                 Text="Node Count 100)"
                 TextBlock.FontStyle="Italic"
@@ -97,16 +97,16 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Grid.Column="0"
-                Grid.Row="8"
+                Grid.Row="7"
                 Grid.RowSpan="1"
-                Grid.ColumnSpan="2"
-                Background="FloralWhite"
+                Grid.ColumnSpan="7"
+                Background="FloralWhite" Height="14" Width="172"
                 />
-            <CheckBox 
+        <CheckBox 
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Center"
-                Grid.ColumnSpan="2"
-                Grid.Row="6"
+                Grid.ColumnSpan="8"
+                Grid.Row="4"
                 Grid.Column="0" 
                 Background="White"
                 Foreground="MediumBlue"
@@ -114,14 +114,14 @@
                 TextBlock.FontSize="5"
                 TextBlock.FontFamily="MS Gothic"
                 TextBlock.FontStyle="Oblique"
-                Click="OnStarterAssetsButtonClicked" 
+                Click="OnStarterAssetsButtonClicked" Height="24" Width="210" 
                 />
-            <Image 
+        <Image 
                 Grid.ColumnSpan="11" 
                 Grid.RowSpan="7" 
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Top" 
                 x:Name="imgPreview"/>
 
-        </Grid>
+    </Grid>
 </Window>

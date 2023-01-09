@@ -66,7 +66,8 @@ namespace pixel_editor
             InitializeComponent();
             inspector = new Inspector(inspectorObjName,  inspectorObjInfo,  inspectorChildGrid, editorMessages);
             Runtime.inspector = inspector;
-            engine = new(new Project(""));
+            Project defaultProject = new ("Default"); 
+            engine = new(defaultProject);
             GetEvents(); 
         }
         private int renderStateIndex = 0;
@@ -80,8 +81,7 @@ namespace pixel_editor
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
-
-            // render and update gc alloc text in editor.
+            Console.Print(Runtime.Instance.renderHost.info.Framerate);
             if (Runtime.Instance.IsRunning 
                 && Runtime.Instance.GetStage() is not null  
                 && host.State == RenderState.Scene)

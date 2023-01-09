@@ -1,12 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿
+using Newtonsoft.Json;
 using pixel_renderer.IO;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Reflection;
-using System.Windows.Documents;
-using System.Xml.Linq;
 
 namespace pixel_renderer.Assets
 {
