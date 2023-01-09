@@ -5,21 +5,10 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using static pixel_renderer.Input;
 using Brushes = System.Windows.Media.Brushes;
 using Image = System.Windows.Controls.Image;
 using Point = System.Windows.Point;
-
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Input;
-
-using pixel_renderer;
-using pixel_renderer.Assets;
-using pixel_renderer.IO;
-using System.Runtime.CompilerServices;
-using System.Linq;
-using System.Collections.Generic;
-using static pixel_renderer.Input;
 
 namespace pixel_editor
 {
@@ -66,6 +55,7 @@ namespace pixel_editor
 
             ScaleValue = (double)OnCoerceScaleValue(window, value);
         }
+
         #endregion Window Scaling
 
         internal EngineInstance? engine;
@@ -82,18 +72,18 @@ namespace pixel_editor
             pos.Y *= img.Height;
             return pos;
         }
-        object[] Args => new object[]
+        private object[] Args => new object[]
         {
             inspector,
             Runtime.Instance,
         };
-        static Action<object[]?> Expr => (o) =>
+        private static Action<object[]?> Expr => (o) =>
         {
             var inspector = o[0] as Inspector;
             var run = o[1] as Runtime;
             run.TrySetStageAsset(0);
             Console.RedTextForMS(inspector, 1);
-        };      
+        };
         private void GetEvents()
         {
             Closing += OnDisable;
