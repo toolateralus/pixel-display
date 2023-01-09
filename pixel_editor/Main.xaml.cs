@@ -82,15 +82,16 @@ namespace pixel_editor
         {
             inspector.Update(sender, e);
 
-
             if (Runtime.Instance.IsRunning 
                 && Runtime.Instance.GetStage() is not null  
                 && host.State == RenderState.Scene)
                 {
                     host.Render(image, Runtime.Instance);
+                    var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
+                    var framerate = Runtime.Instance.renderHost.info.Framerate; 
                     gcAllocText.Content =
-                        $"{Runtime.Instance.renderHost.info.GetTotalMemory()}" +
-                        $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
+                        $"{memory}" +
+                        $" \n frame rate : {}"; 
                 }
         }
         object[] Args => new object[]
