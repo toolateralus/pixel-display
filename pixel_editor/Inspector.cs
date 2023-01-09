@@ -8,18 +8,20 @@ using System.Windows;
 using System.Windows.Controls;
 
 using pixel_renderer;
+using System.Linq;
 
 namespace pixel_editor
 {
     public class Inspector
     {
-        public Inspector(Label name, Label objInfo, Grid componentGrid)
+        public Inspector(Label name, Label objInfo, Grid componentGrid, TextBox messagesQueue)
         {
             this.name = name ?? new();
             this.objInfo = objInfo ?? new();
             this.componentGrid = componentGrid ?? new();
             this.name.Content = "_";
             this.objInfo.Content = "_";
+            this.messagesQueue = messagesQueue;
             Awake();
         }
 
@@ -27,6 +29,7 @@ namespace pixel_editor
         private List<TextBlock> activeControls = new();
         private Label name;
         private Label objInfo;
+        private TextBox messagesQueue; 
         private Grid componentGrid;
         
         private Dictionary<Type, List<Component>> components = new();
@@ -45,7 +48,7 @@ namespace pixel_editor
             OnObjectDeselected += Refresh;
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
-            Runtime.Instance.InspectorEventRaised += Instance_InspectorEventRaised;
+            Runtime.InspectorEventRaised += Instance_InspectorEventRaised;
         }
         public void Update(object? sender, EventArgs e) { }
         
@@ -99,7 +102,6 @@ namespace pixel_editor
             loadedNode = node;
             OnObjectSelected?.Invoke();
         }
-
         public static void AddToInspector(int i, TextBlock component, int rowSpan)
         {
             component.SetValue(Grid.RowSpanProperty, rowSpan);
@@ -107,7 +109,6 @@ namespace pixel_editor
             component.SetValue(Grid.RowProperty, i + i + i);
             component.SetValue(Grid.ColumnProperty, 6);
         }
-
         public static string GetComponentInfo(Component component)
         {
             IEnumerable<FieldInfo> fields = component.GetSerializedFields(); 
@@ -130,7 +131,6 @@ namespace pixel_editor
             fields = component.GetType().GetFields();
             properties = component.GetType().GetProperties();
         }
-
         public static Label CreateLabel(string componentInfo, Thickness margin)
         {
             return new Label
@@ -169,20 +169,9 @@ namespace pixel_editor
             BorderBrush = Brushes.Black,
             BorderThickness = new Thickness(1, 1, 1, 1),
         };
-        
         private void Instance_InspectorEventRaised(InspectorEvent e)
         {
-            if (Runtime.Instance.IsRunning) 
-                    Runtime.Instance.Toggle();  
-
-            var msg = MessageBox.Show(e.expression.ToString(),
-                                      e.message, 
-                                      MessageBoxButton.YesNo);
-
-            var args = e.expressionArgs;
-
-            if (args.Length < 4) return;
-                 e.expression(args[0], args[1] ?? null, args[2] ?? null, args[3] ?? null);
+            messagesQueue.Text += $"\n{e.message}";
         }
     }
 }

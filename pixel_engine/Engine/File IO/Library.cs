@@ -9,7 +9,9 @@ namespace pixel_renderer.Assets
 {
     public class Library
     {
-        public static Dictionary<Type, List<Asset>> LoadedAssets = new();
+        static Dictionary<Type, List<Asset>> LoadedAssets = new();
+        static Dictionary<Metadata, Asset> LoadedMetadata = new();
+
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
         /// </summary>
@@ -20,14 +22,13 @@ namespace pixel_renderer.Assets
         public static bool Fetch<T>(out T result) where T : Asset
         {
             result = null;
-            if (LoadedAssets.TryGetValue(typeof(T), out List<Asset> found))
+            if (LoadedAssets.TryGetValue(typeof(T), out var found))
             {
                 foreach (var _asset in found)
                 {
                     if (_asset is null) continue;
+                    if (_asset as T is null) continue;
                     result = _asset as T;
-
-
                 }
                 return true;
             }
@@ -66,7 +67,7 @@ namespace pixel_renderer.Assets
 
             if (library is null) return;
 
-            AssetIO.skippingOperation = false;
+            AssetIO.Skipping = false;
 
             foreach (var asset in library)
                 AssetIO.SaveAsset(asset, asset.Name);
@@ -83,22 +84,40 @@ namespace pixel_renderer.Assets
                     library.Add(item);
             return library;
         }
+
+        /// <summary>
+        /// Attempts to retrieve metadata by asset file path (asset.pathFromRoot).
+        /// </summary>
+        /// <param name="asset"></param>
+        /// <returns>Metadata if found, else null</returns>
+        public static Metadata? TryGetMetadata(Asset asset)
+        {
+            return (Metadata?)(from _asset
+                               in LoadedMetadata
+                               where _asset.Value.Equals(asset)
+                               select _asset.Value);
+        }
+        public static Metadata? TryGetMetadata(string path)
+        {
+            return (Metadata?)(from asset
+                               in LoadedMetadata 
+                               where asset.Value.filePath.Equals(path) 
+                               select asset.Value); 
+        }
+        private static Metadata? TryGetMetadata(object name) 
+        {
+            return (Metadata?)(from asset
+                               in LoadedMetadata
+                               where asset.Value.filePath.Equals((string)name)
+                               select asset.Value);
+        }
+
         public static void Register(Type type, Asset asset)
         {
             if (!LoadedAssets.ContainsKey(type))
                 LoadedAssets.Add(type, new List<Asset>());
             LoadedAssets[type].Add(asset);
         }
-        public static async Task RegisterAsync(Type type, Asset asset)
-        {
-            if (!LoadedAssets.ContainsKey(type))
-                LoadedAssets.Add(type, new List<Asset>());
-            await Task.Run(()=> m_register_asset?.Invoke(type, asset)); 
-        }
-
-
-        public static  Action<Type, Asset> m_register_asset => (o , e) => { LoadedAssets[o].Add(e); };
-      
         public static void Unregister(Type type, string Name)
         {
             foreach (var asset in from asset in LoadedAssets[type]
@@ -107,6 +126,13 @@ namespace pixel_renderer.Assets
             {
                 LoadedAssets[type].Remove(asset);
             }
+        }
+
+        internal static void RegisterMetadata(Metadata meta, Asset asset)
+        {
+            if (!LoadedMetadata.ContainsKey(meta))
+                LoadedMetadata.Add(meta, asset);
+
         }
     }
 }

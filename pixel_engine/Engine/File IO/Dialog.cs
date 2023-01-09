@@ -1,43 +1,41 @@
 ﻿
 using Microsoft.Win32;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace pixel_renderer.Assets
 {
-    public class Dialog
+    public class FileDialog
     {
         public Type type;
         public string fileName;
         public string fileExtension;
-        public string name; 
-        public Dialog(Type type, string name, string fileName, string fileExtension)
+        public string name;
+        public string filePath; 
+        public FileDialog(Type type, string name, string filePath, string fileName, string fileExtension)
         {
+            this.filePath = filePath;
             this.type = type;
             this.name = name; 
             this.fileName = fileName;
             this.fileExtension = fileExtension;
         }
-        public Dialog()
-        {
-            type = null;
-            name = "";
-            fileName = "";
-            fileExtension = "";
-        }
-        public static Dialog ImportFileDialog()
+       
+        public static FileDialog ImportFileDialog()
         {
             OpenFileDialog fileDialog = new();
             bool? result = fileDialog.ShowDialog();
-            Dialog dlg = new();
+            FileDialog dlg = new(null, "", "", "" ,"");
             if (result == true)
             {
+                var fullPath = Path.GetFullPath(fileDialog.FileName);
                 var name = fileDialog.FileName;
                 var split = name.Split('.');
-                var ext = split.Last();
-                var type = Importer.TypeFromExtension(ext);
+                var extension = split.Last();
+                var type = Importer.TypeFromExtension(extension);
                 var fileName = split[0].Split("\\").Last();
-                dlg = new(type, name, fileName, ext);
+                dlg = new FileDialog(type, name, fullPath, fileName, extension);
             }
             return dlg;
         }

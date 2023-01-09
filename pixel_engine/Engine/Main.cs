@@ -13,7 +13,7 @@
         public EngineInstance()
         {
             InitializeComponent();
-            _ = Runtime.AwakeAsync(this, new(""));
+            Runtime.Awake(this, new(""));
         }
     }
 }

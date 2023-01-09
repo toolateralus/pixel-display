@@ -6,13 +6,13 @@ namespace pixel_renderer.IO
 {
     public class ProjectIO
     {
-        public static string Path => Settings.AppDataDir + Settings.ProjectsDir;
+        public static string Path => Constants.AppDataDir + Constants.ProjectsDir;
         public static void SaveProject(Project project)
         {
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
 
-            if (File.Exists(Path + "/" + project.Name + Settings.ProjectFileExtension))
+            if (File.Exists(Path + "/" + project.Name + Constants.ProjectFileExtension))
             {
                     var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite Project {project.Name}.pxpj ? \n found at {Path}",
                                             "", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning,
@@ -23,7 +23,7 @@ namespace pixel_renderer.IO
                     }
             }
             
-            using TextWriter writer = new StreamWriter(Path + "/" + project.Name + Settings.ProjectFileExtension);
+            using TextWriter writer = new StreamWriter(Path + "/" + project.Name + Constants.ProjectFileExtension);
             
             var settings = new JsonSerializerSettings
             {
@@ -46,7 +46,7 @@ namespace pixel_renderer.IO
                 Formatting = Formatting.Indented,
             };
             var jsonSerializer = JsonSerializer.Create(settings);
-            StreamReader reader = new(Path + "\\" + fileName + Settings.ProjectFileExtension);
+            StreamReader reader = new(Path + "\\" + fileName + Constants.ProjectFileExtension);
             Project  project = new(fileName);
             using JsonTextReader json = new(reader);
                 project = jsonSerializer.Deserialize<Project>(json);

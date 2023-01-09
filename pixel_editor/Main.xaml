@@ -143,6 +143,27 @@
                     x:Name="gcAllocText" 
                     Background="DarkSlateGray"
                     Content="GC Alloc:"/>
+
+            
+            <TextBox 
+                FontSize="3.75" 
+                FontWeight="Normal" 
+                FontFamily="MS Gothic"
+                Grid.Column="14" Grid.Row="15"
+                Grid.ColumnSpan="6" Grid.RowSpan="2" 
+                x:Name="editorMessages" 
+                Background="DarkSlateGray"
+                Text ="!"
+                TextElement.FontStretch="SemiCondensed"
+                TextAlignment="Justify"
+                TextWrapping="Wrap"
+                TextOptions.TextRenderingMode="Aliased"
+                VerticalScrollBarVisibility="Hidden"
+                
+                >
+                
+            </TextBox>
+                   
             
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top" 

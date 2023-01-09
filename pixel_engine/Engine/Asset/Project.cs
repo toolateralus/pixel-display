@@ -4,13 +4,14 @@ using pixel_renderer.IO;
 using pixel_renderer.Assets;
 using System.DirectoryServices.ActiveDirectory;
 using Newtonsoft.Json;
+using System;
 
 public class Project
     {
         public static Project LoadProject()
         {
             Project project = new("Default");
-            Dialog dlg = Dialog.ImportFileDialog();
+            FileDialog dlg = FileDialog.ImportFileDialog();
 
             if (dlg.type is null)
                 return project;
@@ -22,7 +23,13 @@ public class Project
                     return project;
                     else return new("Default"); 
         }
-        public List<StageAsset> stages;
+
+    internal static string GetPathFromRoot(string filePath)
+    {
+        return filePath.Replace(Constants.AppDataDir + "\\Pixel", "");
+    }
+
+    public List<StageAsset> stages;
         public List<Asset> library;
         public int stageIndex;
         public int fileSize = 0;

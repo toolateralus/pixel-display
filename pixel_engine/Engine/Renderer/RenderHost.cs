@@ -12,19 +12,14 @@ namespace pixel_renderer
 
         public RendererBase GetRenderer() => m_renderer;
         public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
-        public void Render(Image renderSurface, Runtime? runtime = null)
+        public void Render(Image renderSurface, Runtime runtime)
         {
-            if (runtime is null)
-                if (Runtime.Instance != null) runtime = Runtime.Instance;
-                else throw new ArgumentException("Runtime_Instance not found. " +
-                    "This is very odd and it's likely your code base is corrupt or partially missing," +
-                    " Clean and rebuild the solution.");
-
+           
+            runtime = Runtime.Instance;
             if (m_renderer is null)
             {
                 State = RenderState.Error;
-                if(runtime.IsRunning) runtime.Toggle();
-                return;
+                throw new NullReferenceException("Renderer was null");
             }
             switch (State)
             {

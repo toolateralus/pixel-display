@@ -6,7 +6,7 @@ using System.Reflection.Metadata;
 
 namespace pixel_renderer
 {
-    public  class Settings
+    public class Constants
     {
         #region Physics / Collision Constants
         /// <summary>

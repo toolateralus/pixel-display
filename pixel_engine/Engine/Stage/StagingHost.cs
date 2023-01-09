@@ -1,4 +1,5 @@
 ﻿using pixel_renderer.Assets;
+using pixel_renderer.IO;
 using System;
 using System.Collections.Generic;
 using Color = System.Drawing.Color; 
@@ -34,8 +35,8 @@ namespace pixel_renderer
                 if (xDelta < 0) xDelta = CMath.Negate(xDelta);
                 if (yDelta < 0) yDelta = CMath.Negate(yDelta);
 
-                if (xDelta > Settings.maxClickDistanceInPixels) continue;
-                if (yDelta > Settings.maxClickDistanceInPixels) continue;
+                if (xDelta > Constants.maxClickDistanceInPixels) continue;
+                if (yDelta > Constants.maxClickDistanceInPixels) continue;
 
                 if (node == lastSelected) continue;
                 result = node;
@@ -62,13 +63,10 @@ namespace pixel_renderer
             
             AddPlayer(nodes);
 
-            BitmapAsset bmpAsset =
-                    new("Solid Color Background:", 
-                    Sprite.SolidColorBitmap(Settings.ScreenVec, Color.FromArgb(0, 0, 0, 0)));
-
-            var stage =
-                new Stage("Default Stage", 
-                bmpAsset, nodes.ToNodeAssets());
+            var bitmap = Constants.AppDataDir + "\\Pixel\\Images" + "\\home";
+            var backgroundMeta = new Metadata("Bitmap Metadata", bitmap, ".bmp");
+            
+            var stage = new Stage("Default Stage", backgroundMeta, nodes.ToNodeAssets());
 
             for (int i = 0; i < 10; i++) 
                 stage.create_generic_node();
@@ -86,8 +84,10 @@ namespace pixel_renderer
             var reset = runtime.GetStageAsset();
             if (reset is null)
                 throw new NullStageException("Resetting stage failed");
+
             if (runtime.renderHost.State is not RenderState.Off)
                 runtime.Toggle();
+
             runtime.SetStageAsset(reset);
         }
         public static void AddPlayer(List<Node> nodes)
@@ -103,9 +103,7 @@ namespace pixel_renderer
             {
                 takingInput = true
             };
-            Text text = new();
 
-            playerNode.AddComponent(text);
             playerNode.AddComponent(rb);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);

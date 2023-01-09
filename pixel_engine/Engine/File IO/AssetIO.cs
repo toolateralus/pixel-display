@@ -5,20 +5,23 @@ using System.IO;
 using System.Text.Json.Nodes;
 using System.Windows;
 using pixel_renderer.Assets;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace pixel_renderer.IO
 {
     public class AssetIO
     {
-        public static bool skippingOperation = false;
-        public static string Path => Settings.AppDataDir + Settings.AssetsDir; 
+        public static bool Skipping = false;
+        public static string Path => Constants.AppDataDir + Constants.AssetsDir; 
         public static void SaveAsset(Asset data, string fileName)
         {
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
 
-            if (File.Exists(Path + "/" + fileName + Settings.AssetsFileExtension))
+            if (File.Exists(Path + "\\" + fileName + Constants.AssetsFileExtension))
             {
-                if (!skippingOperation)
+                if (!Skipping)
                 {
                     var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
                                             "", MessageBoxButton.YesNoCancel, MessageBoxImage.Error,
@@ -28,7 +31,7 @@ namespace pixel_renderer.IO
                                              MessageBoxResult.No, MessageBoxOptions.RtlReading);
                     if (doForAllResult == MessageBoxResult.Yes)
                     {
-                        skippingOperation = true;
+                        Skipping = true;
                     }
                     if (overwriteWarningResult != MessageBoxResult.Yes)
                     {
@@ -37,7 +40,7 @@ namespace pixel_renderer.IO
                 }
             }
 
-            using TextWriter writer = new StreamWriter(Path + "/" + fileName + Settings.AssetsFileExtension);
+            using TextWriter writer = new StreamWriter(Path + "\\" + fileName + Constants.AssetsFileExtension);
 
             var settings = new JsonSerializerSettings
             {
@@ -50,7 +53,7 @@ namespace pixel_renderer.IO
 
             writer.Close();
         }
-        public static void TryDeserializeAssetFIle(ref Asset? outObject, string name)
+        public static void TryDeserializeAssetFile(ref Asset? outObject, string name)
         {
             Asset? _asset = ReadAssetFile(name);
             if (_asset is null) return;
@@ -70,34 +73,38 @@ namespace pixel_renderer.IO
                 Formatting = Formatting.Indented,
             };
             var jsonSerializer = JsonSerializer.Create(settings);
-            StreamReader reader = new(fileName);
-            Asset asset = new("" + fileName, typeof(Asset), "");
+            StreamReader reader = new(Path + "\\" + fileName + Constants.AssetsFileExtension);
+            Asset asset = new(fileName, typeof(Asset));
             using JsonTextReader json = new(reader);
             try
             {
                 asset = jsonSerializer.Deserialize<Asset>(json);
             }
-            catch (Exception) { MessageBox.Show("File read error - Fked Up Big Time"); };
+            catch (Exception e) {
+                var x = e.Message.Take(100);    
+                MessageBox.Show(x.ToString()); 
+            
+            };
             return asset;
         }
-        public static Asset? TryDeserializeNonAssetFile(string fileName, Type type, string assetName)
+        public static Asset? TryDeserializeNonAssetFile(string newName, Type type, string fullPath)
         {
             switch (type)
             {
-                case var _ when type == typeof(Bitmap):
+                case var _ when type.Equals(typeof(Bitmap)):
 
-                    BitmapAsset bmpAsset = BitmapAsset.PathToAsset(fileName, assetName);
-                    if (bmpAsset == null) return null;
-                    bmpAsset.fileType = typeof(Bitmap);
-                    return bmpAsset;
 
-                case var _ when type == typeof(JsonObject):
-                    var asset = ReadAssetFile(fileName);
+
+                case var _ when type.Equals(typeof(JsonObject)):
+                    var asset = ReadAssetFile(newName);
                     return asset;
 
 
                 default: return null;
             }
         }
+        
+
+        
     }
 }

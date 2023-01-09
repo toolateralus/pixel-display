@@ -1,5 +1,6 @@
 ﻿using pixel_renderer;
 using pixel_renderer.Assets;
+using pixel_renderer.IO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -15,7 +16,8 @@ namespace pixel_editor
     public partial class StageWnd : Window
     {
         bool usingStarterAssets = false;
-        Bitmap? background;
+        Metadata? m_background;
+        Bitmap? image; 
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(StageWnd), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
@@ -64,34 +66,41 @@ namespace pixel_editor
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
-            Importer.ImportFileDialog(out Asset result);
-            if (result is null) return;
-            if (result as BitmapAsset is null) return;
-            var bmpAsset = result as BitmapAsset;
-            var image = bmpAsset.RuntimeValue ?? new(256,256); 
+            var result =  FileDialog.ImportFileDialog();
+            e.Handled = true; 
+
+            Bitmap image = new(result.filePath);
+            
             if (image is not null)
             {
-                background = image;
+                this.image = image;
                 CBit.Render(ref image, imgPreview);
             }
         }
         private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
+            if (image is null)
+                await OnNoBackgroundSelected();
+
+            List<Node> nodes = new();
             int count = nodeCtTxt.Text.ToInt();
             var name = stageNameTxt.Text.ToFileNameFormat();
-            List<Node> nodes = new();
-            if (usingStarterAssets) StagingHost.AddPlayer(nodes);
-            if (background is null)
-            {
-                var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
-                await Task.Run(Importer.ImportAssetDialog);
-                if (background is null) return;
-            }
-            var stage = new Stage(name, new("",background), nodes.ToNodeAssets());
-            for (int i = 0; i < count; i++) stage.create_generic_node();
-            var msgResult = MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage?", "Set Stage?", MessageBoxButton.YesNo);
+            
+            if (usingStarterAssets)
+                StagingHost.AddPlayer(nodes);
+
+            var stage = new Stage(name, null, nodes.ToNodeAssets());
+
+            for (int i = 0; i < count; i++) 
+                stage.create_generic_node();
+
+            var msgResult = 
+                MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage and add it to the current project?", "Set Stage?", MessageBoxButton.YesNo);
+
             var asset = new StageAsset(stage.Name, stage);
+            
             Library.Register(typeof(Stage), asset);
+
             if (msgResult == MessageBoxResult.Yes)
             {
                 Runtime.Instance.SetStageAsset(asset);
@@ -99,6 +108,13 @@ namespace pixel_editor
             }
             Close(); 
         }
+
+        private static async Task OnNoBackgroundSelected()
+        {
+            var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
+            await Task.Run(Importer.ImportAssetDialog);
+        }
+
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;
     }
 }

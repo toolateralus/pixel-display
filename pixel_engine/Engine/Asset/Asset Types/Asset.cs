@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
-namespace pixel_renderer.Assets
+namespace pixel_renderer.IO
 {
     public class Asset
     {
-        
         public string Name = "New Asset";
         public string pathFromRoot = "";
+        public string filePath = "C:\\Users\\";
+
         public string fileSize = "";
         private string _uuid = "";
         public string UUID { get { if (_uuid is null || _uuid == "") _uuid = pixel_renderer.UUID.NewUUID();  return _uuid; }}
@@ -15,16 +15,16 @@ namespace pixel_renderer.Assets
 
         new public Type GetType() => fileType;
         
-        public Asset(string name, Type fileType, string? UUID = null)
+        public Asset(string Name, Type fileType, string? UUID = null)
         {
-            Name = name;
+            this.filePath = Constants.AssetsDir + "\\" + Name;
+            this.pathFromRoot = Project.GetPathFromRoot(filePath);
             this.fileType = fileType;
-            _uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
+            this.Name = Name;
+            this._uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
         }
         public Asset() 
         {
-           
         }
     }
-        
 }

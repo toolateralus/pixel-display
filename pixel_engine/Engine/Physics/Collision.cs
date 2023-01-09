@@ -13,7 +13,7 @@ namespace pixel_renderer
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true; 
         public static void SetActive(bool value) => AllowEntries = value;
-        private readonly static SpatialHash hash = new(Settings.ScreenH, Settings.ScreenW, Settings.CollisionCellSize);
+        private readonly static SpatialHash hash = new(Constants.ScreenH, Constants.ScreenW, Constants.CollisionCellSize);
         public static void ViewportCollision(Node node)
         {
              var hasSprite = node.TryGetComponent( out Sprite sprite);
@@ -21,13 +21,13 @@ namespace pixel_renderer
             
             if (!hasSprite || !hasRb || sprite.isCollider) return;
 
-            if (node.position.y > Settings.ScreenW - 4 - sprite.size.y)
+            if (node.position.y > Constants.ScreenW - 4 - sprite.size.y)
             {
-                node.position.y = Settings.ScreenW - 4 - sprite.size.y;
+                node.position.y = Constants.ScreenW - 4 - sprite.size.y;
             }
-            if (node.position.x > Settings.ScreenH - sprite.size.x)
+            if (node.position.x > Constants.ScreenH - sprite.size.x)
             {
-                node.position.x = Settings.ScreenH - sprite.size.x;
+                node.position.x = Constants.ScreenH - sprite.size.x;
                 rb.velocity.x = 0;
             }
             if (node.position.x < 0)
@@ -124,21 +124,21 @@ namespace pixel_renderer
         }
         public static void FinalPhase()
         {
-                Parallel.ForEach(CollisionQueue, collisionPair =>
+            _ = Parallel.ForEach(CollisionQueue, collisionPair =>
+            {
+                Node A = collisionPair.Key;
+                _ = Parallel.ForEach(collisionPair.Value, B =>
                 {
-                    Node A = collisionPair.Key;
-                    Parallel.ForEach(collisionPair.Value, B =>
-                    {
-                        if (!A.TryGetComponent(out Rigidbody rbA) ||
-                            !B.TryGetComponent(out Rigidbody rbB)) return;
+                    if (!A.TryGetComponent(out Rigidbody rbA) ||
+                        !B.TryGetComponent(out Rigidbody rbB)) return;
 
-                        Collide(ref rbA, ref rbB);
-                        AttemptCallbacks(ref rbA, ref rbB);
-                    });
+                    Collide(rbA, rbB);
+                    AttemptCallbacks(rbA, rbB);
                 });
+            });
             CollisionQueue.Clear();
         }
-        private static void AttemptCallbacks(ref Rigidbody A, ref Rigidbody B)
+        private static void AttemptCallbacks(Rigidbody A, Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger)
             {
@@ -162,7 +162,7 @@ namespace pixel_renderer
             NarrowPhase(collisionMap);
             FinalPhase(); 
         }
-        private static void Collide(ref Rigidbody A, ref Rigidbody B)
+        private static void Collide(Rigidbody A, Rigidbody B)
         {
             if (A.IsTrigger || B.IsTrigger) return;
 
@@ -172,12 +172,9 @@ namespace pixel_renderer
 
             Vec2 direction = (B.parent.position - A.parent.position).Normalize();
 
-            // make sure not NaN after possibly dividing by zero in Normalize();
-            direction = direction.SqrMagnitude() is float.NaN ? Vec2.zero : direction;
-
             var depenetrationForce = direction * velocityDifference * 0.5f;
 
-            Vec2.Clamp(depenetrationForce, Vec2.zero, Vec2.one * Settings.MaxDepenetrationForce);
+            Vec2.Clamp(depenetrationForce, Vec2.zero, Vec2.one * Constants.MaxDepenetrationForce);
 
             B.velocity = Vec2.zero;
             A.velocity = Vec2.zero;
@@ -186,6 +183,7 @@ namespace pixel_renderer
             A.parent.position += CMath.Negate(depenetrationForce);
 
             depenetrationForce *= 0.5f;
+
             return; 
             // remove bounciness from collision resolution
             if (A.usingGravity && A.drag != 0) A.velocity += CMath.Negate(depenetrationForce);

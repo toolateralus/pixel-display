@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using pixel_renderer.IO;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
@@ -29,7 +30,7 @@ namespace pixel_renderer.Assets
             this.nodeName = nodeName;
             this.nodeUUID = nodeUUID;
         }
-        public NodeAsset(Node runtimeValue)
+        public NodeAsset(Node runtimeValue) : base()
         {
             nodeName = runtimeValue.Name;
             nodeUUID = runtimeValue.UUID;
@@ -53,8 +54,8 @@ namespace pixel_renderer.Assets
     {
         [JsonIgnore]
         public Component runtimeComponent;
-        
-        public ComponentAsset(string name, Component component, Type type)
+
+        public ComponentAsset(string name,Component component, Type type)
         {
             runtimeComponent = component;
             fileType = type;
@@ -72,6 +73,4 @@ namespace pixel_renderer.Assets
         }
         
     }
-  
-  
 }

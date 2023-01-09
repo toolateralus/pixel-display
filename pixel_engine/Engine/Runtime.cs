@@ -23,7 +23,7 @@ namespace pixel_renderer
         private StageAsset? m_stageAsset;
         private protected volatile Stage? m_stage;
         
-        public event Action<InspectorEvent> InspectorEventRaised;
+        public static event Action<InspectorEvent> InspectorEventRaised;
 
         public bool IsRunning { get; private set; }
         private protected bool PhysicsInitialized = false;
@@ -46,6 +46,8 @@ namespace pixel_renderer
         public void Toggle()
         {
             if (!PhysicsInitialized) InitializePhysics();
+              
+
             if (!physicsClock.Enabled)
             {
                 physicsClock.Start();
@@ -59,22 +61,22 @@ namespace pixel_renderer
         public Stage? GetStage()
         {
             if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
-            if (m_stage is null || m_stage.UUID != m_stageAsset.settings.UUID)
+            if (m_stage is null || m_stage.UUID != m_stageAsset.Copy().UUID)
                 m_stage = m_stageAsset?.Copy();
             return m_stage;
         }
 
-        public static async Task AwakeAsync(EngineInstance mainWnd, Project project)
+        public static void Awake(EngineInstance mainWnd, Project project)
         {
             Instance.LoadedProject = project;
             Instance.mainWnd = mainWnd;
-            await Importer.ImportAsync(false);
+            Importer.Import(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Instance.Initialized = true;
         }
         private void InitializePhysics()
         {
-            var interval = TimeSpan.FromSeconds(Settings.PhysicsRefreshInterval);
+            var interval = TimeSpan.FromSeconds(Constants.PhysicsRefreshInterval);
             physicsClock = new Timer(interval.TotalSeconds);
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
             PhysicsInitialized = true;
@@ -85,23 +87,14 @@ namespace pixel_renderer
 
         public void ResetCurrentStage()
         {
-            bool wasPaused = false;
-            if (IsRunning)
-            {
-                wasPaused = true;
-                Toggle();
-            }
             SetStage(m_stageAsset?.Copy());
-            if (!IsRunning && wasPaused) Toggle();
         }
-        public void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
+        public static void RaiseInspectorEvent(InspectorEvent e) 
+            => InspectorEventRaised?.Invoke(e);
         private protected void SetStage(Stage? value) 
         {
-            if (IsRunning) Toggle();
             m_stage = null; 
             m_stage = value;
-            if (!IsRunning) Toggle();
-
         }
         public void AddStageToProject(StageAsset stageAsset)
         {
@@ -123,9 +116,7 @@ namespace pixel_renderer
         }
         public void SetStageAsset(StageAsset stageAsset)
         {
-            if (IsRunning) Toggle();
             m_stageAsset = stageAsset;
-            if (!IsRunning) Toggle();
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {

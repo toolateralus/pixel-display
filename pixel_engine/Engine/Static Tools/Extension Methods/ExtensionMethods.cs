@@ -28,7 +28,13 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="v"></param>
         /// <returns>A normalized Vector from the length of the current</returns>
-        public static Vec2 Normalize(this Vec2 v) => v / v.Length();
+        public static Vec2 Normalize(this Vec2 v)
+        {
+            if(v.Equals(Vec2.zero)) 
+                return Vec2.zero;
+
+            return v / v.Length();
+        }
         #endregion
         #region Strings
         /// <summary>
@@ -42,7 +48,7 @@ namespace pixel_renderer
             string intResult = "";
 
             foreach (var x in input)
-                if (Settings.int_chars.Contains(x)) intResult += x;
+                if (Constants.int_chars.Contains(x)) intResult += x;
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }
@@ -56,7 +62,7 @@ namespace pixel_renderer
             var output = "";
             foreach (var _char in input)
             {
-                if (!Settings.unsupported_chars.Contains(_char)) output += _char;
+                if (!Constants.unsupported_chars.Contains(_char)) output += _char;
             }
             return output;
         }

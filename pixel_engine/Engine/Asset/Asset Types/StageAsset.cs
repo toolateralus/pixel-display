@@ -1,6 +1,8 @@
 ﻿
 using Newtonsoft.Json;
+using pixel_renderer.IO;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace pixel_renderer.Assets
 {
@@ -15,11 +17,10 @@ namespace pixel_renderer.Assets
         /// <param name="settings"></param>
         /// <param name="UUID"></param>
         [JsonConstructor]
-        public StageAsset(string name, List<NodeAsset> nodes, BitmapAsset background, StageSettings settings, string UUID) : base(name, typeof(Stage), UUID)
+        public StageAsset(string name, List<NodeAsset> nodes, Metadata background, StageSettings settings, string UUID) : base(name, typeof(Stage), UUID)
         {
             this.nodes = nodes;
-            this.background = background;
-            this.settings = settings;
+            this.m_background = background;
         }
         /// <summary>
         /// User Constructor
@@ -29,19 +30,20 @@ namespace pixel_renderer.Assets
         public StageAsset(string name, Stage runtimeValue) : base(name, typeof(Stage))
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();
-           background = runtimeValue.Background;
-           settings = new(runtimeValue.Name, runtimeValue.UUID);
+            // Initialize background metadata
         }
         public List<NodeAsset> nodes;
-        [JsonIgnore]
-        public BitmapAsset background;
-        public StageSettings settings;
-        public static StageAsset? Default => new StageAsset("Default Stage", StagingHost.Default());
+        
+        public Metadata m_background; 
+        
         public Stage Copy()
         {
-            background.RuntimeValue = background.BitmapFromColorArray();
-            var output =new Stage($"{Name} #FROM ASSET#", background, nodes);
+            // Import backgruond and output stage with background bitmap loaded;
+            // REPLACE NULL REFERENCE TO BACKGROUND
+            var output =new Stage($"{Name} #FROM ASSET#", null, nodes);
             return output;  
         }
+        internal Bitmap? GetBackground() => new Bitmap(m_background.fullPath) ?? null;
+        public static StageAsset? Default => new("Default Stage", StagingHost.Default());
     }
 }

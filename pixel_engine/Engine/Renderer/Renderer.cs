@@ -9,7 +9,6 @@
         Bitmap? bmp_cached = null;
         IEnumerable<Sprite>? sprites_cached = null; 
         
-
         public override Bitmap Draw()
         {
             sprites_cached = Runtime.Instance.GetStage().GetSprites();
@@ -21,8 +20,8 @@
                         int offsetX = (int)sprite.parent.position.x + x;
                         int offsetY = (int)sprite.parent.position.y + y;
 
-                        if (offsetX is < 0 or >= Settings.ScreenW
-                            || offsetY is < 0 or >= Settings.ScreenH) continue;
+                        if (offsetX is < 0 or >= Constants.ScreenW
+                            || offsetY is < 0 or >= Constants.ScreenH) continue;
 
                         bmp_cached.SetPixel(offsetX, offsetY, sprite.colorData[x, y]);
                     }
@@ -33,10 +32,9 @@
           
         public Bitmap Background 
         {
-            get 
+            get
             {
-                if (_background is null)
-                    _background = Runtime.Instance.GetStage().Background.Colors.ToBitmap(); 
+                _background ??= Runtime.Instance.GetStage().backgroundImage;
                 return _background; 
             }
         }
