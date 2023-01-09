@@ -188,7 +188,7 @@ namespace pixel_editor
         }
         private void HandleOverflowingConsole(TextBox messagesQueue, string[] lines)
         {
-
+            messagesQueue.Text.Replace(messagesQueue.GetLineText(0), "\n");
         }
         internal Action<object?> RedText(object? o)
         {
