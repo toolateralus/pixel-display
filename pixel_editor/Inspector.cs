@@ -64,7 +64,6 @@ namespace pixel_editor
             int index = 0;
 
             foreach (var componentType in components.Values)
-            {
                 foreach (var component in componentType)
                 {
                     string info = GetComponentInfo(component);
@@ -82,7 +81,6 @@ namespace pixel_editor
 
                     index++;
                 }
-            }
             OnInspectorUpdated?.Invoke();
         }
         public void DeselectNode()
@@ -107,7 +105,7 @@ namespace pixel_editor
         {
             component.SetValue(Grid.RowSpanProperty, rowSpan);
             component.SetValue(Grid.ColumnSpanProperty, 8);
-            component.SetValue(Grid.RowProperty, i + i + i);
+            component.SetValue(Grid.RowProperty, i + i);
             component.SetValue(Grid.ColumnProperty, 6);
         }
         public static string GetComponentInfo(Component component)
@@ -174,7 +172,6 @@ namespace pixel_editor
         {
             if(e.GetType() == typeof(EditorMessage)) LogConsole(e);
         }
-
         private void LogConsole(InspectorEvent e)
         {
             messagesQueue.Text += $"\n{e.message} \n - - - - - - - - - - - - - - - - - - -";
@@ -185,12 +182,10 @@ namespace pixel_editor
             if (length > Constants.InspectorQueueMaxLength)
                 HandleOverflowingConsole(messagesQueue, lines);
         }
-
         private void HandleOverflowingConsole(TextBox messagesQueue, string[] lines)
         {
 
         }
-
         internal Action<object?> RedText(object? o)
         {
             return (o) =>
