@@ -125,7 +125,7 @@ namespace pixel_renderer
                 if (type.BaseType != typeof(Component)) 
                     throw new InvalidOperationException("Cannot add generic type Component to node."); 
 
-                if (!Components.ContainsKey(type))g
+                if (!Components.ContainsKey(type))
                     Components.Add(type, new());
 
                 Components[type].Add(component);
