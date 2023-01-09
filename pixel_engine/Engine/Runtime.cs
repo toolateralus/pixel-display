@@ -70,8 +70,11 @@ namespace pixel_renderer
         {
             if (project != null) Instance.LoadedProject = project;
             Instance.mainWnd = mainWnd;
+
             Importer.Import(false);
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
+            Input.Awake();
+
             Instance.Initialized = true;
         }
         private void InitializePhysics()
@@ -88,6 +91,11 @@ namespace pixel_renderer
         public void ResetCurrentStage()
         {
             SetStage(m_stageAsset?.Copy());
+        }
+        public static void Log(string message)
+        {
+           InspectorEvent e = new(message);
+            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(InspectorEvent e) 
             => InspectorEventRaised?.Invoke(e);
