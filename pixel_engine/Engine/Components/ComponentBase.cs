@@ -5,7 +5,7 @@ using System;
 
 namespace pixel_renderer
 {
-    [JsonObject(MemberSerialization.OptOut)]
+    //[JsonObject(MemberSerialization.OptOut)]
     public class Component
     {
         [JsonIgnore]

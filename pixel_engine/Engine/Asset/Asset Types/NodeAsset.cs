@@ -17,11 +17,11 @@ namespace pixel_renderer.Assets
         
         public Vec2 pos, scale;
 
-        public List<ComponentAsset> components = new();  
+        public List<Component> components = new();  
         public List<NodeAsset> children;
 
         [JsonConstructor]
-        public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<ComponentAsset> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
+        public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<Component> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
         {
             this.components = components;
             this.pos = pos;
@@ -41,7 +41,7 @@ namespace pixel_renderer.Assets
             fileType = typeof(Node);
 
             foreach (var comp in runtimeValue.ComponentsList)
-                components.Add(comp.ToAsset());
+                components.Add(comp);
         }
         public Node Copy()
         {
