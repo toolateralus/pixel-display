@@ -2,15 +2,8 @@
 
 namespace pixel_renderer.IO
 {
-    public class Metadata<T>
+    public class Metadata : FileBase
     {
-        public string Name = "Object Metadata";
-        public string fullPath = "C:\\\\Users\\Josh\\Appdata\\Roaming\\Pixel\\Assets\\Metadata\\Error";
-        public string extension = ""; 
-        public string pathFromProjectRoot = "";
-        private string _uuid = "";
-        public string UUID => _uuid;
-
         public Metadata(string name, string fullPath, string extension)
         {
             Name = name;
@@ -19,7 +12,6 @@ namespace pixel_renderer.IO
             pathFromProjectRoot = Project.GetPathFromRoot(fullPath);
             _uuid = pixel_renderer.UUID.NewUUID();
         }
-
         [JsonConstructor]
         public Metadata(string name, string fullPath, string pathFromProjectRoot, string uuid, string extension)
         {
