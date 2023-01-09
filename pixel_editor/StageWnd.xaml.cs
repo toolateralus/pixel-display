@@ -4,6 +4,7 @@ using pixel_renderer.IO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -67,7 +68,10 @@ namespace pixel_editor
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
             var result =  FileDialog.ImportFileDialog();
-            e.Handled = true; 
+            e.Handled = true;
+            
+            if (result.filePath is "" or null) 
+                return; 
 
             Bitmap image = new(result.filePath);
             

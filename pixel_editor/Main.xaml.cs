@@ -124,13 +124,13 @@ namespace pixel_editor
                             Runtime.Instance.TrySetStageAsset(1);
                         break;                                               
 
-                    case Key.F4:                               
-                        
+                    case Key.F4:
+                        Console.Error(Runtime.Instance.GetHashCode());    
+                    
                         break;                                                  
 
                     case Key.F5:
-                        var x = EditorMessage.New("Message Sent to Console");
-                        Runtime.RaiseInspectorEvent(x);
+                        Console.Print(Runtime.Instance.GetStageAsset());
                         break;
 
                 }

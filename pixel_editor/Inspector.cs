@@ -190,5 +190,22 @@ namespace pixel_editor
         {
 
         }
+
+        internal Action<object?> RedText(object? o)
+        {
+            return (o) =>
+            {
+                messagesQueue.Foreground = Brushes.Red;   
+                messagesQueue.Background = Brushes.Black;   
+            };
+        }
+        internal Action<object?> BlackText(object? o)
+        {
+            return (o) =>
+            {
+                messagesQueue.Foreground = Brushes.Black;
+                messagesQueue.Background = Brushes.DarkSlateGray;   
+            };
+        }
     }
 }

@@ -109,10 +109,11 @@
                     Grid.Row="1" 
                     Grid.Column="0" 
                     RenderOptions.BitmapScalingMode ="NearestNeighbor"
+                    RenderOptions.CachingHint="Cache"
                     Grid.RowSpan="14"
                     Grid.ColumnSpan="14" 
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"/>
+                    
+                    />
            
             <Label  FontSize="4.5" 
                     FontWeight="Bold"
@@ -149,8 +150,8 @@
                 FontSize="3.75" 
                 FontWeight="Normal" 
                 FontFamily="MS Gothic"
-                Grid.Column="14" Grid.Row="15"
-                Grid.ColumnSpan="6" Grid.RowSpan="2" 
+                Grid.Column="12" Grid.Row="14"
+                Grid.ColumnSpan="8" Grid.RowSpan="3" 
                 x:Name="editorMessages" 
                 Background="DarkSlateGray"
                 Text ="!"
@@ -158,10 +159,7 @@
                 TextAlignment="Justify"
                 TextWrapping="Wrap"
                 TextOptions.TextRenderingMode="Aliased"
-                VerticalScrollBarVisibility="Hidden"
-                
-                >
-                
+                VerticalScrollBarVisibility="Hidden" >
             </TextBox>
                    
             
