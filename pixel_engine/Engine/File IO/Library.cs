@@ -44,16 +44,16 @@ namespace pixel_renderer.Assets
             }
             return false;
         }
-        public static bool Fetch<T>(out List<object> output)
+        public static bool Fetch<T>(out List<T> output)
         {
-            output = new List<object>();
+            output = new List<T>();
             foreach (var pair in from pair in LoadedAssets
                                  let type = pair.Key
                                  where type == typeof(T)
                                  select pair)
             {
-                output.AddRange(from asset in pair.Value
-                                select asset);
+                output.AddRange((IEnumerable<T>)(from asset in pair.Value
+                                select asset));
                 return true;
             }
             return false;
@@ -64,11 +64,8 @@ namespace pixel_renderer.Assets
         public static void Sync()
         {
             var library = Clone();
-
             if (library is null) return;
-
             AssetIO.Skipping = false;
-
             foreach (var asset in library)
                 AssetIO.SaveAsset(asset, asset.Name);
         }
@@ -108,7 +105,7 @@ namespace pixel_renderer.Assets
         {
             return (Metadata?)(from asset
                                in LoadedMetadata
-                               where asset.Value.filePath.Equals((string)name)
+                               where asset.Value.Name.Equals((string)name)
                                select asset.Value);
         }
 

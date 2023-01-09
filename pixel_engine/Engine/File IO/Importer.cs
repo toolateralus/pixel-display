@@ -46,22 +46,33 @@ namespace pixel_renderer.Assets
         }
         private static void ImportTask()
         {
-            foreach (var dir in Directory.EnumerateDirectories(Path))
-                foreach (var file in Directory.EnumerateFiles(dir))
-                {
-                    var fileExtension = file.Split('.')[1];
-                    var typeRef = TypeFromExtension(fileExtension);
-                    var asset = TryPullObject(file, typeRef, fileExtension);
-                    Metadata meta = new(asset.Name, file, fileExtension);
+            var subdirectories = Directory.EnumerateDirectories(Path); 
+            foreach (var file in Directory.EnumerateFiles(Path))
+                FinalImport(file);
 
-                    if (asset is not null)
-                    {
-                        asset.fileType ??= typeof(Asset);
-                        Library.Register(asset.fileType, asset);
-                        Library.RegisterMetadata(meta, asset); 
-                    };
-                }
-        } 
+            if (!subdirectories.Any())
+                     return;
+
+            foreach (var dir in subdirectories)
+                foreach (var file in Directory.EnumerateFiles(dir))
+                    FinalImport(file);
+        }
+
+        private static void FinalImport(string file)
+        {
+            var fileExtension = file.Split('.')[1];
+            var typeRef = TypeFromExtension(fileExtension);
+            var asset = TryPullObject(file, typeRef, fileExtension);
+
+            if (asset is not null)
+            {
+                Metadata meta = new(asset.Name, file, fileExtension);
+                asset.fileType ??= typeof(Asset);
+                Library.Register(asset.fileType, asset);
+                Library.RegisterMetadata(meta, asset);
+            };
+        }
+
         /// <summary>
         /// Read and deserialize a single file from Path"
         /// </summary>

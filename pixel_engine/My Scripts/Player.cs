@@ -12,7 +12,10 @@ internal class Player : Component
        parent.TryGetComponent(out sprite);
        parent.TryGetComponent(out rb);
     }
+    
     int j = 0;
+    object? testobj = null; 
+
     public override void FixedUpdate(float delta)
     {
         if (!takingInput) 
@@ -20,7 +23,7 @@ internal class Player : Component
 
         if (Input.GetKeyDown(Key.Q))
             StagingHost.ReloadCurrentStage();
-        Runtime.Log("Player Loop");
+
         var move = Input.GetMoveVector();
         Jump(move);
         Move(move);
