@@ -6,7 +6,7 @@
         public string fullPath = "C:\\\\Users\\Josh\\Appdata\\Roaming\\Pixel\\Assets\\Metadata\\Error";
         public string Name = "Object Metadata";
         public string pathFromProjectRoot = "";
-        internal readonly string _uuid = "";
+        internal string _uuid = "";
         public string UUID => _uuid;
     }
 }
