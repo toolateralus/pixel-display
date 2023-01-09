@@ -15,7 +15,7 @@ namespace pixel_editor
             var e = EditorMessage.New(msg);
             Runtime.RaiseInspectorEvent(e);
         }
-        public static void Error(object? o, float? delay = null)
+        public static void Error(object? o = null, float? delay = null)
         {
             var msg = o.ToString();
             var e = EditorMessage.New(msg);
@@ -23,17 +23,25 @@ namespace pixel_editor
 
             if (inspector is not null)
             {
-                if (delay is not null and not 0)
+                if (delay is not null and not 0 and < int.MaxValue and > int.MinValue)
                 {
-
+                    Action<object[]?> c = RedTextForSeconds(inspector, (int)delay);
+                    e.expression = c;
                 }
-                Action<object[]?> c = RedTextForSeconds(inspector, 1250);
-                e.expression = c;
+                else
+                {
+                    Action<object?> a = inspector.RedText(null);
+                    Action<object?> b = inspector.BlackText(null);
+                    Action<object?> c = (o) =>
+                    {
+                        a.Invoke(null);
+                        b.Invoke(null);
+                    };
+                    e.expression = c;
+                }
             }
-
             Runtime.RaiseInspectorEvent(e);
         }
-
         private static Action<object[]?> RedTextForSeconds(Inspector? inspector, int delay)
         {
             Action<object?> a = inspector.RedText(null);
