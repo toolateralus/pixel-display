@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -17,9 +18,10 @@ namespace pixel_renderer
     /// </summary>
     public unsafe static class CBit
     {
-        [DllImport("PIXELRENDERER")] internal unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
-        
-        [DllImport("gdi32.dll")] internal static extern bool DeleteObject(IntPtr intPtr);
+        [DllImport("PIXELRENDERER")] 
+            internal unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
+        [DllImport("gdi32.dll")] 
+            internal static extern bool DeleteObject(IntPtr intPtr);
         
         public unsafe static void ReadonlyBitmapData(in Bitmap bmp ,out BitmapData bmd, out int stride, out byte[] data)
         {

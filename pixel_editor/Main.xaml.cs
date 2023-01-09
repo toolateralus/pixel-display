@@ -144,6 +144,7 @@ namespace pixel_editor
             {
                 () => { Runtime.Instance.Toggle(); },
             };
+
             Key[] inputs = new Key[]
             {
                 Key.F1,
