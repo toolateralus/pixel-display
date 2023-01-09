@@ -38,7 +38,7 @@ namespace pixel_renderer.Assets
         }
         public Node Copy()
         {
-            Node node = new Node(nodeName, pos, scale, UUID);
+            Node node = new(nodeName, pos, scale, UUID);
             return node;
         }
     }

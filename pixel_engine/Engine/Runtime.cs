@@ -42,7 +42,6 @@ namespace pixel_renderer
                 return instance;
             }
         }
-
         public void Toggle()
         {
             if (!PhysicsInitialized) InitializePhysics();
@@ -65,7 +64,6 @@ namespace pixel_renderer
                 m_stage = m_stageAsset?.Copy();
             return m_stage;
         }
-
         public static void Awake(EngineInstance mainWnd, Project? project = null)
         {
             if (project != null) 
@@ -85,15 +83,12 @@ namespace pixel_renderer
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
             PhysicsInitialized = true;
         }
-        
         public StageAsset? GetStageAsset() => m_stageAsset;
         public void SetProject(Project project) =>  LoadedProject = project;
-
         public void ResetCurrentStage()
         {
             SetStage(m_stageAsset?.Copy());
         }
-
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -103,8 +98,7 @@ namespace pixel_renderer
            InspectorEvent e = new(obj.ToString());
            RaiseInspectorEvent(e);
         }
-        public static void RaiseInspectorEvent(InspectorEvent e) 
-            => InspectorEventRaised?.Invoke(e);
+        public static void RaiseInspectorEvent(InspectorEvent e)  => InspectorEventRaised?.Invoke(e);
         private protected void SetStage(Stage? value) 
         {
             m_stage = null; 

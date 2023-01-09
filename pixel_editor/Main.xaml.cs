@@ -81,7 +81,8 @@ namespace pixel_editor
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
-            Console.Print(Runtime.Instance.renderHost.info.Framerate);
+
+
             if (Runtime.Instance.IsRunning 
                 && Runtime.Instance.GetStage() is not null  
                 && host.State == RenderState.Scene)
