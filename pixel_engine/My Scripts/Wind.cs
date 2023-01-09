@@ -1,7 +1,10 @@
-﻿
+﻿using System.Text.Json.Serialization;
+
 namespace pixel_renderer
 {
-    public enum Direction { Left, Right, Up, Down };
+    public enum Direction
+    { Left, Right, Up, Down };
+
     public static class Orientation
     {
         public static Vec2 GetDirection(Direction direction)
@@ -16,21 +19,21 @@ namespace pixel_renderer
             };
         }
     }
+
     internal class Wind : Component
     {
-        public Wind() { }
-        public Wind(Direction direction) => this.direction = direction;
-        
+        [JsonInclude] public Direction direction = Direction.Up;
         private Rigidbody rb;
-        public Direction direction = Direction.Up;
-        
         public override void Awake() => rb = parent.GetComponent<Rigidbody>();
         public override void FixedUpdate(float delta)
         {
-            if (rb is null) return; 
+            if (rb is null) return;
             var windDir = Orientation.GetDirection(direction);
             float speed = WaveForms.Next.Length() * 5f;
             rb.velocity += windDir * speed;
         }
+        public Wind()
+        { }
+        public Wind(Direction direction) => this.direction = direction;
     }
 }

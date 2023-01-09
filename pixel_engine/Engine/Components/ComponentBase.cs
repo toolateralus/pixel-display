@@ -1,21 +1,20 @@
 ﻿
-using Newtonsoft.Json;
 using pixel_renderer.Assets;
+using Newtonsoft.Json;
 using System;
 
 namespace pixel_renderer
 {
-    //[JsonObject(MemberSerialization.OptOut)]
+    [JsonObject(MemberSerialization.OptIn)]
     public class Component
     {
-        [JsonIgnore]
         public Node parent { get { return _parent; } set { _parent = value; } }
-        public bool Enabled = true;
+        [JsonProperty] public bool Enabled = true;
 
         private protected Node _parent = null;
-        private string _uuid = "";
+        [JsonProperty] private string _uuid = "";
         public string UUID { get { return _uuid; } init => _uuid = pixel_renderer.UUID.NewUUID(); }
-        public string Name { get; set; } = "";
+        [JsonProperty] public string Name { get; set; } = "";
 
         public virtual void Awake() { }
         public virtual void Update() { }
