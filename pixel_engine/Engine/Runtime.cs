@@ -71,10 +71,10 @@ namespace pixel_renderer
 
             Instance.mainWnd = mainWnd;
             Importer.Import(false);
-            CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             Input.Awake();
-
             Instance.Initialized = true;
+
+            CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
         }
         private void InitializePhysics()
         {

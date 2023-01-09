@@ -39,6 +39,10 @@ namespace pixel_renderer.Assets
         public Node Copy()
         {
             Node node = new(nodeName, pos, scale, UUID);
+
+            foreach (var comp in components)
+                node.AddComponent(comp);
+
             return node;
         }
     }
