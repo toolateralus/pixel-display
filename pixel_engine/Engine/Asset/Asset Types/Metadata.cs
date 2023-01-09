@@ -22,7 +22,7 @@ namespace pixel_renderer.IO
         }
 
         [JsonConstructor]
-        private Metadata(string name, string fullPath, string pathFromProjectRoot, string uuid, string extension)
+        public Metadata(string name, string fullPath, string pathFromProjectRoot, string uuid, string extension)
         {
             Name = name;
             this.fullPath = fullPath;

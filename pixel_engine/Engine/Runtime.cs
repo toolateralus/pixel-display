@@ -92,10 +92,15 @@ namespace pixel_renderer
         {
             SetStage(m_stageAsset?.Copy());
         }
-        public static void Log(string message)
+
+        /// <summary>
+        /// Prints a message in the editor console.
+        /// </summary>
+        /// <param name="message"></param>
+        public static void Log(object obj)
         {
-           InspectorEvent e = new(message);
-            RaiseInspectorEvent(e);
+           InspectorEvent e = new(obj.ToString());
+           RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(InspectorEvent e) 
             => InspectorEventRaised?.Invoke(e);

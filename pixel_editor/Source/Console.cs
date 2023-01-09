@@ -4,7 +4,6 @@ using System;
 using System.Threading.Tasks;
 namespace pixel_editor
 {
-
     public static class Console
     {
         public static void Print(object? o)
@@ -15,29 +14,25 @@ namespace pixel_editor
         }
         public static void Error(object? o = null, int? delay = null)
         {
-            var msg = o.ToString();
-            var e = EditorMessage.New(msg);
+            string? msg = o.ToString();
+            EditorMessage e = EditorMessage.New(msg);
             var inspector = (Runtime.inspector as Inspector);
 
             if (inspector is not null)
-            {
                 if (delay is not null)
                 {
-                    Action<object[]?> c = RedTextForSeconds(inspector, (int)delay);
+                    Action<object[]?> c = RedTextForMS(inspector, (int)delay);
                     e.expression = c;
                 }
-            }
             Runtime.RaiseInspectorEvent(e);
         }
-        private static Action<object[]?> RedTextForSeconds(Inspector? inspector, int delay)
+        public static Action<object[]?> RedTextForMS(Inspector? inspector, int delay)
         {
-            Action<object?> a = inspector.RedText(null);
-            Action<object?> b = inspector.BlackText(null);
             Action<object?> c = async (o) =>
             {
-                a.Invoke(null);
+                inspector.RedText(null);
                 await Task.Delay(delay);
-                b.Invoke(null);
+                inspector.BlackText(null);
             };
             return c;
         }

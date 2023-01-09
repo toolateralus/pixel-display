@@ -12,11 +12,8 @@ namespace pixel_renderer
 {
     public static unsafe class CBit
     {
-        [DllImport("PIXELRENDERER")]
-        internal static extern unsafe IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
         [DllImport("gdi32.dll")]
         internal static extern bool DeleteObject(IntPtr intPtr);
-
         public static unsafe void ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd, out int stride, out byte[] data)
         {
             Bitmap copy = bmp.Clone() as Bitmap;
@@ -28,7 +25,6 @@ namespace pixel_renderer
             copy.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
-
         /// <summary>
         /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
         /// </summary>
@@ -45,7 +41,6 @@ namespace pixel_renderer
             source.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
-
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
         /// </summary>
@@ -83,7 +78,6 @@ namespace pixel_renderer
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
-
         /// <summary>
         /// Takes a group of sprites and writes their individual color data arrays to a larger map as positions to prepare for collision and drawing.
         /// </summary>
@@ -106,7 +100,6 @@ namespace pixel_renderer
                     }
             return colors;
         }
-
         public static unsafe Color[,] ColorArrayFromBitmapData(BitmapData bmd, int stride, byte[] data)
         {
             int curRowOffs = 0;

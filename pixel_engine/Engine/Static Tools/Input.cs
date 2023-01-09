@@ -202,28 +202,29 @@ namespace pixel_renderer
                         return;
                     }
                     action?.Invoke();
-                    Runtime.Log("logs");
                 }
         }
     }
+
     public class InputAction
     {
-        internal readonly bool ExecuteAsynchronously = false;
         internal Key Key; 
+        internal readonly bool ExecuteAsynchronously = false;
         private ValueTuple<Action<object[]?>, object[]?> Action_Args = new();
-        internal void Invoke() => Action_Args.Item1?.Invoke(Action_Args.Item2);
-        internal async Task InvokeAsync(float? delay = null)
-        {
-            if (delay is not null)
-                await Task.Delay((int)delay);
-             await Task.Run(() => Action_Args.Item1?.Invoke(Action_Args.Item2));
-        }
+
         public InputAction(bool async, Action<object[]?> expression, object[] args, Key key)
         {
             ExecuteAsynchronously = async;
             Action_Args.Item1 = expression;
             Action_Args.Item2 = args;
             Key = key; 
+        }
+        internal void Invoke() => Action_Args.Item1?.Invoke(Action_Args.Item2);
+        internal async Task InvokeAsync(float? delay = null)
+        {
+            if (delay is not null)
+                await Task.Delay((int)delay);
+             await Task.Run(() => Action_Args.Item1?.Invoke(Action_Args.Item2));
         }
     }
 }

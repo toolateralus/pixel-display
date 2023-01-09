@@ -9,6 +9,18 @@ using Brushes = System.Windows.Media.Brushes;
 using Image = System.Windows.Controls.Image;
 using Point = System.Windows.Point;
 
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Input;
+
+using pixel_renderer;
+using pixel_renderer.Assets;
+using pixel_renderer.IO;
+using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Collections.Generic;
+using static pixel_renderer.Input;
+
 namespace pixel_editor
 {
     public partial class Editor : Window
@@ -70,32 +82,26 @@ namespace pixel_editor
             pos.Y *= img.Height;
             return pos;
         }
+        object[] Args => new object[]
+        {
+            inspector,
+            Runtime.Instance,
+        };
+        static Action<object[]?> Expr => (o) =>
+        {
+            var inspector = o[0] as Inspector;
+            var run = o[1] as Runtime;
+            run.TrySetStageAsset(0);
+            Console.RedTextForMS(inspector, 1);
+        };      
         private void GetEvents()
         {
-            // HandleInputMediator();
-            CompositionTarget.Rendering += Update;
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
+            CompositionTarget.Rendering += Update;
 
-            var args = new object[]
-            {
-                   inspector,
-                   Runtime.Instance,
-            };
-            Action<object[]?> expr = (o) =>
-            {
-                Console.Print("Action called");
-
-                var inspector = o[0] as Inspector;
-                var run = o[1] as Runtime;
-
-                run.TrySetStageAsset(0);
-                inspector.RedText(null)?.Invoke(null);
-            };
-
-            InputAction action = new(false, expr, args, Key.G);
-
-            Input.RegisterAction(action, Input.InputEventType.KeyDown);
+            InputAction action = new(false, Expr, Args, Key.G);
+            Input.RegisterAction(action, InputEventType.KeyDown);
         }
         private void IncrementRenderState()
         {
