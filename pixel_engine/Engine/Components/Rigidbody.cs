@@ -2,20 +2,21 @@
 using System;
 using System.IO.Packaging;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using System.Windows;
 
 namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
-        private float _drag = 0.0f;
-        public float drag = .2f;
-        
-        public bool usingGravity = true;
-        public bool IsTrigger = false;
-        
-        public Vec2 velocity = new();
-        public Sprite? sprite; 
+        [JsonProperty] private float _drag = 0.0f;
+        [JsonProperty] public float drag = .2f;
+
+        [JsonProperty] public bool usingGravity = true;
+        [JsonProperty] public bool IsTrigger = false;
+
+        [JsonProperty] public Vec2 velocity = new();
+        [JsonProperty] public Sprite? sprite; 
 
         const double dragCoefficient = 1;
         
