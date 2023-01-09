@@ -66,9 +66,9 @@ namespace pixel_renderer
             return m_stage;
         }
 
-        public static void Awake(EngineInstance mainWnd, Project project)
+        public static void Awake(EngineInstance mainWnd, Project? project = null)
         {
-            Instance.LoadedProject = project;
+            if (project != null) Instance.LoadedProject = project;
             Instance.mainWnd = mainWnd;
 
             Importer.Import(false);

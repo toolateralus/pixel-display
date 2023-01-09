@@ -10,10 +10,10 @@
     /// </summary>
     public partial class EngineInstance : Window
     {
-        public EngineInstance()
+        public EngineInstance(Project? project = null)
         {
             InitializeComponent();
-            Runtime.Awake(this, new(""));
+            Runtime.Awake(this, project);
         }
     }
 }
