@@ -1,22 +1,16 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.IO.Packaging;
-using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
-using System.Windows;
-
 namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
-        [JsonProperty] private float _drag = 0.0f;
-        [JsonProperty] public float drag = .2f;
+        [Field] [JsonProperty] private float _drag = 0.0f;
+        [Field] [JsonProperty] public float drag = .2f;
+                
+        [Field] [JsonProperty] public bool usingGravity = true;
+        [Field] [JsonProperty] public bool IsTrigger = false;
 
-        [JsonProperty] public bool usingGravity = true;
-        [JsonProperty] public bool IsTrigger = false;
-
-        [JsonProperty] public Vec2 velocity = new();
-        [JsonProperty] public Sprite? sprite; 
+        [Field] [JsonProperty] public Vec2 velocity = new();
+        [Field] [JsonProperty] public Sprite? sprite; 
 
         const double dragCoefficient = 1;
         
@@ -35,10 +29,6 @@ namespace pixel_renderer
         {
             double velocity = this.velocity.Length();
             double drag = velocity * velocity * dragCoefficient;
-            // maybe unneccesary negate?
-            // breakpoint has never been hit despite
-            // running in debug for dozens of hours
-            if (drag < 0) drag = -drag;
             return drag;
         }
 

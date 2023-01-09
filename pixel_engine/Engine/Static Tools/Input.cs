@@ -1,16 +1,10 @@
 ﻿using System.Collections.Generic;
 using System;
-using System.Security.Principal;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace pixel_renderer
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using System.Windows.Controls;
-    using System.Windows.Input;
-    using static System.Runtime.CompilerServices.RuntimeHelpers;
 
     public static class Input
     {
@@ -67,18 +61,8 @@ namespace pixel_renderer
         public static bool InputActionsInUse = true;
         public static void Refresh()
         {
-
-            if (!InputActionsInUse)
-                UpdateStaticInputs();
-            else
-            {
-                IterateActions(InputActions_KeyDown);
-                
-                // Not yet implemented; NYI TODO
-                //IterateActions(InputActions_KeyUp);
-                //IterateActions(InputActions_KeyToggle);
-            }
-
+            UpdateStaticInputs();
+            IterateActions(InputActions_KeyDown);
         }
 
         private static void IterateActions(List<InputAction> actions)
@@ -96,8 +80,10 @@ namespace pixel_renderer
         {
             foreach (Key key in keys)
                 SetKeyDown(key, Keyboard.IsKeyDown(key));
+
             foreach (Key key in keys)
                 SetKeyUp(key, Keyboard.IsKeyUp(key));
+
             foreach (Key key in keys)
                 SetKeyToggled(key, Keyboard.IsKeyToggled(key));
         }

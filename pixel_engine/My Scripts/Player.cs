@@ -6,17 +6,21 @@ internal class Player : Component
     [Field] public int speed = 2;
     [Field] Sprite sprite = new();
     [Field] Rigidbody rb = new();
+    
     public override void Awake()
     {
        parent.TryGetComponent(out sprite);
        parent.TryGetComponent(out rb);
     }
+    int j = 0;
     public override void FixedUpdate(float delta)
     {
-        if (!takingInput) return;
-        if (Input.GetKeyDown(Key.Q))
-            StagingHost.ReloadCurrentStage(); 
+        if (!takingInput) 
+            return;
 
+        if (Input.GetKeyDown(Key.Q))
+            StagingHost.ReloadCurrentStage();
+        Runtime.Log("Player Loop");
         var move = Input.GetMoveVector();
         Jump(move);
         Move(move);

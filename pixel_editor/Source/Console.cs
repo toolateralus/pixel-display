@@ -30,9 +30,9 @@ namespace pixel_editor
         {
             Action<object?> c = async (o) =>
             {
-                inspector.RedText(null);
+                Editor.Current.RedText(null);
                 await Task.Delay(delay);
-                inspector.BlackText(null);
+                Editor.Current.BlackText(null);
             };
             return c;
         }

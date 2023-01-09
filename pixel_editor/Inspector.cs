@@ -167,39 +167,9 @@ namespace pixel_editor
             if (e.message != "" && !e.message.Contains("$no_log$"))
             {
                 e.expression?.Invoke(null);
-                LogConsole(e);
+                Editor.OnInfoLogged?.Invoke(e);
             }
         }
-        private void LogConsole(InspectorEvent e)
-        {
-            messagesQueue.Text +=
-            $"\n{e.message} \n - - - - - - - - - - - - - - - - - - -";
-
-            string[] lines = messagesQueue.Text.Split('\n');
-            int length = lines.Length;
-
-            if (length > Constants.InspectorQueueMaxLength)
-                HandleOverflowingConsole(messagesQueue, lines);
-        }
-        private void HandleOverflowingConsole(TextBox messagesQueue, string[] lines)
-        {
-            messagesQueue.Text = messagesQueue.Text.Replace(messagesQueue.GetLineText(0), "\n");
-        }
-        internal Action<object?> RedText(object? o)
-        {
-            return (o) =>
-            {
-                messagesQueue.Foreground = Brushes.Red;   
-                messagesQueue.Background = Brushes.Black;   
-            };
-        }
-        internal Action<object?> BlackText(object? o)
-        {
-            return (o) =>
-            {
-                messagesQueue.Foreground = Brushes.Black;
-                messagesQueue.Background = Brushes.DarkSlateGray;   
-            };
-        }
+   
     }
 }

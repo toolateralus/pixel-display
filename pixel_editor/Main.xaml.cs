@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Collections.Generic;
 using static pixel_renderer.Input;
+using System.Windows.Controls;
 
 namespace pixel_editor
 {
@@ -68,12 +69,24 @@ namespace pixel_editor
             Runtime.inspector = inspector;
             Project defaultProject = new ("Default"); 
             engine = new(defaultProject);
-            GetEvents(); 
+            GetEvents();
+            OnInfoLogged += LogConsole; 
         }
         private int renderStateIndex = 0;
 
         private readonly Inspector inspector;
         private StageWnd? stageWnd;
+        private protected volatile static Editor current = new();
+        public static Editor Current
+        {
+            get
+            {
+                if (current is not null)
+                    return current;
+                else current = new();
+                return current;
+            }
+        }
 
         internal EngineInstance? engine;
         internal RenderHost? host => Runtime.Instance.renderHost;  
@@ -91,9 +104,36 @@ namespace pixel_editor
                     var framerate = Runtime.Instance.renderHost.info.Framerate; 
                     gcAllocText.Content =
                         $"{memory}" +
-                        $" \n frame rate : {}"; 
+                        $" \n frame rate : {framerate}"; 
                 }
         }
+
+        public static Action<InspectorEvent> OnInfoLogged;
+        public void LogConsole(InspectorEvent e)
+        {
+            string msg = $"\n{e.message} \n - - - - - - - - - - - - - - - - - - -";
+            editorMessages.Dispatcher.Invoke(() => editorMessages.AppendText(msg));
+            string[] lines = editorMessages.Dispatcher.Invoke(() => editorMessages.Text.Split('\n'));
+            int length = lines.Length;
+        }
+
+        internal Action<object?> RedText(object? o = null)
+        {
+            return (o) =>
+            {
+                editorMessages.Foreground = Brushes.Red;
+                editorMessages.Background = Brushes.Black;
+            };
+        }
+        internal Action<object?> BlackText(object? o = null)
+        {
+            return (o) =>
+            {
+                editorMessages.Foreground = Brushes.Black;
+                editorMessages.Background = Brushes.DarkSlateGray;
+            };
+        }
+
         object[] Args => new object[]
         {
             inspector,
@@ -106,6 +146,7 @@ namespace pixel_editor
             run.TrySetStageAsset(0);
             Console.RedTextForMS(inspector, 1);
         };      
+
         private void GetEvents()
         {
             Closing += OnDisable;
@@ -124,6 +165,7 @@ namespace pixel_editor
             pos.Y *= img.Height;
             return pos;
         }
+
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)
