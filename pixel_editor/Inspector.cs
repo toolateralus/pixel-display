@@ -9,6 +9,7 @@ using System.Windows.Controls;
 
 using pixel_renderer;
 using System.Linq;
+using System.Reflection.Metadata;
 
 namespace pixel_editor
 {
@@ -30,7 +31,7 @@ namespace pixel_editor
         private Label name;
         private Label objInfo;
         private TextBox messagesQueue; 
-        private Grid componentGrid;
+        private Grid componentGrid; 
         
         private Dictionary<Type, List<Component>> components = new();
 
@@ -171,7 +172,23 @@ namespace pixel_editor
         };
         private void Instance_InspectorEventRaised(InspectorEvent e)
         {
-            messagesQueue.Text += $"\n{e.message}";
+            if(e.GetType() == typeof(EditorMessage)) LogConsole(e);
+        }
+
+        private void LogConsole(InspectorEvent e)
+        {
+            messagesQueue.Text += $"\n{e.message} \n - - - - - - - - - - - - - - - - - - -";
+
+            string[] lines = messagesQueue.Text.Split('\n');
+            int length = lines.Length;
+
+            if (length > Constants.InspectorQueueMaxLength)
+                HandleOverflowingConsole(messagesQueue, lines);
+        }
+
+        private void HandleOverflowingConsole(TextBox messagesQueue, string[] lines)
+        {
+
         }
     }
 }
