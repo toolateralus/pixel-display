@@ -14,12 +14,9 @@ namespace pixel_renderer.Assets
     {
         public string nodeName;
         public string nodeUUID; 
-        
         public Vec2 pos, scale;
-
         public List<Component> components = new();  
         public List<NodeAsset> children;
-
         [JsonConstructor]
         public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<Component> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
         {
@@ -49,19 +46,16 @@ namespace pixel_renderer.Assets
             return node;
         }
     }
-
     public class ComponentAsset : Asset
     {
         [JsonIgnore]
         public Component runtimeComponent;
-
         public ComponentAsset(string name,Component component, Type type)
         {
             runtimeComponent = component;
             fileType = type;
             Name = name;
         }
-
         [JsonConstructor]
         public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, fileType, UUID) 
         {
@@ -71,6 +65,5 @@ namespace pixel_renderer.Assets
             // are always null after initializing from a file;
             this.runtimeComponent = runtimeComponent; 
         }
-        
     }
 }

@@ -59,12 +59,11 @@ namespace pixel_editor
             name.Content = loadedNode.Name;
             components = loadedNode.Components;
             objInfo.Content = $"#{components.Count} Components";
-
             var thickness = new Thickness(0, 0, 0, 0);
             int index = 0;
 
             foreach (var componentType in components.Values)
-            foreach (var component in componentType)
+             foreach (var component in componentType)
             {
                 string info = GetComponentInfo(component);
                 TextBlock block = CreateBlock(info, thickness);
@@ -75,6 +74,7 @@ namespace pixel_editor
                 activeControls.Add(block);
                 index++;
             }
+
             OnInspectorUpdated?.Invoke();
         }
         public void DeselectNode()

@@ -14,6 +14,7 @@ using pixel_renderer.IO;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Collections.Generic;
+using static pixel_renderer.Input;
 
 namespace pixel_editor
 {
@@ -91,32 +92,26 @@ namespace pixel_editor
                         $" \n frame rate : {Runtime.Instance.renderHost.info.Framerate}"; 
                 }
         }
+        object[] Args => new object[]
+        {
+            inspector,
+            Runtime.Instance,
+        };
+        static Action<object[]?> Expr => (o) =>
+        {
+            var inspector = o[0] as Inspector;
+            var run = o[1] as Runtime;
+            run.TrySetStageAsset(0);
+            Console.RedTextForMS(inspector, 1);
+        };      
         private void GetEvents()
         {
-           // HandleInputMediator();
-            CompositionTarget.Rendering += Update;
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
+            CompositionTarget.Rendering += Update;
 
-            var args = new object[]
-            {
-                   inspector,
-                   Runtime.Instance,
-            };
-            Action<object[]?> expr = (o) =>
-            {
-                Console.Print("Action called");
-
-                var inspector = o[0] as Inspector;
-                var run = o[1] as Runtime;
-
-                run.TrySetStageAsset(0);
-                inspector.RedText(null)?.Invoke(null);
-            };      
-
-            InputAction action = new(false, expr, args, Key.G);
-
-            Input.RegisterAction(action, Input.InputEventType.KeyDown);
+            InputAction action = new(false, Expr, Args, Key.G);
+            Input.RegisterAction(action, InputEventType.KeyDown);
         }
         private static Point ViewportPoint(Image img, Point pos)
         {

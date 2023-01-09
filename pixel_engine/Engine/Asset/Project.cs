@@ -26,7 +26,6 @@ public class Project
             return project;
         else return new("Default");
     }
-
     internal static string GetPathFromRoot(string filePath)
     {
         return filePath.Replace(Constants.AppDataDir + "\\Pixel", "");
@@ -40,7 +39,7 @@ public class Project
         Name = name;
         library = Library.Clone();
         stageIndex = 0;
-        fileSize = 10;
+        fileSize = 0;
     }
     [JsonConstructor]
     public Project(List<StageAsset> stages, List<Asset> library, int stageIndex, int fileSize, string name)
