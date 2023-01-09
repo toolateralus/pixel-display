@@ -40,10 +40,10 @@ namespace pixel_renderer.Assets
         {
             // Import backgruond and output stage with background bitmap loaded;
             // REPLACE NULL REFERENCE TO BACKGROUND
-            var output =new Stage($"{Name} #FROM ASSET#", null, nodes);
+            var output = new Stage(Name, null, nodes, UUID);
             return output;  
         }
         internal Bitmap? GetBackground() => new Bitmap(m_background.fullPath) ?? null;
-        public static StageAsset? Default => new("Default Stage", StagingHost.Default());
+        public static StageAsset Default => new("Default Stage", StagingHost.Default());
     }
 }

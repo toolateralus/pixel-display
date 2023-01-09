@@ -58,11 +58,11 @@ namespace pixel_renderer
             IsRunning = false;
             return;
         }
-        public Stage? GetStage()
+        public Stage GetStage()
         {
             if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
-            if (m_stage is null || m_stage.UUID != m_stageAsset.Copy().UUID)
-                m_stage = m_stageAsset?.Copy();
+            if (m_stage is null || m_stage.UUID != m_stageAsset.UUID)
+                m_stage = m_stageAsset.Copy();
             return m_stage;
         }
 
@@ -106,7 +106,7 @@ namespace pixel_renderer
             => InspectorEventRaised?.Invoke(e);
         private protected void SetStage(Stage? value) 
         {
-            m_stage = null; 
+            m_stage = null;
             m_stage = value;
         }
         public void AddStageToProject(StageAsset stageAsset)

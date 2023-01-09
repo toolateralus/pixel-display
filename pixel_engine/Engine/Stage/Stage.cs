@@ -11,20 +11,18 @@ namespace pixel_renderer
 {
     public class Stage
     {
-        [JsonIgnore]
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
         public Stage() { }
 
-        [JsonConstructor]
-        public Stage(string Name, Metadata Background, List<NodeAsset> nodes)
+        public Stage(string Name, Metadata Background, List<NodeAsset> nodes, string? existingUUID = null)
         {
-            
+            _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
             if (Background is not null && backgroundImage is null)
             {
                 var exists = File.Exists(Background.fullPath += ".bmp");
                 if (exists)
                     backgroundImage = new(Background.fullPath);
-                else backgroundImage = new(256,256); 
+                else backgroundImage = new(256,256);
             }
 
             this.Name = Name;
@@ -40,8 +38,7 @@ namespace pixel_renderer
             get 
             { 
                 return _uuid;
-            } 
-            init => _uuid = pixel_renderer.UUID.NewUUID(); 
+            }
         }
 
         public List<Node> Nodes { get; private set; } = new();
