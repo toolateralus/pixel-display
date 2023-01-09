@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.PerformanceData;
 using System.Linq;
-using System.Reflection.Metadata;
 
 namespace pixel_renderer
 {

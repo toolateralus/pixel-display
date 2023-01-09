@@ -9,13 +9,9 @@ using Bitmap = System.Drawing.Bitmap;
 using Image = System.Windows.Controls.Image;
 using System.Linq;
 using Color = System.Drawing.Color;
-using System.Windows.Controls;
 
 namespace pixel_renderer
 {
-    /// <summary>
-    /// Warning : This class consists of Unsafe code. Please ensure the project has 'Use Unsafe Code' enabled.
-    /// </summary>
     public unsafe static class CBit
     {
         [DllImport("PIXELRENDERER")] 
