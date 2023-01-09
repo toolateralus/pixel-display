@@ -1,25 +1,23 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
-using Image = System.Windows.Controls.Image;
-using System.Linq;
 using Color = System.Drawing.Color;
+using Image = System.Windows.Controls.Image;
 
 namespace pixel_renderer
 {
-    public unsafe static class CBit
+    public static unsafe class CBit
     {
-        [DllImport("PIXELRENDERER")] 
-            internal unsafe static extern IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
-        [DllImport("gdi32.dll")] 
-            internal static extern bool DeleteObject(IntPtr intPtr);
-        
-        public unsafe static void ReadonlyBitmapData(in Bitmap bmp ,out BitmapData bmd, out int stride, out byte[] data)
+        [DllImport("PIXELRENDERER")]
+        internal static extern unsafe IntPtr GetHBITMAP(IntPtr intPtr, byte r, byte g, byte b);
+        [DllImport("gdi32.dll")]
+        internal static extern bool DeleteObject(IntPtr intPtr);
+
+        public static unsafe void ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd, out int stride, out byte[] data)
         {
             Bitmap copy = bmp.Clone() as Bitmap;
             Rectangle rect = new(0, 0, copy.Width, copy.Height);
@@ -30,24 +28,24 @@ namespace pixel_renderer
             copy.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
-        
+
         /// <summary>
         /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
         /// </summary>
-        /// <param name="bmp"></param>
         /// <param name="source"></param>
-         public unsafe static void Render(ref Bitmap bmp, Image source)
+        /// <param name="destination"></param>
+        public static unsafe void Render(ref Bitmap source, Image destination)
         {
-            var bmd = bmp.LockBits(
-              new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
-              System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-            source.Source = BitmapSource.Create(
-              bmd.Width, bmd.Height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
-              bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
-            bmp.UnlockBits(bmd);
+            var bmd = source.LockBits(
+                new System.Drawing.Rectangle(0, 0, source.Width, source.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly, source.PixelFormat);
+            destination.Source = BitmapSource.Create(
+                bmd.Width, bmd.Height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+                bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
+            source.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
-        
+
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
         /// </summary>
@@ -55,7 +53,7 @@ namespace pixel_renderer
         /// <param name="bmp"></param>
         /// <exception cref="InvalidOperationException"></exception>
         /// <returns> A modified input Bitmap that holds all the rendered data from the Stage</returns>
-        internal unsafe static void Draw(IEnumerable<Sprite> sprites, Bitmap bmp)
+        internal static unsafe void Draw(IEnumerable<Sprite> sprites, Bitmap bmp)
         {
             BitmapData bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
                                   System.Drawing.Imaging.ImageLockMode.WriteOnly,
@@ -66,7 +64,7 @@ namespace pixel_renderer
 
             for (var i = 0; i < bmd.Width * bmd.Height; ++i)
             {
-                if (i >= colorBytes.Length - 4) continue; 
+                if (i >= colorBytes.Length - 4) continue;
                 colorBytes[i + 0] = 255;
                 colorBytes[i + 1] = 15;
                 colorBytes[i + 2] = 15;
@@ -74,18 +72,18 @@ namespace pixel_renderer
             }
 
             int start = 0;
-            int length = colorBytes.Length; 
-            IntPtr destination = bmd.Scan0; 
+            int length = colorBytes.Length;
+            IntPtr destination = bmd.Scan0;
 
             if (!length.Equals(Constants.ScreenW * Constants.ScreenH))
                 throw new InvalidOperationException("Color array is not the appropriate size.");
 
             Marshal.Copy(colorBytes, start, destination, length);
-            
+
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
-        
+
         /// <summary>
         /// Takes a group of sprites and writes their individual color data arrays to a larger map as positions to prepare for collision and drawing.
         /// </summary>
@@ -93,7 +91,7 @@ namespace pixel_renderer
         /// <returns></returns>
         internal static Color[] ColorGraph(IEnumerable<Sprite> sprites)
         {
-            var colors = new Color[Constants.ScreenW *  Constants.ScreenH];
+            var colors = new Color[Constants.ScreenW * Constants.ScreenH];
             foreach (Sprite sprite in sprites)
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
@@ -104,11 +102,11 @@ namespace pixel_renderer
                         if (offsetX is < 0 or >= Constants.ScreenW
                             || offsetY is < 0 or >= Constants.ScreenH) continue;
 
-                        colors[(int)(offsetY * 255  + offsetX)] =  sprite.colorData[x, y];
+                        colors[(int)(offsetY * 255 + offsetX)] = sprite.colorData[x, y];
                     }
             return colors;
         }
-        
+
         public static unsafe Color[,] ColorArrayFromBitmapData(BitmapData bmd, int stride, byte[] data)
         {
             int curRowOffs = 0;

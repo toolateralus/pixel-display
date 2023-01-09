@@ -28,7 +28,7 @@
             }
             return bmp_cached;
         }
-        public override void Render(Image output) =>  CBit.Render(ref bmp_cached, output);
+        public override void Render(Image destination) =>  CBit.Render(ref bmp_cached, destination);
           
         public Bitmap Background 
         {
