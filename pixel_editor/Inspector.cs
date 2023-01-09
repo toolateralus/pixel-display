@@ -64,23 +64,17 @@ namespace pixel_editor
             int index = 0;
 
             foreach (var componentType in components.Values)
-                foreach (var component in componentType)
-                {
-                    string info = GetComponentInfo(component);
-
-                    TextBlock block = CreateBlock(info, thickness);
-
-                    int rowSpan = info.Split('\n').Length * 2;
-
-                    AddToInspector(index, block, rowSpan);
-
-                    componentGrid.Children.Add(block);
-                    componentGrid.UpdateLayout();
-
-                    activeControls.Add(block);
-
-                    index++;
-                }
+            foreach (var component in componentType)
+            {
+                string info = GetComponentInfo(component);
+                TextBlock block = CreateBlock(info, thickness);
+                int rowSpan = info.Split('\n').Length * 2;
+                AddToInspector(index, block, rowSpan);
+                componentGrid.Children.Add(block);
+                componentGrid.UpdateLayout();
+                activeControls.Add(block);
+                index++;
+            }
             OnInspectorUpdated?.Invoke();
         }
         public void DeselectNode()
@@ -170,7 +164,7 @@ namespace pixel_editor
         };
         private void Instance_InspectorEventRaised(InspectorEvent e)
         {
-            if (e.GetType() == typeof(EditorMessage))
+            if (e.message != "" && !e.message.Contains("$no_log$"))
             {
                 e.expression?.Invoke(null);
                 LogConsole(e);

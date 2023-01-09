@@ -60,13 +60,39 @@ namespace pixel_renderer
 
                 case InputEventType.KeyToggle:
                     throw new NotImplementedException();
-
             }
         }
 
         public static event Action<Key> OnKeyDown;
-
+        public static bool InputActionsInUse = true;
         public static void Refresh()
+        {
+
+            if (!InputActionsInUse)
+                UpdateStaticInputs();
+            else
+            {
+                IterateActions(InputActions_KeyDown);
+                
+                // Not yet implemented; NYI TODO
+                //IterateActions(InputActions_KeyUp);
+                //IterateActions(InputActions_KeyToggle);
+            }
+
+        }
+
+        private static void IterateActions(List<InputAction> actions)
+        {
+            foreach (var input in actions)
+            {
+                Key key = input.Key;
+                SetKeyDown(key, Keyboard.IsKeyDown(key));
+                SetKeyUp(key, Keyboard.IsKeyUp(key));
+                SetKeyToggled(key, Keyboard.IsKeyToggled(key));
+            }
+        }
+
+        private static void UpdateStaticInputs()
         {
             foreach (Key key in keys)
                 SetKeyDown(key, Keyboard.IsKeyDown(key));
@@ -99,10 +125,7 @@ namespace pixel_renderer
             Key key = s_keys[keycode];
 
             var result = KeyDown.ContainsKey(key) && KeyDown[key];
-
-            if (result)
-                OnKeyDown?.Invoke(key);
-
+           
             return result;
         }
         public static bool GetKeyUp(string keycode)
@@ -122,8 +145,10 @@ namespace pixel_renderer
         {
             if (!KeyDown.ContainsKey(key))
                 KeyDown.Add(key, result);
+
             if (result)
                 OnKeyDown?.Invoke(key);
+
             else KeyDown[key] = result;
         }
         private static void SetKeyToggled(Key key, bool result)
@@ -177,9 +202,19 @@ namespace pixel_renderer
                         return;
                     }
                     action?.Invoke();
+                    EditorMessage msg = new("$editor Debug.Log('Message') $end");
+                    Runtime.RaiseInspectorEvent(msg);
                 }
         }
     }
+    public class EditorMessage : InspectorEvent
+    {
+        public EditorMessage(string msg)
+        {
+            message = msg;
+        }
+    }
+
     public class InputAction
     {
         internal readonly bool ExecuteAsynchronously = false;
