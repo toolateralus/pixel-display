@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-
 namespace pixel_renderer.IO
 {
     public class Metadata : FileBase

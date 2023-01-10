@@ -1,15 +1,9 @@
-﻿
-using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using pixel_renderer.IO;
-using System.Runtime.CompilerServices;
-using System.Windows.Media;
-
 namespace pixel_renderer.Assets
 {
     public class Importer
