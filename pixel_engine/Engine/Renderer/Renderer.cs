@@ -27,7 +27,7 @@
             }
             bmp_cached = (Bitmap)FallBack.Clone();
         }
-        public override Bitmap Draw()
+        public Bitmap _Draw()
         {
             sprites_cached = Runtime.Instance.GetStage().GetSprites();
             foreach (Sprite sprite in sprites_cached)
@@ -46,6 +46,12 @@
             }
             return bmp_cached;
         }
+        public override Bitmap Draw()
+        {
+            //CBit.Draw(Runtime.Instance.GetStage().GetSprites(), bmp_cached);
+            return _Draw();
+        }
+
         public override void Render(Image destination) => CBit.Render(ref bmp_cached, destination);
     }
 }
