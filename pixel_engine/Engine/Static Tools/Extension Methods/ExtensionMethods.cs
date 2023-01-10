@@ -131,5 +131,6 @@ namespace pixel_renderer
             throw new NotImplementedException($"No Media.PixelFormat implemented Imaging.PixelFormat: {sourceFormat.ToString()}");
             return new System.Windows.Media.PixelFormat();
         }
+        public static Rectangle Rect(this Bitmap bmp) => new Rectangle(0, 0, bmp.Width, bmp.Height);
     }
 }
