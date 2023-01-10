@@ -42,11 +42,11 @@ namespace pixel_renderer
         /// <returns>an integer of value based on the order and frequency of numbers in the input string.</returns>
         public static int ToInt(this string input)
         {
-
             string intResult = "";
 
             foreach (var x in input)
-                if (Constants.int_chars.Contains(x)) intResult += x;
+                if (Constants.int_chars.Contains(x)) 
+                    intResult += x;
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }

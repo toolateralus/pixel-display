@@ -12,6 +12,7 @@ using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.IO;
 using static pixel_renderer.Input;
+using System.Linq;
 
 namespace pixel_editor
 {
@@ -282,10 +283,9 @@ namespace pixel_editor
         public static Command spawn_generic = new()
         {
             phrase = "genericNode|spawnGeneric|/sgn|++n",
-            action = (o) => Runtime.Instance.ResetCurrentStage(),
+            action = (o) => Runtime.Instance.GetStage().create_generic_node(),
             args = null
         };
-
         public static readonly Command[] Active = new Command[]
         {
             reload_stage,
@@ -296,8 +296,12 @@ namespace pixel_editor
         public object[]? args;
         public bool Equals(string input)
         {
+            string newPhrase = "";
+            if (input.Contains('$'))
+                newPhrase = input.Split('$')[0];
+            else newPhrase = input; 
 
-            var split = this.phrase.Split('|');
+            var split = newPhrase.Split('|');
             foreach (var line in split)
                 if (line.Equals(input))
                     return true;
@@ -315,14 +319,18 @@ namespace pixel_editor
                 if (command.Equals(line))
                 {
                     int count = 0;
-                    if (line.Contains("$*$"))
+                    
+                    if (line.Contains('$'))
                         count = line.ToInt();
+
                     if (count == 0)
                     {
                         command.Execute();
                         return; 
                     }
-                    for(int i = 0; i < count; ++i)  command.Execute();
+
+                    for(int i = 0; i < count; ++i)
+                        command.Execute();
                       
                 }
         }
