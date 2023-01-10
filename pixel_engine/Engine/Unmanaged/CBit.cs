@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -32,14 +33,14 @@ namespace pixel_renderer
         /// <param name="destination"></param>
         public static unsafe void Render(ref Bitmap source, Image destination)
         {
-            var bmd = source.LockBits(
-                new System.Drawing.Rectangle(0, 0, source.Width, source.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly, source.PixelFormat);
+            Rectangle bmpRect = new Rectangle(0, 0, source.Width, source.Height);
+            BitmapData bmd = source.LockBits(bmpRect, ImageLockMode.ReadOnly, source.PixelFormat);
             destination.Source = BitmapSource.Create(
-                bmd.Width, bmd.Height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+                bmd.Width, bmd.Height, 96, 96, source.PixelFormat.ToMediaFormat(), null,
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
             source.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
+            //System.Windows.Media.PixelFormats.Bgr24
         }
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data

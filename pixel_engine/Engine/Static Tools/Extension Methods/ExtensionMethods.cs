@@ -6,9 +6,7 @@ namespace pixel_renderer
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
-    using System.Printing;
     using System.Reflection;
-    using System.Runtime.InteropServices;
 
     public static class ExtensionMethods
     {
@@ -30,7 +28,7 @@ namespace pixel_renderer
         /// <returns>A normalized Vector from the length of the current</returns>
         public static Vec2 Normalize(this Vec2 v)
         {
-            if(v.Equals(Vec2.zero)) 
+            if (v.Equals(Vec2.zero))
                 return Vec2.zero;
 
             return v / v.Length();
@@ -74,28 +72,28 @@ namespace pixel_renderer
         /// <param name="colors"></param>
         /// <returns> A one dimensional array containing all the elements of the two-dimensional array passed in.</returns>
         public static T[] Flatten<T>(this T[,] array)
-     {
+        {
             List<T> result = new(array.GetLength(0) + array.GetLength(1));
             foreach (var x in array)
                 result.Add(x);
-            return result.ToArray(); 
-     }
+            return result.ToArray();
+        }
         #endregion
         #region Node
-        
+
         public static List<NodeAsset> ToNodeAssets(this List<Node> input)
         {
-            List<NodeAsset> output = new(); 
+            List<NodeAsset> output = new();
             foreach (var node in input)
                 output.Add(node.ToAsset());
-            return output; 
+            return output;
         }
         public static List<Node> ToNodeList(this List<NodeAsset> input)
         {
             List<Node> output = new();
             foreach (var asset in input)
                 output.Add(asset.Copy());
-            return output; 
+            return output;
         }
 
         #endregion
@@ -104,18 +102,34 @@ namespace pixel_renderer
             from CustomAttributeData data in field.CustomAttributes
             where data.AttributeType == typeof(FieldAttribute)
             select field;
-        public static Bitmap ToBitmap(this Color [,] colors)
-    {
-        int sizeX = colors.GetLength(0);
-        int sizeY = colors.GetLength(1);
+        public static Bitmap ToBitmap(this Color[,] colors)
+        {
+            int sizeX = colors.GetLength(0);
+            int sizeY = colors.GetLength(1);
 
-        var bitmap = new Bitmap(sizeX, sizeY);
+            var bitmap = new Bitmap(sizeX, sizeY);
 
-        for (int x = 0; x < sizeX; x++)
-            for (int y = 0; y < sizeY; y++)
-                bitmap.SetPixel(x, y, colors[x, y]);
+            for (int x = 0; x < sizeX; x++)
+                for (int y = 0; y < sizeY; y++)
+                    bitmap.SetPixel(x, y, colors[x, y]);
 
-        return bitmap;
-    }
+            return bitmap;
+        }
+        public static System.Windows.Media.PixelFormat ToMediaFormat(this System.Drawing.Imaging.PixelFormat sourceFormat)
+        {
+            switch (sourceFormat)
+            {
+                case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
+                    return System.Windows.Media.PixelFormats.Bgr24;
+
+                case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
+                    return System.Windows.Media.PixelFormats.Bgra32;
+
+                case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
+                    return System.Windows.Media.PixelFormats.Bgr32;
+            }
+            throw new NotImplementedException($"Imaging PixelFormat: {sourceFormat}");
+            return new System.Windows.Media.PixelFormat();
+        }
     }
 }
