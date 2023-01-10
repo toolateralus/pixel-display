@@ -7,6 +7,7 @@ using System.Windows;
 using pixel_renderer.Assets;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Markup;
 
 namespace pixel_renderer.IO
 {
@@ -14,112 +15,104 @@ namespace pixel_renderer.IO
     {
         public static bool Skipping = false;
         public static string Path => Constants.WorkingRoot + Constants.AssetsDir; 
-        public static void SaveAsset(Asset data, string fileName)
+
+        /// <summary>
+        /// this does not check if the directory exists nor does it instantiate one where it doesnt exist
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <returns>null if the writer is closed, and the writer if it's still open</returns>
+        public static TextWriter? WriteFile<T>(T data, Metadata meta, bool closeStreamWhenFinished = true)
+        {
+            using TextWriter writer = new StreamWriter(meta.fullPath);
+            var jsonSerializer = JsonSerializer.Create(Settings);
+            jsonSerializer.Serialize(writer, data);
+            if (closeStreamWhenFinished)
+            {
+                writer.Close();
+                return null; 
+            }
+            return writer; 
+        }
+        /// <summary>
+        /// this does not check if the directory or file exists, just deserializes a file into a json object of specified type and returns as C# object
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="meta"></param>
+        /// <param name="closeStreamWhenFinished"></param>
+        /// <returns></returns>
+        public static T ReadFile<T>(Metadata meta, bool closeStreamWhenFinished = true)
+        {
+            var jsonSerializer = JsonSerializer.Create(Settings);
+            StreamReader reader = new(meta.fullPath);
+            using JsonTextReader jsonReader = new(reader);
+            T obj = jsonSerializer.Deserialize<T>(jsonReader);
+            if (closeStreamWhenFinished) 
+                reader.Close();
+            return obj;
+        }
+
+        public static void SaveAsset((Asset, Metadata) pair)
+        {
+            FindOrCreateAssetsDirectory();
+            
+            var meta = pair.Item2;
+            var data = pair.Item1;
+            
+            if (!File.Exists(meta.fullPath)) 
+                throw new FileNotFoundException(meta.fullPath);
+
+            if (!Skipping)
+            {
+                MessageBoxResult overwriteWarningResult = YesNoCancelWarning(meta.Name);
+                MessageBoxResult doForAllResult = YesNoQuestion();
+
+                if (doForAllResult == MessageBoxResult.Yes)
+                    Skipping = true;
+                if (overwriteWarningResult != MessageBoxResult.Yes)
+                    return;
+            }
+
+            WriteFile(data, meta);
+        }
+        private static void FindOrCreateAssetsDirectory()
         {
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
-
-            if (File.Exists(Path + "\\" + fileName + Constants.AssetsFileExtension))
-            {
-                if (!Skipping)
-                {
-                    var overwriteWarningResult = MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
-                                            "", MessageBoxButton.YesNoCancel, MessageBoxImage.Error,
-                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
-                    var doForAllResult = MessageBox.Show($"Do for all (uses last choice)",
-                                            "", MessageBoxButton.YesNo, MessageBoxImage.Error,
-                                             MessageBoxResult.No, MessageBoxOptions.RtlReading);
-                    if (doForAllResult == MessageBoxResult.Yes)
-                    {
-                        Skipping = true;
-                    }
-                    if (overwriteWarningResult != MessageBoxResult.Yes)
-                    {
-                        return;
-                    }
-                }
-            }
-
-            using TextWriter writer = new StreamWriter(Path + "\\" + fileName + Constants.AssetsFileExtension);
-
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-            };
-
-            var jsonSerializer = JsonSerializer.Create(settings);
-
-            jsonSerializer.Serialize(writer, data);
-
-            writer.Close();
         }
-        public static void TryDeserializeAssetFile(out Asset? outObject, string name)
+        private static MessageBoxResult YesNoQuestion()
         {
-            Asset? _asset = ReadAssetFile(name);
+            return MessageBox.Show($"Do for all (uses last choice)",
+                                                        "", MessageBoxButton.YesNo, MessageBoxImage.Question,
+                                                         MessageBoxResult.No, MessageBoxOptions.RtlReading);
+        }
+        private static MessageBoxResult YesNoCancelWarning(string fileName)
+        {
+            return MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
+                                                        "", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning,
+                                                         MessageBoxResult.No, MessageBoxOptions.RtlReading);
+        }
+        public static void TryDeserializeAssetFile(out Asset? outObject, Metadata meta)
+        {
+            Asset? _asset = ReadAssetFile(meta);
             outObject = _asset;
             if (_asset is null) return;
             Library.Register(_asset.GetType(), _asset);
             return;
         }
-        public static Asset? ReadAssetFile(string fileName)
+        private static JsonSerializerSettings Settings = new()
         {
-            if (!Directory.Exists(Path))
-            {
-                Directory.CreateDirectory(Path);
-                return null;
-            }
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-            };
-            var jsonSerializer = JsonSerializer.Create(settings);
-            StreamReader reader = new(Path + "\\" + fileName + Constants.AssetsFileExtension);
-            Asset asset = new(fileName, typeof(Asset));
-            using JsonTextReader json = new(reader);
-            try
-            {
-                asset = jsonSerializer.Deserialize<Asset>(json);
-            }
-            catch (Exception e) {
-                var x = e.Message.Take(100);    
-                MessageBox.Show(x.ToString()); 
-            
-            };
+            Formatting = Formatting.Indented,
+        };
+        /// <summary>
+        /// Checks for the existence of the Assets directory and if it exists, tries to read from the location of the data specified in the metadata object.
+        /// </summary>
+        /// <param name="meta"></param>
+        /// <returns>Asset if found, else null </returns>
+        public static Asset? ReadAssetFile(Metadata meta)
+        {
+            FindOrCreateAssetsDirectory();
+            Asset asset = ReadFile<Asset>(meta);
             return asset;
         }
-        public static Asset? TryDeserializeNonAssetFile(string newName, string extension, string fullPath)
-        {
-
-            if (!Directory.Exists(Path))
-            {
-                Directory.CreateDirectory(Path);
-                return null;
-            }
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-            };
-            var jsonSerializer = JsonSerializer.Create(settings);
-            
-            StreamReader reader = new(fullPath);
-
-            Asset asset = new("New Asset", typeof(Asset));
-
-            using JsonTextReader json = new(reader);
-
-            try
-            {
-                asset = jsonSerializer.Deserialize<Asset>(json);
-            }
-            catch (Exception e)
-            {
-                var x = e.Message.Take(300);
-                MessageBox.Show(x.ToString());
-            };
-            return asset;
-        }
-        
-
-        
     }
 }

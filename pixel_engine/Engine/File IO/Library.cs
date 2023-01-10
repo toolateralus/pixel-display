@@ -111,11 +111,14 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Sync()
         {
-            var library = Clone();
-            if (library is null) return;
             AssetIO.Skipping = false;
-            foreach (var asset in library)
-                AssetIO.SaveAsset(asset, asset.Name);
+            foreach (var pair in LoadedMetadata)
+            {
+                (Asset, Metadata) tuple = (pair.Value, pair.Key);
+                AssetIO.SaveAsset(tuple);
+            }
+
+
         }
 
         /// <summary>

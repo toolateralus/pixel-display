@@ -67,13 +67,13 @@ namespace pixel_renderer.Assets
         }
 
         /// <summary>
-        /// Read and deserialize a single file from Path"
+        /// try to read from path specified in metadata and convert to asset type.
         /// </summary>
         /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
         /// <returns>Asset if it exists at path, else null.</returns>
         public static Asset? TryPullObject(Metadata meta)
         {
-            return !File.Exists(meta.fullPath) ? null : AssetIO.TryDeserializeNonAssetFile(meta.Name, meta.extension, meta.fullPath);
+            return !File.Exists(meta.fullPath) ? null : AssetIO.ReadFile<Asset>(meta);
         }
         /// <summary>
         /// </summary>
@@ -107,7 +107,8 @@ namespace pixel_renderer.Assets
             FileDialog dialog = FileDialog.ImportFileDialog();
             if (dialog.type != null)
             {
-                var asset = AssetIO.TryDeserializeNonAssetFile(dialog.fileName, dialog.fileExtension, dialog.filePath);
+                Metadata metadata = new(dialog.name, dialog.filePath, dialog.fileExtension); 
+                var asset = AssetIO.ReadFile<Asset>(metadata);
                 if (asset == null) return;
                 Library.Register(asset.GetType(), asset);
             }
