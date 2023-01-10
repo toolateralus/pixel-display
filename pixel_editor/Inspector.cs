@@ -167,7 +167,7 @@ namespace pixel_editor
             if (e.message != "" && !e.message.Contains("$no_log$"))
             {
                 e.expression?.Invoke(null);
-                Editor.OnInfoLogged?.Invoke(e);
+                Editor.Current.LogConsole(e);
             }
         }
    

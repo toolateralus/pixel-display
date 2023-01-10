@@ -11,11 +11,7 @@ using System.Windows.Input;
 using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.IO;
-using System.Runtime.CompilerServices;
-using System.Linq;
-using System.Collections.Generic;
 using static pixel_renderer.Input;
-using System.Windows.Controls;
 
 namespace pixel_editor
 {
@@ -70,12 +66,12 @@ namespace pixel_editor
             Project defaultProject = new ("Default"); 
             engine = new(defaultProject);
             GetEvents();
-            OnInfoLogged += LogConsole; 
         }
         private int renderStateIndex = 0;
 
         private readonly Inspector inspector;
         private StageWnd? stageWnd;
+
         private protected volatile static Editor current = new();
         public static Editor Current
         {
@@ -108,10 +104,9 @@ namespace pixel_editor
                 }
         }
 
-        public static Action<InspectorEvent> OnInfoLogged;
         public void LogConsole(InspectorEvent e)
         {
-            string msg = $"\n{e.message} \n - - - - - - - - - - - - - - - - - - -";
+            string msg = $"\n - {e.message} \n - - - - - - - - - - - - - - - - - - -";
             editorMessages.Dispatcher.Invoke(() => editorMessages.AppendText(msg));
             string[] lines = editorMessages.Dispatcher.Invoke(() => editorMessages.Text.Split('\n'));
             int length = lines.Length;
@@ -134,18 +129,23 @@ namespace pixel_editor
             };
         }
 
-        object[] Args => new object[]
+        object[] args => new object[]
         {
             inspector,
             Runtime.Instance,
         };
-        static Action<object[]?> Expr => (o) =>
+        static Action<object[]?> set_stage_0 => (o) =>
         {
             var inspector = o[0] as Inspector;
             var run = o[1] as Runtime;
             run.TrySetStageAsset(0);
             Console.RedTextForMS(inspector, 1);
-        };      
+        };
+        static Action<object[]?> reload => (o) =>
+        {
+            var run = o[1] as Runtime;
+            run.ResetCurrentStage();
+        };
 
         private void GetEvents()
         {
@@ -153,8 +153,11 @@ namespace pixel_editor
             image.MouseLeftButtonDown += Mouse0;
             CompositionTarget.Rendering += Update;
 
-            InputAction action = new(false, Expr, Args, Key.G);
-            Input.RegisterAction(action, InputEventType.KeyDown);
+            InputAction setStage0 = new(false, set_stage_0, args, Key.G);
+            InputAction resetStage = new(false, reload, args, Key.H);
+            RegisterAction(setStage0, InputEventType.KeyDown);
+            RegisterAction(resetStage, InputEventType.KeyDown);
+
         }
         private static Point ViewportPoint(Image img, Point pos)
         {
@@ -211,7 +214,8 @@ namespace pixel_editor
 
         private void OnDisable(object? sender, EventArgs e)
         {
-            stageWnd?.Close(); 
+            stageWnd?.Close();
+            Runtime.Instance.mainWnd.Close();
             engine?.Close();
         }
         private void OnPlay(object sender, RoutedEventArgs e)
@@ -263,7 +267,6 @@ namespace pixel_editor
         public EditorMessage(string message) : base(message)
         {
         }
-
         public static EditorMessage New(string message, object? sender = null, object[]? args = null, Action<object[]>? action = null)
         {
             message = DateTime.Now.ToLocalTime().ToShortTimeString() + " " + message; 
