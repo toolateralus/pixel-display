@@ -297,11 +297,13 @@ namespace pixel_editor
         public bool Equals(string input)
         {
             string newPhrase = "";
+
             if (input.Contains('$'))
                 newPhrase = input.Split('$')[0];
             else newPhrase = input; 
 
-            var split = newPhrase.Split('|');
+            var split = phrase.Split('|');
+
             foreach (var line in split)
                 if (line.Equals(input))
                     return true;

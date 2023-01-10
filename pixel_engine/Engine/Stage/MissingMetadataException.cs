@@ -9,15 +9,12 @@ namespace pixel_renderer
         public MissingMetadataException()
         {
         }
-
         public MissingMetadataException(string? message) : base(message)
         {
         }
-
         public MissingMetadataException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
         protected MissingMetadataException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

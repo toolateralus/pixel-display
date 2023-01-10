@@ -113,9 +113,8 @@ namespace pixel_renderer.IO
             }
             catch (Exception e)
             {
-                var x = e.Message.Take(100);
+                var x = e.Message.Take(300);
                 MessageBox.Show(x.ToString());
-
             };
             return asset;
         }

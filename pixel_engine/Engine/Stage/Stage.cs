@@ -59,8 +59,11 @@ namespace pixel_renderer
         public string UUID => _uuid;
         public void FixedUpdate(float delta)
         {
-            foreach (Node node in Nodes)
-                node.FixedUpdate(delta);
+            lock (Nodes)
+            {
+                foreach (Node node in Nodes)
+                     node.FixedUpdate(delta);
+            }
         }
         public void Awake()
         {
