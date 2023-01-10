@@ -29,8 +29,6 @@ namespace pixel_renderer
         public static event Action<Key>? OnKeyDown;
         public static event Action<Key>? OnKeyUp;
         public static event Action<Key>? OnKeyToggled;
-
-
         public static void RegisterAction(InputAction action, InputEventType type)
         {
             switch (type)
@@ -38,15 +36,12 @@ namespace pixel_renderer
                 case InputEventType.DOWN:
                     InputActions_KeyUp.Add(action);
                     break;
-                
                 case InputEventType.UP:
                     InputActions_KeyUp.Add(action);
                     break;
-                
                 case InputEventType.TOGGLE:
                     InputActions_KeyToggled.Add(action);
                     break;
-
                 case InputEventType.ALL:
                     InputActions_KeyToggled.Add(action);
                     InputActions_KeyUp.Add(action);

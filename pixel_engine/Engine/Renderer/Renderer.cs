@@ -18,6 +18,7 @@
                 return _background;
             }
         }
+
         public override void Dispose()
         {
             if (Background is not null)
@@ -27,9 +28,14 @@
             }
             bmp_cached = (Bitmap)FallBack.Clone();
         }
-        public Bitmap _Draw()
+
+        public override Bitmap Draw()
         {
-            sprites_cached = Runtime.Instance.GetStage().GetSprites();
+            sprites_cached = Runtime 
+                .Instance
+                .GetStage()
+                .GetSprites();
+               
             foreach (Sprite sprite in sprites_cached)
             {
                 for (int x = 0; x < sprite.size.x; x++)
@@ -45,11 +51,6 @@
                     }
             }
             return bmp_cached;
-        }
-        public override Bitmap Draw()
-        {
-            //CBit.Draw(Runtime.Instance.GetStage().GetSprites(), bmp_cached);
-            return _Draw();
         }
 
         public override void Render(Image destination) => CBit.Render(ref bmp_cached, destination);

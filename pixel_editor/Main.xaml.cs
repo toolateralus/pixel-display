@@ -85,7 +85,6 @@ namespace pixel_editor
                 return current;
             }
         }
-
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
         private void Update(object? sender, EventArgs e)
