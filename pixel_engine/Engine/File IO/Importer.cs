@@ -14,7 +14,7 @@ namespace pixel_renderer.Assets
 {
     public class Importer
     {
-        public static string Path => Constants.AppDataDir + Constants.AssetsDir;
+        public static string Path => Constants.WorkingRoot + Constants.AssetsDir;
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>

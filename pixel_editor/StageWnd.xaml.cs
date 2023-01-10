@@ -93,7 +93,8 @@ namespace pixel_editor
             if (usingStarterAssets)
                 StagingHost.AddPlayer(nodes);
 
-            var stage = new Stage(name, null, nodes.ToNodeAssets());
+            var path = pixel_renderer.Constants.WorkingRoot + "\\Pixel" + pixel_renderer.Constants.ImagesDir + "\\home";
+            var stage = new Stage(name, new("Home Background", path, ".bmp"), nodes.ToNodeAssets());
 
             for (int i = 0; i < count; i++) 
                 stage.create_generic_node();

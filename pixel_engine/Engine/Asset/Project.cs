@@ -29,7 +29,7 @@ public class Project
     }
     internal static string GetPathFromRoot(string filePath)
     {
-        return filePath.Replace(Constants.AppDataDir + "\\Pixel", "");
+        return filePath.Replace(Constants.WorkingRoot + "\\Pixel", "");
     }
 
     /// <summary>

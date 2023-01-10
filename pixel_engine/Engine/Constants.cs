@@ -58,13 +58,12 @@ namespace pixel_renderer
         public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
         #endregion
         #region Paths and Directories
-        public const string FontsDir = ImagesDir + "\\Font";  // Font Images asset directory (Probably shouldnt be a constant, for text rendering.)
-        public const string ImagesDir = AssetsDir + "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
-        public const string ProjectsDir = "\\Pixel\\Projects"; // Project files 
-        public const string AssetsDir = "\\Pixel\\Assets";   // Asset resources (user - created)
+        public const string ImagesDir = "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
+        public const string ProjectsDir = "\\Projects"; // Project files 
+        public const string AssetsDir = "\\Assets";   // Asset resources (user - created)
         public const string AssetsFileExtension = ".pxad";  // pxad {Pixel Asset Data}
         public const string ProjectFileExtension = ".pxpj";   // pxpj {Pixel Project}
-        public static string AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);    // Root directory for resources
+        public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel";    // Root directory for resources
         #endregion
         private static List<Type> GetInheritedTypesFromBase<T>()
         {

@@ -12,7 +12,7 @@ namespace pixel_renderer.IO
             Formatting = Formatting.Indented,
             TypeNameHandling = TypeNameHandling.All
         };
-        public static string Path => Constants.AppDataDir + Constants.ProjectsDir;
+        public static string Path => Constants.WorkingRoot + Constants.ProjectsDir;
         public static Project ReadProjectFile(string fileName)
         {
             if (!Directory.Exists(Path))

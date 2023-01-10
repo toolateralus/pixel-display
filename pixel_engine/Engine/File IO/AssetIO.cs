@@ -13,7 +13,7 @@ namespace pixel_renderer.IO
     public class AssetIO
     {
         public static bool Skipping = false;
-        public static string Path => Constants.AppDataDir + Constants.AssetsDir; 
+        public static string Path => Constants.WorkingRoot + Constants.AssetsDir; 
         public static void SaveAsset(Asset data, string fileName)
         {
             if (!Directory.Exists(Path))
