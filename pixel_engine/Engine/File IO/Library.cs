@@ -58,6 +58,7 @@ namespace pixel_renderer.Assets
             }
             return false;
         }
+
         /// <summary>
         /// Save the currently loaded asset Library to the disk.
         /// </summary>
@@ -81,27 +82,27 @@ namespace pixel_renderer.Assets
                     library.Add(item);
             return library;
         }
-
+        
         /// <summary>
         /// Attempts to retrieve metadata by asset file path (asset.pathFromRoot).
         /// </summary>
         /// <param name="asset"></param>
         /// <returns>Metadata if found, else null</returns>
-        public static Metadata? TryGetMetadata(Asset asset)
+        public static Metadata? FetchMeta(Asset asset)
         {
             return (Metadata?)(from _asset
                                in LoadedMetadata
                                where _asset.Value.Equals(asset)
                                select _asset.Value);
         }
-        public static Metadata? TryGetMetadata(string path)
+        public static Metadata? FetchMeta(string path)
         {
             return (Metadata?)(from asset
                                in LoadedMetadata 
                                where asset.Value.filePath.Equals(path) 
                                select asset.Value); 
         }
-        private static Metadata? TryGetMetadata(object name) 
+        private static Metadata? FetchMeta(object name) 
         {
             return (Metadata?)(from asset
                                in LoadedMetadata
