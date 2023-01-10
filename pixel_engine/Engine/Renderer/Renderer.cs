@@ -44,8 +44,8 @@
                         int offsetX = (int)sprite.parent.position.x + x;
                         int offsetY = (int)sprite.parent.position.y + y;
 
-                        if (offsetX is < 0 or >= Constants.ScreenW
-                            || offsetY is < 0 or >= Constants.ScreenH) continue;
+                        if (offsetX is < 0 or >= Constants.ScreenW || 
+                            offsetY is < 0 or >= Constants.ScreenH) continue;
 
                         bmp_cached.SetPixel(offsetX, offsetY, sprite.colorData[x, y]);
                     }
