@@ -12,6 +12,7 @@ using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.IO;
 using static pixel_renderer.Input;
+using System.Linq;
 
 namespace pixel_editor
 {
@@ -61,9 +62,9 @@ namespace pixel_editor
         public Editor()
         {
             InitializeComponent();
-            inspector = new Inspector(inspectorObjName,  inspectorObjInfo,  inspectorChildGrid, editorMessages);
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid, editorMessages);
             Runtime.inspector = inspector;
-            Project defaultProject = new ("Default"); 
+            Project defaultProject = new("Default");
             engine = new(defaultProject);
             GetEvents();
         }
@@ -85,25 +86,23 @@ namespace pixel_editor
         }
 
         internal EngineInstance? engine;
-        internal RenderHost? host => Runtime.Instance.renderHost;  
-
+        internal static RenderHost? Host => Runtime.Instance.renderHost;
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
 
-            if (Runtime.Instance.IsRunning 
-                && Runtime.Instance.GetStage() is not null  
-                && host.State == RenderState.Scene)
-                {
-                    host.Render(image, Runtime.Instance);
-                    var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
-                    var framerate = Runtime.Instance.renderHost.info.Framerate; 
-                    gcAllocText.Content =
-                        $"{memory}" +
-                        $" \n frame rate : {framerate}"; 
-                }
+            if (Runtime.Instance.IsRunning
+                && Runtime.Instance.GetStage() is not null
+                && Host.State == RenderState.Scene)
+            {
+                Host.Render(image, Runtime.Instance);
+                var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
+                var framerate = Runtime.Instance.renderHost.info.Framerate;
+                gcAllocText.Content =
+                    $"{memory}" +
+                    $" \n frame rate : {framerate}";
+            }
         }
-
         public void LogConsole(InspectorEvent e)
         {
             string msg = $"\n - {e.message} \n - - - - - - - - - - - - - - - - - - -";
@@ -111,7 +110,6 @@ namespace pixel_editor
             string[] lines = editorMessages.Dispatcher.Invoke(() => editorMessages.Text.Split('\n'));
             int length = lines.Length;
         }
-
         internal Action<object?> RedText(object? o = null)
         {
             return (o) =>
@@ -128,7 +126,6 @@ namespace pixel_editor
                 editorMessages.Background = Brushes.DarkSlateGray;
             };
         }
-
         object[] args => new object[]
         {
             inspector,
@@ -146,7 +143,6 @@ namespace pixel_editor
             var run = o[1] as Runtime;
             run.ResetCurrentStage();
         };
-
         private void GetEvents()
         {
             Closing += OnDisable;
@@ -168,25 +164,24 @@ namespace pixel_editor
             pos.Y *= img.Height;
             return pos;
         }
-
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)
             {
-                host.State = RenderState.Off;
+                Host.State = RenderState.Off;
                 viewBtn.Content = "Stage null.";
-                return; 
+                return;
             }
-            
+
             renderStateIndex++;
             if (renderStateIndex == sizeof(RenderState) - 1)
                 renderStateIndex = 0;
 
-            host.State = (RenderState)renderStateIndex;
-            viewBtn.Content = host.State.ToString();
+            Host.State = (RenderState)renderStateIndex;
+            viewBtn.Content = Host.State.ToString();
 
-            if (host.State != RenderState.Game)
-                return; 
+            if (Host.State != RenderState.Game)
+                return;
 
             var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
             if (msg != MessageBoxResult.Yes)
@@ -195,7 +190,7 @@ namespace pixel_editor
             Runtime.Instance.mainWnd.Show();
         }
         private void Wnd_Closed(object? sender, EventArgs e) =>
-            stageWnd = null;    
+            stageWnd = null;
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
             Image img = (Image)sender;
@@ -211,7 +206,6 @@ namespace pixel_editor
             if (foundNode)
                 inspector.SelectNode(node);
         }
-
         private void OnDisable(object? sender, EventArgs e)
         {
             stageWnd?.Close();
@@ -220,7 +214,7 @@ namespace pixel_editor
         }
         private void OnPlay(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; 
+            e.Handled = true;
             Runtime.Instance.Toggle();
             playBtn.Content = Runtime.Instance.IsRunning ? "On" : "Off";
             playBtn.Background = Runtime.Instance.IsRunning ? Brushes.LightGreen : Brushes.LightPink;
@@ -237,31 +231,112 @@ namespace pixel_editor
         }
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; 
+            e.Handled = true;
             ProjectIO.SaveProject(Runtime.Instance.LoadedProject);
             Library.Sync();
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; 
+            e.Handled = true;
             stageWnd = new StageWnd(this);
             stageWnd.Show();
             stageWnd.Closed += Wnd_Closed;
         }
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; 
+            e.Handled = true;
             Importer.ImportAssetDialog();
         }
         private void OnLoadProjectPressed(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; 
+            e.Handled = true;
             Project project = Project.LoadProject();
             if (project is not null)
                 Runtime.Instance.SetProject(project);
         }
-    }
 
+        private void OnCommandSent(object sender, RoutedEventArgs e)
+        {
+            int cap = 5;
+            string[] split = editorMessages.Text.Split('\n');
+            
+            if (split.Length < cap)
+                cap = split.Length;
+
+            for (int i = 0; i < cap ; ++i)
+            {
+                var line = editorMessages.GetLineText(i);
+                Command.Call(line);
+            }
+        }
+       
+
+    }
+    public class Command
+    {
+        public static Command reload_stage = new()
+        {
+            phrase = "reload|Reload|realod|/r",
+            action = (o) => Runtime.Instance.ResetCurrentStage(),
+            args = null
+        };
+        public static Command spawn_generic = new()
+        {
+            phrase = "genericNode|spawnGeneric|/sgn|++n",
+            action = (o) => Runtime.Instance.GetStage().create_generic_node(),
+            args = null
+        };
+        public static readonly Command[] Active = new Command[]
+        {
+            reload_stage,
+            spawn_generic,
+        };
+        public string phrase = "";
+        public Action<object[]?>? action;
+        public object[]? args;
+        public bool Equals(string input)
+        {
+            string newPhrase = "";
+
+            if (input.Contains('$'))
+                newPhrase = input.Split('$')[0];
+            else newPhrase = input; 
+
+            var split = phrase.Split('|');
+
+            foreach (var line in split)
+                if (line.Equals(input))
+                    return true;
+            return false; 
+        }
+
+        public void Execute()
+        {
+            action?.Invoke(args);
+        }
+
+        internal static void Call(string line)
+        {
+            foreach (var command in Active)
+                if (command.Equals(line))
+                {
+                    int count = 0;
+                    
+                    if (line.Contains('$'))
+                        count = line.ToInt();
+
+                    if (count == 0)
+                    {
+                        command.Execute();
+                        return; 
+                    }
+
+                    for(int i = 0; i < count; ++i)
+                        command.Execute();
+                      
+                }
+        }
+    }
     public class EditorMessage : InspectorEvent
     {
         public EditorMessage(string message) : base(message)
@@ -269,7 +344,7 @@ namespace pixel_editor
         }
         public static EditorMessage New(string message, object? sender = null, object[]? args = null, Action<object[]>? action = null)
         {
-            message = DateTime.Now.ToLocalTime().ToShortTimeString() + " " + message; 
+            message = DateTime.Now.ToLocalTime().ToShortTimeString() + " " + message;
             return new(message)
             {
                 expression = action,
@@ -278,5 +353,5 @@ namespace pixel_editor
             };
         }
     }
-
 }
+

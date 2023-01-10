@@ -16,11 +16,6 @@ namespace pixel_editor
     /// </summary>
     public partial class StageWnd : Window
     {
-        bool usingStarterAssets = false;
-        
-        Metadata? m_background;
-        Bitmap? image; 
-
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(StageWnd), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
         private static object OnCoerceScaleValue(DependencyObject o, object value)
@@ -59,6 +54,11 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
+        
+        bool usingStarterAssets = false;
+        Bitmap? image; 
+        Metadata? background_meta = null;
+        
         public StageWnd(Editor mainWnd)
         {
             InitializeComponent();
@@ -74,7 +74,8 @@ namespace pixel_editor
                 return; 
 
             Bitmap image = new(result.filePath);
-            
+            background_meta = new(result.fileName, result.filePath, result.fileExtension);
+
             if (image is not null)
             {
                 this.image = image;
@@ -93,7 +94,7 @@ namespace pixel_editor
             if (usingStarterAssets)
                 StagingHost.AddPlayer(nodes);
 
-            var stage = new Stage(name, null, nodes.ToNodeAssets());
+            var stage = new Stage(name, background_meta, nodes.ToNodeAssets());
 
             for (int i = 0; i < count; i++) 
                 stage.create_generic_node();
@@ -112,13 +113,11 @@ namespace pixel_editor
             }
             Close(); 
         }
-
         private static async Task OnNoBackgroundSelected()
         {
             var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
             await Task.Run(Importer.ImportAssetDialog);
         }
-
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;
     }
 }

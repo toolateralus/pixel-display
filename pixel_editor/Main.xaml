@@ -145,7 +145,6 @@
                     Background="DarkSlateGray"
                     Content="GC Alloc:"/>
 
-            
             <TextBox 
                 FontSize="3.75" 
                 FontWeight="Normal" 
@@ -159,6 +158,7 @@
                 TextAlignment="Justify"
                 TextWrapping="Wrap"
                 TextOptions.TextRenderingMode="Aliased"
+                AcceptsReturn="True"
                 VerticalScrollBarVisibility="Hidden" >
             </TextBox>
                    
@@ -177,7 +177,21 @@
                     Grid.Column="1"
                     Click="OnViewChanged" 
                     x:Name="viewBtn"/>
-            
+            <Button HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top" 
+                    TextBlock.FontFamily="MS Gothic"
+                    TextBlock.FontSize="4"
+                    Content="Send Command" 
+                    Background="CadetBlue" 
+                    BorderBrush="Black"
+                    BorderThickness="1" 
+                    Grid.Row="14"
+                    Grid.Column="18"
+                    Grid.ColumnSpan="2"
+                    Grid.RowSpan="1"
+                    Click="OnCommandSent" 
+                    x:Name="sendCommandButton"/>
+
             <Button HorizontalAlignment="Stretch" 
                     VerticalAlignment="Top"
                     MaxWidth="90"
@@ -199,12 +213,12 @@
                     MaxHeight="40" 
                     TextBlock.FontFamily="MS Gothic"
                     TextBlock.FontSize="4"
-                    Content="Load Assets"
+                    Content="Reimport All"
                     Background="CadetBlue"
                     BorderBrush="Black"
                     BorderThickness="1"
                     Grid.Row="0" 
-                    Grid.Column="2"
+                    Grid.Column="4"
                     Click="OnImportBtnPressed"  
                     x:Name="importBtn"/>
             
@@ -214,12 +228,12 @@
                     MaxHeight="40" 
                     TextBlock.FontFamily="MS Gothic"
                     TextBlock.FontSize="4"
-                    Content="Save/Sync Assets" 
+                    Content="Save All" 
                     Background="CadetBlue"
                     BorderBrush="Black" 
                     BorderThickness="1" 
                     Grid.Row="0" 
-                    Grid.Column="3" 
+                    Grid.Column="2" 
                     Click="OnSyncBtnPressed"  
                     x:Name="syncBtn"/>
             
@@ -229,12 +243,12 @@
                     MaxHeight="40"
                     TextBlock.FontFamily="MS Gothic"
                     TextBlock.FontSize="4"
-                    Content="Import"
+                    Content="Import File"
                     Background="CadetBlue" 
                     BorderBrush="Black"
                     BorderThickness="1" 
                     Grid.Row="0"
-                    Grid.Column="4"
+                    Grid.Column="3"
                     Click="OnImportFileButtonPressed"
                     x:Name="importFileBtn"/>
             
@@ -243,7 +257,7 @@
                     MaxWidth="90" 
                     MaxHeight="40" 
                     TextBlock.FontFamily="MS Gothic" 
-                    TextBlock.FontSize="4" 
+                    TextBlock.FontSize="3" 
                     Content="Stage Wizard" 
                     Background="White"
                     BorderBrush="White"

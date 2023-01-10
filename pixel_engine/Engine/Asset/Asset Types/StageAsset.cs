@@ -40,7 +40,9 @@ namespace pixel_renderer.Assets
         {
             // Import backgruond and output stage with background bitmap loaded;
             // REPLACE NULL REFERENCE TO BACKGROUND
-            var output = new Stage(Name, null, nodes, UUID);
+            var path = Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp";
+            Metadata meta = new("", path, ".bmp"); 
+            var output = new Stage(Name, meta, nodes, UUID);
             return output;  
         }
         internal Bitmap? GetBackground() => new Bitmap(m_background.fullPath) ?? null;

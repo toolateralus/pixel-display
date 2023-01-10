@@ -1,20 +1,14 @@
-﻿
-using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using pixel_renderer.IO;
-using System.Runtime.CompilerServices;
-using System.Windows.Media;
-
 namespace pixel_renderer.Assets
 {
     public class Importer
     {
-        public static string Path => Constants.AppDataDir + Constants.AssetsDir;
+        public static string Path => Constants.WorkingRoot + Constants.AssetsDir;
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>
@@ -61,12 +55,11 @@ namespace pixel_renderer.Assets
         private static void FinalImport(string file)
         {
             var fileExtension = file.Split('.')[1];
-            var typeRef = TypeFromExtension(fileExtension);
-            var asset = TryPullObject(file, typeRef, fileExtension);
+            Metadata meta = new("New Asset", file, fileExtension);
+            var asset = TryPullObject(meta);
 
             if (asset is not null)
             {
-                Metadata meta = new(asset.Name, file, fileExtension);
                 asset.fileType ??= typeof(Asset);
                 Library.Register(asset.fileType, asset);
                 Library.RegisterMetadata(meta, asset);
@@ -78,9 +71,9 @@ namespace pixel_renderer.Assets
         /// </summary>
         /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
         /// <returns>Asset if it exists at path, else null.</returns>
-        public static Asset? TryPullObject(string path, Type type, string newName)
+        public static Asset? TryPullObject(Metadata meta)
         {
-            return !File.Exists(path) ? null : AssetIO.TryDeserializeNonAssetFile(newName, type, path);
+            return !File.Exists(meta.fullPath) ? null : AssetIO.TryDeserializeNonAssetFile(meta.Name, meta.extension, meta.fullPath);
         }
         /// <summary>
         /// </summary>
@@ -88,7 +81,7 @@ namespace pixel_renderer.Assets
         /// <returns>type if supported, else returns typeof(object) (generic) </returns>
         public static Type TypeFromExtension(string type)
         {
-            if (type[0] == '.')
+            if (type.Contains('.'))
                 type = type.Remove('.');
 
             return type switch
@@ -114,7 +107,7 @@ namespace pixel_renderer.Assets
             FileDialog dialog = FileDialog.ImportFileDialog();
             if (dialog.type != null)
             {
-                var asset = AssetIO.TryDeserializeNonAssetFile(dialog.fileName, dialog.type, dialog.filePath);
+                var asset = AssetIO.TryDeserializeNonAssetFile(dialog.fileName, dialog.fileExtension, dialog.filePath);
                 if (asset == null) return;
                 Library.Register(asset.GetType(), asset);
             }

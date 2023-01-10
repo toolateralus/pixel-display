@@ -63,9 +63,8 @@ namespace pixel_renderer
             
             AddPlayer(nodes);
 
-            var bitmap = Constants.AppDataDir + "\\Pixel\\Images" + "\\home";
+            var bitmap = Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp";
             var backgroundMeta = new Metadata("Bitmap Metadata", bitmap, ".bmp");
-            
             var stage = new Stage("Default Stage", backgroundMeta, nodes.ToNodeAssets());
 
             for (int i = 0; i < 10; i++) 

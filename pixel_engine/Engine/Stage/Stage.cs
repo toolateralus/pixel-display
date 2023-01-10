@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
+using System.Windows.Media.Imaging;
 
 namespace pixel_renderer
 {
@@ -17,38 +19,51 @@ namespace pixel_renderer
         public Stage(string Name, Metadata Background, List<NodeAsset> nodes, string? existingUUID = null)
         {
             _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
-            if (Background is not null && backgroundImage is null)
-            {
-                var exists = File.Exists(Background.fullPath += ".bmp");
-                if (exists)
-                    backgroundImage = new(Background.fullPath);
-                else backgroundImage = new(256,256);
-            }
-
+            GetBackground(Background);
             this.Name = Name;
             Nodes = nodes.ToNodeList();
             Awake();
         }
-       
-        public string Name { get; set; }
+        private Bitmap GetBackground(Metadata meta)
+        {
+            if(FindOrCreateMetadataFile(meta))
+                return backgroundImage = new(meta.fullPath);
+            throw new MissingMetadataException("Metadata not found."); 
+        }
 
-        private string _uuid = "";
-        public string UUID 
-        { 
-            get 
-            { 
-                return _uuid;
+        public static bool FindOrCreateMetadataFile(Metadata meta)
+        {
+            var exists = File.Exists(meta.fullPath);
+            if (exists)
+                return true;
+            else
+            {
+                var stream = File.Create(meta.fullPath);
+                using var writer = new StreamWriter(stream);
+                writer.Write(meta);
             }
+            return false;
         }
 
         public List<Node> Nodes { get; private set; } = new();
-        public event Action OnNodeQueryMade;
         public Bitmap backgroundImage;
+        public event Action OnNodeQueryMade;
 
+        /// <summary>
+        ///  used to keep track of how many generic nodes have been instantiated for naming
+        /// </summary>
+        int genericNodeCt = 0;
+
+        public string Name { get; set; }
+        private string _uuid = "";
+        public string UUID => _uuid;
         public void FixedUpdate(float delta)
         {
-            foreach (Node node in Nodes) 
-                node.FixedUpdate(delta); 
+            lock (Nodes)
+            {
+                foreach (Node node in Nodes)
+                     node.FixedUpdate(delta);
+            }
         }
         public void Awake()
         {
@@ -63,7 +78,7 @@ namespace pixel_renderer
         {
             foreach (Node node in Nodes)
             {
-                if(node.Name is null) continue;
+                if (node.Name is null) continue;
                 if (!NodesByName.ContainsKey(node.Name))
                     NodesByName.Add(node.Name, node);
             }
@@ -98,11 +113,11 @@ namespace pixel_renderer
         }
         public IEnumerable<Sprite> GetSprites()
         {
-            var sprite = new Sprite(); 
-            IEnumerable<Sprite> sprites =(from Node node in Nodes
-                                          where node.TryGetComponent(out sprite)
-                                          select sprite);
-            return sprites;  
+            var sprite = new Sprite();
+            IEnumerable<Sprite> sprites = (from Node node in Nodes
+                                           where node.TryGetComponent(out sprite)
+                                           select sprite);
+            return sprites;
         }
         public void AddNode(Node node) => Nodes.Add(node);
         public Stage Reset()
@@ -110,26 +125,19 @@ namespace pixel_renderer
             List<StageAsset> stageAssets = Runtime.Instance.LoadedProject.stages;
             foreach (StageAsset asset in stageAssets)
             {
-                var stage = asset.Copy(); 
-                if (stage is not null 
+                var stage = asset.Copy();
+                if (stage is not null
                     && stage.UUID.Equals(UUID)) return stage;
             }
-            throw new NullStageException("Stage not found on reset call"); 
+            throw new NullStageException("Stage not found on reset call");
         }
-        internal void Dispose()
-        {
-           NodesByName.Clear();
-           Nodes.Clear();
-        }
-        /// <summary>
-        /// less permanent solution, python syntax to make it disgusting and unusuable 
-        /// </summary>
+
         public void create_generic_node()
         {
             // random variables used here;
-            object[] args = r_node_args(); 
+            object[] args = r_node_args();
             var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
-            var sprite = new Sprite((Vec2)args[2], (Color)args[3], (bool)args[4]); 
+            var sprite = new Sprite((Vec2)args[2], (Color)args[3], (bool)args[4]);
             node.AddComponent(sprite);
             node.AddComponent(new Rigidbody()
             {
@@ -140,21 +148,22 @@ namespace pixel_renderer
             node.AddComponent(new Wind((Direction)args[5]));
             AddNode(node);
         }
-        int nodeCreationCount = 0; 
-        /// <summary>
-        /// gets a random set of args for internal node creation
-        /// </summary>
-        /// <returns></returns>
         private object[] r_node_args()
         {
-            int r_int = nodeCreationCount++;
+            int r_int = genericNodeCt++;
             Vec2 r_pos = JRandom.ScreenPosition();
             Vec2 r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
             Color r_color = JRandom.Color();
             bool r_bool = JRandom.Bool();
             Direction r_dir = JRandom.Direction();
-            return new object[] { r_int, r_pos, r_vec, r_color, r_bool, r_dir }; 
+            return new object[]
+            {
+                r_int,
+                r_pos,
+                r_vec,
+                r_color,
+                r_bool,
+                r_dir };
         }
-       
     }
 }
