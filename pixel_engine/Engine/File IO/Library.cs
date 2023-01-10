@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Accessibility;
 using pixel_renderer.IO;
+using System.Linq;
 
 namespace pixel_renderer.Assets
 {
@@ -12,6 +10,28 @@ namespace pixel_renderer.Assets
         static Dictionary<Type, List<Asset>> LoadedAssets = new();
         static Dictionary<Metadata, Asset> LoadedMetadata = new();
 
+        public static void Register(Type type, Asset asset)
+        {
+            if (!LoadedAssets.ContainsKey(type))
+                LoadedAssets.Add(type, new List<Asset>());
+            LoadedAssets[type].Add(asset);
+        }
+        public static void RegisterMetadata(Metadata meta, Asset asset)
+        {
+            if (!LoadedMetadata.ContainsKey(meta))
+                LoadedMetadata.Add(meta, asset);
+
+        }
+        public static void Unregister(Type type, string Name)
+        {
+            foreach (var asset in from asset in LoadedAssets[type]
+                                  where asset.Name.Equals(Name)
+                                  select asset)
+            {
+                LoadedAssets[type].Remove(asset);
+            }
+        }
+        
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
         /// </summary>
@@ -58,30 +78,6 @@ namespace pixel_renderer.Assets
             }
             return false;
         }
-
-        /// <summary>
-        /// Save the currently loaded asset Library to the disk.
-        /// </summary>
-        public static void Sync()
-        {
-            var library = Clone();
-            if (library is null) return;
-            AssetIO.Skipping = false;
-            foreach (var asset in library)
-                AssetIO.SaveAsset(asset, asset.Name);
-        }
-        /// <summary>
-        /// Clone the current Asset Library into a List.
-        /// </summary>
-        /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
-        public static List<Asset>? Clone()
-        {
-            List<Asset> library = new();
-            foreach (var key in LoadedAssets)
-                foreach (var item in key.Value)
-                    library.Add(item);
-            return library;
-        }
         
         /// <summary>
         /// Attempts to retrieve metadata by asset file path (asset.pathFromRoot).
@@ -102,7 +98,7 @@ namespace pixel_renderer.Assets
                                where asset.Value.filePath.Equals(path) 
                                select asset.Value); 
         }
-        private static Metadata? FetchMeta(object name) 
+        public static Metadata? FetchMeta(object name) 
         {
             return (Metadata?)(from asset
                                in LoadedMetadata
@@ -110,27 +106,29 @@ namespace pixel_renderer.Assets
                                select asset.Value);
         }
 
-        public static void Register(Type type, Asset asset)
+        /// <summary>
+        /// Save the currently loaded asset Library to the disk.
+        /// </summary>
+        public static void Sync()
         {
-            if (!LoadedAssets.ContainsKey(type))
-                LoadedAssets.Add(type, new List<Asset>());
-            LoadedAssets[type].Add(asset);
-        }
-        public static void Unregister(Type type, string Name)
-        {
-            foreach (var asset in from asset in LoadedAssets[type]
-                                  where asset.Name.Equals(Name)
-                                  select asset)
-            {
-                LoadedAssets[type].Remove(asset);
-            }
+            var library = Clone();
+            if (library is null) return;
+            AssetIO.Skipping = false;
+            foreach (var asset in library)
+                AssetIO.SaveAsset(asset, asset.Name);
         }
 
-        internal static void RegisterMetadata(Metadata meta, Asset asset)
+        /// <summary>
+        /// Clone the current Asset Library into a List.
+        /// </summary>
+        /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
+        public static List<Asset>? Clone()
         {
-            if (!LoadedMetadata.ContainsKey(meta))
-                LoadedMetadata.Add(meta, asset);
-
+            List<Asset> library = new();
+            foreach (var key in LoadedAssets)
+                foreach (var item in key.Value)
+                    library.Add(item);
+            return library;
         }
     }
 }
