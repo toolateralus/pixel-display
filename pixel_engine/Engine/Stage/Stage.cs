@@ -20,27 +20,25 @@ namespace pixel_renderer
         {
             _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
             GetBackground(Background);
-
             this.Name = Name;
             Nodes = nodes.ToNodeList();
             Awake();
         }
         private Bitmap GetBackground(Metadata meta)
         {
-            if (meta is not null && backgroundImage is null)
-                if(FindOrCreateMetadataFile(meta))
-                    return backgroundImage = new(meta.fullPath + meta.extension);
+            if(FindOrCreateMetadataFile(meta))
+                return backgroundImage = new(meta.fullPath);
             throw new MissingMetadataException("Metadata not found."); 
         }
 
         public static bool FindOrCreateMetadataFile(Metadata meta)
         {
-            var exists = File.Exists(meta.fullPath + meta.extension);
+            var exists = File.Exists(meta.fullPath);
             if (exists)
                 return true;
             else
             {
-                var stream = File.Create(meta.fullPath + meta.extension);
+                var stream = File.Create(meta.fullPath);
                 using var writer = new StreamWriter(stream);
                 writer.Write(meta);
             }

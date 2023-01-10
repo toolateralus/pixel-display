@@ -13,6 +13,8 @@ namespace pixel_renderer.Assets
         public Vec2 pos, scale;
         public List<Component> components = new();  
         public List<NodeAsset> children;
+
+
         [JsonConstructor]
         public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<Component> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
         {
@@ -39,10 +41,8 @@ namespace pixel_renderer.Assets
         public Node Copy()
         {
             Node node = new(nodeName, pos, scale, UUID);
-
             foreach (var comp in components)
                 node.AddComponent(comp);
-
             return node;
         }
     }

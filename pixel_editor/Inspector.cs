@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
-
 using Brushes = System.Windows.Media.Brushes;
-
 using System.Windows;
 using System.Windows.Controls;
-
 using pixel_renderer;
-using System.Linq;
-using System.Reflection.Metadata;
+
 
 namespace pixel_editor
 {

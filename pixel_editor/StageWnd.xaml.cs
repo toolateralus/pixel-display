@@ -74,13 +74,14 @@ namespace pixel_editor
                 return; 
 
             Bitmap image = new(result.filePath);
-            
+            meta = new("Newly Imported Bitmap", result.filePath, result.fileExtension);
             if (image is not null)
             {
                 this.image = image;
                 CBit.Render(ref image, imgPreview);
             }
         }
+        Metadata? meta = null; 
         private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
             if (image is null)
@@ -93,8 +94,7 @@ namespace pixel_editor
             if (usingStarterAssets)
                 StagingHost.AddPlayer(nodes);
 
-            var path = pixel_renderer.Constants.WorkingRoot + "\\Pixel" + pixel_renderer.Constants.ImagesDir + "\\home";
-            var stage = new Stage(name, new("Home Background", path, ".bmp"), nodes.ToNodeAssets());
+            var stage = new Stage(name, meta, nodes.ToNodeAssets());
 
             for (int i = 0; i < count; i++) 
                 stage.create_generic_node();

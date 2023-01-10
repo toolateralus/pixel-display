@@ -53,11 +53,11 @@ namespace pixel_renderer.IO
 
             writer.Close();
         }
-        public static void TryDeserializeAssetFile(ref Asset? outObject, string name)
+        public static void TryDeserializeAssetFile(out Asset? outObject, string name)
         {
             Asset? _asset = ReadAssetFile(name);
-            if (_asset is null) return;
             outObject = _asset;
+            if (_asset is null) return;
             Library.Register(_asset.GetType(), _asset);
             return;
         }
@@ -87,21 +87,37 @@ namespace pixel_renderer.IO
             };
             return asset;
         }
-        public static Asset? TryDeserializeNonAssetFile(string newName, Type type, string fullPath)
+        public static Asset? TryDeserializeNonAssetFile(string newName, string extension, string fullPath)
         {
-            switch (type)
+
+            if (!Directory.Exists(Path))
             {
-                case var _ when type.Equals(typeof(Bitmap)):
-
-
-
-                case var _ when type.Equals(typeof(JsonObject)):
-                    var asset = ReadAssetFile(newName);
-                    return asset;
-
-
-                default: return null;
+                Directory.CreateDirectory(Path);
+                return null;
             }
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+            };
+            var jsonSerializer = JsonSerializer.Create(settings);
+            
+            StreamReader reader = new(fullPath);
+
+            Asset asset = new("New Asset", typeof(Asset));
+
+            using JsonTextReader json = new(reader);
+
+            try
+            {
+                asset = jsonSerializer.Deserialize<Asset>(json);
+            }
+            catch (Exception e)
+            {
+                var x = e.Message.Take(100);
+                MessageBox.Show(x.ToString());
+
+            };
+            return asset;
         }
         
 
