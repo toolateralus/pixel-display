@@ -128,7 +128,7 @@ namespace pixel_renderer
                 case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
                     return System.Windows.Media.PixelFormats.Bgr32;
             }
-            throw new NotImplementedException($"Imaging PixelFormat: {sourceFormat}");
+            throw new NotImplementedException($"No Media.PixelFormat implemented Imaging.PixelFormat: {sourceFormat.ToString()}");
             return new System.Windows.Media.PixelFormat();
         }
     }
