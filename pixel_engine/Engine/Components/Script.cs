@@ -1,4 +1,4 @@
-﻿using pixel_renderer.IO;
+﻿using pixel_renderer.FileIO;
 using System;
 
 namespace pixel_renderer.Assets

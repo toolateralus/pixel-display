@@ -1,6 +1,6 @@
 ﻿using pixel_renderer;
 using pixel_renderer.Assets;
-using pixel_renderer.IO;
+using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -67,14 +67,14 @@ namespace pixel_editor
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
-            var result =  FileDialog.ImportFileDialog();
+            var meta =  FileDialog.ImportFileDialog();
             e.Handled = true;
             
-            if (result.filePath is "" or null) 
+            if (meta.fullPath is "" or null) 
                 return; 
 
-            Bitmap image = new(result.filePath);
-            background_meta = new(result.fileName, result.filePath, result.fileExtension);
+            Bitmap image = new(meta.fullPath);
+            background_meta = new(meta.fullPath, meta.fullPath, meta.extension);
 
             if (image is not null)
             {
@@ -103,8 +103,9 @@ namespace pixel_editor
                 MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage and add it to the current project?", "Set Stage?", MessageBoxButton.YesNo);
 
             var asset = new StageAsset(stage.Name, stage);
+            var meta = new Metadata(asset.Name, asset.filePath, pixel_renderer.Constants.AssetsFileExtension);
             
-            Library.Register(typeof(Stage), asset);
+            AssetLibrary.Register(meta, asset);
 
             if (msgResult == MessageBoxResult.Yes)
             {

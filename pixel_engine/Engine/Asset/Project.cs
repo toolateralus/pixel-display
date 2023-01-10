@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using pixel_renderer;
 using pixel_renderer.Assets;
-using pixel_renderer.IO;
+using pixel_renderer.FileIO;
 using System.Collections.Generic;
 
 namespace pixel_renderer
@@ -12,9 +12,13 @@ namespace pixel_renderer
         public List<Asset> library;
         public int stageIndex;
         public List<StageAsset> stages;
-        public string Name { get; private set; }
-
+        public string Name 
+        { 
+            get; 
+            private set; 
+        }
         private int hash;
+
         private int NameHash()
         {
             object[] o = new object[] { Name, stages };
@@ -29,17 +33,9 @@ namespace pixel_renderer
         public static Project LoadProject()
         {
             Project project = new("Default");
-            FileDialog dlg = FileDialog.ImportFileDialog();
-
-            if (dlg.type is null)
-                return project;
-
-            if (dlg.type.Equals(typeof(Project)))
-                project = ProjectIO.ReadProjectFile(dlg.fileName);
-
-            if (project is not null)
-                return project;
-            else return new("Default");
+            Metadata meta = FileDialog.ImportFileDialog();
+            Project loadedProject = IO.ReadJson<Project>(meta);
+            return loadedProject is null ? project : loadedProject;
         }
         internal static string GetPathFromRoot(string filePath) => filePath.Replace(Constants.WorkingRoot + "\\Pixel", "");
         /// <summary>
@@ -49,10 +45,14 @@ namespace pixel_renderer
         public Project(string name)
         {
             Name = name;
-            library = Library.Clone();
+            library = AssetLibrary.Clone();
             stageIndex = 0;
             fileSize = 0;
             hash = NameHash();
+        }
+        public Project()
+        {
+
         }
         [JsonConstructor]
         public Project(List<StageAsset> stages, List<Asset> library, int stageIndex, int fileSize, string name, int hash)

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace pixel_renderer.IO
+namespace pixel_renderer.FileIO
 {
     public class Asset
     {

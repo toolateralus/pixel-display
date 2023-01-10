@@ -8,26 +8,13 @@ namespace pixel_renderer
 
     public static class Input
     {
-        public enum InputEventType { KeyDown, KeyUp, KeyToggle };
+        public enum InputEventType { DOWN, UP, TOGGLE,
+            ALL
+        }
         static Dictionary<Key, bool> KeyDown = new Dictionary<Key, bool>();
         static Dictionary<Key, bool> KeyUp = new Dictionary<Key, bool>();
         static Dictionary<Key, bool> KeyToggled = new Dictionary<Key, bool>();
-
-        readonly static Key[] keys =
-        {
-            Key.W,
-            Key.S,
-            Key.A,
-            Key.D,
-
-            Key.Space,
-            Key.Q,
-            Key.F1,
-            Key.F2,
-            Key.F3,
-            Key.F4,
-            Key.F5
-        };
+        
         readonly static Dictionary<string, Key> s_keys = new()
         {
             { "up", Key.W },
@@ -35,39 +22,80 @@ namespace pixel_renderer
             { "left", Key.A },
             { "right", Key.D },
         };
-
         /// 101 keys on US Standard Keyboard.
         static List<InputAction> InputActions_KeyDown = new(101);
         static List<InputAction> InputActions_KeyUp = new(101);
-        static List<InputAction> InputActions_KeyToggle = new(101);
+        static List<InputAction> InputActions_KeyToggled = new(101);
+        public static event Action<Key>? OnKeyDown;
+        public static event Action<Key>? OnKeyUp;
+        public static event Action<Key>? OnKeyToggled;
+
 
         public static void RegisterAction(InputAction action, InputEventType type)
         {
             switch (type)
             {
-                case InputEventType.KeyDown:
-                    InputActions_KeyDown.Add(action);
+                case InputEventType.DOWN:
+                    InputActions_KeyUp.Add(action);
+                    break;
+                
+                case InputEventType.UP:
+                    InputActions_KeyUp.Add(action);
+                    break;
+                
+                case InputEventType.TOGGLE:
+                    InputActions_KeyToggled.Add(action);
                     break;
 
-                case InputEventType.KeyUp:
-                    throw new NotImplementedException();
-
-                case InputEventType.KeyToggle:
-                    throw new NotImplementedException();
+                case InputEventType.ALL:
+                    InputActions_KeyToggled.Add(action);
+                    InputActions_KeyUp.Add(action);
+                    InputActions_KeyDown.Add(action);
+                    break; 
             }
         }
-
-        public static event Action<Key> OnKeyDown;
-        public static bool InputActionsInUse = true;
+        private static void Input_OnKeyToggled(Key key)
+        {
+            foreach (InputAction action in InputActions_KeyToggled)
+                if (action.Key.Equals(key))
+                {
+                    if (action.ExecuteAsynchronously)
+                    {
+                        action?.InvokeAsync();
+                        return;
+                    }
+                    action?.Invoke();
+                }
+        }
+        private static void Input_OnKeyUp(Key key)
+        {
+            foreach (InputAction action in InputActions_KeyUp)
+                if (action.Key.Equals(key))
+                {
+                    if (action.ExecuteAsynchronously)
+                    {
+                        action?.InvokeAsync();
+                        return;
+                    }
+                    action?.Invoke();
+                }
+        }
+        private static void Input_OnKeyDown(Key key)
+        {
+            foreach (InputAction action in InputActions_KeyDown)
+                if (action.Key.Equals(key))
+                {
+                    if (action.ExecuteAsynchronously)
+                    {
+                        action?.InvokeAsync();
+                        return;
+                    }
+                    action?.Invoke();
+                }
+        }
         public static void Refresh()
         {
-            UpdateStaticInputs();
-            IterateActions(InputActions_KeyDown);
-        }
-
-        private static void IterateActions(List<InputAction> actions)
-        {
-            foreach (var input in actions)
+            foreach (var input in InputActions_KeyDown)
             {
                 Key key = input.Key;
                 SetKeyDown(key, Keyboard.IsKeyDown(key));
@@ -76,42 +104,21 @@ namespace pixel_renderer
             }
         }
 
-        private static void UpdateStaticInputs()
+        private static void IterateActions()
         {
-            foreach (Key key in keys)
-                SetKeyDown(key, Keyboard.IsKeyDown(key));
-
-            foreach (Key key in keys)
-                SetKeyUp(key, Keyboard.IsKeyUp(key));
-
-            foreach (Key key in keys)
-                SetKeyToggled(key, Keyboard.IsKeyToggled(key));
+           
         }
 
-        public static bool GetKeyDown(Key key)
-        {
-            var result = KeyDown.ContainsKey(key) && KeyDown[key];
-
-            return result;
-        }
-        public static bool GetKeyUp(Key key)
-        {
-            return KeyUp.ContainsKey(key) && KeyUp[key];
-        }
-        public static bool GetKeyToggled(Key key)
-        {
-            return KeyToggled.ContainsKey(key) && KeyToggled[key];
-        }
+        public static bool GetKeyDown(Key key) => KeyDown.ContainsKey(key) && KeyDown[key];
+        public static bool GetKeyUp(Key key) => KeyUp.ContainsKey(key) && KeyUp[key];
+        public static bool GetKeyToggled(Key key) => KeyToggled.ContainsKey(key) && KeyToggled[key];
 
         public static bool GetKeyDown(string keycode)
         {
             if (!s_keys.ContainsKey(keycode))
                 return false;
-
             Key key = s_keys[keycode];
-
             var result = KeyDown.ContainsKey(key) && KeyDown[key];
-           
             return result;
         }
         public static bool GetKeyUp(string keycode)
@@ -126,15 +133,12 @@ namespace pixel_renderer
             Key key = s_keys[keycode];
             return KeyToggled.ContainsKey(key) && KeyToggled[key];
         }
-
         private static void SetKeyDown(Key key, bool result)
         {
             if (!KeyDown.ContainsKey(key))
                 KeyDown.Add(key, result);
-
             if (result)
                 OnKeyDown?.Invoke(key);
-
             else KeyDown[key] = result;
         }
         private static void SetKeyToggled(Key key, bool result)
@@ -150,12 +154,6 @@ namespace pixel_renderer
             else KeyUp[key] = result;
         }
 
-
-
-        /// <summary>
-        /// Get a Vec2 representing WASD input values, with a vector max range of -1 to 1 
-        /// </summary>
-        /// <returns>new Vec2(right - left, up - down) between -1 and 1</returns>
         public static Vec2 GetMoveVector()
         {
             bool A = GetKeyDown(Key.A);
@@ -167,29 +165,20 @@ namespace pixel_renderer
             int up = S ? 0 : 1;
             int right = D ? 0 : 1;
             int left = A ? 0 : 1;
+            
+            var output = new Vec2(left - right, down - up); 
 
-            return new Vec2(left - right, down - up);
+            return output;  
         }
 
         internal static void Awake()
         {
             OnKeyDown += Input_OnKeyDown;
-            
+            OnKeyUp += Input_OnKeyUp;
+            OnKeyToggled += Input_OnKeyToggled;
         }
 
-        private static void Input_OnKeyDown(Key key)
-        {
-            foreach (InputAction action in InputActions_KeyDown)
-                if (action.Key.Equals(key))
-                {
-                    if (action.ExecuteAsynchronously)
-                    {
-                        action?.InvokeAsync();
-                        return;
-                    }
-                    action?.Invoke();
-                }
-        }
+      
     }
 
     public class InputAction

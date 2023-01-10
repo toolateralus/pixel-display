@@ -10,9 +10,10 @@ using System.Windows.Input;
 
 using pixel_renderer;
 using pixel_renderer.Assets;
-using pixel_renderer.IO;
+using pixel_renderer.FileIO;
 using static pixel_renderer.Input;
 using System.Linq;
+using System.Windows.Media.Media3D;
 
 namespace pixel_editor
 {
@@ -126,33 +127,16 @@ namespace pixel_editor
                 editorMessages.Background = Brushes.DarkSlateGray;
             };
         }
-        object[] args => new object[]
-        {
-            inspector,
-            Runtime.Instance,
-        };
-        static Action<object[]?> set_stage_0 => (o) =>
-        {
-            var inspector = o[0] as Inspector;
-            var run = o[1] as Runtime;
-            run.TrySetStageAsset(0);
-            Console.RedTextForMS(inspector, 1);
-        };
-        static Action<object[]?> reload => (o) =>
-        {
-            var run = o[1] as Runtime;
-            run.ResetCurrentStage();
-        };
         private void GetEvents()
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
             CompositionTarget.Rendering += Update;
 
-            InputAction setStage0 = new(false, set_stage_0, args, Key.G);
-            InputAction resetStage = new(false, reload, args, Key.H);
-            RegisterAction(setStage0, InputEventType.KeyDown);
-            RegisterAction(resetStage, InputEventType.KeyDown);
+            var action = Command.reload_stage.action;
+            var args = Command.reload_stage.args;
+            InputAction resetStage = new(false, action, args, Key.D1);
+            RegisterAction(resetStage, InputEventType.DOWN);
 
         }
         private static Point ViewportPoint(Image img, Point pos)
@@ -189,8 +173,7 @@ namespace pixel_editor
             Runtime.Instance.mainWnd = new();
             Runtime.Instance.mainWnd.Show();
         }
-        private void Wnd_Closed(object? sender, EventArgs e) =>
-            stageWnd = null;
+        private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
             Image img = (Image)sender;
@@ -232,8 +215,21 @@ namespace pixel_editor
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            ProjectIO.SaveProject(Runtime.Instance.LoadedProject);
-            Library.Sync();
+            
+            Project? proj;
+            Metadata meta;
+            GetProjectPsuedoMetadata(out proj, out meta);
+            ProjectIO.WriteProject(proj, meta);
+            AssetLibrary.Sync();
+        }
+        private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
+        {
+            proj = Runtime.Instance.LoadedProject;
+            var projDir = pixel_renderer.Constants.ProjectsDir;
+            var rootDir = pixel_renderer.Constants.WorkingRoot;
+            var ext = pixel_renderer.Constants.ProjectFileExtension;
+            var path = rootDir + projDir + '\\' + proj.Name + ext;
+            meta = new Metadata(proj.Name, path, ext);
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
@@ -254,7 +250,6 @@ namespace pixel_editor
             if (project is not null)
                 Runtime.Instance.SetProject(project);
         }
-
         private void OnCommandSent(object sender, RoutedEventArgs e)
         {
             int cap = 5;
@@ -269,15 +264,19 @@ namespace pixel_editor
                 Command.Call(line);
             }
         }
-       
-
     }
     public class Command
     {
         public static Command reload_stage = new()
         {
             phrase = "reload|Reload|realod|/r",
-            action = (o) => Runtime.Instance.ResetCurrentStage(),
+            action = (o) =>
+            {
+                Console.Print("Josh Is Cool!");
+                Runtime.Instance.ResetCurrentStage();
+            },
+
+
             args = null
         };
         public static Command spawn_generic = new()

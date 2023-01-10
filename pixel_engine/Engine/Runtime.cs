@@ -120,7 +120,7 @@ namespace pixel_renderer
             if (LoadedProject.stages is null) return;
             if (LoadedProject.stages.Count <= stageAssetIndex) return;
             if (LoadedProject.stages[stageAssetIndex] is null) return;
-                SetStageAsset(LoadedProject.stages[stageAssetIndex]);
+            SetStageAsset(LoadedProject.stages[stageAssetIndex]);
         }
         public void SetStageAsset(StageAsset stageAsset)
         {
@@ -133,10 +133,22 @@ namespace pixel_renderer
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
-            if (!IsRunning ||  renderHost.State is RenderState.Off)  return; 
-            if (renderHost.State is RenderState.Error)  throw new Exception("Rendering error");
-            if (renderHost.State is RenderState.Game)   renderHost.Render(mainWnd.renderImage, this);
             Input.Refresh();
+            
+            if (renderHost is null)
+                return; 
+
+            if (!IsRunning ||
+                renderHost.State is RenderState.Off) 
+                return; 
+            
+            if (renderHost.State is RenderState.Error) 
+                throw new Exception("Rendering error");
+
+            if (renderHost.State is RenderState.Game) 
+                renderHost.Render(mainWnd.renderImage, this);
+
+            
         }
     }
 }

@@ -1,8 +1,9 @@
 ﻿
 using Newtonsoft.Json;
-using pixel_renderer.IO;
+using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Navigation;
 
 namespace pixel_renderer.Assets
 {

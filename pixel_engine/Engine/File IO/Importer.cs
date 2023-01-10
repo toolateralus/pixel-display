@@ -3,12 +3,13 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using pixel_renderer.IO;
+using System.Windows.Shapes;
+using pixel_renderer.FileIO;
 namespace pixel_renderer.Assets
 {
     public class Importer
     {
-        public static string Path => Constants.WorkingRoot + Constants.AssetsDir;
+        public static string DirectoryPath => Constants.WorkingRoot + Constants.AssetsDir;
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>
@@ -22,10 +23,9 @@ namespace pixel_renderer.Assets
                         return;
                 }
 
-            if (!Directory.Exists(Path))
-                Directory.CreateDirectory(Path);
 
-               ImportTask(); 
+            AssetIO.FindOrCreateAssetsDirectory();
+            ImportTask(); 
 
             if (!Runtime.Instance.IsRunning)
                 if (showMessage)
@@ -35,15 +35,16 @@ namespace pixel_renderer.Assets
                         "Asset Importer",
                         MessageBoxButton.YesNo);
 
-                    if (syncResult == MessageBoxResult.Yes) Library.Sync();
+                    if (syncResult == MessageBoxResult.Yes) 
+                        AssetLibrary.Sync();
                 }
         }
         private static void ImportTask()
         {
-            var subdirectories = Directory.EnumerateDirectories(Path); 
-            foreach (var file in Directory.EnumerateFiles(Path))
+            foreach (var file in Directory.EnumerateFiles(DirectoryPath))
                 FinalImport(file);
 
+            var subdirectories = Directory.EnumerateDirectories(DirectoryPath); 
             if (!subdirectories.Any())
                      return;
 
@@ -57,12 +58,10 @@ namespace pixel_renderer.Assets
             var fileExtension = file.Split('.')[1];
             Metadata meta = new("New Asset", file, fileExtension);
             var asset = TryPullObject(meta);
-
             if (asset is not null)
             {
                 asset.fileType ??= typeof(Asset);
-                Library.Register(asset.fileType, asset);
-                Library.RegisterMetadata(meta, asset);
+                AssetLibrary.Register((meta, asset));
             };
         }
 
@@ -73,7 +72,7 @@ namespace pixel_renderer.Assets
         /// <returns>Asset if it exists at path, else null.</returns>
         public static Asset? TryPullObject(Metadata meta)
         {
-            return !File.Exists(meta.fullPath) ? null : AssetIO.ReadFile<Asset>(meta);
+            return !File.Exists(meta.fullPath) ? null : IO.ReadJson<Asset>(meta);
         }
         /// <summary>
         /// </summary>
@@ -104,14 +103,16 @@ namespace pixel_renderer.Assets
         }
         public static void ImportAssetDialog()
         {
-            FileDialog dialog = FileDialog.ImportFileDialog();
-            if (dialog.type != null)
-            {
-                Metadata metadata = new(dialog.name, dialog.filePath, dialog.fileExtension); 
-                var asset = AssetIO.ReadFile<Asset>(metadata);
-                if (asset == null) return;
-                Library.Register(asset.GetType(), asset);
-            }
+            Metadata metadata = FileDialog.ImportFileDialog();
+
+            var isPathValid = System.IO.Path.IsPathFullyQualified(metadata.fullPath);
+            
+            if (!isPathValid) 
+                return;
+
+            var asset = IO.ReadJson<Asset>(metadata);
+            if (asset is null) return;
+            AssetLibrary.Register((metadata, asset));
         }
     }
 }

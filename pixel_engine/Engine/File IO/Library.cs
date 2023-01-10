@@ -1,36 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using pixel_renderer.IO;
+using pixel_renderer.FileIO;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace pixel_renderer.Assets
 {
-    public class Library
+    public class AssetLibrary
     {
-        static Dictionary<Type, List<Asset>> LoadedAssets = new();
-        static Dictionary<Metadata, Asset> LoadedMetadata = new();
+        static Dictionary<Metadata, Asset> Current = new();
 
-        public static void Register(Type type, Asset asset)
+        public static void Register((Metadata, Asset) assetPair)
         {
-            if (!LoadedAssets.ContainsKey(type))
-                LoadedAssets.Add(type, new List<Asset>());
-            LoadedAssets[type].Add(asset);
-        }
-        public static void RegisterMetadata(Metadata meta, Asset asset)
-        {
-            if (!LoadedMetadata.ContainsKey(meta))
-                LoadedMetadata.Add(meta, asset);
+            Asset asset = assetPair.Item2;
+            Metadata metadata = assetPair.Item1;
 
+            if (Current.ContainsKey(metadata)) return;
+            Current.Add(metadata, asset);
         }
-        public static void Unregister(Type type, string Name)
+        public static void Register(Metadata metadata, Asset asset)
         {
-            foreach (var asset in from asset in LoadedAssets[type]
-                                  where asset.Name.Equals(Name)
-                                  select asset)
-            {
-                LoadedAssets[type].Remove(asset);
-            }
+            if (Current.ContainsKey(metadata)) return;
+            Current.Add(metadata, asset);
         }
+        public static void Unregister(Metadata metadata) => Current.Remove(metadata);
         
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
@@ -42,40 +35,28 @@ namespace pixel_renderer.Assets
         public static bool Fetch<T>(out T result) where T : Asset
         {
             result = null;
-            if (LoadedAssets.TryGetValue(typeof(T), out var found))
-            {
-                foreach (var _asset in found)
+            foreach(var asset in Current.Values)
+                if (asset.GetType() == typeof(T))
                 {
-                    if (_asset is null) continue;
-                    if (_asset as T is null) continue;
-                    result = _asset as T;
+                    result = asset as T;
+                    return true;
                 }
-                return true;
-            }
-            return false;
-        }
-        public static bool Fetch<T>(string name, out T result) where T : Asset
-        {
-            result = null;
-            if (LoadedAssets.TryGetValue(typeof(T), out var found))
-            {
-                result = (T)found.Where(x => x.Name.Equals(name));
-                return true;
-            }
             return false;
         }
         public static bool Fetch<T>(out List<T> output)
         {
-            output = new List<T>();
-            foreach (var pair in from pair in LoadedAssets
-                                 let type = pair.Key
-                                 where type == typeof(T)
-                                 select pair)
-            {
-                output.AddRange((IEnumerable<T>)(from asset in pair.Value
-                                select asset));
+            IEnumerable<T> objs = (IEnumerable<T>)(from obj in Current.Values where obj.GetType() == typeof(T) select obj);
+            output = objs.ToList();
+            if(output.Count > 0) return true;
+            return false; 
+        }
+        public static bool Fetch<T>(string name, out T result) where T : Asset
+        {
+            IEnumerable<T> objs = (IEnumerable<T>)(from obj in Current.Values where obj.GetType() == typeof(T) select obj);
+            result = objs.First();
+            
+            if (result is not true) 
                 return true;
-            }
             return false;
         }
         
@@ -87,21 +68,21 @@ namespace pixel_renderer.Assets
         public static Metadata? FetchMeta(Asset asset)
         {
             return (Metadata?)(from _asset
-                               in LoadedMetadata
+                               in Current
                                where _asset.Value.Equals(asset)
                                select _asset.Value);
         }
         public static Metadata? FetchMeta(string path)
         {
             return (Metadata?)(from asset
-                               in LoadedMetadata 
+                               in Current 
                                where asset.Value.filePath.Equals(path) 
                                select asset.Value); 
         }
         public static Metadata? FetchMeta(object name) 
         {
             return (Metadata?)(from asset
-                               in LoadedMetadata
+                               in Current
                                where asset.Value.Name.Equals((string)name)
                                select asset.Value);
         }
@@ -111,16 +92,13 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Sync()
         {
-            AssetIO.Skipping = false;
-            foreach (var pair in LoadedMetadata)
+            IO.Skipping = false;
+            foreach (var pair in Current)
             {
                 (Asset, Metadata) tuple = (pair.Value, pair.Key);
-                AssetIO.SaveAsset(tuple);
+                AssetIO.WriteAsset(tuple);
             }
-
-
         }
-
         /// <summary>
         /// Clone the current Asset Library into a List.
         /// </summary>
@@ -128,9 +106,10 @@ namespace pixel_renderer.Assets
         public static List<Asset>? Clone()
         {
             List<Asset> library = new();
-            foreach (var key in LoadedAssets)
-                foreach (var item in key.Value)
-                    library.Add(item);
+            
+            foreach (var pair in Current)
+                    library.Add(pair.Value);
+
             return library;
         }
     }

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using pixel_renderer.Assets;
-using pixel_renderer.IO;
+using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Windows.Media.Imaging;
+using System.Xml.Linq;
 
 namespace pixel_renderer
 {
@@ -57,14 +58,28 @@ namespace pixel_renderer
         public string Name { get; set; }
         private string _uuid = "";
         public string UUID => _uuid;
+        public bool FixedUpdateBusy { get; private set; }
+
         public void FixedUpdate(float delta)
         {
+            FixedUpdateBusy = true;
             lock (Nodes)
             {
                 foreach (Node node in Nodes)
                      node.FixedUpdate(delta);
             }
+            FixedUpdateBusy = false;
+
+            for(int i = 0; DelayedActionQueue.Count - 1 > 0; ++i)
+            {
+               Action<object[]> action = DelayedActionQueue.Dequeue();
+               object[] args = DelayedActionArgsQueue.Dequeue();
+               action(args);
+            }
+               
         }
+        Queue<Action<object[]>> DelayedActionQueue = new();
+        Queue<object[]> DelayedActionArgsQueue = new();
         public void Awake()
         {
             OnNodeQueryMade += RefreshStageDictionary;
@@ -119,7 +134,20 @@ namespace pixel_renderer
                                            select sprite);
             return sprites;
         }
-        public void AddNode(Node node) => Nodes.Add(node);
+        public void AddNode(Node node)
+        {
+            Action<object[]> add_node = (o) => { Nodes.Add(o[0] as Node); };
+            object[] args = { node };
+
+            if (FixedUpdateBusy)
+            {
+                DelayedActionArgsQueue.Enqueue(args);
+                DelayedActionQueue.Enqueue(add_node);
+            }
+            else add_node(args); 
+
+        }
+
         public Stage Reset()
         {
             List<StageAsset> stageAssets = Runtime.Instance.LoadedProject.stages;
@@ -131,13 +159,14 @@ namespace pixel_renderer
             }
             throw new NullStageException("Stage not found on reset call");
         }
-
         public void create_generic_node()
         {
             // random variables used here;
             object[] args = r_node_args();
+            
             var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
             var sprite = new Sprite((Vec2)args[2], (Color)args[3], (bool)args[4]);
+
             node.AddComponent(sprite);
             node.AddComponent(new Rigidbody()
             {

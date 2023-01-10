@@ -9,49 +9,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Markup;
 
-namespace pixel_renderer.IO
+namespace pixel_renderer.FileIO
 {
     public class AssetIO
     {
-        public static bool Skipping = false;
-        public static string Path => Constants.WorkingRoot + Constants.AssetsDir; 
-
-        /// <summary>
-        /// this does not check if the directory exists nor does it instantiate one where it doesnt exist
-        /// </summary>
-        /// <param name="metadata"></param>
-        /// <returns>null if the writer is closed, and the writer if it's still open</returns>
-        public static TextWriter? WriteFile<T>(T data, Metadata meta, bool closeStreamWhenFinished = true)
+        internal static void FindOrCreateAssetsDirectory()
         {
-            using TextWriter writer = new StreamWriter(meta.fullPath);
-            var jsonSerializer = JsonSerializer.Create(Settings);
-            jsonSerializer.Serialize(writer, data);
-            if (closeStreamWhenFinished)
-            {
-                writer.Close();
-                return null; 
-            }
-            return writer; 
+            if (!Directory.Exists(IO.Path))
+                Directory.CreateDirectory(IO.Path);
         }
         /// <summary>
-        /// this does not check if the directory or file exists, just deserializes a file into a json object of specified type and returns as C# object
+        /// Checks for the existence of the Assets directory and if it exists, tries to read from the location of the data specified in the metadata object, then registers it to the AssetLibrary..
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="meta"></param>
-        /// <param name="closeStreamWhenFinished"></param>
-        /// <returns></returns>
-        public static T ReadFile<T>(Metadata meta, bool closeStreamWhenFinished = true)
+        /// <returns>Asset if found, else null </returns>
+        public static void ReadAndRegister(out Asset? asset, Metadata meta)
         {
-            var jsonSerializer = JsonSerializer.Create(Settings);
-            StreamReader reader = new(meta.fullPath);
-            using JsonTextReader jsonReader = new(reader);
-            T obj = jsonSerializer.Deserialize<T>(jsonReader);
-            if (closeStreamWhenFinished) 
-                reader.Close();
-            return obj;
+            asset = ReadAsset(meta);
+            if (asset is null) 
+                return;
+            AssetLibrary.Register(meta, asset);
         }
-
-        public static void SaveAsset((Asset, Metadata) pair)
+        public static void WriteAsset((Asset, Metadata) pair)
         {
             FindOrCreateAssetsDirectory();
             
@@ -61,57 +40,22 @@ namespace pixel_renderer.IO
             if (!File.Exists(meta.fullPath)) 
                 throw new FileNotFoundException(meta.fullPath);
 
-            if (!Skipping)
+            if (!IO.Skipping)
             {
-                MessageBoxResult overwriteWarningResult = YesNoCancelWarning(meta.Name);
-                MessageBoxResult doForAllResult = YesNoQuestion();
+                MessageBoxResult overwriteWarningResult = IO.FileOverrideWarning(meta.Name);
+                MessageBoxResult doForAllResult = IO.DoForAllQuestion();
 
                 if (doForAllResult == MessageBoxResult.Yes)
-                    Skipping = true;
+                    IO.Skipping = true;
                 if (overwriteWarningResult != MessageBoxResult.Yes)
                     return;
             }
-
-            WriteFile(data, meta);
+            IO.WriteJson(data, meta);
         }
-        private static void FindOrCreateAssetsDirectory()
-        {
-            if (!Directory.Exists(Path))
-                Directory.CreateDirectory(Path);
-        }
-        private static MessageBoxResult YesNoQuestion()
-        {
-            return MessageBox.Show($"Do for all (uses last choice)",
-                                                        "", MessageBoxButton.YesNo, MessageBoxImage.Question,
-                                                         MessageBoxResult.No, MessageBoxOptions.RtlReading);
-        }
-        private static MessageBoxResult YesNoCancelWarning(string fileName)
-        {
-            return MessageBox.Show($"Are you sure you want to overwrite {fileName}.json ? \n found at {Path}",
-                                                        "", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning,
-                                                         MessageBoxResult.No, MessageBoxOptions.RtlReading);
-        }
-        public static void TryDeserializeAssetFile(out Asset? outObject, Metadata meta)
-        {
-            Asset? _asset = ReadAssetFile(meta);
-            outObject = _asset;
-            if (_asset is null) return;
-            Library.Register(_asset.GetType(), _asset);
-            return;
-        }
-        private static JsonSerializerSettings Settings = new()
-        {
-            Formatting = Formatting.Indented,
-        };
-        /// <summary>
-        /// Checks for the existence of the Assets directory and if it exists, tries to read from the location of the data specified in the metadata object.
-        /// </summary>
-        /// <param name="meta"></param>
-        /// <returns>Asset if found, else null </returns>
-        public static Asset? ReadAssetFile(Metadata meta)
+        public static Asset? ReadAsset(Metadata meta)
         {
             FindOrCreateAssetsDirectory();
-            Asset asset = ReadFile<Asset>(meta);
+            Asset asset = IO.ReadJson<Asset>(meta);
             return asset;
         }
     }
