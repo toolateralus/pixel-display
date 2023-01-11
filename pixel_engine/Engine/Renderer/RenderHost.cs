@@ -12,10 +12,10 @@ namespace pixel_renderer
 
         public RendererBase GetRenderer() => m_renderer;
         public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
-        public void Render(Image renderSurface, Runtime runtime)
+
+
+        public void Render(Image renderSurface)
         {
-           
-            runtime = Runtime.Instance;
             if (m_renderer is null)
             {
                 State = RenderState.Error;
@@ -36,7 +36,6 @@ namespace pixel_renderer
             }
             Cycle(renderSurface);
         }
-
         /// <summary>
         /// performs the rendering loop for one cycle or frame.
         /// </summary>

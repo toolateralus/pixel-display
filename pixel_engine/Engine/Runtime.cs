@@ -44,8 +44,8 @@ namespace pixel_renderer
         }
         public void Toggle()
         {
-            if (!PhysicsInitialized) InitializePhysics();
-              
+            if (!PhysicsInitialized)
+                InitializePhysics();
 
             if (!physicsClock.Enabled)
             {
@@ -84,7 +84,7 @@ namespace pixel_renderer
             PhysicsInitialized = true;
         }
         public StageAsset? GetStageAsset() => m_stageAsset;
-        public void SetProject(Project project) =>  LoadedProject = project;
+        public void SetProject(Project project) => LoadedProject = project;
         public void ResetCurrentStage()
         {
             SetStage(m_stageAsset?.Copy());
@@ -111,7 +111,6 @@ namespace pixel_renderer
             
             LoadedProject.stages ??= new();
             LoadedProject.stages.Add(stageAsset);
-
             SetStageAsset(stageAsset);
         }
         public void TrySetStageAsset(int stageAssetIndex)
@@ -135,20 +134,14 @@ namespace pixel_renderer
         {
             Input.Refresh();
             
-            if (renderHost is null)
-                return; 
-
-            if (!IsRunning ||
-                renderHost.State is RenderState.Off) 
+            if (!IsRunning || renderHost.State is RenderState.Off)
                 return; 
             
             if (renderHost.State is RenderState.Error) 
                 throw new Exception("Rendering error");
 
             if (renderHost.State is RenderState.Game) 
-                renderHost.Render(mainWnd.renderImage, this);
-
-            
+                renderHost.Render(mainWnd.renderImage);
         }
     }
 }

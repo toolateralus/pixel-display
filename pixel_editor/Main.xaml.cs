@@ -87,6 +87,7 @@ namespace pixel_editor
         }
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
+
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
@@ -94,14 +95,14 @@ namespace pixel_editor
             if (Runtime.Instance.IsRunning
                 && Runtime.Instance.GetStage() is not null
                 && Host.State == RenderState.Scene)
-            {
-                Host.Render(image, Runtime.Instance);
-                var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
-                var framerate = Runtime.Instance.renderHost.info.Framerate;
-                gcAllocText.Content =
-                    $"{memory}" +
-                    $" \n frame rate : {framerate}";
-            }
+                {
+                    Host.Render(image);
+                    var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
+                    var framerate = Runtime.Instance.renderHost.info.Framerate;
+                    gcAllocText.Content =
+                        $"{memory}" +
+                        $" \n frame rate : {framerate}";
+                }
         }
         public void LogConsole(InspectorEvent e)
         {
@@ -110,6 +111,7 @@ namespace pixel_editor
             string[] lines = editorMessages.Dispatcher.Invoke(() => editorMessages.Text.Split('\n'));
             int length = lines.Length;
         }
+        
         internal Action<object?> RedText(object? o = null)
         {
             return (o) =>
@@ -126,6 +128,7 @@ namespace pixel_editor
                 editorMessages.Background = Brushes.DarkSlateGray;
             };
         }
+        
         private void GetEvents()
         {
             Closing += OnDisable;
@@ -134,6 +137,7 @@ namespace pixel_editor
 
             var action = Command.reload_stage.action;
             var args = Command.reload_stage.args;
+
             InputAction resetStage = new(false, action, args, Key.D1);
             RegisterAction(resetStage, InputEventType.DOWN);
 
@@ -147,6 +151,7 @@ namespace pixel_editor
             pos.Y *= img.Height;
             return pos;
         }
+
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)

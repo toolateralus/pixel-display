@@ -6,7 +6,7 @@
 
     public class CRenderer : RendererBase
     {
-        private Bitmap bmp_cached = new(1,1);
+        private Bitmap? bmp_cached = null; 
         private IEnumerable<Sprite>? sprites_cached = null;
 
         private Bitmap? _background;
@@ -31,10 +31,7 @@
 
         public override Bitmap Draw()
         {
-            sprites_cached = Runtime 
-                .Instance
-                .GetStage()
-                .GetSprites();
+            sprites_cached = Runtime.Instance.GetStage().GetSprites();
                
             foreach (Sprite sprite in sprites_cached)
             {
@@ -45,7 +42,8 @@
                         int offsetY = (int)sprite.parent.position.y + y;
 
                         if (offsetX is < 0 or >= Constants.ScreenW || 
-                            offsetY is < 0 or >= Constants.ScreenH) continue;
+                            offsetY is < 0 or >= Constants.ScreenH) 
+                            continue;
 
                         bmp_cached.SetPixel(offsetX, offsetY, sprite.colorData[x, y]);
                     }
