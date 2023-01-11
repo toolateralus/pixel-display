@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Navigation;
 
 namespace pixel_renderer.Assets
 {
@@ -33,7 +32,7 @@ namespace pixel_renderer.Assets
            nodes = runtimeValue.Nodes.ToNodeAssets();
         }
         public List<NodeAsset> nodes;
-        public Metadata m_background; 
+        public Metadata m_background = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp"); 
         public Stage Copy()
         {
             var output = new Stage(Name, m_background, nodes, UUID);

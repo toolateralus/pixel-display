@@ -9,13 +9,13 @@ namespace pixel_editor
         public static void Print(object? o)
         {
             var msg = o.ToString();
-            var e = EditorMessage.New(msg);
+            var e = new EditorMessage(msg);
             Runtime.RaiseInspectorEvent(e);
         }
         public static void Error(object? o = null, int? delay = null)
         {
             string? msg = o.ToString();
-            EditorMessage e = EditorMessage.New(msg);
+            EditorMessage e = new(msg);
             var inspector = (Runtime.inspector as Inspector);
 
             if (inspector is not null)

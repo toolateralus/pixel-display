@@ -11,14 +11,13 @@ namespace pixel_editor
 {
     public class Inspector
     {
-        public Inspector(Label name, Label objInfo, Grid componentGrid, TextBox messagesQueue)
+        public Inspector(Label name, Label objInfo, Grid componentGrid)
         {
             this.name = name ?? new();
             this.objInfo = objInfo ?? new();
             this.componentGrid = componentGrid ?? new();
             this.name.Content = "_";
             this.objInfo.Content = "_";
-            this.messagesQueue = messagesQueue;
             Awake();
         }
 

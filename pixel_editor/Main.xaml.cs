@@ -14,6 +14,7 @@ using pixel_renderer.FileIO;
 using static pixel_renderer.Input;
 using System.Linq;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
 
 namespace pixel_editor
 {
@@ -63,7 +64,7 @@ namespace pixel_editor
         public Editor()
         {
             InitializeComponent();
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid, editorMessages);
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
             Runtime.inspector = inspector;
             Project defaultProject = new("Default");
             engine = new(defaultProject);
@@ -107,12 +108,22 @@ namespace pixel_editor
         public void LogConsole(InspectorEvent e)
         {
             string msg = $"\n - {e.message} \n - - - - - - - - - - - - - - - - - - -";
-            editorMessages.Dispatcher.Invoke(() => editorMessages.AppendText(msg));
-            string[] lines = editorMessages.Dispatcher.Invoke(() => editorMessages.Text.Split('\n'));
-            int length = lines.Length;
+            void append_msg() { 
+                editorMessages.AppendText(msg);
+            }
+
+            try
+            {
+                Dispatcher.Invoke(append_msg);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            };
+
         }
-        
-        internal Action<object?> RedText(object? o = null)
+
+            internal Action<object?> RedText(object? o = null)
         {
             return (o) =>
             {
@@ -279,8 +290,6 @@ namespace pixel_editor
                 Console.Print("Josh Is Cool!");
                 Runtime.Instance.ResetCurrentStage();
             },
-
-
             args = null
         };
         public static Command spawn_generic = new()
@@ -333,27 +342,19 @@ namespace pixel_editor
                         command.Execute();
                         return; 
                     }
-
                     for(int i = 0; i < count; ++i)
                         command.Execute();
-                      
                 }
         }
     }
     public class EditorMessage : InspectorEvent
     {
-        public EditorMessage(string message) : base(message)
-        {
-        }
-        public static EditorMessage New(string message, object? sender = null, object[]? args = null, Action<object[]>? action = null)
+        public EditorMessage(string message, object? sender = null, object[]? args = null, Action<object[]>? action = null) : base(message)
         {
             message = DateTime.Now.ToLocalTime().ToShortTimeString() + " " + message;
-            return new(message)
-            {
-                expression = action,
-                args = args,
-                sender = sender,
-            };
+            expression = action;
+            this.args = args;
+            this.sender = sender;
         }
     }
 }

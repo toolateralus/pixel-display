@@ -17,6 +17,7 @@ internal class Player : Component
             return;
 
         var move = Input.GetMoveVector();
+        Runtime.Log(move.Sum()  + "asdf");
         Jump(move);
         Move(move);
     }
