@@ -33,8 +33,7 @@ namespace pixel_renderer
         /// <param name="destination"></param>
         public static unsafe void Render(ref Bitmap source, Image destination)
         {
-            Rectangle bmpRect = new Rectangle(0, 0, source.Width, source.Height);
-            BitmapData bmd = source.LockBits(bmpRect, ImageLockMode.ReadOnly, source.PixelFormat);
+            BitmapData bmd = GetWriteOnlyBitmapData(source);
             destination.Source = BitmapSource.Create(
                 bmd.Width, bmd.Height, 96, 96, source.PixelFormat.ToMediaFormat(), null,
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
@@ -42,6 +41,12 @@ namespace pixel_renderer
             DeleteObject(bmd.Scan0);
             //System.Windows.Media.PixelFormats.Bgr24
         }
+
+        private static BitmapData GetWriteOnlyBitmapData(Bitmap source)
+        {
+            return source.LockBits(source.Rect(), ImageLockMode.ReadOnly, source.PixelFormat);
+        }
+
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
         /// </summary>
