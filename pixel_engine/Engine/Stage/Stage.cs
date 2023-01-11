@@ -1,14 +1,9 @@
-﻿using Newtonsoft.Json;
-using pixel_renderer.Assets;
+﻿using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Windows.Media.Imaging;
-using System.Xml.Linq;
 
 namespace pixel_renderer
 {
@@ -28,6 +23,7 @@ namespace pixel_renderer
         public event Action OnNodeQueryMade;
         public List<Node> Nodes { get; private set; } = new();
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+
         Queue<Action<object[]>> DelayedActionQueue = new();
         Queue<object[]> DelayedActionArgsQueue = new();
 
