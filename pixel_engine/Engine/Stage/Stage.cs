@@ -14,52 +14,42 @@ namespace pixel_renderer
 {
     public class Stage
     {
-        public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
         public Stage() { }
-
-        public Stage(string Name, Metadata Background, List<NodeAsset> nodes, string? existingUUID = null)
+        public Stage(string Name, Metadata backgroundMeta, List<NodeAsset> nodes, string? existingUUID = null)
         {
             _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
-            GetBackground(Background);
+            GetBackground(backgroundMeta);
             this.Name = Name;
             Nodes = nodes.ToNodeList();
             Awake();
         }
-        private Bitmap GetBackground(Metadata meta)
-        {
-            if(FindOrCreateMetadataFile(meta))
-                return backgroundImage = new(meta.fullPath);
-            throw new MissingMetadataException("Metadata not found."); 
-        }
-
-        public static bool FindOrCreateMetadataFile(Metadata meta)
-        {
-            var exists = File.Exists(meta.fullPath);
-            if (exists)
-                return true;
-            else
-            {
-                var stream = File.Create(meta.fullPath);
-                using var writer = new StreamWriter(stream);
-                writer.Write(meta);
-            }
-            return false;
-        }
-
-        public List<Node> Nodes { get; private set; } = new();
         public Bitmap backgroundImage;
+        
         public event Action OnNodeQueryMade;
+        public List<Node> Nodes { get; private set; } = new();
+        public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+        Queue<Action<object[]>> DelayedActionQueue = new();
+        Queue<object[]> DelayedActionArgsQueue = new();
 
         /// <summary>
         ///  used to keep track of how many generic nodes have been instantiated for naming
         /// </summary>
         int genericNodeCt = 0;
-
         public string Name { get; set; }
         private string _uuid = "";
         public string UUID => _uuid;
+
         public bool FixedUpdateBusy { get; private set; }
 
+        public void Awake()
+        {
+            OnNodeQueryMade += RefreshStageDictionary;
+            foreach (Node node in Nodes)
+            {
+                node.ParentStage = this;
+                node.Awake();
+            }
+        }
         public void FixedUpdate(float delta)
         {
             FixedUpdateBusy = true;
@@ -78,17 +68,7 @@ namespace pixel_renderer
             }
                
         }
-        Queue<Action<object[]>> DelayedActionQueue = new();
-        Queue<object[]> DelayedActionArgsQueue = new();
-        public void Awake()
-        {
-            OnNodeQueryMade += RefreshStageDictionary;
-            foreach (Node node in Nodes)
-            {
-                node.ParentStage = this;
-                node.Awake();
-            }
-        }
+        
         public void RefreshStageDictionary()
         {
             foreach (Node node in Nodes)
@@ -106,6 +86,7 @@ namespace pixel_renderer
 
             nodesToRemove.Clear();
         }
+        
         public Node[] FindNodesByTag(string tag)
         {
             OnNodeQueryMade?.Invoke();
@@ -126,14 +107,6 @@ namespace pixel_renderer
                     .Where(node => node.Name == name)
                     .First();
         }
-        public IEnumerable<Sprite> GetSprites()
-        {
-            var sprite = new Sprite();
-            IEnumerable<Sprite> sprites = (from Node node in Nodes
-                                           where node.TryGetComponent(out sprite)
-                                           select sprite);
-            return sprites;
-        }
         public void AddNode(Node node)
         {
             Action<object[]> add_node = (o) => { Nodes.Add(o[0] as Node); };
@@ -147,7 +120,7 @@ namespace pixel_renderer
             else add_node(args); 
 
         }
-
+        
         public Stage Reset()
         {
             List<StageAsset> stageAssets = Runtime.Instance.LoadedProject.stages;
@@ -159,6 +132,7 @@ namespace pixel_renderer
             }
             throw new NullStageException("Stage not found on reset call");
         }
+        
         public void create_generic_node()
         {
             // random variables used here;
@@ -193,6 +167,20 @@ namespace pixel_renderer
                 r_color,
                 r_bool,
                 r_dir };
+        }
+        
+        public IEnumerable<Sprite> GetSprites()
+        {
+            var sprite = new Sprite();
+            IEnumerable<Sprite> sprites = (from Node node in Nodes
+                                           where node.TryGetComponent(out sprite)
+                                           select sprite);
+            return sprites;
+        }
+        private Bitmap GetBackground(Metadata meta)
+        {
+            return backgroundImage = new(meta.fullPath);
+            throw new MissingMetadataException("Metadata not found."); 
         }
     }
 }

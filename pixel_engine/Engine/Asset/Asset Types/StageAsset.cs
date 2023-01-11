@@ -31,19 +31,12 @@ namespace pixel_renderer.Assets
         public StageAsset(string name, Stage runtimeValue) : base(name, typeof(Stage))
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();
-            // Initialize background metadata
         }
         public List<NodeAsset> nodes;
-        
         public Metadata m_background; 
-        
         public Stage Copy()
         {
-            // Import backgruond and output stage with background bitmap loaded;
-            // REPLACE NULL REFERENCE TO BACKGROUND
-            var path = Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp";
-            Metadata meta = new("", path, ".bmp"); 
-            var output = new Stage(Name, meta, nodes, UUID);
+            var output = new Stage(Name, m_background, nodes, UUID);
             return output;  
         }
         internal Bitmap? GetBackground() => new Bitmap(m_background.fullPath) ?? null;
