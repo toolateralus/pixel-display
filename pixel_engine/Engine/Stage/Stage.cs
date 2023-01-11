@@ -48,13 +48,15 @@ namespace pixel_renderer
         }
         public void FixedUpdate(float delta)
         {
-            FixedUpdateBusy = true;
             lock (Nodes)
             {
+                FixedUpdateBusy = true;
+                
                 foreach (Node node in Nodes)
                      node.FixedUpdate(delta);
+
+                FixedUpdateBusy = false;
             }
-            FixedUpdateBusy = false;
 
             for(int i = 0; DelayedActionQueue.Count - 1 > 0; ++i)
             {
@@ -62,7 +64,6 @@ namespace pixel_renderer
                object[] args = DelayedActionArgsQueue.Dequeue();
                action(args);
             }
-               
         }
         
         public void RefreshStageDictionary()
@@ -82,7 +83,6 @@ namespace pixel_renderer
 
             nodesToRemove.Clear();
         }
-        
         public Node[] FindNodesByTag(string tag)
         {
             OnNodeQueryMade?.Invoke();
@@ -116,19 +116,6 @@ namespace pixel_renderer
             else add_node(args); 
 
         }
-        
-        public Stage Reset()
-        {
-            List<StageAsset> stageAssets = Runtime.Instance.LoadedProject.stages;
-            foreach (StageAsset asset in stageAssets)
-            {
-                var stage = asset.Copy();
-                if (stage is not null
-                    && stage.UUID.Equals(UUID)) return stage;
-            }
-            throw new NullStageException("Stage not found on reset call");
-        }
-        
         public void create_generic_node()
         {
             // random variables used here;

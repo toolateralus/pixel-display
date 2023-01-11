@@ -34,7 +34,7 @@ namespace pixel_renderer
             switch (type)
             {
                 case InputEventType.DOWN:
-                    InputActions_KeyUp.Add(action);
+                    InputActions_KeyDown.Add(action);
                     break;
                 case InputEventType.UP:
                     InputActions_KeyUp.Add(action);
@@ -94,9 +94,9 @@ namespace pixel_renderer
             {
                 Key key = input.Key;
                 SetKeyDown(key, Keyboard.IsKeyDown(key));
-                SetKeyUp(key, Keyboard.IsKeyUp(key));
-                SetKeyToggled(key, Keyboard.IsKeyToggled(key));
             }
+           
+
         }
 
         private static void IterateActions()

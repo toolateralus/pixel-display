@@ -17,6 +17,8 @@ using System.Windows.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Policy;
+using System.Windows.Controls;
+using System.Threading.Tasks;
 
 namespace pixel_editor
 {
@@ -27,18 +29,23 @@ namespace pixel_editor
         public static Editor Editor => Editor.Current;
         public Action<InspectorEvent> InspectorEventRaised;
         public Queue<InspectorEvent> Pending = new();
-        public object[] ExecuteAll()
+        public object[]? ExecuteAll()
         {
             InspectorEvent e;
             List<object> output = new(); 
             for (int i = 0; Pending.Count > 0; ++i)
             {
                 e = Pending.Dequeue();
+               
+                if (e is null) 
+                    return output.ToArray();
+
                 e.action?.Invoke(e.args);
                 output.Add(e);
 
                 if (e.message.Contains("$nolog")) 
                     continue;
+
                 Editor.Current.PrintToConsole(e);
             }
             return output.ToArray(); 
@@ -99,7 +106,7 @@ namespace pixel_editor
             
             Runtime.inspector = inspector;
             Project defaultProject = new("Default");
-
+            current = this; 
             engine = new(defaultProject);
             
             GetEvents();
@@ -108,7 +115,7 @@ namespace pixel_editor
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
 
-        private static Editor current = new();
+        private static Editor current;
         public static Editor Current
         {
             get
@@ -153,7 +160,8 @@ namespace pixel_editor
             {
                 Host?.Render(image);
                 UpdateMetrics();
-                _ = Events.ExecuteAll(); 
+                if(Events.ExecuteAll() is null)
+                    throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
             }
         }
         private void GetEvents()
@@ -167,9 +175,8 @@ namespace pixel_editor
         {
             var action = Command.reload_stage.action;
             var args = Command.reload_stage.args;
-
-
-            InputAction resetStage = new(false, action, args, Key.D1);
+            Action<object[]> act = (e) => { Console.Print("Printing Line"); };
+            InputAction resetStage = new(false, act, args, Key.D1);
             RegisterAction(resetStage, InputEventType.DOWN);
         }
         private void IncrementRenderState()
@@ -197,6 +204,7 @@ namespace pixel_editor
             Runtime.Instance.mainWnd = new();
             Runtime.Instance.mainWnd.Show();
         }
+        
         private void UpdateMetrics()
         {
             var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
@@ -205,21 +213,13 @@ namespace pixel_editor
                 $"{memory}" +
                 $" \n frame rate : {framerate}";
         }
+        
         public void PrintToConsole(InspectorEvent e)
         {
-            consoleOutput.AppendText(
+           consoleOutput.Text +=
                 $"\n - {e.message}" +
                 $" \n -_- - - - - - -_ - - _- - - - - - - -_- " +
-                $"{DateTime.Now.ToLongDateString()}");
-        }
-        private static Point ViewportPoint(Image img, Point pos)
-        {
-            pos.X /= img.ActualWidth;
-            pos.Y /= img.ActualHeight;
-
-            pos.X *= img.Width;
-            pos.Y *= img.Height;
-            return pos;
+                $"{DateTime.Now.ToLongDateString()}";
         }
         private void OnCommandSent(object sender, RoutedEventArgs e)
         {
@@ -236,6 +236,16 @@ namespace pixel_editor
             }
         }
 
+        private static Point ViewportPoint(Image img, Point pos)
+        {
+            pos.X /= img.ActualWidth;
+            pos.Y /= img.ActualHeight;
+
+            pos.X *= img.Width;
+            pos.Y *= img.Height;
+            return pos;
+        }
+        
         #region UI Events
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void Mouse0(object sender, MouseButtonEventArgs e)
@@ -320,73 +330,6 @@ namespace pixel_editor
            Current.Events.Pending.Enqueue(e);
         }
         #endregion
-    }
-    public class Command
-    {
-        public static Command reload_stage = new()
-        {
-            phrase = "reload|Reload|realod|/r",
-            action = (o) =>
-            {
-                Console.Print("Josh Is Cool!");
-                Runtime.Instance.ResetCurrentStage();
-            },
-            args = null
-        };
-        public static Command spawn_generic = new()
-        {
-            phrase = "genericNode|spawnGeneric|/sgn|++n",
-            action = (o) => Runtime.Instance.GetStage().create_generic_node(),
-            args = null
-        };
-        public static readonly Command[] Active = new Command[]
-        {
-            reload_stage,
-            spawn_generic,
-        };
-        public string phrase = "";
-        public Action<object[]?>? action;
-        public object[]? args;
-        public bool Equals(string input)
-        {
-            string newPhrase = "";
-
-            if (input.Contains('$'))
-                newPhrase = input.Split('$')[0];
-            else newPhrase = input; 
-
-            var split = phrase.Split('|');
-
-            foreach (var line in split)
-                if (line.Equals(newPhrase))
-                    return true;
-            return false; 
-        }
-
-        public void Execute()
-        {
-            action?.Invoke(args);
-        }
-
-        internal static void Call(string line)
-        {
-            foreach (var command in Active)
-                if (command.Equals(line))
-                {
-                    int count = 0;
-                    
-                    if (line.Contains('$'))
-                        count = line.ToInt();
-
-                    if (count == 0)
-                    {
-                        command.Execute();
-                        return; 
-                    }
-                    for(int i = 0; i < count; ++i)
-                        command.Execute();
-                }
-        }
     }
  
 }

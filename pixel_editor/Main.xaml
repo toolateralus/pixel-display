@@ -114,8 +114,34 @@
                     Grid.ColumnSpan="14" 
                     
                     />
-            
-            
+            <TextBox 
+                FontSize="3.75" 
+                FontFamily="MS Gothic"
+                Grid.Column="12" Grid.Row="14"
+                Grid.ColumnSpan="8" Grid.RowSpan="3" 
+                x:Name="editorMessages" 
+                Background="DarkSlateGray"
+                Foreground="White"
+                VerticalScrollBarVisibility="Auto" 
+                Text =""
+                TextElement.FontStretch="SemiCondensed"
+                TextWrapping="Wrap"
+                AcceptsReturn="True">
+            </TextBox>
+            <TextBox 
+                
+                x:Name="consoleOutput" 
+                Background="DarkSlateGray"
+                Foreground="White"
+                FontSize="3.75" 
+                FontFamily="MS Gothic"
+                Grid.Column="12" 
+                Grid.Row="12"
+                Grid.ColumnSpan="8" 
+                Grid.RowSpan="2" 
+                >
+            </TextBox>
+
             <Label  FontSize="4.5" 
                     FontWeight="Bold"
                     FontFamily="MS Gothic" 
@@ -143,39 +169,6 @@
                     x:Name="gcAllocText" 
                     Background="DarkSlateGray"
                     Content="GC Alloc:"/>
-            <TextBox 
-                FontSize="3.75" 
-                FontFamily="MS Gothic"
-                Grid.Column="12" Grid.Row="14"
-                Grid.ColumnSpan="8" Grid.RowSpan="3" 
-                x:Name="editorMessages" 
-                Background="DarkSlateGray"
-                Foreground="White"
-                VerticalScrollBarVisibility="Auto" 
-                Text =""
-                TextElement.FontStretch="SemiCondensed"
-                TextWrapping="Wrap"
-                AcceptsReturn="True">
-            </TextBox>
-            <TextBox 
-                
-                x:Name="consoleOutput" 
-                Background="DarkSlateGray"
-                Foreground="White"
-                FontSize="3.75" 
-                FontFamily="MS Gothic"
-                TextWrapping="Wrap"
-                
-                Grid.Column="12" 
-                Grid.Row="12"
-                Grid.ColumnSpan="8" 
-                Grid.RowSpan="2" 
-                
-                VerticalScrollBarVisibility="Auto" 
-                Text =""
-                >
-            </TextBox>
-
 
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top" 

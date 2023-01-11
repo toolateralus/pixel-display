@@ -18,7 +18,7 @@ internal class Player : Component
 
         var move = Input.GetMoveVector();
         string log = "Move Vector Sum =  " +move.Sum().ToString();
-        Runtime.Log(log);
+        //Runtime.Log(log);
         Jump(move);
         Move(move);
     }
