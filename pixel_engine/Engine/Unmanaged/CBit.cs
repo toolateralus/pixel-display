@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
@@ -34,12 +33,14 @@ namespace pixel_renderer
         /// <param name="destination"></param>
         public static unsafe void Render(ref Bitmap source, Image destination)
         {
-            BitmapData bmd = GetWriteOnlyBitmapData(source);
+            Rectangle bmpRect = new Rectangle(0, 0, source.Width, source.Height);
+            BitmapData bmd = source.LockBits(bmpRect, ImageLockMode.ReadOnly, source.PixelFormat);
             destination.Source = BitmapSource.Create(
                 bmd.Width, bmd.Height, 96, 96, source.PixelFormat.ToMediaFormat(), null,
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
             source.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
+            //System.Windows.Media.PixelFormats.Bgr24
         }
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
@@ -48,53 +49,36 @@ namespace pixel_renderer
         /// <param name="bmp"></param>
         /// <exception cref="InvalidOperationException"></exception>
         /// <returns> A modified input Bitmap that holds all the rendered data from the Stage</returns>
-        internal static void Draw(IEnumerable<Sprite> sprites, Bitmap bmp)
+        internal static unsafe void Draw(IEnumerable<Sprite> sprites, Bitmap bmp)
         {
-            if (bmp.PixelFormat != PixelFormat.Format32bppArgb)
-            {
-                throw new ArrayTypeMismatchException($"Bitmap.PixelFormat is {bmp.PixelFormat}, should be Format32bppArgb");
-                return;
-            }
-            BitmapData bmd = GetWriteOnlyBitmapData(bmp);
+            BitmapData bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                  System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                  PixelFormat.Format32bppArgb);
 
             // draw sprite data to bitmap unmanaged
+            byte[] colorBytes = new byte[bmd.Width * bmd.Height];
 
-            foreach (Sprite sprite in sprites)
+            for (var i = 0; i < bmd.Width * bmd.Height; ++i)
             {
-                int posX = (int)sprite.parent.position.x;
-                int posY = (int)sprite.parent.position.y;
-                int width = sprite.colorData.GetLength(0);
-                int height = sprite.colorData.GetLength(1);
-
-                if (posX + width < 0 || posX >= bmd.Width) continue;
-                if (posY + height < 0 || posY >= bmd.Height) continue;
-
-                int leftMargin = Math.Max(0, -posX);
-                int rightMargin = Math.Max(0, posX + width - bmd.Width);
-                int rowSizeInBytes = (width - (leftMargin + rightMargin)) * 4;
-                byte[] bytes = new byte[rowSizeInBytes];
-
-                for (int localY = 0; localY < height; localY++)
-                {
-                    int y = localY + posY;
-                    if (y < 0) continue;
-                    if (y >= bmd.Height) break;
-                    int localByteOffset = (localY * width + leftMargin) * 4;
-                    Buffer.BlockCopy(sprite.colorData, localByteOffset, bytes, 0 , rowSizeInBytes);
-                    IntPtr destination = bmd.Scan0 + (y * bmd.Stride) + (posX * 4);
-                    Marshal.Copy(bytes, 0, destination, rowSizeInBytes);
-                }
+                if (i >= colorBytes.Length - 4) continue;
+                colorBytes[i + 0] = 255;
+                colorBytes[i + 1] = 15;
+                colorBytes[i + 2] = 15;
+                colorBytes[i + 3] = 15;
             }
+
+            int start = 0;
+            int length = colorBytes.Length;
+            IntPtr destination = bmd.Scan0;
+
+            if (!length.Equals(Constants.ScreenW * Constants.ScreenH))
+                throw new InvalidOperationException("Color array is not the appropriate size.");
+
+            Marshal.Copy(colorBytes, start, destination, length);
 
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
-
-        private static BitmapData GetWriteOnlyBitmapData(Bitmap bmp)
-        {
-            return bmp.LockBits(bmp.Rect(), ImageLockMode.WriteOnly, bmp.PixelFormat);
-        }
-
         /// <summary>
         /// Takes a group of sprites and writes their individual color data arrays to a larger map as positions to prepare for collision and drawing.
         /// </summary>
