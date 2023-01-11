@@ -14,10 +14,13 @@ namespace pixel_editor
         public Inspector(Label name, Label objInfo, Grid componentGrid)
         {
             this.name = name ?? new();
+
             this.objInfo = objInfo ?? new();
             this.componentGrid = componentGrid ?? new();
+            
             this.name.Content = "_";
             this.objInfo.Content = "_";
+            
             Awake();
         }
 
@@ -25,7 +28,6 @@ namespace pixel_editor
         private List<TextBlock> activeControls = new();
         private Label name;
         private Label objInfo;
-        private TextBox messagesQueue; 
         private Grid componentGrid; 
         
         private Dictionary<Type, List<Component>> components = new();
@@ -44,7 +46,6 @@ namespace pixel_editor
             OnObjectDeselected += Refresh;
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
-            Runtime.InspectorEventRaised += Instance_InspectorEventRaised;
         }
         public void Update(object? sender, EventArgs e) { }
         
@@ -157,14 +158,7 @@ namespace pixel_editor
             BorderBrush = Brushes.Black,
             BorderThickness = new Thickness(1, 1, 1, 1),
         };
-        private void Instance_InspectorEventRaised(InspectorEvent e)
-        {
-            if (e.message != "" && !e.message.Contains("$no_log$"))
-            {
-                e.expression?.Invoke(null);
-                Editor.Current.LogConsole(e);
-            }
-        }
-   
+       
+       
     }
 }

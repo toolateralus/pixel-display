@@ -99,7 +99,7 @@ namespace pixel_renderer
            InspectorEvent e = new(obj.ToString());
            RaiseInspectorEvent(e);
         }
-        public static void RaiseInspectorEvent(InspectorEvent e)  => InspectorEventRaised?.Invoke(e);
+        public static void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
         private protected void SetStage(Stage? value) 
         {
             m_stage = null;

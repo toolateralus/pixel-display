@@ -114,7 +114,8 @@
                     Grid.ColumnSpan="14" 
                     
                     />
-           
+            
+            
             <Label  FontSize="4.5" 
                     FontWeight="Bold"
                     FontFamily="MS Gothic" 
@@ -125,7 +126,6 @@
                     x:Name="inspectorObjName"
                     Background="DarkSlateGray" 
                     Content="Object Name"/>
-            
             <Label  FontSize="4.5"
                     FontWeight="Bold"
                     FontFamily="MS Gothic"
@@ -134,7 +134,6 @@
                     x:Name="inspectorObjInfo" 
                     Background="DarkSlateGray" 
                     Content="Object Details"/>
-            
             <Label  FontSize="4.5" 
                     FontWeight="Bold" 
                     FontFamily="MS Gothic"
@@ -144,25 +143,40 @@
                     x:Name="gcAllocText" 
                     Background="DarkSlateGray"
                     Content="GC Alloc:"/>
-
             <TextBox 
                 FontSize="3.75" 
-                FontWeight="Normal" 
                 FontFamily="MS Gothic"
                 Grid.Column="12" Grid.Row="14"
                 Grid.ColumnSpan="8" Grid.RowSpan="3" 
                 x:Name="editorMessages" 
                 Background="DarkSlateGray"
-                Text ="!"
+                Foreground="White"
+                VerticalScrollBarVisibility="Auto" 
+                Text =""
                 TextElement.FontStretch="SemiCondensed"
-                TextAlignment="Justify"
                 TextWrapping="Wrap"
-                TextOptions.TextRenderingMode="Aliased"
-                AcceptsReturn="True"
-                VerticalScrollBarVisibility="Hidden" >
+                AcceptsReturn="True">
             </TextBox>
-                   
-            
+            <TextBox 
+                
+                x:Name="consoleOutput" 
+                Background="DarkSlateGray"
+                Foreground="White"
+                FontSize="3.75" 
+                FontFamily="MS Gothic"
+                TextWrapping="Wrap"
+                
+                Grid.Column="12" 
+                Grid.Row="12"
+                Grid.ColumnSpan="8" 
+                Grid.RowSpan="2" 
+                
+                VerticalScrollBarVisibility="Auto" 
+                Text =""
+                >
+            </TextBox>
+
+
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top" 
                     MaxWidth="90" 
@@ -191,7 +205,6 @@
                     Grid.RowSpan="1"
                     Click="OnCommandSent" 
                     x:Name="sendCommandButton"/>
-
             <Button HorizontalAlignment="Stretch" 
                     VerticalAlignment="Top"
                     MaxWidth="90"
@@ -206,7 +219,6 @@
                     Grid.Column="0" 
                     Click="OnPlay" 
                     x:Name="playBtn"/>
-            
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
                     MaxWidth="90"
@@ -221,7 +233,6 @@
                     Grid.Column="4"
                     Click="OnImportBtnPressed"  
                     x:Name="importBtn"/>
-            
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
                     MaxWidth="90" 
@@ -236,7 +247,6 @@
                     Grid.Column="2" 
                     Click="OnSyncBtnPressed"  
                     x:Name="syncBtn"/>
-            
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
                     MaxWidth="90" 
@@ -251,7 +261,6 @@
                     Grid.Column="3"
                     Click="OnImportFileButtonPressed"
                     x:Name="importFileBtn"/>
-            
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top" 
                     MaxWidth="90" 
@@ -266,7 +275,6 @@
                     Grid.Column="6" 
                     Click="OnStagePressed"
                     x:Name="stageBtn"/>
-            
             <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
                     MaxWidth="90"
