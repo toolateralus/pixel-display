@@ -25,11 +25,8 @@ namespace pixel_editor
     public class EditorEventHandler
     {
         public static Editor Editor => Editor.Current;
-        
         public Action<InspectorEvent> InspectorEventRaised;
-        
         public Queue<InspectorEvent> Pending = new();
-
         public object[] ExecuteAll()
         {
             InspectorEvent e;
@@ -90,7 +87,10 @@ namespace pixel_editor
         }
         #endregion
         private int renderStateIndex = 0;
-        private static bool ShouldUpdate => Runtime.Instance.IsRunning && Runtime.Instance.GetStage() is not null && Host?.State == RenderState.Scene;
+        private static bool ShouldUpdate =>
+            Runtime.Instance.IsRunning && 
+            Runtime.Instance.GetStage() is not null && 
+            Host?.State == RenderState.Scene;
 
         public Editor()
         {
@@ -99,14 +99,15 @@ namespace pixel_editor
             
             Runtime.inspector = inspector;
             Project defaultProject = new("Default");
-            
 
             engine = new(defaultProject);
             
             GetEvents();
             SubscribeInputs();
         }
-        public readonly EditorEventHandler Events = new(); 
+        internal EngineInstance? engine;
+        internal static RenderHost? Host => Runtime.Instance.renderHost;
+
         private static Editor current = new();
         public static Editor Current
         {
@@ -124,10 +125,9 @@ namespace pixel_editor
 
         // for stage creation, hopefully a better solution eventually.
         private StageWnd? stageWnd;
-        // the main window; 
-        internal EngineInstance? engine;
-        internal static RenderHost? Host => Runtime.Instance.renderHost;
         
+        
+        public readonly EditorEventHandler Events = new(); 
         internal Action<object?> RedText(object? o = null)
         {
             return (o) =>
