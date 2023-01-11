@@ -155,7 +155,6 @@ namespace pixel_editor
                 UpdateMetrics();
                 _ = Events.ExecuteAll(); 
             }
-
         }
         private void GetEvents()
         {
