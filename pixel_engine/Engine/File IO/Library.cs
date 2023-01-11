@@ -45,9 +45,16 @@ namespace pixel_renderer.Assets
         }
         public static bool Fetch<T>(out List<T> output)
         {
-            IEnumerable<T> objs = (IEnumerable<T>)(from obj in Current.Values where obj.GetType() == typeof(T) select obj);
+            IEnumerable<T> objs = (IEnumerable<T>)(
+                from obj
+                in Current.Values
+                where obj.GetType() == typeof(T) 
+                select obj);
+
             output = objs.ToList();
+
             if(output.Count > 0) return true;
+
             return false; 
         }
         public static bool Fetch<T>(string name, out T result) where T : Asset

@@ -6,22 +6,19 @@ internal class Player : Component
     [Field] public int speed = 2;
     [Field] Sprite sprite = new();
     [Field] Rigidbody rb = new();
-    
     public override void Awake()
     {
        parent.TryGetComponent(out sprite);
        parent.TryGetComponent(out rb);
     }
-    
-    int j = 0;
-    object? testobj = null; 
-
     public override void FixedUpdate(float delta)
     {
         if (!takingInput) 
             return;
 
         var move = Input.GetMoveVector();
+        string log = "Move Vector Sum =  " +move.Sum().ToString();
+        Runtime.Log(log);
         Jump(move);
         Move(move);
     }

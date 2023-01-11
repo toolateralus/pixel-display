@@ -13,10 +13,37 @@ using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using static pixel_renderer.Input;
 using System.Linq;
-using System.Windows.Media.Media3D;
+using System.Windows.Threading;
+using System.Collections;
+using System.Collections.Generic;
+using System.Security.Policy;
 
 namespace pixel_editor
 {
+
+
+    public class EditorEventHandler
+    {
+        public static Editor Editor => Editor.Current;
+        public Action<InspectorEvent> InspectorEventRaised;
+        public Queue<InspectorEvent> Pending = new();
+        public object[] ExecuteAll()
+        {
+            InspectorEvent e;
+            List<object> output = new(); 
+            for (int i = 0; Pending.Count > 0; ++i)
+            {
+                e = Pending.Dequeue();
+                e.action?.Invoke(e.args);
+                output.Add(e);
+
+                if (e.message.Contains("$nolog")) 
+                    continue;
+                Editor.Current.PrintToConsole(e);
+            }
+            return output.ToArray(); 
+        }
+    }
     public partial class Editor : Window
     {
         #region Window Scaling
@@ -59,22 +86,29 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
+        private int renderStateIndex = 0;
+        private static bool ShouldUpdate =>
+            Runtime.Instance.IsRunning && 
+            Runtime.Instance.GetStage() is not null && 
+            Host?.State == RenderState.Scene;
 
         public Editor()
         {
             InitializeComponent();
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid, editorMessages);
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
+            
             Runtime.inspector = inspector;
             Project defaultProject = new("Default");
+
             engine = new(defaultProject);
+            
             GetEvents();
+            SubscribeInputs();
         }
-        private int renderStateIndex = 0;
+        internal EngineInstance? engine;
+        internal static RenderHost? Host => Runtime.Instance.renderHost;
 
-        private readonly Inspector inspector;
-        private StageWnd? stageWnd;
-
-        private protected volatile static Editor current = new();
+        private static Editor current = new();
         public static Editor Current
         {
             get
@@ -85,33 +119,15 @@ namespace pixel_editor
                 return current;
             }
         }
-        internal EngineInstance? engine;
-        internal static RenderHost? Host => Runtime.Instance.renderHost;
 
-        private void Update(object? sender, EventArgs e)
-        {
-            inspector.Update(sender, e);
+        public Inspector? Inspector => inspector; 
+        private readonly Inspector inspector;
 
-            if (Runtime.Instance.IsRunning
-                && Runtime.Instance.GetStage() is not null
-                && Host.State == RenderState.Scene)
-                {
-                    Host.Render(image);
-                    var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
-                    var framerate = Runtime.Instance.renderHost.info.Framerate;
-                    gcAllocText.Content =
-                        $"{memory}" +
-                        $" \n frame rate : {framerate}";
-                }
-        }
-        public void LogConsole(InspectorEvent e)
-        {
-            string msg = $"\n - {e.message} \n - - - - - - - - - - - - - - - - - - -";
-            editorMessages.Dispatcher.Invoke(() => editorMessages.AppendText(msg));
-            string[] lines = editorMessages.Dispatcher.Invoke(() => editorMessages.Text.Split('\n'));
-            int length = lines.Length;
-        }
+        // for stage creation, hopefully a better solution eventually.
+        private StageWnd? stageWnd;
         
+        
+        public readonly EditorEventHandler Events = new(); 
         internal Action<object?> RedText(object? o = null)
         {
             return (o) =>
@@ -128,30 +144,35 @@ namespace pixel_editor
                 editorMessages.Background = Brushes.DarkSlateGray;
             };
         }
-        
+
+        private void Update(object? sender, EventArgs e)
+        {
+            inspector.Update(sender, e);
+
+            if (ShouldUpdate)
+            {
+                Host?.Render(image);
+                UpdateMetrics();
+                _ = Events.ExecuteAll(); 
+            }
+
+        }
         private void GetEvents()
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
             CompositionTarget.Rendering += Update;
-
+            Runtime.InspectorEventRaised += QueueEvent;
+        }
+        private static void SubscribeInputs()
+        {
             var action = Command.reload_stage.action;
             var args = Command.reload_stage.args;
 
+
             InputAction resetStage = new(false, action, args, Key.D1);
             RegisterAction(resetStage, InputEventType.DOWN);
-
         }
-        private static Point ViewportPoint(Image img, Point pos)
-        {
-            pos.X /= img.ActualWidth;
-            pos.Y /= img.ActualHeight;
-
-            pos.X *= img.Width;
-            pos.Y *= img.Height;
-            return pos;
-        }
-
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)
@@ -177,6 +198,46 @@ namespace pixel_editor
             Runtime.Instance.mainWnd = new();
             Runtime.Instance.mainWnd.Show();
         }
+        private void UpdateMetrics()
+        {
+            var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
+            var framerate = Runtime.Instance.renderHost.info.Framerate;
+            gcAllocText.Content =
+                $"{memory}" +
+                $" \n frame rate : {framerate}";
+        }
+        public void PrintToConsole(InspectorEvent e)
+        {
+            consoleOutput.AppendText(
+                $"\n - {e.message}" +
+                $" \n -_- - - - - - -_ - - _- - - - - - - -_- " +
+                $"{DateTime.Now.ToLongDateString()}");
+        }
+        private static Point ViewportPoint(Image img, Point pos)
+        {
+            pos.X /= img.ActualWidth;
+            pos.Y /= img.ActualHeight;
+
+            pos.X *= img.Width;
+            pos.Y *= img.Height;
+            return pos;
+        }
+        private void OnCommandSent(object sender, RoutedEventArgs e)
+        {
+            int cap = 5;
+            string[] split = editorMessages.Text.Split('\n');
+            
+            if (split.Length < cap)
+                cap = split.Length;
+
+            for (int i = 0; i < cap ; ++i)
+            {
+                var line = editorMessages.GetLineText(i);
+                Command.Call(line);
+            }
+        }
+
+        #region UI Events
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
@@ -254,20 +315,12 @@ namespace pixel_editor
             if (project is not null)
                 Runtime.Instance.SetProject(project);
         }
-        private void OnCommandSent(object sender, RoutedEventArgs e)
-        {
-            int cap = 5;
-            string[] split = editorMessages.Text.Split('\n');
-            
-            if (split.Length < cap)
-                cap = split.Length;
 
-            for (int i = 0; i < cap ; ++i)
-            {
-                var line = editorMessages.GetLineText(i);
-                Command.Call(line);
-            }
+        internal static void QueueEvent(InspectorEvent e)
+        {
+           Current.Events.Pending.Enqueue(e);
         }
+        #endregion
     }
     public class Command
     {
@@ -279,8 +332,6 @@ namespace pixel_editor
                 Console.Print("Josh Is Cool!");
                 Runtime.Instance.ResetCurrentStage();
             },
-
-
             args = null
         };
         public static Command spawn_generic = new()
@@ -333,28 +384,11 @@ namespace pixel_editor
                         command.Execute();
                         return; 
                     }
-
                     for(int i = 0; i < count; ++i)
                         command.Execute();
-                      
                 }
         }
     }
-    public class EditorMessage : InspectorEvent
-    {
-        public EditorMessage(string message) : base(message)
-        {
-        }
-        public static EditorMessage New(string message, object? sender = null, object[]? args = null, Action<object[]>? action = null)
-        {
-            message = DateTime.Now.ToLocalTime().ToShortTimeString() + " " + message;
-            return new(message)
-            {
-                expression = action,
-                args = args,
-                sender = sender,
-            };
-        }
-    }
+ 
 }
 
