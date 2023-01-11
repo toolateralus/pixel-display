@@ -358,7 +358,7 @@ namespace pixel_editor
             var split = phrase.Split('|');
 
             foreach (var line in split)
-                if (line.Equals(input))
+                if (line.Equals(newPhrase))
                     return true;
             return false; 
         }
