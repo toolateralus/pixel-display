@@ -185,6 +185,8 @@ namespace pixel_renderer
             depenetrationForce *= 0.5f;
 
             return; 
+            
+            
             // remove bounciness from collision resolution
             if (A.usingGravity && A.drag != 0) A.velocity += CMath.Negate(depenetrationForce);
             if (B.usingGravity && B.drag != 0) B.velocity += depenetrationForce;
