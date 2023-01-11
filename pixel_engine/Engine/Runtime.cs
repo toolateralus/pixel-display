@@ -70,9 +70,10 @@ namespace pixel_renderer
                 Instance.LoadedProject = project;
 
             Instance.mainWnd = mainWnd;
+            Instance.Initialized = true;
+           
             Importer.Import(false);
             Input.Awake();
-            Instance.Initialized = true;
 
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
         }
