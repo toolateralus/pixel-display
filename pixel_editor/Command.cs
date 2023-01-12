@@ -12,7 +12,7 @@ namespace pixel_editor
     public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
     public class Command
     {
-        private static Command load_project = new()
+        private static Command load_project         = new()
         {
             phrase = "loadProject;",
             action = async (e) =>
@@ -52,7 +52,7 @@ namespace pixel_editor
             args = new object[] { },
             description = "Loads a project @../Pixel/Projects of specified name, and if found, prompts the user to load the project as the current project."
         };
-        private static Command reload_stage = new()
+        private static Command reload_stage         = new()
         {
             phrase = "reload;|/r;|++r;",
             action = (o) =>
@@ -62,7 +62,7 @@ namespace pixel_editor
             args = null,
             description = "Reloads the currently loaded stage",
         };
-        private static Command get_node = new()
+        private static Command get_node             = new()
         {
             phrase = "getNode;",
             action = (e) =>
@@ -87,7 +87,7 @@ namespace pixel_editor
             description = "Retrieves the node of name specified",
 
         };
-        private static Command set_node = new()
+        private static Command set_node             = new()
         {
             phrase = "setNode;",
             args = new object[] {  },
@@ -102,9 +102,8 @@ namespace pixel_editor
             },
             description = "neccesary arguments : (string Name, string FieldName, object value) " +
             "\n gets a node and attempts to write the provided value to specified field.",
-
-        };
-        private static Command spawn_generic = new()
+        };  
+        private static Command spawn_generic        = new()
         {
             phrase = "++n;|newNode;",
             action = (o) => Runtime.Instance.GetStage().create_generic_node(),
@@ -112,6 +111,20 @@ namespace pixel_editor
             description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
 
         };
+        private static Command get_all_commands     = new()
+        {
+            phrase = "help;|help|Help|/h",
+            action = (o) =>
+            {
+                string output = "";
+                foreach (var cmd in Active)
+                    output += cmd.phrase + "\n" + cmd.description + "\n\n";
+                Console.Print(output);
+            },
+            args = null,
+            description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
+        };
+
 
         private static async Task<PromptResult> YesNoPromptAsync(string question, float? waitDuration = 60f)
         {
@@ -162,10 +175,12 @@ namespace pixel_editor
 
         public static readonly Command[] Active = new Command[]
         {
+            get_all_commands,
             load_project,
-            get_node, 
-            reload_stage,
-            spawn_generic,
+            reload_stage,   
+            get_node,        
+            set_node,       
+            spawn_generic,  
         };
         public string phrase = "";
         public string description = "";
