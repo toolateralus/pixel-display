@@ -9,15 +9,19 @@ namespace pixel_renderer
 {
     public class SpriteCamera : Component
     {
-        [JsonProperty] Vec2 halfSize;
+        [JsonProperty] Vec2 bottomRightCorner = new(1,1);
         [JsonProperty] Vec2 viewportPosition = new(0,0);
-        [JsonProperty] Vec2 viewportSize = new(1, 1);
-        [JsonProperty] public float angle;
+        [JsonProperty] Vec2 viewportSize = new(1,1);
+        [JsonProperty] public float angle = 0f;
         float[,] zBuffer = new float[0,0];
-        public Vec2 Size { get => halfSize * 2; set => halfSize = value * 0.5f; }
+        public Vec2 Size
+        {
+            get => bottomRightCorner * 2;
+            set => bottomRightCorner = (value * 0.5f).GetDivideSafe();
+        }
         public Vec2 Center { get => parent.position; set => parent.position = value; }
 
-        public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + halfSize) / Size;
+        public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + bottomRightCorner) / Size;
         public void Draw(IEnumerable<Sprite> sprites, Bitmap bmp)
         {
             if (bmp.Width != zBuffer.GetLength(0) ||
