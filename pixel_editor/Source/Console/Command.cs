@@ -12,7 +12,6 @@ namespace pixel_editor
     public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
     public class Command
     {
-
         public string phrase = "";
         public string description = "";
         public Action<object[]?>? action;
