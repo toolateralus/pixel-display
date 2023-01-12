@@ -96,12 +96,16 @@ namespace pixel_renderer
                     .Where(node => node.tag == tag)
                     .First();
         }
-        public Node FindNode(string name)
+        public Node? FindNode(string name)
         {
             OnNodeQueryMade?.Invoke();
-            return Nodes
-                    .Where(node => node.Name == name)
-                    .First();
+            IEnumerable<Node> result = (
+                from node
+                in Nodes
+                where node.Name.Equals(name)
+                select node); 
+            return result.Any() ? result.First() : null; 
+
         }
         public void AddNode(Node node)
         {

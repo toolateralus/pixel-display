@@ -128,6 +128,7 @@ namespace pixel_renderer
             Key key = s_keys[keycode];
             return KeyToggled.ContainsKey(key) && KeyToggled[key];
         }
+        
         private static void SetKeyDown(Key key, bool result)
         {
             if (!KeyDown.ContainsKey(key))
@@ -136,6 +137,7 @@ namespace pixel_renderer
                 OnKeyDown?.Invoke(key);
             else KeyDown[key] = result;
         }
+
         private static void SetKeyToggled(Key key, bool result)
         {
             if (!KeyToggled.ContainsKey(key))

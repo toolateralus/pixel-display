@@ -13,12 +13,7 @@ using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using static pixel_renderer.Input;
 using System.Linq;
-using System.Windows.Threading;
-using System.Collections;
 using System.Collections.Generic;
-using System.Security.Policy;
-using System.Windows.Controls;
-using System.Threading.Tasks;
 
 namespace pixel_editor
 {
@@ -156,13 +151,15 @@ namespace pixel_editor
         {
             inspector.Update(sender, e);
 
+            // updates things relevant to to engine more or less.
             if (ShouldUpdate)
             {
                 Host?.Render(image);
                 UpdateMetrics();
-                if(Events.ExecuteAll() is null)
-                    throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
             }
+
+            if(Events.ExecuteAll() is null)
+                throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
         }
         private void GetEvents()
         {
@@ -173,10 +170,12 @@ namespace pixel_editor
         }
         private static void SubscribeInputs()
         {
-            var action = Command.reload_stage.action;
-            var args = Command.reload_stage.args;
-            Action<object[]> act = (e) => { Console.Print("Printing Line"); };
-            InputAction resetStage = new(false, act, args, Key.D1);
+            Action<object[]> act = (e) => 
+            {
+                Console.Print(Runtime.Instance.IsRunning); 
+            };
+
+            InputAction resetStage = new(false, act, null, Key.D1);
             RegisterAction(resetStage, InputEventType.DOWN);
         }
         private void IncrementRenderState()
@@ -216,10 +215,8 @@ namespace pixel_editor
         
         public void PrintToConsole(InspectorEvent e)
         {
-           consoleOutput.Text +=
-                $"\n - {e.message}" +
-                $" \n -_- - - - - - -_ - - _- - - - - - - -_- " +
-                $"{DateTime.Now.ToLongDateString()}";
+           consoleOutput.AppendText(e.message + '\n');
+           consoleOutput.ScrollToEnd(); 
         }
         private void OnCommandSent(object sender, RoutedEventArgs e)
         {
