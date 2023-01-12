@@ -159,7 +159,11 @@ namespace pixel_editor
 
                 argsIndices(input, out argStartIndex, out argEndIndex);
                 args_str = get_args_string(input, args_str, argStartIndex, argEndIndex);
-                //args_str = remove_parentheses(args_str);
+
+                // causes whitespace to be neccessary to indicate void or null argument,
+                // might cause issues being unimplemented
+                // args_str = remove_parentheses(args_str);
+
                 arguments = split_args_at_commas(args_str);
                 cmd_without_args = clean_up(input, arguments, cmd_without_args);
                 cmd_without_args = remove_parentheses(cmd_without_args);
