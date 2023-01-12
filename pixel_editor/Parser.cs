@@ -144,7 +144,7 @@ namespace pixel_editor
                 if (arguments.Length > 0)
                     foreach (var arg in arguments)
                     {
-                        if (arg.Length == 0) continue;
+                        if (arg.Length == 0 || arg == "") continue;
                         cmd_without_args = input.Replace(arg, "");
                         cmd_without_args = cmd_without_args.Replace(",", "");
                     }
