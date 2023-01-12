@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -11,51 +12,8 @@ namespace pixel_editor
     public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
     public class Command
     {
-        private static Command reload_stage = new()
+        private static Command load_project         = new()
         {
-            phrase = "reload;|/r;|++r;",
-            action = (o) =>
-            {
-                Runtime.Instance.ResetCurrentStage();
-            },
-            args = null,
-            argsTypes = null,
-        };
-        private static Command spawn_generic = new()
-        {
-            phrase = "++n;|newNode;",
-            action = (o) => Runtime.Instance.GetStage().create_generic_node(),
-            args = null,
-            argsTypes = null,
-
-        };
-        private static Command get_node = new()
-        {
-            phrase = "getNode;",
-            action = (e) => 
-            {
-                string name = (string)e[0];
-                Node node = Runtime.Instance.GetStage().FindNode(name);
-                Editor.Current.Inspector.SelectNode(node);
-                if (node is not null)
-                {
-                    Console.Print(
-                        $"Node Found! " +
-                        $"\n Name : { node.Name} " +
-                        $"\n Position : x : {node.position.x} y : {node.position.y} " +
-                        $"\n UUID : {node.UUID} " +
-                        $"\n Tag: {node.tag} " +
-                        $"\n Component Count : {node.ComponentsList.Count}");
-                    return; 
-                }
-                Console.Print($"getNode({name}) \n Node with name {name} not found."); 
-            },
-            args = null,
-            argsTypes = new Type[] { typeof(string) },
-        };
-        private static Command load_project = new()
-        {
-
             phrase = "loadProject;",
             action = async (e) =>
             {
@@ -92,28 +50,81 @@ namespace pixel_editor
                 }
             },
             args = new object[] { },
-            argsTypes = new Type[] { typeof(string) },
+            description = "Loads a project @../Pixel/Projects of specified name, and if found, prompts the user to load the project as the current project."
+        };
+        private static Command reload_stage         = new()
+        {
+            phrase = "reload;|/r;|++r;",
+            action = (o) =>
+            {
+                Runtime.Instance.ResetCurrentStage();
+            },
+            args = null,
+            description = "Reloads the currently loaded stage",
+        };
+        private static Command get_node             = new()
+        {
+            phrase = "getNode;",
+            action = (e) =>
+            {
+                string name = (string)e[0];
+                Node node = Runtime.Instance.GetStage().FindNode(name);
+                Editor.Current.Inspector.SelectNode(node);
+                if (node is not null)
+                {
+                    Console.Print(
+                        $"Node Found! " +
+                        $"\n Name : {node.Name} " +
+                        $"\n Position : x : {node.position.x} y : {node.position.y} " +
+                        $"\n UUID : {node.UUID} " +
+                        $"\n Tag: {node.tag} " +
+                        $"\n Component Count : {node.ComponentsList.Count}");
+                    return;
+                }
+                Console.Print($"getNode({name}) \n Node with name {name} not found.");
+            },
+            args = null,
+            description = "Retrieves the node of name specified",
 
         };
-        private static Command set_node_field = new()
+        private static Command set_node             = new()
         {
             phrase = "setNode;",
             args = new object[] {  },
-
-            argsTypes = new Type[] 
-            { 
-                typeof(string),
-                typeof(string),
-                typeof(object)
-            },
-
             action = (e) => 
             {
-                var fName = (string)e[0];
-                var value = e[1];
-            
+                string fName = (string)e[0];
+                object value = e[1];
+                Type type = typeof(Node);
+                FieldInfo? field = type.GetRuntimeField(fName);
+                object? curValue = field.GetValue(field);
+                field.SetValue(field, value);
             },
+            description = "neccesary arguments : (string Name, string FieldName, object value) " +
+            "\n gets a node and attempts to write the provided value to specified field.",
+        };  
+        private static Command spawn_generic        = new()
+        {
+            phrase = "++n;|newNode;",
+            action = (o) => Runtime.Instance.GetStage().create_generic_node(),
+            args = null,
+            description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
+
         };
+        private static Command get_all_commands     = new()
+        {
+            phrase = "help;|help|Help|/h",
+            action = (o) =>
+            {
+                string output = "";
+                foreach (var cmd in Active)
+                    output += cmd.phrase + "\n" + cmd.description + "\n\n";
+                Console.Print(output);
+            },
+            args = null,
+            description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
+        };
+
 
         private static async Task<PromptResult> YesNoPromptAsync(string question, float? waitDuration = 60f)
         {
@@ -142,7 +153,7 @@ namespace pixel_editor
         {
             foreach (var command in Active)
                 if (command.Equals(line))
-                    CommandParser.TryParseLine(line, command);
+                    CommandParser.TryCallLine(line, command);
         }
 
         public void Invoke()
@@ -151,9 +162,8 @@ namespace pixel_editor
         }
         public bool Equals(string input)
         {
-            
             string withoutArgs = CommandParser.ParseArguments(input, out _);  
-            withoutArgs = CommandParser.ParseIterator(withoutArgs, out _);
+            withoutArgs = CommandParser.ParseIterativeArgs(withoutArgs, out _);
 
             string[] split = phrase.Split('|');
 
@@ -165,16 +175,17 @@ namespace pixel_editor
 
         public static readonly Command[] Active = new Command[]
         {
+            get_all_commands,
             load_project,
-            get_node, 
-            reload_stage,
-            spawn_generic,
+            reload_stage,   
+            get_node,        
+            set_node,       
+            spawn_generic,  
         };
         public string phrase = "";
+        public string description = "";
         public Action<object[]?>? action;
-
         public object[]? args;
-        public Type[]? argsTypes; 
 
     }
 

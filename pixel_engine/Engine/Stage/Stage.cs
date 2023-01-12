@@ -40,8 +40,9 @@ namespace pixel_renderer
         public void Awake()
         {
             OnNodeQueryMade += RefreshStageDictionary;
-            foreach (Node node in Nodes)
+            for (int i = 0; i < Nodes.Count; i++)
             {
+                Node node = Nodes[i];
                 node.ParentStage = this;
                 node.Awake();
             }
@@ -51,9 +52,12 @@ namespace pixel_renderer
             lock (Nodes)
             {
                 FixedUpdateBusy = true;
-                
-                foreach (Node node in Nodes)
-                     node.FixedUpdate(delta);
+
+                for (int i = 0; i < Nodes.Count; i++)
+                {
+                    Node node = Nodes[i];
+                    node.FixedUpdate(delta);
+                }
 
                 FixedUpdateBusy = false;
             }
