@@ -124,15 +124,16 @@ namespace pixel_renderer
             else add_node(args); 
 
         }
+       
         public void create_generic_node()
         {
             // random variables used here;
             object[] args = r_node_args();
             
             var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
-            var sprite = new Sprite((Vec2)args[2], (Color)args[3], (bool)args[4]);
+            var sprite = new Sprite((Vec2)args[2], (Color)args[3], false);
             node.AddComponent(sprite);
-            node.AddComponent(new Rigidbody());
+            node.AddComponent(new Rigidbody() { IsTrigger = false });
             node.AddComponent(new Wind((Direction)args[5]));
             AddNode(node);
         }
