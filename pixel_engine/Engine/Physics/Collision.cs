@@ -6,20 +6,31 @@ using System.Threading.Tasks;
 
 namespace pixel_renderer
 {
+    public enum TriggerInteraction { Colliders, Triggers, None, All }; 
     public static class Collision
     {
         private static readonly ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
         private static readonly ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
-        public static bool AllowEntries { get; private set; } = true; 
+        public static bool AllowEntries { get; private set; } = true;
+
         public static void SetActive(bool value) => AllowEntries = value;
         private readonly static SpatialHash hash = new(Constants.ScreenH, Constants.ScreenW, Constants.CollisionCellSize);
         public static void ViewportCollision(Node node)
         {
              var hasSprite = node.TryGetComponent( out Sprite sprite);
              var hasRb = node.TryGetComponent(out Rigidbody rb);
+
+            var hasComponents = (!hasSprite
+                || !hasRb
+                || !sprite.isCollider);
             
-            if (!hasSprite || !hasRb || sprite.isCollider) return;
+            var isCollisionEnabled = !rb.IsTrigger || 
+                rb.TriggerInteraction is not TriggerInteraction.None 
+                or TriggerInteraction.Triggers;
+
+            if (!hasComponents || !isCollisionEnabled) 
+                return; 
 
             if (node.position.y > Constants.ScreenW - 4 - sprite.size.y)
             {

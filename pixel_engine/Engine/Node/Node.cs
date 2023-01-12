@@ -28,24 +28,15 @@ namespace pixel_renderer
         }
         #endregion
         #region Other Constructors
-        public Node(string name)
+        public Node() =>  _uuid = pixel_renderer.UUID.NewUUID(); 
+        public Node(string name) : this() => Name = name;
+        public Node(string name, Vec2 pos, Vec2 scale) : this(name)
         {
-            Name = name;
-            _uuid = pixel_renderer.UUID.NewUUID();
-
-        }
-        public Node() { _uuid = pixel_renderer.UUID.NewUUID(); }
-        public Node(string name, Vec2 pos, Vec2 scale)
-        {
-            _uuid = pixel_renderer.UUID.NewUUID();
-            Name = name;
             position = pos;
             this.scale = scale;
         }
-        public Node(string name, Vec2 pos, Vec2 scale, string UUID)
+        public Node(string name, Vec2 pos, Vec2 scale, string UUID) : this(name, pos, scale)
         {
-            _uuid = UUID;
-            Name = name;
             position = pos;
             this.scale = scale;
         }
@@ -54,14 +45,15 @@ namespace pixel_renderer
         [JsonIgnore]
         public Stage ParentStage { get; set; }
         
-        private string _uuid = "";
+        public bool Enabled { get { return _enabled; } }
         private bool _enabled = true; 
         
         public string Name { get; set; }
         public string tag = "untagged - nyi";
-        public string UUID { get { return _uuid; } set { } }
 
-        public bool Enabled { get { return _enabled; } }
+        public string UUID { get { return _uuid; } set { } }
+        private string _uuid = "";
+
         
         public Vec2 position = new();
         public Vec2 localPosition => parentNode == null ? position : parentNode.position - position;
@@ -83,6 +75,7 @@ namespace pixel_renderer
             }
         }
         public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
+        
         public void Awake()
         {
             for (int i = 0; i < ComponentsList.Count; i++)
@@ -98,7 +91,9 @@ namespace pixel_renderer
             for (int i = 0; i < ComponentsList.Count; i++)
                   ComponentsList[i].Update();
         }
+        
         public void SetActive(bool value) => _enabled = value; 
+        
         public void OnTrigger(Rigidbody otherBody)
         {
             lock (Components)
@@ -111,6 +106,7 @@ namespace pixel_renderer
                 for (int i = 0; i < ComponentsList.Count; i++)
                   ComponentsList[i].OnCollision(otherBody);
         }
+        
         public void AddComponent(Component component)
         {
             lock (Components)
@@ -144,6 +140,7 @@ namespace pixel_renderer
                 return component;
             }
         }
+        
         public void RemoveComponent(Component component)
         {
             lock (Components)
@@ -164,15 +161,6 @@ namespace pixel_renderer
                 }
             }
         }
-        public T GetComponent<T>(int? index = 0) where T : Component
-        {
-            if (!Components.ContainsKey(typeof(T)))
-            {
-                throw new MissingComponentException();
-            }
-            T? component = Components[typeof(T)][index ?? 0] as T;
-            return component;
-        }
         public bool TryGetComponent<T>(out T? component, int? index = 0) where T : Component
         {
             lock (Components)
@@ -186,6 +174,16 @@ namespace pixel_renderer
                 return true;
             }
         }
+
+        public T GetComponent<T>(int? index = 0) where T : Component
+        {
+            if (!Components.ContainsKey(typeof(T)))
+            {
+                throw new MissingComponentException();
+            }
+            T? component = Components[typeof(T)][index ?? 0] as T;
+            return component;
+        }
         public bool HasComponent<T>() where T : Component
         {
             lock (Components)
@@ -197,6 +195,7 @@ namespace pixel_renderer
                 return true;
             }
         }
+
         public List<T> GetComponents<T>() where T : Component
         {
             lock (Components)

@@ -97,8 +97,8 @@ namespace pixel_renderer
             {
                 IsTrigger = false,
             };
-            Sprite sprite = new(Vec2.one * 4, JRandom.Color(), true);
-            Player player_obj = new()
+            Sprite sprite = new(Vec2.one * 4, JRandom.Color(), false);
+            Scripts.Player player_obj = new()
             {
                 takingInput = true
             };

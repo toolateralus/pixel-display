@@ -1,6 +1,7 @@
 ﻿namespace pixel_renderer
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Text.Json.Serialization;
     using System.Windows;
     public struct Vec3
@@ -49,6 +50,7 @@
     {
         public float x;
         public float y;
+       
         public float Length() => (float)Math.Sqrt(x * x + y * y);
         public Vec2 Rotated(float angle)
         {
