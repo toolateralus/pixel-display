@@ -215,7 +215,7 @@ namespace pixel_editor
         
         public void PrintToConsole(InspectorEvent e)
         {
-           consoleOutput.AppendText(e.message + '\n');
+           consoleOutput.Text += e.message + '\n';
            consoleOutput.ScrollToEnd(); 
         }
         private void OnCommandSent(object sender, RoutedEventArgs e)

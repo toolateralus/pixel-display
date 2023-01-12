@@ -91,5 +91,14 @@ namespace pixel_renderer
             FindOrCreateProjectsDirectory();
             IO.WriteJson(proj, meta);
         }
+
+        public static Project ReadProject(string name)
+        {
+            FindOrCreateProjectsDirectory();
+            Metadata meta = new(name, Path + "\\" + name + extension, extension);
+            var project = IO.ReadJson<Project>(meta);
+            if (project is null) throw new FileNotFoundException(); 
+            return project;  
+        }
     }
 }

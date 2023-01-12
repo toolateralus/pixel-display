@@ -7,6 +7,7 @@ namespace pixel_editor
 {
     public class CommandArgsParser 
     {
+        // for the final cleanup of commands before execution
         static List<char> disallowed_chars = new()
         {
             ';',
@@ -16,26 +17,30 @@ namespace pixel_editor
             '/',
             '(',
             ')',
-            '"'
+            '"',
         };
-
         public static object? Parse<T>(string? arg0 = null) where T: class
         {
+            arg0 = RemoveUnwantedChars(arg0);
 
-            foreach (var _char in arg0)
-                if (disallowed_chars.Contains(_char))
-                arg0 = arg0.Replace($"{_char}", "");
-
-
-            if(typeof(T) == typeof(string)) 
+            if (typeof(T) == typeof(string))
                 return String(arg0);
+
             if (typeof(T) == typeof(int))
                 return Int(arg0);
+
             if (typeof(T) == typeof(Vec2))
                 return Vec2(arg0);
-            return null; 
-        }
 
+            return null;
+        }
+        private static string RemoveUnwantedChars(string? arg0)
+        {
+            foreach (var _char in arg0)
+                if (disallowed_chars.Contains(_char))
+                    arg0 = arg0.Replace($"{_char}", "");
+            return arg0;
+        }
         private static Vec2 Vec2(string? arg0)
         {
             string[] values = arg0.Split(',');

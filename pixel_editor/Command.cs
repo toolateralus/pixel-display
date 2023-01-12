@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using pixel_renderer;
+using pixel_renderer.FileIO;
 
 namespace pixel_editor
 {
@@ -33,13 +36,92 @@ namespace pixel_editor
                 if (node is not null)
                 {
                     Console.Print(
-                        $"\n Node Found! \n Name : { node.Name} \n Position : x : {node.position.x} y : {node.position.y} \n UUID : {node.UUID} \n Tag: {node.tag} \n Component Count : {node.ComponentsList.Count}");
+                        $"Node Found! " +
+                        $"\n Name : { node.Name} " +
+                        $"\n Position : x : {node.position.x} y : {node.position.y} " +
+                        $"\n UUID : {node.UUID} " +
+                        $"\n Tag: {node.tag} " +
+                        $"\n Component Count : {node.ComponentsList.Count}");
+                    return; 
                 }
+                Console.Print($"getNode({name}) \n Node with name {name} not found."); 
             },
             args = null,
         };
+        private static Command draw
+        {
+
+        }
+
+        enum PromptResult { Yes, No, Ok, Cancel, Timeout};
+        private static async Task<PromptResult> YesNoPromptAsync(string question, float? waitDuration = 60f)
+        {
+            Console.Print(question);
+            for (int i = 0; i < waitDuration * 100; i++)
+            {
+                if (i % 100 == 0)
+                {
+                    int seconds = 10 * (5000 - i) / 1000;
+                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
+                }
+
+                if (Keyboard.IsKeyDown(Key.Y)) 
+                    return PromptResult.Yes;
+                if (Keyboard.IsKeyDown(Key.N))
+                    return PromptResult.No; 
+                if (Keyboard.IsKeyDown(Key.End))
+                    return PromptResult.Cancel;
+
+                await Task.Delay(10);
+            };
+            return PromptResult.Timeout; 
+        }
+        private static Command load_project = new()
+        {
+
+            phrase = "loadProject;",
+            action = async (e) =>
+            {
+                string name = (string)e[0];
+                var project = ProjectIO.ReadProject(name);
+
+                if (project is not null)
+                {
+                    string question = $"Project Found! " +
+                                            $"\n Name : {project.Name} " +
+                                            $"\n UUID : {project.stageIndex} " +
+                                            $"Do you want to load this project?";
+
+                    Task<PromptResult> result = YesNoPromptAsync(question, 60f);
+                    await result;
+                    switch (result.Result)
+                    {
+                        case PromptResult.Yes:
+                            Console.Print($"Project {name} set.");
+                            break;
+                        case PromptResult.No:
+                            Console.Print("Project not set.");
+                            break;
+                        case PromptResult.Cancel:
+                            Console.Print("Load Project cancelled.");
+                            break; 
+                        case PromptResult.Timeout:
+                            Console.Print("Load Project timed out.");
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            },
+            args = new object[] { },
+
+        };
+
+
         public static readonly Command[] Active = new Command[]
         {
+            load_project,
             get_node, 
             reload_stage,
             spawn_generic,
@@ -120,13 +202,18 @@ namespace pixel_editor
             // command with params; 
             if (pArgs.Length > 0)
             {
+               
                 string args = (string)CommandArgsParser.Parse<string>(pArgs);
-                command.args = new object[] { args };
+
+                command.args = new object[] 
+                {
+                    args
+                };
                 command.Execute(); 
             }
             for (int i = 0; i < count; ++i)  command.Execute();
         }
     }
- 
+
 }
 
