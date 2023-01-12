@@ -2,6 +2,7 @@
 using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Documents;
 
@@ -122,8 +123,8 @@ namespace pixel_renderer
 
                 var type = component.GetType();
 
-                if (type.BaseType != typeof(Component)) 
-                    throw new InvalidOperationException("Cannot add generic type Component to node."); 
+                //if (type.BaseType != typeof(Component)) 
+                //    throw new InvalidOperationException("Cannot add generic type Component to node."); 
 
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
@@ -132,7 +133,7 @@ namespace pixel_renderer
                 component.parent = this;
             }
         }
-        public void AddComponent<T>() where T : Component, new()
+        public T AddComponent<T>() where T : Component, new()
         {
             lock (Components)
             {
@@ -140,10 +141,11 @@ namespace pixel_renderer
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
 
-                Component component = new T();
+                T component = new T();
 
                 Components[type].Add(component);
                 component.parent = this;
+                return component;
             }
         }
         public void RemoveComponent(Component component)

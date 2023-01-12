@@ -36,7 +36,7 @@ namespace pixel_renderer
             foreach (SpriteCamera cam in Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>())
             {
                 if(cam.Enabled == false) continue;
-                cam.Draw(sprites_cached, bmp_cached);
+                cam.Draw(bmp_cached);
             }
             return bmp_cached;
         }

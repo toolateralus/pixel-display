@@ -7,23 +7,17 @@ using System.Windows.Controls;
 
 namespace pixel_renderer
 {
-    public class SpriteCamera : Component
+    public class SpriteCamera : UIComponent
     {
-        [JsonProperty] Vec2 bottomRightCorner = new(1,1);
         [JsonProperty] Vec2 viewportPosition = new(0,0);
         [JsonProperty] Vec2 viewportSize = new(1,1);
         [JsonProperty] public float angle = 0f;
         float[,] zBuffer = new float[0,0];
-        public Vec2 Size
-        {
-            get => bottomRightCorner * 2;
-            set => bottomRightCorner = (value * 0.5f).GetDivideSafe();
-        }
-        public Vec2 Center { get => parent.position; set => parent.position = value; }
 
-        public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + bottomRightCorner) / Size;
-        public void Draw(IEnumerable<Sprite> sprites, Bitmap bmp)
+        public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + bottomRightCornerOffset) / Size.GetDivideSafe();
+        public void Draw(Bitmap bmp)
         {
+            IEnumerable<Sprite> sprites = Runtime.Instance.GetStage().GetAllComponents<Sprite>();
             if (bmp.Width != zBuffer.GetLength(0) ||
                 bmp.Height != zBuffer.GetLength(1))
                 zBuffer = new float[bmp.Width, bmp.Height];
