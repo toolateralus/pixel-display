@@ -13,7 +13,9 @@ namespace pixel_renderer
         [Field]  public Sprite? sprite; 
 
         const double dragCoefficient = 1;
-        
+
+        public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
+
         private protected void ApplyVelocity()
         {
             parent.position.y += velocity.y;

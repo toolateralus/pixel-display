@@ -28,24 +28,15 @@ namespace pixel_renderer
         }
         #endregion
         #region Other Constructors
-        public Node(string name)
+        public Node() =>  _uuid = pixel_renderer.UUID.NewUUID(); 
+        public Node(string name) : this() => Name = name;
+        public Node(string name, Vec2 pos, Vec2 scale) : this(name)
         {
-            Name = name;
-            _uuid = pixel_renderer.UUID.NewUUID();
-
-        }
-        public Node() { _uuid = pixel_renderer.UUID.NewUUID(); }
-        public Node(string name, Vec2 pos, Vec2 scale)
-        {
-            _uuid = pixel_renderer.UUID.NewUUID();
-            Name = name;
             position = pos;
             this.scale = scale;
         }
-        public Node(string name, Vec2 pos, Vec2 scale, string UUID)
+        public Node(string name, Vec2 pos, Vec2 scale, string UUID) : this(name, pos, scale)
         {
-            _uuid = UUID;
-            Name = name;
             position = pos;
             this.scale = scale;
         }
@@ -182,7 +173,7 @@ namespace pixel_renderer
                 component = Components[typeof(T)][index ?? 0] as T;
                 return true;
             }
-        }\
+        }
 
         public T GetComponent<T>(int? index = 0) where T : Component
         {

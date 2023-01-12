@@ -8,26 +8,22 @@ namespace pixel_editor
     {
         static Inspector? inspector = Editor.Current.Inspector; 
 
-        public static void Print(object? o)
+        public static void Print(object? o, bool includeDateTime = false)
         {
             var msg = o.ToString();
-            var e = new InspectorEvent(msg, false);
+            var e = new InspectorEvent(msg, includeDateTime);
             Editor.QueueEvent(e); 
         }
         public static void Error(object? o = null, int? textColorAlterationDuration = null)
         {
             string? msg = o.ToString();
             InspectorEvent e = new(msg, true);
-
-            if (inspector is not null)
+           
                 if (textColorAlterationDuration is not null)
-                {
-                    Action<object[]?> c = RedTextForMsAsync(inspector, (int)textColorAlterationDuration);
-                    e.action = c;
-                }
+                    e.action = RedTextForMsAsync( (int)textColorAlterationDuration);
             Editor.QueueEvent(e);
         }
-        public static Action<object[]?> RedTextForMsAsync(Inspector? inspector, int delay)
+        public static Action<object[]?> RedTextForMsAsync(int delay)
         {
             Action<object?> c = async (o) =>
             {

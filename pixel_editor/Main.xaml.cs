@@ -14,6 +14,7 @@ using pixel_renderer.FileIO;
 using static pixel_renderer.Input;
 using System.Linq;
 using System.Collections.Generic;
+using System.Windows.Automation;
 
 namespace pixel_editor
 {
@@ -170,13 +171,7 @@ namespace pixel_editor
         }
         private static void SubscribeInputs()
         {
-            Action<object[]> act = (e) => 
-            {
-                Console.Print(Runtime.Instance.IsRunning); 
-            };
-
-            InputAction resetStage = new(false, act, null, Key.D1);
-            RegisterAction(resetStage, InputEventType.DOWN);
+            
         }
         private void IncrementRenderState()
         {
@@ -226,14 +221,11 @@ namespace pixel_editor
             if (split.Length < cap)
                 cap = split.Length;
 
-            Console.Print(cap);
             for (int i = 0; i < cap ; ++i)
             {
                 string line = editorMessages.GetLineText(i);
-
                 if (line != "") 
                     Command.Call(line);
-                   
             }
         }
 
@@ -328,6 +320,8 @@ namespace pixel_editor
 
         internal static void QueueEvent(InspectorEvent e)
         {
+            if (e.ClearConsole)
+                Current.consoleOutput.Clear();
            Current.Events.Pending.Enqueue(e);
         }
         #endregion

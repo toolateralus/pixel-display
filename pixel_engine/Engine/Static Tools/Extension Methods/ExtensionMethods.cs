@@ -23,6 +23,10 @@ namespace pixel_renderer
         public static double Sum(this Vec2 v) => v.x + v.y;
         public static double Sum(this Vec3 v) => v.x + v.y + v.z;
         public static float Distance(this Vec2 v, Vec2 end) => (v - end).Length();
+        public static string AsString(this Vec2 v)
+        {
+            return $" X : {v.x} Y : {v.y}";
+        }
         /// <summary>
         ///  TODO: fix possible  'divide by zero'
         ///   Normalize a vector
@@ -100,6 +104,9 @@ namespace pixel_renderer
         }
 
         #endregion
+
+
+
         public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
             from FieldInfo field in component.GetType().GetRuntimeFields()
             from CustomAttributeData data in field.CustomAttributes
