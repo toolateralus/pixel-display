@@ -12,7 +12,64 @@ namespace pixel_editor
     public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
     public class Command
     {
-        private static Command load_project         = new()
+
+        public string phrase = "";
+        public string description = "";
+        public Action<object[]?>? action;
+        public object[]? args;
+
+        internal static void Call(string line) => CommandParser.TryCallLine(line, Active);
+        private static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
+        {
+            Console.Print(question);
+            for (int i = 0; i < waitDuration * 100; i++)
+            {
+                if (i % 100 == 0)
+                {
+                    int seconds = 10 * (5000 - i) / 1000;
+                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
+                }
+
+                if (Keyboard.IsKeyDown(Key.Y)) 
+                    return PromptResult.Yes;
+                if (Keyboard.IsKeyDown(Key.N))
+                    return PromptResult.No; 
+                if (Keyboard.IsKeyDown(Key.End))
+                    return PromptResult.Cancel;
+
+                await Task.Delay(10);
+            };
+            return PromptResult.Timeout; 
+        }
+        public void Invoke()
+        {
+            action?.Invoke(args);
+        }
+        public bool Equals(string input)
+        {
+            string withoutArgs = CommandParser.ParseArguments(input, out _);  
+            withoutArgs = CommandParser.ParseIterativeArgs(withoutArgs, out _);
+
+            string[] split = phrase.Split('|');
+
+            foreach (var line in split)
+                if (line.Equals(withoutArgs))
+                    return true;
+            return false;
+        }
+
+        public static readonly Command[] Active = new Command[]
+        {
+            cmd_help,
+            cmd_load_project,
+            cmd_reload_stage,   
+            cmd_get_node,        
+            cmd_set_node_field,       
+            cmd_spawn_generic,  
+            cmd_log,
+        };
+
+        private static Command cmd_load_project = new()
         {
             phrase = "loadProject;",
             action = async (e) =>
@@ -27,7 +84,7 @@ namespace pixel_editor
                                             $"\n UUID : {project.stageIndex} " +
                                             $"Do you want to load this project?";
 
-                    Task<PromptResult> result = YesNoPromptAsync(question, 60f);
+                    Task<PromptResult> result = PromptAsync(question, 60f);
                     await result;
                     switch (result.Result)
                     {
@@ -39,7 +96,7 @@ namespace pixel_editor
                             break;
                         case PromptResult.Cancel:
                             Console.Print("Load Project cancelled.");
-                            break; 
+                            break;
                         case PromptResult.Timeout:
                             Console.Print("Load Project timed out.");
                             break;
@@ -52,7 +109,7 @@ namespace pixel_editor
             args = new object[] { },
             description = "Loads a project @../Pixel/Projects of specified name, and if found, prompts the user to load the project as the current project."
         };
-        private static Command reload_stage         = new()
+        private static Command cmd_reload_stage = new()
         {
             phrase = "reload;|/r;|++r;",
             action = (o) =>
@@ -62,7 +119,7 @@ namespace pixel_editor
             args = null,
             description = "Reloads the currently loaded stage",
         };
-        private static Command get_node             = new()
+        private static Command cmd_get_node = new()
         {
             phrase = "getNode;",
             action = (e) =>
@@ -87,23 +144,27 @@ namespace pixel_editor
             description = "Retrieves the node of name specified",
 
         };
-        private static Command set_node             = new()
+        private static Command cmd_set_node_field = new()
         {
-            phrase = "setNode;",
-            args = new object[] {  },
-            action = (e) => 
+            phrase = "getNode.Set;",
+            args = Array.Empty<object>(),
+            action = (e) =>
             {
-                string fName = (string)e[0];
-                object value = e[1];
-                Type type = typeof(Node);
+                if (e.Length < 3)
+                    return;
+                string nName = (string)e[0];
+                string fName = (string)e[1];
+                object value = e[2];
+
+                Node? node = Runtime.Instance.GetStage().FindNode(nName);
+                Type type = node.GetType();
                 FieldInfo? field = type.GetRuntimeField(fName);
-                object? curValue = field.GetValue(field);
-                field.SetValue(field, value);
+                field.SetValue(node, value);
             },
             description = "neccesary arguments : (string Name, string FieldName, object value) " +
             "\n gets a node and attempts to write the provided value to specified field.",
-        };  
-        private static Command spawn_generic        = new()
+        };
+        private static Command cmd_spawn_generic = new()
         {
             phrase = "++n;|newNode;",
             action = (o) => Runtime.Instance.GetStage().create_generic_node(),
@@ -111,7 +172,7 @@ namespace pixel_editor
             description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
 
         };
-        private static Command get_all_commands     = new()
+        private static Command cmd_help = new()
         {
             phrase = "help;|help|Help|/h",
             action = (o) =>
@@ -124,68 +185,13 @@ namespace pixel_editor
             args = null,
             description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
         };
-
-
-        private static async Task<PromptResult> YesNoPromptAsync(string question, float? waitDuration = 60f)
+        private static Command cmd_log = new()
         {
-            Console.Print(question);
-            for (int i = 0; i < waitDuration * 100; i++)
-            {
-                if (i % 100 == 0)
-                {
-                    int seconds = 10 * (5000 - i) / 1000;
-                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
-                }
-
-                if (Keyboard.IsKeyDown(Key.Y)) 
-                    return PromptResult.Yes;
-                if (Keyboard.IsKeyDown(Key.N))
-                    return PromptResult.No; 
-                if (Keyboard.IsKeyDown(Key.End))
-                    return PromptResult.Cancel;
-
-                await Task.Delay(10);
-            };
-            return PromptResult.Timeout; 
-        }
-
-        internal static void Call(string line)
-        {
-            foreach (var command in Active)
-                if (command.Equals(line))
-                    CommandParser.TryCallLine(line, command);
-        }
-
-        public void Invoke()
-        {
-            action?.Invoke(args);
-        }
-        public bool Equals(string input)
-        {
-            string withoutArgs = CommandParser.ParseArguments(input, out _);  
-            withoutArgs = CommandParser.ParseIterativeArgs(withoutArgs, out _);
-
-            string[] split = phrase.Split('|');
-
-            foreach (var line in split)
-                if (line.Equals(withoutArgs))
-                    return true;
-            return false;
-        }
-
-        public static readonly Command[] Active = new Command[]
-        {
-            get_all_commands,
-            load_project,
-            reload_stage,   
-            get_node,        
-            set_node,       
-            spawn_generic,  
+            phrase = "log;",
+            action = (o) => Console.Print(o[0]),
+            args = null,
+            description = "Logs a message to the console, Some characters will cause this to fail."
         };
-        public string phrase = "";
-        public string description = "";
-        public Action<object[]?>? action;
-        public object[]? args;
 
     }
 
