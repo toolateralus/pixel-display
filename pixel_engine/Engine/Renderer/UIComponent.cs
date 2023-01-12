@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Drawing;
 
 namespace pixel_renderer
 {
@@ -12,5 +13,6 @@ namespace pixel_renderer
             get => bottomRightCornerOffset * 2;
             set => bottomRightCornerOffset = value * 0.5f;
         }
+        abstract public void Draw(Bitmap bmp);
     }
 }

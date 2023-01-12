@@ -3,6 +3,7 @@ using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Security.Policy;
 using System.Windows.Controls;
 
 namespace pixel_renderer
@@ -12,16 +13,20 @@ namespace pixel_renderer
         [JsonProperty] Vec2 viewportPosition = new(0,0);
         [JsonProperty] Vec2 viewportSize = new(1,1);
         [JsonProperty] public float angle = 0f;
+        [JsonProperty] public DrawingType bgDrawingType = DrawingType.Clamped;
         float[,] zBuffer = new float[0,0];
 
         public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + bottomRightCornerOffset) / Size.GetDivideSafe();
-        public void Draw(Bitmap bmp)
+        public Vec2 ViewportToGlobal(Vec2 vpPos) => (vpPos * Size - bottomRightCornerOffset).Rotated(-angle) + Center;
+        public override void Draw(Bitmap bmp)
         {
             IEnumerable<Sprite> sprites = Runtime.Instance.GetStage().GetAllComponents<Sprite>();
             if (bmp.Width != zBuffer.GetLength(0) ||
                 bmp.Height != zBuffer.GetLength(1))
                 zBuffer = new float[bmp.Width, bmp.Height];
             Array.Clear(zBuffer);
+
+            DrawBackground(bmp);
 
             foreach (Sprite sprite in sprites)
             {
@@ -47,5 +52,37 @@ namespace pixel_renderer
                 }
             }
         }
+
+        private void DrawBackground(Bitmap bmp)
+        {
+            if (bgDrawingType == DrawingType.None) return;
+            Bitmap bg = Runtime.Instance.GetStage().backgroundImage;
+            for (int x = 0; x < bmp.Width; x++)
+            {
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    Vec2 bgSize = new Vec2(bg.Width, bg.Height);
+
+                    Vec2 viewportPos = new Vec2(x,y) / new Vec2(bmp.Width, bmp.Height).GetDivideSafe();
+                    Vec2 globalPos = ViewportToGlobal(viewportPos);
+                    Vec2 bgViewport = (globalPos / bgSize.GetDivideSafe());
+                    if (bgDrawingType == DrawingType.Scrolling)
+                    {
+                        bgViewport += new Vec2(1, 1);
+                        Vec2 wrappedBgViewport = new(bgViewport.x - (int)bgViewport.x, bgViewport.y - (int)bgViewport.y);
+                        Vec2 bgPos = wrappedBgViewport * bgSize;
+                        bmp.SetPixel(x, y, bg.GetPixel((int)bgPos.x, (int)bgPos.y));
+                    }
+                    if (bgDrawingType == DrawingType.Clamped)
+                    {
+                        Vec2.Clamp(bgViewport, new(0,0), new(1,1));
+                        Vec2 bgPos = bgViewport * bgSize;
+                        bmp.SetPixel(x, y, bg.GetPixel((int)bgPos.x, (int)bgPos.y));
+                    }
+                }
+            }
+        }
+
+        public enum DrawingType { Scrolling, Clamped, None}
     }
 }
