@@ -1,6 +1,8 @@
 ﻿namespace pixel_renderer
 {
+    using pixel_renderer.Engine.Renderer;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Windows.Controls;
     using Bitmap = System.Drawing.Bitmap;
 
@@ -8,6 +10,7 @@
     {
         private Bitmap? bmp_cached = null; 
         private IEnumerable<Sprite>? sprites_cached = null;
+        public SpriteCamera cam;
 
         private Bitmap? _background;
         public Bitmap Background
@@ -32,22 +35,12 @@
         public override Bitmap Draw()
         {
             sprites_cached = Runtime.Instance.GetStage().GetSprites();
-               
-            foreach (Sprite sprite in sprites_cached)
+            if (cam == null)
             {
-                for (int x = 0; x < sprite.size.x; x++)
-                    for (int y = 0; y < sprite.size.y; y++)
-                    {
-                        int offsetX = (int)sprite.parent.position.x + x;
-                        int offsetY = (int)sprite.parent.position.y + y;
-
-                        if (offsetX is < 0 or >= Constants.ScreenW || 
-                            offsetY is < 0 or >= Constants.ScreenH) 
-                            continue;
-
-                        bmp_cached.SetPixel(offsetX, offsetY, sprite.colorData[x, y]);
-                    }
+                Vec2 bmpSize = new Vec2(bmp_cached.Width, bmp_cached.Height);
+                cam = new SpriteCamera(bmpSize, bmpSize / 2);
             }
+            cam.Draw(sprites_cached.ToList(), bmp_cached);
             return bmp_cached;
         }
         public override void Render(Image destination) => CBit.Render(ref bmp_cached, destination);

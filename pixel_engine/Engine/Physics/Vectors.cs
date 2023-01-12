@@ -50,6 +50,17 @@
         public float x;
         public float y;
         public float Length() => (float)Math.Sqrt(x * x + y * y);
+        public Vec2 Rotated(float angle)
+        {
+            float xResult = (MathF.Cos(angle) * x) - (MathF.Sin(angle) * y);
+            float yResult = (MathF.Sin(angle) * x) + (MathF.Cos(angle) * y);
+            return new Vec2(xResult, yResult);
+        }
+        public void Rotate(float angle)
+        {
+            x = (MathF.Cos(angle) * x) - (MathF.Sin(angle) * y);
+            y = (MathF.Sin(angle) * x) + (MathF.Cos(angle) * y);
+        }
         public float SqrMagnitude() => x * x + y * y;
         public static Vec2 one = new Vec2(1, 1);
         public static Vec2 zero = new Vec2(0, 0);
