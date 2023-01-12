@@ -154,7 +154,6 @@ namespace pixel_renderer
                 r_bool,
                 r_dir };
         }
-        
         public IEnumerable<Sprite> GetSprites()
         {
             var sprite = new Sprite();

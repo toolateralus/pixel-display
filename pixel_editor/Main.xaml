@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Editor" 
     Name="window"
+    WindowStartupLocation="CenterScreen"
     Width="1920" Height="1080"
     Background="Gray">
     <Grid Name="MainGrid" SizeChanged="MainGrid_SizeChanged">
