@@ -8,12 +8,12 @@ namespace pixel_renderer
 {
     public class Sprite : Component
     {
-        [JsonIgnore]
-        public Bitmap? image;
-        public Vec2 size = new Vec2();
+        [JsonIgnore] public Bitmap? image;
+        [JsonProperty] public Vec2 size = new Vec2();
+        [JsonProperty] public float camDistance = 1;
         public Color[,] colorData;
 
-        public bool isCollider = false;
+        [JsonProperty] public bool isCollider = false;
         public bool dirty = false;
 
         dynamic? cachedColor = new Color();

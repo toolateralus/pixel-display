@@ -13,6 +13,7 @@ namespace pixel_renderer.Engine.Renderer
         public Vec2 GlobalToViewport(Vec2 global) => ((global - center).Rotated(angle) + halfSize) / Size;
         public void Draw(List<Sprite> sprites, Bitmap bmp)
         {
+            float[,] zBuffer = new float[bmp.Width, bmp.Height];
             foreach (Sprite sprite in sprites)
             {
                 for (int x = 0; x < sprite.size.x; x++)
@@ -26,6 +27,9 @@ namespace pixel_renderer.Engine.Renderer
 
                         int screenPosX = (int)(viewportPos.x * bmp.Width);
                         int screenPosY = (int)(viewportPos.y * bmp.Height);
+
+                        if (sprite.camDistance <= zBuffer[screenPosX, screenPosY]) continue;
+                        zBuffer[screenPosX, screenPosY] = sprite.camDistance;
 
                         bmp.SetPixel(screenPosX, screenPosY, sprite.colorData[x, y]);
                     }

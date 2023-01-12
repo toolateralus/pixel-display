@@ -10,7 +10,7 @@ namespace pixel_renderer
         [Field] [JsonProperty] public bool IsTrigger = false;
 
         [Field] [JsonProperty] public Vec2 velocity = new();
-        [Field] [JsonProperty] public Sprite? sprite; 
+        [Field]  public Sprite? sprite; 
 
         const double dragCoefficient = 1;
         
