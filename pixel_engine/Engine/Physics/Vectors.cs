@@ -83,8 +83,6 @@
             x = a.x / b.x,
             y = a.y / b.y,
         };
-
-
         public static implicit operator Point(Vec2 v) => new()
         {
             X = v.x,
@@ -98,10 +96,17 @@
         /// <param name="max"></param>
         internal static void Clamp(Vec2 value, Vec2 min, Vec2 max)
         {
-            if (value.x < min.x) value.x = min.x;
-            if (value.x > max.x) value.x = max.x;
-            if (value.y < min.y) value.y = min.y;
-            if (value.y > max.y) value.y = max.y;
+            if (value.x < min.x)
+                value.x = min.x;
+
+            if (value.x > max.x) 
+                value.x = max.x;
+
+            if (value.y < min.y) 
+                value.y = min.y;
+
+            if (value.y > max.y)
+                value.y = max.y;
         }
     }
 }

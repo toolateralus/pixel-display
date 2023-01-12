@@ -1,5 +1,6 @@
 ﻿using pixel_renderer;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,49 +50,45 @@ namespace pixel_editor
             return arg0;
         }
 
-        internal static void TryParseLine(string line, Command command)
+        internal static void TryCallLine(string line, Command command)
         {
-            string withoutArgs = ParseArguments(line, out string pArgs);
-            withoutArgs = ParseIterator(line, out string rArgs);
+            string withoutArgs = ParseArguments(line, out string[] args);
+            withoutArgs = ParseIterativeArgs(line, out string rArgs);
             int count = rArgs.ToInt();
 
             // single execution paramaterless command; 
-            if (count == 0 && pArgs.Length == 0)
+            if (count == 0 && args.Length == 0)
             {
                 command.Invoke();
                 return;
             }
             // command with params; 
-            if (pArgs.Length > 0)
+            if (args.Length > 0)
             {
-               
-                string args = (string)Parse<string>(pArgs);
-
-                command.args = new object[] 
+                List<object> init_args = new List<object>{ };
+                for(int i =0; i < args.Length; ++i)
                 {
-                    args
-                };
+                    object? parse_arg = Parse<string>(args[i]);
+                    init_args.Add(parse_arg);
+                }
+                command.args = init_args.ToArray(); 
                 command.Invoke(); 
             }
             for (int i = 0; i < count; ++i)  command.Invoke();
         }
-        public static object? Parse<T>(string? arg0 = null) where T: class
+        public static object? Parse<T>(string arg = null) where T : class 
         {
-            arg0 = RemoveUnwantedChars(arg0);
-
-            if (typeof(T) == typeof(string))
-                return String(arg0);
-
-            if (typeof(T) == typeof(int))
-                return Int(arg0);
-
-            if (typeof(T) == typeof(Vec2))
-                return Vec2(arg0);
-
-            return null;
+                arg = RemoveUnwantedChars(arg);
+                if (typeof(T) == typeof(string))
+                    return String(arg);
+                if (typeof(T) == typeof(int))
+                    return Int(arg);
+                if (typeof(T) == typeof(Vec2))
+                    return Vec2(arg);
+                throw new ArgumentException("Console command used an Argument that is of a type that is not currently supported. Sorry XD");
         }
 
-        internal static string ParseIterator(string input, out string repeaterArgs)
+        internal static string ParseIterativeArgs(string input, out string repeaterArgs)
         {
             string withoutArgs = "";
             repeaterArgs = ""; 
@@ -107,29 +104,67 @@ namespace pixel_editor
             else withoutArgs = input;
             return withoutArgs;
         }
-        internal static string ParseArguments(string input, out string arguments)
+        internal static string ParseArguments(string input, out string[] arguments)
         {
-            arguments = "";
+            arguments = new string[]{};
+            var args_str = ""; 
             string cmd_without_args = "";
 
             bool cmd_has_args = input.Contains('(') && input.Contains(')'); 
 
             if (cmd_has_args)
-            {
-                int argStartIndex = input.IndexOf('(');
-                int argEndIndex = input.IndexOf(';');
-
-
-                for (int i = argStartIndex; i < argEndIndex; ++i)
-                    arguments += input[i];
-
-                var splitParams = arguments.Split(',');
-
-
-                if(arguments.Length > 0)
-                    cmd_without_args = input.Replace(arguments, "");
-            }
+                arguments = parseArgumentsReturnCommand(input, ref args_str, ref cmd_without_args);
             return cmd_without_args;
+
+            static string remove_parentheses(string input)
+            {
+                if (input.Contains('('))
+                     input =  input.Replace("(", "");
+                if (input.Contains(')'))
+                     input = input.Replace(")", "");
+                return input; 
+            }
+            static string[] split_args_at_commas(string args_str)
+            {
+                return args_str.Split(',');
+            }
+            static string get_args_string(string input, string args_str, int argStartIndex, int argEndIndex)
+            {
+                for (int i = argStartIndex; i < argEndIndex; ++i)
+                    args_str += input[i];
+                return args_str;
+            }
+            static void argsIndices(string input, out int argStartIndex, out int argEndIndex)
+            {
+                argStartIndex = input.IndexOf('(');
+                argEndIndex = input.IndexOf(';');
+            }
+            static string clean_up(string input, string[] arguments, string cmd_without_args)
+            {
+                if (arguments.Length > 0)
+                    foreach (var arg in arguments)
+                    {
+                        if (arg.Length == 0) continue;
+                        cmd_without_args = input.Replace(arg, "");
+                        cmd_without_args = cmd_without_args.Replace(",", "");
+                    }
+
+                return cmd_without_args;
+            }
+
+            static string[] parseArgumentsReturnCommand(string input, ref string args_str, ref string cmd_without_args)
+            {
+                string[] arguments;
+                int argStartIndex, argEndIndex;
+
+                argsIndices(input, out argStartIndex, out argEndIndex);
+                args_str = get_args_string(input, args_str, argStartIndex, argEndIndex);
+                args_str = remove_parentheses(args_str);
+                arguments = split_args_at_commas(args_str);
+                cmd_without_args = clean_up(input, arguments, cmd_without_args);
+                cmd_without_args = remove_parentheses(cmd_without_args);
+                return arguments;
+            }
         }
     }
 }
