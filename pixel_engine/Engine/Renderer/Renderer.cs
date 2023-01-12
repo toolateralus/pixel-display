@@ -32,11 +32,10 @@ namespace pixel_renderer
 
         public override Bitmap Draw()
         {
-            sprites_cached = Runtime.Instance.GetStage().GetSprites();
-            foreach (SpriteCamera cam in Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>())
+            foreach (SpriteCamera uiComponent in Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>())
             {
-                if(cam.Enabled == false) continue;
-                cam.Draw(bmp_cached);
+                if(uiComponent.Enabled == false) continue;
+                uiComponent.Draw(bmp_cached);
             }
             return bmp_cached;
         }
