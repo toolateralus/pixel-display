@@ -117,12 +117,12 @@
             <TextBox 
                 FontSize="3.75" 
                 FontFamily="MS Gothic"
-                Grid.Column="15" Grid.Row="17"
-                Grid.ColumnSpan="5" Grid.RowSpan="1" 
+                Grid.Column="13" Grid.Row="17"
+                Grid.ColumnSpan="7" Grid.RowSpan="1" 
                 x:Name="editorMessages" 
                 Background="DarkSlateGray"
                 Foreground="White"
-                VerticalScrollBarVisibility="Auto" 
+                VerticalScrollBarVisibility="Hidden" 
                 Text =""
                 TextElement.FontStretch="SemiCondensed"
                 TextWrapping="Wrap"
@@ -136,9 +136,9 @@
                 Foreground="White"
                 FontSize="3.75" 
                 FontFamily="MS Gothic"
-                Grid.Column="15" 
-                Grid.Row="12"
-                Grid.ColumnSpan="5" 
+                Grid.Column="13" 
+                Grid.Row="11"
+                Grid.ColumnSpan="7" 
                 Grid.RowSpan="4" 
                 >
             </TextBox>
@@ -185,15 +185,16 @@
                     Grid.Column="1"
                     Click="OnViewChanged" 
                     x:Name="viewBtn"/>
-            <Button HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top" 
+            <Button 
+                    
                     TextBlock.FontFamily="MS Gothic"
                     TextBlock.FontSize="4"
                     Content="Send" 
                     Background="CadetBlue" 
                     BorderBrush="Black"
                     BorderThickness="1" 
-                    Grid.Row="17"
+                    
+                    Grid.Row="15"
                     Grid.Column="19"
                     Grid.ColumnSpan="1"
                     Grid.RowSpan="1"

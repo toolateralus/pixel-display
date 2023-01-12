@@ -58,17 +58,6 @@ namespace pixel_editor
             return false;
         }
 
-        public static readonly Command[] Active = new Command[]
-        {
-            cmd_help,
-            cmd_load_project,
-            cmd_reload_stage,   
-            cmd_get_node,        
-            cmd_set_node_field,       
-            cmd_spawn_generic,  
-            cmd_log,
-        };
-
         private static Command cmd_load_project = new()
         {
             phrase = "loadProject;",
@@ -193,6 +182,16 @@ namespace pixel_editor
             description = "Logs a message to the console, Some characters will cause this to fail."
         };
 
+        public static Command[] Active { get; } = new Command[]
+        {
+            cmd_help,
+            cmd_load_project,
+            cmd_reload_stage,
+            cmd_get_node,
+            cmd_set_node_field,
+            cmd_spawn_generic,
+            cmd_log,
+        };
     }
 
 }

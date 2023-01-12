@@ -1,6 +1,6 @@
 ﻿namespace pixel_renderer
 {
-    using pixel_renderer.Engine.Renderer;
+    using pixel_renderer;
     using System.Collections.Generic;
     using System.Linq;
     using System.Windows.Controls;
