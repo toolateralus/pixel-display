@@ -23,16 +23,17 @@ namespace pixel_renderer.Scripts
 
         private void CreateInputEvents()
         {
-            Action<object[]> up = (e) =>    moveVector += new Vec2(0, 1);
-            Action<object[]> down = (e) =>  moveVector += new Vec2(0, -1);
-            Action<object[]> left = (e) =>  moveVector += new Vec2(1, 0);
-            Action<object[]> right = (e) => moveVector += new Vec2(1, 1);
 
-            InputAction player_move_up = new(false, up, null, Key.W);
-            InputAction player_move_down = new(false, down, null, Key.W);
-            InputAction player_move_left = new(false, left, null, Key.W);
-            InputAction player_move_right = new(false, right, null, Key.W);
+            Action<object[]> up = (e) => moveVector    = new Vec2(0, 1);
+            Action<object[]> down = (e) => moveVector  = new Vec2(0, -1);
+            Action<object[]> left = (e) => moveVector  = new Vec2(1, 0);
+            Action<object[]> right = (e) => moveVector = new Vec2(-1, 0);
 
+            InputAction player_move_up =    new(false, up, null, Key.W);
+            InputAction player_move_down =  new(false, down, null, Key.S);
+            InputAction player_move_left =  new(false, left, null, Key.A);
+            InputAction player_move_right = new(false, right, null, Key.D);
+            
             RegisterAction(player_move_up, InputEventType.DOWN);
             RegisterAction(player_move_down, InputEventType.DOWN);
             RegisterAction(player_move_left, InputEventType.DOWN);
@@ -41,12 +42,8 @@ namespace pixel_renderer.Scripts
 
         public override void FixedUpdate(float delta)
         {
-
             if (!takingInput) 
                 return;
-            Runtime.Log(moveVector.AsString());
-
-            //Runtime.Log(log);
             Jump(moveVector);
             Move(moveVector);
             moveVector = Vec2.zero; 
