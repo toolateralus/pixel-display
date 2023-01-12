@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
-namespace pixel_renderer.Engine.Renderer
+namespace pixel_renderer
 {
     public class SpriteCamera
     {
@@ -9,10 +10,16 @@ namespace pixel_renderer.Engine.Renderer
         public Vec2 Size { get => halfSize * 2; set => halfSize = value * 0.5f; }
         public Vec2 center;
         public float angle;
+        float[,] zBuffer = new float[0,0];
 
         public Vec2 GlobalToViewport(Vec2 global) => ((global - center).Rotated(angle) + halfSize) / Size;
         public void Draw(List<Sprite> sprites, Bitmap bmp)
         {
+            if (bmp.Width != zBuffer.GetLength(0) ||
+                bmp.Height != zBuffer.GetLength(1))
+                zBuffer = new float[bmp.Width, bmp.Height];
+            Array.Clear(zBuffer);
+
             foreach (Sprite sprite in sprites)
             {
                 for (int x = 0; x < sprite.size.x; x++)
@@ -26,6 +33,9 @@ namespace pixel_renderer.Engine.Renderer
 
                         int screenPosX = (int)(viewportPos.x * bmp.Width);
                         int screenPosY = (int)(viewportPos.y * bmp.Height);
+
+                        if (sprite.camDistance <= zBuffer[screenPosX, screenPosY]) continue;
+                        zBuffer[screenPosX, screenPosY] = sprite.camDistance;
 
                         bmp.SetPixel(screenPosX, screenPosY, sprite.colorData[x, y]);
                     }
