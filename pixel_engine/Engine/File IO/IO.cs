@@ -41,7 +41,7 @@ namespace pixel_renderer
 
                 return obj;
             }
-            return obj; 
+            throw new FileNotFoundException("File was not found at provided path");
         }
         /// <summary>
         /// this does not check if the directory exists nor does it instantiate one where it doesnt exist

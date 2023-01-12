@@ -83,7 +83,6 @@ namespace pixel_renderer
             }
         }
         public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
-
         public void Awake()
         {
             for (int i = 0; i < ComponentsList.Count; i++)
@@ -99,9 +98,7 @@ namespace pixel_renderer
             for (int i = 0; i < ComponentsList.Count; i++)
                   ComponentsList[i].Update();
         }
-        
         public void SetActive(bool value) => _enabled = value; 
-        
         public void OnTrigger(Rigidbody otherBody)
         {
             lock (Components)
@@ -114,7 +111,6 @@ namespace pixel_renderer
                 for (int i = 0; i < ComponentsList.Count; i++)
                   ComponentsList[i].OnCollision(otherBody);
         }
-        
         public void AddComponent(Component component)
         {
             lock (Components)
@@ -168,7 +164,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         public T GetComponent<T>(int? index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -215,7 +210,6 @@ namespace pixel_renderer
                 return output;
             }
         }
-        
         public NodeAsset ToAsset() => new(this);
     }
 }

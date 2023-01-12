@@ -226,10 +226,14 @@ namespace pixel_editor
             if (split.Length < cap)
                 cap = split.Length;
 
+            Console.Print(cap);
             for (int i = 0; i < cap ; ++i)
             {
-                var line = editorMessages.GetLineText(i);
-                Command.Call(line);
+                string line = editorMessages.GetLineText(i);
+
+                if (line != "") 
+                    Command.Call(line);
+                   
             }
         }
 

@@ -9,7 +9,7 @@ namespace pixel_editor
     public class CommandParser 
     {
         // for the final cleanup of commands before execution
-        static List<char> disallowed_chars = new()
+        private protected static List<char> disallowed_chars = new()
         {
             ';',
             '\'',
@@ -20,6 +20,20 @@ namespace pixel_editor
             ')',
             '"',
         };
+        private protected static string[] typeIdentifiers = new string[] 
+        {
+            "vec:",
+            "int:",
+            "str:",
+        };
+        
+        private static string RemoveUnwantedChars(string? arg0)
+        {
+            foreach (var _char in arg0)
+                if (disallowed_chars.Contains(_char))
+                    arg0 = arg0.Replace($"{_char}", "");
+            return arg0;
+        }
         
         private static Vec2 Vec2(string? arg0)
         {
@@ -42,52 +56,71 @@ namespace pixel_editor
             return arg0;
         }
 
-        private static string RemoveUnwantedChars(string? arg0)
+        internal static void TryCallLine(string line, Command[] commands)
         {
-            foreach (var _char in arg0)
-                if (disallowed_chars.Contains(_char))
-                    arg0 = arg0.Replace($"{_char}", "");
-            return arg0;
+            _ = ParseArguments(line, out string[] args);
+            _ = ParseIterativeArgs(line, out string rArgs);
+
+            int count = rArgs.ToInt();
+            foreach (var command in commands)
+                if (command.Equals(line))
+                    ExecuteCommand(args, count, command);
         }
 
-        internal static void TryCallLine(string line, Command command)
+        private static void ExecuteCommand(string[] args, int count, Command command)
         {
-            string withoutArgs = ParseArguments(line, out string[] args);
-            withoutArgs = ParseIterativeArgs(line, out string rArgs);
-            int count = rArgs.ToInt();
-
-            // single execution paramaterless command; 
-            if (count == 0 && args.Length == 0)
-            {
-                command.Invoke();
-                return;
-            }
-            // command with params; 
             if (args.Length > 0)
             {
-                List<object> init_args = new List<object>{ };
-                for(int i =0; i < args.Length; ++i)
+                List<object> init_args = new();
+                for (int i = 0; i < args.Length; ++i)
                 {
-                    object? parse_arg = Parse<string>(args[i]);
-                    init_args.Add(parse_arg);
+                    object? parse_arg = ParseParam(args[i]);
+
+                    if (parse_arg != null)
+                        init_args.Add(parse_arg);
                 }
-                command.args = init_args.ToArray(); 
-                command.Invoke(); 
+                command.args = init_args.ToArray();
+                command.Invoke();
             }
-            for (int i = 0; i < count; ++i)  command.Invoke();
-        }
-        public static object? Parse<T>(string arg = null) where T : class 
-        {
-                arg = RemoveUnwantedChars(arg);
-                if (typeof(T) == typeof(string))
-                    return String(arg);
-                if (typeof(T) == typeof(int))
-                    return Int(arg);
-                if (typeof(T) == typeof(Vec2))
-                    return Vec2(arg);
-                throw new ArgumentException("Console command used an Argument that is of a type that is not currently supported. Sorry XD");
+            for (int i = 0; i < count; ++i)
+            {
+                command.Invoke();
+            }
         }
 
+        public static object? ParseParam(string arg)
+        {
+            // this string gets treated like a null/void variable.
+            object? outArg = "";
+
+            arg = RemoveUnwantedChars(arg);
+            outArg = ConvertToObjectAndRemoveTypeArg(arg, outArg);
+            return outArg;
+        }
+        private static object ConvertToObjectAndRemoveTypeArg(string arg, object outArg)
+        {
+            foreach (var identifier in typeIdentifiers)
+                if (arg.Contains(identifier))
+                {
+                    switch (identifier)
+                    {
+                        case "vec:":
+                            arg = arg.Replace("vec:", "");
+                            outArg = Vec2(arg);
+                            break;
+                        case "int:":
+                            arg = arg.Replace("int:", "");
+                            outArg = Int(arg);
+                            break;
+                        case "str:":
+                            arg = ((string)arg).Replace("str:", "");
+                            outArg = String(arg);
+                            break;
+                    }
+                }
+
+            return outArg;
+        }
         internal static string ParseIterativeArgs(string input, out string repeaterArgs)
         {
             string withoutArgs = "";
@@ -110,10 +143,13 @@ namespace pixel_editor
             var args_str = ""; 
             string cmd_without_args = "";
 
-            bool cmd_has_args = input.Contains('(') && input.Contains(')'); 
+            bool cmd_has_args = input.Contains('(') && input.Contains(')');
+            cmd_without_args = input.Split('(')[0] + ';';
 
             if (cmd_has_args)
-                arguments = parseArgumentsReturnCommand(input, ref args_str, ref cmd_without_args);
+                arguments = parseArgumentsReturnCommand(input, ref args_str);
+
+
             return cmd_without_args;
 
             static string remove_parentheses(string input)
@@ -124,9 +160,9 @@ namespace pixel_editor
                      input = input.Replace(")", "");
                 return input; 
             }
-            static string[] split_args_at_commas(string args_str)
+            static string[] split_args_at_commas_with_trailing_whitespace(string args_str)
             {
-                return args_str.Split(',');
+                return args_str.Split(", ");
             }
             static string get_args_string(string input, string args_str, int argStartIndex, int argEndIndex)
             {
@@ -139,26 +175,10 @@ namespace pixel_editor
                 argStartIndex = input.IndexOf('(');
                 argEndIndex = input.IndexOf(';');
             }
-            static string clean_up_args(string input, string[] arguments, string cmd_without_args)
-            {
-                if (arguments.Length > 0)
-                    foreach (var arg in arguments)
-                    {
-                        if (arg.Length == 0 || arg == "") 
-                            continue;
-
-                        cmd_without_args = input.Replace(arg, "");
-                        cmd_without_args = cmd_without_args.Replace(",", "");
-                    }
-
-                return cmd_without_args;
-            }
-
-            static string[] parseArgumentsReturnCommand(string input, ref string args_str, ref string cmd_without_args)
+            static string[] parseArgumentsReturnCommand(string input, ref string args_str)
             {
                 string[] arguments;
                 int argStartIndex, argEndIndex;
-
                 args_indices(input, out argStartIndex, out argEndIndex);
                 args_str = get_args_string(input, args_str, argStartIndex, argEndIndex);
 
@@ -166,9 +186,7 @@ namespace pixel_editor
                 // might cause issues being unimplemented
                 // args_str = remove_parentheses(args_str);
 
-                arguments = split_args_at_commas(args_str);
-                cmd_without_args = clean_up_args(input, arguments, cmd_without_args);
-                cmd_without_args = remove_parentheses(cmd_without_args);
+                arguments = split_args_at_commas_with_trailing_whitespace(args_str);
                 return arguments;
             }
         }
