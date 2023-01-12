@@ -134,17 +134,19 @@ namespace pixel_editor
                     args_str += input[i];
                 return args_str;
             }
-            static void argsIndices(string input, out int argStartIndex, out int argEndIndex)
+            static void args_indices(string input, out int argStartIndex, out int argEndIndex)
             {
                 argStartIndex = input.IndexOf('(');
                 argEndIndex = input.IndexOf(';');
             }
-            static string clean_up(string input, string[] arguments, string cmd_without_args)
+            static string clean_up_args(string input, string[] arguments, string cmd_without_args)
             {
                 if (arguments.Length > 0)
                     foreach (var arg in arguments)
                     {
-                        if (arg.Length == 0 || arg == "") continue;
+                        if (arg.Length == 0 || arg == "") 
+                            continue;
+
                         cmd_without_args = input.Replace(arg, "");
                         cmd_without_args = cmd_without_args.Replace(",", "");
                     }
@@ -157,7 +159,7 @@ namespace pixel_editor
                 string[] arguments;
                 int argStartIndex, argEndIndex;
 
-                argsIndices(input, out argStartIndex, out argEndIndex);
+                args_indices(input, out argStartIndex, out argEndIndex);
                 args_str = get_args_string(input, args_str, argStartIndex, argEndIndex);
 
                 // causes whitespace to be neccessary to indicate void or null argument,
@@ -165,7 +167,7 @@ namespace pixel_editor
                 // args_str = remove_parentheses(args_str);
 
                 arguments = split_args_at_commas(args_str);
-                cmd_without_args = clean_up(input, arguments, cmd_without_args);
+                cmd_without_args = clean_up_args(input, arguments, cmd_without_args);
                 cmd_without_args = remove_parentheses(cmd_without_args);
                 return arguments;
             }
