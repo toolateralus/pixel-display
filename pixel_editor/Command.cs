@@ -8,6 +8,7 @@ using pixel_renderer.FileIO;
 
 namespace pixel_editor
 {
+    public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
     public class Command
     {
         private static Command reload_stage = new()
@@ -17,13 +18,16 @@ namespace pixel_editor
             {
                 Runtime.Instance.ResetCurrentStage();
             },
-            args = null
+            args = null,
+            argsTypes = null,
         };
         private static Command spawn_generic = new()
         {
             phrase = "++n;|newNode;",
             action = (o) => Runtime.Instance.GetStage().create_generic_node(),
-            args = null
+            args = null,
+            argsTypes = null,
+
         };
         private static Command get_node = new()
         {
@@ -47,35 +51,8 @@ namespace pixel_editor
                 Console.Print($"getNode({name}) \n Node with name {name} not found."); 
             },
             args = null,
+            argsTypes = new Type[] { typeof(string) },
         };
-        private static Command draw
-        {
-
-        }
-
-        enum PromptResult { Yes, No, Ok, Cancel, Timeout};
-        private static async Task<PromptResult> YesNoPromptAsync(string question, float? waitDuration = 60f)
-        {
-            Console.Print(question);
-            for (int i = 0; i < waitDuration * 100; i++)
-            {
-                if (i % 100 == 0)
-                {
-                    int seconds = 10 * (5000 - i) / 1000;
-                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
-                }
-
-                if (Keyboard.IsKeyDown(Key.Y)) 
-                    return PromptResult.Yes;
-                if (Keyboard.IsKeyDown(Key.N))
-                    return PromptResult.No; 
-                if (Keyboard.IsKeyDown(Key.End))
-                    return PromptResult.Cancel;
-
-                await Task.Delay(10);
-            };
-            return PromptResult.Timeout; 
-        }
         private static Command load_project = new()
         {
 
@@ -115,9 +92,76 @@ namespace pixel_editor
                 }
             },
             args = new object[] { },
+            argsTypes = new Type[] { typeof(string) },
 
         };
+        private static Command set_node_field = new()
+        {
+            phrase = "setNode;",
+            args = new object[] {  },
 
+            argsTypes = new Type[] 
+            { 
+                typeof(string),
+                typeof(string),
+                typeof(object)
+            },
+
+            action = (e) => 
+            {
+                var fName = (string)e[0];
+                var value = e[1];
+            
+            },
+        };
+
+        private static async Task<PromptResult> YesNoPromptAsync(string question, float? waitDuration = 60f)
+        {
+            Console.Print(question);
+            for (int i = 0; i < waitDuration * 100; i++)
+            {
+                if (i % 100 == 0)
+                {
+                    int seconds = 10 * (5000 - i) / 1000;
+                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
+                }
+
+                if (Keyboard.IsKeyDown(Key.Y)) 
+                    return PromptResult.Yes;
+                if (Keyboard.IsKeyDown(Key.N))
+                    return PromptResult.No; 
+                if (Keyboard.IsKeyDown(Key.End))
+                    return PromptResult.Cancel;
+
+                await Task.Delay(10);
+            };
+            return PromptResult.Timeout; 
+        }
+
+        internal static void Call(string line)
+        {
+            foreach (var command in Active)
+                if (command.Equals(line))
+                    CommandParser.TryParseLine(line, command);
+        }
+
+        public void Invoke()
+        {
+            action?.Invoke(args);
+        }
+        public bool Equals(string input)
+        {
+            
+            string withoutArgs = CommandParser.ParseArguments(input, out _);  
+            withoutArgs = CommandParser.ParseIterator(withoutArgs, out _);
+
+            string[] split = phrase.Split('|');
+
+            foreach (var line in split)
+                if (line.Equals(withoutArgs))
+                    return true;
+            return false;
+        }
 
         public static readonly Command[] Active = new Command[]
         {
@@ -128,91 +172,10 @@ namespace pixel_editor
         };
         public string phrase = "";
         public Action<object[]?>? action;
+
         public object[]? args;
+        public Type[]? argsTypes; 
 
-        public bool Equals(string input)
-        {
-            
-            string withoutArgs = ParseParameters(input, out _);  
-            withoutArgs = ParseIterator(withoutArgs, out _);
-
-            string[] split = phrase.Split('|');
-
-            foreach (var line in split)
-                if (line.Equals(withoutArgs))
-                    return true;
-            return false;
-        }
-        private static string ParseIterator(string input, out string repeaterArgs)
-        {
-            string withoutArgs = "";
-            repeaterArgs = ""; 
-            if (input.Contains('$'))
-            {
-                int indexOfStart = input.IndexOf('$');
-                int indexOfEnd = input.IndexOf(';');
-                for (int i = indexOfStart; i < indexOfEnd; ++i)
-                    repeaterArgs += input[i];
-                if(repeaterArgs.Length > 0)
-                    withoutArgs = input.Replace(repeaterArgs, "");
-            }
-            else withoutArgs = input;
-            return withoutArgs;
-        }
-        private static string ParseParameters(string input, out string parenthesesArgs)
-        {
-            parenthesesArgs = "";
-            string withoutArgs = "";
-            bool hasPArgs = input.Contains('(') && input.Contains(')'); 
-            if (hasPArgs)
-            {
-                int indexOfStart = input.IndexOf('(');
-                int indexOfEnd = input.IndexOf(';');
-
-                for (int i = indexOfStart; i < indexOfEnd; ++i)
-                    parenthesesArgs += input[i];
-
-                if(parenthesesArgs.Length > 0)
-                    withoutArgs = input.Replace(parenthesesArgs, "");
-            }
-            return withoutArgs;
-        }
-        public void Execute()
-        {
-            action?.Invoke(args);
-        }
-        internal static void Call(string line)
-        {
-            foreach (var command in Active)
-                if (command.Equals(line))
-                    TryParseLine(line, command);
-        }
-        private static void TryParseLine(string line, Command command)
-        {
-            string withoutArgs = ParseParameters(line, out string pArgs);
-            withoutArgs = ParseIterator(line, out string rArgs);
-            int count = rArgs.ToInt();
-
-            // single execution paramaterless command; 
-            if (count == 0 && pArgs.Length == 0)
-            {
-                command.Execute();
-                return;
-            }
-            // command with params; 
-            if (pArgs.Length > 0)
-            {
-               
-                string args = (string)CommandArgsParser.Parse<string>(pArgs);
-
-                command.args = new object[] 
-                {
-                    args
-                };
-                command.Execute(); 
-            }
-            for (int i = 0; i < count; ++i)  command.Execute();
-        }
     }
 
 }
