@@ -106,6 +106,7 @@ namespace pixel_renderer
             playerNode.AddComponent(rb);
             playerNode.AddComponent(player_obj);
             playerNode.AddComponent(sprite);
+            playerNode.AddComponent<SpriteCamera>();
             
             nodes.Add(playerNode);
         }

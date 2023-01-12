@@ -132,6 +132,20 @@ namespace pixel_renderer
                 component.parent = this;
             }
         }
+        public void AddComponent<T>() where T : Component, new()
+        {
+            lock (Components)
+            {
+                Type type = typeof(T);
+                if (!Components.ContainsKey(type))
+                    Components.Add(type, new());
+
+                Component component = new T();
+
+                Components[type].Add(component);
+                component.parent = this;
+            }
+        }
         public void RemoveComponent(Component component)
         {
             lock (Components)
@@ -172,6 +186,17 @@ namespace pixel_renderer
                     return false;
                 }
                 component = Components[typeof(T)][index ?? 0] as T;
+                return true;
+            }
+        }
+        public bool HasComponent<T>() where T : Component
+        {
+            lock (Components)
+            {
+                if (!Components.ContainsKey(typeof(T)))
+                {
+                    return false;
+                }
                 return true;
             }
         }
