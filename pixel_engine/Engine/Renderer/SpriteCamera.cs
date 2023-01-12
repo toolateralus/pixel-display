@@ -13,7 +13,7 @@ namespace pixel_renderer
         [JsonProperty] Vec2 viewportPosition = new(0,0);
         [JsonProperty] Vec2 viewportSize = new(1,1);
         [JsonProperty] public float angle = 0f;
-        [JsonProperty] public DrawingType bgDrawingType = DrawingType.Clamped;
+        [JsonProperty] public DrawingType bgDrawingType = DrawingType.Scrolling;
         float[,] zBuffer = new float[0,0];
 
         public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + bottomRightCornerOffset) / Size.GetDivideSafe();
