@@ -1,16 +1,14 @@
-﻿namespace pixel_renderer
-{
-    using pixel_renderer;
-    using System.Collections.Generic;
+﻿    using System.Collections.Generic;
     using System.Linq;
     using System.Windows.Controls;
     using Bitmap = System.Drawing.Bitmap;
 
+namespace pixel_renderer
+{
     public class CRenderer : RendererBase
     {
         private Bitmap? bmp_cached = null; 
         private IEnumerable<Sprite>? sprites_cached = null;
-        public SpriteCamera cam;
 
         private Bitmap? _background;
         public Bitmap Background
@@ -35,12 +33,11 @@
         public override Bitmap Draw()
         {
             sprites_cached = Runtime.Instance.GetStage().GetSprites();
-            if (cam == null)
+            foreach (SpriteCamera cam in Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>())
             {
-                Vec2 bmpSize = new Vec2(bmp_cached.Width, bmp_cached.Height);
-                cam = new SpriteCamera(bmpSize, bmpSize / 2);
+                if(cam.Enabled == false) continue;
+                cam.Draw(bmp_cached);
             }
-            cam.Draw(sprites_cached.ToList(), bmp_cached);
             return bmp_cached;
         }
         public override void Render(Image destination) => CBit.Render(ref bmp_cached, destination);

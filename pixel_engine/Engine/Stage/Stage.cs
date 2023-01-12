@@ -163,6 +163,14 @@ namespace pixel_renderer
                                            select sprite);
             return sprites;
         }
+        public IEnumerable<T> GetAllComponents<T>() where T : Component
+        {
+            IEnumerable<T> components = from Node node in Nodes
+                                        where node.HasComponent<T>()
+                                        let component = node.GetComponent<T>()
+                                           select component;
+            return components;
+        }
         private Bitmap GetBackground(Metadata meta)
         {
             return backgroundImage = new(meta.fullPath);

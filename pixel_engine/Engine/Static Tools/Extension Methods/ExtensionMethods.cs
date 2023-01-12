@@ -13,8 +13,11 @@ namespace pixel_renderer
         #region Numbers
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
+        public static float GetDivideSafe(this float v) => v == 0 ? float.Epsilon : v;
+        public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion
         #region Vectors
+        public static Vec2 GetDivideSafe(this Vec2 v) => new(v.x.GetDivideSafe(), v.y.GetDivideSafe());
         public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.x); }
         public static Vec2 WithScale(this Vec2 v, int x = 1, int y = 1) { return new Vec2(v.x * x, v.y * y); }
         public static double Sum(this Vec2 v) => v.x + v.y;
