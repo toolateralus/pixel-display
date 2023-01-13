@@ -59,9 +59,9 @@ namespace pixel_editor
         internal static void TryCallLine(string line, Command[] commands)
         {
             _ = ParseArguments(line, out string[] args);
-            _ = ParseIterativeArgs(line, out string rArgs);
+            _ = ParseLoopParams(line, out string loop_param);
 
-            int count = rArgs.ToInt();
+            int count = loop_param.ToInt();
 
             foreach (var command in commands)
                 if (command.Equals(line))
@@ -130,7 +130,7 @@ namespace pixel_editor
 
             return outArg;
         }
-        internal static string ParseIterativeArgs(string input, out string repeaterArgs)
+        internal static string ParseLoopParams(string input, out string repeaterArgs)
         {
             string withoutArgs = "";
             repeaterArgs = ""; 
