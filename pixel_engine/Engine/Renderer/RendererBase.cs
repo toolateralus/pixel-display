@@ -1,5 +1,6 @@
 ﻿namespace pixel_renderer
 {
+    using System.Threading.Tasks;
     using System.Windows.Controls;
     using Bitmap = System.Drawing.Bitmap;
 
