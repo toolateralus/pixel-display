@@ -1,6 +1,7 @@
 ﻿    using System.Collections.Generic;
     using System.Linq;
-    using System.Windows.Controls;
+using System.Threading.Tasks;
+using System.Windows.Controls;
     using Bitmap = System.Drawing.Bitmap;
 
 namespace pixel_renderer
@@ -35,7 +36,7 @@ namespace pixel_renderer
             foreach (SpriteCamera uiComponent in Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>())
             {
                 if(uiComponent.Enabled == false) continue;
-                uiComponent.Draw(bmp_cached);
+                    uiComponent.Draw(bmp_cached);
             }
             return bmp_cached;
         }

@@ -26,7 +26,7 @@ namespace pixel_renderer
         public static float Distance(this Vec2 v, Vec2 end) => (v - end).Length();
         public static string AsString(this Vec2 v)
         {
-            return $" X : {v.x} Y : {v.y}";
+            return $" ({v.x},{v.y})";
         }
         /// <summary>
         ///  TODO: fix possible  'divide by zero'
