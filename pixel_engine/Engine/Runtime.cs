@@ -1,26 +1,23 @@
-﻿using Newtonsoft.Json;
-using pixel_renderer;
+﻿using pixel_renderer;
 using pixel_renderer.Assets;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using Timer = System.Timers.Timer;
-using Bitmap = System.Drawing.Bitmap;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 
 namespace pixel_renderer
 {
     public class Runtime
     {
         public EngineInstance mainWnd;
-        public Timer? physicsClock;
         public RenderHost? renderHost = new();
-        public Project? LoadedProject = null;
         public StagingHost? stagingHost = new();
+        
+        public Timer? physicsClock;
         private StageAsset? m_stageAsset;
+        public Project? LoadedProject = null;
+        
+
         private protected volatile Stage? m_stage;
         
         public static event Action<InspectorEvent> InspectorEventRaised;
@@ -133,13 +130,11 @@ namespace pixel_renderer
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
-            Input.Refresh();
-            
-            if (!IsRunning || renderHost.State is RenderState.Off)
+            bool HasNoRenderSurface = renderHost.State is RenderState.Off;
+
+            if (!IsRunning || HasNoRenderSurface) 
                 return; 
-            
-            if (renderHost.State is RenderState.Error) 
-                throw new Exception("Rendering error");
+           
 
             if (renderHost.State is RenderState.Game) 
                 renderHost.Render(mainWnd.renderImage);

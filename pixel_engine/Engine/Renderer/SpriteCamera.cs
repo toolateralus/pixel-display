@@ -14,19 +14,23 @@ namespace pixel_renderer
         [JsonProperty] Vec2 viewportPosition = new(0,0);
         [JsonProperty] Vec2 viewportSize = new(1,1);
         [JsonProperty] public float angle = 0f;
-        [JsonProperty] public DrawingType bgDrawingType = DrawingType.Wrapped;
+        [JsonProperty] public DrawingType DrawMode = DrawingType.Wrapped;
         float[,] zBuffer = new float[0,0];
 
         public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + bottomRightCornerOffset) / Size.GetDivideSafe();
         public Vec2 ViewportToGlobal(Vec2 vpPos) => (vpPos * Size - bottomRightCornerOffset).Rotated(-angle) + Center;
+
         public override void Draw(Bitmap bmp)
         {
             IEnumerable<Sprite> sprites = Runtime.Instance.GetStage().GetAllComponents<Sprite>();
-            if (bmp.Width != zBuffer.GetLength(0) ||
-                bmp.Height != zBuffer.GetLength(1))
+            
+            var shouldResize = bmp.Height != zBuffer.GetLength(1) || bmp.Width != zBuffer.GetLength(0);
+            
+            if(shouldResize)
                 zBuffer = new float[bmp.Width, bmp.Height];
 
             Array.Clear(zBuffer);
+
 
             DrawBackground(bmp);
 
@@ -59,33 +63,40 @@ namespace pixel_renderer
 
         private void DrawBackground(Bitmap bmp)
         {
-            if (bgDrawingType == DrawingType.None) return;
-            Bitmap bg = Runtime.Instance.GetStage().backgroundImage;
+            if (DrawMode is DrawingType.None) return;
+
+            Bitmap background = Runtime.Instance.GetStage().backgroundImage;
+            Vec2 bgSize = new(background.Width, background.Height);
+            Vec2 bmpSize = new(bmp.Width, bmp.Height);
+
             for (int x = 0; x < bmp.Width; x++)
             {
                 for (int y = 0; y < bmp.Height; y++)
                 {
-                    Vec2 bgSize = new Vec2(bg.Width, bg.Height);
-                    Vec2 bmpSize = new Vec2(bmp.Width, bmp.Height);
-
-                    Vec2 viewportPos = new Vec2(x,y) / bmpSize.GetDivideSafe();
+                    Vec2 viewportPos = new Vec2(x, y) / bmpSize.GetDivideSafe();
                     Vec2 globalPos = ViewportToGlobal(viewportPos);
-                    Vec2 bgViewport = (globalPos / bgSize.GetDivideSafe());
-                    if (bgDrawingType == DrawingType.Wrapped)
-                    {
-                        bgViewport += new Vec2(1, 1);
-                        Vec2 wrappedBgViewport = new(bgViewport.x - (int)bgViewport.x, bgViewport.y - (int)bgViewport.y);
-                        Vec2 bgPos = wrappedBgViewport * bgSize;
-                        bmp.SetPixel(x, y, bg.GetPixel((int)bgPos.x, (int)bgPos.y));
-                    }
-                    if (bgDrawingType == DrawingType.Clamped)
-                    {
-                        bgViewport.Clamp(Vec2.zero, Vec2.one);
-                        Vec2 bgPos = (bgViewport * (bgSize - Vec2.one)).Clamped(Vec2.zero, bmpSize);
-                        bmp.SetPixel(x, y, bg.GetPixel((int)bgPos.x, (int)bgPos.y));
-                    }
+                    Vec2 bgViewport = globalPos / bgSize.GetDivideSafe();
+
+                    if (DrawMode == DrawingType.Wrapped)
+                       DrawWrapped(bmp, background, ref bgSize, ref x, ref y, ref bgViewport);
+
+                    if (DrawMode == DrawingType.Clamped)
+                       DrawClamped(bmp, background, ref bgSize, ref x, ref y, ref bmpSize, ref bgViewport);
                 }
             }
+        }
+        public static void DrawClamped(Bitmap bmp, Bitmap background, ref Vec2 bgSize, ref int x, ref int y, ref Vec2 bmpSize, ref Vec2 bgViewport)
+        {
+            bgViewport.Clamp(Vec2.zero, Vec2.one);
+            Vec2 bgPos = (bgViewport * (bgSize - Vec2.one)).Clamped(Vec2.zero, bmpSize);
+            bmp.SetPixel(x, y, background.GetPixel((int)bgPos.x, (int)bgPos.y));
+        }
+        public static void DrawWrapped(Bitmap bmp, Bitmap background, ref Vec2 bgSize, ref int x, ref int y, ref Vec2 bgViewport)
+        {
+            bgViewport += new Vec2(1, 1);
+            Vec2 wrappedBgViewport = new(bgViewport.x - (int)bgViewport.x, bgViewport.y - (int)bgViewport.y);
+            Vec2 bgPos = wrappedBgViewport * bgSize;
+            bmp.SetPixel(x, y, background.GetPixel((int)bgPos.x, (int)bgPos.y));
         }
 
         public enum DrawingType { Wrapped, Clamped, None}

@@ -8,8 +8,7 @@ namespace pixel_renderer
 {
     public class CRenderer : RendererBase
     {
-        private Bitmap? bmp_cached = null; 
-        private IEnumerable<Sprite>? sprites_cached = null;
+        private Bitmap? renderTexture = null; 
 
         private Bitmap? _background;
         public Bitmap Background
@@ -25,10 +24,10 @@ namespace pixel_renderer
         {
             if (Background is not null)
             {
-                bmp_cached = (Bitmap)Background.Clone();
+                renderTexture = (Bitmap)Background.Clone();
                 return;
             }
-            bmp_cached = (Bitmap)FallBack.Clone();
+            renderTexture = (Bitmap)FallBack.Clone();
         }
 
         public override Bitmap Draw()
@@ -36,10 +35,10 @@ namespace pixel_renderer
             foreach (SpriteCamera uiComponent in Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>())
             {
                 if(uiComponent.Enabled == false) continue;
-                    uiComponent.Draw(bmp_cached);
+                    uiComponent.Draw(renderTexture);
             }
-            return bmp_cached;
+            return renderTexture;
         }
-        public override void Render(Image destination) => CBit.Render(ref bmp_cached, destination);
+        public override void Render(Image destination) => CBit.Render(ref renderTexture, destination);
     }
 }

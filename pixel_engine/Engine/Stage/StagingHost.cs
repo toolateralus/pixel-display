@@ -74,7 +74,7 @@ namespace pixel_renderer
         }
         public static void Update(Stage stage)
         {
-            var delta = RenderInfo.LastFrameTime;
+            var delta = runtime.renderHost.info.FrameTime;
             stage.FixedUpdate(delta);
             runtime.renderHost.info.frameCount++;
         }
