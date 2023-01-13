@@ -79,7 +79,7 @@ namespace pixel_editor
             if (image is not null)
             {
                 this.image = image;
-                CBit.Render(ref image, imgPreview);
+                CBit.Render(image, imgPreview);
             }
         }
         private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)

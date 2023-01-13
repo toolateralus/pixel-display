@@ -4,9 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media.Media3D;
 using pixel_renderer;
-using pixel_renderer.FileIO;
 
 namespace pixel_editor
 {
@@ -195,7 +193,7 @@ namespace pixel_editor
                 object value = e[2];
 
                 Node? node = Runtime.Instance.GetStage().FindNode(nName);
-                SpriteCamera cam = node.GetComponent<SpriteCamera>();
+                Camera cam = node.GetComponent<Camera>();
                 Type type = cam.GetType();
                 FieldInfo? field = type.GetRuntimeField(fName);
                 field.SetValue(cam, value);
