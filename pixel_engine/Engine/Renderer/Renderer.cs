@@ -51,24 +51,21 @@ namespace pixel_renderer
 
             DrawBackground(cam);
 
+            Vec2 bmpSize = new Vec2(renderTexture.Width, renderTexture.Height);
+
             foreach (Sprite sprite in sprites)
                 for (int x = 0; x < sprite.size.x; x++)
                     for (int y = 0; y < sprite.size.y; y++)
                     {
-                        Vec2 viewportPos = cam.GlobalToViewport(sprite.parent.position + new Vec2(x, y));
+                        Vec2 camViewport = cam.GlobalToCamViewport(sprite.parent.position + new Vec2(x, y));
+                        if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
-                        if (!viewportPos.Equals(viewportPos.Clamped(Vec2.zero, Vec2.one)))
-                            continue;
+                        Vec2 screenPos = cam.CamToScreenViewport(camViewport) * bmpSize;
 
-                        int screenPosX = (int)(viewportPos.x * renderTexture.Width);
-                        int screenPosY = (int)(viewportPos.y * renderTexture.Height);
+                        if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
+                        cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
 
-                        if (sprite.camDistance <= cam.zBuffer[screenPosX, screenPosY])
-                            continue;
-
-                        cam.zBuffer[screenPosX, screenPosY] = sprite.camDistance;
-
-                        renderTexture.SetPixel(screenPosX, screenPosY, sprite.colorData[x, y]);
+                        renderTexture.SetPixel((int)screenPos.x, (int)screenPos.y, sprite.colorData[x, y]);
                     }
         }
 
@@ -85,11 +82,11 @@ namespace pixel_renderer
             {
                 for (int y = 0; y < renderTexture.Height; y++)
                 {
-                    Vec2 viewportPos = new Vec2(x, y) / bmpSize.GetDivideSafe();
-                    if (!viewportPos.Equals(viewportPos.Clamped(Vec2.zero, Vec2.one)))
-                        continue;
-                    Vec2 globalPos = cam.ViewportToGlobal(viewportPos);
-                    Vec2 bgViewport = globalPos / bgSize.GetDivideSafe();
+                    Vec2 camViewport = cam.ScreenToCamViewport(new Vec2(x, y) / bmpSize.GetDivideSafe());
+                    if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+
+                    Vec2 global = cam.CamViewportToGlobal(camViewport);
+                    Vec2 bgViewport = global / bgSize.GetDivideSafe();
 
                     if (cam.DrawMode == DrawingType.Wrapped)
                         DrawWrapped(renderTexture, bg, ref bgSize, ref x, ref y, ref bgViewport);

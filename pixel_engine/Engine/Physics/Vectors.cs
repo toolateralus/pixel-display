@@ -119,6 +119,9 @@
             value.y = value.y.Clamp(min.y, max.y);
         }
         internal Vec2 Clamped(Vec2 min, Vec2 max) => new(x.Clamp(min.x, max.x), y.Clamp(min.y, max.y));
+        internal bool IsWithin(Vec2 min, Vec2 max) => x.IsWithin(min.x, max.x) && y.IsWithin(min.y, max.y);
+        internal bool IsWithinMaxExclusive(Vec2 min, Vec2 max) =>
+            x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
     }
 }
 
