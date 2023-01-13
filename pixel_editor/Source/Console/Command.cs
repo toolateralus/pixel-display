@@ -46,7 +46,7 @@ namespace pixel_editor
         public bool Equals(string input)
         {
             string withoutArgs = CommandParser.ParseArguments(input, out _);  
-            withoutArgs = CommandParser.ParseIterativeArgs(withoutArgs, out _);
+            withoutArgs = CommandParser.ParseLoopParams(withoutArgs, out _);
 
             string[] split = phrase.Split('|');
 
