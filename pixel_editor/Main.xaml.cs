@@ -204,8 +204,9 @@ namespace pixel_editor
             var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
             var framerate = Runtime.Instance.renderHost.info.Framerate;
             gcAllocText.Content =
-                $"{memory}" +
-                $" \n frame rate : {framerate}";
+                $"{memory}";
+            framerateLabel.Content = $" \n frame rate : {framerate}"; 
+
         }
         
         public void PrintToConsole(InspectorEvent e)
