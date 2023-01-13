@@ -14,18 +14,19 @@ namespace pixel_renderer
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] private Metadata imgData; 
         [JsonProperty] public bool isCollider = false;
+
         public Color[,] colorData;
         public Bitmap? image;
         public bool dirty = false;
         private Color[,]? cachedColor = null;
         public bool HasImage => image != null;
         public bool HasImageMetadata => imgData != null; 
+
         public override void Awake()
         {
-           imgData = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
-           image = new(imgData.fullPath);
-           dirty = true;
+
         }
+        
         public override void FixedUpdate(float delta)
         {
             if (dirty)
@@ -37,8 +38,10 @@ namespace pixel_renderer
 
                 CBit.ReadonlyBitmapData(in image, out var bmd, out int stride, out byte[] data);
                 colorData = CBit.ColorArrayFromBitmapData(bmd, stride, data);
+                dirty = false; 
             }
         }
+        
         public void Randomize()
         {
             int x = (int)size.x;
@@ -56,6 +59,13 @@ namespace pixel_renderer
             DrawSquare(size, cachedColor, isCollider);
             if (nullifyCache) cachedColor = null;
         }
+        public void InitializeTestImage()
+        {
+            imgData = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
+            image = new(imgData.fullPath);
+            dirty = true;
+        }
+        
         /// <summary>
         /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
         /// </summary>
@@ -76,6 +86,7 @@ namespace pixel_renderer
                 }
             DrawSquare(size, colorData, isCollider);
         }
+        
         public void DrawSquare(Vec2 size, Color[,] color, bool isCollider)
         {
             colorData = color;
@@ -93,8 +104,7 @@ namespace pixel_renderer
             this.size = size;
             this.isCollider = isCollider;
         }
-
-
+        
         public static Bitmap SolidColorBitmap(Vec2 size, Color color)
         {
             int x = (int)size.x;
@@ -115,7 +125,7 @@ namespace pixel_renderer
                     colorData[x, y] = color;
             return colorData; 
         }
-             
+
 
 
         public Sprite() => colorData = new Color[0,0];

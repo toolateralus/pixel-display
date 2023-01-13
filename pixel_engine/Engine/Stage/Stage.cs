@@ -134,14 +134,13 @@ namespace pixel_renderer
             var sprite = new Sprite((Vec2)args[2], (Color)args[3], false);
             node.AddComponent(sprite);
             node.AddComponent(new Rigidbody() { IsTrigger = false });
-            node.AddComponent(new Wind((Direction)args[5]));
             AddNode(node);
         }
         private object[] r_node_args()
         {
             int r_int = genericNodeCt++;
             Vec2 r_pos = JRandom.ScreenPosition();
-            Vec2 r_vec = JRandom.Vec2(Vec2.one, Vec2.one * 15);
+            Vec2 r_vec = JRandom.Vec2(Vec2.one* 2, Vec2.one * (Constants.CollisionCellSize - 1));
             Color r_color = JRandom.Color();
             bool r_bool = JRandom.Bool();
             Direction r_dir = JRandom.Direction();

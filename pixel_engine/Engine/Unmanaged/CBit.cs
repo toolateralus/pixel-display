@@ -38,9 +38,7 @@ namespace pixel_renderer
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
             source.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
-            //System.Windows.Media.PixelFormats.Bgr24
         }
-
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
         /// </summary>
