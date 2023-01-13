@@ -154,7 +154,6 @@
                     x:Name="inspectorObjName"
                     Background="DarkSlateGray" 
                     Content="Object Name"/>
-            
             <Label  FontSize="4.5"
                     FontWeight="Bold"
                     FontFamily="MS Gothic"
@@ -163,7 +162,6 @@
                     x:Name="inspectorObjInfo" 
                     Background="DarkSlateGray" 
                     Content="Object Details"/>
-            
             <Label  FontSize="4.5" 
                     FontWeight="Bold" 
                     FontFamily="MS Gothic"
@@ -173,7 +171,6 @@
                     x:Name="gcAllocText" 
                     Background="DarkSlateGray"
                     Content="GC Alloc:"/>
-            
             <Label  FontSize="4.5" 
                     FontWeight="Bold" 
                     FontFamily="MS Gothic"

@@ -81,6 +81,7 @@ namespace pixel_renderer
         public static void ReloadCurrentStage()
         {
             var reset = runtime.GetStageAsset();
+
             if (reset is null)
                 throw new NullStageException("Resetting stage failed");
 

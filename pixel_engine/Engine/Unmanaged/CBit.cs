@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
 using Color = System.Drawing.Color;
@@ -19,7 +20,7 @@ namespace pixel_renderer
         {
             Bitmap copy = bmp.Clone() as Bitmap;
             Rectangle rect = new(0, 0, copy.Width, copy.Height);
-            bmd = copy.LockBits(new Rectangle(0, 0, copy.Width, copy.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            bmd = copy.LockBits(new Rectangle(0, 0, copy.Width, copy.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             stride = bmd.Stride;
             data = new byte[stride * copy.Height];
             Marshal.Copy(bmd.Scan0, data, 0, data.Length);
@@ -53,7 +54,7 @@ namespace pixel_renderer
         {
             BitmapData bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
                                   System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                                  PixelFormat.Format32bppArgb);
+                                  System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             // draw sprite data to bitmap unmanaged
             byte[] colorBytes = new byte[bmd.Width * bmd.Height];
