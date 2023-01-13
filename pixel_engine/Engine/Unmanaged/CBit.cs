@@ -31,7 +31,7 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="source"></param>
         /// <param name="destination"></param>
-        public static unsafe void Render(ref Bitmap source, Image destination)
+        public static unsafe void Render(Bitmap source, Image destination)
         {
             BitmapData bmd = source.LockBits(source.Rect(), ImageLockMode.ReadOnly, source.PixelFormat);
             destination.Source = BitmapSource.Create(

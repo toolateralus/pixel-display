@@ -9,7 +9,6 @@ namespace pixel_renderer
     public class CRenderer : RendererBase
     {
         private Bitmap? renderTexture = null; 
-
         private Bitmap? _background;
         public Bitmap Background
         {
@@ -29,16 +28,13 @@ namespace pixel_renderer
             }
             renderTexture = (Bitmap)FallBack.Clone();
         }
-
         public override Bitmap Draw()
         {
-            foreach (SpriteCamera uiComponent in Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>())
-            {
-                if(uiComponent.Enabled == false) continue;
-                    uiComponent.Draw(renderTexture);
-            }
+            IEnumerable<SpriteCamera> cams = Runtime.Instance.GetStage().GetAllComponents<SpriteCamera>();
+            foreach (SpriteCamera cam in cams)
+                if(cam.Enabled) cam.Draw(renderTexture);
             return renderTexture;
         }
-        public override void Render(Image destination) => CBit.Render(ref renderTexture, destination);
+        public override void Render(Image destination) => CBit.Render(renderTexture, destination);
     }
 }
