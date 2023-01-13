@@ -18,13 +18,11 @@ namespace pixel_renderer
         internal static extern bool DeleteObject(IntPtr intPtr);
         public static unsafe void ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd, out int stride, out byte[] data)
         {
-            Bitmap copy = bmp.Clone() as Bitmap;
-            Rectangle rect = new(0, 0, copy.Width, copy.Height);
-            bmd = copy.LockBits(new Rectangle(0, 0, copy.Width, copy.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             stride = bmd.Stride;
-            data = new byte[stride * copy.Height];
+            data = new byte[stride * bmp.Height];
             Marshal.Copy(bmd.Scan0, data, 0, data.Length);
-            copy.UnlockBits(bmd);
+            bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
         }
         /// <summary>
