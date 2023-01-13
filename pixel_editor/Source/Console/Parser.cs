@@ -52,7 +52,7 @@ namespace pixel_editor
         {
             foreach (var x in arg0)
                 if (disallowed_chars.Contains(x))
-                    arg0.Replace(x, (char)0);
+                    arg0 = arg0.Replace(x, (char)0);
             return arg0;
         }
 

@@ -183,6 +183,7 @@
                     Grid.ColumnSpan="3" 
                     x:Name="framerateLabel" 
                     Background="DarkSlateGray"
+                    Foreground="White"
                     Content="Framerate:"/>
 
             <Button HorizontalAlignment="Stretch"
