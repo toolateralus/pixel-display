@@ -7,11 +7,11 @@ namespace pixel_renderer
 {
     public class Camera : UIComponent
     {
-        [JsonProperty] public Vec2 viewportPosition = new(0,0);
-        [JsonProperty] public Vec2 viewportSize = new(1,1);
+        [JsonProperty] public Vec2 viewportPosition = Vec2.zero;
+        [JsonProperty] public Vec2 viewportSize = Vec2.one;
         [JsonProperty] public float angle = 0f;
         [JsonProperty] public DrawingType DrawMode = DrawingType.Wrapped;
-        public float[,] zBuffer = new float[0,0];
+        public float[,] zBuffer = new float[0, 0];
 
         public Vec2 GlobalToViewport(Vec2 global)
         {
@@ -21,9 +21,9 @@ namespace pixel_renderer
 
         public Vec2 ViewportToGlobal(Vec2 vpPos)
         {
-            Vec2 a = vpPos * Size;
-            return (a - bottomRightCornerOffset).Rotated(-angle) + Center;
+            Vec2 relativePosition = (vpPos - viewportPosition) / viewportSize.GetDivideSafe() * Size;
+            return (relativePosition - bottomRightCornerOffset).Rotated(-angle) + Center;
         }
     }
-    public enum DrawingType { Wrapped, Clamped, None}
+    public enum DrawingType { Wrapped, Clamped, None }
 }

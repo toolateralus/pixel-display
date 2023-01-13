@@ -57,10 +57,7 @@ namespace pixel_renderer
                     {
                         Vec2 viewportPos = cam.GlobalToViewport(sprite.parent.position + new Vec2(x, y));
 
-                        if (viewportPos.x < 0 || viewportPos.x >= 1)
-                            continue;
-
-                        if (viewportPos.y < 0 || viewportPos.y >= 1)
+                        if (!viewportPos.Equals(viewportPos.Clamped(Vec2.zero, Vec2.one)))
                             continue;
 
                         int screenPosX = (int)(viewportPos.x * renderTexture.Width);
@@ -89,6 +86,8 @@ namespace pixel_renderer
                 for (int y = 0; y < renderTexture.Height; y++)
                 {
                     Vec2 viewportPos = new Vec2(x, y) / bmpSize.GetDivideSafe();
+                    if (!viewportPos.Equals(viewportPos.Clamped(Vec2.zero, Vec2.one)))
+                        continue;
                     Vec2 globalPos = cam.ViewportToGlobal(viewportPos);
                     Vec2 bgViewport = globalPos / bgSize.GetDivideSafe();
 
