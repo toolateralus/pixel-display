@@ -29,6 +29,12 @@ namespace pixel_renderer
         public static event Action<Key>? OnKeyDown;
         public static event Action<Key>? OnKeyUp;
         public static event Action<Key>? OnKeyToggled;
+
+        public static void RegisterAction(bool async, Action<object[]?> action, object[]? args, Key key, InputEventType type)
+        {
+            InputAction ia = new(async, action, args, key);
+            RegisterAction(ia, type);
+        }
         public static void RegisterAction(InputAction action, InputEventType type)
         {
             switch (type)
@@ -98,12 +104,6 @@ namespace pixel_renderer
            
 
         }
-
-        private static void IterateActions()
-        {
-           
-        }
-
         public static bool GetKeyDown(Key key) => KeyDown.ContainsKey(key) && KeyDown[key];
         public static bool GetKeyUp(Key key) => KeyUp.ContainsKey(key) && KeyUp[key];
         public static bool GetKeyToggled(Key key) => KeyToggled.ContainsKey(key) && KeyToggled[key];

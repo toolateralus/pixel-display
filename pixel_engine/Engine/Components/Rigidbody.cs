@@ -3,19 +3,18 @@ namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
-        [JsonProperty] private float _drag = 0.0f;
+        private float _drag = 0.0f;
         [Field] [JsonProperty] public float drag = .4f;
                 
         [Field] [JsonProperty] public bool usingGravity = true;
         [Field] [JsonProperty] public bool IsTrigger = false;
 
         [Field] [JsonProperty] public Vec2 velocity = new();
-        [Field]  public Sprite? sprite; 
-
+        [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
+        [Field] public Sprite? sprite; 
+        
         const double dragCoefficient = 1;
-
-        public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
-
+        
         private protected void ApplyVelocity()
         {
             parent.position.y += velocity.y;

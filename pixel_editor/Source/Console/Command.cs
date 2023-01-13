@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Media3D;
 using pixel_renderer;
 using pixel_renderer.FileIO;
 
@@ -180,6 +181,27 @@ namespace pixel_editor
             args = null,
             description = "Logs a message to the console, Some characters will cause this to fail."
         };
+        private static Command cmd_set_camera = new()
+        {
+            phrase = "cam;",
+            args = Array.Empty<object>(),
+            action = (e) =>
+            {
+                if (e.Length < 3)
+                    return;
+
+                string nName = (string)e[0];
+                string fName = (string)e[1];
+                object value = e[2];
+
+                Node? node = Runtime.Instance.GetStage().FindNode(nName);
+                SpriteCamera cam = node.GetComponent<SpriteCamera>();
+                Type type = cam.GetType();
+                FieldInfo? field = type.GetRuntimeField(fName);
+                field.SetValue(cam, value);
+            },
+            description = "\n sets provided field in first camera",
+        };
 
         public static Command[] Active { get; } = new Command[]
         {
@@ -190,6 +212,7 @@ namespace pixel_editor
             cmd_set_node_field,
             cmd_spawn_generic,
             cmd_log,
+            cmd_set_camera,
         };
     }
 

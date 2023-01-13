@@ -25,6 +25,7 @@ namespace pixel_editor
             "vec:",
             "int:",
             "str:",
+            "float:",
         };
         
         private static string RemoveUnwantedChars(string? arg0)
@@ -47,7 +48,6 @@ namespace pixel_editor
 
             return new Vec2(x,y);
         }
-        private static int Int(string? arg0) => arg0.ToInt(); 
         private static string String(string arg0)
         {
             foreach (var x in arg0)
@@ -62,6 +62,7 @@ namespace pixel_editor
             _ = ParseIterativeArgs(line, out string rArgs);
 
             int count = rArgs.ToInt();
+
             foreach (var command in commands)
                 if (command.Equals(line))
                     ExecuteCommand(args, count, command);
@@ -72,6 +73,7 @@ namespace pixel_editor
             if (args.Length > 0)
             {
                 List<object> init_args = new();
+                
                 for (int i = 0; i < args.Length; ++i)
                 {
                     object? parse_arg = ParseParam(args[i]);
@@ -108,14 +110,21 @@ namespace pixel_editor
                             arg = arg.Replace("vec:", "");
                             outArg = Vec2(arg);
                             break;
+
                         case "int:":
                             arg = arg.Replace("int:", "");
-                            outArg = Int(arg);
+                            outArg = int.Parse(arg);
                             break;
+
                         case "str:":
                             arg = ((string)arg).Replace("str:", "");
                             outArg = String(arg);
                             break;
+
+                        case "float:":
+                            arg = ((string)arg).Replace("float:", "");
+                            outArg = float.Parse(arg);
+                            break; 
                     }
                 }
 
