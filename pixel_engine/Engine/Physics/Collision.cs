@@ -185,7 +185,7 @@ namespace pixel_renderer
 
             var depenetrationForce = direction * velocityDifference * 0.5f;
 
-            Vec2.Clamp(depenetrationForce, Vec2.zero, Vec2.one * Constants.MaxDepenetrationForce);
+            Vec2.Clamp(ref depenetrationForce, Vec2.zero, Vec2.one * Constants.MaxDepenetrationForce);
 
             B.velocity = Vec2.zero;
             A.velocity = Vec2.zero;

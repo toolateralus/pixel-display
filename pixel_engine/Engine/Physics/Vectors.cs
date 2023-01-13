@@ -1,5 +1,6 @@
 ﻿namespace pixel_renderer
 {
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Runtime.CompilerServices;
     using System.Text.Json.Serialization;
@@ -107,20 +108,17 @@
         /// <param name="value"></param>
         /// <param name="min"></param>
         /// <param name="max"></param>
-        internal static void Clamp(Vec2 value, Vec2 min, Vec2 max)
+        internal void Clamp(Vec2 min, Vec2 max)
         {
-            if (value.x < min.x)
-                value.x = min.x;
-
-            if (value.x > max.x) 
-                value.x = max.x;
-
-            if (value.y < min.y) 
-                value.y = min.y;
-
-            if (value.y > max.y)
-                value.y = max.y;
+            x = x.Clamp(min.x, max.x);
+            y = y.Clamp(min.y, max.y);
         }
+        internal static void Clamp(ref Vec2 value, Vec2 min, Vec2 max)
+        {
+            value.x = value.x.Clamp(min.x, max.x);
+            value.y = value.y.Clamp(min.y, max.y);
+        }
+        internal Vec2 Clamped(Vec2 min, Vec2 max) => new(x.Clamp(min.x, max.x), y.Clamp(min.y, max.y));
     }
 }
 

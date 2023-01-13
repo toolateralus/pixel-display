@@ -13,6 +13,7 @@ namespace pixel_renderer
         #region Numbers
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
+        public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
         public static float GetDivideSafe(this float v) => v == 0 ? float.Epsilon : v;
         public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion

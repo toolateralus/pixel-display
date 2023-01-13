@@ -13,7 +13,7 @@ namespace pixel_renderer
         [JsonProperty] Vec2 viewportPosition = new(0,0);
         [JsonProperty] Vec2 viewportSize = new(1,1);
         [JsonProperty] public float angle = 0f;
-        [JsonProperty] public DrawingType bgDrawingType = DrawingType.Scrolling;
+        [JsonProperty] public DrawingType bgDrawingType = DrawingType.Wrapped;
         float[,] zBuffer = new float[0,0];
 
         public Vec2 GlobalToViewport(Vec2 global) => ((global - Center).Rotated(angle) + bottomRightCornerOffset) / Size.GetDivideSafe();
@@ -62,11 +62,12 @@ namespace pixel_renderer
                 for (int y = 0; y < bmp.Height; y++)
                 {
                     Vec2 bgSize = new Vec2(bg.Width, bg.Height);
+                    Vec2 bmpSize = new Vec2(bmp.Width, bmp.Height);
 
-                    Vec2 viewportPos = new Vec2(x,y) / new Vec2(bmp.Width, bmp.Height).GetDivideSafe();
+                    Vec2 viewportPos = new Vec2(x,y) / bmpSize.GetDivideSafe();
                     Vec2 globalPos = ViewportToGlobal(viewportPos);
                     Vec2 bgViewport = (globalPos / bgSize.GetDivideSafe());
-                    if (bgDrawingType == DrawingType.Scrolling)
+                    if (bgDrawingType == DrawingType.Wrapped)
                     {
                         bgViewport += new Vec2(1, 1);
                         Vec2 wrappedBgViewport = new(bgViewport.x - (int)bgViewport.x, bgViewport.y - (int)bgViewport.y);
@@ -75,14 +76,14 @@ namespace pixel_renderer
                     }
                     if (bgDrawingType == DrawingType.Clamped)
                     {
-                        Vec2.Clamp(bgViewport, new(0,0), new(1,1));
-                        Vec2 bgPos = bgViewport * bgSize;
+                        bgViewport.Clamp(Vec2.zero, Vec2.one);
+                        Vec2 bgPos = (bgViewport * (bgSize - Vec2.one)).Clamped(Vec2.zero, bmpSize);
                         bmp.SetPixel(x, y, bg.GetPixel((int)bgPos.x, (int)bgPos.y));
                     }
                 }
             }
         }
 
-        public enum DrawingType { Scrolling, Clamped, None}
+        public enum DrawingType { Wrapped, Clamped, None}
     }
 }
