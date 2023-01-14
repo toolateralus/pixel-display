@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Printing;
 using System.Security.Policy;
 using System.Windows.Controls;
@@ -13,11 +14,11 @@ namespace pixel_renderer
 {
     public class Texture : Asset
     {
-        [JsonProperty] private Metadata imgData;
-        [JsonProperty] public Color? color;
-        [Field] public Bitmap? Image;
-        [Field] public Bitmap? Mask;
+        [JsonConstructor]
+        public Texture(string Name, Type fileType, string? UUID = null) : base(Name, fileType, UUID)
+        {
 
+        }
         public Texture(Metadata imgData, Color? color = null, Bitmap? mask = null)
         {
             this.imgData = imgData;
@@ -25,24 +26,32 @@ namespace pixel_renderer
             this.Mask = mask;
             this.color = color;
         }
-        [JsonConstructor]
-        public Texture(string Name, Type fileType, string? UUID = null) : base(Name, fileType, UUID)
-        {
-
-        }
+        
+        [JsonProperty] private Metadata imgData;
+        [Field] [JsonProperty] public Color? color;
+        
+        [Field] public Bitmap? Image;
+        [Field] public Bitmap? Mask;
+        
+        public bool HasImage => Image != null;
+        public bool HasImageMetadata => imgData != null; 
 
         public Color[,] GetColorArray()
         {
-            if (Image is null) throw new NullReferenceException();
+            if (Image is null)
+                throw new NullReferenceException();
+
+            // clone the bitmap to prevent usage violations
+            Bitmap copy = (Bitmap)Image.Clone();
+
             Color[,] output = new Color[Image.Width, Image.Height];
-            for (int i = 0; i < Image.Width; ++i)
+            for (int i = 0; i < copy.Width; ++i)
                 for (int j = 0; j < Image.Height; ++j)
-                    output[i,j] = Image.GetPixel(i, j);
+                    output[i,j] = copy.GetPixel(i, j);
             return output; 
                     
         }
-        public bool HasImage => Image != null;
-        public bool HasImageMetadata => imgData != null; 
+        
 
     }
     public enum SpriteType { SolidColor, Image, Custom};
