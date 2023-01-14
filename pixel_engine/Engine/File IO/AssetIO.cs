@@ -43,7 +43,7 @@ namespace pixel_renderer.FileIO
             if (!IO.Skipping)
             {
                 MessageBoxResult overwriteWarningResult = IO.FileOverrideWarning(meta.Name);
-                MessageBoxResult doForAllResult = IO.DoForAllQuestion();
+                MessageBoxResult doForAllResult = IO.QuestionBox("Do for all (uses last choice)");
 
                 if (doForAllResult == MessageBoxResult.Yes)
                     IO.Skipping = true;

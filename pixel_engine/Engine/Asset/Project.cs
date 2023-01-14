@@ -9,7 +9,7 @@ namespace pixel_renderer
     public class Project
     {
         public int fileSize = 0;
-        public List<Asset> library;
+        public List<Metadata> library;
         public int stageIndex;
         public List<StageAsset> stages;
         public string Name 
@@ -45,11 +45,21 @@ namespace pixel_renderer
         public Project(string name)
         {
             Name = name;
-            library = AssetLibrary.Clone();
+            GetAssetLibrary();
+
             stageIndex = 0;
             fileSize = 0;
             hash = NameHash();
         }
+
+        private void GetAssetLibrary()
+        {
+            library = new();
+            var lib = AssetLibrary.Clone();
+            foreach (var asset in lib)
+                library.Add(asset.Key);
+        }
+
         public Project()
         {
 
