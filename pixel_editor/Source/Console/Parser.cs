@@ -26,6 +26,7 @@ namespace pixel_editor
             "int:",
             "str:",
             "float:",
+            "bool:",
         };
         
         private static string RemoveUnwantedChars(string? arg0)
@@ -110,21 +111,26 @@ namespace pixel_editor
                             arg = arg.Replace("vec:", "");
                             outArg = Vec2(arg);
                             break;
-
                         case "int:":
                             arg = arg.Replace("int:", "");
                             outArg = int.Parse(arg);
                             break;
-
                         case "str:":
                             arg = ((string)arg).Replace("str:", "");
                             outArg = String(arg);
                             break;
-
                         case "float:":
-                            arg = ((string)arg).Replace("float:", "");
+                            arg = arg.Replace("float:", "");
                             outArg = float.Parse(arg);
-                            break; 
+                            break;
+                        case "bool:":
+                            arg = arg.Replace("bool:", "");
+                            outArg = bool.Parse(arg);
+                            break;
+                        default:
+                            arg = "";
+                            outArg = new object(); 
+                            break;
                     }
                 }
 

@@ -64,8 +64,9 @@ namespace pixel_renderer
         {
 
         }
+         
         [JsonConstructor]
-        public Project(List<StageAsset> stages, List<Asset> library, int stageIndex, int fileSize, string name, int hash)
+        public Project(List<StageAsset> stages, List<Metadata> library, int stageIndex, int fileSize, string name, int hash)
         {
             this.stages = stages;
             this.library = library;

@@ -151,7 +151,7 @@ namespace pixel_editor
             // updates things relevant to to engine more or less.
             if (ShouldUpdate)
             {
-                Host?.Render(image);
+                Host.Render(image);
                 UpdateMetrics();
             }
 

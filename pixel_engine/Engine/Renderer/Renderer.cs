@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Ink;
+using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
 
 namespace pixel_renderer
@@ -38,34 +37,51 @@ namespace pixel_renderer
             IEnumerable<Camera> cams = Runtime.Instance.GetStage().GetAllComponents<Camera>();
             IEnumerable<Sprite> sprites = Runtime.Instance.GetStage().GetAllComponents<Sprite>();
             foreach (Camera cam in cams)
-                if(cam.Enabled) RenderSprites(cam, sprites);
+            {
+                if (cam.Enabled)
+                {
+                    lock(renderTexture) 
+                        RenderSprites(cam, sprites);
+                }
+            }
             return renderTexture;
+        }
+        public override void Render(Image destination)
+        {
+            if(renderTexture is null) return;
+
+            CBit.WriteOnlyBitmapData(renderTexture, out var bmd);
+            IntPtr scan0 = bmd.Scan0;
+            Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
+            renderTexture.UnlockBits(bmd); 
+            CBit.DeleteObject(scan0);
+
+            CBit.Render(renderTexture, destination);
         }
         public void RenderSprites(Camera cam, IEnumerable<Sprite> sprites)
         {
+           
             if (renderTexture == null) return;
 
-            var bmd = renderTexture.LockBits(
-                new(0, 0, renderTexture.Width, renderTexture.Height),
-                System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                renderTexture.PixelFormat
-                );
+
+            int height = renderTexture.Height;
+            int width = renderTexture.Width;
+            int stride = 4 * (width * 24 + 31) / 32);
 
             bool shouldResize =
-                bmd.Height != cam.zBuffer.GetLength(1) ||
-                bmd.Width != cam.zBuffer.GetLength(0);
+                height != cam.zBuffer.GetLength(1) ||
+                width != cam.zBuffer.GetLength(0);
 
             if (shouldResize)
             {
-                cam.zBuffer = new float[bmd.Width, bmd.Height];
-                frameBuffer = new byte[bmd.Stride * bmd.Height];
+                cam.zBuffer = new float[width, height];
+                frameBuffer = new byte[stride * height];
             }
 
             System.Array.Clear(cam.zBuffer);
 
-            DrawBackground(cam, bmd);
-
-            Vec2 bmpSize = new Vec2(bmd.Width, bmd.Height);
+            DrawBackground(cam, height, width, stride);
+            Vec2 bmpSize = new Vec2(width, height);
 
             foreach (Sprite sprite in sprites)
                 for (Vec2Int spritePos = new(); spritePos.y < sprite.size.y; spritePos.Increment2D((int)sprite.size.x))
@@ -77,11 +93,14 @@ namespace pixel_renderer
 
                     if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
                     cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
-                    SetPixelColor(bmd, sprite.ColorData[spritePos.x, spritePos.y], screenPos);
+                    SetPixelColor(width, height, stride, sprite.ColorData[spritePos.x, spritePos.y], screenPos);
                 }
-            Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
-            renderTexture.UnlockBits(bmd);
         }
+
+
+
+
+
 
         private void SetPixelColor(BitmapData bmd, System.Drawing.Color color, Vec2 screenPos)
         {
@@ -91,7 +110,6 @@ namespace pixel_renderer
             frameBuffer[frameBufferIndex + 1] = color.G;
             frameBuffer[frameBufferIndex + 2] = color.R;
         }
-
         private void DrawBackground(Camera cam, BitmapData bmd)
         {
             if (cam.DrawMode is DrawingType.None) return;
@@ -111,7 +129,6 @@ namespace pixel_renderer
                 SetPixelColor(bmd, bg.GetPixel((int)bgPos.x, (int)bgPos.y), screenPos);
             }
         }
-
         private static Vec2 BgViewportToBgPos(Camera cam, Vec2 bgSize, Vec2 bgViewportPos)
         {
             Vec2 maxIndex = bgSize - Vec2.one;
@@ -123,6 +140,5 @@ namespace pixel_renderer
             };
         }
 
-        public override void Render(Image destination) => CBit.Render(renderTexture, destination);
     }
 }
