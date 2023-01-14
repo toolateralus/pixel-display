@@ -67,8 +67,7 @@ namespace pixel_renderer
         {
             get
             { 
-                Color? color = texture?.color ?? _colors[0,0];
-                color ??= Color.White;
+                Color? color = texture?.color ?? Color.White;
                 return (Color)color; 
             }
 

@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 using System.DirectoryServices;
 using System.Runtime.CompilerServices;
+using System.Drawing;
 
 namespace pixel_renderer.Scripts
 {
@@ -25,7 +26,6 @@ namespace pixel_renderer.Scripts
             parent.TryGetComponent(out sprite);
             parent.TryGetComponent(out rb);
             CreateInputEvents();
-
         }
 
         void Up(object[] e) => moveVector = new Vec2(0, -inputMagnitude);
@@ -70,14 +70,7 @@ namespace pixel_renderer.Scripts
             var imgData = new Metadata("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
             Sprite sprite = new()
             {
-                texture = new(imgData),
-                size = new(24, 24),
-                isCollider = true,
-                camDistance = 1,
-                dirty = true,
-                Type = SpriteType.Image,
-                Enabled = true,
-                Name = "Player sprite",
+                
             };
             Player player_obj = new()
             {
