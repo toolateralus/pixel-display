@@ -163,11 +163,9 @@ namespace pixel_renderer
         }
         public IEnumerable<T> GetAllComponents<T>() where T : Component
         {
-            IEnumerable<T> components = from Node node in Nodes
-                                        where node.HasComponent<T>()
-                                        let component = node.GetComponent<T>()
-                                           select component;
-            return components;
+            return from Node node in Nodes
+                from T component in node.GetComponents<T>()
+                   select component;
         }
         private Bitmap GetBackground(Metadata meta)
         {
