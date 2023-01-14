@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using Newtonsoft.Json;
 using pixel_renderer;
+using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using Color = System.Drawing.Color;
 
@@ -19,19 +20,23 @@ namespace pixel_renderer
         {
 
         }
-        public Texture(Metadata imgData, Color? color = null, Bitmap? mask = null)
+        public Texture(Metadata imageMetadata, Color? color = null, (Metadata, Bitmap)? mask = null )
         {
-            this.imgData = imgData;
-            Image = new(imgData.fullPath);
-            this.Mask = mask;
+            m_image = new(imageMetadata, new(imageMetadata.fullPath)); 
+            Mask = mask;
             this.color = color;
         }
         
         [JsonProperty] private Metadata imgData;
         [Field] [JsonProperty] public Color? color;
-        
-        [Field] public Bitmap? Image;
-        [Field] public Bitmap? Mask;
+
+        public Bitmap? Image
+        {
+            get => m_image.Value.Item2;
+            set { m_image = new(m_image.Value.Item1, value); }
+        }
+        public (Metadata, Bitmap)? m_image;
+        [Field] public (Metadata, Bitmap)? Mask;
         
         public bool HasImage => Image != null;
         public bool HasImageMetadata => imgData != null; 

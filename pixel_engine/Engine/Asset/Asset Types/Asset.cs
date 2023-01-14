@@ -7,23 +7,26 @@ namespace pixel_renderer.FileIO
         public string Name = "New Asset";
         public string pathFromRoot = "";
         public string filePath = "C:\\Users\\";
-
+        public Metadata metadata;
         public string fileSize = "";
         public string UUID => _uuid;
         private string _uuid = "";
 
         public Type fileType;
-
         new public Type GetType() => fileType;
-        
+        public Metadata GetMetadata() => new(Name, Constants.WorkingRoot + Constants.AssetsDir + $"\\{Name}", Constants.AssetsFileExtension);
+        public void RegisterInLibrary() => Assets.AssetLibrary.Register(GetMetadata(), this);
+
         public Asset(string Name, Type fileType, string? UUID = null)
         {
             this.filePath = Constants.AssetsDir + "\\" + Name;
             this.pathFromRoot = Project.GetPathFromRoot(filePath);
             this.fileType = fileType;
             this.Name = Name;
-            _uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
+            _uuid = UUID ?? pixel_renderer.UUID.NewUUID();
+            metadata = GetMetadata(); 
         }
+
         public Asset() 
         {
         }

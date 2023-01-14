@@ -113,7 +113,6 @@
                     RenderOptions.CachingHint="Cache"
                     Grid.RowSpan="14"
                     Grid.ColumnSpan="14" 
-                    
                     />
             <TextBox 
                 FontSize="3.75" 
@@ -211,7 +210,8 @@
                     Grid.ColumnSpan="1"
                     Grid.RowSpan="1"
                     Click="OnCommandSent" 
-                    x:Name="sendCommandButton"/>
+                    x:Name="sendCommandButton"
+                />
             <Button HorizontalAlignment="Stretch" 
                     VerticalAlignment="Top"
                     MaxWidth="90"

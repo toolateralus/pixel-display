@@ -36,7 +36,7 @@ namespace pixel_renderer.Assets
                         MessageBoxButton.YesNo);
 
                     if (syncResult == MessageBoxResult.Yes) 
-                        AssetLibrary.Sync();
+                        AssetLibrary.Save();
                 }
         }
         private static void ImportTask()

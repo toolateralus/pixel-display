@@ -97,7 +97,7 @@ namespace pixel_renderer.Assets
         /// <summary>
         /// Save the currently loaded asset Library to the disk.
         /// </summary>
-        public static void Sync()
+        public static void Save()
         {
             IO.Skipping = false;
             foreach (var pair in Current)
@@ -110,14 +110,13 @@ namespace pixel_renderer.Assets
         /// Clone the current Asset Library into a List.
         /// </summary>
         /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
-        public static List<Asset>? Clone()
+        public static Dictionary<Metadata, Asset>? Clone()
         {
-            List<Asset> library = new();
-            
-            foreach (var pair in Current)
-                    library.Add(pair.Value);
+            Dictionary<Metadata, Asset>? assets = new();
 
-            return library;
+            foreach (var pair in Current)
+                assets.Add(pair.Key, pair.Value);
+            return assets;
         }
     }
 }

@@ -10,6 +10,7 @@ using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Windows.Threading;
 using System.Threading;
+using static pixel_renderer.IO;
 
 namespace pixel_editor
 {
@@ -150,7 +151,7 @@ namespace pixel_editor
             // updates things relevant to to engine more or less.
             if (ShouldUpdate)
             {
-                Host?.Render(image);
+                Host.Render(image);
                 UpdateMetrics();
             }
 
@@ -292,7 +293,7 @@ namespace pixel_editor
             Metadata meta;
             GetProjectPsuedoMetadata(out proj, out meta);
             ProjectIO.WriteProject(proj, meta);
-            AssetLibrary.Sync();
+            AssetLibrary.Save();
         }
         private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
         {
