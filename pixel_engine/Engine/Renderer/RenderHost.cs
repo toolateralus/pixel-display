@@ -35,7 +35,7 @@ namespace pixel_renderer
                 default:
                     throw new InvalidOperationException("Invalid case passed into RenderState selection");
             }
-            m_renderer.Render(renderSurface);
+            if(m_renderer.HasRenderTexture) m_renderer.Render(renderSurface);
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
         }
         internal protected void Next()

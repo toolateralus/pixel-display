@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Media.Imaging;
@@ -12,8 +14,10 @@ namespace pixel_renderer
     public class CRenderer : RendererBase
     {
         private Bitmap? renderTexture = null; 
-        private Bitmap? _background;
+        private volatile Bitmap? _background;
         byte[] frameBuffer = System.Array.Empty<byte>();
+        Task? frameBufferTask = null;
+        public bool HasRenderTexture => renderTexture != null;
         public Bitmap Background
         {
             get
@@ -46,23 +50,36 @@ namespace pixel_renderer
             }
             return renderTexture;
         }
-        public override void Render(Image destination)
+        public async override void Render(Image destination)
         {
-            if(renderTexture is null) return;
-
+            if (renderTexture is null) return;
             CBit.WriteOnlyBitmapData(renderTexture, out var bmd);
             IntPtr scan0 = bmd.Scan0;
-            Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
-            renderTexture.UnlockBits(bmd); 
+            await WaitForFramebufferTask(WriteFrameToBitmap(bmd));
+            renderTexture.UnlockBits(bmd);
             CBit.DeleteObject(scan0);
-
             CBit.Render(renderTexture, destination);
-        }
-        public void RenderSprites(Camera cam, IEnumerable<Sprite> sprites)
-        {
-           
-            if (renderTexture == null) return;
 
+            return;
+        }
+
+        private async Task WaitForFramebufferTask(Task task)
+        {
+            if (frameBufferTask != null) await frameBufferTask;
+            frameBufferTask = task;
+            await frameBufferTask;
+            frameBufferTask = null;
+        }
+
+        private Task WriteFrameToBitmap(BitmapData bmd)
+        {
+            Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
+            return Task.CompletedTask;
+        }
+
+        public async void RenderSprites(Camera cam, IEnumerable<Sprite> sprites)
+        {
+            if (renderTexture == null) return;
 
             int height = renderTexture.Height;
             int width = renderTexture.Width;
@@ -93,25 +110,27 @@ namespace pixel_renderer
 
                     if (sprite.camDistance <= cam.zBuffer[screenPos.x, screenPos.y]) continue;
                     cam.zBuffer[screenPos.x, screenPos.y] = sprite.camDistance;
-                    SetPixelColor(stride, sprite.ColorData[spritePos.x, spritePos.y], screenPos);
+                    Task task = SetPixelColor(stride, sprite.ColorData[spritePos.x, spritePos.y], screenPos);
+                    await WaitForFramebufferTask(task);
                 }
         }
 
-
-        private void SetPixelColor(int stride, System.Drawing.Color color, Vec2Int screenPos)
+        private Task SetPixelColor(int stride, System.Drawing.Color color, Vec2Int screenPos)
         {
             int frameBufferIndex = screenPos.y * stride + (screenPos.x * 3);
 
             frameBuffer[frameBufferIndex + 0] = color.B;
             frameBuffer[frameBufferIndex + 1] = color.G;
             frameBuffer[frameBufferIndex + 2] = color.R;
+
+            return Task.CompletedTask;
         }
         private void DrawBackground(Camera cam, Vec2Int bmpSize, int stride)
         {
             if (cam.DrawMode is DrawingType.None) return;
 
-            Bitmap bg = Background;
-            Vec2 bgSize = new(bg.Width, bg.Height);
+            Bitmap background = Background;
+            Vec2 bgSize = new(background.Width, background.Height);
 
             for (Vec2Int screenPos = new(0,0); screenPos.y < bmpSize.x; screenPos.Increment2D(bmpSize.x))
             {
@@ -121,7 +140,7 @@ namespace pixel_renderer
                 Vec2 global = cam.CamViewportToGlobal(camViewport);
                 Vec2 bgViewportPos = global / bgSize.GetDivideSafe();
                 Vec2Int bgPos = (Vec2Int)BgViewportToBgPos(cam, bgSize, bgViewportPos);
-                SetPixelColor(stride, bg.GetPixel(bgPos.x, bgPos.y), screenPos);
+                SetPixelColor(stride, background.GetPixel(bgPos.x, bgPos.y), screenPos);
             }
         }
         private static Vec2 BgViewportToBgPos(Camera cam, Vec2 bgSize, Vec2 bgViewportPos)
