@@ -87,9 +87,9 @@ namespace pixel_renderer
         {
             int frameBufferIndex = (int)screenPos.y * bmd.Stride + ((int)screenPos.x * 3);
 
-            frameBuffer[frameBufferIndex + 0] = color.R;
+            frameBuffer[frameBufferIndex + 0] = color.B;
             frameBuffer[frameBufferIndex + 1] = color.G;
-            frameBuffer[frameBufferIndex + 2] = color.B;
+            frameBuffer[frameBufferIndex + 2] = color.R;
         }
 
         private void DrawBackground(Camera cam, BitmapData bmd)
