@@ -120,6 +120,8 @@
             value.y = value.y.Clamp(min.y, max.y);
         }
         internal Vec2 Clamped(Vec2 min, Vec2 max) => new(x.Clamp(min.x, max.x), y.Clamp(min.y, max.y));
+        internal void Wrap(Vec2 max) { x = x.Wrapped(max.x); y = y.Wrapped(max.y); }
+        internal Vec2 Wrapped(Vec2 max) => new(x.Wrapped(max.x), y.Wrapped(max.y));
         internal bool IsWithin(Vec2 min, Vec2 max) => x.IsWithin(min.x, max.x) && y.IsWithin(min.y, max.y);
         internal bool IsWithinMaxExclusive(Vec2 min, Vec2 max) =>
             x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
