@@ -202,17 +202,14 @@ namespace pixel_renderer
             }
         }
 
-        public List<T> GetComponents<T>() where T : Component
+        public IEnumerable<T> GetComponents<T>() where T : Component
         {
             lock (Components)
             {
-                List<T> output = new();
-                foreach (var component in ComponentsList)
-                {
-                    if (component.GetType().Equals(typeof(T)))
-                        output.Add((T)component);
-                }
-                return output;
+                return from Type type in Components.Keys
+                       where type.IsAssignableTo(typeof(T))
+                       from T component in Components[type]
+                       select component;
             }
         }
         public NodeAsset ToAsset() => new(this);

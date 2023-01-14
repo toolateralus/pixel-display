@@ -35,10 +35,14 @@ namespace pixel_renderer
         }
         public override Bitmap Draw()
         {
-            IEnumerable<Camera> cams = Runtime.Instance.GetStage().GetAllComponents<Camera>();
+            IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
             IEnumerable<Sprite> sprites = Runtime.Instance.GetStage().GetAllComponents<Sprite>();
-            foreach (Camera cam in cams)
-                if(cam.Enabled) RenderSprites(cam, sprites);
+            foreach (var uiComponent in uiComponents)
+            {
+                if (!uiComponent.Enabled) continue;
+                if (uiComponent is Camera) RenderSprites(uiComponent as Camera, sprites);
+            }
+                
             return renderTexture;
         }
         public void RenderSprites(Camera cam, IEnumerable<Sprite> sprites)
