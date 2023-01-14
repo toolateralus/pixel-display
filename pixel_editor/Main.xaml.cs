@@ -9,6 +9,7 @@ using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Windows.Threading;
+using System.Threading;
 
 namespace pixel_editor
 {
@@ -101,7 +102,6 @@ namespace pixel_editor
             engine.project = defaultProject;
             
             GetEvents();
-            SubscribeInputs();
         }
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
@@ -158,20 +158,22 @@ namespace pixel_editor
                 throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
         }
         DispatcherTimer timer = new();
-
+        Timer _timer; 
         private void GetEvents()
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
-            timer.Interval = TimeSpan.FromTicks(100);
-            timer.Tick += Update;
-            timer.Start();
+            StartEditorRenderClock();
+            timer.Tick += Update;    
             Runtime.InspectorEventRaised += QueueEvent;
         }
-        private static void SubscribeInputs()
+
+        private void StartEditorRenderClock()
         {
-            
+            timer.Interval = TimeSpan.FromTicks(100);
+            timer.Start();
         }
+
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)
