@@ -15,6 +15,9 @@ using static pixel_renderer.Input;
 using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Automation;
+using System.ComponentModel;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace pixel_editor
 {
@@ -162,11 +165,16 @@ namespace pixel_editor
             if(Events.ExecuteAll() is null)
                 throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
         }
+        DispatcherTimer timer = new();
+
         private void GetEvents()
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
-            CompositionTarget.Rendering += Update;
+            //CompositionTarget.Rendering += Update;
+            timer.Interval = TimeSpan.FromTicks(100);
+            timer.Tick += Update;
+            timer.Start();
             Runtime.InspectorEventRaised += QueueEvent;
         }
         private static void SubscribeInputs()

@@ -1,6 +1,7 @@
 ﻿using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
+using pixel_renderer.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -92,7 +93,7 @@ namespace pixel_editor
             var name = stageNameTxt.Text.ToFileNameFormat();
             
             if (usingStarterAssets)
-                StagingHost.AddPlayer(nodes);
+                Player.AddPlayer(nodes);
 
             var stage = new Stage(name, background_meta, nodes.ToNodeAssets());
 

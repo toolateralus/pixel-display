@@ -97,7 +97,7 @@ namespace pixel_renderer
                         if (offsetX is < 0 or >= Constants.ScreenW
                             || offsetY is < 0 or >= Constants.ScreenH) continue;
 
-                        colors[(int)(offsetY * 255 + offsetX)] = sprite.colorData[x, y];
+                        colors[(int)(offsetY * 255 + offsetX)] = sprite.ColorData[x, y];
                     }
             return colors;
         }

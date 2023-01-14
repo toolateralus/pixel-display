@@ -78,7 +78,7 @@ namespace pixel_renderer
 
                         if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
                         cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
-                        SetPixelColor(bmd, sprite.colorData[x,y], screenPos);
+                        SetPixelColor(bmd, sprite.ColorData[x,y], screenPos);
                     }
             Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
             renderTexture.UnlockBits(bmd);

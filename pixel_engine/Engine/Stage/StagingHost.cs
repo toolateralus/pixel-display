@@ -1,5 +1,6 @@
 ﻿using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
+using pixel_renderer.Scripts;
 using System;
 using System.Collections.Generic;
 using Color = System.Drawing.Color; 
@@ -60,8 +61,8 @@ namespace pixel_renderer
         public static Stage Default()
         {
             var nodes = new List<Node>();
-            
-            AddPlayer(nodes);
+            Player.
+                        AddPlayer(nodes);
 
             var bitmap = Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp";
             var backgroundMeta = new Metadata("Bitmap Metadata", bitmap, ".bmp");
@@ -89,28 +90,6 @@ namespace pixel_renderer
                 runtime.Toggle();
 
             runtime.SetStageAsset(reset);
-        }
-        public static void AddPlayer(List<Node> nodes)
-        {
-            Vec2 playerStartPosition = new Vec2(12, 24);
-            Node playerNode = new("Player", playerStartPosition, Vec2.one);
-            Rigidbody rb = new()
-            {
-                IsTrigger = false,
-            };
-            Sprite sprite = new(Vec2.one * 4, JRandom.Color(), false);
-            Scripts.Player player_obj = new()
-            {
-                takingInput = true
-            };
-
-            playerNode.AddComponent(rb);
-            playerNode.AddComponent(player_obj);
-            playerNode.AddComponent(sprite);
-            var cam = playerNode.AddComponent<Camera>();
-            cam.Size = new(256, 256);
-            
-            nodes.Add(playerNode);
         }
     }
 }

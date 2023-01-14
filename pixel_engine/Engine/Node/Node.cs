@@ -83,13 +83,19 @@ namespace pixel_renderer
         }
         public void FixedUpdate(float delta)
         {
-            for (int i = 0; i < ComponentsList.Count; i++)
-                  ComponentsList[i].FixedUpdate(delta);
+            lock (Components)
+            {
+                for (int i = 0; i < ComponentsList.Count; i++)
+                      ComponentsList[i].FixedUpdate(delta);
+            }
         }
         public void Update()
         {
-            for (int i = 0; i < ComponentsList.Count; i++)
-                  ComponentsList[i].Update();
+            lock (Components)
+            {
+                for (int i = 0; i < ComponentsList.Count; i++)
+                    ComponentsList[i].Update();
+            }
         }
         
         public void SetActive(bool value) => _enabled = value; 
