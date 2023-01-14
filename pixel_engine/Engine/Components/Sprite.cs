@@ -46,7 +46,7 @@ namespace pixel_renderer
 
             Color[,] output = new Color[Image.Width, Image.Height];
             for (int i = 0; i < copy.Width; ++i)
-                for (int j = 0; j < Image.Height; ++j)
+                for (int j = 0; j < copy.Height; ++j)
                     output[i,j] = copy.GetPixel(i, j);
             return output; 
                     
