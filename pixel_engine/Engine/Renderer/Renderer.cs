@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-    using Bitmap = System.Drawing.Bitmap;
+using System.Windows.Media;
+using Bitmap = System.Drawing.Bitmap;
 
 namespace pixel_renderer
 {
@@ -10,6 +14,7 @@ namespace pixel_renderer
     {
         private Bitmap? renderTexture = null; 
         private Bitmap? _background;
+        byte[] frameBuffer = System.Array.Empty<byte>();
         public Bitmap Background
         {
             get
@@ -40,18 +45,27 @@ namespace pixel_renderer
         {
             if (renderTexture == null) return;
 
+            var bmd = renderTexture.LockBits(
+                new(0, 0, renderTexture.Width, renderTexture.Height),
+                System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                renderTexture.PixelFormat
+                );
+
             bool shouldResize =
-                renderTexture.Height != cam.zBuffer.GetLength(1) ||
-                renderTexture.Width != cam.zBuffer.GetLength(0);
+                bmd.Height != cam.zBuffer.GetLength(1) ||
+                bmd.Width != cam.zBuffer.GetLength(0);
 
             if (shouldResize)
-                cam.zBuffer = new float[renderTexture.Width, renderTexture.Height];
+            {
+                cam.zBuffer = new float[bmd.Width, bmd.Height];
+                frameBuffer = new byte[bmd.Stride * bmd.Height];
+            }
 
             System.Array.Clear(cam.zBuffer);
 
-            DrawBackground(cam);
+            DrawBackground(cam, bmd);
 
-            Vec2 bmpSize = new Vec2(renderTexture.Width, renderTexture.Height);
+            Vec2 bmpSize = new Vec2(bmd.Width, bmd.Height);
 
             foreach (Sprite sprite in sprites)
                 for (int x = 0; x < sprite.size.x; x++)
@@ -64,23 +78,32 @@ namespace pixel_renderer
 
                         if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
                         cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
-
-                        renderTexture.SetPixel((int)screenPos.x, (int)screenPos.y, sprite.ColorData[x, y]);
+                        SetPixelColor(bmd, sprite.colorData[x,y], screenPos);
                     }
+            Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
+            renderTexture.UnlockBits(bmd);
         }
 
-        private void DrawBackground(Camera cam)
+        private void SetPixelColor(BitmapData bmd, System.Drawing.Color color, Vec2 screenPos)
+        {
+            int frameBufferIndex = (int)screenPos.y * bmd.Stride + ((int)screenPos.x * 3);
+
+            frameBuffer[frameBufferIndex + 0] = color.R;
+            frameBuffer[frameBufferIndex + 1] = color.G;
+            frameBuffer[frameBufferIndex + 2] = color.B;
+        }
+
+        private void DrawBackground(Camera cam, BitmapData bmd)
         {
             if (cam.DrawMode is DrawingType.None) return;
-            if (renderTexture == null) return;
 
             Bitmap bg = Background;
             Vec2 bgSize = new(bg.Width, bg.Height);
-            Vec2 bmpSize = new(renderTexture.Width, renderTexture.Height);
+            Vec2 bmpSize = new(bmd.Width, bmd.Height);
 
-            for (int x = 0; x < renderTexture.Width; x++)
+            for (int x = 0; x < bmd.Width; x++)
             {
-                for (int y = 0; y < renderTexture.Height; y++)
+                for (int y = 0; y < bmd.Height; y++)
                 {
                     Vec2 camViewport = cam.ScreenToCamViewport(new Vec2(x, y) / bmpSize.GetDivideSafe());
                     if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
@@ -89,25 +112,25 @@ namespace pixel_renderer
                     Vec2 bgViewport = global / bgSize.GetDivideSafe();
 
                     if (cam.DrawMode == DrawingType.Wrapped)
-                        DrawWrapped(renderTexture, bg, ref bgSize, ref x, ref y, ref bgViewport);
+                        DrawWrapped(bmd, bg, bgSize, x, y, bgViewport);
 
                     if (cam.DrawMode == DrawingType.Clamped)
-                        DrawClamped(renderTexture, bg, ref bgSize, ref x, ref y, ref bmpSize, ref bgViewport);
+                        DrawClamped(bmd, bg, bgSize, x, y, bmpSize, bgViewport);
                 }
             }
         }
-        public static void DrawClamped(Bitmap bmp, Bitmap background, ref Vec2 bgSize, ref int x, ref int y, ref Vec2 bmpSize, ref Vec2 bgViewport)
+        public void DrawClamped(BitmapData bmd, Bitmap background, Vec2 bgSize, int x, int y, Vec2 bmpSize, Vec2 bgViewport)
         {
             bgViewport.Clamp(Vec2.zero, Vec2.one);
             Vec2 bgPos = (bgViewport * (bgSize - Vec2.one)).Clamped(Vec2.zero, bmpSize);
-            bmp.SetPixel(x, y, background.GetPixel((int)bgPos.x, (int)bgPos.y));
+            SetPixelColor(bmd, background.GetPixel((int)bgPos.x, (int)bgPos.y), new Vec2(x, y));
         }
-        public static void DrawWrapped(Bitmap bmp, Bitmap background, ref Vec2 bgSize, ref int x, ref int y, ref Vec2 bgViewport)
+        public void DrawWrapped(BitmapData bmd, Bitmap background, Vec2 bgSize, int x, int y, Vec2 bgViewport)
         {
             bgViewport += new Vec2(1, 1);
             Vec2 wrappedBgViewport = new(bgViewport.x - (int)bgViewport.x, bgViewport.y - (int)bgViewport.y);
             Vec2 bgPos = wrappedBgViewport * bgSize;
-            bmp.SetPixel(x, y, background.GetPixel((int)bgPos.x, (int)bgPos.y));
+            SetPixelColor(bmd, background.GetPixel((int)bgPos.x, (int)bgPos.y), new Vec2(x, y));
         }
         public override void Render(Image destination) => CBit.Render(renderTexture, destination);
     }
