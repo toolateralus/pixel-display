@@ -65,7 +65,7 @@ namespace pixel_renderer
                         if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
                         cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
 
-                        renderTexture.SetPixel((int)screenPos.x, (int)screenPos.y, sprite.colorData[x, y]);
+                        renderTexture.SetPixel((int)screenPos.x, (int)screenPos.y, sprite.ColorData[x, y]);
                     }
         }
 

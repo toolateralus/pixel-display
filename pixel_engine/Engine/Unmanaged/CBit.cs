@@ -16,7 +16,7 @@ namespace pixel_renderer
     {
         [DllImport("gdi32.dll")]
         internal static extern bool DeleteObject(IntPtr intPtr);
-        public static unsafe void ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd, out int stride, out byte[] data)
+        public static unsafe void ReadonlyBitmapData(Bitmap bmp, out BitmapData bmd, out int stride, out byte[] data)
         {
             bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             stride = bmd.Stride;
@@ -94,7 +94,7 @@ namespace pixel_renderer
                         if (offsetX is < 0 or >= Constants.ScreenW
                             || offsetY is < 0 or >= Constants.ScreenH) continue;
 
-                        colors[(int)(offsetY * 255 + offsetX)] = sprite.colorData[x, y];
+                        colors[(int)(offsetY * 255 + offsetX)] = sprite.ColorData[x, y];
                     }
             return colors;
         }

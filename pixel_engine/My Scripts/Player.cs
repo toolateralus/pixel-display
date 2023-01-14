@@ -2,17 +2,24 @@
 using static pixel_renderer.Input;
 using System;
 using Key = System.Windows.Input.Key;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using pixel_renderer.FileIO;
+using System.DirectoryServices;
+using System.Runtime.CompilerServices;
 
 namespace pixel_renderer.Scripts
 {
 
     public class Player : Component
     {
-        [Field] public bool takingInput = true;
-        [Field] public int speed = 2;
+        [Field] [JsonProperty] public bool takingInput = true;
+        [Field] [JsonProperty] public int speed = 4;
+        [Field] [JsonProperty] public float inputMagnitude = 1f;
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vec2 moveVector;
+
         public override void Awake()
         {
             parent.TryGetComponent(out sprite);
@@ -21,20 +28,18 @@ namespace pixel_renderer.Scripts
 
         }
 
+        void Up(object[] e) => moveVector = new Vec2(0, -inputMagnitude);
+        void Down(object[] e) => moveVector = new Vec2(0, inputMagnitude);
+        void Left(object[] e) => moveVector = new Vec2(-inputMagnitude, 0);
+        void Right(object[] e) => moveVector = new Vec2(inputMagnitude, 0);
+
         private void CreateInputEvents()
         {
-
-            void up(object[] e) => moveVector = new Vec2(0, -1);
-            void down(object[] e) => moveVector = new Vec2(0, 1);
-            void left(object[] e) => moveVector = new Vec2(-1, 0);
-            void right(object[] e) => moveVector = new Vec2(1, 0);
-          
-            RegisterAction(false, up, null, Key.W, InputEventType.KeyDown);
-            RegisterAction(false, down, null, Key.D, InputEventType.KeyDown);
-            RegisterAction(false, left, null, Key.A, InputEventType.KeyDown);
-            RegisterAction(false, right, null, Key.R, InputEventType.KeyDown);
+            RegisterAction(false, Up, null, Key.W, InputEventType.KeyDown);
+            RegisterAction(false, Down, null, Key.S, InputEventType.KeyDown);
+            RegisterAction(false, Left, null, Key.A, InputEventType.KeyDown);
+            RegisterAction(false, Right, null, Key.D, InputEventType.KeyDown);
         }
-
         public override void FixedUpdate(float delta)
         {
             if (!takingInput) 
@@ -53,6 +58,38 @@ namespace pixel_renderer.Scripts
         {
             var jumpVel = speed * 2;
             rb.velocity.y = moveVector.y * jumpVel;
+        }
+        public static void AddPlayer(List<Node> nodes)
+        {
+            Vec2 playerStartPosition = new Vec2(12, 24);
+            Node playerNode = new("Player", playerStartPosition, Vec2.one);
+            Rigidbody rb = new()
+            {
+                IsTrigger = false,
+            };
+            var imgData = new Metadata("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
+            Sprite sprite = new()
+            {
+                texture = new(imgData),
+                size = new(24, 24),
+                isCollider = true,
+                camDistance = 1,
+                dirty = true,
+                Type = SpriteType.Image,
+                Enabled = true,
+                Name = "Player sprite",
+            };
+            Player player_obj = new()
+            {
+                takingInput = true
+            };
+            playerNode.AddComponent(rb);
+            playerNode.AddComponent(player_obj);
+            playerNode.AddComponent(sprite);
+            var cam = playerNode.AddComponent<Camera>();
+            cam.Size = new(256, 256);
+            
+            nodes.Add(playerNode);
         }
     }
 
