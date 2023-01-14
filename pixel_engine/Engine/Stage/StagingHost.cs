@@ -21,14 +21,14 @@ namespace pixel_renderer
             };
             foreach (var node in stage.Nodes)
             {
-                // round up number to improve click accuracy
                 Point pt = node.position;
                 pt = new()
                 {
-                    X = Math.Round(pt.X),
-                    Y = Math.Round(pt.Y)
+                    X = Math.Floor(pt.X),
+                    Y = Math.Floor(pt.Y)
                 };
-
+                Vec2 vec = pt;
+                Runtime.Log(vec.AsString());
                 var xDelta = pt.X - pos.Y;
                 var yDelta = pt.Y - pos.X;
 

@@ -29,10 +29,10 @@ namespace pixel_renderer.Scripts
             void left(object[] e) => moveVector = new Vec2(-1, 0);
             void right(object[] e) => moveVector = new Vec2(1, 0);
           
-            RegisterAction(false, up, null, Key.W, InputEventType.DOWN);
-            RegisterAction(false, down, null, Key.D, InputEventType.DOWN);
-            RegisterAction(false, left, null, Key.A, InputEventType.DOWN);
-            RegisterAction(false, right, null, Key.R, InputEventType.DOWN);
+            RegisterAction(false, up, null, Key.W, InputEventType.KeyDown);
+            RegisterAction(false, down, null, Key.D, InputEventType.KeyDown);
+            RegisterAction(false, left, null, Key.A, InputEventType.KeyDown);
+            RegisterAction(false, right, null, Key.R, InputEventType.KeyDown);
         }
 
         public override void FixedUpdate(float delta)

@@ -113,6 +113,7 @@ namespace pixel_editor
             {
                 string name = (string)e[0];
                 Node node = Runtime.Instance.GetStage().FindNode(name);
+                Editor.Current.Inspector.DeselectNode();
                 Editor.Current.Inspector.SelectNode(node);
                 if (node is not null)
                 {

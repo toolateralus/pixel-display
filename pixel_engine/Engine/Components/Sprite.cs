@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Security.Policy;
+using System.Windows.Controls;
 using Newtonsoft.Json;
 using pixel_renderer;
 using pixel_renderer.FileIO;
@@ -65,25 +66,32 @@ namespace pixel_renderer
             image = new(imgData.fullPath);
             dirty = true;
         }
-        
+
         /// <summary>
         /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
         /// </summary>
         /// <param name="borderColor"></param>
-        public void Highlight(Color borderColor)
+        public void Highlight(Color borderColor, Vec2? widthIn = null)
         {
-            int x = (int)size.x;
-            int y = (int)size.y;
             cachedColor = this.colorData;
-            var colorData = new Color[x, y];
-            for (int i = 0; i < y; i++)
-                for (int j = 0; j < x; j++)
-                {
-                    if (colorData.Length < i && colorData.Length < j)
-                        if (j == 0 || j == x && i == 0 || i == y)
-                            colorData[i, j] = borderColor;
+            
+            Vec2 width = widthIn ?? Vec2.one;
+            
+            int sizeX = (int)size.x;
+            int sizeY = (int)size.y;
 
+            var colorData = new Color[sizeX, sizeY];
+
+            for (int x = 0; x< sizeX; ++x)
+                for (int y = 0; y < sizeY; ++y)
+                {
+                    var pt = new Vec2(x, y);
+                    if (!pt.IsWithinMaxExclusive(width, size - width))
+                    {
+                        colorData[x, y] = borderColor;
+                    }
                 }
+
             DrawSquare(size, colorData, isCollider);
         }
         

@@ -246,14 +246,15 @@ namespace pixel_editor
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
-            Image img = (Image)sender;
-            Point pos = e.GetPosition(img);
-            pos = ViewportPoint(img, pos);
-            inspector.DeselectNode();
             Stage stage = Runtime.Instance.GetStage();
             if (stage is null) return;
             StagingHost stagingHost = Runtime.Instance.stagingHost;
             if (stagingHost is null) return;
+
+            Image img = (Image)sender;
+            Point pos = e.GetPosition(img);
+            pos = ViewportPoint(img, pos);
+            inspector.DeselectNode();
 
             bool foundNode = stagingHost.GetNodeAtPoint(stage, pos, out var node);
             if (foundNode)

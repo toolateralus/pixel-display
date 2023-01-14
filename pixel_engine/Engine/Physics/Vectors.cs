@@ -102,6 +102,7 @@
             X = v.x,
             Y = v.y
         };
+        public static implicit operator Vec2(Point v) => new((float)v.X, (float)v.Y);
         /// <summary>
         /// Clamp each value of the vector component-wise;
         /// </summary>

@@ -130,14 +130,16 @@ namespace pixel_renderer
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
+            Input.Refresh();
+
             bool HasNoRenderSurface = renderHost.State is RenderState.Off;
 
             if (!IsRunning || HasNoRenderSurface) 
-                return; 
-           
+                return;
 
             if (renderHost.State is RenderState.Game) 
                 renderHost.Render(mainWnd.renderImage);
+
         }
     }
 }
