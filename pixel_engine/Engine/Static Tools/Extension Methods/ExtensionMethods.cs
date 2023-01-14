@@ -14,6 +14,7 @@ namespace pixel_renderer
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
+        public static float Wrapped(this float v, float max) => v % max >= 0 ? v % max : v % max + max;
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
         public static bool IsWithinMaxExclusive(this float v, float min, float max) => v >= min && v < max;
         public static float GetDivideSafe(this float v) => v == 0 ? float.Epsilon : v;
@@ -23,6 +24,15 @@ namespace pixel_renderer
         public static Vec2 GetDivideSafe(this Vec2 v) => new(v.x.GetDivideSafe(), v.y.GetDivideSafe());
         public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.x); }
         public static Vec2 WithScale(this Vec2 v, int x = 1, int y = 1) { return new Vec2(v.x * x, v.y * y); }
+        public static void Increment2D(this Vec2 v, int xMax)
+        {
+            if (v.x >= xMax)
+            {
+                v.y++;
+                v.x = 0;
+            }
+            else v.x++;
+        }
         public static double Sum(this Vec2 v) => v.x + v.y;
         public static double Sum(this Vec3 v) => v.x + v.y + v.z;
         public static float Distance(this Vec2 v, Vec2 end) => (v - end).Length();

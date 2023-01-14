@@ -63,7 +63,7 @@ namespace pixel_renderer
 
             System.Array.Clear(cam.zBuffer);
 
-            DrawBackground(cam, bmd);
+            //DrawBackground(cam, bmd);
 
             Vec2 bmpSize = new Vec2(bmd.Width, bmd.Height);
 
@@ -101,37 +101,33 @@ namespace pixel_renderer
             Vec2 bgSize = new(bg.Width, bg.Height);
             Vec2 bmpSize = new(bmd.Width, bmd.Height);
 
-            for (int x = 0; x < bmd.Width; x++)
+            for (Vec2 screenPos = new(0,0); screenPos.y < bmd.Height; screenPos.Increment2D(bmd.Width))
             {
-                for (int y = 0; y < bmd.Height; y++)
-                {
-                    Vec2 camViewport = cam.ScreenToCamViewport(new Vec2(x, y) / bmpSize.GetDivideSafe());
-                    if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                Vec2 camViewport = cam.ScreenToCamViewport(screenPos / bmpSize.GetDivideSafe());
+                if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
-                    Vec2 global = cam.CamViewportToGlobal(camViewport);
-                    Vec2 bgViewport = global / bgSize.GetDivideSafe();
-
-                    if (cam.DrawMode == DrawingType.Wrapped)
-                        DrawWrapped(bmd, bg, bgSize, x, y, bgViewport);
-
-                    if (cam.DrawMode == DrawingType.Clamped)
-                        DrawClamped(bmd, bg, bgSize, x, y, bmpSize, bgViewport);
-                }
+                Vec2 global = cam.CamViewportToGlobal(camViewport);
+                Vec2 bgViewportPos = global / bgSize.GetDivideSafe();
+                Vec2 bgPos = BgViewportToBgPos(cam, bgSize, bgViewportPos);
+                SetPixelColor(bmd, bg.GetPixel((int)bgPos.x, (int)bgPos.y), screenPos);
             }
         }
-        public void DrawClamped(BitmapData bmd, Bitmap background, Vec2 bgSize, int x, int y, Vec2 bmpSize, Vec2 bgViewport)
+
+        private static Vec2 BgViewportToBgPos(Camera cam, Vec2 bgSize, Vec2 bgViewportPos)
         {
-            bgViewport.Clamp(Vec2.zero, Vec2.one);
-            Vec2 bgPos = (bgViewport * (bgSize - Vec2.one)).Clamped(Vec2.zero, bmpSize);
-            SetPixelColor(bmd, background.GetPixel((int)bgPos.x, (int)bgPos.y), new Vec2(x, y));
+            Vec2 maxIndex = bgSize - Vec2.one;
+
+            switch (cam.DrawMode)
+            {
+                case DrawingType.Wrapped:
+                    return bgViewportPos.Wrapped(Vec2.one) * maxIndex;
+                case DrawingType.Clamped:
+                    return (bgViewportPos.Clamped(Vec2.zero, Vec2.one) * maxIndex).Clamped(Vec2.zero, maxIndex);
+                default:
+                    return new(0,0);
+            }
         }
-        public void DrawWrapped(BitmapData bmd, Bitmap background, Vec2 bgSize, int x, int y, Vec2 bgViewport)
-        {
-            bgViewport += new Vec2(1, 1);
-            Vec2 wrappedBgViewport = new(bgViewport.x - (int)bgViewport.x, bgViewport.y - (int)bgViewport.y);
-            Vec2 bgPos = wrappedBgViewport * bgSize;
-            SetPixelColor(bmd, background.GetPixel((int)bgPos.x, (int)bgPos.y), new Vec2(x, y));
-        }
+
         public override void Render(Image destination) => CBit.Render(renderTexture, destination);
     }
 }
