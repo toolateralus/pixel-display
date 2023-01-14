@@ -40,9 +40,11 @@ namespace pixel_renderer
         {
             if (Image is null)
                 throw new NullReferenceException();
-
+            Bitmap? copy = null;
             // clone the bitmap to prevent usage violations
-            Bitmap copy = (Bitmap)Image.Clone();
+            lock (Image)
+                copy = (Bitmap)Image.Clone();
+
 
             Color[,] output = new Color[Image.Width, Image.Height];
             for (int i = 0; i < copy.Width; ++i)

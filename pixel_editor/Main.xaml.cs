@@ -204,6 +204,7 @@ namespace pixel_editor
             if (msg != MessageBoxResult.Yes)
                 return;
             Runtime.Instance.mainWnd = new();
+            Runtime.Instance.mainWnd.project = new();
             Runtime.Instance.mainWnd.Show();
         }
         
