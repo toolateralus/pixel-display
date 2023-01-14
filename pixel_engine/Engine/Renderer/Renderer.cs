@@ -96,12 +96,6 @@ namespace pixel_renderer
                     SetPixelColor(width, height, stride, sprite.ColorData[spritePos.x, spritePos.y], screenPos);
                 }
         }
-
-
-
-
-
-
         private void SetPixelColor(BitmapData bmd, System.Drawing.Color color, Vec2 screenPos)
         {
             int frameBufferIndex = (int)screenPos.y * bmd.Stride + ((int)screenPos.x * 3);
