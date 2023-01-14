@@ -18,10 +18,12 @@ namespace pixel_renderer
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
         public static bool IsWithinMaxExclusive(this float v, float min, float max) => v >= min && v < max;
         public static float GetDivideSafe(this float v) => v == 0 ? float.Epsilon : v;
+        public static int GetDivideSafe(this int v) => v == 0 ? 1 : v;
         public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion
         #region Vectors
         public static Vec2 GetDivideSafe(this Vec2 v) => new(v.x.GetDivideSafe(), v.y.GetDivideSafe());
+        public static Vec2Int GetDivideSafe(this Vec2Int v) => new(v.x.GetDivideSafe(), v.y.GetDivideSafe());
         public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.x); }
         public static Vec2 WithScale(this Vec2 v, int x = 1, int y = 1) { return new Vec2(v.x * x, v.y * y); }
         public static double Sum(this Vec2 v) => v.x + v.y;
