@@ -1,22 +1,13 @@
 ﻿using System;
-
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
 using Image = System.Windows.Controls.Image;
-
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Input;
-
 using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
-using static pixel_renderer.Input;
-using System.Linq;
 using System.Collections.Generic;
-using System.Windows.Automation;
-using System.ComponentModel;
-using System.Threading;
 using System.Windows.Threading;
 
 namespace pixel_editor
@@ -172,7 +163,6 @@ namespace pixel_editor
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
-            //CompositionTarget.Rendering += Update;
             timer.Interval = TimeSpan.FromTicks(100);
             timer.Tick += Update;
             timer.Start();
