@@ -7,7 +7,7 @@ using System.Xml;
 namespace pixel_renderer
 {
 
-    public enum InputEventType { KeyDown, UP, TOGGLE }
+    public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
         static List<InputAction> InputActions = new(250);

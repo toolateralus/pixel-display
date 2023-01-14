@@ -35,10 +35,10 @@ namespace pixel_renderer
                 if (!HasImage)
                     if (imgData != null)
                         image = new(imgData.fullPath);
-                    else return; 
+                    else return;
 
-                CBit.ReadonlyBitmapData(in image, out var bmd, out int stride, out byte[] data);
-                colorData = CBit.ColorArrayFromBitmapData(bmd, stride, data);
+                byte[] data = CBit.ReadonlyBitmapData(in image, out var bmd);
+                colorData = CBit.ColorArrayFromBitmapData(bmd, data);
                 dirty = false; 
             }
         }

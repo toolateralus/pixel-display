@@ -16,14 +16,17 @@ namespace pixel_renderer
     {
         [DllImport("gdi32.dll")]
         internal static extern bool DeleteObject(IntPtr intPtr);
-        public static unsafe void ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd, out int stride, out byte[] data)
+        public static unsafe byte[] ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd)
         {
-            bmd = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            stride = bmd.Stride;
-            data = new byte[stride * bmp.Height];
+            bmd = bmp.LockBits(
+                new Rectangle(0, 0, bmp.Width, bmp.Height),
+                ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            byte[] data = new byte[bmd.Stride * bmp.Height];
             Marshal.Copy(bmd.Scan0, data, 0, data.Length);
             bmp.UnlockBits(bmd);
             DeleteObject(bmd.Scan0);
+            return data;
         }
         /// <summary>
         /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
@@ -98,7 +101,7 @@ namespace pixel_renderer
                     }
             return colors;
         }
-        public static unsafe Color[,] ColorArrayFromBitmapData(BitmapData bmd, int stride, byte[] data)
+        public static unsafe Color[,] ColorArrayFromBitmapData(BitmapData bmd, byte[] data)
         {
             int curRowOffs = 0;
             Color[,] _colors = new Color[bmd.Width, bmd.Height];
@@ -115,7 +118,7 @@ namespace pixel_renderer
                     byteOffset += 4;
                     _colors[x, y] = Color.FromArgb(a, r, g, b);
                 }
-                curRowOffs += stride;
+                curRowOffs += bmd.Stride;
             }
 
             return _colors;
