@@ -125,7 +125,7 @@ namespace pixel_renderer
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            Task.Run(() => Collision.Run());
+            _ = Task.Run(() => Collision.Run());
             StagingHost.Update(GetStage());
             renderHost.Next(); 
         }

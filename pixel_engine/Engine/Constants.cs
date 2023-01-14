@@ -58,6 +58,7 @@ namespace pixel_renderer
         public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
         #endregion
         #region Paths and Directories
+
         public const string ImagesDir = "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
         public const string ProjectsDir = "\\Projects"; // Project files 
         public const string AssetsDir = "\\Assets";   // Asset resources (user - created)
