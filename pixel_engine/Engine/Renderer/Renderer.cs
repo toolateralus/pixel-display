@@ -38,14 +38,16 @@ namespace pixel_renderer
         }
         public async override Task<Bitmap> Draw()
         {
-            IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
+            IEnumerable<Camera> cams = Runtime.Instance.GetStage().GetAllComponents<Camera>();
             IEnumerable<Sprite> sprites = Runtime.Instance.GetStage().GetAllComponents<Sprite>();
-            foreach (var uiComponent in uiComponents)
+            foreach (Camera cam in cams)
             {
-                if (!uiComponent.Enabled) continue;
-                if (uiComponent is Camera) RenderSprites(uiComponent as Camera, sprites);
+                if (cam.Enabled)
+                {
+                    lock(renderTexture) 
+                        await RenderSprites(cam, sprites);
+                }
             }
-                
             return renderTexture;
         }
         public async override void Render(Image destination)
