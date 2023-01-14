@@ -106,7 +106,8 @@ namespace pixel_editor
             Runtime.inspector = inspector;
             Project defaultProject = new("Default");
             current = this; 
-            engine = new(defaultProject);
+            engine = new();
+            engine.project = defaultProject;
             
             GetEvents();
             SubscribeInputs();

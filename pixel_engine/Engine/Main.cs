@@ -10,7 +10,7 @@
     /// </summary>
     public partial class EngineInstance : Window
     {
-        internal Project? project = null;
+        public Project? project = null;
         public EngineInstance()
         {
             InitializeComponent();
