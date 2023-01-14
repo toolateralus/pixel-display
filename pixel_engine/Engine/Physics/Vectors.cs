@@ -126,6 +126,38 @@
         internal bool IsWithinMaxExclusive(Vec2 min, Vec2 max) =>
             x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
     }
+    public struct Vec2Int
+    {
+        public int x;
+        public int y;
+
+        public void Increment2D(int xMax)
+        {
+            x++;
+            if (x >= xMax)
+            {
+                y++;
+                x = 0;
+            }
+        }
+        public Vec2Int(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        public Vec2Int(Vec2Int v)
+        {
+            this.x = v.x;
+            this.y = v.y;
+        }
+        public Vec2Int(Vec2 v)
+        {
+            this.x = (int)v.x;
+            this.y = (int)v.y;
+        }
+        public static implicit operator Vec2(Vec2Int v) => new(v.x, v.y);
+        public static explicit operator Vec2Int(Vec2 v) => new((int)v.x, (int)v.y);
+    }
 }
 
 

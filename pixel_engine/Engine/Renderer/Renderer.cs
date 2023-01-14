@@ -63,23 +63,22 @@ namespace pixel_renderer
 
             System.Array.Clear(cam.zBuffer);
 
-            //DrawBackground(cam, bmd);
+            DrawBackground(cam, bmd);
 
             Vec2 bmpSize = new Vec2(bmd.Width, bmd.Height);
 
             foreach (Sprite sprite in sprites)
-                for (int x = 0; x < sprite.size.x; x++)
-                    for (int y = 0; y < sprite.size.y; y++)
-                    {
-                        Vec2 camViewport = cam.GlobalToCamViewport(sprite.parent.position + new Vec2(x, y));
-                        if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                for (Vec2Int spritePos = new(); spritePos.y < sprite.size.y; spritePos.Increment2D((int)sprite.size.x))
+                {
+                    Vec2 camViewport = cam.GlobalToCamViewport(sprite.parent.position + spritePos);
+                    if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
-                        Vec2 screenPos = cam.CamToScreenViewport(camViewport) * bmpSize;
+                    Vec2 screenPos = cam.CamToScreenViewport(camViewport) * bmpSize;
 
-                        if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
-                        cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
-                        SetPixelColor(bmd, sprite.ColorData[x,y], screenPos);
-                    }
+                    if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
+                    cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
+                    SetPixelColor(bmd, sprite.ColorData[spritePos.x, spritePos.y], screenPos);
+                }
             Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
             renderTexture.UnlockBits(bmd);
         }
@@ -101,7 +100,7 @@ namespace pixel_renderer
             Vec2 bgSize = new(bg.Width, bg.Height);
             Vec2 bmpSize = new(bmd.Width, bmd.Height);
 
-            for (Vec2 screenPos = new(0,0); screenPos.y < bmd.Height; screenPos.Increment2D(bmd.Width))
+            for (Vec2Int screenPos = new(0,0); screenPos.y < bmd.Height; screenPos.Increment2D(bmd.Width))
             {
                 Vec2 camViewport = cam.ScreenToCamViewport(screenPos / bmpSize.GetDivideSafe());
                 if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
