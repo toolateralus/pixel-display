@@ -127,6 +127,7 @@ namespace pixel_renderer
         {
             Task.Run(() => Collision.Run());
             StagingHost.Update(GetStage());
+            renderHost.Next(); 
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {

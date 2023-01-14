@@ -6,12 +6,12 @@ using System.Windows.Media;
 
 namespace pixel_renderer
 {
-    public enum RenderState { Game, Scene, Off , Error}
+    public enum RenderState { Game, Scene, Off, Error }
     public class RenderHost
     {
-        private RendererBase? m_renderer = new CRenderer();
+        private CRenderer? m_renderer = new CRenderer();
         public RenderState State = RenderState.Game;
-        public RenderInfo info;  
+        public RenderInfo info;
         public RendererBase GetRenderer() => m_renderer;
 
         public RenderHost()
@@ -19,13 +19,14 @@ namespace pixel_renderer
             info = new(this);
         }
 
-        public event Action<long> OnRenderCompleted; 
+        public event Action<long> OnRenderCompleted;
 
-        public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
+        public void SetRenderer(CRenderer renderer) => m_renderer = renderer;
 
         public void Render(Image renderSurface)
         {
-            if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded."); 
+            if (m_renderer is null) 
+                throw new NullReferenceException("RenderHost does not have a renderer loaded.");
             switch (State)
             {
                 case RenderState.Game: break;
@@ -34,67 +35,61 @@ namespace pixel_renderer
                 default:
                     throw new InvalidOperationException("Invalid case passed into RenderState selection");
             }
-            Cycle(renderSurface);
+            m_renderer.Render(renderSurface);
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
         }
-        /// <summary>
-        /// performs the rendering loop for one cycle or frame.
-        /// </summary>
-        /// <param name="renderSurface"></param>
-        private protected void Cycle(Image renderSurface)
+        internal protected void Next()
         {
             m_renderer.Dispose();
             m_renderer.Draw();
-            m_renderer.Render(renderSurface);
         }
-    }
-    public class RenderInfo 
-    {
-
-        string cachedGCValue = "";
-        const int framesUntilGC_Check = 120;
-        private int framesSinceGC_Check = 0;
-        public int framesUntilCheck = 50;
-        public int frameCount;
-
-        internal long lastFrameTime = 0;
-        internal long thisFrameTime = 0;
-
-        public RenderInfo(RenderHost renderer)
+        public class RenderInfo
         {
-            renderer.OnRenderCompleted += Update; 
-        }
 
-        public long FrameTime => thisFrameTime - lastFrameTime;
-        public double Framerate => (double)Math.Floor((double)1 / ((double)FrameTime / (double)10_000_000));
+            string cachedGCValue = "";
+            const int framesUntilGC_Check = 120;
+            private int framesSinceGC_Check = 0;
+            public int framesUntilCheck = 50;
+            public int frameCount;
 
-        public void Update(long value)
-        {
-            lastFrameTime = thisFrameTime;
-            thisFrameTime = value;
-        }
-       
-        public string GetTotalMemory()
-        {
-            if (framesSinceGC_Check < framesUntilGC_Check)
+            internal long lastFrameTime = 0;
+            internal long thisFrameTime = 0;
+
+            public RenderInfo(RenderHost renderer)
             {
-                framesSinceGC_Check++;
+                renderer.OnRenderCompleted += Update;
+            }
+
+            public long FrameTime => thisFrameTime - lastFrameTime;
+            public double Framerate => (double)Math.Floor((double)1 / ((double)FrameTime / (double)10_000_000));
+
+            public void Update(long value)
+            {
+                lastFrameTime = thisFrameTime;
+                thisFrameTime = value;
+            }
+
+            public string GetTotalMemory()
+            {
+                if (framesSinceGC_Check < framesUntilGC_Check)
+                {
+                    framesSinceGC_Check++;
+                    return cachedGCValue;
+                }
+                framesSinceGC_Check = 0;
+                UpdateGCInfo();
                 return cachedGCValue;
             }
-            framesSinceGC_Check = 0;
-            UpdateGCInfo();
-            return cachedGCValue;
-        }
-        private void UpdateGCInfo()
-        {
-            var bytes = GC.GetTotalMemory(true) + 1f;
-            float megaBytes = BytesToMegaBytes(bytes);
-            cachedGCValue = $"gc alloc : {megaBytes} MB";
-        }
-        private static float BytesToMegaBytes(float bytes)
-        {
-            return bytes / 1_048_576;
+            private void UpdateGCInfo()
+            {
+                var bytes = GC.GetTotalMemory(true) + 1f;
+                float megaBytes = BytesToMegaBytes(bytes);
+                cachedGCValue = $"gc alloc : {megaBytes} MB";
+            }
+            private static float BytesToMegaBytes(float bytes)
+            {
+                return bytes / 1_048_576;
+            }
         }
     }
 }
-

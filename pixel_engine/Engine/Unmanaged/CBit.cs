@@ -28,6 +28,13 @@ namespace pixel_renderer
             DeleteObject(bmd.Scan0);
             return data;
         }
+        public static unsafe void WriteOnlyBitmapData(in Bitmap bmp, out BitmapData bmd)
+        {
+            bmd = bmp.LockBits(
+                new Rectangle(0, 0, bmp.Width, bmp.Height),
+                ImageLockMode.WriteOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        }
         /// <summary>
         /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
         /// </summary>

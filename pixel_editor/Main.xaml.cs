@@ -9,6 +9,8 @@ using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Windows.Threading;
+using System.Threading;
+using static pixel_renderer.IO;
 
 namespace pixel_editor
 {
@@ -101,7 +103,6 @@ namespace pixel_editor
             engine.project = defaultProject;
             
             GetEvents();
-            SubscribeInputs();
         }
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
@@ -150,7 +151,7 @@ namespace pixel_editor
             // updates things relevant to to engine more or less.
             if (ShouldUpdate)
             {
-                Host?.Render(image);
+                Host.Render(image);
                 UpdateMetrics();
             }
 
@@ -158,20 +159,22 @@ namespace pixel_editor
                 throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
         }
         DispatcherTimer timer = new();
-
+        Timer _timer; 
         private void GetEvents()
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
-            timer.Interval = TimeSpan.FromTicks(100);
-            timer.Tick += Update;
-            timer.Start();
+            StartEditorRenderClock();
+            timer.Tick += Update;    
             Runtime.InspectorEventRaised += QueueEvent;
         }
-        private static void SubscribeInputs()
+
+        private void StartEditorRenderClock()
         {
-            
+            timer.Interval = TimeSpan.FromTicks(100);
+            timer.Start();
         }
+
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)
@@ -290,7 +293,7 @@ namespace pixel_editor
             Metadata meta;
             GetProjectPsuedoMetadata(out proj, out meta);
             ProjectIO.WriteProject(proj, meta);
-            AssetLibrary.Sync();
+            AssetLibrary.Save();
         }
         private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
         {
