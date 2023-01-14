@@ -87,9 +87,9 @@ namespace pixel_renderer
         {
             int frameBufferIndex = (int)screenPos.y * bmd.Stride + ((int)screenPos.x * 3);
 
-            frameBuffer[frameBufferIndex + 0] = color.R;
+            frameBuffer[frameBufferIndex + 0] = color.B;
             frameBuffer[frameBufferIndex + 1] = color.G;
-            frameBuffer[frameBufferIndex + 2] = color.B;
+            frameBuffer[frameBufferIndex + 2] = color.R;
         }
 
         private void DrawBackground(Camera cam, BitmapData bmd)
@@ -115,16 +115,12 @@ namespace pixel_renderer
         private static Vec2 BgViewportToBgPos(Camera cam, Vec2 bgSize, Vec2 bgViewportPos)
         {
             Vec2 maxIndex = bgSize - Vec2.one;
-
-            switch (cam.DrawMode)
+            return cam.DrawMode switch
             {
-                case DrawingType.Wrapped:
-                    return bgViewportPos.Wrapped(Vec2.one) * maxIndex;
-                case DrawingType.Clamped:
-                    return (bgViewportPos.Clamped(Vec2.zero, Vec2.one) * maxIndex).Clamped(Vec2.zero, maxIndex);
-                default:
-                    return new(0,0);
-            }
+                DrawingType.Wrapped => bgViewportPos.Wrapped(Vec2.one) * maxIndex,
+                DrawingType.Clamped => (bgViewportPos.Clamped(Vec2.zero, Vec2.one) * maxIndex).Clamped(Vec2.zero, maxIndex),
+                _ => new(0, 0),
+            };
         }
 
         public override void Render(Image destination) => CBit.Render(renderTexture, destination);
