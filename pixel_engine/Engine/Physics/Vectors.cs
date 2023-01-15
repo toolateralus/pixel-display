@@ -12,7 +12,28 @@
         public float z;
         public float Magnitude() => MathF.Sqrt(x * x + y * y + z * z);
         public float SqrMagnitude() => x * x + y * y + z * z;
+        public float this[int index]
+        {
+            get =>
+                index switch
+                {
+                    0 => x,
+                    1 => y,
+                    2 => z,
+                    _ => throw new IndexOutOfRangeException(),
+                };
+            set
+            {
+                switch (index)
+                {
+                    case 0: x = value; break;
+                    case 1: y = value; break;
+                    case 2: z = value; break;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
 
+        }
         public static Vec3 one = new Vec3(1, 1, 1);
         public static Vec3 zero = new Vec3(0, 0, 0);
 
@@ -51,7 +72,29 @@
     {
         public float x;
         public float y;
-       
+        public Vec2 Normal_RHS => new(-y, x);
+        public Vec2 Normal_LHS => new(y, -x);
+        public float this[int index]
+        {
+            get
+            {
+                return index switch
+                {
+                    0 => x,
+                    1 => y,
+                    _ => throw new IndexOutOfRangeException(),
+                };
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0: x = value; break;
+                    case 1: y = value; break;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
         public float Length() => (float)Math.Sqrt(x * x + y * y);
         public Vec2 Rotated(float angle)
         {

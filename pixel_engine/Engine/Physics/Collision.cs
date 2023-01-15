@@ -165,7 +165,6 @@ namespace pixel_renderer
 
             Vec2 top_left_A = A.parent.position + A.size;
             Vec2 top_left_B = B.parent.position + B.size;
-
           
         }
 
