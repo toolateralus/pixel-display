@@ -20,6 +20,7 @@ namespace pixel_renderer.Scripts
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vec2 moveVector;
+        public static Metadata test_image_data = new Metadata("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
 
         public override void Awake()
         {
@@ -63,16 +64,16 @@ namespace pixel_renderer.Scripts
         {
             Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
-            var imgData = new Metadata("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
-            Player player_obj = new()
-            {
-                takingInput = true
-            };
+         
             playerNode.AddComponent<Rigidbody>();
-            playerNode.AddComponent<Sprite>();
-            playerNode.AddComponent(player_obj);
+            var sprite = playerNode.AddComponent<Sprite>();
+            
+            playerNode.AddComponent<Player>().takingInput = true;
+
             var col =playerNode.AddComponent<Collider>();
             col.IsTrigger = true;
+            col.size = sprite.size;
+
             var cam = playerNode.AddComponent<Camera>();
             cam.Size = new(256, 256);
             

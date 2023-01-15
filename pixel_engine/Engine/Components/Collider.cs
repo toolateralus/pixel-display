@@ -5,9 +5,9 @@ namespace pixel_renderer
     public class Collider : Component
     {
         public Vec2 size = new(0,0);
-        public Sprite? spr;
-
+        public Sprite? sprite;
         public bool IsTrigger { get; internal set; }
+      
         public override void Awake()
         { 
 

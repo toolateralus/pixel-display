@@ -228,13 +228,14 @@ namespace pixel_renderer
             object[] args = r_node_args();
             
             var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
+            var sprite = node.AddComponent<Sprite>();
             var collider = new Collider()
             {
+                size = sprite.size,
                 IsTrigger = false
             };
-            node.AddComponent<Sprite>();
             node.AddComponent(collider);
-            node.AddComponent<Rigidbody>();
+            if(JRandom.Bool()) node.AddComponent<Rigidbody>();
             AddNode(node);
         }
         private object[] r_node_args()
