@@ -38,8 +38,8 @@ namespace pixel_renderer
         }
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
-            var colA = nodeA.TryGetComponent<Collider>(out Collider col_A);
-            var colB = nodeB.TryGetComponent<Collider>(out Collider col_B);
+            var colA = nodeA.TryGetComponent(out Collider col_A);
+            var colB = nodeB.TryGetComponent(out Collider col_B);
            return colA && colB && GetBoxCollision(nodeA, nodeB, col_A, col_B);
         }
         private static bool GetBoxCollision(Node nodeA, Node nodeB, Collider col_A, Collider col_B)
@@ -152,9 +152,7 @@ namespace pixel_renderer
                                 {
                                     RigidbodyCollide(rbA, rbB);
                                 }
-                                else
-                                    Collide(col_A, col_B);
-
+                                Collide(col_A, col_B);
                                 AttemptCallbacks(col_A, col_B);
                             });
                         };
@@ -165,11 +163,10 @@ namespace pixel_renderer
         {
             if (A.IsTrigger || B.IsTrigger) return;
 
-            Vec2 direction = (B.parent.position - A.parent.position).Normalize();
+            Vec2 top_left_A = A.parent.position + A.size;
+            Vec2 top_left_B = B.parent.position + B.size;
 
-            B.parent.position += direction;
-            A.parent.position += CMath.Negate(direction);
-
+          
         }
 
         private static void AttemptCallbacks(Collider A, Collider B)

@@ -2,6 +2,7 @@
 using pixel_renderer.Assets;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using System.Windows.Media;
 using Timer = System.Timers.Timer;
 
@@ -91,9 +92,9 @@ namespace pixel_renderer
         /// Prints a message in the editor console.
         /// </summary>
         /// <param name="message"></param>
-        public static void Log(object obj)
+        public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
-           InspectorEvent e = new(obj.ToString());
+           InspectorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);

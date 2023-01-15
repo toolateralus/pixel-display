@@ -172,8 +172,7 @@ namespace pixel_editor
 
         private void StartEditorRenderClock()
         {
-            timer.Interval = TimeSpan.FromTicks(10000
-                );
+            timer.Interval = TimeSpan.FromTicks(1000);
             timer.Start();
         }
 
@@ -329,7 +328,7 @@ namespace pixel_editor
         internal static void QueueEvent(InspectorEvent e)
         {
             if (e.ClearConsole)
-                Current.consoleOutput.Clear();
+                Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
            Current.Events.Pending.Enqueue(e);
         }
         #endregion
