@@ -33,21 +33,38 @@ namespace pixel_renderer
             }
             renderTexture = (Bitmap)FallBack.Clone();
         }
-        public override Bitmap Draw()
+        public override Bitmap Draw(StageRenderInfo renderInfo)
         {
             IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
-            IEnumerable<Sprite> sprites = Runtime.Instance.GetStage().GetAllComponents<Sprite>();
+
+
             foreach (var uiComponent in uiComponents)
             {
                 if (!uiComponent.Enabled) continue;
-                if (uiComponent is Camera) RenderSprites(uiComponent as Camera, sprites);
+                if (uiComponent is Camera) RenderSprites(uiComponent as Camera, renderInfo);
             }
                 
             return renderTexture;
         }
-        public void RenderSprites(Camera cam, IEnumerable<Sprite> sprites)
+        public void RenderSprites(Camera camera, StageRenderInfo renderInfo)
         {
             if (renderTexture == null) return;
+
+            var node = Node.New;
+            node.position = camera.parent.position;
+
+            Camera cam = new()
+            {
+                parent = node,
+                Center = camera.Center,
+                angle = camera.angle,
+                bottomRightCornerOffset= camera.bottomRightCornerOffset,
+                drawOrder = camera.drawOrder,
+                viewportSize= camera.viewportSize,
+                DrawMode= camera.DrawMode,
+                viewportPosition = camera.viewportPosition,
+                zBuffer = camera.zBuffer,
+            };
 
             var bmd = renderTexture.LockBits(
                 new(0, 0, renderTexture.Width, renderTexture.Height),
@@ -70,20 +87,38 @@ namespace pixel_renderer
             DrawBackground(cam, bmd);
 
             Vec2 bmpSize = new Vec2(bmd.Width, bmd.Height);
+           
 
-            foreach (Sprite sprite in sprites)
-                for (Vec2Int spritePos = new(); spritePos.y < sprite.size.y; spritePos.Increment2D((int)sprite.size.x))
+            
+
+            for (int i = 0; i < renderInfo.Count; ++i)
+            {
+                var pos = renderInfo.spritePositions[i];
+                var size = renderInfo.spriteSizeVectors[i];
+                var colorData = renderInfo.spriteColorData[i];
+                var camDistance = renderInfo.spriteCamDistances[i];
+
+                for (Vec2Int localPos = new(); localPos.y < size.y; localPos.Increment2D((int)size.x))
                 {
-                    Vec2 camViewport = cam.GlobalToCamViewport(sprite.parent.position + spritePos);
-                    if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                    Vec2 camViewport = cam.GlobalToCamViewport(pos + localPos);
+
+                    if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) 
+                        continue;
 
                     Vec2 screenPos = cam.CamToScreenViewport(camViewport) * bmpSize;
 
-                    if (sprite.camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y]) continue;
-                    cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = sprite.camDistance;
-                    SetPixelColor(bmd, sprite.ColorData[spritePos.x, spritePos.y], screenPos);
+                    if (camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y])
+                        continue;
+
+                    cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = camDistance;
+
+                    SetPixelColor(bmd, colorData[localPos.x, localPos.y], screenPos);
                 }
-            Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
+            }
+            lock (frameBuffer)
+            {
+                Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
+            }
             renderTexture.UnlockBits(bmd);
         }
 

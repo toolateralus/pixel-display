@@ -4,9 +4,63 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Policy;
 
 namespace pixel_renderer
 {
+
+    public class StageRenderInfo
+    {
+        public int Count => spritePositions.Count;
+        
+        public List<Vec2> spritePositions= new ();
+        public List<Vec2> spriteSizeVectors = new();
+        public List<float> spriteCamDistances = new();
+        public List<Color[,]> spriteColorData = new();
+
+        public StageRenderInfo(Stage stage)
+        {
+            lock (stage)
+                Refresh(stage);
+        }
+        public void Refresh(Stage stage)
+        {
+            var sprites = stage.GetSprites();
+            int numOfSprites = sprites.Count();
+            var listSize = spritePositions.Count; 
+            if (numOfSprites != listSize)
+            {
+                for (int i = spritePositions.Count; i < numOfSprites; ++i)
+                    addMemberOnTop();
+                for (int i = spritePositions.Count; i > numOfSprites; --i)
+                    removeFirst();
+            }
+            for (int i = 0; i < sprites.Count(); ++i)
+            {
+                Sprite sprite = sprites.ElementAt(i);
+                  spritePositions[i] = sprite.parent.position;
+                spriteSizeVectors[i] = sprite.size;
+                  spriteColorData[i] = sprite.ColorData;
+                spriteCamDistances[i] = sprite.camDistance;
+            }
+            void addMemberOnTop()
+            {
+                spritePositions.Add(Vec2.zero);
+                spriteSizeVectors.Add(Vec2.zero);
+                spriteColorData.Add(new Color[1, 1]);
+                spriteCamDistances.Add(1f);
+            }
+            void removeFirst()
+            {
+                spritePositions.RemoveAt(0);
+                spriteSizeVectors.RemoveAt(0);
+                spriteColorData.RemoveAt(0);
+                spriteCamDistances.RemoveAt(0);
+
+            }
+        }
+    }
+
     public class Stage
     {
         public Stage() { }
@@ -18,12 +72,29 @@ namespace pixel_renderer
             Nodes = nodes.ToNodeList();
             Awake();
         }
+
+        
         public Bitmap backgroundImage;
         
         public event Action OnNodeQueryMade;
         public List<Node> Nodes { get; private set; } = new();
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+        private StageRenderInfo? stage_render_info = null;
+        public StageRenderInfo StageRenderInfo
+        {
+            get
+            {
+                var wasNull = stage_render_info is null;
+                var stage = Runtime.Instance.GetStage(); 
+                stage_render_info ??= new(stage);
+                
+                if (!wasNull)
+                    stage_render_info.Refresh(stage); 
 
+                return stage_render_info;
+            }
+            set { stage_render_info = value; }
+        }
         Queue<Action<object[]>> DelayedActionQueue = new();
         Queue<object[]> DelayedActionArgsQueue = new();
 
@@ -131,7 +202,7 @@ namespace pixel_renderer
             object[] args = r_node_args();
             
             var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
-            var sprite = new Sprite((Vec2)args[2], (Color)args[3], false);
+            var sprite = new Sprite();
             node.AddComponent(sprite);
             node.AddComponent(new Rigidbody() { IsTrigger = false });
             AddNode(node);

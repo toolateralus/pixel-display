@@ -160,6 +160,7 @@ namespace pixel_renderer
             A.parent.OnCollision(B);
             B.parent.OnCollision(A);
         }
+       
         public async static Task Run()
         {
             if (!AllowEntries)
@@ -167,8 +168,10 @@ namespace pixel_renderer
                 if(HasTasks) FinalPhase();
                 return; 
             }
-            var stage = Runtime.Instance.GetStage(); 
-            await Task.Run(() => RegisterCollidersAsync(stage));
+            var stage = Runtime.Instance.GetStage();
+            
+            await RegisterCollidersAsync(stage);
+            
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
             FinalPhase(); 
@@ -196,11 +199,6 @@ namespace pixel_renderer
             depenetrationForce *= 0.5f;
 
             return; 
-            
-            
-            // remove bounciness from collision resolution
-            if (A.usingGravity && A.drag != 0) A.velocity += CMath.Negate(depenetrationForce);
-            if (B.usingGravity && B.drag != 0) B.velocity += depenetrationForce;
         }
     }
 

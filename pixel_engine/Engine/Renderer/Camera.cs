@@ -12,8 +12,7 @@ namespace pixel_renderer
         public Vec2 LocalToCamViewport(Vec2 local) => local / Size.GetDivideSafe();
         public Vec2 CamViewportToLocal(Vec2 camViewport) => camViewport * Size;
         public Vec2 CamToScreenViewport(Vec2 camViewport) => camViewport * viewportSize + viewportPosition;
-        public Vec2 ScreenToCamViewport(Vec2 screenViewport) =>
-            (screenViewport - viewportPosition) / viewportSize.GetDivideSafe();
+        public Vec2 ScreenToCamViewport(Vec2 screenViewport) => (screenViewport - viewportPosition) / viewportSize.GetDivideSafe();
         public Vec2 GlobalToCamViewport(Vec2 global) => LocalToCamViewport(GlobalToLocal(global));
         public Vec2 CamViewportToGlobal(Vec2 camViewport) => LocalToGlobal(CamViewportToLocal(camViewport));
         public Vec2 GlobalToScreenViewport(Vec2 global) => CamToScreenViewport(GlobalToCamViewport(global));

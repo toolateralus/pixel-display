@@ -28,17 +28,17 @@ namespace pixel_renderer.Scripts
             CreateInputEvents();
         }
 
-        void Up(object[] e) => moveVector = new Vec2(0, -inputMagnitude);
-        void Down(object[] e) => moveVector = new Vec2(0, inputMagnitude);
-        void Left(object[] e) => moveVector = new Vec2(-inputMagnitude, 0);
-        void Right(object[] e) => moveVector = new Vec2(inputMagnitude, 0);
+        void Up(object[]? e) => moveVector = new Vec2(0, -inputMagnitude);
+        void Down(object[]? e) => moveVector = new Vec2(0, inputMagnitude);
+        void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, 0);
+        void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, 0);
 
         private void CreateInputEvents()
         {
-            RegisterAction(false, Up, null, Key.W, InputEventType.KeyDown);
-            RegisterAction(false, Down, null, Key.S, InputEventType.KeyDown);
-            RegisterAction(false, Left, null, Key.A, InputEventType.KeyDown);
-            RegisterAction(false, Right, null, Key.D, InputEventType.KeyDown);
+            RegisterAction(Up,  Key.W);
+            RegisterAction(Down,Key.S);
+            RegisterAction(Left,  Key.A);
+            RegisterAction(Right, Key.D);
         }
         public override void FixedUpdate(float delta)
         {

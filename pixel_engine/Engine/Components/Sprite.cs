@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Printing;
-using System.Security.Policy;
-using System.Windows.Controls;
-using System.Windows.Documents;
+using System.Windows.Input;
 using Newtonsoft.Json;
-using pixel_renderer;
 using pixel_renderer.FileIO;
 using Color = System.Drawing.Color;
 
@@ -15,43 +10,62 @@ namespace pixel_renderer
     public class Texture : Asset
     {
         [JsonConstructor]
-        public Texture(string Name, Type fileType, string? UUID = null) : base(Name, fileType, UUID)
+        public Texture(Metadata imgData, Metadata maskData, Color? color, string Name, Type fileType, string? UUID = null) : base(Name, fileType, UUID)
         {
 
         }
-        public Texture(Metadata imgData, Color? color = null, Bitmap? mask = null)
+        public Texture(Metadata? imgData = null, Color? color = null)
         {
-            this.imgData = imgData;
-            Image = new(imgData.fullPath);
-            this.Mask = mask;
             this.color = color;
+            if (imgData is not null)
+            {
+                this.imgData = imgData;
+                Image = new(imgData.fullPath);
+                runtime_img = GetScaledBitmap();
+            }
+            else
+            {
+                this.imgData = new("Default Sprite Image", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", "bmp");
+                Image = new(this.imgData.fullPath);
+                runtime_img = GetScaledBitmap();
+            }
+            if(color is not null) Image = Sprite.SolidColorBitmap(scale, (Color)color);
+            
         }
-        
-        [JsonProperty] private Metadata imgData;
-        [Field] [JsonProperty] public Color? color;
-        
         [Field] public Bitmap? Image;
+        [Field] public Bitmap? runtime_img; 
+
         [Field] public Bitmap? Mask;
+        [Field] public Bitmap? runtime_mask; 
+
+        [JsonProperty] internal Metadata imgData;
+        [JsonProperty] internal Metadata maskData;
+
+        [Field] [JsonProperty] public Color? color;
+        [Field] [JsonProperty] public Vec2 scale = Vec2.one;
         
         public bool HasImage => Image != null;
-        public bool HasImageMetadata => imgData != null; 
+        internal bool HasImageMetadata => imgData != null;
 
+        public bool HasMask => Mask != null;
+        internal bool HasMaskMetadata => imgData != null;
+
+        public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
         public Color[,] GetColorArray()
         {
             if (Image is null)
-                throw new NullReferenceException();
+                throw new Exception();
+
             Bitmap? copy = null;
             // clone the bitmap to prevent usage violations
             lock (Image)
                 copy = (Bitmap)Image.Clone();
 
-
-            Color[,] output = new Color[Image.Width, Image.Height];
+            Color[,] output = new Color[copy.Width, copy.Height];
             for (int i = 0; i < copy.Width; ++i)
                 for (int j = 0; j < copy.Height; ++j)
                     output[i,j] = copy.GetPixel(i, j);
             return output; 
-                    
         }
         
 
@@ -59,10 +73,10 @@ namespace pixel_renderer
     public enum SpriteType { SolidColor, Image, Custom};
     public class Sprite : Component
     {
-        [JsonProperty] public Vec2 size = Vec2.one * 2;
+        [JsonProperty] public Vec2 size = Vec2.one * 16;
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] public bool isCollider = false;
-        [JsonProperty] public Texture? texture = null;
+        [JsonProperty] public Texture texture = new(null, Color.DarkBlue);
         [JsonProperty] public Color Color
         {
             get
@@ -70,6 +84,7 @@ namespace pixel_renderer
                 Color? color = texture?.color ?? Color.White;
                 return (Color)color; 
             }
+            set => texture.color = value;
 
         }
         [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
@@ -102,16 +117,24 @@ namespace pixel_renderer
             set => _colors = value;
         }
         private Color[,] _colors; 
+
         public override void Awake()
         {
+            Input.RegisterAction(delegate {
+                dirty = true; 
+            }, Key.OemSemicolon);
+            Input.RegisterAction(delegate {
+                Color = JRandom.Color();
+            }, Key.R);
 
         }
         public override void FixedUpdate(float delta)
         {
             if (dirty)
             {
+                if (!texture.HasImage) return; 
                 ColorData = texture.GetColorArray();
-                dirty = false; 
+                dirty = false;
             }
         }
         public void Randomize()
@@ -131,12 +154,7 @@ namespace pixel_renderer
             DrawSquare(size, cached_colors, isCollider);
             if (nullifyCache) cached_colors = null;
         }
-        public void InitializeTestImage()
-        {
-            var imgData = new Metadata("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
-            texture.Image = new(imgData.fullPath);
-            dirty = true;
-        }
+
 
         /// <summary>
         /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
@@ -165,7 +183,6 @@ namespace pixel_renderer
 
             DrawSquare(size, colorData, isCollider);
         }
-        
         public void DrawSquare(Vec2 size, Color[,] color, bool isCollider)
         {
             ColorData = color;
@@ -181,7 +198,6 @@ namespace pixel_renderer
                 for (int y = 0; y < size.y; y++)
                     ColorData[x, y] = color;
         }
-        
         public static Bitmap SolidColorBitmap(Vec2 size, Color color)
         {
             int x = (int)size.x;
@@ -203,10 +219,7 @@ namespace pixel_renderer
             return colorData; 
         }
 
-
-
         public Sprite() => ColorData = new Color[0,0];
         public Sprite(int x, int y) => size = new(x, y);
-        public Sprite(Vec2 size, Color color, bool isCollider) => DrawSquare(size, color, isCollider);
     }
 }

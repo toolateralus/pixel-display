@@ -157,8 +157,10 @@ namespace pixel_editor
             if(Events.ExecuteAll() is null)
                 throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
         }
+        
         DispatcherTimer timer = new();
         Timer _timer; 
+
         private void GetEvents()
         {
             Closing += OnDisable;
@@ -170,7 +172,8 @@ namespace pixel_editor
 
         private void StartEditorRenderClock()
         {
-            timer.Interval = TimeSpan.FromTicks(100);
+            timer.Interval = TimeSpan.FromTicks(10000
+                );
             timer.Start();
         }
 

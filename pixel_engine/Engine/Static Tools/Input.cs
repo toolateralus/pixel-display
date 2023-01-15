@@ -31,7 +31,7 @@ namespace pixel_renderer
                     else action.Invoke();
             }
         }
-        public static void RegisterAction(bool async, Action<object[]?> action, object[]? args, Key key, InputEventType type) => InputActions.Add(new(action, key));
+        public static void RegisterAction(Action<object[]?> action, Key key , object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown) => InputActions.Add(new(action, key));
     }
 
     public class InputAction

@@ -36,6 +36,11 @@
                 y = Int((int)min.y, (int)max.y),
             };
         }
+
+        internal static object Int(int v, float x)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
 }

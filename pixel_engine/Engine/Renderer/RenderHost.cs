@@ -43,8 +43,9 @@ namespace pixel_renderer
         /// <param name="renderSurface"></param>
         private protected void Cycle(Image renderSurface)
         {
+            var stage = Runtime.Instance.GetStage();
             m_renderer.Dispose();
-            m_renderer.Draw();
+            m_renderer.Draw(stage.StageRenderInfo);
             m_renderer.Render(renderSurface);
         }
     }
