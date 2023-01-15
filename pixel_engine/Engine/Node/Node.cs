@@ -100,13 +100,13 @@ namespace pixel_renderer
         
         public void SetActive(bool value) => _enabled = value;
         public void Destroy() => ParentStage.Nodes.Remove(this);
-        public void OnTrigger(Rigidbody otherBody)
+        public void OnTrigger(Collider otherBody)
         {
             lock (Components)
                 for (int i = 0; i < ComponentsList.Count; i++)
                   ComponentsList[i].OnTrigger(otherBody);
         }
-        public void OnCollision(Rigidbody otherBody)
+        public void OnCollision(Collider otherBody)
         {
             lock (Components)
                 for (int i = 0; i < ComponentsList.Count; i++)
@@ -120,10 +120,8 @@ namespace pixel_renderer
                 if (component is null) return; 
 
                 var type = component.GetType();
-
-                //if (type.BaseType != typeof(Component)) 
-                //    throw new InvalidOperationException("Cannot add generic type Component to node."); 
-
+                if (component.GetType() is Component)
+                    throw new Exception(); 
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
 
@@ -141,12 +139,10 @@ namespace pixel_renderer
 
                 T component = new T();
 
-                Components[type].Add(component);
-                component.parent = this;
+                AddComponent(component);
                 return component;
             }
         }
-        
         public void RemoveComponent(Component component)
         {
             lock (Components)
@@ -180,7 +176,6 @@ namespace pixel_renderer
                 return true;
             }
         }
-
         public T GetComponent<T>(int? index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -201,7 +196,6 @@ namespace pixel_renderer
                 return true;
             }
         }
-
         public IEnumerable<T> GetComponents<T>() where T : Component
         {
             lock (Components)

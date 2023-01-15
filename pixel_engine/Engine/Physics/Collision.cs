@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pixel_renderer
 {
@@ -18,48 +20,34 @@ namespace pixel_renderer
         private readonly static SpatialHash hash = new(Constants.ScreenH, Constants.ScreenW, Constants.CollisionCellSize);
         public static void ViewportCollision(Node node)
         {
-             var hasSprite = node.TryGetComponent( out Sprite sprite);
-             var hasRb = node.TryGetComponent(out Rigidbody rb);
+            var hasCollider = node.TryGetComponent(out Collider col);
+            if (!hasCollider) return;
 
-            var hasComponents = (!hasSprite
-                || !hasRb
-                || !sprite.isCollider);
-            
-            var isCollisionEnabled = !rb.IsTrigger || 
-                rb.TriggerInteraction is not TriggerInteraction.None 
-                or TriggerInteraction.Triggers;
-
-            if (!hasComponents || !isCollisionEnabled) 
-                return; 
-
-            if (node.position.y > Constants.ScreenW - 4 - sprite.size.y)
+            if (node.position.y > Constants.ScreenW - 4 - col.size.y)
             {
-                node.position.y = Constants.ScreenW - 4 - sprite.size.y;
+                node.position.y = Constants.ScreenW - 4 - col.size.y;
             }
-            if (node.position.x > Constants.ScreenH - sprite.size.x)
+            if (node.position.x > Constants.ScreenH - col.size.x)
             {
-                node.position.x = Constants.ScreenH - sprite.size.x;
-                rb.velocity.x = 0;
+                node.position.x = Constants.ScreenH - col.size.x;
             }
             if (node.position.x < 0)
             {
                 node.position.x = 0;
-                rb.velocity.x = 0;
             }
         }
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
-            var A = nodeA.TryGetComponent(out Sprite spriteA); 
-            var B = nodeB.TryGetComponent(out Sprite spriteB);
-            return A && B
-                && GetBoxCollision(nodeA, nodeB, spriteA, spriteB);
+            var colA = nodeA.TryGetComponent<Collider>(out Collider col_A);
+            var colB = nodeB.TryGetComponent<Collider>(out Collider col_B);
+           return colA && colB && GetBoxCollision(nodeA, nodeB, col_A, col_B);
         }
-        private static bool GetBoxCollision(Node nodeA, Node nodeB, Sprite spriteA, Sprite spriteB)
+        private static bool GetBoxCollision(Node nodeA, Node nodeB, Collider col_A, Collider col_B)
         {
-            if (nodeA.position.x < nodeB.position.x + spriteB.size.x &&
-                nodeA.position.y < nodeB.position.y + spriteB.size.y &&
-                       spriteA.size.x + nodeA.position.x > nodeB.position.x &&
-                       spriteA.size.y + nodeA.position.y > nodeB.position.y)
+            if (nodeA.position.x < nodeB.position.x + col_B.size.x &&
+                nodeA.position.y < nodeB.position.y + col_B.size.y &&
+                       col_A.size.x + nodeA.position.x > nodeB.position.x &&
+                       col_A.size.y + nodeA.position.y > nodeB.position.y)
                 return true;
             return false;
         }
@@ -74,7 +62,8 @@ namespace pixel_renderer
             {
                 List<Node> result = hash.GetNearby(node);
                 ConcurrentBag<Node> nodes = new();
-                foreach (var _node in result) nodes.Add(_node);
+                foreach (var _node in result)
+                    nodes.Add(_node);
                 collisionCells.Add(nodes);
             });
         }
@@ -84,24 +73,37 @@ namespace pixel_renderer
             {
                 if (i >= collisionCells.Count) return;
                 var cellArray = collisionCells.ToArray();
+                
                 if (i >= cellArray.Length) return;
                 var cell = cellArray[i].ToArray();
+                
                 if (cell is null) return;
                 if (cell.Length <= 0) return;
-                Parallel.For(0, cell.Length, j =>
+
+                for (int j = 0; j < cell.Length; j++)
                 {
                     var nodeA = cell[j];
-                    if (nodeA is null) return;
-                    var colliders = new ConcurrentBag<Node>();
-                    Parallel.For(0, cell.Length, k =>
+                    if (nodeA is null) continue;
+
+                    var colliders = new List<Node>(); 
+
+                    for (int k = 0; k < cell.Length; ++k)
                     {
                         var nodeB = cell[k];
-                        if (nodeB is null) return;
-                        if (nodeA.UUID.Equals(nodeB.UUID)) return;
-                        if (!colliders.Contains(nodeB)) colliders.Add(nodeB);
-                    });
-                    RegisterCollisionEvent(nodeA, colliders.ToArray());
-                });
+
+                        if (nodeB is null)
+                            continue;
+
+                        bool hittingItself = nodeA.UUID.Equals(nodeB.UUID);
+
+                        if (hittingItself)
+                            continue;
+
+                        if (!colliders.Contains(nodeB))
+                            colliders.Add(nodeB);
+                    }
+                    RegisterCollisionEvent(nodeA, colliders);
+                }
             });
         }
         public static async Task RegisterCollidersAsync(Stage stage)
@@ -111,45 +113,66 @@ namespace pixel_renderer
             while (hash.busy)
                 await Task.Delay(10);
 
-            await Task.Run(() => Parallel.ForEach(stage.Nodes, node =>
+            Action<Node> RegisterAction = (node) =>
             {
-                if (!node.TryGetComponent<Sprite>(out _)
-                    || !node.TryGetComponent<Rigidbody>(out _)) return;
+                if(!node.TryGetComponent<Collider>(out _)) 
+                    return;
                 ViewportCollision(node);
                 hash.RegisterObject(node);
-            }));
-           
+            };
+            _ = Parallel.ForEach(stage.Nodes, RegisterAction);
             
         }
-        private static void RegisterCollisionEvent(Node A, Node[] colliders)
+        private static void RegisterCollisionEvent(Node A, List<Node> colliders)
         {
-            if (A is null) return;
-            for (int i = 0; i < colliders.Length; i++)
+            if (A is null)
+                return;
+
+            for (int i = 0; i < colliders.Count; i++)
             {
-                if (colliders[i] is null) continue;
+                if (colliders[i] is null)
+                    continue;
                 if (A.CheckOverlap(colliders[i]))
-                {
-                    _ = CollisionQueue.GetOrAdd(key: A, value: colliders);
-                }
+                    _ = CollisionQueue.GetOrAdd(key: A, value: colliders.ToArray());
             }
         }
         public static void FinalPhase()
         {
-            _ = Parallel.ForEach(CollisionQueue, collisionPair =>
-            {
-                Node A = collisionPair.Key;
-                _ = Parallel.ForEach(collisionPair.Value, B =>
-                {
-                    if (!A.TryGetComponent(out Rigidbody rbA) ||
-                        !B.TryGetComponent(out Rigidbody rbB)) return;
+            Action<KeyValuePair<Node, Node[]>> forBody = collisionPair =>
+                        {
+                            Node A = collisionPair.Key;
+                            _ = Parallel.ForEach(collisionPair.Value, B =>
+                            {
+                                if (!A.TryGetComponent(out Collider col_A) ||
+                                    !B.TryGetComponent(out Collider col_B))
+                                    return;
 
-                    Collide(rbA, rbB);
-                    AttemptCallbacks(rbA, rbB);
-                });
-            });
+                                if (A.TryGetComponent<Rigidbody>(out var rbA)
+                                && B.TryGetComponent<Rigidbody>(out var rbB))
+                                {
+                                    RigidbodyCollide(rbA, rbB);
+                                }
+                                else
+                                    Collide(col_A, col_B);
+
+                                AttemptCallbacks(col_A, col_B);
+                            });
+                        };
+            _ = Parallel.ForEach(CollisionQueue, forBody);
             CollisionQueue.Clear();
         }
-        private static void AttemptCallbacks(Rigidbody A, Rigidbody B)
+        private static void Collide(Collider A, Collider B)
+        {
+            if (A.IsTrigger || B.IsTrigger) return;
+
+            Vec2 direction = (B.parent.position - A.parent.position).Normalize();
+
+            B.parent.position += direction;
+            A.parent.position += CMath.Negate(direction);
+
+        }
+
+        private static void AttemptCallbacks(Collider A, Collider B)
         {
             if (A.IsTrigger || B.IsTrigger)
             {
@@ -176,9 +199,11 @@ namespace pixel_renderer
             NarrowPhase(collisionMap);
             FinalPhase(); 
         }
-        private static void Collide(Rigidbody A, Rigidbody B)
+
+        private static void RigidbodyCollide(Rigidbody A, Rigidbody B)
         {
-            if (A.IsTrigger || B.IsTrigger) return;
+            // check collider for trigger
+            ///if (A.IsTrigger || B.IsTrigger) return;
 
             var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
             if (velocityDifference < 0.1f)
@@ -198,7 +223,6 @@ namespace pixel_renderer
 
             depenetrationForce *= 0.5f;
 
-            return; 
         }
     }
 

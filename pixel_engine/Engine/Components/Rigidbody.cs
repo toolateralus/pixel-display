@@ -7,7 +7,6 @@ namespace pixel_renderer
         [Field] [JsonProperty] public float drag = .4f;
                 
         [Field] [JsonProperty] public bool usingGravity = true;
-        [Field] [JsonProperty] public bool IsTrigger = false;
 
         [Field] [JsonProperty] public Vec2 velocity = new();
         [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 

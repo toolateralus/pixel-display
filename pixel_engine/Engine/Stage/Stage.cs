@@ -76,8 +76,11 @@ namespace pixel_renderer
         public Bitmap backgroundImage;
         
         public event Action OnNodeQueryMade;
+        
         public List<Node> Nodes { get; private set; } = new();
+        
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
+        
         private StageRenderInfo? stage_render_info = null;
         public StageRenderInfo StageRenderInfo
         {
@@ -94,6 +97,7 @@ namespace pixel_renderer
             }
             set { stage_render_info = value; }
         }
+
         Queue<Action<object[]>> DelayedActionQueue = new();
         Queue<object[]> DelayedActionArgsQueue = new();
 
@@ -139,7 +143,6 @@ namespace pixel_renderer
                action(args);
             }
         }
-        
         public void RefreshStageDictionary()
         {
             foreach (Node node in Nodes)
@@ -157,6 +160,7 @@ namespace pixel_renderer
 
             nodesToRemove.Clear();
         }
+
         public Node[] FindNodesByTag(string tag)
         {
             OnNodeQueryMade?.Invoke();
@@ -181,6 +185,7 @@ namespace pixel_renderer
             return result.Any() ? result.First() : null; 
 
         }
+
         public void AddNode(Node node)
         {
             Action<object[]> add_node = (o) => { Nodes.Add(o[0] as Node); };
@@ -194,16 +199,42 @@ namespace pixel_renderer
             else add_node(args); 
 
         }
-       
+
+        private Bitmap GetBackground(Metadata meta)
+        {
+            return backgroundImage = new(meta.fullPath);
+            throw new MissingMetadataException("Metadata not found."); 
+        }
+
+        public IEnumerable<Sprite> GetSprites()
+        {
+            var sprite = new Sprite();
+            IEnumerable<Sprite> sprites = (from Node node in Nodes
+                                           where node.TryGetComponent(out sprite)
+                                           select sprite);
+            return sprites;
+        }
+        public IEnumerable<T> GetAllComponents<T>() where T : Component
+        {
+            return from Node node in Nodes
+                from T component in node.GetComponents<T>()
+                   select component;
+        }
+        
+        
         public void create_generic_node()
         {
             // random variables used here;
             object[] args = r_node_args();
             
             var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
-            var sprite = new Sprite();
-            node.AddComponent(sprite);
-            node.AddComponent(new Rigidbody() { IsTrigger = false });
+            var collider = new Collider()
+            {
+                IsTrigger = false
+            };
+            node.AddComponent<Sprite>();
+            node.AddComponent(collider);
+            node.AddComponent<Rigidbody>();
             AddNode(node);
         }
         private object[] r_node_args()
@@ -222,25 +253,6 @@ namespace pixel_renderer
                 r_color,
                 r_bool,
                 r_dir };
-        }
-        public IEnumerable<Sprite> GetSprites()
-        {
-            var sprite = new Sprite();
-            IEnumerable<Sprite> sprites = (from Node node in Nodes
-                                           where node.TryGetComponent(out sprite)
-                                           select sprite);
-            return sprites;
-        }
-        public IEnumerable<T> GetAllComponents<T>() where T : Component
-        {
-            return from Node node in Nodes
-                from T component in node.GetComponents<T>()
-                   select component;
-        }
-        private Bitmap GetBackground(Metadata meta)
-        {
-            return backgroundImage = new(meta.fullPath);
-            throw new MissingMetadataException("Metadata not found."); 
         }
     }
 }

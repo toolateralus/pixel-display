@@ -48,8 +48,8 @@ namespace pixel_renderer.Scripts
             Move(moveVector);
             moveVector = Vec2.zero; 
         }
-        public override void OnTrigger(Rigidbody other) { }
-        public override void OnCollision(Rigidbody collider) => sprite.Randomize();
+        public override void OnTrigger(Collider other) { }
+        public override void OnCollision(Collider collider) => sprite.Randomize();
         private void Move(Vec2 moveVector)
         {
             rb.velocity.x += moveVector.x * speed;
@@ -63,22 +63,16 @@ namespace pixel_renderer.Scripts
         {
             Vec2 playerStartPosition = new Vec2(12, 24);
             Node playerNode = new("Player", playerStartPosition, Vec2.one);
-            Rigidbody rb = new()
-            {
-                IsTrigger = false,
-            };
             var imgData = new Metadata("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
-            Sprite sprite = new()
-            {
-                
-            };
             Player player_obj = new()
             {
                 takingInput = true
             };
-            playerNode.AddComponent(rb);
+            playerNode.AddComponent<Rigidbody>();
+            playerNode.AddComponent<Sprite>();
             playerNode.AddComponent(player_obj);
-            playerNode.AddComponent(sprite);
+            var col =playerNode.AddComponent<Collider>();
+            col.IsTrigger = true;
             var cam = playerNode.AddComponent<Camera>();
             cam.Size = new(256, 256);
             

@@ -7,6 +7,6 @@
     {
         public Vec2 startPos = new(256, 256);
         public override void Update() => parent.position = startPos;
-        public override void OnCollision(Rigidbody collider) => GetComponent<Sprite>().Randomize();
+        public override void OnCollision(Collider collider) => GetComponent<Sprite>().Randomize();
     }
 }
