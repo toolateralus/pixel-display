@@ -12,15 +12,10 @@ namespace pixel_renderer.FileIO
         public string UUID => _uuid;
         private string _uuid = "";
 
-        public Type fileType;
-
-        new public Type GetType() => fileType;
-        
-        public Asset(string Name, Type fileType, string? UUID = null)
+        public Asset(string Name, string? UUID = null)
         {
             this.filePath = Constants.AssetsDir + "\\" + Name;
             this.pathFromRoot = Project.GetPathFromRoot(filePath);
-            this.fileType = fileType;
             this.Name = Name;
             _uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
         }

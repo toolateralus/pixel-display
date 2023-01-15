@@ -28,16 +28,16 @@ namespace pixel_editor
                     Console.Print($"[Y/N/End] {seconds} seconds remaining");
                 }
 
-                if (Keyboard.IsKeyDown(Key.Y)) 
+                if (Keyboard.IsKeyDown(Key.Y))
                     return PromptResult.Yes;
                 if (Keyboard.IsKeyDown(Key.N))
-                    return PromptResult.No; 
+                    return PromptResult.No;
                 if (Keyboard.IsKeyDown(Key.End))
                     return PromptResult.Cancel;
 
                 await Task.Delay(10);
             };
-            return PromptResult.Timeout; 
+            return PromptResult.Timeout;
         }
         public void Invoke()
         {
@@ -45,7 +45,7 @@ namespace pixel_editor
         }
         public bool Equals(string input)
         {
-            string withoutArgs = CommandParser.ParseArguments(input, out _);  
+            string withoutArgs = CommandParser.ParseArguments(input, out _);
             withoutArgs = CommandParser.ParseLoopParams(withoutArgs, out _);
 
             string[] split = phrase.Split('|');
@@ -108,7 +108,7 @@ namespace pixel_editor
         };
         private static Command cmd_get_node = new()
         {
-            phrase = "getNode;",
+            phrase = "node.Get;",
             action = (e) =>
             {
                 string name = (string)e[0];
@@ -134,12 +134,25 @@ namespace pixel_editor
         };
         private static Command cmd_set_node_field = new()
         {
-            phrase = "getNode.Set;",
+            phrase = "node.Set;",
             args = Array.Empty<object>(),
-            action = (e) =>
+            action = set_node_field,
+            description = "neccesary arguments : (string Name, string FieldName, object value) " +
+            "\n gets a node and attempts to write the provided value to specified field.",
+        };
+        private static Command cmd_call_node_method = new()
+        {
+            phrase = "node.Call;",
+            args = Array.Empty<object>(),
+            action = call_node_method,
+            description = "neccesary arguments : (string Name, string FieldName, object value) " +
+          "\n gets a node and attempts to write the provided value to specified field.",
+        };
+
+        private static void set_node_field(params object[]? e)
+        {
+            if (e.Length >= 3)
             {
-                if (e.Length < 3)
-                    return;
                 string nName = (string)e[0];
                 string fName = (string)e[1];
                 object value = e[2];
@@ -147,11 +160,34 @@ namespace pixel_editor
                 Node? node = Runtime.Instance.GetStage().FindNode(nName);
                 Type type = node.GetType();
                 FieldInfo? field = type.GetRuntimeField(fName);
-                field.SetValue(node, value);
-            },
-            description = "neccesary arguments : (string Name, string FieldName, object value) " +
-            "\n gets a node and attempts to write the provided value to specified field.",
-        };
+                field?.SetValue(node, value);
+            }
+        }
+        private static void call_node_method(params object[]? e)
+        {
+            if (e.Length > 2)
+            {
+                string nName = (string)e[0];
+                string fName = (string)e[1];
+                object[] init_params = { e[2] };
+
+                Node? node = Runtime.Instance.GetStage().FindNode(nName);
+                Type type = node.GetType();
+
+                MethodInfo method = type.GetMethod(fName);
+
+                bool hasValidParams = init_params.Length != 0 && init_params[0] != "" && init_params[0] != " ";
+                bool methodHasParams = method.GetParameters().Length > 0;
+                if (hasValidParams && methodHasParams)
+                {
+
+                    method.Invoke(node, init_params);
+                    return;
+                }
+                method.Invoke(node, null);
+            }
+        }
+
         private static Command cmd_spawn_generic = new()
         {
             phrase = "++n;|newNode;",
@@ -209,6 +245,7 @@ namespace pixel_editor
             cmd_reload_stage,
             cmd_get_node,
             cmd_set_node_field,
+            cmd_call_node_method,
             cmd_spawn_generic,
             cmd_log,
             cmd_set_camera,

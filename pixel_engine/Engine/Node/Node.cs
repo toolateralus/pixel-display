@@ -98,8 +98,8 @@ namespace pixel_renderer
             }
         }
         
-        public void SetActive(bool value) => _enabled = value; 
-        
+        public void SetActive(bool value) => _enabled = value;
+        public void Destroy() => ParentStage.Nodes.Remove(this);
         public void OnTrigger(Rigidbody otherBody)
         {
             lock (Components)

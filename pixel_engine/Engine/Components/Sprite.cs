@@ -10,7 +10,7 @@ namespace pixel_renderer
     public class Texture : Asset
     {
         [JsonConstructor]
-        public Texture(Metadata imgData, Metadata maskData, Color? color, string Name, Type fileType, string? UUID = null) : base(Name, fileType, UUID)
+        public Texture(Metadata imgData, Metadata maskData, Color? color, string Name, Type fileType, string? UUID = null) : base(Name, UUID)
         {
 
         }
@@ -104,8 +104,8 @@ namespace pixel_renderer
                     case SpriteType.Image:
                         if (texture is null)
                             _colors = SolidColorSquare(size, Color);
-
-                        _colors = texture.GetColorArray();
+                        else 
+                            _colors = texture.GetColorArray();
                         break;
                     case SpriteType.Custom:
                         throw new NotImplementedException("Custom Sprite render type not yet implemented");
@@ -132,9 +132,12 @@ namespace pixel_renderer
         {
             if (dirty)
             {
-                if (!texture.HasImage) return; 
+                if (!texture.HasImage || !texture.HasImageMetadata)
+                {
+                    dirty = false;
+                    return; 
+                }
                 ColorData = texture.GetColorArray();
-                dirty = false;
             }
         }
         public void Randomize()

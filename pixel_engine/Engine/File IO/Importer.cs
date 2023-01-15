@@ -59,10 +59,7 @@ namespace pixel_renderer.Assets
             Metadata meta = new("New Asset", file, fileExtension);
             var asset = TryPullObject(meta);
             if (asset is not null)
-            {
-                asset.fileType ??= typeof(Asset);
                 AssetLibrary.Register((meta, asset));
-            };
         }
 
         /// <summary>

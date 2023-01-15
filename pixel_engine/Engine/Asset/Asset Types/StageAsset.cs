@@ -17,7 +17,7 @@ namespace pixel_renderer.Assets
         /// <param name="settings"></param>
         /// <param name="UUID"></param>
         [JsonConstructor]
-        public StageAsset(string name, List<NodeAsset> nodes, Metadata background, StageSettings settings, string UUID) : base(name, typeof(Stage), UUID)
+        public StageAsset(string name, List<NodeAsset> nodes, Metadata background, StageSettings settings, string UUID) : base(name, UUID)
         {
             this.nodes = nodes;
             this.m_background = background;
@@ -27,7 +27,7 @@ namespace pixel_renderer.Assets
         /// </summary>
         /// <param name="name"></param>
         /// <param name="runtimeValue"></param>
-        public StageAsset(string name, Stage runtimeValue) : base(name, typeof(Stage))
+        public StageAsset(string name, Stage runtimeValue) : base(name)
         {
            nodes = runtimeValue.Nodes.ToNodeAssets();
         }

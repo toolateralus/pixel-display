@@ -20,8 +20,7 @@ namespace pixel_renderer
 
         public StageRenderInfo(Stage stage)
         {
-            lock (stage)
-                Refresh(stage);
+             Refresh(stage);
         }
         public void Refresh(Stage stage)
         {

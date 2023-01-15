@@ -23,7 +23,7 @@ namespace pixel_renderer
         public virtual void FixedUpdate(float delta) { }
         public virtual void OnTrigger(Rigidbody other) { }
         public virtual void OnCollision(Rigidbody collider) { }
-        public ComponentAsset ToAsset() => new(Name, this, GetType());  
+        public ComponentAsset ToAsset() => new(Name, this);  
         /// <summary>
         /// Performs a 'Get Component' call on the Parent node object of the component this is called from.
         /// </summary>

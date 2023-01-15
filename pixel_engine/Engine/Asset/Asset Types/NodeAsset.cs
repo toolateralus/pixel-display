@@ -16,7 +16,7 @@ namespace pixel_renderer.Assets
 
 
         [JsonConstructor]
-        public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<Component> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, typeof(Node), UUID)
+        public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<Component> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, UUID)
         {
             this.components = components;
             this.pos = pos;
@@ -33,8 +33,6 @@ namespace pixel_renderer.Assets
 
             pos = runtimeValue.position;
             scale = runtimeValue.scale;
-            fileType = typeof(Node);
-
             foreach (var comp in runtimeValue.ComponentsList)
                 components.Add(comp);
         }
@@ -50,19 +48,14 @@ namespace pixel_renderer.Assets
     {
         [JsonIgnore]
         public Component runtimeComponent;
-        public ComponentAsset(string name,Component component, Type type)
+        public ComponentAsset(string name,Component component)
         {
             runtimeComponent = component;
-            fileType = type;
             Name = name;
         }
         [JsonConstructor]
-        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, fileType, UUID) 
+        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, UUID) 
         {
-            // somehow we need to keep a constant reference to the type and any data that needs to be saved; 
-            // we cannot instantiate a component of unknown type at runtime. 
-            // this is potentially the sole reason the scene seems to be empty when loading from an asset: the Components list and dict
-            // are always null after initializing from a file;
             this.runtimeComponent = runtimeComponent; 
         }
     }

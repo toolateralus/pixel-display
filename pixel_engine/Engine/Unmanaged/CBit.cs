@@ -25,7 +25,6 @@ namespace pixel_renderer
             byte[] data = new byte[bmd.Stride * bmp.Height];
             Marshal.Copy(bmd.Scan0, data, 0, data.Length);
             bmp.UnlockBits(bmd);
-            DeleteObject(bmd.Scan0);
             return data;
         }
         /// <summary>
@@ -40,7 +39,6 @@ namespace pixel_renderer
                 bmd.Width, bmd.Height, 96, 96, source.PixelFormat.ToMediaFormat(), null,
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
             source.UnlockBits(bmd);
-            DeleteObject(bmd.Scan0);
         }
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
@@ -77,7 +75,6 @@ namespace pixel_renderer
             Marshal.Copy(colorBytes, start, destination, length);
 
             bmp.UnlockBits(bmd);
-            DeleteObject(bmd.Scan0);
         }
         /// <summary>
         /// Takes a group of sprites and writes their individual color data arrays to a larger map as positions to prepare for collision and drawing.
