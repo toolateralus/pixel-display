@@ -38,10 +38,10 @@ namespace pixel_renderer
             IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
 
 
-            foreach (var uiComponent in uiComponents)
+            foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
             {
-                if (!uiComponent.Enabled) continue;
-                if (uiComponent is Camera) RenderSprites(uiComponent as Camera, renderInfo);
+                if (!uiComponent.Enabled ) continue;
+                if (uiComponent as Camera != null) RenderSprites(uiComponent as Camera, renderInfo);
             }
                 
             return renderTexture;
