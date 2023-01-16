@@ -64,20 +64,27 @@ namespace pixel_editor
                     string info = GetComponentInfo(component);
                     TextBox block = CreateBlock(info);
 
-                    int lineCt = info.Split('\n').Length;
-                    int rowSpan = lineCt * 3;
-                    int colSpan = 10;
-                    int row = index * 4;
-                    int col = 2; 
-                    SetRowAndColumn(block, rowSpan, colSpan, col, row);
-                    componentGrid.Children.Add(block);
-                    componentGrid.UpdateLayout();
-                    activeControls.Add(block);
+                    int lineCt = info.Split('\n').Length ;
+
+                    block.Width = 250;
+                    block.Height = Math.Max(3 * lineCt, 5);
+
+                    SetRowAndColumn(block, 1, 4, 0, index + 2);
+                    AddControlToInspector(block);
+
                     index++;
-                 }
+                }
 
             OnInspectorUpdated?.Invoke();
         }
+
+        private void AddControlToInspector(Control control)
+        {
+            componentGrid.Children.Add(control);
+            componentGrid.UpdateLayout();
+            activeControls.Add(control);
+        }
+
         public void DeselectNode()
         {
             if (loadedNode != null)
@@ -96,12 +103,12 @@ namespace pixel_editor
             loadedNode = node;
             OnObjectSelected?.Invoke();
         }
-        public static void SetRowAndColumn(Control component, int rowSpan, int colSpan, int col, int row)
+        public static void SetRowAndColumn(Control component, int height, int width, int x, int y)
         {
-            component.SetValue(Grid.RowSpanProperty, rowSpan);
-            component.SetValue(Grid.ColumnSpanProperty, colSpan);
-            component.SetValue(Grid.RowProperty, row);
-            component.SetValue(Grid.ColumnProperty, col);
+            component.SetValue(Grid.RowSpanProperty, height);
+            component.SetValue(Grid.ColumnSpanProperty, width);
+            component.SetValue(Grid.RowProperty, y);
+            component.SetValue(Grid.ColumnProperty, x);
         }
         public static string GetComponentInfo(Component component)
         {
@@ -120,8 +127,7 @@ namespace pixel_editor
 
                 // default value type print
                 else valString = value?.ToString();
-
-                output.Add($" \n{field.Name} {valString}\n");
+                output.Add($" \n{field.Name} {valString}");
             }
             string output_string = string.Empty;
             foreach (var str in output)
@@ -159,15 +165,19 @@ namespace pixel_editor
             return new()
             {
                 Text = componentInfo,
+                
                 FontSize = 3f,
                 FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
+                
+                AcceptsReturn = true, AcceptsTab = true, AllowDrop = true,
                 TextWrapping = TextWrapping.Wrap,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
+                
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Visible,
+                HorizontalAlignment = HorizontalAlignment.Left, 
+                VerticalAlignment= VerticalAlignment.Top,
                 Foreground = Brushes.White,
                 Background = Brushes.Black,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Visible,
-                AcceptsReturn = true, AcceptsTab = true, AllowDrop = true
+                
             };
         }
         public static Button CreateButton(string content, Thickness margin) => new Button()

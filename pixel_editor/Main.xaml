@@ -5,7 +5,7 @@
     Name="window"
     WindowStartupLocation="CenterScreen"
     Width="1920" Height="1080"
-    Background="Gray">
+    Background="Black">
     <Grid Name="MainGrid" SizeChanged="MainGrid_SizeChanged">
         <Grid.LayoutTransform>
             <ScaleTransform x:Name="ApplicationScaleTransform"
@@ -58,10 +58,13 @@
             </Grid.ColumnDefinitions>
             <Grid 
                 x:Name="inspectorChildGrid"
-                Grid.ColumnSpan="6"
-                Grid.RowSpan="6"
+                Grid.ColumnSpan="8"
+                Grid.RowSpan="10"
                 Grid.Column="12"
-                Grid.Row="3">
+                Grid.Row="1"
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Stretch">
+                
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="3*"/>
@@ -84,7 +87,6 @@
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
             </Grid>
-            <Ellipse Fill="Red"> </Ellipse>
             <Image  x:Name="image"
                     Grid.Row="1" 
                     Grid.Column="0" 
@@ -120,7 +122,7 @@
                 Grid.Column="13" 
                 Grid.Row="11"
                 Grid.ColumnSpan="7" 
-                Grid.RowSpan="4" 
+                Grid.RowSpan="4" TextChanged="consoleOutput_TextChanged" 
                 >
             </TextBox>
 

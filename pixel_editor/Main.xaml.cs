@@ -328,6 +328,11 @@ namespace pixel_editor
            Current.Events.Pending.Enqueue(e);
         }
         #endregion
+
+        private void consoleOutput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+
+        }
     }
  
 }
