@@ -19,10 +19,11 @@ namespace pixel_renderer
         {
             foreach (var action in InputActions)
             {
-                var type = action.EventType; 
+                var type = action.EventType;
                 var key = action.Key;
-                var isDown = Keyboard.IsKeyDown(key);
-                if (isDown)
+                bool input_value;
+                input_value = GetInputValueByType(type, key);
+                if (input_value)
                     if (action.ExecuteAsynchronously)
                     {
                         Task.Run(() => action.InvokeAsync());
@@ -30,6 +31,30 @@ namespace pixel_renderer
                     }
                     else action.Invoke();
             }
+        }
+        public static bool GetInputValueByType_Name(InputEventType type, string key)
+        {
+            Key key_ = Enum.Parse<Key>(key);
+            var input_value = type switch
+            {
+                InputEventType.KeyDown => Keyboard.IsKeyDown(key_),
+                InputEventType.KeyUp => Keyboard.IsKeyUp(key_),
+                InputEventType.KeyToggle => Keyboard.IsKeyToggled(key_),
+                _ => false,
+            };
+            return input_value;
+        }
+        public static bool GetInputValueByType(InputEventType type, Key key)
+        {
+            
+            var input_value = type switch
+            {
+                InputEventType.KeyDown => Keyboard.IsKeyDown(key),
+                InputEventType.KeyUp => Keyboard.IsKeyUp(key),
+                InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
+                _ => false,
+            };
+            return input_value;
         }
         public static void RegisterAction(Action<object[]?> action, Key key , object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown) => InputActions.Add(new(action, key));
     }

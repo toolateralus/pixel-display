@@ -222,13 +222,20 @@ namespace pixel_renderer
                    select component;
         }
         
+       
+
         public void create_generic_node()
         {
             // random variables used here;
             object[] args = r_node_args();
-            
-            var node = new Node($"NODE {(int)args[0]}", (Vec2)args[1], Vec2.one);
-            var sprite = node.AddComponent<Sprite>();
+
+            int name_ct = (int)args[0];
+            Vec2 pos = (Vec2)args[1];
+            Vec2 scale = Vec2.one;
+            var node = new Node($"NODE {name_ct}", pos, scale);
+
+            var sprite = new Sprite(24, 24);
+            node.AddComponent(sprite);
             var collider = new Collider()
             {
                 size = sprite.size,

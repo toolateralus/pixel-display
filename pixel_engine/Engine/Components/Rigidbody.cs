@@ -40,6 +40,7 @@ namespace pixel_renderer
                 Collider col = node.AddComponent<Collider>();
                 rb.parent = node;
                 rb.sprite = new(16, 16);
+                node.AddComponent(rb.sprite);
                 col.size = rb.sprite.size;
                 col.IsTrigger = false;
                 return node;
