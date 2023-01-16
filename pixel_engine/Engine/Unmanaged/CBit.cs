@@ -98,26 +98,17 @@ namespace pixel_renderer
                     }
             return colors;
         }
-        public static unsafe Color[,] ColorArrayFromBitmapData(BitmapData bmd, byte[] data)
+        public static Color[,] ColorArrayFromBitmap(Bitmap bmp)
         {
-            int curRowOffs = 0;
-            Color[,] _colors = new Color[bmd.Width, bmd.Height];
+            Color[,] _colors = new Color[bmp.Width, bmp.Height];
 
-            for (int y = 0; y < bmd.Height; y++)
+            for (int y = 0; y < bmp.Height; y++)
             {
-                int byteOffset = curRowOffs;
-                for (int x = 0; x < bmd.Width; x++)
-                {
-                    byte b = data[byteOffset];
-                    byte g = data[byteOffset + 1];
-                    byte r = data[byteOffset + 2];
-                    byte a = data[byteOffset + 3];
-                    byteOffset += 4;
-                    _colors[x, y] = Color.FromArgb(a, r, g, b);
+                for (int x = 0; x < bmp.Width; x++)
+                { 
+                    _colors[x, y] = bmp.GetPixel(x, y);
                 }
-                curRowOffs += bmd.Stride;
             }
-
             return _colors;
         }
     }
