@@ -61,8 +61,7 @@ namespace pixel_renderer
         public static Stage Default()
         {
             var nodes = new List<Node>();
-            Player.
-                        AddPlayer(nodes);
+            Player.AddPlayer(nodes);
 
             var bitmap = Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp";
             var backgroundMeta = new Metadata("Bitmap Metadata", bitmap, ".bmp");

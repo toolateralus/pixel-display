@@ -87,15 +87,12 @@ namespace pixel_renderer
             DrawBackground(cam, bmd);
 
             Vec2 bmpSize = new Vec2(bmd.Width, bmd.Height);
-           
-
-            
 
             for (int i = 0; i < renderInfo.Count; ++i)
             {
                 var pos = renderInfo.spritePositions[i];
-                var size = renderInfo.spriteSizeVectors[i];
                 var colorData = renderInfo.spriteColorData[i];
+                var size = new Vec2(colorData.GetLength(0) , colorData.GetLength(1));
                 var camDistance = renderInfo.spriteCamDistances[i];
 
                 for (Vec2Int localPos = new(); localPos.y < size.y; localPos.Increment2D((int)size.x))

@@ -163,6 +163,7 @@ namespace pixel_editor
                 field?.SetValue(node, value);
             }
         }
+       
         private static void call_node_method(params object[]? e)
         {
             if (e.Length > 2)

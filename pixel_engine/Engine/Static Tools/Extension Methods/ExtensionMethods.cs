@@ -22,8 +22,8 @@ namespace pixel_renderer
         #endregion
         #region Vectors
         public static Vec2 GetDivideSafe(this Vec2 v) => new(v.x.GetDivideSafe(), v.y.GetDivideSafe());
-        public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.x); }
-        public static Vec2 WithValue(this Vec2 v, float? x = null, float? y = null) { return new Vec2(x ?? v.x, y ?? v.x); }
+        public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.y); }
+        public static Vec2 WithValue(this Vec2 v, float? x = null, float? y = null) { return new Vec2(x ?? v.x, y ?? v.y); }
         public static Vec2 WithScale(this Vec2 v, int x = 1, int y = 1) { return new Vec2(v.x * x, v.y * y); }
         public static double Sum(this Vec2 v) => v.x + v.y;
         public static double Sum(this Vec3 v) => v.x + v.y + v.z;

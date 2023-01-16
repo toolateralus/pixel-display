@@ -30,6 +30,7 @@ namespace pixel_renderer
         #region Other Constructors
         public Node() =>  _uuid = pixel_renderer.UUID.NewUUID(); 
         public Node(string name) : this() => Name = name;
+        public Node Clone() { return (Node)Clone(); }
         public Node(string name, Vec2 pos, Vec2 scale) : this(name)
         {
             position = pos;
@@ -112,7 +113,7 @@ namespace pixel_renderer
                 for (int i = 0; i < ComponentsList.Count; i++)
                   ComponentsList[i].OnCollision(otherBody);
         }
-        
+
         public void AddComponent(Component component)
         {
             lock (Components)

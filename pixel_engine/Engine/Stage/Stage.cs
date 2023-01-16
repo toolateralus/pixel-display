@@ -221,7 +221,6 @@ namespace pixel_renderer
                    select component;
         }
         
-        
         public void create_generic_node()
         {
             // random variables used here;
@@ -234,8 +233,12 @@ namespace pixel_renderer
                 size = sprite.size,
                 IsTrigger = false
             };
+            
             node.AddComponent(collider);
-            if(JRandom.Bool()) node.AddComponent<Rigidbody>();
+
+            if(JRandom.Bool()) 
+                node.AddComponent<Rigidbody>();
+
             AddNode(node);
         }
         private object[] r_node_args()

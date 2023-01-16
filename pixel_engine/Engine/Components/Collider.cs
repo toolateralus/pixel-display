@@ -1,6 +1,7 @@
 ﻿
 
 using Newtonsoft.Json;
+using System;
 using System.Windows.Documents;
 
 namespace pixel_renderer
@@ -8,30 +9,74 @@ namespace pixel_renderer
     public class Collider : Component
     {
         [JsonProperty] [Field] public Vec2 size = new(0,0);
-        [JsonProperty] [Field] public Vec2[] normals;
         [JsonProperty] [Field] public Sprite? sprite;
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
         [JsonProperty]public bool IsTrigger { get; internal set; } = false;
+        public Vec2[] normals => GetNormals();
+        /*
+          * CORNERS
+     
+
+         NORMALS
+         Top,
+         Left,
+         Bottom,
+         Right
+
+         */
+        /// <summary>
+        /// <code>
+        /// returns a list of the normals organizes as such
+        /// Top
+        /// Left
+        /// Bottom
+        /// Right
+        /// </code>
+        /// </summary>
+        /// <returns></returns>
         public Vec2[] GetNormals()
         {
             Vec2 pos = parent.position;
-            var corners = GetCorners(pos);
+            var corners = GetVertices();
+         
             return new Vec2[]
             {
-                (corners[1] - corners[0]).Normal_RHS,
-                (corners[2] - corners[1]).Normal_RHS,
-                (corners[3] - corners[2]).Normal_RHS,
-                (corners[0] - corners[3]).Normal_RHS,
+                (corners[1] - corners[0]).Normal_RHS.Normalize(),
+                (corners[2] - corners[1]).Normal_RHS.Normalize(),
+                (corners[3] - corners[2]).Normal_RHS.Normalize(),
+                (corners[0] - corners[3]).Normal_RHS.Normalize(),
             };
         }
+        /// <summary>
+        /// <code>
+        /// Gets the colliders corners in a list organized as such
+        /// Top Left, 
+        /// Top Right,
+        /// Bottom Left,
+        /// Bottom Right
+        /// </code>
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public Vec2[] GetVertices()
+        {
+            Vec2 position = new(parent.position);
+            Vec2 size = new(this.size);
 
-        private Vec2[] GetCorners(Vec2 pos) => new Vec2[] {
-                    pos,
-                    pos.WithValue(x: pos.x + size.x),
-                    pos.WithValue(y: pos.y + size.y),
-                    pos + size,
-        };
-        
+            Vec2 topLeft = position;
+            Vec2 topRight = position.WithValue(x: position.x + size.x);
+            Vec2 bottomLeft = position.WithValue(y: position.y + size.y);
+            Vec2 bottomRight = position + size;
+
+            var vertices = new Vec2[] {
+                    topLeft,
+                    topRight,
+                    bottomLeft,
+                    bottomRight,
+            };
+
+            return vertices;
+        }
 
         public override void Awake()
         { 
@@ -53,6 +98,18 @@ namespace pixel_renderer
         }
         public override void Update()
         {
+        }
+
+        internal Vec2 GetCentroid()
+        {
+            var corners = GetVertices();
+            Vec2 centroid = new();
+            for (int i = 0; i < corners.Length; i++)
+            {
+                Vec2 vec = corners[i];
+                centroid += vec;
+            }
+            return centroid / corners.Length;
         }
     }
 }

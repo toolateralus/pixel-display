@@ -72,8 +72,8 @@
     {
         public float x;
         public float y;
-        public Vec2 Normal_RHS => new(-y, x);
-        public Vec2 Normal_LHS => new(y, -x);
+        public Vec2 Normal_RHS => new Vec2(-y, x).Normalize();
+        public Vec2 Normal_LHS => new Vec2(y, -x).Normalize();
         public float this[int index]
         {
             get
@@ -95,6 +95,10 @@
                 }
             }
         }
+        public static float Dot(Vec2 a, Vec2 b)
+        {
+            return (a.x * b.x) - (a.y * b.y);
+        }
         public float Length() => (float)Math.Sqrt(x * x + y * y);
         public Vec2 Rotated(float angle)
         {
@@ -108,13 +112,18 @@
             y = (MathF.Sin(angle) * x) + (MathF.Cos(angle) * y);
         }
         public float SqrMagnitude() => x * x + y * y;
-        public static Vec2 one = new Vec2(1, 1);
-        public static Vec2 zero = new Vec2(0, 0);
+        public static Vec2 one = new(1, 1);
+        public static Vec2 zero = new(0, 0);
         internal static Vec2 up = new(0, -1);
         internal static Vec2 down = new(0, 1);
         internal static Vec2 left = new(-1, 0);
         internal static Vec2 right = new(1, 0);
 
+        public Vec2(Vec2 original)
+        {
+            x = original.x;
+            y = original.y;
+        }
         public Vec2(float x, float y)
         {
             this.x = x;

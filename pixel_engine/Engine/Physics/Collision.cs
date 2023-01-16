@@ -2,14 +2,18 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using System.Xml.Linq;
+using static pixel_renderer.Collision;
 
 namespace pixel_renderer
 {
-    public enum TriggerInteraction { Colliders, Triggers, None, All }; 
-    public static class Collision
+    public enum TriggerInteraction { Colliders, Triggers, None, All };
+    public static partial class Collision
     {
         private static readonly ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
         private static readonly ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
@@ -24,23 +28,17 @@ namespace pixel_renderer
             if (!hasCollider) return;
 
             if (node.position.y > Constants.ScreenW - 4 - col.size.y)
-            {
                 node.position.y = Constants.ScreenW - 4 - col.size.y;
-            }
             if (node.position.x > Constants.ScreenH - col.size.x)
-            {
                 node.position.x = Constants.ScreenH - col.size.x;
-            }
             if (node.position.x < 0)
-            {
                 node.position.x = 0;
-            }
         }
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             var colA = nodeA.TryGetComponent(out Collider col_A);
             var colB = nodeB.TryGetComponent(out Collider col_B);
-           return colA && colB && GetBoxCollision(nodeA, nodeB, col_A, col_B);
+            return colA && colB && GetBoxCollision(nodeA, nodeB, col_A, col_B);
         }
         private static bool GetBoxCollision(Node nodeA, Node nodeB, Collider col_A, Collider col_B)
         {
@@ -54,10 +52,10 @@ namespace pixel_renderer
         public static void BroadPhase(Stage stage, ConcurrentBag<ConcurrentBag<Node>> collisionCells)
         {
             collisionCells.Clear();
-            
-            if(stage.Nodes is null ||
+
+            if (stage.Nodes is null ||
                 stage.Nodes.Count == 0) return;
-                
+
             Parallel.ForEach(stage.Nodes, node =>
             {
                 List<Node> result = hash.GetNearby(node);
@@ -73,10 +71,10 @@ namespace pixel_renderer
             {
                 if (i >= collisionCells.Count) return;
                 var cellArray = collisionCells.ToArray();
-                
+
                 if (i >= cellArray.Length) return;
                 var cell = cellArray[i].ToArray();
-                
+
                 if (cell is null) return;
                 if (cell.Length <= 0) return;
 
@@ -85,7 +83,7 @@ namespace pixel_renderer
                     var nodeA = cell[j];
                     if (nodeA is null) continue;
 
-                    var colliders = new List<Node>(); 
+                    var colliders = new List<Node>();
 
                     for (int k = 0; k < cell.Length; ++k)
                     {
@@ -106,22 +104,20 @@ namespace pixel_renderer
                 }
             });
         }
-        public static async Task RegisterCollidersAsync(Stage stage)
+        public static Task RegisterCollidersAsync(Stage stage)
         {
             hash.ClearBuckets();
 
-            while (hash.busy)
-                await Task.Delay(10);
 
             Action<Node> RegisterAction = (node) =>
             {
-                if(!node.TryGetComponent<Collider>(out _)) 
+                if (!node.TryGetComponent<Collider>(out _))
                     return;
                 ViewportCollision(node);
                 hash.RegisterObject(node);
             };
             _ = Parallel.ForEach(stage.Nodes, RegisterAction);
-            
+
         }
         private static void RegisterCollisionEvent(Node A, List<Node> colliders)
         {
@@ -138,36 +134,60 @@ namespace pixel_renderer
         }
         public static void FinalPhase()
         {
-            Action<KeyValuePair<Node, Node[]>> forBody = collisionPair =>
-                        {
-                            Node A = collisionPair.Key;
-                            _ = Parallel.ForEach(collisionPair.Value, B =>
-                            {
-                                if (!A.TryGetComponent(out Collider col_A) ||
-                                    !B.TryGetComponent(out Collider col_B))
-                                    return;
+            for (int i = 0; i < CollisionQueue.Count; ++i)
+            {
+                Node A = CollisionQueue.Keys.ElementAt(i);
+                if (!CollisionQueue.TryGetValue(A, out var nodes)) return;
+                for (int j = 0; j < nodes.Length; ++j)
+                {
+                    Node B = nodes[j];
+                    if (!A.TryGetComponent(out Collider col_A) ||
+                        !B.TryGetComponent(out Collider col_B))
+                        return;
 
-                                if (A.TryGetComponent<Rigidbody>(out var rbA)
-                                && B.TryGetComponent<Rigidbody>(out var rbB))
-                                {
-                                    RigidbodyCollide(rbA, rbB);
-                                }
-                                Collide(col_A, col_B);
-                                AttemptCallbacks(col_A, col_B);
-                            });
-                        };
-            _ = Parallel.ForEach(CollisionQueue, forBody);
-            CollisionQueue.Clear();
+                    bool has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
+                    bool has_rb_b = B.TryGetComponent<Rigidbody>(out var rbB);
+
+                    if (has_rb && has_rb_b)
+                        RigidbodyCollide(rbA, rbB);
+
+
+                    else if (has_rb || has_rb_b)
+                        if (has_rb) Collide(rbA, col_B);
+                        else Collide(rbB, col_A);
+                    AttemptCallbacks(col_A, col_B);
+                }
+                CollisionQueue.Clear();
+            }
         }
-        private static void Collide(Collider A, Collider B)
+        private static void Collide(Rigidbody A, Collider B)
         {
-            if (A.IsTrigger || B.IsTrigger) return;
+            var aCol = A.GetComponent<Collider>();
+            if (aCol.IsTrigger || B.IsTrigger) return;
 
-            Vec2 top_left_A = A.parent.position + A.size;
-            Vec2 top_left_B = B.parent.position + B.size;
-          
+            var a_vertices = aCol.GetVertices(); 
+            var b_vertices = B.GetVertices();
+
+            var a_normals = aCol.normals;
+            var b_normals = B.normals;
+
+            var a_centroid = aCol.GetCentroid();
+            var b_centroid = B.GetCentroid();
+            Polygon pA = new()
+            {
+                vertices = a_vertices,
+                centroid = a_centroid,
+                normals = a_normals,
+            };
+            Polygon pB = new()
+            {
+                vertices = b_vertices,
+                centroid = b_centroid,
+                normals = b_normals,
+            };
+            var minDepth = SATCollision.GetMinimumDepthVector(pA, pB);
+            A.parent.position += minDepth;
         }
-
         private static void AttemptCallbacks(Collider A, Collider B)
         {
             if (A.IsTrigger || B.IsTrigger)
@@ -179,23 +199,21 @@ namespace pixel_renderer
             A.parent.OnCollision(B);
             B.parent.OnCollision(A);
         }
-       
         public async static Task Run()
         {
             if (!AllowEntries)
             {
-                if(HasTasks) FinalPhase();
-                return; 
+                if (HasTasks) FinalPhase();
+                return;
             }
             var stage = Runtime.Instance.GetStage();
-            
-            await RegisterCollidersAsync(stage);
-            
+
+            await RegisterCollidersAsync(stage));
+
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
-            FinalPhase(); 
+            FinalPhase();
         }
-
         private static void RigidbodyCollide(Rigidbody A, Rigidbody B)
         {
             // check collider for trigger

@@ -1,5 +1,6 @@
 ﻿namespace pixel_renderer
 {
+    using System.Security.Cryptography;
     using Color = System.Drawing.Color;
     using Random = System.Random;
 
@@ -24,7 +25,16 @@
             return System.Drawing.Color.FromArgb(r, g, b, a);
         }
         public static byte Byte() => (byte)Int(0, 255);
-        public static int Int(int min, int max) => new Random().Next(min, max);
+        public static int Int(int min, int max)
+        {
+            if (min > max)
+            {
+                Runtime.Log("Random int min was greater than the max");
+                return min;
+            }
+            return min + RandomNumberGenerator.GetInt32(max - min);
+        }
+
         public static bool Bool() => Int(-32000, 32000) > 0;
         public static bool Bool(int odds) => Int(-odds, odds) > 0;
 

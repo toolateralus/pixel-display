@@ -31,6 +31,20 @@ namespace pixel_renderer
             double drag = velocity * velocity * dragCoefficient;
             return drag;
         }
+        public static Node Standard
+        {
+            get
+            {
+                Node node = Node.New;
+                Rigidbody rb = node.AddComponent<Rigidbody>();
+                Collider col = node.AddComponent<Collider>();
+                rb.parent = node;
+                rb.sprite = new(16, 16);
+                col.size = rb.sprite.size;
+                col.IsTrigger = false;
+                return node;
+            }
+        }
 
         // Todo: prevent these methods from being overridden.
         // Immutable Method attribute or something.
