@@ -18,8 +18,8 @@ namespace pixel_renderer
             }
             lock (frame)
             {
-                stride = 4 * (Resolution.x * 24 + 31) / 32;
-                if (frame.Length != stride * Resolution.y) frame = new byte[stride * Resolution.y];
+                stride = 4 * (resolution.x * 24 + 31) / 32;
+                if (frame.Length != stride * resolution.y) frame = new byte[stride * resolution.y];
                 IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
                 foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                 {
@@ -32,7 +32,7 @@ namespace pixel_renderer
         public override void Render(System.Windows.Controls.Image destination)
         {
             destination.Source = BitmapSource.Create(
-                Resolution.x, Resolution.y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+                resolution.x, resolution.y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
                 frame, stride);
         }
     }

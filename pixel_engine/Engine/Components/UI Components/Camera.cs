@@ -6,7 +6,7 @@ namespace pixel_renderer
     {
         [JsonProperty] public Vec2 viewportPosition = Vec2.zero;
         [JsonProperty] public Vec2 viewportSize = Vec2.one;
-        [JsonProperty] public DrawingType DrawMode = DrawingType.Wrapped;
+        [JsonProperty] public DrawingType DrawMode = DrawingType.Clamped;
         public float[,] zBuffer = new float[0, 0];
 
         public Vec2 LocalToCamViewport(Vec2 local) => local / Size.GetDivideSafe();
