@@ -11,13 +11,13 @@ namespace pixel_editor
         public static void Print(object? o, bool includeDateTime = false)
         {
             var msg = o.ToString();
-            var e = new InspectorEvent(msg, includeDateTime);
+            var e = new EditorEvent(msg, includeDateTime);
             Editor.QueueEvent(e); 
         }
         public static void Error(object? o = null, int? textColorAlterationDuration = null)
         {
             string? msg = o.ToString();
-            InspectorEvent e = new(msg, true);
+            EditorEvent e = new(msg, true);
            
                 if (textColorAlterationDuration is not null)
                     e.action = RedTextForMsAsync( (int)textColorAlterationDuration);

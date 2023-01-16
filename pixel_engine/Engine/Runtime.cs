@@ -21,7 +21,7 @@ namespace pixel_renderer
 
         private protected volatile Stage? m_stage;
         
-        public static event Action<InspectorEvent> InspectorEventRaised;
+        public static event Action<EditorEvent> InspectorEventRaised;
 
         public bool IsRunning { get; private set; }
         private protected bool PhysicsInitialized = false;
@@ -94,10 +94,10 @@ namespace pixel_renderer
         /// <param name="message"></param>
         public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
-           InspectorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
+           EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
            RaiseInspectorEvent(e);
         }
-        public static void RaiseInspectorEvent(InspectorEvent e) => InspectorEventRaised?.Invoke(e);
+        public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
         private protected void SetStage(Stage? value) 
         {
             m_stage = null;

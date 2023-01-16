@@ -20,7 +20,6 @@ namespace pixel_renderer
 
             foreach (var node in stage.Nodes)
             {
-                //Runtime.Log($"{((Vec2)clickPosition).AsString()} < - click pos {node.position.AsString()} < - node pos");
                 if (node == lastSelected) continue;
 
                 bool hasSprite = !node.TryGetComponent(out Sprite sprite);
