@@ -87,17 +87,18 @@ namespace pixel_renderer
 
                 for (Vec2Int localPos = new(); localPos.y < size.y; localPos.Increment2D((int)size.x))
                 {
+                    if (colorData[localPos.x, localPos.y].A == 0) continue;
                     Vec2 camViewport = cam.GlobalToCamViewport(pos + localPos);
 
                     if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) 
                         continue;
 
-                    Vec2 screenPos = cam.CamToScreenViewport(camViewport) * bmpSize;
+                    Vec2Int screenPos = (Vec2Int)(cam.CamToScreenViewport(camViewport) * bmpSize);
 
-                    if (camDistance <= cam.zBuffer[(int)screenPos.x, (int)screenPos.y])
+                    if (camDistance <= cam.zBuffer[screenPos.x, screenPos.y])
                         continue;
 
-                    cam.zBuffer[(int)screenPos.x, (int)screenPos.y] = camDistance;
+                    if (colorData[localPos.x, localPos.y].A == 255) cam.zBuffer[screenPos.x, screenPos.y] = camDistance;
 
                     SetPixelColor(bmd, colorData[localPos.x, localPos.y], screenPos);
                 }
@@ -113,9 +114,17 @@ namespace pixel_renderer
         {
             int frameBufferIndex = (int)screenPos.y * bmd.Stride + ((int)screenPos.x * 3);
 
-            frameBuffer[frameBufferIndex + 0] = color.B;
-            frameBuffer[frameBufferIndex + 1] = color.G;
-            frameBuffer[frameBufferIndex + 2] = color.R;
+            int colorB = (int)((float)color.B / 255 * color.A);
+            int colorG = (int)((float)color.G / 255 * color.A);
+            int colorR = (int)((float)color.R / 255 * color.A);
+
+            int frameB = (int)((float)frameBuffer[frameBufferIndex + 0] / 255 * (255 - color.A));
+            int frameG = (int)((float)frameBuffer[frameBufferIndex + 1] / 255 * (255 - color.A));
+            int frameR = (int)((float)frameBuffer[frameBufferIndex + 2] / 255 * (255 - color.A));
+
+            frameBuffer[frameBufferIndex + 0] = (byte)(colorB + frameB);
+            frameBuffer[frameBufferIndex + 1] = (byte)(colorG + frameB);
+            frameBuffer[frameBufferIndex + 2] = (byte)(colorR + frameB);
         }
 
         private void DrawBackground(Camera cam, BitmapData bmd)
