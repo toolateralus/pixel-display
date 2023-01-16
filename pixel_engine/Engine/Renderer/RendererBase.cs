@@ -11,8 +11,8 @@
         {
             get => fallback ??= new(256, 256);
         }
-        public abstract  void Render(Image output);
-        public abstract Bitmap Draw(StageRenderInfo info);
+        public abstract void Render(Image output);
+        public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
     }
     }
