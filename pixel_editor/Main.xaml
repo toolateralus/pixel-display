@@ -56,29 +56,14 @@
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-        <Grid 
+            <Grid 
                 x:Name="inspectorChildGrid"
-                Grid.ColumnSpan="8"
-                Grid.RowSpan="16"
+                Grid.ColumnSpan="6"
+                Grid.RowSpan="6"
                 Grid.Column="12"
-                Grid.Row="1">
+                Grid.Row="3">
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
                     <RowDefinition Height="3*"/>
                     <RowDefinition Height="3*"/>
                     <RowDefinition Height="3*"/>
@@ -97,15 +82,9 @@
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
             </Grid>
-            
+            <Ellipse Fill="Red"> </Ellipse>
             <Image  x:Name="image"
                     Grid.Row="1" 
                     Grid.Column="0" 

@@ -5,7 +5,7 @@ using Brushes = System.Windows.Media.Brushes;
 using System.Windows;
 using System.Windows.Controls;
 using pixel_renderer;
-
+using System.Windows.Media.Effects;
 
 namespace pixel_editor
 {
@@ -25,7 +25,7 @@ namespace pixel_editor
         }
 
         public Node? loadedNode;
-        private List<TextBlock> activeControls = new();
+        private List<Control> activeControls = new();
         private Label name;
         private Label objInfo;
         private Grid componentGrid; 
@@ -59,17 +59,22 @@ namespace pixel_editor
             int index = 0;
 
             foreach (var componentType in components.Values)
-             foreach (var component in componentType)
-            {
-                string info = GetComponentInfo(component);
-                TextBlock block = CreateBlock(info, thickness);
-                int rowSpan = info.Split('\n').Length * 2;
-                AddToInspector(index, block, rowSpan);
-                componentGrid.Children.Add(block);
-                componentGrid.UpdateLayout();
-                activeControls.Add(block);
-                index++;
-            }
+                foreach (var component in componentType)
+                {
+                    string info = GetComponentInfo(component);
+                    TextBox block = CreateBlock(info);
+
+                    int lineCt = info.Split('\n').Length;
+                    int rowSpan = lineCt * 3;
+                    int colSpan = 10;
+                    int row = index * 4;
+                    int col = 2; 
+                    SetRowAndColumn(block, rowSpan, colSpan, col, row);
+                    componentGrid.Children.Add(block);
+                    componentGrid.UpdateLayout();
+                    activeControls.Add(block);
+                    index++;
+                 }
 
             OnInspectorUpdated?.Invoke();
         }
@@ -91,25 +96,22 @@ namespace pixel_editor
             loadedNode = node;
             OnObjectSelected?.Invoke();
         }
-        public static void AddToInspector(int i, TextBlock component, int rowSpan)
+        public static void SetRowAndColumn(Control component, int rowSpan, int colSpan, int col, int row)
         {
             component.SetValue(Grid.RowSpanProperty, rowSpan);
-            component.SetValue(Grid.ColumnSpanProperty, 8);
-            component.SetValue(Grid.RowProperty, i + i);
-            component.SetValue(Grid.ColumnProperty, 6);
+            component.SetValue(Grid.ColumnSpanProperty, colSpan);
+            component.SetValue(Grid.RowProperty, row);
+            component.SetValue(Grid.ColumnProperty, col);
         }
         public static string GetComponentInfo(Component component)
         {
-            IEnumerable<FieldInfo> fields = component.GetSerializedFields(); 
-            string output = $"\b {component.Name} ";
+            IEnumerable<FieldInfo> fields = component.GetSerializedFields();
+            List<string >output = new List<string>();
+            output.Add($"{component.Name} \n");
             foreach (var field in fields)
             {
                 string valString = ""; 
                 var value = field.GetValue(component);
-
-
-
-
 
                 if (field.FieldType == typeof(Vec2))
                     valString = ((Vec2)value).AsString();
@@ -119,9 +121,16 @@ namespace pixel_editor
                 // default value type print
                 else valString = value?.ToString();
 
-                output += $" \n \t{field.Name} {valString}";
+                output.Add($" \n{field.Name} {valString}\n");
             }
-            return output;
+            string output_string = string.Empty;
+            foreach (var str in output)
+            {
+                if(str != string.Empty || !string.IsNullOrEmpty(str))
+                    output_string += str;
+                Runtime.Log(output_string);
+            }
+            return output_string;
         }
         public static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
@@ -134,35 +143,31 @@ namespace pixel_editor
             fields = component.GetType().GetFields();
             properties = component.GetType().GetProperties();
         }
-        public static Label CreateLabel(string componentInfo, Thickness margin)
+        public static Label CreateLabel(string componentInfo)
         {
             return new Label
             {
                 Content = componentInfo,
-                FontSize = 2.25f,
-                Background = Brushes.DarkGray,
+                FontSize = 3f,
                 Foreground = Brushes.White,
-                Margin = margin,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Center,
+                Padding = new(5, 5, 5, 5),
                 FontFamily = new System.Windows.Media.FontFamily("MS Gothic")
             };
         }
-        public static TextBlock CreateBlock(string componentInfo, Thickness margin)
+        public static TextBox CreateBlock(string componentInfo)
         {
             return new()
             {
                 Text = componentInfo,
-                FontSize = 2.25f,
+                FontSize = 3f,
                 FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
                 TextWrapping = TextWrapping.Wrap,
-                Background = Brushes.DarkGray,
-                Foreground = Brushes.White,
-                Margin = margin,
-                Height = double.NaN,
-                Width = double.NaN,
+                VerticalAlignment = VerticalAlignment.Stretch,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = Brushes.White,
+                Background = Brushes.Black,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Visible,
+                AcceptsReturn = true, AcceptsTab = true, AllowDrop = true
             };
         }
         public static Button CreateButton(string content, Thickness margin) => new Button()

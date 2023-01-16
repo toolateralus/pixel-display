@@ -26,11 +26,9 @@ namespace pixel_editor
             for (int i = 0; Pending.Count > 0; ++i)
             {
                 e = Pending.Dequeue();
-
                 if (e is null)
                     return; 
-
-                
+                Editor.Current.EditorEvent(e);
             }
         }
     }
@@ -207,10 +205,10 @@ namespace pixel_editor
            e.action?.Invoke(e.args);
            if (e.message is ""|| e.message.Contains("$nolog")) return;
 
-           Current.EditorEvent(e);
            consoleOutput.Text += e.message + '\n';
            consoleOutput.ScrollToEnd(); 
         }
+
         private void OnCommandSent(object sender, RoutedEventArgs e)
         {
             int cap = 5;
@@ -231,7 +229,6 @@ namespace pixel_editor
         {
             pos.X /= img.ActualWidth;
             pos.Y /= img.ActualHeight;
-
             return pos;
         }
         
@@ -239,6 +236,7 @@ namespace pixel_editor
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
+            inspector.DeselectNode();
             Stage stage = Runtime.Instance.GetStage();
             if (stage is null) return;
             StagingHost stagingHost = Runtime.Instance.stagingHost;
@@ -251,17 +249,14 @@ namespace pixel_editor
 
             Node cams = stage.FindNodeWithComponent<Camera>();
             if (cams is null) return;
-
-            inspector.DeselectNode();
             Camera cam = cams.GetComponent<Camera>();
             
             Vec2 globalPosition = cam.ScreenViewportToGlobal((Vec2)pos);
 
             bool foundNode = stagingHost.GetNodeAtPoint(stage, globalPosition, out var node);
+
             if (foundNode)
                 inspector.SelectNode(node);
-
-
 
         }
         private void OnDisable(object? sender, EventArgs e)
