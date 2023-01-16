@@ -51,7 +51,7 @@ namespace pixel_renderer
         public const int FramerateSampleThreshold = 60;
         public const int ScreenH = 256;
         public const int ScreenW = 256;
-        public const byte maxClickDistanceInPixels = 25; 
+        public const byte maxClickDistanceInPixels = 24; 
         public static Vec2 ScreenVec => new Vec2(ScreenW, ScreenH);
         #endregion
         #region File IO and String/Char Constants

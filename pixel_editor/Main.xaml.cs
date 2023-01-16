@@ -235,13 +235,11 @@ namespace pixel_editor
             }
         }
 
-        private static Point ViewportPoint(Image img, Point pos)
+        private static Point GetNormalizedPoint(Image img, Point pos)
         {
             pos.X /= img.ActualWidth;
             pos.Y /= img.ActualHeight;
 
-            pos.X *= img.Width;
-            pos.Y *= img.Height;
             return pos;
         }
         
@@ -254,14 +252,25 @@ namespace pixel_editor
             StagingHost stagingHost = Runtime.Instance.stagingHost;
             if (stagingHost is null) return;
 
-            Image img = (Image)sender;
-            Point pos = e.GetPosition(img);
-            pos = ViewportPoint(img, pos);
-            inspector.DeselectNode();
+            UIElement img = (UIElement)sender;
+            Point pos = Mouse.GetPosition(img);
 
-            bool foundNode = stagingHost.GetNodeAtPoint(stage, pos, out var node);
+            pos = GetNormalizedPoint((Image)img, pos);
+
+            Node cams = stage.FindNodeWithComponent<Camera>();
+            if (cams is null) return;
+
+            inspector.DeselectNode();
+            Camera cam = cams.GetComponent<Camera>();
+            
+            Vec2 globalPosition = cam.ScreenViewportToGlobal((Vec2)pos);
+
+            bool foundNode = stagingHost.GetNodeAtPoint(stage, globalPosition, out var node);
             if (foundNode)
                 inspector.SelectNode(node);
+
+
+
         }
         private void OnDisable(object? sender, EventArgs e)
         {
