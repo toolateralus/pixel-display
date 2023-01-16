@@ -16,7 +16,7 @@ namespace pixel_renderer
 
         public override void Dispose()
         {
-            Array.Clear(frame);
+            //unecessary
         }
         public override void Draw(StageRenderInfo renderInfo)
         {
@@ -50,7 +50,7 @@ namespace pixel_renderer
 
             Array.Clear(cam.zBuffer);
 
-            DrawBackground(cam);
+            RenderBaseImage(cam);
 
             for (int i = 0; i < renderInfo.Count; ++i)
             {
@@ -97,7 +97,7 @@ namespace pixel_renderer
             frame[index + 2] = (byte)(colorR + frameB);
         }
 
-        private void DrawBackground(Camera cam)
+        private void RenderBaseImage(Camera cam)
         {
             if (cam.DrawMode is DrawingType.None) return;
 
