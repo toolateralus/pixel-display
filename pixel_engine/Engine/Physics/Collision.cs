@@ -15,8 +15,8 @@ namespace pixel_renderer
     public enum TriggerInteraction { Colliders, Triggers, None, All };
     public static partial class Collision
     {
-        private static readonly ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
-        private static readonly ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
+        private static readonly Dictionary<Node, Node[]> CollisionQueue = new();
+        private static readonly List<List<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true;
 
@@ -49,7 +49,7 @@ namespace pixel_renderer
                 return true;
             return false;
         }
-        public static void BroadPhase(Stage stage, ConcurrentBag<ConcurrentBag<Node>> collisionCells)
+        public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
 
@@ -59,13 +59,13 @@ namespace pixel_renderer
             Parallel.ForEach(stage.Nodes, node =>
             {
                 List<Node> result = hash.GetNearby(node);
-                ConcurrentBag<Node> nodes = new();
+                List<Node> nodes = new();
                 foreach (var _node in result)
                     nodes.Add(_node);
                 collisionCells.Add(nodes);
             });
         }
-        public static void NarrowPhase(ConcurrentBag<ConcurrentBag<Node>> collisionCells)
+        public static void NarrowPhase(List<List<Node>> collisionCells)
         {
             Parallel.For(0, collisionCells.Count, i =>
             {
@@ -104,11 +104,9 @@ namespace pixel_renderer
                 }
             });
         }
-        public static Task RegisterCollidersAsync(Stage stage)
+        public static void RegisterColliders(Stage stage)
         {
             hash.ClearBuckets();
-
-
             Action<Node> RegisterAction = (node) =>
             {
                 if (!node.TryGetComponent<Collider>(out _))
@@ -116,20 +114,30 @@ namespace pixel_renderer
                 ViewportCollision(node);
                 hash.RegisterObject(node);
             };
-            _ = Parallel.ForEach(stage.Nodes, RegisterAction);
+
+            foreach (var node in stage.Nodes)
+                RegisterAction(node);
 
         }
         private static void RegisterCollisionEvent(Node A, List<Node> colliders)
         {
-            if (A is null)
-                return;
-
-            for (int i = 0; i < colliders.Count; i++)
+            lock (CollisionQueue)
             {
-                if (colliders[i] is null)
-                    continue;
-                if (A.CheckOverlap(colliders[i]))
-                    _ = CollisionQueue.GetOrAdd(key: A, value: colliders.ToArray());
+                if (A is null)
+                    return;
+
+                for (int i = 0; i < colliders.Count; i++)
+                {
+                    if (colliders[i] is null)
+                        continue;
+                    if (A.CheckOverlap(colliders[i]))
+                    {
+                        var nodesArray = colliders.ToArray();
+                        if (CollisionQueue.ContainsKey(A))
+                            CollisionQueue[A] = nodesArray;
+                        else CollisionQueue.Add(A, nodesArray);
+                    }
+                }
             }
         }
         public static void FinalPhase()
@@ -199,7 +207,7 @@ namespace pixel_renderer
             A.parent.OnCollision(B);
             B.parent.OnCollision(A);
         }
-        public async static Task Run()
+        public static void Run()
         {
             if (!AllowEntries)
             {
@@ -208,8 +216,7 @@ namespace pixel_renderer
             }
             var stage = Runtime.Instance.GetStage();
 
-            await RegisterCollidersAsync(stage));
-
+            RegisterColliders(stage);
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
             FinalPhase();
