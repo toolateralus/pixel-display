@@ -21,17 +21,15 @@ namespace pixel_renderer
             {
                 this.imgData = imgData;
                 Image = new(imgData.fullPath);
-                runtime_img = GetScaledBitmap();
+                Image = GetScaledBitmap();
             }
             if(color is not null)
                 Image = Sprite.SolidColorBitmap(this.scale, (Color)color);
             
         }
         [Field] public Bitmap? Image;
-        [Field] public Bitmap? runtime_img; 
 
         [Field] public Bitmap? Mask;
-        [Field] public Bitmap? runtime_mask; 
 
         [JsonProperty] internal Metadata imgData;
         [JsonProperty] internal Metadata maskData;
