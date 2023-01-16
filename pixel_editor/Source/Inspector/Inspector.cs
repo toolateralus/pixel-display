@@ -104,8 +104,22 @@ namespace pixel_editor
             string output = $"\b {component.Name} ";
             foreach (var field in fields)
             {
+                string valString = ""; 
                 var value = field.GetValue(component);
-                output += $" \n \t{field} {value}";
+
+
+
+
+
+                if (field.FieldType == typeof(Vec2))
+                    valString = ((Vec2)value).AsString();
+                if (field.FieldType.BaseType == typeof(Component))
+                    valString = "component view not yet implemented";
+
+                // default value type print
+                else valString = value?.ToString();
+
+                output += $" \n \t{field.Name} {valString}";
             }
             return output;
         }
@@ -158,7 +172,7 @@ namespace pixel_editor
             BorderBrush = Brushes.Black,
             BorderThickness = new Thickness(1, 1, 1, 1),
         };
-       
-       
+
+
     }
 }
