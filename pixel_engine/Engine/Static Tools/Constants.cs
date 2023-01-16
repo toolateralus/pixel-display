@@ -15,7 +15,8 @@ namespace pixel_renderer
         public const float PhysicsRefreshInterval = .01f;
         public const float MaxDepenetrationForce = 3f;
         public static int TerminalVelocity = 4;
-        public const int CollisionCellSize = 16; // this value determines the area of a Broad Collision Cell, which segments the worlds physics into chunks. The area of the largest Object in the stage must be smaller than this value.
+        public const int CollisionCellSize = 24; // this value determines the area of a Broad Collision Cell, which segments the worlds physics into chunks. The area of the largest Object in the stage must be smaller than this value.
+
         public static Vec2 TerminalVec2()
         {
             return new Vec2()

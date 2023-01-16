@@ -17,10 +17,12 @@ namespace pixel_renderer.Scripts
         [Field] [JsonProperty] public bool takingInput = true;
         [Field] [JsonProperty] public int speed = 4;
         [Field] [JsonProperty] public float inputMagnitude = 1f;
+
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vec2 moveVector;
-        public static Metadata test_image_data = new Metadata("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
+
+        public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
 
         public override void Awake()
         {
@@ -70,8 +72,9 @@ namespace pixel_renderer.Scripts
             
             playerNode.AddComponent<Player>().takingInput = true;
 
-            var col =playerNode.AddComponent<Collider>();
-            col.IsTrigger = true;
+            var col = playerNode.AddComponent<Collider>();
+
+            col.IsTrigger = false;
             col.size = sprite.size;
 
             var cam = playerNode.AddComponent<Camera>();
