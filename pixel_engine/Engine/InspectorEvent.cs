@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace pixel_renderer
 {
-    public class InspectorEvent
+    public class EditorEvent
     {
         public string message;
         public object? sender;
@@ -15,7 +15,7 @@ namespace pixel_renderer
             + "\n"; 
         public bool ClearConsole = false; 
 
-        public InspectorEvent(string message, bool includeDateTime = false, bool clearConsole = false)
+        public EditorEvent(string message, bool includeDateTime = false, bool clearConsole = false)
         {
             ClearConsole = clearConsole;
             if (!includeDateTime)

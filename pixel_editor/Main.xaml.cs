@@ -18,28 +18,20 @@ namespace pixel_editor
     public class EditorEventHandler
     {
         public static Editor Editor => Editor.Current;
-        public Action<InspectorEvent> InspectorEventRaised;
-        public Queue<InspectorEvent> Pending = new();
-        public object[]? ExecuteAll()
+        public Action<EditorEvent> InspectorEventRaised;
+        public Queue<EditorEvent> Pending = new();
+        public void ExecuteAll()
         {
-            InspectorEvent e;
-            List<object> output = new(); 
+            EditorEvent e;
             for (int i = 0; Pending.Count > 0; ++i)
             {
                 e = Pending.Dequeue();
-               
-                if (e is null) 
-                    return output.ToArray();
 
-                e.action?.Invoke(e.args);
-                output.Add(e);
+                if (e is null)
+                    return; 
 
-                if (e.message.Contains("$nolog")) 
-                    continue;
-
-                Editor.Current.PrintToConsole(e);
+                
             }
-            return output.ToArray(); 
         }
     }
     public partial class Editor : Window
@@ -124,7 +116,6 @@ namespace pixel_editor
         // for stage creation, hopefully a better solution eventually.
         private StageWnd? stageWnd;
         
-        
         public readonly EditorEventHandler Events = new(); 
         internal Action<object?> RedText(object? o = null)
         {
@@ -153,13 +144,10 @@ namespace pixel_editor
                 Host?.Render(image);
                 UpdateMetrics();
             }
-
-            if(Events.ExecuteAll() is null)
-                throw new EditorEventNullException("Editor Event Queue returned an invalid event."); 
+            Events.ExecuteAll();
         }
         
         DispatcherTimer timer = new();
-        Timer _timer; 
 
         private void GetEvents()
         {
@@ -214,8 +202,12 @@ namespace pixel_editor
 
         }
         
-        public void PrintToConsole(InspectorEvent e)
+        public void EditorEvent(EditorEvent e)
         {
+           e.action?.Invoke(e.args);
+           if (e.message is ""|| e.message.Contains("$nolog")) return;
+
+           Current.EditorEvent(e);
            consoleOutput.Text += e.message + '\n';
            consoleOutput.ScrollToEnd(); 
         }
@@ -334,7 +326,7 @@ namespace pixel_editor
                 Runtime.Instance.SetProject(project);
         }
 
-        internal static void QueueEvent(InspectorEvent e)
+        internal static void QueueEvent(EditorEvent e)
         {
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());

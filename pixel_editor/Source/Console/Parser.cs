@@ -9,7 +9,7 @@ namespace pixel_editor
     public class CommandParser 
     {
         // for the final cleanup of commands before execution
-        private protected static List<char> disallowed_chars = new()
+        internal static List<char> disallowed_chars = new()
         {
             ';',
             '\'',
