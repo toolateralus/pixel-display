@@ -52,7 +52,12 @@ namespace pixel_renderer.Scripts
             moveVector = Vec2.zero; 
         }
         public override void OnTrigger(Collider other) { }
-        public override void OnCollision(Collider collider) => sprite.Randomize();
+        public override void OnCollision(Collider collider)
+        {
+            if (JRandom.Bool())
+                sprite.Randomize();
+            else sprite.DrawSquare(sprite.size, JRandom.Color());
+        }
         private void Move(Vec2 moveVector)
         {
             rb.velocity.x += moveVector.x * speed;

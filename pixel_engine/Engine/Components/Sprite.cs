@@ -76,12 +76,12 @@ namespace pixel_renderer
             for (int j = 0; j < y; j++)
                 for (int i = 0; i < x; i++)
                     colorData[i, j] = JRandom.Color();
-            DrawSquare(size, colorData, isCollider);
+            Draw(size, colorData);
         }
         public void RestoreCachedColor(bool nullifyCache)
         {
             if (cached_colors == null) Randomize();
-            DrawSquare(size, cached_colors, isCollider);
+            Draw(size, cached_colors);
             if (nullifyCache) cached_colors = null;
         }
         /// <summary>
@@ -104,27 +104,19 @@ namespace pixel_renderer
                 {
                     var pt = new Vec2(x, y);
                     if (!pt.IsWithinMaxExclusive(width, size - width))
-                    {
                         colorData[x, y] = borderColor;
-                    }
                 }
-
-            DrawSquare(size, colorData, isCollider);
+            Draw(size, colorData);
         }
-        public void DrawSquare(Vec2 size, Color[,] color, bool isCollider)
+        public void Draw(Vec2 size, Color[,] color)
         {
+            this.size = size;
             ColorData = color;
-            this.size = size;
-            this.isCollider = isCollider;
         }
-        public void DrawSquare(Vec2 size, Color color, bool isCollider)
+        public void DrawSquare(Vec2 size, Color color)
         {
             this.size = size;
-            this.isCollider = isCollider;
-            ColorData = new Color[(int)size.x, (int)size.y];
-            for (int x = 0; x < size.x; x++)
-                for (int y = 0; y < size.y; y++)
-                    ColorData[x, y] = color;
+            ColorData = SolidColorSquare(size, color);
         }
         public static Bitmap SolidColorBitmap(Vec2 size, Color color)
         {
@@ -146,15 +138,11 @@ namespace pixel_renderer
                     colorData[x, y] = color;
             return colorData; 
         }
-
-        public Sprite()
-        {
-
-        }
+        public Sprite(){}
         public Sprite(int x, int y)
         {
             size = new(x, y);
-            texture.scale = size;
+            texture.scale.Set(size);
         }
     }
 }

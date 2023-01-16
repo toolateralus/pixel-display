@@ -175,8 +175,10 @@
         internal void Wrap(Vec2 max) { x = x.Wrapped(max.x); y = y.Wrapped(max.y); }
         internal Vec2 Wrapped(Vec2 max) => new(x.Wrapped(max.x), y.Wrapped(max.y));
         internal bool IsWithin(Vec2 min, Vec2 max) => x.IsWithin(min.x, max.x) && y.IsWithin(min.y, max.y);
-        internal bool IsWithinMaxExclusive(Vec2 min, Vec2 max) =>
-            x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
+        internal bool IsWithinMaxExclusive(Vec2 min, Vec2 max) => x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
+        internal void Set(Vec2 size) => this = size; 
+        internal void Set(int axis, float value) => this[axis] = value;
+    
     }
     public struct Vec2Int
     {
