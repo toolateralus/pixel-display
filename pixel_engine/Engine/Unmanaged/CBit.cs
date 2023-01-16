@@ -72,7 +72,7 @@ namespace pixel_renderer
             if (!length.Equals(Constants.ScreenW * Constants.ScreenH))
                 throw new InvalidOperationException("Color array is not the appropriate size.");
 
-            Marshal.Copy(colorBytes, start, destination, length);
+            //Marshal.Copy(colorBytes, start, destination, length);
 
             bmp.UnlockBits(bmd);
         }
