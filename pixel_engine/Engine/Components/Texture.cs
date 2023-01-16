@@ -13,7 +13,7 @@ namespace pixel_renderer
         {
 
         }
-        public Texture(Vec2 scale, Metadata? imgData = null, Color? color = null)
+        public Texture(Vec2Int scale, Metadata? imgData = null, Color? color = null)
         {
             this.scale = scale; 
             this.color = color;
@@ -37,7 +37,7 @@ namespace pixel_renderer
         [JsonProperty] internal Metadata maskData;
 
         [Field] [JsonProperty] public Color? color;
-        [Field] [JsonProperty] public Vec2 scale = Vec2.one;
+        [Field] [JsonProperty] public Vec2Int scale = new(1, 1);
         
         public bool HasImage => Image != null;
         internal bool HasImageMetadata => imgData != null;

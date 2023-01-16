@@ -48,6 +48,7 @@ namespace pixel_renderer.Scripts
                     renderer.resolution[i] += incrementAmt;
             }
             res_incrementer++;
+
             if(res_incrementer % 25 == 0)
                 Runtime.Log(((Vec2)renderer.resolution).AsString());
 
@@ -72,7 +73,8 @@ namespace pixel_renderer.Scripts
             RegisterAction(Down,Key.S);
             RegisterAction(Left,  Key.A);
             RegisterAction(Right, Key.D);
-            RegisterAction(IncreaseResolution,  Key.OemPlus);
+
+            RegisterAction(IncreaseResolution, Key.OemPlus);
             RegisterAction(DecreaseResolution, Key.OemMinus);
         }
         public override void FixedUpdate(float delta)

@@ -12,7 +12,7 @@ namespace pixel_renderer
     {
         [JsonProperty] public Vec2 size = Vec2.one * 16;
         [JsonProperty] public float camDistance = 1;
-        [JsonProperty] public Texture texture = new(new Vec2(24, 24), Player.test_image_data);
+        [JsonProperty] public Texture texture;
         [JsonProperty] public Color Color
         {
             get
@@ -137,11 +137,14 @@ namespace pixel_renderer
                     colorData[x, y] = color;
             return colorData; 
         }
-        public Sprite(){}
-        public Sprite(int x, int y)
+        public Sprite()
+        {
+            texture = new((Vec2Int)size, Player.test_image_data);
+        }
+        public Sprite(int x, int y) : this()
         {
             size = new(x, y);
-            texture.scale.Set(size);
+            
         }
     }
 }
