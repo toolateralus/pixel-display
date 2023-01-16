@@ -67,7 +67,7 @@ namespace pixel_renderer
         }
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
-            Parallel.For(0, collisionCells.Count, i =>
+            for (int i = 0; i < collisionCells.Count; i++)
             {
                 if (i >= collisionCells.Count) return;
                 var cellArray = collisionCells.ToArray();
@@ -102,7 +102,7 @@ namespace pixel_renderer
                     }
                     RegisterCollisionEvent(nodeA, colliders);
                 }
-            });
+            }
         }
         public static void RegisterColliders(Stage stage)
         {
