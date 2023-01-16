@@ -235,6 +235,8 @@
         }
         public static implicit operator Vec2(Vec2Int v) => new(v.x, v.y);
         public static explicit operator Vec2Int(Vec2 v) => new((int)v.x, (int)v.y);
+        public static Vec2Int operator +(Vec2Int v1, Vec2Int v2) => new(v1.x + v2.x, v1.y + v2.y);
+        public static Vec2Int operator -(Vec2Int v1, Vec2Int v2) => new(v1.x - v2.x, v1.y - v2.y);
     }
 }
 

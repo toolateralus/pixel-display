@@ -44,13 +44,13 @@ namespace pixel_renderer.Scripts
 
             for (int i = 0; i < 2; i++)
             {
-                if (renderer.Resolution[i] < Constants.MaxResolution[i])
-                    renderer.Resolution[i] += incrementAmt;
+                if (renderer.resolution[i] < Constants.MaxResolution[i])
+                    renderer.resolution[i] += incrementAmt;
             }
             res_incrementer++;
 
             if(res_incrementer % 25 == 0)
-                Runtime.Log(((Vec2)renderer.Resolution).AsString());
+                Runtime.Log(((Vec2)renderer.resolution).AsString());
 
         }
         void DecreaseResolution(object[]? e)
@@ -59,11 +59,11 @@ namespace pixel_renderer.Scripts
             var decrementAmt = 1;
 
             for (int i = 0; i < 2; i++)
-                if (renderer.Resolution[i] > Constants.MinResolution[i])
-                    renderer.Resolution[i] -= decrementAmt;
+                if (renderer.resolution[i] > Constants.MinResolution[i])
+                    renderer.resolution[i] -= decrementAmt;
 
             if (res_incrementer % 25 == 0)
-                Runtime.Log(((Vec2)renderer.Resolution).AsString());
+                Runtime.Log(((Vec2)renderer.resolution).AsString());
             res_incrementer--;
         }
 
