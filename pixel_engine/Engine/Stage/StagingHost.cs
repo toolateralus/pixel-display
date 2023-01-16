@@ -3,6 +3,7 @@ using pixel_renderer.FileIO;
 using pixel_renderer.Scripts;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Color = System.Drawing.Color; 
 using Point = System.Windows.Point;
 
@@ -13,45 +14,27 @@ namespace pixel_renderer
         public Node? lastSelected;
         static Runtime runtime => Runtime.Instance;
         
-        public bool GetNodeAtPoint(Stage stage, Point pos, out Node? result)
+        public bool GetNodeAtPoint(Stage stage, Point clickPosition, out Node? result)
         {
-            pos = new Point()
-            {
-                X = Math.Round(pos.X),
-                Y = Math.Round(pos.Y)
-            };
+      
+
             foreach (var node in stage.Nodes)
             {
-                Point pt = node.position;
-                pt = new()
-                {
-                    X = Math.Floor(pt.X),
-                    Y = Math.Floor(pt.Y)
-                };
-                Vec2 vec = pt;
-                Runtime.Log(vec.AsString());
-                var xDelta = pt.X - pos.Y;
-                var yDelta = pt.Y - pos.X;
-
-                if (xDelta < 0) xDelta = CMath.Negate(xDelta);
-                if (yDelta < 0) yDelta = CMath.Negate(yDelta);
-
-                if (xDelta > Constants.maxClickDistanceInPixels) continue;
-                if (yDelta > Constants.maxClickDistanceInPixels) continue;
-
+                //Runtime.Log($"{((Vec2)clickPosition).AsString()} < - click pos {node.position.AsString()} < - node pos");
                 if (node == lastSelected) continue;
+
+                bool hasSprite = !node.TryGetComponent(out Sprite sprite);
+                if (hasSprite) continue;
+
+                bool isWithin = ((Vec2)clickPosition).IsWithin(node.position, node.position + sprite.size);
+                if (!isWithin) continue;
+
                 result = node;
+                sprite.Highlight(Color.Orange);
                 
-                if (lastSelected != null)
-                {
-                    if (lastSelected.TryGetComponent(out Sprite sprite))
-                        sprite.RestoreCachedColor(false);
-                }
+                lastSelected?.GetComponent<Sprite>().RestoreCachedColor(false);
                 lastSelected = node;
-                if (node.TryGetComponent(out Sprite sprite_))
-                {
-                    sprite_.Highlight(Color.Black);
-                }
+
                 return true;
             }
             result = null;

@@ -113,7 +113,8 @@
                     RenderOptions.CachingHint="Cache"
                     Grid.RowSpan="14"
                     Grid.ColumnSpan="14" 
-                    
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
                     />
             <TextBox 
                 FontSize="3.75" 

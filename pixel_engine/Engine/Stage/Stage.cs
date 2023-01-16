@@ -2,6 +2,7 @@
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Drawing;
 using System.Linq;
 using System.Security.Policy;
@@ -257,6 +258,19 @@ namespace pixel_renderer
                 r_color,
                 r_bool,
                 r_dir };
+        }
+
+        public Node? FindNodeWithComponent<T>() where T : Component
+        {
+            IEnumerable<Node> outNode = from node in Nodes let hasComponent = node.HasComponent<T>()  where hasComponent select node;
+            if (outNode.Count() == 0) return null; 
+            Node first = outNode.First();
+            return first; 
+        }
+        public List<Node>? FindNodesWithComponent<T>() where T : Component
+        {
+            IEnumerable<Node> outNodes = from node in Nodes let hasComponent = node.HasComponent<T>() where hasComponent select node;
+            return outNodes.ToList();
         }
     }
 }

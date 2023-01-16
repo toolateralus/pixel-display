@@ -12,7 +12,6 @@ namespace pixel_renderer
     {
         [JsonProperty] public Vec2 size = Vec2.one * 16;
         [JsonProperty] public float camDistance = 1;
-        [JsonProperty] public bool isCollider = false;
         [JsonProperty] public Texture texture = new(new Vec2(24, 24), Player.test_image_data);
         [JsonProperty] public Color Color
         {
