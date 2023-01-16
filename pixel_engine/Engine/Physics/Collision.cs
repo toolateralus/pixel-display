@@ -56,14 +56,8 @@ namespace pixel_renderer
             if (stage.Nodes is null ||
                 stage.Nodes.Count == 0) return;
 
-            Parallel.ForEach(stage.Nodes, node =>
-            {
-                List<Node> result = hash.GetNearby(node);
-                List<Node> nodes = new();
-                foreach (var _node in result)
-                    nodes.Add(_node);
-                collisionCells.Add(nodes);
-            });
+            foreach (var node in stage.Nodes)
+                collisionCells.Add(hash.GetNearby(node));
         }
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
@@ -121,8 +115,6 @@ namespace pixel_renderer
         }
         private static void RegisterCollisionEvent(Node A, List<Node> colliders)
         {
-            lock (CollisionQueue)
-            {
                 if (A is null)
                     return;
 
@@ -132,13 +124,15 @@ namespace pixel_renderer
                         continue;
                     if (A.CheckOverlap(colliders[i]))
                     {
-                        var nodesArray = colliders.ToArray();
-                        if (CollisionQueue.ContainsKey(A))
-                            CollisionQueue[A] = nodesArray;
-                        else CollisionQueue.Add(A, nodesArray);
+                        lock (CollisionQueue)
+                        {
+                            var nodesArray = colliders.ToArray();
+                            if (CollisionQueue.ContainsKey(A))
+                                CollisionQueue[A] = nodesArray;
+                            else CollisionQueue.Add(A, nodesArray);
+                        }
                     }
                 }
-            }
         }
         public static void FinalPhase()
         {
