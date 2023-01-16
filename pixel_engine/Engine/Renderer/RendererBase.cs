@@ -81,6 +81,8 @@
 
             for (Vec2Int localPos = new(0, 0); localPos.y < sprite.size.y; localPos.Increment2D((int)sprite.size.x))
             {
+                if (localPos.x >= sprite.ColorData.GetLength(0)) continue;
+                if (localPos.y >= sprite.ColorData.GetLength(1)) continue;
                 if (sprite.ColorData[localPos.x, localPos.y].A == 0)
                     continue;
 
