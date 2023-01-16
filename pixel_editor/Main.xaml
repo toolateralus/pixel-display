@@ -5,7 +5,7 @@
     Name="window"
     WindowStartupLocation="CenterScreen"
     Width="1920" Height="1080"
-    Background="Gray">
+    Background="Black">
     <Grid Name="MainGrid" SizeChanged="MainGrid_SizeChanged">
         <Grid.LayoutTransform>
             <ScaleTransform x:Name="ApplicationScaleTransform"
@@ -87,7 +87,6 @@
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
             </Grid>
-            <Ellipse Fill="Red"> </Ellipse>
             <Image  x:Name="image"
                     Grid.Row="1" 
                     Grid.Column="0" 

@@ -36,12 +36,44 @@ namespace pixel_renderer.Scripts
         void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, 0);
         void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, 0);
 
+        int res_incrementer; 
+        void IncreaseResolution(object[]? e)
+        {
+            var renderer = Runtime.Instance.renderHost.GetRenderer();
+            var incrementAmt = 1;
+
+            for (int i = 0; i < 2; i++)
+            {
+                if (renderer.Resolution[i] < Constants.MaxResolution[i])
+                    renderer.Resolution[i] += incrementAmt;
+            }
+            res_incrementer++;
+            if(res_incrementer % 25 == 0)
+                Runtime.Log(((Vec2)renderer.Resolution).AsString());
+
+        }
+        void DecreaseResolution(object[]? e)
+        {
+            var renderer = Runtime.Instance.renderHost.GetRenderer();
+            var decrementAmt = 1;
+
+            for (int i = 0; i < 2; i++)
+                if (renderer.Resolution[i] > Constants.MinResolution[i])
+                    renderer.Resolution[i] -= decrementAmt;
+
+            if (res_incrementer % 25 == 0)
+                Runtime.Log(((Vec2)renderer.Resolution).AsString());
+            res_incrementer--;
+        }
+
         private void CreateInputEvents()
         {
             RegisterAction(Up,  Key.W);
             RegisterAction(Down,Key.S);
             RegisterAction(Left,  Key.A);
             RegisterAction(Right, Key.D);
+            RegisterAction(IncreaseResolution,  Key.OemPlus);
+            RegisterAction(DecreaseResolution, Key.OemMinus);
         }
         public override void FixedUpdate(float delta)
         {

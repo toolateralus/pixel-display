@@ -212,6 +212,27 @@
             this.x = (int)v.x;
             this.y = (int)v.y;
         }
+        public int this[int index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return x;
+                    case 1: return y;
+                }
+                return 0; 
+            }
+            set
+            {
+                switch (index)
+                {
+                    case 0: x = value; break;
+                    case 1: y = value; break;
+                }
+            }
+
+        }
         public static implicit operator Vec2(Vec2Int v) => new(v.x, v.y);
         public static explicit operator Vec2Int(Vec2 v) => new((int)v.x, (int)v.y);
     }

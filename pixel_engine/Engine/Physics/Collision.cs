@@ -16,7 +16,7 @@ namespace pixel_renderer
     public static partial class Collision
     {
         private static readonly Dictionary<Node, Node[]> CollisionQueue = new();
-        private static readonly List<List<Node>> collisionMap = new();
+        private static readonly ConcurrentBag<List<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true;
 
@@ -49,20 +49,19 @@ namespace pixel_renderer
                 return true;
             return false;
         }
-        public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
+        public static void BroadPhase(Stage stage, ConcurrentBag<List<Node>> collisionCells)
         {
             collisionCells.Clear();
 
             if (stage.Nodes is null ||
                 stage.Nodes.Count == 0) return;
 
-            lock (stage.Nodes)
-            {
-                foreach (var node in stage.Nodes)
-                    collisionCells.Add(hash.GetNearby(node));
-            }
+            List<Node> nodes = new List<Node>(stage.Nodes);
+
+            foreach (var node in nodes)
+                collisionCells.Add(hash.GetNearby(node));
         }
-        public static void NarrowPhase(List<List<Node>> collisionCells)
+        public static void NarrowPhase(ConcurrentBag<List<Node>> collisionCells)
         {
             for (int i = 0; i < collisionCells.Count; i++)
             {
@@ -112,8 +111,9 @@ namespace pixel_renderer
                 hash.RegisterObject(node);
             };
 
-            foreach (var node in stage.Nodes)
-                RegisterAction(node);
+            List<Node> nodes = new(stage.Nodes);
+                foreach (var node in nodes)
+                    RegisterAction(node);
 
         }
         private static void RegisterCollisionEvent(Node A, List<Node> colliders)
