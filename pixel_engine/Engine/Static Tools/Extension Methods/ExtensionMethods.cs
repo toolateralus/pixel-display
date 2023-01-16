@@ -109,9 +109,6 @@ namespace pixel_renderer
         }
 
         #endregion
-
-
-
         public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
             from FieldInfo field in component.GetType().GetRuntimeFields()
             from CustomAttributeData data in field.CustomAttributes
@@ -147,5 +144,6 @@ namespace pixel_renderer
             return new System.Windows.Media.PixelFormat();
         }
         public static Rectangle Rect(this Bitmap bmp) => new Rectangle(0, 0, bmp.Width, bmp.Height);
+        internal static T Clone<T>(this T component) where T : Component => component.GetShallowClone<T>();
     }
 }

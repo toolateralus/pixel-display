@@ -53,18 +53,8 @@ namespace pixel_renderer
             var node = Node.New;
             node.position = camera.parent.position;
 
-            Camera cam = new()
-            {
-                parent = node,
-                Center = camera.Center,
-                angle = camera.angle,
-                bottomRightCornerOffset= camera.bottomRightCornerOffset,
-                drawOrder = camera.drawOrder,
-                viewportSize= camera.viewportSize,
-                DrawMode= camera.DrawMode,
-                viewportPosition = camera.viewportPosition,
-                zBuffer = camera.zBuffer,
-            };
+            Camera cam = camera.Clone();
+            cam.parent = node;
 
             var bmd = renderTexture.LockBits(
                 new(0, 0, renderTexture.Width, renderTexture.Height),
