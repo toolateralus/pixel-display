@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
 
 namespace pixel_renderer
@@ -37,13 +38,15 @@ namespace pixel_renderer
         }
         public override Bitmap Draw(StageRenderInfo renderInfo)
         {
+            lock (renderTexture) UpdateFrameInfo();
             IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
-
-
-            foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
+            lock (frameBuffer)
             {
-                if (!uiComponent.Enabled ) continue;
-                if (uiComponent as Camera != null) RenderSprites(uiComponent as Camera, renderInfo);
+                foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
+                {
+                    if (!uiComponent.Enabled) continue;
+                    if (uiComponent as Camera != null) RenderSprites(uiComponent as Camera, renderInfo);
+                }
             }
                 
             return renderTexture;
@@ -57,7 +60,6 @@ namespace pixel_renderer
 
             Camera cam = camera.Clone();
             cam.parent = node;
-            BitmapData bmd = UpdateFrameInfo();
 
             if (cam.zBuffer.GetLength(0) != frameSize.x || cam.zBuffer.GetLength(1) != frameSize.y)
                 cam.zBuffer = new float[frameSize.x, frameSize.y];
@@ -92,14 +94,9 @@ namespace pixel_renderer
                     WriteColorToFrame(colorData[localPos.x, localPos.y], framePos);
                 }
             }
-            lock (frameBuffer)
-            {
-                Marshal.Copy(frameBuffer, 0, bmd.Scan0, frameBuffer.Length);
-                renderTexture.UnlockBits(bmd);
-            }
         }
 
-        private BitmapData UpdateFrameInfo()
+        private void UpdateFrameInfo()
         {
             var bmd = renderTexture.LockBits(
                 new(0, 0, renderTexture.Width, renderTexture.Height),
@@ -121,9 +118,9 @@ namespace pixel_renderer
                 frameStride = bmd.Stride;
                 shouldResizeFrame = true;
             }
+            renderTexture.UnlockBits(bmd);
 
-            if (shouldResizeFrame) frameBuffer = new byte[bmd.Stride * bmd.Height];
-            return bmd;
+            if (shouldResizeFrame) frameBuffer = new byte[frameStride * frameSize.y];
         }
 
         private void WriteColorToFrame(System.Drawing.Color color, Vec2Int framePos)
@@ -173,6 +170,11 @@ namespace pixel_renderer
             };
         }
 
-        public override void Render(Image destination) => CBit.Render(renderTexture, destination);
+        public override void Render(Image destination)
+        {
+            destination.Source = BitmapSource.Create(
+                frameSize.x, frameSize.y, 96, 96,PixelFormats.Bgr24, null,
+                frameBuffer, frameStride);
+        }
     }
 }
