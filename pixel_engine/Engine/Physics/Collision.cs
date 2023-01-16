@@ -56,8 +56,11 @@ namespace pixel_renderer
             if (stage.Nodes is null ||
                 stage.Nodes.Count == 0) return;
 
-            foreach (var node in stage.Nodes)
-                collisionCells.Add(hash.GetNearby(node));
+            lock (stage.Nodes)
+            {
+                foreach (var node in stage.Nodes)
+                    collisionCells.Add(hash.GetNearby(node));
+            }
         }
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
