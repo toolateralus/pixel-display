@@ -8,6 +8,7 @@ namespace pixel_renderer
     [JsonObject(MemberSerialization.OptIn)]
     public class Component
     {
+        internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
         public Component()
         {
             _uuid = pixel_renderer.UUID.NewUUID(); 
