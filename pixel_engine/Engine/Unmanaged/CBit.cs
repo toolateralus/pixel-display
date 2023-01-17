@@ -27,6 +27,13 @@ namespace pixel_renderer
             bmp.UnlockBits(bmd);
             return data;
         }
+        public static void RenderFromFrame(byte[] frame, int stride, Vec2Int resolution, Image output)
+        {
+            output.Source = BitmapSource.Create(
+                resolution.x, resolution.y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+                frame, stride);
+        }
+
         /// <summary>
         /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
         /// </summary>
