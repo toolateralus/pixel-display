@@ -154,7 +154,10 @@ namespace pixel_editor
             phrase = "resolution.Set;",
             action = (e) =>
             {
-                Runtime.Instance.renderHost.GetRenderer().Resolution = (Vec2Int)e[0];
+                Vec2 vector = (Vec2)e[0];
+                Vec2Int newRes = (Vec2Int)vector;
+                Console.Print(vector.AsString());
+                Runtime.Instance.renderHost.GetRenderer().Resolution = newRes;
             },
             description = "sets the resolution to the specified Vec2. \n syntax : resolution.Set(vec:x,y);"
 

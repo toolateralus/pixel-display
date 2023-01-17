@@ -122,16 +122,16 @@ namespace pixel_editor
         {
             return (o) =>
             {
-                editorMessages.Foreground = Brushes.Red;
-                editorMessages.Background = Brushes.Black;
+                consoleOutput.Foreground = Brushes.Red;
+                consoleOutput.Background = Brushes.Black;
             };
         }
         internal Action<object?> BlackText(object? o = null)
         {
             return (o) =>
             {
-                editorMessages.Foreground = Brushes.Black;
-                editorMessages.Background = Brushes.DarkSlateGray;
+                consoleOutput.Foreground = Brushes.Black;
+                consoleOutput.Background = Brushes.DarkSlateGray;
             };
         }
 

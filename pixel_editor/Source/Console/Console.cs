@@ -6,8 +6,6 @@ namespace pixel_editor
 {
     public static class Console
     {
-        static Inspector? inspector = Editor.Current.Inspector; 
-
         public static void Print(object? o, bool includeDateTime = false)
         {
             var msg = o.ToString();
@@ -23,13 +21,14 @@ namespace pixel_editor
                     e.action = RedTextForMsAsync( (int)textColorAlterationDuration);
             Editor.QueueEvent(e);
         }
+
         public static Action<object[]?> RedTextForMsAsync(int delay)
         {
             return async (o) =>
             {
-                Editor.Current.RedText(null);
+                Editor.Current.RedText().Invoke(o);
                 await Task.Delay(delay * 1000);
-                Editor.Current.BlackText(null);
+                Editor.Current.BlackText().Invoke(o);
             };
         }
         public static void Clear()
@@ -38,7 +37,7 @@ namespace pixel_editor
             editorEvent.ClearConsole = true;
             Editor.QueueEvent(editorEvent);
 
-            Print("Console Cleared", true);
+            Error("Console Cleared", 1);
         }
     }
 }
