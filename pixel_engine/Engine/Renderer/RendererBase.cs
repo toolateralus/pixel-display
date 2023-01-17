@@ -94,8 +94,8 @@
             {
                 BB_Min.x = Math.Min(corner.x, BB_Min.x);
                 BB_Min.y = Math.Min(corner.y, BB_Min.y);
-                BB_Max.x = Math.Max(corner.x, BB_Max.x);
-                BB_Max.y = Math.Max(corner.y, BB_Max.y);
+                BB_Max.x = Math.Max(corner.x + 1, BB_Max.x);
+                BB_Max.y = Math.Max(corner.y + 1, BB_Max.y);
             }
 
             if (!((Vec2)BB_Min).IsWithinMaxExclusive(Vec2.zero, Resolution) ||
