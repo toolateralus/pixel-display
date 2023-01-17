@@ -36,10 +36,8 @@ namespace pixel_editor
         {
             EditorEvent editorEvent = new EditorEvent("");
             editorEvent.ClearConsole = true;
-            editorEvent.message = "Reloaded";
-            Editor.Current.EditorEvent(editorEvent);
-          
-
+            Editor.QueueEvent(editorEvent);
+            Print("Console Cleared", true);
         }
     }
 }
