@@ -75,11 +75,11 @@
                 sprite.ColorData = renderInfo.spriteColorData[i];
                 sprite.size = renderInfo.spriteSizeVectors[i];
                 sprite.camDistance = renderInfo.spriteCamDistances[i];
-                RenderSprite(cam, sprite);
+                DrawTransparentSprite(cam, sprite);
             }
         }
 
-        private void RenderSprite(Camera cam, Sprite sprite)
+        private void DrawTransparentSprite(Camera cam, Sprite sprite)
         {
             //Bounding box on screen which fully captures sprite
             Vec2Int BB_Min = (Vec2Int)(cam.GlobalToScreenViewport(sprite.parent.position) * Resolution);
@@ -98,11 +98,12 @@
                 BB_Max.y = Math.Max(corner.y + 1, BB_Max.y);
             }
 
-            if (!((Vec2)BB_Min).IsWithinMaxExclusive(Vec2.zero, Resolution) ||
+            if (!((Vec2)BB_Min).IsWithinMaxExclusive(Vec2.zero, Resolution) &&
                 !((Vec2)BB_Max).IsWithinMaxExclusive(Vec2.zero, Resolution)) return;
 
             for (Vec2Int framePos = BB_Min; framePos.y < BB_Max.y; framePos.Increment2D(BB_Max.x, BB_Min.x))
             {
+                if (!((Vec2)framePos).IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
                 if (sprite.camDistance <= cam.zBuffer[framePos.x, framePos.y]) continue;
 
                 Vec2 camViewport = cam.ScreenToCamViewport(framePos / ((Vec2)Resolution).GetDivideSafe());
