@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace pixel_renderer
@@ -53,9 +54,11 @@ namespace pixel_renderer
         public const int ScreenH = 256;
         public const int ScreenW = 256;
 
-        public static Vec2 DefaultResolution => new Vec2(ScreenW, ScreenH);
-        public static Vec2 MaxResolution => new Vec2(3840, 3840);
-        public static Vec2 MinResolution => new Vec2(4, 4);
+        public static Vec2 DefaultResolution => new(ScreenW, ScreenH);
+        public static Vec2 MaxResolution => new(3840, 3840);
+        public static Vec2 MinResolution => new(4, 4);
+
+        public static Color EditorHighlightColor = Color.Orange;
         #endregion
         #region File IO and String/Char Constants
         public static char[] unsupported_chars = { '_', '-', '.', '`'};

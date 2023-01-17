@@ -10,9 +10,9 @@
     /// </summary>
     public partial class EngineInstance : Window
     {
-        public Project? project = null;
         public EngineInstance()
         {
+            Project project = Project.LoadProject();
             InitializeComponent();
             Runtime.Awake(this, project);
         }

@@ -137,6 +137,12 @@ namespace pixel_renderer
                     colorData[x, y] = color;
             return colorData; 
         }
+
+        internal void Highlight(object editorHighlightColor)
+        {
+            throw new NotImplementedException();
+        }
+
         public Sprite()
         {
             texture = new((Vec2Int)size, Player.test_image_data);

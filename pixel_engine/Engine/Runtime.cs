@@ -57,7 +57,11 @@ namespace pixel_renderer
         }
         public Stage GetStage()
         {
-            if (m_stageAsset is null) m_stageAsset = StageAsset.Default;
+            if (m_stageAsset is null)
+            {
+                m_stageAsset = StageAsset.Default;
+                AssetLibrary.Sync();
+            }
             if (m_stage is null || m_stage.UUID != m_stageAsset.UUID)
                 m_stage = m_stageAsset.Copy();
             return m_stage;
@@ -71,9 +75,9 @@ namespace pixel_renderer
             Instance.Initialized = true;
            
             Importer.Import(false);
-            Input.Awake();
 
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
+            CompositionTarget.Rendering += Input.Refresh;
         }
         private void InitializePhysics()
         {
@@ -86,8 +90,11 @@ namespace pixel_renderer
         public void SetProject(Project project) => LoadedProject = project;
         public void ResetCurrentStage()
         {
-            SetStage(m_stageAsset?.Copy());
+            if(m_stageAsset != null)
+                SetStage(m_stageAsset.Copy());
         }
+
+
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -98,6 +105,7 @@ namespace pixel_renderer
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
+
         private protected void SetStage(Stage? value) 
         {
             m_stage = null;
@@ -131,7 +139,6 @@ namespace pixel_renderer
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
-            Input.Refresh();
 
             bool HasNoRenderSurface = renderHost.State is RenderState.Off;
 
