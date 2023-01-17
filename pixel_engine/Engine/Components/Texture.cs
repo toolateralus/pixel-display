@@ -21,7 +21,7 @@ namespace pixel_renderer
             {
                 this.imgData = imgData;
                 Image = new(imgData.fullPath);
-                Image = GetScaledBitmap();
+                Image = new(Image, scale.x, scale.y);
             }
             if(color is not null)
                 Image = Sprite.SolidColorBitmap(this.scale, (Color)color);
