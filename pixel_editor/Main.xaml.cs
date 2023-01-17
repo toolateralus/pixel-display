@@ -82,16 +82,14 @@ namespace pixel_editor
 
         public Editor()
         {
-            InitializeComponent();
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
-            
-            Runtime.inspector = inspector;
-            Project defaultProject = new("Default");
-            current = this; 
             engine = new();
-            engine.project = defaultProject;
-            
+            Runtime.inspector = inspector;
+            current = this; 
+
+            InitializeComponent();
             GetEvents();
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
+
         }
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
@@ -285,26 +283,13 @@ namespace pixel_editor
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            
-            Project? proj;
-            Metadata meta;
-            GetProjectPsuedoMetadata(out proj, out meta);
-            ProjectIO.WriteProject(proj, meta);
+            Project.SaveProject();
             AssetLibrary.Sync();
         }
-        private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
-        {
-            proj = Runtime.Instance.LoadedProject;
 
-            if (proj is null)
-                proj = new("FallbackProject");
+       
 
-            var projDir = pixel_renderer.Constants.ProjectsDir;
-            var rootDir = pixel_renderer.Constants.WorkingRoot;
-            var ext = pixel_renderer.Constants.ProjectFileExtension;
-            var path = rootDir + projDir + '\\' + proj.Name + ext;
-            meta = new Metadata(proj.Name, path, ext);
-        }
+        
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;

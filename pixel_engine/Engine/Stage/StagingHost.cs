@@ -13,11 +13,8 @@ namespace pixel_renderer
     {
         public Node? lastSelected;
         static Runtime runtime => Runtime.Instance;
-        
         public bool GetNodeAtPoint(Stage stage, Point clickPosition, out Node? result)
         {
-      
-
             foreach (var node in stage.Nodes)
             {
                 if (node == lastSelected) continue;
@@ -29,7 +26,8 @@ namespace pixel_renderer
                 if (!isWithin) continue;
 
                 result = node;
-                sprite.Highlight(Color.Orange);
+                
+                sprite.Highlight(Constants.EditorHighlightColor);
                 
                 lastSelected?.GetComponent<Sprite>().RestoreCachedColor(false);
                 lastSelected = node;

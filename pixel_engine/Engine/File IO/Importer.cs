@@ -52,25 +52,28 @@ namespace pixel_renderer.Assets
                 foreach (var file in Directory.EnumerateFiles(dir))
                     FinalImport(file);
         }
-
-        private static void FinalImport(string file)
+        private static void FinalImport(string fullPath)
         {
-            var fileExtension = file.Split('.')[1];
-            Metadata meta = new("New Asset", file, fileExtension);
+            GetFileNameAndExtensionFromPath(fullPath, out string name, out string ext);
+            Metadata meta = new(name, fullPath, ext);
             var asset = TryPullObject(meta);
             if (asset is not null)
                 AssetLibrary.Register((meta, asset));
         }
-
+        public static void GetFileNameAndExtensionFromPath(string path, out string name, out string ext)
+        {
+            var split = path.Split('\\');
+            string nameAndExt = split[^1];
+            split = nameAndExt.Split('.');
+            name = split[0];
+            ext = split[1];
+        }
         /// <summary>
         /// try to read from path specified in metadata and convert to asset type.
         /// </summary>
         /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
         /// <returns>Asset if it exists at path, else null.</returns>
-        public static Asset? TryPullObject(Metadata meta)
-        {
-            return !File.Exists(meta.fullPath) ? null : IO.ReadJson<Asset>(meta);
-        }
+        public static Asset? TryPullObject(Metadata meta) => !File.Exists(meta.fullPath) ? null : IO.ReadJson<Asset>(meta);   
         /// <summary>
         /// </summary>
         /// <param name="type"></param>

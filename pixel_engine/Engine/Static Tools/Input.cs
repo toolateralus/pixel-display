@@ -10,12 +10,9 @@ namespace pixel_renderer
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
-        static List<InputAction> InputActions = new(250);
-        internal static void Awake()
-        {
-          
-        }
-        internal static void Refresh()
+        private static readonly List<InputAction> InputActions = new(250);
+       
+        internal static void Refresh(object? sender, EventArgs e)
         {
             foreach (var action in InputActions)
             {
@@ -56,7 +53,13 @@ namespace pixel_renderer
             };
             return input_value;
         }
-        public static void RegisterAction(Action<object[]?> action, Key key , object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown) => InputActions.Add(new(action, key));
+        public static void RegisterAction(Action<object[]?> action, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
+        {
+            lock (InputActions)
+            {
+                InputActions.Add(new(action, key));
+            }
+        }
     }
 
     public class InputAction

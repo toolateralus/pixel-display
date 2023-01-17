@@ -30,6 +30,25 @@ namespace pixel_renderer
                 Name = newName;
             return (Name, hash);
         }
+        public static void SaveProject()
+        {
+            Project? proj;
+            Metadata meta;
+            GetProjectPsuedoMetadata(out proj, out meta);
+            ProjectIO.WriteProject(proj, meta);
+        }
+        private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
+        {
+            proj = Runtime.Instance.LoadedProject;
+
+            proj ??= new("FallbackProject");
+
+            var projDir = Constants.ProjectsDir;
+            var rootDir = Constants.WorkingRoot;
+            var ext = Constants.ProjectFileExtension;
+            var path = rootDir + projDir + '\\' + proj.Name + ext;
+            meta = new Metadata(proj.Name, path, ext);
+        }
         public static Project LoadProject()
         {
             Project project = new("Default");
@@ -59,6 +78,7 @@ namespace pixel_renderer
         {
 
         }
+
         [JsonConstructor]
         public Project(List<StageAsset> stages, List<Asset> library, int stageIndex, int fileSize, string name, int hash)
         {
