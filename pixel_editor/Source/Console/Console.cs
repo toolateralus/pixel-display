@@ -37,6 +37,7 @@ namespace pixel_editor
             EditorEvent editorEvent = new EditorEvent("");
             editorEvent.ClearConsole = true;
             Editor.QueueEvent(editorEvent);
+
             Print("Console Cleared", true);
         }
     }
