@@ -25,13 +25,21 @@ namespace pixel_editor
         }
         public static Action<object[]?> RedTextForMsAsync(int delay)
         {
-            Action<object?> c = async (o) =>
+            return async (o) =>
             {
                 Editor.Current.RedText(null);
-                await Task.Delay(delay);
+                await Task.Delay(delay * 1000);
                 Editor.Current.BlackText(null);
             };
-            return c;
+        }
+        public static void Clear()
+        {
+            EditorEvent editorEvent = new EditorEvent("");
+            editorEvent.ClearConsole = true;
+            editorEvent.message = "Reloaded";
+            Editor.Current.EditorEvent(editorEvent);
+          
+
         }
     }
 }

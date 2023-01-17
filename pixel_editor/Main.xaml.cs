@@ -10,6 +10,8 @@ using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Windows.Threading;
 using System.Threading;
+using Newtonsoft.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace pixel_editor
 {
@@ -83,13 +85,16 @@ namespace pixel_editor
         public Editor()
         {
             engine = new();
-            Runtime.inspector = inspector;
             current = this; 
 
             InitializeComponent();
             GetEvents();
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
 
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
+            Runtime.inspector = inspector;
+
+            Task.Run(() => Console.Print("Session Started", true));
+                
         }
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
@@ -285,11 +290,12 @@ namespace pixel_editor
             e.Handled = true;
             Project.SaveProject();
             AssetLibrary.Sync();
+      
         }
+      
 
-       
 
-        
+
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
