@@ -27,7 +27,7 @@ namespace pixel_renderer
                 Image = Sprite.SolidColorBitmap(this.scale, (Color)color);
             
         }
-        [Field] public Bitmap? Image;
+         public Bitmap? Image { get; set; }
 
         [Field] public Bitmap? Mask;
 
