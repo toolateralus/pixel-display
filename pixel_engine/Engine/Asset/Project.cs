@@ -37,7 +37,12 @@ namespace pixel_renderer
             Project loadedProject = IO.ReadJson<Project>(meta);
             return loadedProject is null ? project : loadedProject;
         }
-        internal static string GetPathFromRoot(string filePath) => filePath.Replace(Constants.WorkingRoot + "\\Pixel", "");
+        internal static string GetPathFromRoot(string filePath)
+        {
+            var output = filePath.Replace(Constants.WorkingRoot, "");
+            return output; 
+        }
+
         /// <summary>
         /// use this for new projects and overwrite the default stage data, this prevents lockups
         /// </summary>

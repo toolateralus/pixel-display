@@ -44,13 +44,13 @@ namespace pixel_renderer.Scripts
 
             for (int i = 0; i < 2; i++)
             {
-                if (renderer.resolution[i] < Constants.MaxResolution[i])
-                    renderer.resolution[i] += incrementAmt;
+                if (renderer.Resolution[i] < Constants.MaxResolution[i])
+                    renderer.Resolution[i] += incrementAmt;
             }
             res_incrementer++;
 
             if(res_incrementer % 25 == 0)
-                Runtime.Log(((Vec2)renderer.resolution).AsString());
+                Runtime.Log(((Vec2)renderer.Resolution).AsString());
 
         }
         void DecreaseResolution(object[]? e)
@@ -59,11 +59,11 @@ namespace pixel_renderer.Scripts
             var decrementAmt = 1;
 
             for (int i = 0; i < 2; i++)
-                if (renderer.resolution[i] > Constants.MinResolution[i])
-                    renderer.resolution[i] -= decrementAmt;
+                if (renderer.Resolution[i] > Constants.MinResolution[i])
+                    renderer.Resolution[i] -= decrementAmt;
 
             if (res_incrementer % 25 == 0)
-                Runtime.Log(((Vec2)renderer.resolution).AsString());
+                Runtime.Log(((Vec2)renderer.Resolution).AsString());
             res_incrementer--;
         }
 
@@ -117,6 +117,7 @@ namespace pixel_renderer.Scripts
             col.size = sprite.size;
 
             var cam = playerNode.AddComponent<Camera>();
+            cam.DrawMode = DrawingType.Wrapped;
             cam.Size = new(256, 256);
             
             nodes.Add(playerNode);

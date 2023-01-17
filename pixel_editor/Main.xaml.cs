@@ -295,6 +295,10 @@ namespace pixel_editor
         private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
         {
             proj = Runtime.Instance.LoadedProject;
+
+            if (proj is null)
+                proj = new("FallbackProject");
+
             var projDir = pixel_renderer.Constants.ProjectsDir;
             var rootDir = pixel_renderer.Constants.WorkingRoot;
             var ext = pixel_renderer.Constants.ProjectFileExtension;

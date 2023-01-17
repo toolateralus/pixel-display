@@ -77,10 +77,28 @@ namespace pixel_renderer
 
             return vertices;
         }
+        /// <summary>
+        /// returns the center of the polygon the collider represents.
+        /// </summary>
+        /// <returns></returns>
+        internal Vec2 GetCentroid()
+        {
+            var corners = GetVertices();
+            Vec2 centroid = new();
+            for (int i = 0; i < corners.Length; i++)
+            {
+                Vec2 vec = corners[i];
+                centroid += vec;
+            }
+            return centroid / corners.Length;
+        }
 
         public override void Awake()
         { 
 
+        }
+        public override void Update()
+        {
         }
         public override void FixedUpdate(float delta)
         {
@@ -95,21 +113,6 @@ namespace pixel_renderer
         {
 
 
-        }
-        public override void Update()
-        {
-        }
-
-        internal Vec2 GetCentroid()
-        {
-            var corners = GetVertices();
-            Vec2 centroid = new();
-            for (int i = 0; i < corners.Length; i++)
-            {
-                Vec2 vec = corners[i];
-                centroid += vec;
-            }
-            return centroid / corners.Length;
         }
     }
 }
