@@ -114,20 +114,20 @@ namespace pixel_renderer
                   ComponentsList[i].OnCollision(otherBody);
         }
 
-        public void AddComponent(Component component)
+        public T AddComponent<T>(T component) where T : Component
         {
             lock (Components)
             {
-                if (component is null) return; 
-
                 var type = component.GetType();
-                if (component.GetType() is Component)
+                if (type is Component)
                     throw new Exception(); 
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
 
                 Components[type].Add(component);
                 component.parent = this;
+
+                return component;
             }
         }
         public T AddComponent<T>() where T : Component, new()

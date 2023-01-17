@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Drawing;
+using System.Security.Policy;
 using System.Windows.Input;
 using Newtonsoft.Json;
 using pixel_renderer.Scripts;
+using Bitmap = System.Drawing.Bitmap;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer
@@ -25,32 +27,38 @@ namespace pixel_renderer
         [JsonProperty] public SpriteType Type = SpriteType.Image;
 
         public bool dirty = true;
+        Vec2Int colorDataSize = new(1,1);
 
         private Color[,]? cached_colors = null;
-        internal Color[,] ColorData 
+        internal Color[,] ColorData
         {
             get
             {
-                if (!dirty) 
+                if (!dirty)
                     return _colors;
-                    switch (Type)
-                    {
-                        case SpriteType.SolidColor:
+                switch (Type)
+                {
+                    case SpriteType.SolidColor:
+                        _colors = SolidColorSquare(size, Color);
+                        break;
+                    case SpriteType.Image:
+                        if (texture is null)
                             _colors = SolidColorSquare(size, Color);
-                            break;
-                        case SpriteType.Image:
-                            if (texture is null)
-                                _colors = SolidColorSquare(size, Color);
-                            else 
-                                _colors = texture.GetColorArray();
-                            break;
-                        default:
-                            throw new NotImplementedException("Custom Sprite render type not yet implemented");
-                    }
-                dirty = false; 
-                return _colors; 
+                        else
+                            _colors = texture.GetColorArray();
+                        break;
+                    default:
+                        throw new NotImplementedException("Custom Sprite render type not yet implemented");
+                }
+                colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+                dirty = false;
+                return _colors;
             }
-            set => _colors = value;
+            set
+            {
+                _colors = value;
+                colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+            }
         }
         private Color[,] _colors; 
         public override void Awake()
@@ -137,6 +145,10 @@ namespace pixel_renderer
                     colorData[x, y] = color;
             return colorData; 
         }
+
+        public Vec2Int ViewportToColorPos(Vec2 spriteViewport) => (Vec2Int)(spriteViewport.Wrapped(Vec2.one) * colorDataSize);
+        internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.position) / size.GetDivideSafe();
+
 
         internal void Highlight(object editorHighlightColor)
         {
