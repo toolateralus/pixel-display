@@ -188,13 +188,13 @@
         public int x;
         public int y;
 
-        public void Increment2D(int xMax)
+        public void Increment2D(int xMax, int xMin = 0)
         {
             x++;
             if (x >= xMax)
             {
                 y++;
-                x = 0;
+                x = xMin;
             }
         }
         public Vec2Int(int x, int y)
