@@ -10,6 +10,8 @@ using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Windows.Threading;
 using System.Threading;
+using Newtonsoft.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace pixel_editor
 {
@@ -17,10 +19,10 @@ namespace pixel_editor
 
     public class EditorEventHandler
     {
-        public static Editor Editor => Editor.Current;
-        public Action<EditorEvent> InspectorEventRaised;
-        public Queue<EditorEvent> Pending = new();
-        public void ExecuteAll()
+        internal protected static Editor Editor => Editor.Current;
+        internal protected Action<EditorEvent> InspectorEventRaised;
+        internal protected Queue<EditorEvent> Pending = new();
+        internal protected void ExecuteAll()
         {
             EditorEvent e;
             for (int i = 0; Pending.Count > 0; ++i)
@@ -83,13 +85,16 @@ namespace pixel_editor
         public Editor()
         {
             engine = new();
-            Runtime.inspector = inspector;
             current = this; 
 
             InitializeComponent();
             GetEvents();
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
 
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
+            Runtime.inspector = inspector;
+
+            Task.Run(() => Console.Print("Session Started", true));
+                
         }
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
@@ -198,7 +203,7 @@ namespace pixel_editor
 
         }
         
-        public void EditorEvent(EditorEvent e)
+        internal protected void EditorEvent(EditorEvent e)
         {
            e.action?.Invoke(e.args);
            if (e.message is ""|| e.message.Contains("$nolog")) return;
@@ -285,11 +290,12 @@ namespace pixel_editor
             e.Handled = true;
             Project.SaveProject();
             AssetLibrary.Sync();
+      
         }
+      
 
-       
 
-        
+
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
@@ -310,7 +316,11 @@ namespace pixel_editor
                 Runtime.Instance.SetProject(project);
         }
 
-        internal static void QueueEvent(EditorEvent e)
+        /// <summary>
+        /// For users to pass an event to the inspector to be executed as soon as possible
+        /// </summary>
+        /// <param name="e"></param>
+        public static void QueueEvent(EditorEvent e)
         {
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());

@@ -149,6 +149,38 @@ namespace pixel_editor
           "\n gets a node and attempts to write the provided value to specified field.",
         };
 
+        private static Command cmd_set_resolution = new()
+        {
+            phrase = "resolution.Set;",
+            action = (e) =>
+            {
+                Runtime.Instance.renderHost.GetRenderer().Resolution = (Vec2Int)e[0];
+            },
+            description = "sets the resolution to the specified Vec2. \n syntax : resolution.Set(vec:x,y);"
+
+        };
+        private static Command cmd_get_resolution = new()
+        {
+            phrase = "resolution.Get;",
+            action = (e) =>
+            {
+                Console.Print(((Vec2)Runtime.Instance.renderHost.GetRenderer().Resolution).AsString());
+            },
+            description = "gets the resolution and prints it to the console"
+
+        };
+        private static Command cmd_clear_console = new()
+        {
+            phrase = "cclear;",
+            action = (e) =>
+            {
+                Console.Clear();
+            },
+            args = null,
+            description = "Clears the console's output",
+
+        };
+
         private static void set_node_field(params object[]? e)
         {
             if (e.Length >= 3)
@@ -163,7 +195,6 @@ namespace pixel_editor
                 field?.SetValue(node, value);
             }
         }
-       
         private static void call_node_method(params object[]? e)
         {
             if (e.Length > 2)
@@ -250,6 +281,9 @@ namespace pixel_editor
             cmd_spawn_generic,
             cmd_log,
             cmd_set_camera,
+            cmd_set_resolution,
+            cmd_get_resolution,
+            cmd_clear_console,
         };
     }
 
