@@ -62,7 +62,7 @@ namespace pixel_renderer
         
         public Node? parentNode;
         public List<Node> children= new() ;
-        public static Node New = new("", Vec2.zero, Vec2.one);
+        public static Node New => new("", Vec2.zero, Vec2.one);
         
         public List<Component> ComponentsList
         {
