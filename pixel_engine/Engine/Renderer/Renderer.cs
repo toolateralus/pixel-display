@@ -20,8 +20,8 @@ namespace pixel_renderer
 
             lock (frame)
             {
-                stride = 4 * (Resolution.x * 24 + 31) / 32;
-                if (frame.Length != stride * Resolution.y) frame = new byte[stride * Resolution.y];
+                stride = 4 * ((int)Resolution.x * 24 + 31) / 32;
+                if (frame.Length != stride * Resolution.y) frame = new byte[stride * (int)Resolution.y];
                 
                 IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
 
