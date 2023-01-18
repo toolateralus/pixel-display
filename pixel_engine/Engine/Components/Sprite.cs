@@ -39,13 +39,13 @@ namespace pixel_renderer
                 switch (Type)
                 {
                     case SpriteType.SolidColor:
-                        _colors = SolidColorSquare(size, Color);
+                        _colors = CBit.SolidColorSquare(size, Color);
                         break;
                     case SpriteType.Image:
                         if (texture is null)
-                            _colors = SolidColorSquare(size, Color);
+                            _colors = CBit.SolidColorSquare(size, Color);
                         else
-                            _colors = texture.GetColorArray();
+                            _colors = CBit.ColorArrayFromBitmap(texture.Image);
                         break;
                     default:
                         throw new NotImplementedException("Custom Sprite render type not yet implemented");
@@ -115,6 +115,7 @@ namespace pixel_renderer
                 }
             Draw(size, colorData);
         }
+        
         public void Draw(Vec2 size, Color[,] color)
         {
             this.size = size;
@@ -123,28 +124,10 @@ namespace pixel_renderer
         public void DrawSquare(Vec2 size, Color color)
         {
             this.size = size;
-            ColorData = SolidColorSquare(size, color);
+            ColorData = CBit.SolidColorSquare(size, color);
         }
-        public static Bitmap SolidColorBitmap(Vec2 size, Color color)
-        {
-            int x = (int)size.x;
-            int y = (int)size.y; 
-            
-            var bitmap = new Bitmap(x, y);
 
-            for(int i = 0; i < x ; i++)
-                for(int j = 0; j < x ; j++)
-                    bitmap.SetPixel(i, j, color);
-            return bitmap;
-        }
-        public static Color[,] SolidColorSquare(Vec2 size, Color color)
-        {
-            var colorData = new Color[(int)size.x, (int)size.y];
-            for (int x = 0; x < size.x; x++)
-                for (int y = 0; y < size.y; y++)
-                    colorData[x, y] = color;
-            return colorData; 
-        }
+        
 
         public Vec2Int ViewportToColorPos(Vec2 spriteViewport) => (Vec2Int)(spriteViewport.Wrapped(Vec2.one) * colorDataSize);
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.position) / size.GetDivideSafe();

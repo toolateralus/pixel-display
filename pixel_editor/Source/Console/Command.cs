@@ -68,7 +68,6 @@ namespace pixel_editor
                 {
                     string question = $"Project Found! " +
                                             $"\n Name : {project.Name} " +
-                                            $"\n UUID : {project.stageIndex} " +
                                             $"Do you want to load this project?";
 
                     Task<PromptResult> result = PromptAsync(question, 60f);

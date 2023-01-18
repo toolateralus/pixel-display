@@ -47,6 +47,22 @@ namespace pixel_renderer
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
             source.UnlockBits(bmd);
         }
+        public static void ByteArrayFromColorArray(Color[,] colors, out byte[] data, out int stride)
+        {
+            var w = colors.GetLength(0);
+            var h = colors.GetLength(1);
+            stride = 4 + (w * 24 + 31) / 32;
+            data = new byte[stride * h];
+
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                {
+                    data[y * stride + x * 3 + 0] = colors[x, y].B;
+                    data[y * stride + x * 3 + 1] = colors[x, y].G;
+                    data[y * stride + x * 3 + 2] = colors[x, y].R;
+                }
+        }
+
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
         /// </summary>
@@ -117,6 +133,26 @@ namespace pixel_renderer
                 }
             }
             return _colors;
+        }
+        public static Bitmap SolidColorBitmap(Vec2 size, Color color)
+        {
+            int x = (int)size.x;
+            int y = (int)size.y;
+
+            var bitmap = new Bitmap(x, y);
+
+            for (int i = 0; i < x; i++)
+                for (int j = 0; j < x; j++)
+                    bitmap.SetPixel(i, j, color);
+            return bitmap;
+        }
+        public static Color[,] SolidColorSquare(Vec2 size, Color color)
+        {
+            var colorData = new Color[(int)size.x, (int)size.y];
+            for (int x = 0; x < size.x; x++)
+                for (int y = 0; y < size.y; y++)
+                    colorData[x, y] = color;
+            return colorData;
         }
     }
 }
