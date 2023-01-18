@@ -70,7 +70,6 @@ namespace pixel_renderer
             var output = filePath.Replace(Constants.WorkingRoot, "");
             return output; 
         }
-
         /// <summary>
         /// use this for new projects and overwrite the default stage data, this prevents lockups
         /// </summary>
@@ -86,7 +85,6 @@ namespace pixel_renderer
         {
 
         }
-
         [JsonConstructor]
         public Project(List<Metadata>? stage_meta, List<Metadata> library, int stageIndex, int fileSize, string name, int hash)
         {
