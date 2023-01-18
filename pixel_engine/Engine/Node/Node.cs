@@ -61,8 +61,8 @@ namespace pixel_renderer
         public Vec2 scale = new();
         
         public Node? parentNode;
-        public List<Node> children= new() ;
-        public static Node New = new("", Vec2.zero, Vec2.one);
+        public List<Node> children = new();
+        public static Node New => new("", Vec2.zero, Vec2.one);
         
         public List<Component> ComponentsList
         {

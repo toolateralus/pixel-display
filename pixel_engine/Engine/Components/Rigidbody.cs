@@ -31,11 +31,9 @@ namespace pixel_renderer
             double drag = velocity * velocity * dragCoefficient;
             return drag;
         }
-        public static Node Standard
+        public static Node Standard()
         {
-            get
-            {
-                Node node = Node.New;
+            Node node = Node.New; 
                 Rigidbody rb = node.AddComponent<Rigidbody>();
                 Collider col = node.AddComponent<Collider>();
                 rb.parent = node;
@@ -44,7 +42,6 @@ namespace pixel_renderer
                 col.size = rb.sprite.size;
                 col.IsTrigger = false;
                 return node;
-            }
         }
 
         // Todo: prevent these methods from being overridden.

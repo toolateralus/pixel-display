@@ -100,7 +100,7 @@ namespace pixel_editor
             var stage = new Stage(name, background_meta, nodes.ToNodeAssets());
 
             for (int i = 0; i < count; i++) 
-                stage.AddNode(Rigidbody.Standard);
+                stage.AddNode(Rigidbody.Standard());
 
             var msgResult = 
                 MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage and add it to the current project?", "Set Stage?", MessageBoxButton.YesNo);
