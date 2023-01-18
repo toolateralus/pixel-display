@@ -55,6 +55,7 @@ namespace pixel_renderer
             IsRunning = false;
             return;
         }
+        private string current_stage_uuid = ""; 
         public Stage GetStage()
         {
             if (m_stageAsset is null)
@@ -62,8 +63,11 @@ namespace pixel_renderer
                 m_stageAsset = StageAsset.Default;
                 AssetLibrary.Sync();
             }
-            if (m_stage is null || m_stage.UUID != m_stageAsset.UUID)
+            if (m_stage is null || m_stage.UUID != current_stage_uuid)
+            {
                 m_stage = m_stageAsset.Copy();
+                current_stage_uuid = m_stage.UUID; 
+            }
             return m_stage;
         }
         public static void Awake(EngineInstance mainWnd, Project? project = null)

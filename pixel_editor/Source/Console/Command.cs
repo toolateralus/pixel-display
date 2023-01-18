@@ -56,6 +56,48 @@ namespace pixel_editor
             return false;
         }
 
+        private static Command cmd_set_stage = new()
+        {
+            phrase = "stage.Set;",
+            action = async (o) =>
+            {
+                string stageName = (string)o[0];
+                bool loadAsynchronously = false;
+
+                if (o.Length > 1 && o[1] is bool)
+                    loadAsynchronously = (bool)o[1];
+
+                Project project = Runtime.Instance.LoadedProject;
+
+                if (project is null) return;
+
+                var stage = Project.GetStageByName(stageName);
+                if (stage == null) Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
+                var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
+                await prompt;
+
+                switch (prompt.Result)
+                {
+                    case PromptResult.Yes:
+                        Console.Print($"Stage {stage.Name} set.");
+                        Runtime.Instance.SetStageAsset(stage);
+                        break;
+                    case PromptResult.No:
+                        Console.Print("Stage not set."); 
+                        break;
+                    case PromptResult.Cancel:
+                        Console.Print("Set Stage cancelled.");
+                        break;
+                    case PromptResult.Timeout:
+                        Console.Print("Set Stage timed out.");
+                        break;
+                    default:
+                        break;
+                }
+            },
+
+
+        };
         private static Command cmd_load_project = new()
         {
             phrase = "loadProject;",
@@ -78,6 +120,7 @@ namespace pixel_editor
                     {
                         case PromptResult.Yes:
                             Console.Print($"Project {name} set.");
+                            Runtime.Instance.SetProject(project);
                             break;
                         case PromptResult.No:
                             Console.Print("Project not set.");
@@ -288,6 +331,7 @@ namespace pixel_editor
             cmd_set_resolution,
             cmd_get_resolution,
             cmd_clear_console,
+            cmd_set_stage,
         };
     }
 

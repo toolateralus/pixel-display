@@ -85,6 +85,8 @@ namespace pixel_editor
         }
         private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
+
             if (image is null)
                 await OnNoBackgroundSelected();
 
@@ -104,7 +106,7 @@ namespace pixel_editor
                 MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage and add it to the current project?", "Set Stage?", MessageBoxButton.YesNo);
 
             var asset = new StageAsset(stage.Name, stage);
-            var meta = new Metadata(asset.Name, asset.filePath, pixel_renderer.Constants.AssetsFileExtension);
+            var meta = new Metadata(asset.Name, pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\"  + asset.Name + pixel_renderer.Constants.AssetsFileExtension, pixel_renderer.Constants.AssetsFileExtension);
             
             AssetLibrary.Register(meta, asset);
 
@@ -113,6 +115,7 @@ namespace pixel_editor
                 Runtime.Instance.SetStageAsset(asset);
                 Runtime.Instance.AddStageToProject(asset);
             }
+            AssetLibrary.Sync();
             Close(); 
         }
         private static async Task OnNoBackgroundSelected()

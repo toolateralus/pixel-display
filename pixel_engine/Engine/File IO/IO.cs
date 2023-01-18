@@ -15,7 +15,6 @@ namespace pixel_renderer
             Formatting = Formatting.Indented,
         };
         public static string Path => Constants.WorkingRoot + Constants.AssetsDir;
-        public static string[] asset_fileExtensions = { "pxad", "pxpj" };
         /// <summary>
         /// this does not check if the directory or file exists, just deserializes a file into a json object of specified type and returns as C# object
         /// </summary>
@@ -26,7 +25,9 @@ namespace pixel_renderer
         public static T? ReadJson<T>(Metadata meta, bool closeStreamWhenFinished = true) where T : new()
         {
             T? obj = new(); 
-            if (asset_fileExtensions.Contains(meta.extension))
+
+            
+            if (Constants.ReadableExtensions.Contains(meta.extension))
             {
                 var jsonSerializer = JsonSerializer.Create(Settings);
                 
@@ -60,7 +61,6 @@ namespace pixel_renderer
             }
             return writer;
         }
-
         public static MessageBoxResult FileOverrideWarning(string path)
         {
             return MessageBox.Show($"Are you sure you want to overwrite {path}?",
@@ -80,7 +80,6 @@ namespace pixel_renderer
         public const string directory = Constants.ProjectsDir;
         public const string extension = Constants.ProjectFileExtension;
         public static string Path => root + directory;
-
         private static void FindOrCreateProjectsDirectory()
         {
             if (!Directory.Exists(Path))
@@ -91,7 +90,6 @@ namespace pixel_renderer
             FindOrCreateProjectsDirectory();
             IO.WriteJson(proj, meta);
         }
-
         public static Project ReadProject(string name)
         {
             FindOrCreateProjectsDirectory();

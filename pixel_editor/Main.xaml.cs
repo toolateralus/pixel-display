@@ -12,6 +12,8 @@ using System.Windows.Threading;
 using System.Threading;
 using Newtonsoft.Json.Serialization;
 using System.Threading.Tasks;
+using System.Drawing;
+using System.Windows.Media;
 
 namespace pixel_editor
 {
@@ -120,18 +122,28 @@ namespace pixel_editor
         public readonly EditorEventHandler Events = new(); 
         internal Action<object?> RedText(object? o = null)
         {
-            return (o) =>
+            return async (o) =>
             {
-                consoleOutput.Foreground = Brushes.Red;
-                consoleOutput.Background = Brushes.Black;
+                for (int i = 0; i < 3; ++i)
+                {
+                    await Task.Delay(500);
+                    var c = JRandom.Color();
+                    consoleOutput.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+                    await Task.Delay(500);
+                    c = JRandom.Color();
+                    if (i == 2) consoleOutput.Foreground = Brushes.Black; 
+                    consoleOutput.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+                }
             };
         }
+        
+
         internal Action<object?> BlackText(object? o = null)
         {
             return (o) =>
             {
-                consoleOutput.Foreground = Brushes.Black;
-                consoleOutput.Background = Brushes.DarkSlateGray;
+                consoleOutput.Foreground = Brushes.White;
+                consoleOutput.Background = Brushes.Black;
             };
         }
 

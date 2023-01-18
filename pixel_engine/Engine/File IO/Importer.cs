@@ -56,7 +56,7 @@ namespace pixel_renderer.Assets
         {
             GetFileNameAndExtensionFromPath(fullPath, out string name, out string ext);
             Metadata meta = new(name, fullPath, ext);
-            var asset = TryPullObject(meta);
+            Asset? asset = TryPullObject(meta) as Asset;
             if (asset is not null)
                 AssetLibrary.Register((meta, asset));
         }
@@ -73,7 +73,14 @@ namespace pixel_renderer.Assets
         /// </summary>
         /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
         /// <returns>Asset if it exists at path, else null.</returns>
-        public static Asset? TryPullObject(Metadata meta) => !File.Exists(meta.fullPath) ? null : IO.ReadJson<Asset>(meta);   
+        public static object? TryPullObject(Metadata meta)
+        {
+            if(meta.extension == Constants.BitmapFileExtension)
+                return !File.Exists(meta.fullPath) ? null : meta;
+
+            return !File.Exists(meta.fullPath) ? null : IO.ReadJson<Asset>(meta);
+        }
+
         /// <summary>
         /// </summary>
         /// <param name="type"></param>
@@ -85,20 +92,24 @@ namespace pixel_renderer.Assets
 
             return type switch
             {
-                "pxad" => typeof(Asset),
-                "pxpj" => typeof(Project),
-                "bmp" => typeof(Bitmap),
+                Constants.AssetsFileExtension => typeof(Asset),
+                Constants.ProjectFileExtension => typeof(Project),
+                Constants.MetadataFileExtension => typeof(Metadata),
+                Constants.BitmapFileExtension => typeof(Bitmap),
                  _ => typeof(object),
             };
         }
         public static string ExtensionFromType(Type type)
         {
             if (type == typeof(Asset))
-                return ".pxad";
+                return Constants.AssetsFileExtension;
             if (type == typeof(Project))
-                return ".pxpj";
+                return Constants.ProjectFileExtension;
             if (type == typeof(Bitmap))
-                return ".bmp";
+                return Constants.BitmapFileExtension;
+            if (type == typeof(Metadata))
+                return Constants.MetadataFileExtension;
+
             return "File Extension not found from type, either it's unsupported or was edited";
         }
         public static void ImportAssetDialog()

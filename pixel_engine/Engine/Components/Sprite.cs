@@ -63,12 +63,6 @@ namespace pixel_renderer
         private Color[,] _colors; 
         public override void Awake()
         {
-            Input.RegisterAction(delegate {
-                dirty = true; 
-            }, Key.OemSemicolon);
-            Input.RegisterAction(delegate {
-                Color = JRandom.Color();
-            }, Key.R);
 
         }
         public override void FixedUpdate(float delta)

@@ -45,28 +45,30 @@ namespace pixel_renderer.Assets
                 }
             return false;
         }
-        public static bool Fetch<T>(out List<T> output)
+        public static bool Fetch<T>(out List<T> output) where T : Asset
         {
-            IEnumerable<T> objs = (IEnumerable<T>)(
-                from obj
-                in Current.Values
-                where obj.GetType() == typeof(T) 
-                select obj);
 
-            output = objs.ToList();
+            output = new List<T>();
+            foreach (var obj in Current.Values)
+                if (obj.GetType() == typeof(T))
+                    output.Add((T)obj);
 
             if(output.Count > 0) return true;
-
             return false; 
         }
         public static bool Fetch<T>(string name, out T result) where T : Asset
         {
-            IEnumerable<T> objs = (IEnumerable<T>)(from obj in Current.Values where obj.GetType() == typeof(T) select obj);
-            result = objs.First();
-            
-            if (result is not true) 
-                return true;
-            return false;
+            Fetch<T>(out List<T> list);
+            bool r = false;
+            result = null; 
+            foreach (var item in list)
+                if (item.Name == name)
+                {
+                    result = item;
+                    r = true;
+                    break; 
+                }
+            return r; 
         }
         
         /// <summary>
@@ -85,7 +87,7 @@ namespace pixel_renderer.Assets
         {
             return (Metadata?)(from asset
                                in Current 
-                               where asset.Value.filePath.Equals(path) 
+                               where asset.Value.fullPath.Equals(path) 
                                select asset.Value); 
         }
         public static Metadata? FetchMeta(object name) 
@@ -105,9 +107,23 @@ namespace pixel_renderer.Assets
             foreach (var pair in Current)
             {
                 (Asset, Metadata) tuple = (pair.Value, pair.Key);
+                WriteMetadata(pair);
                 AssetIO.WriteAsset(tuple);
             }
         }
+
+        private static void WriteMetadata(KeyValuePair<Metadata, Asset> pair)
+        {
+            Metadata meta = pair.Key;
+
+            meta.fullPath = meta.fullPath.Replace(meta.extension, "");
+
+            if (meta.fullPath.Contains(Constants.MetadataFileExtension))
+                meta.fullPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
+
+            meta.fullPath = meta.fullPath + Constants.MetadataFileExtension;
+        }
+
         /// <summary>
         /// Clone the current Asset Library into a List.
         /// </summary>

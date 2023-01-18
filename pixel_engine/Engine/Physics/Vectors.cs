@@ -1,5 +1,6 @@
 ﻿namespace pixel_renderer
 {
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using System;
     using System.Runtime.CompilerServices;
@@ -68,9 +69,13 @@
         };
 
     }
+    [JsonObject(MemberSerialization.OptIn)]
     public struct Vec2
     {
+        [JsonProperty]
         public float x;
+
+        [JsonProperty]
         public float y;
         public Vec2 Normal_RHS => new Vec2(-y, x).Normalize();
         public Vec2 Normal_LHS => new Vec2(y, -x).Normalize();

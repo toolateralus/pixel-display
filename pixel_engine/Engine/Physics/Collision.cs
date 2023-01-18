@@ -73,6 +73,7 @@ namespace pixel_renderer
 
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
+            lock(collisionCells)
             for (int i = 0; i < collisionCells.Count; i++)
             {
                 if (i >= collisionCells.Count) return;
@@ -153,6 +154,7 @@ namespace pixel_renderer
         }
         public static void FinalPhase()
         {
+            lock(CollisionQueue)
             for (int i = 0; i < CollisionQueue.Count; ++i)
             {
                 Node A = CollisionQueue.Keys.ElementAt(i);

@@ -1,6 +1,6 @@
 ﻿namespace pixel_renderer.FileIO
 {
-    public class FileBase
+    public abstract class FileBase
     {
         public string extension = "";
         public string fullPath = "C:\\\\Users\\Josh\\Appdata\\Roaming\\Pixel\\Assets\\Metadata\\Error";

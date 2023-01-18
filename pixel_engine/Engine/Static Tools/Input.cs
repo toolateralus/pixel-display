@@ -14,18 +14,13 @@ namespace pixel_renderer
        
         internal static void Refresh(object? sender, EventArgs e)
         {
+            lock(InputActions)
             foreach (var action in InputActions)
             {
                 var type = action.EventType;
-                var key = action.Key;
-                bool input_value;
-                input_value = GetInputValueByType(type, key);
+                bool input_value = GetInputValueByType(type, ref action.Key);
                 if (input_value)
-                    if (action.ExecuteAsynchronously)
-                    {
-                        Task.Run(() => action.InvokeAsync());
-                        return;
-                    }
+                    if (action.ExecuteAsynchronously) Task.Run(() => action.InvokeAsync());
                     else action.Invoke();
             }
         }
@@ -41,7 +36,7 @@ namespace pixel_renderer
             };
             return input_value;
         }
-        public static bool GetInputValueByType(InputEventType type, Key key)
+        public static bool GetInputValueByType(InputEventType type, ref Key key)
         {
             
             var input_value = type switch

@@ -33,24 +33,10 @@ namespace pixel_renderer.FileIO
         public static void WriteAsset((Asset, Metadata) pair)
         {
             FindOrCreateAssetsDirectory();
-            
             var meta = pair.Item2;
             var data = pair.Item1;
-            
-            if (!File.Exists(meta.fullPath)) 
-                throw new FileNotFoundException(meta.fullPath);
-
-            if (!IO.Skipping)
-            {
-                MessageBoxResult overwriteWarningResult = IO.FileOverrideWarning(meta.Name);
-                MessageBoxResult doForAllResult = IO.DoForAllQuestion();
-
-                if (doForAllResult == MessageBoxResult.Yes)
-                    IO.Skipping = true;
-                if (overwriteWarningResult != MessageBoxResult.Yes)
-                    return;
-            }
             IO.WriteJson(data, meta);
+            Runtime.Log($"Data written to {meta.fullPath} for {data.Name}");
         }
         public static Asset? ReadAsset(Metadata meta)
         {

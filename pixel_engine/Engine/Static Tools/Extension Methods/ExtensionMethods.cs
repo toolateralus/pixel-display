@@ -72,7 +72,9 @@ namespace pixel_renderer
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }
         /// <summary>
-        /// Since the assets system handles the file extension, this format is only relevant to the naming convention used for files.
+        /// Since the assets system handles the file 
+        /// 
+        /// , this format is only relevant to the naming convention used for files.
         /// </summary>
         /// <param name="input"></param>
         /// <returns>A formatted version of the string that will not cause file-saving errors</returns>

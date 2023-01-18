@@ -2,6 +2,7 @@
 using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -70,6 +71,15 @@ namespace pixel_renderer
             var output = filePath.Replace(Constants.WorkingRoot, "");
             return output; 
         }
+
+        public static StageAsset? GetStageByName(string stageName)
+        {
+            bool gotAsset = AssetLibrary.Fetch(stageName, out StageAsset stage);
+            
+            if (gotAsset) return stage; 
+            return null; 
+        }
+
         /// <summary>
         /// use this for new projects and overwrite the default stage data, this prevents lockups
         /// </summary>
