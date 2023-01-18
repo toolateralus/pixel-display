@@ -39,7 +39,17 @@ namespace pixel_editor
     public partial class Editor : Window
     {
         #region Window Scaling
-        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(Editor), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
+        public static readonly DependencyProperty ScaleValueProperty =
+            DependencyProperty.Register(
+                "ScaleValue",
+                typeof(double),
+                typeof(Editor),
+                new UIPropertyMetadata(
+                    1.0,
+                    new PropertyChangedCallback(OnScaleValueChanged),
+                    new CoerceValueCallback(OnCoerceScaleValue)
+                    )
+                );
         private static object OnCoerceScaleValue(DependencyObject o, object value)
         {
             Editor mainWindow = o as Editor;
@@ -78,6 +88,7 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
+
         private int renderStateIndex = 0;
         private static bool ShouldUpdate =>
             Runtime.Instance.IsRunning && 
@@ -169,6 +180,13 @@ namespace pixel_editor
             StartEditorRenderClock();
             timer.Tick += Update;    
             Runtime.InspectorEventRaised += QueueEvent;
+            Input.RegisterAction(delegate
+            {
+                if (!editorMessages.IsKeyboardFocusWithin) return;
+                if(!Input.GetInputValueByType_Name(InputEventType.KeyDown, "LeftShift")) return;
+                OnCommandSent(new(), new());
+                editorMessages.Clear();
+            }, Key.Return);
         }
 
         private void StartEditorRenderClock()

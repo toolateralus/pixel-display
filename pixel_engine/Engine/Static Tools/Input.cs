@@ -14,14 +14,18 @@ namespace pixel_renderer
        
         internal static void Refresh(object? sender, EventArgs e)
         {
-            lock(InputActions)
-            foreach (var action in InputActions)
+            lock (InputActions)
             {
-                var type = action.EventType;
-                bool input_value = GetInputValueByType(type, ref action.Key);
-                if (input_value)
-                    if (action.ExecuteAsynchronously) Task.Run(() => action.InvokeAsync());
-                    else action.Invoke();
+                InputAction[] actions = new InputAction[InputActions.Count];
+                InputActions.CopyTo(0, actions, 0, InputActions.Count); 
+                foreach (var action in actions)
+                {
+                    var type = action.EventType;
+                    bool input_value = GetInputValueByType(type, ref action.Key);
+                    if (input_value)
+                        if (action.ExecuteAsynchronously) Task.Run(() => action.InvokeAsync());
+                        else action.Invoke();
+                }
             }
         }
         public static bool GetInputValueByType_Name(InputEventType type, string key)
