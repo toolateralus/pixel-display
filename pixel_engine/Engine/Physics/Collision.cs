@@ -15,8 +15,8 @@ namespace pixel_renderer
     public enum TriggerInteraction { Colliders, Triggers, None, All };
     public static partial class Collision
     {
-        private static readonly Dictionary<Node, Node[]> CollisionQueue = new();
-        private static readonly ConcurrentBag<ConcurrentBag<Node>> collisionMap = new();
+        private static readonly ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
+        private static readonly List<List<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true;
 
@@ -34,12 +34,14 @@ namespace pixel_renderer
             if (node.position.x < 0)
                  node.position.x = 0;
         }
+
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             var colA = nodeA.TryGetComponent(out Collider col_A);
             var colB = nodeB.TryGetComponent(out Collider col_B);
             return colA && colB && GetBoxCollision(nodeA, nodeB, col_A, col_B);
         }
+
         private static bool GetBoxCollision(Node nodeA, Node nodeB, Collider col_A, Collider col_B)
         {
             if (nodeA.position.x < nodeB.position.x + col_B.size.x &&
@@ -49,30 +51,27 @@ namespace pixel_renderer
                 return true;
             return false;
         }
-        public static void BroadPhase(Stage stage, ConcurrentBag<ConcurrentBag<Node>> collisionCells)
+
+        public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
 
             if (stage.Nodes is null ||
                 stage.Nodes.Count == 0) return;
 
-            List<Node> nodes;
+            IReadOnlyCollection<Node> nodes;
             
             lock (stage.Nodes)
-                nodes = new List<Node>(stage.Nodes);
+                nodes = stage.Nodes;
 
-            if (nodes is null) return;
+            if (nodes is null)
+                return;
+
             foreach (var stage_node in nodes)
-            {
-                List<Node> nearbyNodes = hash.GetNearby(stage_node);
-                ConcurrentBag<Node> colliders = new();
-
-                foreach(var node in nodes)
-                    colliders.Add(node);
-                collisionCells.Add(colliders);
-            }
+                collisionCells.Add(hash.GetNearby(stage_node));
         }
-        public static void NarrowPhase(ConcurrentBag<ConcurrentBag<Node>> collisionCells)
+
+        public static void NarrowPhase(List<List<Node>> collisionCells)
         {
             for (int i = 0; i < collisionCells.Count; i++)
             {
@@ -147,7 +146,7 @@ namespace pixel_renderer
                             var nodesArray = colliders.ToArray();
                             if (CollisionQueue.ContainsKey(A))
                                 CollisionQueue[A] = nodesArray;
-                            else CollisionQueue.Add(A, nodesArray);
+                            else _ = CollisionQueue.GetOrAdd(A, nodesArray);
                         }
                     }
                 }
