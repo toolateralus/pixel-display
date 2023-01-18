@@ -83,11 +83,11 @@ namespace pixel_renderer.Assets
                                where _asset.Value.Equals(asset)
                                select _asset.Value);
         }
-        public static Metadata? FetchMeta(object name) 
+        public static Metadata? FetchMeta(string name) 
         {
             return (Metadata?)(from asset
                                in Current
-                               where asset.Value.Name.Equals((string)name)
+                               where asset.Value.Name.Equals(name)
                                select asset.Value);
         }
 
@@ -108,13 +108,15 @@ namespace pixel_renderer.Assets
         private static void WriteMetadata(KeyValuePair<Metadata, Asset> pair)
         {
             Metadata meta = pair.Key;
+            if (meta.fullPath.Contains(meta.extension)
+                && meta.extension != Constants.MetadataFileExtension)
+            {
+                meta.fullPath = meta.fullPath.Replace(meta.extension, "");
+                if (meta.fullPath.Contains(Constants.MetadataFileExtension))
+                    meta.fullPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
+            }
 
-            meta.fullPath = meta.fullPath.Replace(meta.extension, "");
-
-            if (meta.fullPath.Contains(Constants.MetadataFileExtension))
-                meta.fullPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
-
-            meta.fullPath = meta.fullPath + Constants.MetadataFileExtension;
+            meta.fullPath += Constants.MetadataFileExtension;
         }
 
         /// <summary>
