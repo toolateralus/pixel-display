@@ -23,10 +23,9 @@ namespace pixel_renderer.Assets
                         return;
                 }
 
-
             AssetIO.FindOrCreateAssetsDirectory();
             ImportTask(); 
-
+            
             if (!Runtime.Instance.IsRunning)
                 if (showMessage)
                 {
