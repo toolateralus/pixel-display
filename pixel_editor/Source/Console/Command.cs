@@ -71,7 +71,9 @@ namespace pixel_editor
                                             $"Do you want to load this project?";
 
                     Task<PromptResult> result = PromptAsync(question, 60f);
+                    
                     await result;
+                    
                     switch (result.Result)
                     {
                         case PromptResult.Yes:
