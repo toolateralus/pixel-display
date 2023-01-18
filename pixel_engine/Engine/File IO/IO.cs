@@ -51,6 +51,7 @@ namespace pixel_renderer
         /// <returns>null if the writer is closed, and the writer if it's still open</returns>
         public static TextWriter? WriteJson<T>(T data, Metadata meta, bool closeStreamWhenFinished = true)
         {
+            
             using TextWriter writer = new StreamWriter(meta.fullPath);
             var jsonSerializer = JsonSerializer.Create(Settings);
             jsonSerializer.Serialize(writer, data);
