@@ -14,7 +14,7 @@
         private protected byte[] frame = Array.Empty<byte>();
         private protected int stride = 0;
 
-        public Vec2Int Resolution = (Vec2Int)Constants.DefaultResolution;
+        public Vec2 Resolution = Constants.DefaultResolution;
 
         public bool baseImageDirty = true;
         
@@ -42,25 +42,26 @@
 
             Vec2 backgroundSize = new(baseImage.GetLength(0), baseImage.GetLength(1));
 
-            for (Vec2Int framePos = new(0,0); framePos.y < Resolution.y; framePos.Increment2D(Resolution.x))
+            for (Vec2 framePos = new(0,0); framePos.y < Resolution.y; framePos.Increment2D(Resolution.x))
             {
-                Vec2 camViewport = cam.ScreenToCamViewport(framePos / ((Vec2)Resolution).GetDivideSafe());
+                Vec2 camViewport = cam.ScreenToCamViewport(framePos / Resolution);
                 if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
                 Vec2 global = cam.ViewportToGlobal(camViewport);
                 Vec2 bgViewportPos = global / backgroundSize.GetDivideSafe();
-                Vec2Int bgPos = (Vec2Int)ViewportToPosWithDrawingType(cam, backgroundSize, bgViewportPos);
+                Vec2 bgPos = ViewportToPosWithDrawingType(cam, backgroundSize, bgViewportPos);
 
-                WriteColorToFrame(baseImage[bgPos.x, bgPos.y], framePos);
+                WriteColorToFrame(baseImage[(int)bgPos.x, (int)bgPos.y], framePos);
             }
         }
         public void RenderSprites(Camera camera, StageRenderInfo renderInfo)
         {
+            if (Resolution.y == 0 || Resolution.x == 0) return;
             Node camNode = new("CamNode", camera.parent.position, Vec2.one);
             Camera cam = camNode.AddComponent(camera.Clone());
             
             if (cam.zBuffer.GetLength(0) != Resolution.x || cam.zBuffer.GetLength(1) != Resolution.y)
-                cam.zBuffer = new float[Resolution.x, Resolution.y];
+                cam.zBuffer = new float[(int)Resolution.x, (int)Resolution.y];
 
             Array.Clear(cam.zBuffer);
 
@@ -75,38 +76,36 @@
                 sprite.ColorData = renderInfo.spriteColorData[i];
                 sprite.size = renderInfo.spriteSizeVectors[i];
                 sprite.camDistance = renderInfo.spriteCamDistances[i];
-                DrawTransparentSprite(cam, sprite);
+
+                Vec2 firstCorner = cam.GlobalToScreenViewport(sprite.parent.position) * Resolution;
+                //Bounding box on screen which fully captures sprite
+                BoundingBox2D drawArea = new(firstCorner, firstCorner);
+                List<Vec2> corners = new()
+                {
+                    cam.GlobalToScreenViewport(sprite.parent.position + new Vec2(sprite.size.x, 0)) * Resolution,
+                    cam.GlobalToScreenViewport(sprite.parent.position + new Vec2(0, sprite.size.y)) * Resolution,
+                    cam.GlobalToScreenViewport(sprite.parent.position + sprite.size) * Resolution
+                };
+
+                foreach (Vec2 corner in corners) drawArea.ExpandTo(corner);
+
+                if (!(drawArea.min).IsWithinMaxExclusive(Vec2.zero, Resolution) &&
+                    !(drawArea.max).IsWithinMaxExclusive(Vec2.zero, Resolution)) return;
+
+                DrawTransparentSprite(cam, sprite, drawArea);
             }
         }
 
-        private void DrawTransparentSprite(Camera cam, Sprite sprite)
+        private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea)
         {
-            //Bounding box on screen which fully captures sprite
-            Vec2Int BB_Min = (Vec2Int)(cam.GlobalToScreenViewport(sprite.parent.position) * Resolution);
-            Vec2Int BB_Max = (Vec2Int)(cam.GlobalToScreenViewport(sprite.parent.position) * Resolution);
-            List<Vec2Int> corners = new()
+            for (Vec2 framePos = drawArea.min;
+                framePos.y < drawArea.max.y;
+                framePos.Increment2D(drawArea.max.x, drawArea.min.x))
             {
-                (Vec2Int)(cam.GlobalToScreenViewport(sprite.parent.position + new Vec2(sprite.size.x, 0)) * Resolution),
-                (Vec2Int)(cam.GlobalToScreenViewport(sprite.parent.position + new Vec2(0, sprite.size.y)) * Resolution),
-                (Vec2Int)(cam.GlobalToScreenViewport(sprite.parent.position + sprite.size) * Resolution)
-            };
-            foreach (Vec2Int corner in corners)
-            {
-                BB_Min.x = Math.Min(corner.x, BB_Min.x);
-                BB_Min.y = Math.Min(corner.y, BB_Min.y);
-                BB_Max.x = Math.Max(corner.x + 1, BB_Max.x);
-                BB_Max.y = Math.Max(corner.y + 1, BB_Max.y);
-            }
+                if (!framePos.IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
+                if (sprite.camDistance <= cam.zBuffer[(int)framePos.x, (int)framePos.y]) continue;
 
-            if (!((Vec2)BB_Min).IsWithinMaxExclusive(Vec2.zero, Resolution) &&
-                !((Vec2)BB_Max).IsWithinMaxExclusive(Vec2.zero, Resolution)) return;
-
-            for (Vec2Int framePos = BB_Min; framePos.y < BB_Max.y; framePos.Increment2D(BB_Max.x, BB_Min.x))
-            {
-                if (!((Vec2)framePos).IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
-                if (sprite.camDistance <= cam.zBuffer[framePos.x, framePos.y]) continue;
-
-                Vec2 camViewport = cam.ScreenToCamViewport(framePos / ((Vec2)Resolution).GetDivideSafe());
+                Vec2 camViewport = cam.ScreenToCamViewport(framePos / Resolution);
                 if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
                 Vec2 spriteViewport = cam.ViewportToSpriteViewport(sprite, camViewport);
@@ -116,23 +115,23 @@
                 if (sprite.ColorData[colorPos.x, colorPos.y].A == 0) continue;
 
                 if (sprite.ColorData[colorPos.x, colorPos.y].A == 255)
-                    cam.zBuffer[framePos.x, framePos.y] = sprite.camDistance;
+                    cam.zBuffer[(int)framePos.x, (int)framePos.y] = sprite.camDistance;
 
                 WriteColorToFrame(sprite.ColorData[colorPos.x, colorPos.y], framePos);
             }
         }
 
-        private void WriteColorToFrame(Color color, Vec2Int framePos)
+        private void WriteColorToFrame(Color color, Vec2 framePos)
         {
-            int index = framePos.y * stride + (framePos.x * 3);
+            int index = (int)framePos.y * stride + ((int)framePos.x * 3);
 
-            int colorB = (int)((float)color.B / 255 * color.A);
-            int colorG = (int)((float)color.G / 255 * color.A);
-            int colorR = (int)((float)color.R / 255 * color.A);
+            float colorB = (float)color.B / 255 * color.A;
+            float colorG = (float)color.G / 255 * color.A;
+            float colorR = (float)color.R / 255 * color.A;
 
-            int frameB = (int)((float)frame[index + 0] / 255 * (255 - color.A));
-            int frameG = (int)((float)frame[index + 1] / 255 * (255 - color.A));
-            int frameR = (int)((float)frame[index + 2] / 255 * (255 - color.A));
+            float frameB = (float)frame[index + 0] / 255 * (255 - color.A);
+            float frameG = (float)frame[index + 1] / 255 * (255 - color.A);
+            float frameR = (float)frame[index + 2] / 255 * (255 - color.A);
 
             frame[index + 0] = (byte)(colorB + frameB);
             frame[index + 1] = (byte)(colorG + frameG);

@@ -45,6 +45,15 @@ namespace pixel_renderer
 
             return v / v.Length();
         }
+        public static void Increment2D(this ref Vec2 v, float xMax, float xMin = 0)
+        {
+            v.x++;
+            if (v.x >= xMax)
+            {
+                v.y++;
+                v.x = xMin;
+            }
+        }
         #endregion
         #region Strings
         /// <summary>
