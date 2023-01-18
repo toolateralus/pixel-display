@@ -75,7 +75,6 @@ namespace pixel_renderer
             MetadataFileExtension,
             AssetsFileExtension,
             ProjectFileExtension, 
-            BitmapFileExtension, 
         };
 
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel";    // Root directory for resources
