@@ -68,8 +68,8 @@ namespace pixel_editor
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
-            var meta =  FileDialog.ImportFileDialog();
             e.Handled = true;
+            Metadata meta =  FileDialog.ImportFileDialog();
             
             if (meta.fullPath is "" or null) 
                 return; 
