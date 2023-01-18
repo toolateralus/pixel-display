@@ -99,9 +99,8 @@ namespace pixel_renderer.Assets
             IO.Skipping = false;
             foreach (var pair in Current)
             {
-                (Asset, Metadata) tuple = (pair.Value, pair.Key);
                 WriteMetadata(pair);
-                AssetIO.WriteAsset(tuple);
+                AssetIO.WriteAsset(new(pair.Value, pair.Key));
             }
         }
 
