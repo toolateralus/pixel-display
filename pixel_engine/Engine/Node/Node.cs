@@ -144,6 +144,7 @@ namespace pixel_renderer
                 return component;
             }
         }
+
         public void RemoveComponent(Component component)
         {
             lock (Components)
@@ -177,6 +178,17 @@ namespace pixel_renderer
                 return true;
             }
         }
+
+        public IEnumerable<T> GetComponents<T>() where T : Component
+        {
+            lock (Components)
+            {
+                return from Type type in Components.Keys
+                       where type.IsAssignableTo(typeof(T))
+                       from T component in Components[type]
+                       select component;
+            }
+        }
         public T GetComponent<T>(int? index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -197,16 +209,7 @@ namespace pixel_renderer
                 return true;
             }
         }
-        public IEnumerable<T> GetComponents<T>() where T : Component
-        {
-            lock (Components)
-            {
-                return from Type type in Components.Keys
-                       where type.IsAssignableTo(typeof(T))
-                       from T component in Components[type]
-                       select component;
-            }
-        }
+
         public NodeAsset ToAsset() => new(this);
     }
 }

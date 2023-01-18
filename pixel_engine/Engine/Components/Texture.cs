@@ -17,14 +17,16 @@ namespace pixel_renderer
         {
             this.scale = scale; 
             this.color = color;
+
             if (imgData is not null)
             {
                 this.imgData = imgData;
                 Image = new(imgData.fullPath);
                 Image = new(Image, scale.x, scale.y);
             }
-            if(color is not null)
-                Image = Sprite.SolidColorBitmap(this.scale, (Color)color);
+
+            if(color is not null)  Image = CBit.SolidColorBitmap(this.scale, (Color)color);
+            
             
         }
          public Bitmap? Image { get; set; }
@@ -44,21 +46,6 @@ namespace pixel_renderer
         internal bool HasMaskMetadata => imgData != null;
 
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
-        public Color[,] GetColorArray()
-        {
-            if (Image is null)
-                throw new Exception();
-
-            Bitmap? copy = null;
-            // clone the bitmap to prevent usage violations
-            lock (Image)
-                copy = (Bitmap)Image.Clone();
-
-            Color[,] output = new Color[copy.Width, copy.Height];
-            for (int i = 0; i < copy.Width; ++i)
-                for (int j = 0; j < copy.Height; ++j)
-                    output[i,j] = copy.GetPixel(i, j);
-            return output; 
-        }
+       
     }
 }

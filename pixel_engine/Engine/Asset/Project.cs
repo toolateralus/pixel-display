@@ -3,33 +3,38 @@ using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace pixel_renderer
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public class Project
     {
+        public List<Metadata> library;
         public int fileSize = 0;
-        public List<Asset> library;
-        public int stageIndex;
+        
         public List<StageAsset> stages;
-        public string Name 
+
+        [JsonProperty]  public string Name 
         { 
             get; 
             private set; 
         }
-        private int hash;
+        [JsonProperty]  private readonly int Hash;
 
         private int NameHash()
         {
             object[] o = new object[] { Name, stages };
             return o.GetHashCode();
         }
+
         public (string, int) Rename(string newName, int hash)
         {
-            if (this.hash.Equals(hash))
+            if (this.Hash.Equals(hash))
                 Name = newName;
             return (Name, hash);
         }
+
         public static void SaveProject()
         {
             Project? proj;
@@ -37,11 +42,10 @@ namespace pixel_renderer
             GetProjectPsuedoMetadata(out proj, out meta);
             ProjectIO.WriteProject(proj, meta);
         }
+
         private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
         {
             proj = Runtime.Instance.LoadedProject;
-
-            proj ??= new("FallbackProject");
 
             var projDir = Constants.ProjectsDir;
             var rootDir = Constants.WorkingRoot;
@@ -53,7 +57,12 @@ namespace pixel_renderer
         {
             Project project = new("Default");
             Metadata meta = FileDialog.ImportFileDialog();
-            Project loadedProject = IO.ReadJson<Project>(meta);
+
+            if (string.IsNullOrWhiteSpace(meta.fullPath) || 
+                !Path.IsPathFullyQualified(meta.fullPath))
+                return project;
+
+            Project? loadedProject = IO.ReadJson<Project>(meta);
             return loadedProject is null ? project : loadedProject;
         }
         internal static string GetPathFromRoot(string filePath)
@@ -69,10 +78,9 @@ namespace pixel_renderer
         public Project(string name)
         {
             Name = name;
-            library = AssetLibrary.Clone();
-            stageIndex = 0;
+            library = AssetLibrary.LibraryMetadata();
             fileSize = 0;
-            hash = NameHash();
+            Hash = NameHash();
         }
         public Project()
         {
@@ -80,13 +88,12 @@ namespace pixel_renderer
         }
 
         [JsonConstructor]
-        public Project(List<StageAsset> stages, List<Asset> library, int stageIndex, int fileSize, string name, int hash)
+        public Project(List<Metadata>? stage_meta, List<Metadata> library, int stageIndex, int fileSize, string name, int hash)
         {
-            this.stages = stages;
+            //this.stage_metadata = stage_meta;
             this.library = library;
-            this.stageIndex = stageIndex;
             this.fileSize = fileSize;
-            this.hash = hash;
+            this.Hash = hash;
             Name = name;
         }
     }

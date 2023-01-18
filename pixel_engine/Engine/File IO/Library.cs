@@ -9,7 +9,7 @@ namespace pixel_renderer.Assets
     public class AssetLibrary
     {
         static Dictionary<Metadata, Asset> Current = new();
-
+        internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
         public static void Register((Metadata, Asset) assetPair)
         {
             Asset asset = assetPair.Item2;
@@ -23,6 +23,8 @@ namespace pixel_renderer.Assets
             if (Current.ContainsKey(metadata)) return;
             Current.Add(metadata, asset);
         }
+
+
         public static void Unregister(Metadata metadata) => Current.Remove(metadata);
         
         /// <summary>

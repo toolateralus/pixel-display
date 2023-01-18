@@ -23,7 +23,7 @@
             get => fallback ??= new(256, 256);
         }
 
-        public abstract void Render(Image output);
+        public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
         private static Vec2 ViewportToPosWithDrawingType(Camera cam, Vec2 size, Vec2 ViewportPos)
