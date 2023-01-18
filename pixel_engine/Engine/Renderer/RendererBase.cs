@@ -51,7 +51,7 @@
                 Vec2 bgViewportPos = global / backgroundSize.GetDivideSafe();
                 Vec2 bgPos = ViewportToPosWithDrawingType(cam, backgroundSize, bgViewportPos);
 
-                WriteColorToFrame(baseImage[(int)bgPos.x, (int)bgPos.y], framePos);
+                WriteColorToFrame(ref baseImage[(int)bgPos.x, (int)bgPos.y], ref framePos);
             }
         }
         public void RenderSprites(Camera camera, StageRenderInfo renderInfo)
@@ -105,23 +105,23 @@
                 if (!framePos.IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
                 if (sprite.camDistance <= cam.zBuffer[(int)framePos.x, (int)framePos.y]) continue;
 
-                Vec2 camViewport = cam.ScreenToCamViewport(framePos / Resolution);
-                if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                Vec2 colorPos = cam.ScreenToCamViewport(framePos / Resolution);
+                if (!colorPos.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
-                Vec2 spriteViewport = cam.ViewportToSpriteViewport(sprite, camViewport);
-                if (!spriteViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                colorPos = cam.ViewportToSpriteViewport(sprite, colorPos);
+                if (!colorPos.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
-                Vec2Int colorPos = sprite.ViewportToColorPos(spriteViewport);
-                if (sprite.ColorData[colorPos.x, colorPos.y].A == 0) continue;
+                colorPos = sprite.ViewportToColorPos(colorPos);
+                if (sprite.ColorData[(int)colorPos.x, (int)colorPos.y].A == 0) continue;
 
-                if (sprite.ColorData[colorPos.x, colorPos.y].A == 255)
+                if (sprite.ColorData[(int)colorPos.x, (int)colorPos.y].A == 255)
                     cam.zBuffer[(int)framePos.x, (int)framePos.y] = sprite.camDistance;
 
-                WriteColorToFrame(sprite.ColorData[colorPos.x, colorPos.y], framePos);
+                WriteColorToFrame(ref sprite.ColorData[(int)colorPos.x, (int)colorPos.y], ref framePos);
             }
         }
 
-        private void WriteColorToFrame(Color color, Vec2 framePos)
+        private void WriteColorToFrame(ref Color color, ref Vec2 framePos)
         {
             int index = (int)framePos.y * stride + ((int)framePos.x * 3);
 

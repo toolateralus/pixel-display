@@ -19,13 +19,8 @@ namespace pixel_renderer
         public Vec2 ScreenViewportToLocal(Vec2 screenViewport) => CamViewportToLocal(ScreenToCamViewport(screenViewport));
         public Vec2 ScreenViewportToGlobal(Vec2 screenViewport) => LocalToGlobal(ScreenViewportToLocal(screenViewport));
 
-        public Vec2 ViewportToSpriteViewport(Sprite sprite, Vec2 viewportPos)
-        {
-            Vec2 global = ViewportToGlobal(viewportPos);
-            //Vec2 spriteViewport = (global - sprite.parent.position) / sprite.size.GetDivideSafe();
-            Vec2 spriteViewport = sprite.GlobalToViewport(global);
-            return spriteViewport;
-        }
+        public Vec2 ViewportToSpriteViewport(Sprite sprite, Vec2 viewportPos) =>
+            sprite.GlobalToViewport(ViewportToGlobal(viewportPos));
 
     }
     public enum DrawingType { Wrapped, Clamped, None }
