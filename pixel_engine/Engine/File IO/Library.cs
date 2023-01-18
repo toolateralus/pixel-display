@@ -83,13 +83,6 @@ namespace pixel_renderer.Assets
                                where _asset.Value.Equals(asset)
                                select _asset.Value);
         }
-        public static Metadata? FetchMeta(string path)
-        {
-            return (Metadata?)(from asset
-                               in Current 
-                               where asset.Value.fullPath.Equals(path) 
-                               select asset.Value); 
-        }
         public static Metadata? FetchMeta(object name) 
         {
             return (Metadata?)(from asset

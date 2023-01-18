@@ -2,13 +2,14 @@
 
 namespace pixel_renderer.FileIO
 {
-    public class Asset : FileBase
+    public class Asset 
     {
+        public string Name;
+        public string UUID; 
         public Asset(string Name, string? UUID = null)
         {
-            this.fullPath = Constants.AssetsDir + "\\" + Name;
             this.Name = Name;
-            _uuid = UUID ?? pixel_renderer.UUID.NewUUID(); 
+            this.UUID = UUID;
         }
         public Asset() 
         {
