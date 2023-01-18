@@ -114,9 +114,9 @@ namespace pixel_renderer.Assets
                 meta.fullPath = meta.fullPath.Replace(meta.extension, "");
                 if (meta.fullPath.Contains(Constants.MetadataFileExtension))
                     meta.fullPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
+                meta.fullPath += Constants.MetadataFileExtension;
             }
 
-            meta.fullPath += Constants.MetadataFileExtension;
         }
 
         /// <summary>
