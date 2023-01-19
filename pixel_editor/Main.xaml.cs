@@ -230,8 +230,9 @@ namespace pixel_editor
                 return;
 
             var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
-            if (msg != MessageBoxResult.Yes)
+             if (msg != MessageBoxResult.Yes)
                 return;
+
             Runtime.Instance.mainWnd = new();
             Runtime.Instance.mainWnd.Show();
         }

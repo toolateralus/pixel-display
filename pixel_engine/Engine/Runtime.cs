@@ -1,5 +1,8 @@
 ﻿using pixel_renderer.Assets;
+using pixel_renderer.FileIO;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -38,7 +41,6 @@ namespace pixel_renderer
             physicsClock = new Timer(interval.TotalSeconds);
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
 
-            Importer.Import(false);
 
             CompositionTarget.Rendering += GlobalUpdateRoot;
             CompositionTarget.Rendering += Input.Refresh;
@@ -76,9 +78,42 @@ namespace pixel_renderer
         }
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
+            Importer.Import(false);
             instance ??= new(mainWnd, project);
-            if (Instance.LoadedProject.stages.Count > 0)
-                Instance.SetStageAsset(Instance.LoadedProject.stages[0]);
+
+            AssetLibrary.Fetch(out StageAsset fetched_asset);
+            List<StageAsset> found_stages = new List<StageAsset>();
+            StageAsset? stageAsset = null;
+
+            if (fetched_asset == null)
+            {
+                foreach (var sMeta in project.stagesMeta)
+                {
+                    int stageCt = 0;
+                    AssetIO.ReadAndRegister(out Asset? registeredStage, sMeta);
+                    if (registeredStage != null)
+                    {
+                        stageCt++;
+                        Log($"{registeredStage.Name}  + {stageCt}");
+                        found_stages.Add((StageAsset)registeredStage);
+                    }
+                }
+                if (found_stages == null || found_stages.Count == 0)
+                {
+                    Log("No stage data was read from the project selected - a default stage has been instantiated.");
+                    Instance.SetStageAsset(StageAsset.Default);
+                    return;
+                }
+                stageAsset = found_stages[0];
+               
+            }
+            else found_stages[0] = fetched_asset;
+            
+            if (stageAsset is null)
+                throw new NullStageException($"{stageAsset.Name} not found.");
+
+            Instance.SetStageAsset(stageAsset);
+            Log($"Stage asset {stageAsset.Name} loaded.");
         }
         private void InitializePhysics()
         {
