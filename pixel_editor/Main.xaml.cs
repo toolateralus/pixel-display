@@ -320,7 +320,6 @@ namespace pixel_editor
             e.Handled = true;
             Project.SaveProject();
             AssetLibrary.Sync();
-      
         }
       
 
