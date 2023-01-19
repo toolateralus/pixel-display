@@ -99,14 +99,14 @@ namespace pixel_renderer.Assets
             IO.Skipping = false;
             foreach (var pair in Current)
             {
-                WriteMetadata(pair);
                 AssetIO.WriteAsset(new(pair.Value, pair.Key));
+                WriteMetadata(pair);
             }
         }
 
         private static void WriteMetadata(KeyValuePair<Metadata, Asset> pair)
         {
-            Metadata meta = pair.Key;
+            Metadata meta = new(new(pair.Key.Name), new(pair.Key.fullPath), new(pair.Key.extension));
             if (meta.fullPath.Contains(meta.extension)
                 && meta.extension != Constants.MetadataFileExtension)
             {
@@ -115,6 +115,10 @@ namespace pixel_renderer.Assets
                     meta.fullPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
                 meta.fullPath += Constants.MetadataFileExtension;
             }
+
+
+
+            IO.WriteJson(meta, meta);
 
         }
 
