@@ -359,6 +359,7 @@ namespace pixel_editor
                 $"\n Tag: {node.tag} " +
                 $"\n Component Count : {node.ComponentsList.Count}");
         }
+
         private static void ListNodes(params object[]? e)
         {
             string nodesList = "";
