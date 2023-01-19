@@ -104,7 +104,7 @@
                 />
         <TextBox
                 x:Name="nodeCtTxt"
-                Text="Node Count 10000"
+                Text="Generate Nodes: 2"
                 TextBlock.FontSize="5"
                 Grid.Column="0"
                 Grid.Row="6"

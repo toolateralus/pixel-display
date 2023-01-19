@@ -75,8 +75,9 @@ namespace pixel_renderer
         }
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
-            if (instance != null) return;
-            instance = new(mainWnd, project);
+            instance ??= new(mainWnd, project);
+            if (Instance.LoadedProject.stages.Count > 0)
+                Instance.SetStageAsset(Instance.LoadedProject.stages[0]);
         }
         private void InitializePhysics()
         {
@@ -84,7 +85,7 @@ namespace pixel_renderer
         }
         public StageAsset? GetStageAsset() => m_stageAsset;
         public void SetProject(Project project) => LoadedProject = project;
-        public void LoadCurrentStage()
+        public void ReloadStage()
         {
             if (m_stageAsset is null) throw new Exception("Stage asset NULL");
             m_stage = m_stageAsset.Copy();
@@ -122,7 +123,7 @@ namespace pixel_renderer
         public void SetStageAsset(StageAsset stageAsset)
         {
             m_stageAsset = stageAsset;
-            LoadCurrentStage();
+            ReloadStage();
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {

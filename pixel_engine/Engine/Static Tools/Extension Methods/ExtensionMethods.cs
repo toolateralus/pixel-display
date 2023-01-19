@@ -152,7 +152,6 @@ namespace pixel_renderer
                     return System.Windows.Media.PixelFormats.Bgr32;
             }
             throw new NotImplementedException($"No Media.PixelFormat implemented Imaging.PixelFormat: {sourceFormat.ToString()}");
-            return new System.Windows.Media.PixelFormat();
         }
         public static Rectangle Rect(this Bitmap bmp) => new Rectangle(0, 0, bmp.Width, bmp.Height);
         internal static T Clone<T>(this T component) where T : Component => component.GetShallowClone<T>();

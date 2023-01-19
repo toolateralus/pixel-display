@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using Color = System.Drawing.Color;
 using static pixel_renderer.CBit; 
 namespace pixel_renderer
 {
@@ -12,19 +10,18 @@ namespace pixel_renderer
         public override void Dispose() => Array.Clear(frame);
         public override void Draw(StageRenderInfo renderInfo)
         {
+            if (Runtime.Instance.GetStage() is not Stage stage) return;
             if (baseImageDirty)
             {
-                baseImage = ColorArrayFromBitmap(Runtime.Instance.GetStage().backgroundImage);
+                baseImage = ColorArrayFromBitmap(stage.backgroundImage);
                 baseImageDirty = false;
             }
-
             lock (frame)
             {
                 stride = 4 * ((int)Resolution.x * 24 + 31) / 32;
                 if (frame.Length != stride * Resolution.y) frame = new byte[stride * (int)Resolution.y];
-                
-                IEnumerable<UIComponent> uiComponents = Runtime.Instance.GetStage().GetAllComponents<UIComponent>();
 
+                IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>();
                 foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                     if (uiComponent.Enabled && uiComponent is Camera camera) 
                         RenderSprites(camera, renderInfo);
