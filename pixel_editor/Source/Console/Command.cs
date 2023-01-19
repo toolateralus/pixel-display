@@ -176,6 +176,22 @@ namespace pixel_editor
             description = "Retrieves the node of name specified",
 
         };
+        private static void ListNodes(params object[]? e)
+        {
+            string nodesList = "";
+            char nonBreakingspace = '\u2007';
+            foreach (Node node in Runtime.Instance.GetStage().Nodes)
+                nodesList += node.Name.PadLeft(16, nonBreakingspace) + " ";
+            Console.Print($"{nodesList}");
+        }
+        private static Command cmd_list_node = new()
+        {
+            phrase = "node.List;",
+            action = ListNodes,
+            args = null,
+            description = "Lists all nodes in currently loaded stage.",
+
+        };
         private static Command cmd_set_node_field = new()
         {
             phrase = "node.Set;",
@@ -244,26 +260,27 @@ namespace pixel_editor
         }
         private static void call_node_method(params object[]? e)
         {
-            if (e.Length > 2)
+            if (e is not null && e.Length > 1)
             {
                 string nName = (string)e[0];
                 string fName = (string)e[1];
-                object[] init_params = { e[2] };
 
-                Node? node = Runtime.Instance.GetStage().FindNode(nName);
-                Type type = node.GetType();
-
-                MethodInfo method = type.GetMethod(fName);
-
-                bool hasValidParams = init_params.Length != 0 && init_params[0] != "" && init_params[0] != " ";
-                bool methodHasParams = method.GetParameters().Length > 0;
-                if (hasValidParams && methodHasParams)
+                if (Runtime.Instance.GetStage().FindNode(nName) is not Node node)
                 {
-
-                    method.Invoke(node, init_params);
+                    Console.Error($"\"{nName}.{fName}()\" Node not found!", 2);
                     return;
                 }
+
+                Type type = node.GetType();
+                MethodInfo method = type.GetMethod(fName);
+                if (method is null)
+                {
+                    Console.Error($"\"{nName}.{fName}()\" Method not found!", 2);
+                    return;
+                }
+
                 method.Invoke(node, null);
+                Console.Print($"\"{nName}.{fName}()\" Call succesful.");
             }
         }
 
@@ -332,6 +349,7 @@ namespace pixel_editor
             cmd_get_resolution,
             cmd_clear_console,
             cmd_set_stage,
+            cmd_list_node,
         };
     }
 
