@@ -57,7 +57,7 @@ namespace pixel_editor
             return arg0;
         }
 
-        internal static void TryCallLine(string line, Command[] commands)
+        internal static void TryCallLine(string line, List<Command> commands)
         {
             _ = ParseArguments(line, out string[] args);
             _ = ParseLoopParams(line, out string loop_param);

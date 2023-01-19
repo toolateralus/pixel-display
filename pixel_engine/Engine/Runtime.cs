@@ -82,6 +82,7 @@ namespace pixel_renderer
 
             CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
             CompositionTarget.Rendering += Input.Refresh;
+            
         }
         private void InitializePhysics()
         {
