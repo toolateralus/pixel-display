@@ -106,20 +106,28 @@ namespace pixel_renderer.Assets
 
         private static void WriteMetadata(KeyValuePair<Metadata, Asset> pair)
         {
-            Metadata meta = new(new(pair.Key.Name), new(pair.Key.fullPath), new(pair.Key.extension));
-            if (meta.fullPath.Contains(meta.extension)
-                && meta.extension != Constants.MetadataFileExtension)
+            string fullPath = new(pair.Key.fullPath.ToCharArray());
+            string extension = new(pair.Key.extension.ToCharArray());
+            string name = new(pair.Key.Name);
+
+            string thisPath = fullPath;
+            string thisExt = Constants.MetadataFileExtension; 
+
+            Metadata meta = new(name, fullPath, extension);
+            Metadata this_meta = new(name, fullPath, extension);
+
+
+            if (thisPath.Contains(meta.extension)
+                && meta.extension != thisExt)
             {
-                meta.fullPath = meta.fullPath.Replace(meta.extension, "");
-                if (meta.fullPath.Contains(Constants.MetadataFileExtension))
-                    meta.fullPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
-                meta.fullPath += Constants.MetadataFileExtension;
+                thisPath = meta.fullPath.Replace(meta.extension, "");
+
+                if (thisPath.Contains(Constants.MetadataFileExtension))
+                    thisPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
+
+                thisPath += thisExt;
             }
-
-
-
-            IO.WriteJson(meta, meta);
-
+            IO.WriteJson(meta, this_meta);
         }
 
         /// <summary>
