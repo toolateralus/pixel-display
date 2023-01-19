@@ -137,17 +137,32 @@ namespace pixel_editor
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    await Task.Delay(500);
+                    await Task.Delay(800);
+                    
                     var c = JRandom.Color();
-                    consoleOutput.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
-                    await Task.Delay(500);
-                    c = JRandom.Color();
-                    if (i == 2) consoleOutput.Foreground = Brushes.Black; 
-                    consoleOutput.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+                    c = await VerifyColorBrightnessOrGetNew(c);
+
+                    SolidColorBrush brush_alt = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, c.R, c.G, c.B));
+                    consoleOutput.Foreground = brush_alt;
+                 
                 }
             };
         }
-        
+
+        private static async Task<System.Drawing.Color> VerifyColorBrightnessOrGetNew(System.Drawing.Color c)
+        {
+            int iterations = 0;
+            while (255 + c.B + c.R + c.G < 610)
+            {
+                c = JRandom.Color();
+                await Task.Delay(1);
+                iterations++;
+
+                if (iterations > 1000)
+                    break; 
+            }
+            return c;
+        }
 
         internal Action<object?> BlackText(object? o = null)
         {

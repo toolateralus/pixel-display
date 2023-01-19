@@ -15,25 +15,27 @@ namespace pixel_editor
             get
             {
                 if (_console == null)
-                    InitializeConsole();
+                {
+
+                    // init singleton and use it to fill cmd list; 
+                    _console = new();
+                    var type = _console.GetType();
+                    var methods = type.GetRuntimeMethods();
+                    foreach (var method in methods)
+                        if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
+                        {
+                            Command? item = (Command)method.Invoke(null, null);
+                            if (item != null && !Current.Active.Contains(item))
+                                Current.Active.Add(item);
+                        }
+                }
+
                 return _console; 
             }
             set => _console = value; 
         }
-        private static void InitializeConsole()
-        {
-            _console = new();
-            var type = _console.GetType();
-            var methods = type.GetRuntimeMethods();
-            foreach (var method in methods)
-                if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
-                {
-                    Command? item = (Command)method.Invoke(null, null);
-                    if (item != null && !Current.Active.Contains(item))
-                        Current.Active.Add(item);
-                }
-        }
 
+        private const string divider = "\n-- -- --\n";
         private static Console _console; 
 
         public static void Print(object? o, bool includeDateTime = false)
@@ -133,6 +135,7 @@ namespace pixel_editor
                             break;
                     }
                 },
+                description = "Attempts to find a stage by name, and if found, prompts the user to load it or not."
             };
         }
         public static Command cmd_load_project()
@@ -251,8 +254,8 @@ namespace pixel_editor
                 phrase = "node.Call;",
                 args = Array.Empty<object>(),
                 action = call_node_method,
-                description = "neccesary arguments : (string Name, string FieldName, object value) " +
-          "\n gets a node and attempts to write the provided value to specified field.",
+                description = "neccesary arguments : (string Name, string MethodName) {Method must be paramaterless.} " +
+                             "\n Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
             };
         }
         public static Command cmd_set_resolution()
@@ -288,10 +291,7 @@ namespace pixel_editor
             return new()
             {
                 phrase = "cclear;",
-                action = (e) =>
-                {
-                    Console.Clear();
-                },
+                action = (e) => Clear(),
                 description = "Clears the console's output",
             };
         }
@@ -301,7 +301,7 @@ namespace pixel_editor
             {
                 phrase = "++n;|newNode;",
                 action = (o) => Runtime.Instance.GetStage().create_generic_node(),
-                description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
+                description = "Spawns a generic node with a Rigidbody , Sprite, and Collider, and adds it to the current Stage."
             };
 
         }
@@ -314,10 +314,9 @@ namespace pixel_editor
                 {
                     string output = "";
                     foreach (var cmd in Console.Current.Active)
-                        output += cmd.phrase + "\n" + cmd.description + "\n\n";
-                    Console.Print(output);
+                        output += divider + cmd.phrase + "\n" + cmd.description + divider;
+                    Print(output);
                 },
-                description = "Spawns a generic node with a Rigidbody and Sprite and adds it to the current Stage."
             };
         }
         public static Command cmd_log()
@@ -350,7 +349,7 @@ namespace pixel_editor
                     FieldInfo? field = type.GetRuntimeField(fName);
                     field.SetValue(cam, value);
                 },
-                description = "\n sets provided field in first camera",
+                description = "\n {must not be a property or method} Sets Field in camera by name on node of provided name \n syntax : cam(str:<nodeName>, str:<fieldName>, object:value)",
             };
         }
 
