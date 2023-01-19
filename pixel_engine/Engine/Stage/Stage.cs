@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Security.Policy;
 
@@ -68,7 +69,7 @@ namespace pixel_renderer
         {
             _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
             this.backgroundMeta = backgroundMeta;
-            GetBackground(backgroundMeta);
+            backgroundImage = GetBackground(backgroundMeta);
             this.Name = Name;
             Nodes = nodes.ToNodeList();
             Awake();
@@ -77,7 +78,7 @@ namespace pixel_renderer
         public Metadata backgroundMeta;
         public Bitmap backgroundImage;
         
-        public event Action OnNodeQueryMade;
+        public event Action? OnNodeQueryMade;
         
         public List<Node> Nodes { get; private set; } = new();
         
@@ -204,8 +205,9 @@ namespace pixel_renderer
 
         private Bitmap GetBackground(Metadata meta)
         {
-            return backgroundImage = new(meta.fullPath);
-            throw new MissingMetadataException("Metadata not found."); 
+            if (File.Exists(backgroundMeta.fullPath))
+                return new(meta.fullPath);
+            throw new MissingMetadataException($"Metadata fullpath:\"{meta.fullPath}\". File not found.");
         }
 
         public IEnumerable<Sprite> GetSprites()

@@ -94,13 +94,17 @@ namespace pixel_editor
             for (int i = 0; i < count; i++) 
                 stage.AddNode(Rigidbody.Standard());
 
-            var msgResult = 
-                MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage and add it to the current project?", "Set Stage?", MessageBoxButton.YesNo);
-
             var asset = new StageAsset(stage);
-            var meta = new Metadata(asset.Name, pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\"  + asset.Name + pixel_renderer.Constants.AssetsFileExtension, pixel_renderer.Constants.AssetsFileExtension);
+            var meta = new Metadata(
+                asset.Name,
+                pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\" + asset.Name + pixel_renderer.Constants.AssetsFileExtension,
+                pixel_renderer.Constants.AssetsFileExtension);
             
             AssetLibrary.Register(meta, asset);
+
+            var msgResult = MessageBox.Show(
+                "Stage Creation complete : Would you like to set this as the current stage and add it to the current project?",
+                "Set Stage?", MessageBoxButton.YesNo);
 
             if (msgResult == MessageBoxResult.Yes)
             {
