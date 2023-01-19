@@ -20,20 +20,18 @@ namespace pixel_editor
             }
             set => _console = value; 
         }
-
         private static void InitializeConsole()
         {
             _console = new();
             var type = _console.GetType();
             var methods = type.GetRuntimeMethods();
-            foreach(var method in methods)
-                if(method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
+            foreach (var method in methods)
+                if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
                 {
                     Command? item = (Command)method.Invoke(null, null);
-
                     if (item != null && !Current.Active.Contains(item))
                         Current.Active.Add(item);
-}
+                }
         }
 
         private static Console _console; 
