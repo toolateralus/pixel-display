@@ -55,12 +55,14 @@ namespace pixel_renderer
             using TextWriter writer = new StreamWriter(meta.fullPath);
             var jsonSerializer = JsonSerializer.Create(Settings);
             jsonSerializer.Serialize(writer, data);
+            Runtime.Log($"Data written to {meta.fullPath}");
             if (closeStreamWhenFinished)
             {
                 writer.Close();
                 return null;
             }
             return writer;
+
         }
         public static MessageBoxResult FileOverrideWarning(string path)
         {

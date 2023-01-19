@@ -36,7 +36,6 @@ namespace pixel_renderer.FileIO
             var meta = pair.Item2;
             var data = pair.Item1;
             IO.WriteJson(data, meta);
-            Runtime.Log($"Data written to {meta.fullPath} for {data.Name}");
         }
         public static Asset? ReadAsset(Metadata meta)
         {
