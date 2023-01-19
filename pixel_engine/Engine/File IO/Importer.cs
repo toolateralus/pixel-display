@@ -54,8 +54,10 @@ namespace pixel_renderer.Assets
         private static void FinalImport(string fullPath)
         {
             GetFileNameAndExtensionFromPath(fullPath, out string name, out string ext);
+
             Metadata meta = new(name, fullPath, ext);
             Asset? asset = TryPullObject(meta) as Asset;
+            
             if (asset is not null)
                 AssetLibrary.Register((meta, asset));
         }

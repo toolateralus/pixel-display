@@ -22,7 +22,6 @@ namespace pixel_renderer
             {
                 this.imgData = imgData;
                 Image = new(imgData.fullPath);
-                Image = new(Image, scale.x, scale.y);
             }
 
             if(color is not null)  Image = CBit.SolidColorBitmap(this.scale, (Color)color);

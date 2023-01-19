@@ -108,7 +108,7 @@ namespace pixel_renderer.Scripts
          
             playerNode.AddComponent<Rigidbody>();
             var sprite = playerNode.AddComponent<Sprite>();
-            
+            sprite.size = Vec2.one * 64; 
             playerNode.AddComponent<Player>().takingInput = true;
 
             var col = playerNode.AddComponent<Collider>();
