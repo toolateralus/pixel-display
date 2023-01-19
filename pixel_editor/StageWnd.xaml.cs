@@ -57,38 +57,30 @@ namespace pixel_editor
         #endregion
         
         bool usingStarterAssets = false;
-        Bitmap? image; 
-        Metadata? background_meta = null;
+        Metadata background_meta = StageAsset.DefaultBackground;
         
         public StageWnd(Editor mainWnd)
         {
             InitializeComponent();
+            if (File.Exists(background_meta.fullPath))
+                CBit.Render(new Bitmap(background_meta.fullPath), imgPreview);
             mainWnd.Closing += MainWnd_Closing;  
         }
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            Metadata meta =  FileDialog.ImportFileDialog();
-            
-            if (meta.fullPath is "" or null) 
-                return; 
+            background_meta = FileDialog.ImportFileDialog();
 
-            Bitmap image = new(meta.fullPath);
-            background_meta = new(meta.fullPath, meta.fullPath, meta.extension);
+            if (background_meta.fullPath is "" or null)
+                background_meta = StageAsset.DefaultBackground;
 
-            if (image is not null)
-            {
-                this.image = image;
-                CBit.Render(image, imgPreview);
-            }
+            if (File.Exists(background_meta.fullPath))
+                CBit.Render(new Bitmap(background_meta.fullPath), imgPreview);
         }
-        private async void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
+        private void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-
-            if (image is null)
-                await OnNoBackgroundSelected();
 
             List<Node> nodes = new();
             int count = nodeCtTxt.Text.ToInt();
@@ -105,7 +97,7 @@ namespace pixel_editor
             var msgResult = 
                 MessageBox.Show("Stage Creation complete : Would you like to set this as the current stage and add it to the current project?", "Set Stage?", MessageBoxButton.YesNo);
 
-            var asset = new StageAsset(stage.Name, stage);
+            var asset = new StageAsset(stage);
             var meta = new Metadata(asset.Name, pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\"  + asset.Name + pixel_renderer.Constants.AssetsFileExtension, pixel_renderer.Constants.AssetsFileExtension);
             
             AssetLibrary.Register(meta, asset);
@@ -117,11 +109,6 @@ namespace pixel_editor
             }
             AssetLibrary.Sync();
             Close(); 
-        }
-        private static async Task OnNoBackgroundSelected()
-        {
-            var msg = MessageBox.Show("No background selected! please navigate to a Bitmap file to continue.");
-            await Task.Run(Importer.ImportAssetDialog);
         }
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;
     }

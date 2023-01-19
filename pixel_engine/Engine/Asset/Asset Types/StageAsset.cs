@@ -27,18 +27,20 @@ namespace pixel_renderer.Assets
         /// </summary>
         /// <param name="name"></param>
         /// <param name="runtimeValue"></param>
-        public StageAsset(string name, Stage runtimeValue) : base(name)
+        public StageAsset(Stage runtimeValue) : base(runtimeValue.Name, runtimeValue.UUID)
         {
-           nodes = runtimeValue.Nodes.ToNodeAssets();
+            m_background = runtimeValue.backgroundMeta;
+            nodes = runtimeValue.Nodes.ToNodeAssets();
         }
         public List<NodeAsset> nodes;
-        public Metadata m_background = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp"); 
+        public Metadata m_background; 
+        public static Metadata DefaultBackground = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp"); 
         public Stage Copy()
         {
             var output = new Stage(Name, m_background, nodes, UUID);
             return output;  
         }
         internal Bitmap? GetBackground() => new Bitmap(m_background.fullPath) ?? null;
-        public static StageAsset Default => new("Default Stage", StagingHost.Default());
+        public static StageAsset Default => new(StagingHost.Default());
     }
 }
