@@ -120,12 +120,15 @@ namespace pixel_renderer.Assets
             if (thisPath.Contains(meta.extension)
                 && meta.extension != thisExt)
             {
-                thisPath = meta.fullPath.Replace(meta.extension, "");
+                thisPath = thisPath.Replace(meta.extension, "");
 
-                if (thisPath.Contains(Constants.MetadataFileExtension))
-                    thisPath = meta.fullPath.Replace(Constants.MetadataFileExtension, "");
+                if (thisPath.Contains(thisExt))
+                    thisPath = thisPath.Replace(Constants.MetadataFileExtension, "");
 
                 thisPath += thisExt;
+                this_meta.fullPath = thisPath;
+                this_meta.pathFromProjectRoot = Project.GetPathFromRoot(thisPath);
+                this_meta.extension = thisExt; 
             }
             IO.WriteJson(meta, this_meta);
         }
