@@ -17,7 +17,7 @@ namespace pixel_renderer
         
         public List<StageAsset> stages;
         [JsonProperty]
-        public List<Metadata> stagesMeta; 
+        public List<Metadata> stagesMeta = new();
         [JsonProperty]  public string Name 
         { 
             get; 

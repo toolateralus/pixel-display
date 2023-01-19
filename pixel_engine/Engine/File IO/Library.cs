@@ -78,29 +78,40 @@ namespace pixel_renderer.Assets
         /// <returns>Metadata if found, else null</returns>
         public static Metadata? FetchMeta(Asset asset)
         {
-            return (Metadata?)(from _asset
-                               in Current
-                               where _asset.Value.Equals(asset)
-                               select _asset.Value);
+            foreach (var data in Current)
+                if (data.Value.Equals(asset))
+                    return data.Key;
+            Runtime.Log($"Metadata fetch failed. Asset : {asset.Name}");
+            return null;
         }
-        public static Metadata? FetchMeta(string name) 
-        {
-            return (Metadata?)(from asset
-                               in Current
-                               where asset.Value.Name.Equals(name)
-                               select asset.Value);
-        }
+       
 
         /// <summary>
         /// Save the currently loaded asset Library to the disk.
         /// </summary>
         public static void Sync()
         {
-            IO.Skipping = false;
+            RefreshProjectStageMetadata();
+            Project.SaveProject();
             foreach (var pair in Current)
             {
                 AssetIO.WriteAsset(new(pair.Value, pair.Key));
                 WriteMetadata(pair);
+            }
+        }
+
+        private static void RefreshProjectStageMetadata()
+        {
+            if (Runtime.Instance.LoadedProject == null) return;
+            var stages = Runtime.Instance.LoadedProject.stages;
+            if (stages is null) return; 
+            foreach (var stage in stages)
+            {
+                var stages_meta = Runtime.Instance.LoadedProject.stagesMeta;
+                var meta = FetchMeta(stage);
+
+                if (stages_meta.Contains(meta))
+                    stages_meta.Add(meta);
             }
         }
 
