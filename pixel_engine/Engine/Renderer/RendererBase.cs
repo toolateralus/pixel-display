@@ -84,7 +84,7 @@
                 foreach (Vec2 corner in corners) drawArea.ExpandTo(corner);
 
                 if (!(drawArea.min).IsWithinMaxExclusive(Vec2.zero, Resolution) &&
-                    !(drawArea.max).IsWithinMaxExclusive(Vec2.zero, Resolution)) return;
+                    !(drawArea.max).IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
 
                 DrawTransparentSprite(cam, sprite, drawArea);
             }

@@ -78,8 +78,8 @@ namespace pixel_renderer
         }
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
-            Importer.Import(false);
             instance ??= new(mainWnd, project);
+            Importer.Import(false);
 
             AssetLibrary.Fetch(out StageAsset fetched_asset);
             List<StageAsset> found_stages = new List<StageAsset>();
