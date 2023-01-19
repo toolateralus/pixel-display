@@ -112,24 +112,27 @@ namespace pixel_editor
                     if (project is null) return;
 
                     var stage = Project.GetStageByName(stageName);
-                    if (stage == null) Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
+                    
+                    if (stage == null)
+                        Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
+
                     var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
                     await prompt;
-
+                  
                     switch (prompt.Result)
                     {
                         case PromptResult.Yes:
-                            Console.Print($"Stage {stage.Name} set.");
+                            Print($"Stage {stage.Name} set.");
                             Runtime.Instance.SetStageAsset(stage);
                             break;
                         case PromptResult.No:
-                            Console.Print("Stage not set.");
+                            Print("Stage not set.");
                             break;
                         case PromptResult.Cancel:
-                            Console.Print("Set Stage cancelled.");
+                            Print("Set Stage cancelled.");
                             break;
                         case PromptResult.Timeout:
-                            Console.Print("Set Stage timed out.");
+                            Print("Set Stage timed out.");
                             break;
                         default:
                             break;
@@ -209,21 +212,14 @@ namespace pixel_editor
                     Editor.Current.Inspector.SelectNode(node);
                     if (node is not null)
                     {
-                        Console.Print(
-                            $"Node Found! " +
-                            $"\n Name : {node.Name} " +
-                            $"\n Position : x : {node.position.x} y : {node.position.y} " +
-                            $"\n UUID : {node.UUID} " +
-                            $"\n Tag: {node.tag} " +
-                            $"\n Component Count : {node.ComponentsList.Count}");
+                        PrintNodeInformation(node);
                         return;
                     }
-                    Console.Print($"getNode({name}) \n Node with name {name} not found.");
+                    Print($"getNode({name}) \n Node with name {name} not found.");
                 },
                 args = null,
                 description = "Retrieves the node of name specified",
             };
-
         }
         public static Command cmd_list_node()
         {
@@ -242,7 +238,7 @@ namespace pixel_editor
             {
                 phrase = "node.Set;",
                 args = Array.Empty<object>(),
-                action = set_node_field,
+                action = SetNodeField,
                 description = "neccesary arguments : (string Name, string FieldName, object value) " +
             "\n gets a node and attempts to write the provided value to specified field.",
             };
@@ -253,7 +249,7 @@ namespace pixel_editor
             {
                 phrase = "node.Call;",
                 args = Array.Empty<object>(),
-                action = call_node_method,
+                action = CallNodeMethod,
                 description = "neccesary arguments : (string Name, string MethodName) {Method must be paramaterless.} " +
                              "\n Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
             };
@@ -313,7 +309,7 @@ namespace pixel_editor
                 action = (o) =>
                 {
                     string output = "";
-                    foreach (var cmd in Console.Current.Active)
+                    foreach (var cmd in Current.Active)
                         output += divider + cmd.phrase + "\n" + cmd.description + divider;
                     Print(output);
                 },
@@ -353,6 +349,16 @@ namespace pixel_editor
             };
         }
 
+        private static void PrintNodeInformation(Node node)
+        {
+            Print(
+                $"Node Found! " +
+                $"\n Name : {node.Name} " +
+                $"\n Position : {node.position.AsString()} " +
+                $"\n UUID : {node.UUID} " +
+                $"\n Tag: {node.tag} " +
+                $"\n Component Count : {node.ComponentsList.Count}");
+        }
         private static void ListNodes(params object[]? e)
         {
             string nodesList = "";
@@ -361,7 +367,7 @@ namespace pixel_editor
                 nodesList += node.Name.PadLeft(16, nonBreakingspace) + " ";
             Console.Print($"{nodesList}");
         }
-        private static void set_node_field(params object[]? e)
+        private static void SetNodeField(params object[]? e)
         {
             if (e.Length >= 3)
             {
@@ -375,7 +381,7 @@ namespace pixel_editor
                 field?.SetValue(node, value);
             }
         }
-        private static void call_node_method(params object[]? e)
+        private static void CallNodeMethod(params object[]? e)
         {
             if (e is not null && e.Length > 1)
             {
