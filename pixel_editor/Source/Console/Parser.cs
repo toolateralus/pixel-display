@@ -57,7 +57,7 @@ namespace pixel_editor
             return arg0;
         }
 
-        internal static void TryCallLine(string line, Command[] commands)
+        internal static void TryCallLine(string line, List<Command> commands)
         {
             _ = ParseArguments(line, out string[] args);
             _ = ParseLoopParams(line, out string loop_param);
@@ -166,14 +166,7 @@ namespace pixel_editor
 
             return cmd_without_args;
 
-            static string remove_parentheses(string input)
-            {
-                if (input.Contains('('))
-                     input =  input.Replace("(", "");
-                if (input.Contains(')'))
-                     input = input.Replace(")", "");
-                return input; 
-            }
+          
             static string[] split_args_at_commas_with_trailing_whitespace(string args_str)
             {
                 return args_str.Split(", ");

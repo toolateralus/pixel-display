@@ -72,6 +72,7 @@ namespace pixel_renderer
         public Stage? GetStage()
         {
             return m_stage;
+
         }
         public static void Initialize(EngineInstance mainWnd, Project project)
         {

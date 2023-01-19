@@ -1,29 +1,27 @@
 ﻿using Newtonsoft.Json;
-using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Policy;
 
 namespace pixel_renderer
 {
     [JsonObject(MemberSerialization.OptIn)]
     public class Project
     {
-        public List<Metadata> library;
-        public int fileSize = 0;
-        
         public List<StageAsset> stages;
         [JsonProperty]
         public List<Metadata> stagesMeta = new();
-        [JsonProperty]  public string Name 
+
+        [JsonProperty]  
+        public string Name 
         { 
             get; 
             private set; 
         }
-        [JsonProperty]  private readonly int Hash;
+
+        [JsonProperty]  
+        private readonly int Hash;
 
         private int NameHash()
         {
@@ -89,8 +87,6 @@ namespace pixel_renderer
         public Project(string name)
         {
             Name = name;
-            library = AssetLibrary.LibraryMetadata();
-            fileSize = 0;
             stages = new List<StageAsset>();
             Hash = NameHash();
         }
@@ -112,8 +108,6 @@ namespace pixel_renderer
         public Project(List<Metadata>? stage_meta, List<Metadata> library, int stageIndex, int fileSize, string name, int hash)
         {
             //this.stage_metadata = stage_meta;
-            this.library = library;
-            this.fileSize = fileSize;
             this.Hash = hash;
             Name = name;
         }

@@ -64,7 +64,7 @@ namespace pixel_renderer
 
     public class Stage
     {
-        public Stage() { }
+        //public Stage() { }
         public Stage(string Name, Metadata backgroundMeta, List<NodeAsset> nodes, string? existingUUID = null)
         {
             _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
@@ -72,13 +72,14 @@ namespace pixel_renderer
             backgroundImage = GetBackground(backgroundMeta);
             this.Name = Name;
             Nodes = nodes.ToNodeList();
+            OnNodeQueryMade = RefreshStageDictionary;
             Awake();
         }
 
         public Metadata backgroundMeta;
         public Bitmap backgroundImage;
         
-        public event Action? OnNodeQueryMade;
+        public event Action OnNodeQueryMade;
         
         public List<Node> Nodes { get; private set; } = new();
         
@@ -116,7 +117,6 @@ namespace pixel_renderer
 
         public void Awake()
         {
-            OnNodeQueryMade += RefreshStageDictionary;
             for (int i = 0; i < Nodes.Count; i++)
             {
                 Node node = Nodes[i];
@@ -191,7 +191,13 @@ namespace pixel_renderer
 
         public void AddNode(Node node)
         {
-            Action<object[]> add_node = (o) => { Nodes.Add(o[0] as Node); };
+            void add_node(object[] o)
+            {
+                if (o[0] is not Node newNode) return;
+                if (Nodes.Contains(newNode)) return;
+                newNode.ParentStage = this;
+                Nodes.Add(newNode);
+            }
             object[] args = { node };
 
             if (FixedUpdateBusy)
