@@ -87,8 +87,6 @@ namespace pixel_renderer
         public Project(string name)
         {
             Name = name;
-            library = AssetLibrary.LibraryMetadata();
-            fileSize = 0;
             Hash = NameHash();
         }
         public Project()
@@ -99,8 +97,6 @@ namespace pixel_renderer
         public Project(List<Metadata>? stage_meta, List<Metadata> library, int stageIndex, int fileSize, string name, int hash)
         {
             //this.stage_metadata = stage_meta;
-            this.library = library;
-            this.fileSize = fileSize;
             this.Hash = hash;
             Name = name;
         }
