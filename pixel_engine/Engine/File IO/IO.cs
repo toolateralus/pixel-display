@@ -61,6 +61,8 @@ namespace pixel_renderer
                 return null;
             }
             return writer;
+            Runtime.Log($"Data written to {meta.fullPath} for {data.Name}");
+
         }
         public static MessageBoxResult FileOverrideWarning(string path)
         {
