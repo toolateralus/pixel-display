@@ -119,7 +119,7 @@ namespace pixel_renderer
             lock (Components)
             {
                 var type = component.GetType();
-                if (type is Component)
+                if (type == typeof(Component))
                     throw new Exception(); 
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
@@ -158,7 +158,7 @@ namespace pixel_renderer
                                          where comp is not null &&
                                          comp.UUID.Equals(component.UUID)
                                          select comp)
-                        toRemove = comp;
+                    toRemove = comp;
 
                     if (toRemove is not null)
                         compList.Remove(toRemove);

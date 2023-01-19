@@ -193,7 +193,7 @@ namespace pixel_editor
                 phrase = "reload;|/r;|++r;",
                 action = (o) =>
                 {
-                    Runtime.Instance.ResetCurrentStage();
+                    Runtime.Instance.ReloadStage();
                 },
                 args = null,
                 description = "Reloads the currently loaded stage",

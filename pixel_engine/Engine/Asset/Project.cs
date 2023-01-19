@@ -56,7 +56,7 @@ namespace pixel_renderer
         }
         public static Project LoadProject()
         {
-            Project project = new("Default");
+            Project project = Default;
             Metadata meta = FileDialog.ImportFileDialog();
 
             if (string.IsNullOrWhiteSpace(meta.fullPath) || 
@@ -87,8 +87,19 @@ namespace pixel_renderer
         public Project(string name)
         {
             Name = name;
+            stages = new List<StageAsset>();
             Hash = NameHash();
         }
+        public static Project Default
+        {
+            get
+            {
+                Project defaultProj = new("Default project");
+                defaultProj.stages.Add(StageAsset.Default);
+                return defaultProj;
+            }
+        }
+
         public Project()
         {
 

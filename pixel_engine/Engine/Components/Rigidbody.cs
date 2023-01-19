@@ -34,14 +34,14 @@ namespace pixel_renderer
         public static Node Standard()
         {
             Node node = Node.New; 
-                Rigidbody rb = node.AddComponent<Rigidbody>();
-                Collider col = node.AddComponent<Collider>();
-                rb.parent = node;
-                rb.sprite = new(16, 16);
-                node.AddComponent(rb.sprite);
-                col.size = rb.sprite.size;
-                col.IsTrigger = false;
-                return node;
+            Rigidbody rb = node.AddComponent<Rigidbody>();
+            Collider col = node.AddComponent<Collider>();
+            rb.parent = node;
+            rb.sprite = new(16, 16);
+            node.AddComponent(rb.sprite);
+            col.size = rb.sprite.size;
+            col.IsTrigger = false;
+            return node;
         }
 
         // Todo: prevent these methods from being overridden.
