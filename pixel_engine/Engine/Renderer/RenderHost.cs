@@ -46,7 +46,7 @@ namespace pixel_renderer
             m_renderer.Render(renderSurface);
         }
 
-        internal void MarkDirty()
+        public void MarkDirty()
         {
             m_renderer.MarkDirty();
         }

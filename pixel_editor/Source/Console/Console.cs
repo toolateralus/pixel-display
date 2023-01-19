@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Windows.Input;
+using pixel_renderer.Assets;
+using System.Diagnostics;
+using pixel_renderer.FileIO;
 
 namespace pixel_editor
 {
@@ -63,13 +66,14 @@ namespace pixel_editor
                 Editor.Current.BlackText().Invoke(o);
             };
         }
-        public static void Clear()
+        public static void Clear(bool randomColor = false)
         {
             EditorEvent editorEvent = new EditorEvent("");
             editorEvent.ClearConsole = true;
             Editor.QueueEvent(editorEvent);
-
-            Error("Console Cleared", 1);
+            
+            if(randomColor)
+                Error("Console Cleared", 1);
         }
         private static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
         {
@@ -93,54 +97,8 @@ namespace pixel_editor
             };
             return PromptResult.Timeout;
         }
-
-        public static Command cmd_set_stage()
-        {
-            return new()
-            {
-                phrase = "stage.Set;",
-                action = async (o) =>
-                {
-                    string stageName = (string)o[0];
-                    bool loadAsynchronously = false;
-
-                    if (o.Length > 1 && o[1] is bool)
-                        loadAsynchronously = (bool)o[1];
-
-                    Project project = Runtime.Instance.LoadedProject;
-
-                    if (project is null) return;
-
-                    var stage = Project.GetStageByName(stageName);
-                    
-                    if (stage == null)
-                        Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
-
-                    var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
-                    await prompt;
-                  
-                    switch (prompt.Result)
-                    {
-                        case PromptResult.Yes:
-                            Print($"Stage {stage.Name} set.");
-                            Runtime.Instance.SetStageAsset(stage);
-                            break;
-                        case PromptResult.No:
-                            Print("Stage not set.");
-                            break;
-                        case PromptResult.Cancel:
-                            Print("Set Stage cancelled.");
-                            break;
-                        case PromptResult.Timeout:
-                            Print("Set Stage timed out.");
-                            break;
-                        default:
-                            break;
-                    }
-                },
-                description = "Attempts to find a stage by name, and if found, prompts the user to load it or not."
-            };
-        }
+        
+        
         public static Command cmd_load_project()
         {
             return new()
@@ -199,6 +157,111 @@ namespace pixel_editor
                 description = "Reloads the currently loaded stage",
             };
         }
+        public static Command cmd_random_background()
+        {
+            return new()
+            {
+                phrase = "stage.Background.Randomize;",
+                action = RandomizeBackground,
+                description = "Sets the current stage's background to a random array of colors until reloaded.",
+            };
+        }
+        public static Command cmd_set_stage()
+        {
+            return new()
+            {
+                phrase = "stage.Set;",
+                action = async (o) =>
+                {
+                    string stageName = (string)o[0];
+                    bool loadAsynchronously = false;
+
+                    if (o.Length > 1 && o[1] is bool)
+                        loadAsynchronously = (bool)o[1];
+
+                    Project project = Runtime.Instance.LoadedProject;
+
+                    if (project is null) return;
+
+                    var stage = Project.GetStageByName(stageName);
+                    
+                    if (stage == null)
+                        Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
+
+                    var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
+                    await prompt;
+                  
+                    switch (prompt.Result)
+                    {
+                        case PromptResult.Yes:
+                            Print($"Stage {stage.Name} set.");
+                            Runtime.Instance.SetStageAsset(stage);
+                            break;
+                        case PromptResult.No:
+                            Print("Stage not set.");
+                            break;
+                        case PromptResult.Cancel:
+                            Print("Set Stage cancelled.");
+                            break;
+                        case PromptResult.Timeout:
+                            Print("Set Stage timed out.");
+                            break;
+                        default:
+                            break;
+                    }
+                },
+                description = "Attempts to find a stage by name, and if found, prompts the user to load it or not."
+            };
+        }
+        public static Command cmd_asset_exists()
+        {
+            return new()
+            {
+                description = "Tries to retrieve an asset by name and returns the reuslt and some information about the asset",
+                phrase = "fetch;",
+                action = AssetExists,
+            };
+        }
+        private static async void AssetExists(object[]? obj) {
+
+            var found = AssetLibrary.Fetch<Asset>(out List<Asset> assets);
+            if (found)
+            {
+                var prompt = PromptAsync($"found {assets.Count} assets. Do you want more information?");
+                await prompt; 
+                switch (prompt.Result)
+                {
+                    case PromptResult.Yes:
+                        PrintAssetsInfo(assets);
+                        return;
+                    case PromptResult.No:
+                        Print("Asset fetch cancelled.");
+                        return;
+                    case PromptResult.Ok:
+                        PrintAssetsInfo(assets);
+                        return;
+                    case PromptResult.Cancel:
+                        Print("Asset fetch cancelled.");
+                        return;
+                    case PromptResult.Timeout:
+                        Print("Asset fetch timed out.");
+                        return;
+                }
+              
+            }
+            void PrintAssetsInfo(List<Asset> assets)
+            {
+                string assetInfo = "";
+                for (int i = 0; i < assets.Count; i++)
+                {
+                    Asset? asset = assets[i];
+                    assetInfo += $"fetch #{i} :: Name, {asset.Name} UUID, {asset.UUID}\n";
+                }
+                Error(assetInfo, 1);
+            }
+
+
+        }
         public static Command cmd_get_node()
         {
             return new()
@@ -232,6 +295,7 @@ namespace pixel_editor
             };
 
         }
+        
         public static Command cmd_set_node_field()
         {
             return new()
@@ -254,6 +318,7 @@ namespace pixel_editor
                              "\n Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
             };
         }
+
         public static Command cmd_set_resolution()
         {
             return new()
@@ -282,15 +347,22 @@ namespace pixel_editor
                 description = "gets the resolution and prints it to the console"
             };
         }
+        
         public static Command cmd_clear_console()
         {
             return new()
             {
                 phrase = "cclear;",
-                action = (e) => Clear(),
+                action = (e) =>
+                {
+                    if (e is not null && e[0] is bool color)
+                        Clear(color);
+                    else Clear(); 
+                },
                 description = "Clears the console's output",
             };
         }
+
         public static Command cmd_spawn_generic()
         {
             return new()
@@ -349,6 +421,28 @@ namespace pixel_editor
             };
         }
 
+        private static void RandomizeBackground(params object[]? args)
+        {
+            var stage = Runtime.Instance.GetStage();
+
+            var background = stage.backgroundImage;
+
+            if (background == null)
+            {
+                Error("Error finding background.", 2);
+                return;
+            }
+            int y, x;
+
+            x = background.Width;
+            y = background.Height;
+
+            for (int i = 0; i < x - 1; ++i)
+                for (int j = 0; j < y - 1; ++j)
+                    background.SetPixel(i, j, JRandom.Color());
+
+            Runtime.Instance.renderHost.MarkDirty();
+        }
         private static void PrintNodeInformation(Node node)
         {
             Print(
