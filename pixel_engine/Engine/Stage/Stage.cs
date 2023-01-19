@@ -67,13 +67,14 @@ namespace pixel_renderer
         public Stage(string Name, Metadata backgroundMeta, List<NodeAsset> nodes, string? existingUUID = null)
         {
             _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
+            this.backgroundMeta = backgroundMeta;
             GetBackground(backgroundMeta);
             this.Name = Name;
             Nodes = nodes.ToNodeList();
             Awake();
         }
 
-        
+        public Metadata backgroundMeta;
         public Bitmap backgroundImage;
         
         public event Action OnNodeQueryMade;
