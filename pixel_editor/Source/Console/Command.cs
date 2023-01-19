@@ -19,10 +19,7 @@ namespace pixel_editor
         public object[]? args;
 
         internal static void Call(string line) => CommandParser.TryCallLine(line, Console.Current.Active);
-        public void Invoke()
-        {
-            action?.Invoke(args);
-        }
+        public void Invoke() => action?.Invoke(args);
         public bool Equals(string input)
         {
             string withoutArgs = CommandParser.ParseArguments(input, out _);
