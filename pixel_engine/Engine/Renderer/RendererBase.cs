@@ -9,7 +9,6 @@
 
     public abstract class  RendererBase 
     {
-        private protected Bitmap fallback;
         private protected Color[,] baseImage = new Color[1,1];
         private protected byte[] frame = Array.Empty<byte>();
         private protected int stride = 0;
@@ -17,11 +16,6 @@
         public Vec2 Resolution = Constants.DefaultResolution;
 
         public bool baseImageDirty = true;
-        
-        public Bitmap FallBack
-        {
-            get => fallback ??= new(256, 256);
-        }
 
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
@@ -136,6 +130,11 @@
             frame[index + 0] = (byte)(colorB + frameB);
             frame[index + 1] = (byte)(colorG + frameG);
             frame[index + 2] = (byte)(colorR + frameR);
+        }
+
+        internal void MarkDirty()
+        {
+            baseImageDirty = true;
         }
     }
     }

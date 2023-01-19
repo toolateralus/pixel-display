@@ -14,7 +14,7 @@
         {
             Project project = Project.LoadProject();
             InitializeComponent();
-            Runtime.Awake(this, project);
+            Runtime.Initialize(this, project);
         }
     }
 }

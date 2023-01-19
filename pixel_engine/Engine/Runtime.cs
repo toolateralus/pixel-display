@@ -1,5 +1,4 @@
-﻿using pixel_renderer;
-using pixel_renderer.Assets;
+﻿using pixel_renderer.Assets;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Documents;
@@ -11,17 +10,16 @@ namespace pixel_renderer
     public class Runtime
     {
         public EngineInstance mainWnd;
-        public RenderHost? renderHost = new();
-        public StagingHost? stagingHost = new();
+        public RenderHost renderHost = new();
+        public StagingHost stagingHost = new();
         
-        public Timer? physicsClock;
+        public Timer physicsClock;
         private StageAsset? m_stageAsset;
-        public Project? LoadedProject = null;
-        
+        public Project LoadedProject;
 
         private protected volatile Stage? m_stage;
         
-        public static event Action<EditorEvent> InspectorEventRaised;
+        public static event Action<EditorEvent>? InspectorEventRaised;
 
         public bool IsRunning { get; private set; }
         private protected bool PhysicsInitialized = false;
@@ -29,14 +27,30 @@ namespace pixel_renderer
         
         public static object? inspector = null;
 
-        private protected volatile static Runtime instance = new();
+        private Runtime(EngineInstance mainWnd, Project project)
+        {
+            instance = this;
+            this.mainWnd = mainWnd;
+            this.LoadedProject = project;
+            Initialized = true;
+
+            var interval = TimeSpan.FromSeconds(Constants.PhysicsRefreshInterval);
+            physicsClock = new Timer(interval.TotalSeconds);
+            physicsClock.Elapsed += GlobalFixedUpdateRoot;
+
+            Importer.Import(false);
+
+            CompositionTarget.Rendering += GlobalUpdateRoot;
+            CompositionTarget.Rendering += Input.Refresh;
+        }
+
+        private protected volatile static Runtime? instance;
         public static Runtime Instance
         {
             get
             {
-                if (instance is not null)
-                    return instance;
-                else instance = new();
+                if (instance is null)
+                    throw new Exception("Runtime not initialized.");
                 return instance;
             }
         }
@@ -55,47 +69,26 @@ namespace pixel_renderer
             IsRunning = false;
             return;
         }
-        private string current_stage_uuid = ""; 
-        public Stage GetStage()
+        public Stage? GetStage()
         {
-            if (m_stageAsset is null)
-            {
-                m_stageAsset = StageAsset.Default;
-                AssetLibrary.Sync();
-            }
-            if (m_stage is null || m_stage.UUID != current_stage_uuid)
-            {
-                m_stage = m_stageAsset.Copy();
-                current_stage_uuid = m_stage.UUID; 
-            }
             return m_stage;
         }
-        public static void Awake(EngineInstance mainWnd, Project? project = null)
+        public static void Initialize(EngineInstance mainWnd, Project project)
         {
-            if (project != null) 
-                Instance.LoadedProject = project;
-
-            Instance.mainWnd = mainWnd;
-            Instance.Initialized = true;
-           
-            Importer.Import(false);
-
-            CompositionTarget.Rendering += Instance.GlobalUpdateRoot;
-            CompositionTarget.Rendering += Input.Refresh;
+            if (instance != null) return;
+            instance = new(mainWnd, project);
         }
         private void InitializePhysics()
         {
-            var interval = TimeSpan.FromSeconds(Constants.PhysicsRefreshInterval);
-            physicsClock = new Timer(interval.TotalSeconds);
-            physicsClock.Elapsed += GlobalFixedUpdateRoot;
             PhysicsInitialized = true;
         }
         public StageAsset? GetStageAsset() => m_stageAsset;
         public void SetProject(Project project) => LoadedProject = project;
-        public void ResetCurrentStage()
+        public void LoadCurrentStage()
         {
-            if(m_stageAsset != null)
-                SetStage(m_stageAsset.Copy());
+            if (m_stageAsset is null) throw new Exception("Stage asset NULL");
+            m_stage = m_stageAsset.Copy();
+            renderHost.MarkDirty();
         }
 
 
@@ -105,16 +98,11 @@ namespace pixel_renderer
         /// <param name="message"></param>
         public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
-           EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
+           EditorEvent e = new(obj.ToString() ?? "", includeDateTime, clearConsole);
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
 
-        private protected void SetStage(Stage? value) 
-        {
-            m_stage = null;
-            m_stage = value;
-        }
         public void AddStageToProject(StageAsset stageAsset)
         {
             if (LoadedProject is null) 
@@ -122,7 +110,6 @@ namespace pixel_renderer
             
             LoadedProject.stages ??= new();
             LoadedProject.stages.Add(stageAsset);
-            SetStageAsset(stageAsset);
         }
         public void TrySetStageAsset(int stageAssetIndex)
         {
@@ -135,11 +122,13 @@ namespace pixel_renderer
         public void SetStageAsset(StageAsset stageAsset)
         {
             m_stageAsset = stageAsset;
+            LoadCurrentStage();
         }
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
+            if(m_stage is null || !PhysicsInitialized) return;
             Task.Run(() => Collision.Run());
-            StagingHost.Update(GetStage());
+            StagingHost.Update(m_stage);
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {

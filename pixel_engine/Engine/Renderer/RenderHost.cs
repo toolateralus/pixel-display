@@ -1,15 +1,12 @@
-﻿using Image = System.Windows.Controls.Image; 
-    using System;
-    using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Windows.Media;
+﻿using System;
+using Image = System.Windows.Controls.Image; 
 
 namespace pixel_renderer
 {
     public enum RenderState { Game, Scene, Off , Error}
     public class RenderHost
     {
-        private RendererBase? m_renderer = new CRenderer();
+        private RendererBase m_renderer = new CRenderer();
         public RenderState State = RenderState.Game;
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
@@ -19,7 +16,7 @@ namespace pixel_renderer
             info = new(this);
         }
 
-        public event Action<long> OnRenderCompleted; 
+        public event Action<long>? OnRenderCompleted; 
 
         public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
 
@@ -43,10 +40,15 @@ namespace pixel_renderer
         /// <param name="renderSurface"></param>
         private protected void Cycle(Image renderSurface)
         {
-            var stage = Runtime.Instance.GetStage();
             m_renderer.Dispose();
-            m_renderer.Draw(stage.StageRenderInfo);
+            if(Runtime.Instance.GetStage() is Stage stage)
+                m_renderer.Draw(stage.StageRenderInfo);
             m_renderer.Render(renderSurface);
+        }
+
+        internal void MarkDirty()
+        {
+            m_renderer.MarkDirty();
         }
     }
     public class RenderInfo 
