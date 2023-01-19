@@ -110,7 +110,8 @@
                 Text =""
                 TextElement.FontStretch="SemiCondensed"
                 TextWrapping="Wrap"
-                AcceptsReturn="True" HorizontalAlignment="Right" Margin="0,62,0,0" Width="672">
+                AcceptsReturn="True"
+               >
             </TextBox>
             <TextBox 
                 
@@ -126,15 +127,7 @@
                 Grid.RowSpan="4" Text="                                &#xD;&#xA;" 
                 >
             </TextBox>
-            <Image 
-                
-                x:Name="consoleOuputCover" 
-                Grid.Column="13" 
-                Grid.Row="11"
-                Grid.ColumnSpan="7" 
-                Grid.RowSpan="4" 
-                >
-            </Image>
+            
 
             <Label  FontSize="4.5" 
                     FontWeight="Bold"
