@@ -103,9 +103,8 @@ namespace pixel_renderer.Scripts
         }
         public static void AddPlayer(List<Node> nodes)
         {
-            Vec2 playerStartPosition = new Vec2(12, 24);
-            Node playerNode = new("Player", playerStartPosition, Vec2.one);
-         
+            Node playerNode = new("Player");
+            playerNode.position = JRandom.Vec2(Vec2.zero, Vec2.one * 256); 
             playerNode.AddComponent<Rigidbody>();
             var sprite = playerNode.AddComponent<Sprite>();
             sprite.size = Vec2.one * 36; 

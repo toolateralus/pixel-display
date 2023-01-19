@@ -261,8 +261,8 @@ namespace pixel_renderer
         private object[] r_node_args()
         {
             int r_int = genericNodeCt++;
-            Vec2 r_pos = JRandom.ScreenPosition();
-            Vec2 r_vec = JRandom.Vec2(Vec2.one* 2, Vec2.one * (Constants.CollisionCellSize - 1));
+            Vec2 r_pos = JRandom.Vec2(Vec2.zero, Vec2.one * 256);
+            Vec2 r_vec = JRandom.Vec2(Vec2.one * 2, Vec2.one * (Constants.CollisionCellSize - 1));
             Color r_color = JRandom.Color();
             bool r_bool = JRandom.Bool();
             Direction r_dir = JRandom.Direction();

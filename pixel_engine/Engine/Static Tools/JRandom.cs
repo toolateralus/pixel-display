@@ -9,11 +9,6 @@
 
         public static Direction Direction() => (Direction)Int(0, sizeof(Direction) - 1);
 
-        public static Vec2 ScreenPosition() => new()
-        {
-            x = Int(0, Constants.ScreenW),
-            y = Int(0, Constants.ScreenH)
-        };
 
         public static Color Color()
         {
@@ -45,11 +40,6 @@
                 x = Int((int)min.x, (int)max.x),
                 y = Int((int)min.y, (int)max.y),
             };
-        }
-
-        internal static object Int(int v, float x)
-        {
-            throw new System.NotImplementedException();
         }
     }
 
