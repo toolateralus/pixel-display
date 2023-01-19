@@ -5,6 +5,7 @@ using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Policy;
 
 namespace pixel_renderer
 {
@@ -15,7 +16,8 @@ namespace pixel_renderer
         public int fileSize = 0;
         
         public List<StageAsset> stages;
-
+        [JsonProperty]
+        public List<Metadata> stagesMeta = new();
         [JsonProperty]  public string Name 
         { 
             get; 

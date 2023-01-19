@@ -318,9 +318,8 @@ namespace pixel_editor
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            Project.SaveProject();
+          
             AssetLibrary.Sync();
-      
         }
       
 
