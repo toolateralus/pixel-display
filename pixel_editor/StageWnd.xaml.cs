@@ -111,7 +111,6 @@ namespace pixel_editor
                 Runtime.Instance.SetStageAsset(asset);
                 Runtime.Instance.AddStageToProject(asset);
             }
-            AssetLibrary.Sync();
             Close(); 
         }
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;

@@ -32,8 +32,11 @@ namespace pixel_renderer.Assets
             m_background = runtimeValue.backgroundMeta;
             nodes = runtimeValue.Nodes.ToNodeAssets();
         }
+        [JsonProperty]
         public List<NodeAsset> nodes;
-        public Metadata m_background; 
+        [JsonProperty]
+        public Metadata m_background;
+        public static Metadata DefaultMetadata = new("Default Stage Asset", Constants.WorkingRoot + Constants.AssetsDir + "\\DefaultStageAsset" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
         public static Metadata DefaultBackground = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp"); 
         public Stage Copy()
         {

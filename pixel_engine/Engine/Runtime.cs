@@ -61,7 +61,7 @@ namespace pixel_renderer
             if (m_stageAsset is null)
             {
                 m_stageAsset = StageAsset.Default;
-                AssetLibrary.Sync();
+                AssetLibrary.Register(StageAsset.DefaultMetadata, m_stageAsset);
             }
             if (m_stage is null || m_stage.UUID != current_stage_uuid)
             {
@@ -69,6 +69,7 @@ namespace pixel_renderer
                 current_stage_uuid = m_stage.UUID; 
             }
             return m_stage;
+
         }
         public static void Awake(EngineInstance mainWnd, Project? project = null)
         {
