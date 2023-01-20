@@ -9,7 +9,7 @@ namespace pixel_renderer
     [JsonObject(MemberSerialization.OptIn)]
     public class Project
     {
-        public List<StageAsset> stages;
+        public List<Stage> stages = new();
         [JsonProperty]
         public List<Metadata> stagesMeta = new();
 
@@ -72,9 +72,9 @@ namespace pixel_renderer
             return output; 
         }
 
-        public static StageAsset? GetStageByName(string stageName)
+        public static Stage? GetStageByName(string stageName)
         {
-            bool gotAsset = AssetLibrary.Fetch(stageName, out StageAsset stage);
+            bool gotAsset = AssetLibrary.Fetch(stageName, out Stage stage);
             
             if (gotAsset) return stage; 
             return null; 
@@ -87,7 +87,7 @@ namespace pixel_renderer
         public Project(string name)
         {
             Name = name;
-            stages = new List<StageAsset>();
+            stages = new List<Stage>();
             Hash = NameHash();
         }
         public static Project Default
@@ -95,7 +95,7 @@ namespace pixel_renderer
             get
             {
                 Project defaultProj = new("Default project");
-                defaultProj.stages.Add(StageAsset.Default);
+                defaultProj.stages.Add(Stage.Default());
                 return defaultProj;
             }
         }

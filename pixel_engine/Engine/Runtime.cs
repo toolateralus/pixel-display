@@ -17,7 +17,6 @@ namespace pixel_renderer
         public StagingHost stagingHost = new();
         
         public Timer physicsClock;
-        private StageAsset? m_stageAsset;
         public Project LoadedProject;
 
         private protected volatile Stage? m_stage;
@@ -74,57 +73,28 @@ namespace pixel_renderer
         public Stage? GetStage()
         {
             return m_stage;
-
         }
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             instance ??= new(mainWnd, project);
-            Importer.Import(false);
 
-            AssetLibrary.Fetch(out StageAsset fetched_asset);
-            List<StageAsset> found_stages = new List<StageAsset>();
-            StageAsset? stageAsset = null;
-
-            if (fetched_asset == null)
-            {
-                foreach (var sMeta in project.stagesMeta)
-                {
-                    int stageCt = 0;
-                    AssetIO.ReadAndRegister(out Asset? registeredStage, sMeta);
-                    if (registeredStage != null)
-                    {
-                        stageCt++;
-                        Log($"{registeredStage.Name}  + {stageCt}");
-                        found_stages.Add((StageAsset)registeredStage);
-                    }
-                }
-                if (found_stages == null || found_stages.Count == 0)
-                {
-                    Log("No stage data was read from the project selected - a default stage has been instantiated.");
-                    Instance.SetStageAsset(StageAsset.Default);
-                    return;
-                }
-                stageAsset = found_stages[0];
-               
-            }
-            else found_stages[0] = fetched_asset;
-            
-            if (stageAsset is null)
-                throw new NullStageException($"{stageAsset.Name} not found.");
-
-            Instance.SetStageAsset(stageAsset);
-            Log($"Stage asset {stageAsset.Name} loaded.");
+            if (Instance.LoadedProject.stages.Count > 0)
+                Instance.SetStage(Instance.LoadedProject.stages[0]);
         }
+
+        public void SetStage(Stage stage)
+        {
+            Instance.LoadedProject.stages.Add(stage);
+        }
+
         private void InitializePhysics()
         {
             PhysicsInitialized = true;
         }
-        public StageAsset? GetStageAsset() => m_stageAsset;
         public void SetProject(Project project) => LoadedProject = project;
         public void ReloadStage()
         {
-            if (m_stageAsset is null) throw new Exception("Stage asset NULL");
-            m_stage = m_stageAsset.Copy();
+            m_stage.LoadFromFile();
             renderHost.MarkDirty();
         }
 
@@ -140,27 +110,15 @@ namespace pixel_renderer
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
 
-        public void AddStageToProject(StageAsset stageAsset)
+        public void AddStageToProject(Stage stage)
         {
             if (LoadedProject is null) 
                 throw new NullReferenceException("Loaded Project reference to a null instance of an object");
             
             LoadedProject.stages ??= new();
-            LoadedProject.stages.Add(stageAsset);
+            LoadedProject.stages.Add(stage);
         }
-        public void TrySetStageAsset(int stageAssetIndex)
-        {
-            if (LoadedProject is null) return;
-            if (LoadedProject.stages is null) return;
-            if (LoadedProject.stages.Count <= stageAssetIndex) return;
-            if (LoadedProject.stages[stageAssetIndex] is null) return;
-            SetStageAsset(LoadedProject.stages[stageAssetIndex]);
-        }
-        public void SetStageAsset(StageAsset stageAsset)
-        {
-            m_stageAsset = stageAsset;
-            ReloadStage();
-        }
+      
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
             if(m_stage is null || !PhysicsInitialized) return;

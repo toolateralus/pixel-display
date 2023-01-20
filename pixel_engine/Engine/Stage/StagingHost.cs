@@ -60,7 +60,7 @@ namespace pixel_renderer
         }
         public static void ReloadCurrentStage()
         {
-            var reset = runtime.GetStageAsset();
+            var reset = runtime.GetStage();
 
             if (reset is null)
                 throw new NullStageException("Resetting stage failed");
@@ -68,7 +68,7 @@ namespace pixel_renderer
             if (runtime.renderHost.State is not RenderState.Off)
                 runtime.Toggle();
 
-            runtime.SetStageAsset(reset);
+            runtime.SetStage(reset);
         }
     }
 }

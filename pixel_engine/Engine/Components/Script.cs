@@ -10,5 +10,15 @@ namespace pixel_renderer.Assets
         {
             component = c;
         }
+
+        public override void LoadFromFile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SaveToFile()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

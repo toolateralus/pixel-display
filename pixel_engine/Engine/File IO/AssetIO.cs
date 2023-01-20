@@ -23,13 +23,7 @@ namespace pixel_renderer.FileIO
         /// </summary>
         /// <param name="meta"></param>
         /// <returns>Asset if found, else null </returns>
-        public static void ReadAndRegister(out Asset? asset, Metadata meta)
-        {
-            asset = ReadAsset(meta);
-            if (asset is null) 
-                return;
-            AssetLibrary.Register(meta, asset);
-        }
+     
         public static void WriteAsset((Asset, Metadata) pair)
         {
             FindOrCreateAssetsDirectory();
@@ -37,11 +31,6 @@ namespace pixel_renderer.FileIO
             var data = pair.Item1;
             IO.WriteJson(data, meta);
         }
-        public static Asset? ReadAsset(Metadata meta)
-        {
-            FindOrCreateAssetsDirectory();
-            Asset asset = IO.ReadJson<Asset>(meta);
-            return asset;
-        }
+       
     }
 }

@@ -45,6 +45,15 @@ namespace pixel_renderer
         internal bool HasMaskMetadata => imgData != null;
 
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
-       
+
+        public override void LoadFromFile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SaveToFile()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,12 +1,19 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Xml.Linq;
 
 namespace pixel_renderer.FileIO
 {
-    public class Asset 
+    [JsonObject(MemberSerialization.OptIn)]
+    public abstract class Asset 
     {
-        public string Name;
-        public string UUID; 
+        [JsonProperty] public string Name;
+        [JsonProperty] public string UUID;
+        [JsonProperty] public Metadata Metadata; 
+
+        public abstract void LoadFromFile();
+        public abstract void SaveToFile();
+
         public Asset(string Name, string UUID)
         {
             this.Name = Name;

@@ -43,6 +43,15 @@ namespace pixel_renderer.Assets
                 node.AddComponent(comp);
             return node;
         }
+
+        public override void LoadFromFile()
+        {
+            throw new NotImplementedException();
+        }
+        public override void SaveToFile()
+        {
+            throw new NotImplementedException();
+        }
     }
     public class ComponentAsset : Asset
     {
@@ -57,6 +66,16 @@ namespace pixel_renderer.Assets
         public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, UUID) 
         {
             this.runtimeComponent = runtimeComponent; 
+        }
+
+        public override void LoadFromFile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SaveToFile()
+        {
+            throw new NotImplementedException();
         }
     }
 }

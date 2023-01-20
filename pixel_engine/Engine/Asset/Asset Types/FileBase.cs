@@ -1,4 +1,6 @@
-﻿namespace pixel_renderer.FileIO
+﻿using Newtonsoft.Json;
+
+namespace pixel_renderer.FileIO
 {
     public abstract class FileBase
     {

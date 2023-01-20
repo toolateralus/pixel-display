@@ -14,7 +14,6 @@ namespace pixel_renderer.FileIO
             pathFromProjectRoot = Project.GetPathFromRoot(fullPath);
             _uuid = pixel_renderer.UUID.NewUUID();
         }
-
         private static string VerifyExtension(string extension)
         {
             int periods = 0;

@@ -216,6 +216,7 @@ namespace pixel_editor
             {
                 Host.State = RenderState.Off;
                 viewBtn.Content = "Stage null.";
+                Console.Error("Stage was null!!", 3);
                 return;
             }
 

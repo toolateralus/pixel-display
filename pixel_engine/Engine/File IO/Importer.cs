@@ -78,8 +78,7 @@ namespace pixel_renderer.Assets
         {
             if(meta.extension == Constants.BitmapFileExtension)
                 return !File.Exists(meta.fullPath) ? null : meta;
-
-            return !File.Exists(meta.fullPath) ? null : IO.ReadJson<Asset>(meta);
+            return null;
         }
 
         /// <summary>
@@ -121,10 +120,6 @@ namespace pixel_renderer.Assets
             
             if (!isPathValid) 
                 return;
-
-            var asset = IO.ReadJson<Asset>(metadata);
-            if (asset is null) return;
-            AssetLibrary.Register((metadata, asset));
         }
     }
 }

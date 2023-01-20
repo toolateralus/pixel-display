@@ -57,7 +57,7 @@ namespace pixel_editor
         #endregion
         
         bool usingStarterAssets = false;
-        Metadata background_meta = StageAsset.DefaultBackground;
+        Metadata background_meta = Stage.DefaultBackground;
         
         public StageWnd(Editor mainWnd)
         {
@@ -73,7 +73,7 @@ namespace pixel_editor
             background_meta = FileDialog.ImportFileDialog();
 
             if (background_meta.fullPath is "" or null)
-                background_meta = StageAsset.DefaultBackground;
+                background_meta = Stage.DefaultBackground;
 
             if (File.Exists(background_meta.fullPath))
                 CBit.Render(new Bitmap(background_meta.fullPath), imgPreview);
@@ -94,7 +94,7 @@ namespace pixel_editor
             for (int i = 0; i < count; i++) 
                 stage.AddNode(Rigidbody.Standard());
 
-            var asset = new StageAsset(stage);
+            var asset = new Stage(stage);
             var meta = new Metadata(
                 asset.Name,
                 pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\" + asset.Name + pixel_renderer.Constants.AssetsFileExtension,
@@ -108,7 +108,7 @@ namespace pixel_editor
 
             if (msgResult == MessageBoxResult.Yes)
             {
-                Runtime.Instance.SetStageAsset(asset);
+                Runtime.Instance.SetStage(asset);
                 Runtime.Instance.AddStageToProject(asset);
             }
             Close(); 

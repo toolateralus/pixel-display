@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer.Assets;
-using System.Diagnostics;
 using pixel_renderer.FileIO;
 
 namespace pixel_editor
@@ -195,7 +194,7 @@ namespace pixel_editor
                     {
                         case PromptResult.Yes:
                             Print($"Stage {stage.Name} set.");
-                            Runtime.Instance.SetStageAsset(stage);
+                            Runtime.Instance.SetStage(stage);
                             break;
                         case PromptResult.No:
                             Print("Stage not set.");
@@ -217,50 +216,10 @@ namespace pixel_editor
         {
             return new()
             {
-                description = "Tries to retrieve an asset by name and returns the reuslt and some information about the asset",
+                description = "Shows a count of all loaded assets, and an option to see more info.",
                 phrase = "fetch;",
                 action = AssetExists,
             };
-        }
-        private static async void AssetExists(object[]? obj) {
-
-            var found = AssetLibrary.Fetch<Asset>(out List<Asset> assets);
-            if (found)
-            {
-                var prompt = PromptAsync($"found {assets.Count} assets. Do you want more information?");
-                await prompt; 
-                switch (prompt.Result)
-                {
-                    case PromptResult.Yes:
-                        PrintAssetsInfo(assets);
-                        return;
-                    case PromptResult.No:
-                        Print("Asset fetch cancelled.");
-                        return;
-                    case PromptResult.Ok:
-                        PrintAssetsInfo(assets);
-                        return;
-                    case PromptResult.Cancel:
-                        Print("Asset fetch cancelled.");
-                        return;
-                    case PromptResult.Timeout:
-                        Print("Asset fetch timed out.");
-                        return;
-                }
-              
-            }
-            void PrintAssetsInfo(List<Asset> assets)
-            {
-                string assetInfo = "";
-                for (int i = 0; i < assets.Count; i++)
-                {
-                    Asset? asset = assets[i];
-                    assetInfo += $"fetch #{i} :: Name, {asset.Name} UUID, {asset.UUID}\n";
-                }
-                Error(assetInfo, 1);
-            }
-
-
         }
         public static Command cmd_get_node()
         {
@@ -295,7 +254,6 @@ namespace pixel_editor
             };
 
         }
-        
         public static Command cmd_set_node_field()
         {
             return new()
@@ -318,7 +276,6 @@ namespace pixel_editor
                              "\n Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
             };
         }
-
         public static Command cmd_set_resolution()
         {
             return new()
@@ -347,7 +304,6 @@ namespace pixel_editor
                 description = "gets the resolution and prints it to the console"
             };
         }
-        
         public static Command cmd_clear_console()
         {
             return new()
@@ -453,7 +409,46 @@ namespace pixel_editor
                 $"\n Tag: {node.tag} " +
                 $"\n Component Count : {node.ComponentsList.Count}");
         }
+        private static async void AssetExists(object[]? obj) {
 
+            var found = AssetLibrary.Fetch<Asset>(out List<Asset> assets);
+            if (found)
+            {
+                var prompt = PromptAsync($"found {assets.Count} assets. Do you want more information?");
+                await prompt; 
+                switch (prompt.Result)
+                {
+                    case PromptResult.Yes:
+                        PrintAssetsInfo(assets);
+                        return;
+                    case PromptResult.No:
+                        Print("Asset fetch cancelled.");
+                        return;
+                    case PromptResult.Ok:
+                        PrintAssetsInfo(assets);
+                        return;
+                    case PromptResult.Cancel:
+                        Print("Asset fetch cancelled.");
+                        return;
+                    case PromptResult.Timeout:
+                        Print("Asset fetch timed out.");
+                        return;
+                }
+              
+            }
+            void PrintAssetsInfo(List<Asset> assets)
+            {
+                string assetInfo = "";
+                for (int i = 0; i < assets.Count; i++)
+                {
+                    Asset? asset = assets[i];
+                    assetInfo += $"fetch #{i} :: Name, {asset.Name} UUID, {asset.UUID}\n";
+                }
+                Error(assetInfo, 1);
+            }
+
+
+        }
         private static void ListNodes(params object[]? e)
         {
             string nodesList = "";
