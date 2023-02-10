@@ -10,11 +10,10 @@ namespace pixel_renderer
     public static class IO
     {
         public static bool Skipping = false;
-        public static JsonSerializerSettings Settings = new()
+        private static JsonSerializerSettings Settings = new()
         {
             Formatting = Formatting.Indented,
         };
-        public static string Path => Constants.WorkingRoot + Constants.AssetsDir;
         /// <summary>
         /// this does not check if the directory or file exists, just deserializes a file into a json object of specified type and returns as C# object
         /// </summary>
@@ -24,25 +23,24 @@ namespace pixel_renderer
         /// <returns></returns>
         public static T? ReadJson<T>(Metadata meta, bool closeStreamWhenFinished = true) where T : new()
         {
-            T? obj = new(); 
-
-            
+            T? obj = new();
+            if (meta is null)
+            {
+                Runtime.Log(nameof(meta) + " was not found.");
+                // this is a really janky way to return null out of this;
+                return (T)Convert.ChangeType(null, typeof(T));
+            }
             if (Constants.ReadableExtensions.Contains(meta.extension))
             {
                 var jsonSerializer = JsonSerializer.Create(Settings);
-                
                 StreamReader reader = new(meta.fullPath);
-                
                 using JsonTextReader jsonReader = new(reader);
-                
                 obj = jsonSerializer.Deserialize<T>(jsonReader);
-                
                 if (closeStreamWhenFinished)
                     reader.Close();
-
                 return obj;
             }
-            throw new FileNotFoundException("File was not found at provided path");
+            throw new FileNotFoundException("File was not found at provided path, or had an unsupported file extension");
         }
         /// <summary>
         /// this does not check if the directory exists nor does it instantiate one where it doesnt exist
@@ -64,6 +62,7 @@ namespace pixel_renderer
             return writer;
 
         }
+
         public static MessageBoxResult FileOverrideWarning(string path)
         {
             return MessageBox.Show($"Are you sure you want to overwrite {path}?",
@@ -100,6 +99,33 @@ namespace pixel_renderer
             var project = IO.ReadJson<Project>(meta);
             if (project is null) throw new FileNotFoundException(); 
             return project;  
+        }
+    }
+    public class StageIO
+    {
+        private static void FindOrCreateStagesDirectory()
+        {
+            if (!Directory.Exists(Constants.WorkingRoot + Constants.StagesDir))
+                Directory.CreateDirectory(Constants.WorkingRoot + Constants.StagesDir);
+        }
+        public static void WriteStage(Stage stage)
+        {
+            FindOrCreateStagesDirectory();
+            IO.WriteJson(stage, stage.Metadata);
+        }
+
+        public static Stage? ReadStage(Metadata meta)
+        {
+            FindOrCreateStagesDirectory();
+
+            // this is an inevitability of using a reference type based metadata,
+            // consider using a struct if it makes sense to structure it that way
+            
+            if (meta is null)
+                return null;
+
+            Stage? stage = IO.ReadJson<Stage>(meta);
+            return stage;
         }
     }
 }

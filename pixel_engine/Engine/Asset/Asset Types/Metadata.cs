@@ -31,7 +31,10 @@ namespace pixel_renderer.FileIO
 
             return extension;
         }
+        public Metadata()
+        {
 
+        }
         [JsonConstructor]
         public Metadata(string name, string fullPath, string pathFromProjectRoot, string uuid, string extension)
         {

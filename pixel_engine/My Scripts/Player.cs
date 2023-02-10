@@ -103,23 +103,40 @@ namespace pixel_renderer.Scripts
         }
         public static void AddPlayer(List<Node> nodes)
         {
-            Node playerNode = new("Player");
-            playerNode.position = JRandom.Vec2(Vec2.zero, Vec2.one * 256); 
-            playerNode.AddComponent<Rigidbody>();
-            var sprite = playerNode.AddComponent<Sprite>();
-            sprite.size = Vec2.one * 36; 
-            playerNode.AddComponent<Player>().takingInput = true;
+            Node playerNode = new("Player")
+            {
+                position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
+            };
 
+            playerNode.AddComponent<Rigidbody>();
+            playerNode.AddComponent<Player>().takingInput = true;
+            
+            Sprite sprite = AddSprite(playerNode);
+            AddCollider(playerNode, sprite);
+            AddCamera(playerNode);
+
+            nodes.Add(playerNode);
+
+        }
+        public static void AddCamera(Node playerNode, int height = 256, int width = 256, DrawingType type = DrawingType.Wrapped)
+        {
+            var cam = playerNode.AddComponent<Camera>();
+            cam.DrawMode = type;
+            cam.Size = new(width, height);
+        }
+        public static void AddCollider(Node playerNode, Sprite sprite)
+        {
             var col = playerNode.AddComponent<Collider>();
 
             col.IsTrigger = false;
             col.size = sprite.size;
+        }
+        public static Sprite AddSprite(Node playerNode)
+        {
+            var sprite = playerNode.AddComponent<Sprite>();
 
-            var cam = playerNode.AddComponent<Camera>();
-            cam.DrawMode = DrawingType.Wrapped;
-            cam.Size = new(256, 256);
-            
-            nodes.Add(playerNode);
+            sprite.size = Vec2.one * 36;
+            return sprite;
         }
     }
 

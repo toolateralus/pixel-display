@@ -58,23 +58,32 @@ namespace pixel_renderer
         public static Vec2 MaxResolution => new(3840, 3840);
         public static Vec2 MinResolution => new(4, 4);
 
+
         public static Color EditorHighlightColor = Color.Orange;
         #endregion
         #region IO
-        public static char[] unsupported_chars = { '_', '-', '.', '`'};
-        public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+        public static char[] unsupported_chars = { '_', '-', '.', '`' };
+        public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        
+        
         public const string ImagesDir = "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
         public const string ProjectsDir = "\\Projects"; // Project files 
-        public const string AssetsDir = "\\Assets";   // Asset resources (user - created)
-        public const string AssetsFileExtension = ".asset";  // pxad {Pixel Asset Data}
-        public const string ProjectFileExtension = ".pixel";   // pxpj {Pixel Project}
-        public const string MetadataFileExtension = ".meta";   // pxpj {Pixel Project}
-        public const string BitmapFileExtension = ".bmp";
+        public const string AssetsDir = "\\Assets";   // Asset files (user - created)
+        public const string StagesDir = "\\Stages"; //Stage files
+        // metadata is saved next to all files.
+
+        public const string AssetsFileExtension = ".asset";  // .asset {Pixel Asset Data}
+        public const string ProjectFileExtension = ".pixel";   // .pixel {Pixel Project}
+        public const string MetadataFileExtension = ".meta";  // .meta {File Metadata} 
+        public const string StageFileExtension = ".stage";    // .stage {Stage File}
+
+        public const string BitmapFileExtension = ".bmp"; // .bmp {The only image format currently supported.}
         public static string[] ReadableExtensions = 
         { 
             MetadataFileExtension,
             AssetsFileExtension,
-            ProjectFileExtension, 
+            ProjectFileExtension,
+            StageFileExtension,
         };
 
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel";    // Root directory for resources

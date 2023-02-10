@@ -54,6 +54,10 @@ namespace pixel_renderer
             var path = rootDir + projDir + '\\' + proj.Name + ext;
             meta = new Metadata(proj.Name, path, ext);
         }
+        /// <summary>
+        /// Runs an import file dialog and when appropriately navigated to a project file, loads it.-
+        /// </summary>
+        /// <returns></returns>
         public static Project LoadProject()
         {
             Project project = Default;

@@ -74,7 +74,7 @@ namespace pixel_editor
             if(randomColor)
                 Error("Console Cleared", 1);
         }
-        private static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
+        internal static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
         {
             Console.Print(question);
             for (int i = 0; i < waitDuration * 100; i++)
@@ -96,8 +96,25 @@ namespace pixel_editor
             };
             return PromptResult.Timeout;
         }
-        
-        
+
+        public static Command cmd_swap_theme()
+        {
+            return new()
+            {
+                phrase = "theme;",
+                action = (o) =>
+                {
+                    bool hasArg = o != null && o.Length > 0;
+                    if (hasArg)
+                    {
+                        if(o[0] is string arg)
+                            Editor.Current.SetTheme(arg);
+                    }
+                },
+                args = null,
+                description = "Swaps the current theme",
+            };
+        }
         public static Command cmd_load_project()
         {
             return new()
@@ -150,7 +167,7 @@ namespace pixel_editor
                 phrase = "reload;|/r;|++r;",
                 action = (o) =>
                 {
-                    Runtime.Instance.ReloadStage();
+                    Runtime.TryLoadStageFromProject();
                 },
                 args = null,
                 description = "Reloads the currently loaded stage",
@@ -381,7 +398,7 @@ namespace pixel_editor
         {
             var stage = Runtime.Instance.GetStage();
 
-            var background = stage.backgroundImage;
+            var background = stage.initializedBackground;
 
             if (background == null)
             {

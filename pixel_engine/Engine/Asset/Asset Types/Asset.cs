@@ -11,14 +11,12 @@ namespace pixel_renderer.FileIO
         [JsonProperty] public string UUID;
         [JsonProperty] public Metadata Metadata; 
 
-        public abstract void LoadFromFile();
-        public abstract void SaveToFile();
-
         public Asset(string Name, string UUID)
         {
             this.Name = Name;
             this.UUID = UUID;
         }
+
         public Asset() 
         {
             Name = "New Asset";

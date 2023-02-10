@@ -23,10 +23,7 @@ namespace pixel_renderer.Assets
             if (Current.ContainsKey(metadata)) return;
             Current.Add(metadata, asset);
         }
-
-
         public static void Unregister(Metadata metadata) => Current.Remove(metadata);
-        
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
         /// </summary>
@@ -70,80 +67,45 @@ namespace pixel_renderer.Assets
                 }
             return r; 
         }
-        
         /// <summary>
         /// Attempts to retrieve metadata by asset file path (asset.pathFromRoot).
         /// </summary>
         /// <param name="asset"></param>
         /// <returns>Metadata if found, else null</returns>
-        public static Metadata? FetchMeta(Asset asset)
-        {
-            foreach (var data in Current)
-                if (data.Value.Equals(asset))
-                    return data.Key;
-            Runtime.Log($"Metadata fetch failed. Asset : {asset.Name}");
-            return null;
-        }
-       
 
         /// <summary>
         /// Save the currently loaded asset Library to the disk.
         /// </summary>
+        /// 
         public static void Sync()
         {
             RefreshProjectStageMetadata();
             Project.SaveProject();
-            foreach (var pair in Current)
+            foreach (var assetPair in Current)
             {
-                AssetIO.WriteAsset(new(pair.Value, pair.Key));
-                WriteMetadata(pair);
+                AssetIO.WriteAsset(assetPair.Value, assetPair.Key);
+                AssetIO.WriteMetadata(assetPair);
             }
         }
 
         private static void RefreshProjectStageMetadata()
         {
-            if (Runtime.Instance.LoadedProject == null) return;
+            if (Runtime.Instance.LoadedProject == null)
+                return;
+
             var stages = Runtime.Instance.LoadedProject.stages;
-            if (stages is null) return; 
+            
+            if (stages is null) 
+                return; 
+
             foreach (var stage in stages)
             {
                 var stages_meta = Runtime.Instance.LoadedProject.stagesMeta;
-                var meta = FetchMeta(stage);
 
-                if (stages_meta.Contains(meta))
-                    stages_meta.Add(meta);
+                if (!stages_meta.Contains(stage.Metadata))
+                    stages_meta.Add(stage.Metadata);
             }
         }
-
-        private static void WriteMetadata(KeyValuePair<Metadata, Asset> pair)
-        {
-            string fullPath = new(pair.Key.fullPath.ToCharArray());
-            string extension = new(pair.Key.extension.ToCharArray());
-            string name = new(pair.Key.Name);
-
-            string thisPath = fullPath;
-            string thisExt = Constants.MetadataFileExtension; 
-
-            Metadata meta = new(name, fullPath, extension);
-            Metadata this_meta = new(name, fullPath, extension);
-
-
-            if (thisPath.Contains(meta.extension)
-                && meta.extension != thisExt)
-            {
-                thisPath = thisPath.Replace(meta.extension, "");
-
-                if (thisPath.Contains(thisExt))
-                    thisPath = thisPath.Replace(Constants.MetadataFileExtension, "");
-
-                thisPath += thisExt;
-                this_meta.fullPath = thisPath;
-                this_meta.pathFromProjectRoot = Project.GetPathFromRoot(thisPath);
-                this_meta.extension = thisExt; 
-            }
-            IO.WriteJson(meta, this_meta);
-        }
-
         /// <summary>
         /// Clone the current Asset Library into a List.
         /// </summary>
@@ -159,3 +121,4 @@ namespace pixel_renderer.Assets
         }
     }
 }
+// save all meta next to assets, read meta to recognize as file and get type, call asset only when actually needing reading.

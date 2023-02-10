@@ -13,7 +13,7 @@ namespace pixel_renderer
             if (Runtime.Instance.GetStage() is not Stage stage) return;
             if (baseImageDirty)
             {
-                baseImage = ColorArrayFromBitmap(stage.backgroundImage);
+                baseImage = ColorArrayFromBitmap(stage.initializedBackground);
                 baseImageDirty = false;
             }
             lock (frame)

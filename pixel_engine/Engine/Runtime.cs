@@ -2,6 +2,8 @@
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Documents;
@@ -70,21 +72,59 @@ namespace pixel_renderer
             IsRunning = false;
             return;
         }
+
         public Stage? GetStage()
         {
             return m_stage;
         }
+
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             instance ??= new(mainWnd, project);
-
-            if (Instance.LoadedProject.stages.Count > 0)
-                Instance.SetStage(Instance.LoadedProject.stages[0]);
+            TryLoadStageFromProject();
         }
 
-        public void SetStage(Stage stage)
+        public static void TryLoadStageFromProject()
         {
-            Instance.LoadedProject.stages.Add(stage);
+            List<Metadata> stagesMeta = Instance.LoadedProject.stagesMeta;
+            List<Stage> stages = Instance.LoadedProject.stages;
+
+            Stage stage = new();
+            if (stagesMeta.Count <= 0)
+            {
+                stage = InstantiateDefaultStageIntoProject(stagesMeta, stages);
+            }
+            else
+            {
+                Metadata stageMeta = stagesMeta[0];
+                stage ??= StageIO.ReadStage(stageMeta);
+            }
+            Instance.SetStage(stage);
+        }
+
+        private static Stage InstantiateDefaultStageIntoProject(List<Metadata> stagesMeta, List<Stage> stages)
+        {
+            Log("No stages were found in the project. A Default will be instantiated and added to the project.");
+            
+            var meta = Stage.DefaultMetadata;
+
+            Stage stage = new();
+            if (File.Exists(meta.fullPath))
+            {
+                stage = StageIO.ReadStage(meta);
+                if (stage != null)
+                {
+                    stages.Add(stage);
+                    stagesMeta.Add(meta);
+                    StageIO.WriteStage(stage);
+                }
+            }
+            else stage = null; 
+            return stage; 
+        }
+        internal int selectedStage = 0;
+        public void SetStage(Stage stage) {
+            m_stage = stage;
         }
 
         private void InitializePhysics()
@@ -92,20 +132,15 @@ namespace pixel_renderer
             PhysicsInitialized = true;
         }
         public void SetProject(Project project) => LoadedProject = project;
-        public void ReloadStage()
-        {
-            m_stage.LoadFromFile();
-            renderHost.MarkDirty();
-        }
-
-
+        
+       
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
         /// <param name="message"></param>
         public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
-           EditorEvent e = new(obj.ToString() ?? "", includeDateTime, clearConsole);
+           EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);

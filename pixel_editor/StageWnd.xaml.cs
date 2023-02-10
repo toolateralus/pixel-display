@@ -89,7 +89,9 @@ namespace pixel_editor
             if (usingStarterAssets)
                 Player.AddPlayer(nodes);
 
-            var stage = new Stage(name, background_meta, nodes.ToNodeAssets());
+            var stage = Stage.Default();
+
+            stage.nodes.Clear();
 
             for (int i = 0; i < count; i++) 
                 stage.AddNode(Rigidbody.Standard());

@@ -123,6 +123,8 @@ namespace pixel_renderer
         }
         public static Color[,] ColorArrayFromBitmap(Bitmap bmp)
         {
+            if (bmp == null)
+                return new Color[0, 0];
             Color[,] _colors = new Color[bmp.Width, bmp.Height];
 
             for (int y = 0; y < bmp.Height; y++)

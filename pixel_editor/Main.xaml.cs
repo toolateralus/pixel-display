@@ -14,6 +14,8 @@ using Newtonsoft.Json.Serialization;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Windows.Media;
+using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 
 namespace pixel_editor
 {
@@ -76,7 +78,7 @@ namespace pixel_editor
             double xScale = ActualWidth / 200f;
             double value = Math.Min(xScale, yScale);
 
-            ScaleValue = (double)OnCoerceScaleValue(window, value);
+            ScaleValue = (double)OnCoerceScaleValue(editorWindow, value);
         }
         public void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -106,7 +108,7 @@ namespace pixel_editor
             inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
             Runtime.inspector = inspector;
 
-            Task.Run(() => Console.Print("Session Started", true));
+            Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
                 
         }
         internal EngineInstance? engine;
@@ -124,12 +126,11 @@ namespace pixel_editor
             }
         }
 
+        DispatcherTimer timer = new();
         public Inspector? Inspector => inspector; 
         private readonly Inspector inspector;
-
         // for stage creation, hopefully a better solution eventually.
         private StageWnd? stageWnd;
-        
         public readonly EditorEventHandler Events = new(); 
         internal Action<object?> RedText(object? o = null)
         {
@@ -148,7 +149,6 @@ namespace pixel_editor
                 }
             };
         }
-
         private static async Task<System.Drawing.Color> VerifyColorBrightnessOrGetNew(System.Drawing.Color c)
         {
             int iterations = 0;
@@ -163,7 +163,6 @@ namespace pixel_editor
             }
             return c;
         }
-
         internal Action<object?> BlackText(object? o = null)
         {
             return (o) =>
@@ -172,7 +171,6 @@ namespace pixel_editor
                 consoleOutput.Background = Brushes.Black;
             };
         }
-
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
@@ -185,9 +183,6 @@ namespace pixel_editor
             }
             Events.ExecuteAll();
         }
-        
-        DispatcherTimer timer = new();
-
         private void GetEvents()
         {
             Closing += OnDisable;
@@ -195,29 +190,41 @@ namespace pixel_editor
             StartEditorRenderClock();
             timer.Tick += Update;    
             Runtime.InspectorEventRaised += QueueEvent;
-            Input.RegisterAction(delegate
+            Input.RegisterAction(action: delegate
             {
-                if (!editorMessages.IsKeyboardFocusWithin) return;
-                if(!Input.GetInputValueByType_Name(InputEventType.KeyDown, "LeftShift")) return;
+                if (!editorMessages.IsKeyboardFocusWithin)
+                    return;
+
+                if(!Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
+                    return;
+
                 OnCommandSent(new(), new());
+
                 editorMessages.Clear();
+
             }, Key.Return);
         }
-
         private void StartEditorRenderClock()
         {
             timer.Interval = TimeSpan.FromTicks(1000);
             timer.Start();
         }
+        
 
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)
             {
-                Host.State = RenderState.Off;
-                viewBtn.Content = "Stage null.";
-                Console.Error("Stage was null!!", 3);
-                return;
+                Console.cmd_reload_stage().Invoke();
+
+
+                if (Runtime.Instance.GetStage() is null)
+                {
+                    Console.Error("Stage was null!! Please create a new one.", 3);
+                    Current.OnStagePressed(this, null);
+                }
+                
+               
             }
 
             renderStateIndex++;
@@ -237,7 +244,7 @@ namespace pixel_editor
             Runtime.Instance.mainWnd = new();
             Runtime.Instance.mainWnd.Show();
         }
-        
+
         private void UpdateMetrics()
         {
             var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
@@ -261,7 +268,9 @@ namespace pixel_editor
 
         private void OnCommandSent(object sender, RoutedEventArgs e)
         {
+            // the max amt of lines that a command can consist of
             int cap = 5;
+
             string[] split = editorMessages.Text.Split('\n');
             
             if (split.Length < cap)
@@ -338,13 +347,11 @@ namespace pixel_editor
           
             AssetLibrary.Sync();
         }
-      
-
-
-
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
-            e.Handled = true;
+            if(e != null)
+                e.Handled = true;
+
             stageWnd = new StageWnd(this);
             stageWnd.Show();
             stageWnd.Closed += Wnd_Closed;
@@ -378,7 +385,20 @@ namespace pixel_editor
         {
 
         }
-    }
- 
-}
 
+        internal void SetTheme(string name)
+        {
+            name = name.ToLower();   
+        }
+    }
+
+}
+public class EditorTheme
+{
+    public static EditorTheme Dark => new() { Foreground = Brushes.White, Background = Brushes.DarkGray };
+    public static EditorTheme Light => new() { Foreground = Brushes.Black, Background = Brushes.WhiteSmoke };
+
+    public SolidColorBrush Foreground = Brushes.White;
+    public SolidColorBrush Background = Brushes.White;
+
+}

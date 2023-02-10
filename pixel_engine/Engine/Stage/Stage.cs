@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
+using pixel_renderer.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -65,80 +66,21 @@ namespace pixel_renderer
 
     public class Stage : Asset
     {
-        /// <summary>
-        /// Do not use this, this is open only for file reading purposes
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="nodes"></param>
-        /// <param name="background"></param>
-        /// <param name="settings"></param>
-        /// <param name="UUID"></param>
-        [JsonConstructor]
-        public Stage(string name, List<NodeAsset> nodes, Metadata background, StageSettings settings, string UUID) : base(name, UUID)
-        {
-            this.nodes = nodes;
-            this.m_background = background;
-        }
-        /// <summary>
-        /// User Constructor
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="runtimeValue"></param>
-        public Stage(Stage runtimeValue) : base(runtimeValue.Name, runtimeValue.UUID)
-        {
-            Metadata = new("", "", "");
-            m_background = runtimeValue.backgroundMeta;
-            nodes = runtimeValue.Nodes.ToNodeAssets();
-        }
+       
         [JsonProperty]
         public List<NodeAsset> nodes;
-        [JsonProperty]
-        public Metadata m_background;
-        public static Metadata DefaultMetadata = new("Default Stage Asset", Constants.WorkingRoot + Constants.AssetsDir + "\\DefaultStage" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
-        public static Metadata DefaultBackground = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
-        public Stage Copy()
-        {
-            var output = new Stage(Name, m_background, nodes, UUID);
-            return output;
-        }
-        internal Bitmap? GetBackground() => new Bitmap(m_background.fullPath) ?? null;
-
-        public override void LoadFromFile()
-        {
-             
-        }
-        public override void SaveToFile()
-        {
-
-        }
-
-        public static Stage Default() => StagingHost.Default();
-
-
-
-
-
-        //public Stage() { }
-        public Stage(string Name, Metadata backgroundMeta, List<NodeAsset> nodes, string? existingUUID = null)
-        {
-            _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
-            this.backgroundMeta = backgroundMeta;
-            backgroundImage = GetBackground(backgroundMeta);
-            this.Name = Name;
-            Nodes = nodes.ToNodeList();
-            OnNodeQueryMade = RefreshStageDictionary;
-            Awake();
-        }
-
+      
+   
+        
         public Metadata backgroundMeta;
-        public Bitmap backgroundImage;
-        
+        public Bitmap? initializedBackground;
+
+        #region Node Utils
         public event Action OnNodeQueryMade;
-        
         public List<Node> Nodes { get; private set; } = new();
-        
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
-        
+        #endregion
+        #region  Misc Utils
         private StageRenderInfo? stage_render_info = null;
         public StageRenderInfo StageRenderInfo
         {
@@ -158,17 +100,20 @@ namespace pixel_renderer
 
         Queue<Action<object[]>> DelayedActionQueue = new();
         Queue<object[]> DelayedActionArgsQueue = new();
+        #endregion
 
         /// <summary>
         ///  used to keep track of how many generic nodes have been instantiated for naming
         /// </summary>
         int genericNodeCt = 0;
+
         public string Name { get; set; }
         private string _uuid = "";
         public string UUID => _uuid;
 
         public bool FixedUpdateBusy { get; private set; }
 
+        #region Engine Stuff
         public void Awake()
         {
             for (int i = 0; i < Nodes.Count; i++)
@@ -197,6 +142,7 @@ namespace pixel_renderer
             {
                Action<object[]> action = DelayedActionQueue.Dequeue();
                object[] args = DelayedActionArgsQueue.Dequeue();
+
                action(args);
             }
         }
@@ -217,7 +163,6 @@ namespace pixel_renderer
 
             nodesToRemove.Clear();
         }
-
         public Node[] FindNodesByTag(string tag)
         {
             OnNodeQueryMade?.Invoke();
@@ -242,7 +187,6 @@ namespace pixel_renderer
             return result.Any() ? result.First() : null; 
 
         }
-
         public void AddNode(Node node)
         {
             void add_node(object[] o)
@@ -262,14 +206,17 @@ namespace pixel_renderer
             else add_node(args); 
 
         }
-
-        private Bitmap GetBackground(Metadata meta)
+        public Stage Copy()
+        {
+            var output = new Stage(Name, backgroundMeta, nodes, UUID);
+            return output;
+        }
+        public Bitmap GetBackground(Metadata meta)
         {
             if (File.Exists(backgroundMeta.fullPath))
                 return new(meta.fullPath);
             throw new MissingMetadataException($"Metadata fullpath:\"{meta.fullPath}\". File not found.");
         }
-
         public IEnumerable<Sprite> GetSprites()
         {
             var sprite = new Sprite();
@@ -284,8 +231,23 @@ namespace pixel_renderer
                 from T component in node.GetComponents<T>()
                    select component;
         }
-        
-       
+        public Node? FindNodeWithComponent<T>() where T : Component
+        {
+            IEnumerable<Node> collec = from node in Nodes where node.HasComponent<T>() select node;
+
+            if (!collec.Any())
+                return null;
+
+            Node first = collec.First();
+            return first;
+        }
+        public List<Node>? FindNodesWithComponent<T>() where T : Component
+        {
+            IEnumerable<Node> outNodes = from node in Nodes where node.HasComponent<T>() select node;
+            return outNodes.ToList();
+        }
+        #endregion
+
 
         public void create_generic_node()
         {
@@ -316,6 +278,7 @@ namespace pixel_renderer
         {
             int r_int = genericNodeCt++;
             Vec2 r_pos = JRandom.Vec2(Vec2.zero, Vec2.one * 256);
+
             Vec2 r_vec = JRandom.Vec2(Vec2.one * 2, Vec2.one * (Constants.CollisionCellSize - 1));
             Color r_color = JRandom.Color();
             bool r_bool = JRandom.Bool();
@@ -327,20 +290,65 @@ namespace pixel_renderer
                 r_vec,
                 r_color,
                 r_bool,
-                r_dir };
+                r_dir 
+            };
+        }
+       
+        public Stage()
+        {
+
         }
 
-        public Node? FindNodeWithComponent<T>() where T : Component
+        
+        [JsonConstructor]
+        internal Stage(string name, List<NodeAsset> nodes, Metadata background, StageSettings settings, string UUID) : base(name, UUID)
         {
-            IEnumerable<Node> outNode = from node in Nodes let hasComponent = node.HasComponent<T>()  where hasComponent select node;
-            if (outNode.Count() == 0) return null; 
-            Node first = outNode.First();
-            return first; 
+            this.nodes = nodes;
+            this.Metadata = Metadata;
+            this.backgroundMeta = background;
         }
-        public List<Node>? FindNodesWithComponent<T>() where T : Component
+        public Stage(Stage runtimeValue) : base(runtimeValue.Name, runtimeValue.UUID)
         {
-            IEnumerable<Node> outNodes = from node in Nodes let hasComponent = node.HasComponent<T>() where hasComponent select node;
-            return outNodes.ToList();
+            if (string.IsNullOrEmpty(Name))
+                Name = "Stage00";
+
+            Metadata = new(Name, Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension, Constants.StageFileExtension);
+            nodes = runtimeValue.Nodes.ToNodeAssets();
+
+            StageIO.WriteStage(this);
         }
+        /// <summary>
+        /// Memberwise copy constructor
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="backgroundMeta"></param>
+        /// <param name="nodes"></param>
+        /// <param name="existingUUID"></param>
+        internal Stage(string Name, Metadata backgroundMeta, List<NodeAsset> nodes, string? existingUUID = null)
+        {
+            _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
+            this.backgroundMeta = backgroundMeta;
+            initializedBackground = GetBackground(backgroundMeta);
+            this.Name = Name;
+            Nodes = nodes.ToNodeList();
+            OnNodeQueryMade = RefreshStageDictionary;
+            Awake();
+        }
+        public static Metadata DefaultMetadata = new("Default Stage Asset", Constants.WorkingRoot + Constants.AssetsDir + "\\DefaultStage" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
+        public static Metadata DefaultBackground = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
+        public static Stage Default()
+        {
+            var stage = new Stage("Default Stage", DefaultBackground, new());
+
+            for (int i = 0; i < 10; i++)
+                stage.create_generic_node();
+
+            var player = new Player();
+            Player.AddPlayer
+            return stage;
+        }
+
+
+
     }
 }

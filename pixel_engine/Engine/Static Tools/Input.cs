@@ -28,7 +28,7 @@ namespace pixel_renderer
                 }
             }
         }
-        public static bool GetInputValueByType_Name(InputEventType type, string key)
+        public static bool GetInputValue(InputEventType type, string key)
         {
             Key key_ = Enum.Parse<Key>(key);
             var input_value = type switch
