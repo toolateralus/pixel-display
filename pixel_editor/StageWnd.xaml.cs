@@ -82,27 +82,20 @@ namespace pixel_editor
         {
             e.Handled = true;
 
-            List<Node> nodes = new();
             int count = nodeCtTxt.Text.ToInt();
             var name = stageNameTxt.Text.ToFileNameFormat();
             
-            if (usingStarterAssets)
-                Player.AddPlayer(nodes);
-
             var stage = Stage.Default();
-
-            stage.nodes.Clear();
 
             for (int i = 0; i < count; i++) 
                 stage.AddNode(Rigidbody.Standard());
 
-            var asset = new Stage(stage);
             var meta = new Metadata(
-                asset.Name,
-                pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\" + asset.Name + pixel_renderer.Constants.AssetsFileExtension,
+                stage.Name,
+                pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\" + stage.Name + pixel_renderer.Constants.AssetsFileExtension,
                 pixel_renderer.Constants.AssetsFileExtension);
             
-            AssetLibrary.Register(meta, asset);
+            AssetLibrary.Register(meta, stage);
 
             var msgResult = MessageBox.Show(
                 "Stage Creation complete : Would you like to set this as the current stage and add it to the current project?",
@@ -110,8 +103,8 @@ namespace pixel_editor
 
             if (msgResult == MessageBoxResult.Yes)
             {
-                Runtime.Instance.SetStage(asset);
-                Runtime.Instance.AddStageToProject(asset);
+                Runtime.Instance.SetStage(stage);
+                Runtime.Instance.AddStageToProject(stage);
             }
             Close(); 
         }

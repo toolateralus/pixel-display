@@ -88,8 +88,9 @@ namespace pixel_renderer
         {
             List<Metadata> stagesMeta = Instance.LoadedProject.stagesMeta;
             List<Stage> stages = Instance.LoadedProject.stages;
-
-            Stage stage = new();
+            
+            Stage stage;
+            
             if (stagesMeta.Count <= 0)
             {
                 stage = InstantiateDefaultStageIntoProject(stagesMeta, stages);
@@ -97,29 +98,23 @@ namespace pixel_renderer
             else
             {
                 Metadata stageMeta = stagesMeta[0];
-                stage ??= StageIO.ReadStage(stageMeta);
+                stage = StageIO.ReadStage(stageMeta);
             }
             Instance.SetStage(stage);
         }
 
-        private static Stage InstantiateDefaultStageIntoProject(List<Metadata> stagesMeta, List<Stage> stages)
+        private static Stage? InstantiateDefaultStageIntoProject(List<Metadata> stagesMeta, List<Stage> stages)
         {
             Log("No stages were found in the project. A Default will be instantiated and added to the project.");
-            
-            var meta = Stage.DefaultMetadata;
 
-            Stage stage = new();
-            if (File.Exists(meta.fullPath))
+            Stage stage = Stage.Default();
+            if (stage != null)
             {
-                stage = StageIO.ReadStage(meta);
-                if (stage != null)
-                {
-                    stages.Add(stage);
-                    stagesMeta.Add(meta);
-                    StageIO.WriteStage(stage);
-                }
+                stages.Add(stage);
+                stage.Sync();
+                stagesMeta.Add(stage.Metadata);
+                StageIO.WriteStage(stage);
             }
-            else stage = null; 
             return stage; 
         }
         internal int selectedStage = 0;

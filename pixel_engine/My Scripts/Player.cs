@@ -8,6 +8,7 @@ using pixel_renderer.FileIO;
 using System.DirectoryServices;
 using System.Runtime.CompilerServices;
 using System.Drawing;
+using System.Xml.Linq;
 
 namespace pixel_renderer.Scripts
 {
@@ -101,6 +102,7 @@ namespace pixel_renderer.Scripts
             var jumpVel = speed * 2;
             rb.velocity.y = moveVector.y * jumpVel;
         }
+
         public static void AddPlayer(List<Node> nodes)
         {
             Node playerNode = new("Player")
@@ -118,6 +120,23 @@ namespace pixel_renderer.Scripts
             nodes.Add(playerNode);
 
         }
+        public static Node Standard()
+        {
+            Node playerNode = new("Player")
+            {
+                position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
+            };
+
+            playerNode.AddComponent<Rigidbody>();
+            playerNode.AddComponent<Player>().takingInput = true;
+            Sprite sprite = AddSprite(playerNode);
+
+            AddCollider(playerNode, sprite);
+            AddCamera(playerNode);
+
+            return playerNode;
+        }
+
         public static void AddCamera(Node playerNode, int height = 256, int width = 256, DrawingType type = DrawingType.Wrapped)
         {
             var cam = playerNode.AddComponent<Camera>();
