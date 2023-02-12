@@ -66,6 +66,7 @@ namespace pixel_editor
                 CBit.Render(new Bitmap(background_meta.fullPath), imgPreview);
             mainWnd.Closing += MainWnd_Closing;  
         }
+
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
         private void SetBackgroundClicked(object sender, RoutedEventArgs e)
         {

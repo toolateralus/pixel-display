@@ -103,18 +103,15 @@ namespace pixel_renderer
             Instance.SetStage(stage);
         }
 
-        private static Stage? InstantiateDefaultStageIntoProject(List<Metadata> stagesMeta, List<Stage> stages)
+        private static Stage InstantiateDefaultStageIntoProject(List<Metadata> stagesMeta, List<Stage> stages)
         {
             Log("No stages were found in the project. A Default will be instantiated and added to the project.");
 
             Stage stage = Stage.Default();
-            if (stage != null)
-            {
-                stages.Add(stage);
-                stage.Sync();
-                stagesMeta.Add(stage.Metadata);
-                StageIO.WriteStage(stage);
-            }
+            stages.Add(stage);
+            stage.Sync();
+            stagesMeta.Add(stage.Metadata);
+            StageIO.WriteStage(stage);
             return stage; 
         }
         internal int selectedStage = 0;

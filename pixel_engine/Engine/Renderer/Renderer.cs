@@ -26,9 +26,11 @@ namespace pixel_renderer
                     if (uiComponent.Enabled && uiComponent is Camera camera) 
                         RenderSprites(camera, renderInfo);
             }
-
         }
-        public override void Render(Image output) => RenderFromFrame(frame, stride, Resolution, output);
-
+        public override void Render(Image output)
+        {
+            if(stride != 0)
+                RenderFromFrame(frame, stride, Resolution, output);
+        }
     }
 }

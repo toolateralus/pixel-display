@@ -102,17 +102,22 @@ namespace pixel_editor
             return new()
             {
                 phrase = "theme;",
+                description = "Swaps the current theme [DOES NOT WORK CURRENTLY]",
+                syntax = "theme(light_or_dark);",
+                argumentTypes = new string[] {"str:"},
                 action = (o) =>
                 {
                     bool hasArg = o != null && o.Length > 0;
                     if (hasArg)
                     {
-                        if(o[0] is string arg)
+                        if (o[0] is string arg)
+                        {
                             Editor.Current.SetTheme(arg);
+                            return;
+                        }
                     }
                 },
                 args = null,
-                description = "Swaps the current theme",
             };
         }
         public static Command cmd_load_project()
@@ -120,6 +125,8 @@ namespace pixel_editor
             return new()
             {
                 phrase = "loadProject;",
+                syntax = "loadProject(projectName);",
+                argumentTypes = new string[] { "str:" },
                 action = async (e) =>
                 {
                     string name = (string)e[0];
@@ -165,6 +172,7 @@ namespace pixel_editor
             return new()
             {
                 phrase = "reload;|/r;|++r;",
+                syntax = "reload();",
                 action = (o) =>
                 {
                     Runtime.TryLoadStageFromProject();
@@ -178,6 +186,7 @@ namespace pixel_editor
             return new()
             {
                 phrase = "stage.Background.Randomize;",
+                syntax = "stage.Background.Randomize();",
                 action = RandomizeBackground,
                 description = "Sets the current stage's background to a random array of colors until reloaded.",
             };
@@ -187,6 +196,8 @@ namespace pixel_editor
             return new()
             {
                 phrase = "stage.Set;",
+                syntax = "stage.Set(stageName);",
+                argumentTypes = new string[] { "str:" },
                 action = async (o) =>
                 {
                     string stageName = (string)o[0];
@@ -202,7 +213,10 @@ namespace pixel_editor
                     var stage = Project.GetStageByName(stageName);
                     
                     if (stage == null)
+                    {
                         Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
+                        return; 
+                    }
 
                     var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
                     await prompt;
@@ -226,7 +240,7 @@ namespace pixel_editor
                             break;
                     }
                 },
-                description = "Attempts to find a stage by name, and if found, prompts the user to load it or not."
+                description = "[STAGE MUST BE IN PROJECT] \nAttempts to find a stage by name, and if found, prompts the user to load it or not."
             };
         }
         public static Command cmd_asset_exists()
@@ -234,6 +248,8 @@ namespace pixel_editor
             return new()
             {
                 description = "Shows a count of all loaded assets, and an option to see more info.",
+                syntax = "fetch(assetName);",
+                argumentTypes = new string[] { "str:" },
                 phrase = "fetch;",
                 action = AssetExists,
             };
@@ -243,6 +259,8 @@ namespace pixel_editor
             return new()
             {
                 phrase = "node.Get;",
+                syntax = "node.Get(nodeName);",
+                argumentTypes = new string[] { "str:" },
                 action = (e) =>
                 {
                     string name = (string)e[0];
@@ -265,6 +283,7 @@ namespace pixel_editor
             return new()
             {
                 phrase = "node.List;",
+                syntax = "node.List();",
                 action = ListNodes,
                 args = null,
                 description = "Lists all nodes in currently loaded stage.",
@@ -276,10 +295,12 @@ namespace pixel_editor
             return new()
             {
                 phrase = "node.Set;",
-                args = Array.Empty<object>(),
+                syntax = "node.Set(nodeName, fieldName, value);",
+                argumentTypes = new string[] { "str:", "str:", "bool:" },
+                args = null,
                 action = SetNodeField,
-                description = "neccesary arguments : (string Name, string FieldName, object value) " +
-            "\n gets a node and attempts to write the provided value to specified field.",
+                description = "gets a node and attempts to write the provided value to specified field.",
+            
             };
         }
         public static Command cmd_call_node_method()
@@ -287,10 +308,12 @@ namespace pixel_editor
             return new()
             {
                 phrase = "node.Call;",
-                args = Array.Empty<object>(),
+                syntax = "node.Call(nodeName, methodName);",
+                argumentTypes = new string[] {"str:", "str:"},
                 action = CallNodeMethod,
-                description = "neccesary arguments : (string Name, string MethodName) {Method must be paramaterless.} " +
-                             "\n Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
+                args = null,
+                description = "Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
+                             
             };
         }
         public static Command cmd_set_resolution()
@@ -298,6 +321,8 @@ namespace pixel_editor
             return new()
             {
                 phrase = "resolution.Set;",
+                syntax = "resolution.Set(1024,1024);",
+                argumentTypes = new string[] { "vec:"},
                 action = (e) =>
                 {
                     Vec2 vector = (Vec2)e[0];
@@ -305,7 +330,7 @@ namespace pixel_editor
                     Console.Print(vector.AsString());
                     Runtime.Instance.renderHost.GetRenderer().Resolution = newRes;
                 },
-                description = "sets the resolution to the specified Vec2. \n syntax : resolution.Set(vec:x,y);"
+                description = "sets the resolution to the specified Vec2"
             };
 
         }
@@ -314,6 +339,7 @@ namespace pixel_editor
             return new()
             {
                 phrase = "resolution.Get;",
+                syntax = "resolution.Get();",
                 action = (e) =>
                 {
                     Console.Print(((Vec2)Runtime.Instance.renderHost.GetRenderer().Resolution).AsString());
@@ -326,6 +352,7 @@ namespace pixel_editor
             return new()
             {
                 phrase = "cclear;",
+                syntax = "cclear();",
                 action = (e) =>
                 {
                     if (e is not null && e[0] is bool color)
@@ -340,7 +367,8 @@ namespace pixel_editor
         {
             return new()
             {
-                phrase = "++n;|newNode;",
+                phrase = "++n;",
+                syntax = "++n();",
                 action = (o) => Runtime.Instance.GetStage().create_generic_node(),
                 description = "Spawns a generic node with a Rigidbody , Sprite, and Collider, and adds it to the current Stage."
             };
@@ -351,11 +379,12 @@ namespace pixel_editor
             return new()
             {
                 phrase = "help;|help|Help|/h",
+                syntax = "help();",
                 action = (o) =>
                 {
                     string output = "";
                     foreach (var cmd in Current.Active)
-                        output += divider + cmd.phrase + "\n" + cmd.description + divider;
+                        output += "\n" + cmd.syntax  + "\n" + cmd.description + "\n" + divider;
                     Print(output);
                 },
             };
@@ -365,6 +394,8 @@ namespace pixel_editor
             return new()
             {
                 phrase = "log;",
+                syntax = "log(message);",
+                argumentTypes = new string[] {"str:"},
                 action = (o) => Console.Print(o[0]),
                 description = "Logs a message to the console, Some characters will cause this to fail."
             };
@@ -374,7 +405,8 @@ namespace pixel_editor
             return new()
             {
                 phrase = "cam;",
-                args = Array.Empty<object>(),
+                syntax = "cam();",
+                argumentTypes = new string[] { "str:", "str:", "vec"},
                 action = (e) =>
                 {
                     if (e.Length < 3)

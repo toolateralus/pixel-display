@@ -3,6 +3,7 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Documents;
 
 namespace pixel_editor
 {
@@ -60,13 +61,20 @@ namespace pixel_editor
         internal static void TryCallLine(string line, List<Command> commands)
         {
             _ = ParseArguments(line, out string[] args);
-            _ = ParseLoopParams(line, out string loop_param);
+            line = ParseLoopParams(line, out string loop_param);
 
             int count = loop_param.ToInt();
+            int cmds = 0;
 
             foreach (var command in commands)
                 if (command.Equals(line))
+                {
                     ExecuteCommand(args, count, command);
+                    cmds++;
+            }
+
+            if (cmds == 0)
+                Console.Print($"\"{line}\" \n not found.");
         }
 
         private static void ExecuteCommand(string[] args, int count, Command command)
@@ -77,7 +85,7 @@ namespace pixel_editor
                 
                 for (int i = 0; i < args.Length; ++i)
                 {
-                    object? parse_arg = ParseParam(args[i]);
+                    object? parse_arg = ParseParam(args[i], command, i);
 
                     if (parse_arg != null)
                         init_args.Add(parse_arg);
@@ -86,53 +94,35 @@ namespace pixel_editor
                 command.Invoke();
             }
             for (int i = 0; i < count; ++i)
-            {
                 command.Invoke();
-            }
         }
 
-        public static object? ParseParam(string arg)
+        public static object? ParseParam(string arg, Command command, int index)
         {
             // this string gets treated like a null/void variable.
             object? outArg = "";
-
             arg = RemoveUnwantedChars(arg);
-            outArg = ConvertToObjectAndRemoveTypeArg(arg, outArg);
-            return outArg;
-        }
-        private static object ConvertToObjectAndRemoveTypeArg(string arg, object outArg)
-        {
-            foreach (var identifier in typeIdentifiers)
-                if (arg.Contains(identifier))
-                {
-                    switch (identifier)
-                    {
-                        case "vec:":
-                            arg = arg.Replace("vec:", "");
-                            outArg = Vec2(arg);
-                            break;
+            if (command.argumentTypes == null)
+                return outArg;
 
-                        case "int:":
-                            arg = arg.Replace("int:", "");
-                            outArg = int.Parse(arg);
-                            break;
-
-                        case "str:":
-                            arg = arg.Replace("str:", "");
-                            outArg = String(arg);
-                            break;
-
-                        case "float:":
-                            arg = arg.Replace("float:", "");
-                            outArg = float.Parse(arg);
-                            break;
-                        case "bool:":
-                            arg = arg.Replace("bool:", "");
-                            outArg = bool.Parse(arg);
-                            break;
-                    }
-                }
-
+            switch (command.argumentTypes[index])
+            {
+                case "vec:":
+                    outArg = Vec2(arg);
+                    break;
+                case "int:":
+                    outArg = int.Parse(arg);
+                    break;
+                case "str:":
+                    outArg = String(arg);
+                    break;
+                case "float:":
+                    outArg = float.Parse(arg);
+                    break;
+                case "bool:":
+                    outArg = bool.Parse(arg);
+                    break;
+            }
             return outArg;
         }
         internal static string ParseLoopParams(string input, out string repeaterArgs)

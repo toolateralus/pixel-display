@@ -16,12 +16,13 @@ namespace pixel_renderer.Scripts
     public class Player : Component
     {
         [Field] [JsonProperty] public bool takingInput = true;
-        [Field] [JsonProperty] public int speed = 4;
+        [Field] [JsonProperty] public int speed = 8;
         [Field] [JsonProperty] public float inputMagnitude = 1f;
 
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vec2 moveVector;
+        int resolution_increment; 
 
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
 
@@ -37,7 +38,6 @@ namespace pixel_renderer.Scripts
         void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, 0);
         void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, 0);
 
-        int res_incrementer; 
         void IncreaseResolution(object[]? e)
         {
             var renderer = Runtime.Instance.renderHost.GetRenderer();
@@ -48,10 +48,10 @@ namespace pixel_renderer.Scripts
                 if (renderer.Resolution[i] < Constants.MaxResolution[i])
                     renderer.Resolution[i] += incrementAmt;
             }
-            res_incrementer++;
+            resolution_increment++;
 
-            if(res_incrementer % 25 == 0)
-                Runtime.Log(((Vec2)renderer.Resolution).AsString());
+            if(resolution_increment % 25 == 0)
+                Runtime.Log(renderer.Resolution.AsString());
 
         }
         void DecreaseResolution(object[]? e)
@@ -63,9 +63,9 @@ namespace pixel_renderer.Scripts
                 if (renderer.Resolution[i] > Constants.MinResolution[i])
                     renderer.Resolution[i] -= decrementAmt;
 
-            if (res_incrementer % 25 == 0)
+            if (resolution_increment % 25 == 0)
                 Runtime.Log(((Vec2)renderer.Resolution).AsString());
-            res_incrementer--;
+            resolution_increment--;
         }
 
         private void CreateInputEvents()

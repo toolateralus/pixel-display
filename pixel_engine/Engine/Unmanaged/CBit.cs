@@ -16,24 +16,7 @@ namespace pixel_renderer
     {
         [DllImport("gdi32.dll")]
         internal static extern bool DeleteObject(IntPtr intPtr);
-        public static unsafe byte[] ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd)
-        {
-            bmd = bmp.LockBits(
-                new Rectangle(0, 0, bmp.Width, bmp.Height),
-                ImageLockMode.ReadOnly,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            byte[] data = new byte[bmd.Stride * bmp.Height];
-            Marshal.Copy(bmd.Scan0, data, 0, data.Length);
-            bmp.UnlockBits(bmd);
-            return data;
-        }
-        public static void RenderFromFrame(byte[] frame, int stride, Vec2 resolution, Image output)
-        {
-            output.Source = BitmapSource.Create(
-                (int)resolution.x, (int)resolution.y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
-                frame, stride);
-        }
-
+       
         /// <summary>
         /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
         /// </summary>
@@ -47,22 +30,7 @@ namespace pixel_renderer
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
             source.UnlockBits(bmd);
         }
-        public static void ByteArrayFromColorArray(Color[,] colors, out byte[] data, out int stride)
-        {
-            var w = colors.GetLength(0);
-            var h = colors.GetLength(1);
-            stride = 4 + (w * 24 + 31) / 32;
-            data = new byte[stride * h];
-
-            for (int x = 0; x < w; x++)
-                for (int y = 0; y < h; y++)
-                {
-                    data[y * stride + x * 3 + 0] = colors[x, y].B;
-                    data[y * stride + x * 3 + 1] = colors[x, y].G;
-                    data[y * stride + x * 3 + 2] = colors[x, y].R;
-                }
-        }
-
+      
         /// <summary>
         ///  asseses each node in the stage and renders any neccesary data
         /// </summary>
@@ -99,6 +67,7 @@ namespace pixel_renderer
 
             bmp.UnlockBits(bmd);
         }
+       
         /// <summary>
         /// Takes a group of sprites and writes their individual color data arrays to a larger map as positions to prepare for collision and drawing.
         /// </summary>
@@ -121,6 +90,7 @@ namespace pixel_renderer
                     }
             return colors;
         }
+       
         public static Color[,] ColorArrayFromBitmap(Bitmap bmp)
         {
             if (bmp == null)
@@ -136,6 +106,22 @@ namespace pixel_renderer
             }
             return _colors;
         }
+        public static void ByteArrayFromColorArray(Color[,] colors, out byte[] data, out int stride)
+        {
+            var w = colors.GetLength(0);
+            var h = colors.GetLength(1);
+            stride = 4 + (w * 24 + 31) / 32;
+            data = new byte[stride * h];
+
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                {
+                    data[y * stride + x * 3 + 0] = colors[x, y].B;
+                    data[y * stride + x * 3 + 1] = colors[x, y].G;
+                    data[y * stride + x * 3 + 2] = colors[x, y].R;
+                }
+        }
+        
         public static Bitmap SolidColorBitmap(Vec2 size, Color color)
         {
             int x = (int)size.x;
@@ -155,6 +141,24 @@ namespace pixel_renderer
                 for (int y = 0; y < size.y; y++)
                     colorData[x, y] = color;
             return colorData;
+        }
+        
+        public static unsafe byte[] ReadonlyBitmapData(in Bitmap bmp, out BitmapData bmd)
+        {
+            bmd = bmp.LockBits(
+                new Rectangle(0, 0, bmp.Width, bmp.Height),
+                ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            byte[] data = new byte[bmd.Stride * bmp.Height];
+            Marshal.Copy(bmd.Scan0, data, 0, data.Length);
+            bmp.UnlockBits(bmd);
+            return data;
+        }
+        public static void RenderFromFrame(byte[] frame, int stride, Vec2 resolution, Image output)
+        {
+            output.Source = BitmapSource.Create(
+                (int)resolution.x, (int)resolution.y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+                frame, stride);
         }
     }
 }
