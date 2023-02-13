@@ -11,6 +11,7 @@ namespace pixel_renderer
     public class Project
     {
         public List<Stage> stages = new();
+
         [JsonProperty]
         public List<Metadata> stagesMeta = new();
 
@@ -117,9 +118,10 @@ namespace pixel_renderer
 
         }
         [JsonConstructor]
-        public Project(List<Metadata>? stage_meta, List<Metadata> library, int stageIndex, int fileSize, string name, int hash)
+        public Project(List<Metadata>? stage_meta, string name, int hash)
         {
-            //this.stage_metadata = stage_meta;
+            this.stagesMeta = stage_meta;
+            this.stages = new(); 
             this.Hash = hash;
             Name = name;
         }
