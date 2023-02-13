@@ -406,7 +406,7 @@ namespace pixel_editor
             {
                 phrase = "cam;",
                 syntax = "cam();",
-                argumentTypes = new string[] { "str:", "str:", "vec"},
+                argumentTypes = new string[] { "str:", "str:", "vec:"},
                 action = (e) =>
                 {
                     if (e.Length < 3)
@@ -417,6 +417,7 @@ namespace pixel_editor
                     object value = e[2];
 
                     Node? node = Runtime.Instance.GetStage().FindNode(nName);
+                    if (node is null) Console.Print("Node was not found.") 
                     Camera cam = node.GetComponent<Camera>();
                     Type type = cam.GetType();
                     FieldInfo? field = type.GetRuntimeField(fName);
@@ -502,7 +503,7 @@ namespace pixel_editor
         {
             string nodesList = "";
             char nonBreakingspace = '\u2007';
-            foreach (Node node in Runtime.Instance.GetStage().Nodes)
+            foreach (Node node in Runtime.Instance.GetStage().nodes)
                 nodesList += node.Name.PadLeft(16, nonBreakingspace) + " ";
             Console.Print($"{nodesList}");
         }

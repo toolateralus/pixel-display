@@ -1,5 +1,8 @@
 ﻿using Newtonsoft.Json;
+using pixel_renderer.Assets;
 using System;
+using System.CodeDom;
+using System.DirectoryServices.ActiveDirectory;
 using System.Xml.Linq;
 
 namespace pixel_renderer.FileIO
@@ -9,9 +12,20 @@ namespace pixel_renderer.FileIO
     {
         [JsonProperty] public string Name;
         [JsonProperty] public string UUID;
-        [JsonProperty] public Metadata Metadata; 
+        [JsonProperty] public Metadata Metadata;
 
-        public Asset(string Name, string UUID)
+        public virtual bool Sync()
+        {
+            try
+            {
+                string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsFileExtension;
+                Metadata = new(Name, defaultPath, Constants.AssetsFileExtension);
+                return true;
+            }
+            catch { return false; }
+               
+        }
+        public Asset(string Name, string UUID) : this()
         {
             this.Name = Name;
             this.UUID = UUID;
@@ -21,6 +35,9 @@ namespace pixel_renderer.FileIO
         {
             Name = "New Asset";
             UUID = pixel_renderer.UUID.NewUUID();
+
+            Sync();
+            AssetLibrary.Register(Metadata, this);
         }
     }
 }

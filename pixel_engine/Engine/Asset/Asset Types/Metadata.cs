@@ -33,7 +33,8 @@ namespace pixel_renderer.FileIO
         }
         public Metadata()
         {
-
+            Name = "Default Metadata";
+            fullPath = Constants.WorkingRoot + Constants.AssetsDir + Name + Constants.AssetsFileExtension;
         }
         [JsonConstructor]
         public Metadata(string name, string fullPath, string pathFromProjectRoot, string uuid, string extension)

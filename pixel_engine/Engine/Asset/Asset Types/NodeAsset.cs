@@ -27,6 +27,10 @@ namespace pixel_renderer.Assets
         [JsonConstructor]
         public NodeAsset(string nodeUUID, string nodeName , string name, string UUID, List<Component> components, Vec2 pos, Vec2 scale, List<NodeAsset> children) : base(name, UUID)
         {
+            nodeName = name;
+            Name = name;
+            this.UUID = UUID; 
+
             this.components = components;
             this.pos = pos;
             this.scale = scale;
@@ -38,11 +42,16 @@ namespace pixel_renderer.Assets
         public NodeAsset(Node runtimeValue) : base()
         {
             nodeName = runtimeValue.Name;
-            nodeUUID = runtimeValue.UUID;
-            children = runtimeValue.children.ToNodeAssets();
+            Name = nodeName; 
 
+            nodeUUID = runtimeValue.UUID;
+            UUID = nodeUUID; 
+            
+            children = runtimeValue.children.ToNodeAssets();
+            
             pos = runtimeValue.position;
             scale = runtimeValue.scale;
+            
             foreach (var comp in runtimeValue.ComponentsList)
                 components.Add(comp);
         }
@@ -60,9 +69,11 @@ namespace pixel_renderer.Assets
         }
 
         [JsonConstructor]
-        public ComponentAsset(Component runtimeComponent, string name, Type fileType, string UUID) : base(name, UUID) 
+        public ComponentAsset(Component runtimeComponent, string name, string UUID) : base(name, UUID) 
         {
             this.runtimeComponent = runtimeComponent; 
+            this.UUID = UUID;
+            Name = name;
         }
     }
 }

@@ -24,23 +24,32 @@ namespace pixel_renderer
         public static T? ReadJson<T>(Metadata meta, bool closeStreamWhenFinished = true) where T : new()
         {
             T? obj = new();
-            if (meta is null)
+            try
             {
-                Runtime.Log(nameof(meta) + " was not found.");
-                // this is a really janky way to return null out of this;
-                return (T)Convert.ChangeType(null, typeof(T));
+
+                if (meta is null)
+                {
+                    Runtime.Log(nameof(meta) + " was not found.");
+                    // this is a really janky way to return null out of this;
+                    return (T)Convert.ChangeType(null, typeof(T));
+                }
+                if (Constants.ReadableExtensions.Contains(meta.extension))
+                {
+                    var jsonSerializer = JsonSerializer.Create(Settings);
+                    StreamReader reader = new(meta.fullPath);
+                    using JsonTextReader jsonReader = new(reader);
+                    obj = jsonSerializer.Deserialize<T>(jsonReader);
+                    if (closeStreamWhenFinished)
+                        reader.Close();
+                    return obj;
+                }
+                throw new FileNotFoundException("File was not found at provided path, or had an unsupported file extension");
             }
-            if (Constants.ReadableExtensions.Contains(meta.extension))
+            catch(Exception e)
             {
-                var jsonSerializer = JsonSerializer.Create(Settings);
-                StreamReader reader = new(meta.fullPath);
-                using JsonTextReader jsonReader = new(reader);
-                obj = jsonSerializer.Deserialize<T>(jsonReader);
-                if (closeStreamWhenFinished)
-                    reader.Close();
-                return obj;
+                Runtime.Log("File read exception occured : \n\t" + e.Message, true, false);
             }
-            throw new FileNotFoundException("File was not found at provided path, or had an unsupported file extension");
+            return obj;
         }
         /// <summary>
         /// this does not check if the directory exists nor does it instantiate one where it doesnt exist

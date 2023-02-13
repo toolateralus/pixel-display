@@ -1,6 +1,6 @@
-﻿namespace pixel_renderer
+﻿using System;
+namespace pixel_renderer
 {
-    using System;
 
     public struct BoundingBox2DInt
     {

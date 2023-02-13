@@ -8,6 +8,7 @@ using pixel_renderer.Assets;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Markup;
+using System.Windows.Documents.DocumentStructures;
 
 namespace pixel_renderer.FileIO
 {
@@ -24,6 +25,7 @@ namespace pixel_renderer.FileIO
         {
             string fullPath = new(pair.Key.fullPath.ToCharArray());
             string extension = new(pair.Key.extension.ToCharArray());
+
             string name = new(pair.Key.Name);
 
             string thisPath = fullPath;
@@ -58,9 +60,88 @@ namespace pixel_renderer.FileIO
         {
             FindOrCreateAssetsDirectory();
             IO.WriteJson(data, meta);
-            AssetLibrary.Register(meta, data);
-            WriteMetadata(new(meta, data));
         }
-       
+
+        static Dictionary<string, int> filesWritten = new(); 
+
+        public static bool FindOrCreatePath(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+                return false;
+            }
+            return true;
+        }
+
+        internal static void GuaranteeUniqueName(Metadata meta, Asset asset)
+        {
+            string[] split;
+            string name, dir;
+
+            GetDir(meta, out split, out name, out dir);
+
+            _ = FindOrCreatePath(dir);
+
+            name = DuplicateCheck(name, dir, asset);
+
+            asset.Name = name;
+            meta.Name = name;
+
+            UpdateMetadataPath(meta, name);
+
+        }
+        public static void GetDir(Metadata meta, out string[] split, out string name, out string dir)
+            {
+                split = meta.fullPath.Split("\\");
+
+                // nullifies C:\\ cuz for some reason it would double up when reconstructing from array
+                split[0] = "";
+
+                name = split[^1];
+                dir = meta.fullPath.Replace(name, "");
+            }
+
+        private static string DuplicateCheck(string name, string dir, Asset asset)
+        {
+            foreach (var path in Directory.EnumerateFiles(dir))
+            {
+                var splitPath = path.Split("\\");
+                var fileName = splitPath[^1];
+
+                if (fileName == name)
+                {
+                    var fileNameSplit = name.Split(".");
+                    var isolated_name = fileNameSplit[0];
+                    var extension = fileNameSplit[1];
+
+                    Metadata meta = new(isolated_name, fileName, extension);
+
+                    var obj = IO.ReadJson<object>(meta);
+
+                    // this allows us to overwrite files that have already been
+                    // read and or written this session by comparing their data
+                    if (obj is Asset foundAsset && foundAsset == asset)
+                        continue; 
+
+                    if (filesWritten.ContainsKey(name))
+                    {
+                        isolated_name += filesWritten[name]++;
+                        name = isolated_name + "." + extension;
+                    }
+                    else filesWritten.Add(name, 1);
+
+                    Runtime.Log($"Number added to file {name}");
+                }
+            }
+            return name;
+        }
+
+        private static void UpdateMetadataPath(Metadata meta, string name)
+        {
+           var path = meta.pathFromProjectRoot.Split("\\");
+           meta.fullPath = Constants.WorkingRoot + path[0] + "\\" + path [1] + "\\" + name;
+
+        }
     }
 }

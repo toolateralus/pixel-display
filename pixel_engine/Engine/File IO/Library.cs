@@ -10,6 +10,7 @@ namespace pixel_renderer.Assets
     {
         static Dictionary<Metadata, Asset> Current = new();
         internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
+
         public static void Register((Metadata, Asset) assetPair)
         {
             Asset asset = assetPair.Item2;
@@ -81,10 +82,10 @@ namespace pixel_renderer.Assets
         {
             RefreshProjectStageMetadata();
             Project.SaveProject();
-            foreach (var assetPair in Current)
+            foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
             {
+                AssetIO.GuaranteeUniqueName(assetPair.Key, assetPair.Value);
                 AssetIO.WriteAsset(assetPair.Value, assetPair.Key);
-                AssetIO.WriteMetadata(assetPair);
             }
         }
 

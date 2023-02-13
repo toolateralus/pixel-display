@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -82,6 +83,13 @@ namespace pixel_renderer
             
             if (gotAsset) return stage; 
             return null; 
+        }
+
+        internal void AddStage(Stage stage)
+        {
+            stage.Sync();
+            stagesMeta.Add(stage.Metadata);
+            stages.Add(stage);
         }
 
         /// <summary>

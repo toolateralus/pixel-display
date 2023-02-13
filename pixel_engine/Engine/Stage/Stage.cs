@@ -81,7 +81,8 @@ namespace pixel_renderer
         int genericNodeCt = 0;
         #region Node Utils
         public event Action OnNodeQueryMade;
-        public List<Node> Nodes { get; private set; } = new();
+
+        public List<Node> nodes { get; private set; } = new();
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
         #endregion
 
@@ -127,22 +128,22 @@ namespace pixel_renderer
         #region Engine Stuff
         public void Awake()
         {
-            for (int i = 0; i < Nodes.Count; i++)
+            for (int i = 0; i < nodes.Count; i++)
             {
-                Node node = Nodes[i];
+                Node node = nodes[i];
                 node.ParentStage = this;
                 node.Awake();
             }
         }
         public void FixedUpdate(float delta)
         {
-            lock (Nodes)
+            lock (nodes)
             {
                 FixedUpdateBusy = true;
 
-                for (int i = 0; i < Nodes.Count; i++)
+                for (int i = 0; i < nodes.Count; i++)
                 {
-                    Node node = Nodes[i];
+                    Node node = nodes[i];
                     node.FixedUpdate(delta);
                 }
 
@@ -159,7 +160,7 @@ namespace pixel_renderer
         }
         public void RefreshStageDictionary()
         {
-            foreach (Node node in Nodes)
+            foreach (Node node in nodes)
             {
                 if (node.Name is null) continue;
                 if (!NodesByName.ContainsKey(node.Name))
@@ -169,7 +170,7 @@ namespace pixel_renderer
             List<Node> nodesToRemove = new();
 
             foreach (var pair in NodesByName)
-                if (!Nodes.Contains(pair.Value))
+                if (!nodes.Contains(pair.Value))
                     nodesToRemove.Add(pair.Value);
 
             nodesToRemove.Clear();
@@ -177,13 +178,13 @@ namespace pixel_renderer
         public Node[] FindNodesByTag(string tag)
         {
             OnNodeQueryMade?.Invoke();
-            IEnumerable<Node> matchingNodes = Nodes.Where(node => node.tag == tag);
+            IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
             return matchingNodes.ToArray();
         }
         public Node FindNodeByTag(string tag)
         {
             OnNodeQueryMade?.Invoke();
-            return Nodes
+            return nodes
                     .Where(node => node.tag == tag)
                     .First();
         }
@@ -192,7 +193,7 @@ namespace pixel_renderer
             OnNodeQueryMade?.Invoke();
             IEnumerable<Node> result = (
                 from node
-                in Nodes
+                in nodes
                 where node.Name.Equals(name)
                 select node); 
             return result.Any() ? result.First() : null; 
@@ -203,9 +204,9 @@ namespace pixel_renderer
             void add_node(object[] o)
             {
                 if (o[0] is not Node newNode) return;
-                if (Nodes.Contains(newNode)) return;
+                if (nodes.Contains(newNode)) return;
                 newNode.ParentStage = this;
-                Nodes.Add(newNode);
+                nodes.Add(newNode);
             }
             object[] args = { node };
 
@@ -232,7 +233,7 @@ namespace pixel_renderer
         public IEnumerable<Sprite> GetSprites()
         {
             var sprite = new Sprite();
-            IEnumerable<Sprite> sprites = (from Node node in Nodes
+            IEnumerable<Sprite> sprites = (from Node node in nodes
                                            where node.TryGetComponent(out sprite)
                                            select sprite);
             return sprites;
@@ -240,14 +241,14 @@ namespace pixel_renderer
         
         public IEnumerable<T> GetAllComponents<T>() where T : Component
         {
-            return from Node node in Nodes
+            return from Node node in nodes
                 from T component in node.GetComponents<T>()
                    select component;
         }
         
         public Node? FindNodeWithComponent<T>() where T : Component
         {
-            IEnumerable<Node> collec = from node in Nodes where node.HasComponent<T>() select node;
+            IEnumerable<Node> collec = from node in nodes where node.HasComponent<T>() select node;
 
             if (!collec.Any())
                 return null;
@@ -258,7 +259,7 @@ namespace pixel_renderer
         
         public List<Node>? FindNodesWithComponent<T>() where T : Component
         {
-            IEnumerable<Node> outNodes = from node in Nodes where node.HasComponent<T>() select node;
+            IEnumerable<Node> outNodes = from node in nodes where node.HasComponent<T>() select node;
             return outNodes.ToList();
         }
         #endregion
@@ -326,7 +327,7 @@ namespace pixel_renderer
         {
             this.Name = Name;
             _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
-            Nodes = nodes.ToNodeList();
+            this.nodes = nodes.ToNodeList();
             OnNodeQueryMade = RefreshStageDictionary;
 
             Background = backgroundMeta;
@@ -334,11 +335,10 @@ namespace pixel_renderer
             
             Awake();
         }
-        public void Sync()
+        public override bool Sync()
         {
             Metadata = new(Name, Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension, Constants.StageFileExtension);
-            NodeAssets = Nodes.ToNodeAssets();
-            StageIO.WriteStage(this);
+            return true; 
         }
         public Stage()
         {

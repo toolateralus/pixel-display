@@ -56,13 +56,13 @@ namespace pixel_renderer
         {
             collisionCells.Clear();
 
-            if (stage.Nodes is null ||
-                stage.Nodes.Count == 0) return;
+            if (stage.nodes is null ||
+                stage.nodes.Count == 0) return;
 
             IReadOnlyCollection<Node> nodes;
             
-            lock (stage.Nodes)
-                nodes = stage.Nodes;
+            lock (stage.nodes)
+                nodes = stage.nodes;
 
             if (nodes is null)
                 return;
@@ -122,7 +122,7 @@ namespace pixel_renderer
                 hash.RegisterObject(node);
             };
 
-            List<Node> nodes = new(stage.Nodes);
+            List<Node> nodes = new(stage.nodes);
                 foreach (var node in nodes)
                     RegisterAction(node);
 

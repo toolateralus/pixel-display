@@ -16,7 +16,7 @@ namespace pixel_renderer
         /// <returns></returns>
         public bool GetNodeAtPoint(Stage stage, Point clickPosition, out Node? result)
         {
-            foreach (var node in stage.Nodes)
+            foreach (var node in stage.nodes)
             {
                 if (node == lastSelected) continue;
 
@@ -38,7 +38,6 @@ namespace pixel_renderer
             result = null;
             return false;
         }
-      
         public static void Update(Stage stage)
         {
             var delta = runtime.renderHost.info.FrameTime;
