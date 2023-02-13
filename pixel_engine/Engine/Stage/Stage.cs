@@ -75,7 +75,10 @@ namespace pixel_renderer
         public string UUID => _uuid;
 
         public bool FixedUpdateBusy { get; private set; }
+        
+        [JsonProperty]
         public Metadata Background;
+
         public Bitmap? initializedBackground;
 
         int genericNodeCt = 0;
@@ -128,6 +131,9 @@ namespace pixel_renderer
         #region Engine Stuff
         public void Awake()
         {
+            if (Background != null)
+                initializedBackground = GetBackground();
+
             for (int i = 0; i < nodes.Count; i++)
             {
                 Node node = nodes[i];

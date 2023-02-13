@@ -405,7 +405,7 @@ namespace pixel_editor
             return new()
             {
                 phrase = "cam;",
-                syntax = "cam();",
+                syntax = "cam(Name, Field, Vector2 Value);",
                 argumentTypes = new string[] { "str:", "str:", "vec:"},
                 action = (e) =>
                 {
@@ -417,7 +417,8 @@ namespace pixel_editor
                     object value = e[2];
 
                     Node? node = Runtime.Instance.GetStage().FindNode(nName);
-                    if (node is null) Console.Print("Node was not found."); 
+                    if (node is null) 
+                        Console.Print("Node was not found."); 
                     Camera cam = node.GetComponent<Camera>();
                     Type type = cam.GetType();
                     FieldInfo? field = type.GetRuntimeField(fName);
@@ -435,9 +436,14 @@ namespace pixel_editor
 
             if (background == null)
             {
-                Error("Error finding background.", 2);
-                return;
+                background = stage.GetBackground();
+                if (background == null)
+                {
+                    Error("Error finding background. Instantiating a new one, though this likely does not fix the problem.", 2);
+                    background = new(pixel_renderer.Constants.ScreenW, pixel_renderer.Constants.ScreenH);
+                }
             }
+
             int y, x;
 
             x = background.Width;

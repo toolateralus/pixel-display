@@ -115,15 +115,17 @@ namespace pixel_renderer.FileIO
                     var isolated_name = fileNameSplit[0];
                     var extension = fileNameSplit[1];
 
-                    Metadata meta = new(isolated_name, fileName, extension);
-
-                    var obj = IO.ReadJson<object>(meta);
+                    // this metadata is created to check if there are any existing files in place of this one
+                    Metadata meta = new(isolated_name, path, extension);
+                    object obj = IO.ReadJson<object>(meta);
 
                     // this allows us to overwrite files that have already been
                     // read and or written this session by comparing their data
                     if (obj is Asset foundAsset && foundAsset == asset)
-                        continue; 
+                        continue;
 
+                    if (isolated_name == "")
+                        isolated_name = "NamelessAsset";
                     if (filesWritten.ContainsKey(name))
                     {
                         isolated_name += filesWritten[name]++;
@@ -141,6 +143,7 @@ namespace pixel_renderer.FileIO
         {
            var path = meta.pathFromProjectRoot.Split("\\");
            meta.fullPath = Constants.WorkingRoot + path[0] + "\\" + path [1] + "\\" + name;
+           meta.pathFromProjectRoot = Project.GetPathFromRoot(meta.fullPath);
 
         }
     }
