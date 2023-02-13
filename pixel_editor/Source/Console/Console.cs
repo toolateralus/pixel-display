@@ -417,7 +417,7 @@ namespace pixel_editor
                     object value = e[2];
 
                     Node? node = Runtime.Instance.GetStage().FindNode(nName);
-                    if (node is null) Console.Print("Node was not found.") 
+                    if (node is null) Console.Print("Node was not found."); 
                     Camera cam = node.GetComponent<Camera>();
                     Type type = cam.GetType();
                     FieldInfo? field = type.GetRuntimeField(fName);
