@@ -84,7 +84,6 @@ namespace pixel_renderer.FileIO
 
             name = DuplicateCheck(name, dir, asset);
 
-            asset.Name = name;
             meta.Name = name;
 
             UpdateMetadataPath(meta, name);
