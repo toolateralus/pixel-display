@@ -7,13 +7,20 @@ using System.Windows;
 
 namespace pixel_renderer
 {
+    public enum PixelDirectory
+    {
+        Root = 0,
+        Projects = 1,
+        Stages = 2,
+        Assets = 3,
+    }
     public static class IO
     {
-        public static bool Skipping = false;
         private static JsonSerializerSettings Settings = new()
         {
             Formatting = Formatting.Indented,
         };
+        
         /// <summary>
         /// this does not check if the directory or file exists, just deserializes a file into a json object of specified type and returns as C# object
         /// </summary>
@@ -71,7 +78,7 @@ namespace pixel_renderer
             return writer;
 
         }
-
+        
         public static MessageBoxResult FileOverrideWarning(string path)
         {
             return MessageBox.Show($"Are you sure you want to overwrite {path}?",
@@ -84,6 +91,7 @@ namespace pixel_renderer
                                                         "", MessageBoxButton.YesNo, MessageBoxImage.Question,
                                                          MessageBoxResult.No, MessageBoxOptions.RtlReading);
         }
+
     }
     public class ProjectIO
     {

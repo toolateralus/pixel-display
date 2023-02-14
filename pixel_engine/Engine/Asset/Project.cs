@@ -12,17 +12,17 @@ namespace pixel_renderer
     {
         public List<Stage> stages = new();
 
-        [JsonProperty]
+        [JsonProperty] [Field]
         public List<Metadata> stagesMeta = new();
 
-        [JsonProperty]  
+        [JsonProperty] 
         public string Name 
         { 
             get; 
             private set; 
         }
 
-        [JsonProperty]  
+        [JsonProperty]
         private readonly int Hash;
 
         private int NameHash()
@@ -30,37 +30,40 @@ namespace pixel_renderer
             object[] o = new object[] { Name, stages };
             return o.GetHashCode();
         }
-
-        public (string, int) Rename(string newName, int hash)
+        public bool Rename(string newName, int hash)
         {
-            if (this.Hash.Equals(hash))
+            if (Hash.Equals(hash))
+            {
                 Name = newName;
-            return (Name, hash);
+                return true;
+            }
+            return false; 
         }
 
-        public static void SaveProject()
+        public void Save()
         {
-            Project? proj;
-            Metadata meta;
-            GetProjectPsuedoMetadata(out proj, out meta);
-            ProjectIO.WriteProject(proj, meta);
+            ProjectIO.WriteProject(Runtime.Instance.LoadedProject, Metadata);
         }
 
-        private static void GetProjectPsuedoMetadata(out Project? proj, out Metadata meta)
-        {
-            proj = Runtime.Instance.LoadedProject;
+       
 
-            var projDir = Constants.ProjectsDir;
-            var rootDir = Constants.WorkingRoot;
-            var ext = Constants.ProjectFileExtension;
-            var path = rootDir + projDir + '\\' + proj.Name + ext;
-            meta = new Metadata(proj.Name, path, ext);
+        private Metadata Metadata
+        {
+            get
+            {
+                string projDir = Constants.ProjectsDir;
+                string rootDir = Constants.WorkingRoot;
+                string ext = Constants.ProjectFileExtension;
+                string path = rootDir + projDir + '\\' + Name + ext;
+
+                return new Metadata(Name, path, ext);
+            }
         }
         /// <summary>
         /// Runs an import file dialog and when appropriately navigated to a project file, loads it.-
         /// </summary>
         /// <returns></returns>
-        public static Project LoadProject()
+        public static Project Load()
         {
             Project project = Default;
             Metadata meta = FileDialog.ImportFileDialog();
@@ -72,6 +75,7 @@ namespace pixel_renderer
             Project? loadedProject = IO.ReadJson<Project>(meta);
             return loadedProject is null ? project : loadedProject;
         }
+
         internal static string GetPathFromRoot(string filePath)
         {
             var output = filePath.Replace(Constants.WorkingRoot, "");
@@ -86,9 +90,11 @@ namespace pixel_renderer
             return null; 
         }
 
-        internal void AddStage(Stage stage)
+        public void AddStage(Stage stage)
         {
+            // makes sure the metadata is up-to-date.
             stage.Sync();
+
             stagesMeta.Add(stage.Metadata);
             stages.Add(stage);
         }

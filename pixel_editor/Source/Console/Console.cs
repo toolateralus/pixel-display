@@ -97,6 +97,64 @@ namespace pixel_editor
             return PromptResult.Timeout;
         }
 
+        public static object GetArgAtIndexIfExists<T>(int index, object[] o)
+        {
+            bool hasArg = o != null && o.Length > index;
+            if (hasArg && o[index] is T arg)
+                return arg;
+            return null; 
+        }
+
+        public static Command cmd_list_stages()
+        {
+            return new() 
+            {
+                phrase = "stages.List;",
+                description = "Lists the names of the stage metadata loaded for the current project",
+                syntax = "stages.List(inst || file); \n \n{must use either inst or file to get a result, \n inst == instanced/loaded stages | \n file == loaded metadata for stage files in project.}",
+                argumentTypes = new string[] { "str:" },
+                action = (o) =>
+                {
+                    object? arg = GetArgAtIndexIfExists<string>(0, o);
+                    if (arg is null)
+                    {
+                        Console.Print("Argument was null. Expected argument :{ inst || file }");
+                        return; 
+                    }
+
+                    string s = (string)arg;
+                    ListStages(s);
+                },
+                args = null,
+            };
+        }
+        static void PrintLoadedStageNames()
+        {
+            foreach (var stage in Runtime.Instance.LoadedProject.stages)
+                Console.Print(stage.Name);
+        }
+
+        static void PrintLoadedStageMetaFileNames()
+        {
+            foreach (var stage in Runtime.Instance.LoadedProject.stagesMeta)
+                Console.Print(stage.Name);
+        }
+        static void ListStages(string s)
+        {
+            switch (s)
+            {
+                case "inst":
+                    PrintLoadedStageNames();
+                    break;
+
+                case "file":
+                    PrintLoadedStageMetaFileNames();
+                    break;
+
+                default: break;
+            }
+        }
+
         public static Command cmd_swap_theme()
         {
             return new()

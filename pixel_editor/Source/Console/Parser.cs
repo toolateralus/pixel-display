@@ -74,7 +74,7 @@ namespace pixel_editor
             }
 
             if (cmds == 0)
-                Console.Print($"\"{line}\" \n not found.");
+                Console.Print($"\n Command {line} not found.");
         }
 
         private static void ExecuteCommand(string[] args, int count, Command command)
@@ -140,7 +140,7 @@ namespace pixel_editor
             }
             else withoutArgs = input;
             return withoutArgs;
-        }
+        } 
         internal static string ParseArguments(string input, out string[] arguments)
         {
             arguments = new string[]{};

@@ -76,10 +76,9 @@ namespace pixel_renderer.FileIO
 
         internal static void GuaranteeUniqueName(Metadata meta, Asset asset)
         {
-            string[] split;
             string name, dir;
 
-            GetDir(meta, out split, out name, out dir);
+            GetDir(meta, out name, out dir);
 
             _ = FindOrCreatePath(dir);
 
@@ -91,16 +90,16 @@ namespace pixel_renderer.FileIO
             UpdateMetadataPath(meta, name);
 
         }
-        public static void GetDir(Metadata meta, out string[] split, out string name, out string dir)
-            {
-                split = meta.fullPath.Split("\\");
+        public static void GetDir(Metadata meta, out string name, out string dir)
+        {
+            var split = meta.fullPath.Split("\\");
 
-                // nullifies C:\\ cuz for some reason it would double up when reconstructing from array
-                split[0] = "";
+            // nullifies C:\\ cuz for some reason it would double up when reconstructing from array
+            split[0] = "";
 
-                name = split[^1];
-                dir = meta.fullPath.Replace(name, "");
-            }
+            name = split[^1];
+            dir = meta.fullPath.Replace(name, "");
+        }
 
         private static string DuplicateCheck(string name, string dir, Asset asset)
         {

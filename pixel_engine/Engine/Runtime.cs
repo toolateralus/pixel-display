@@ -135,14 +135,7 @@ namespace pixel_renderer
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
 
-        public void AddStageToProject(Stage stage)
-        {
-            if (LoadedProject is null) 
-                throw new NullReferenceException("Loaded Project reference to a null instance of an object");
-            
-            LoadedProject.stages ??= new();
-            LoadedProject.stages.Add(stage);
-        }
+        
       
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {

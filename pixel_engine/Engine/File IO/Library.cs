@@ -75,13 +75,16 @@ namespace pixel_renderer.Assets
         /// <returns>Metadata if found, else null</returns>
 
         /// <summary>
-        /// Save the currently loaded asset Library to the disk.
+        /// Save the currently loaded asset Library and project to the disk.
         /// </summary>
         /// 
         public static void Sync()
         {
-            RefreshProjectStageMetadata();
-            Project.SaveProject();
+            
+            RefreshStageMetadataWithinLoadedProject();
+            
+            Runtime.Instance.LoadedProject.Save();
+
             foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
             {
                 AssetIO.GuaranteeUniqueName(assetPair.Key, assetPair.Value);
@@ -89,7 +92,7 @@ namespace pixel_renderer.Assets
             }
         }
 
-        private static void RefreshProjectStageMetadata()
+        private static void RefreshStageMetadataWithinLoadedProject()
         {
             if (Runtime.Instance.LoadedProject == null)
                 return;

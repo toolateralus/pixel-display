@@ -12,7 +12,7 @@
     {
         public EngineInstance()
         {
-            Project project = Project.LoadProject();
+            Project project = Project.Load();
             InitializeComponent();
             Runtime.Initialize(this, project);
         }

@@ -364,7 +364,7 @@ namespace pixel_editor
         private void OnLoadProjectPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            Project project = Project.LoadProject();
+            Project project = Project.Load();
             if (project is not null)
                 Runtime.Instance.SetProject(project);
         }
