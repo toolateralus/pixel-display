@@ -134,21 +134,16 @@ namespace pixel_editor
         public readonly EditorEventHandler Events = new(); 
         internal Action<object?> RedText(object? o = null)
         {
-            return async (o) =>
+            return (o) =>
             {
-                for (int i = 0; i < 3; ++i)
-                {
-                    await Task.Delay(800);
-                    
-                    var c = JRandom.Color();
-                    c = await VerifyColorBrightnessOrGetNew(c);
-
-                    SolidColorBrush brush_alt = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, c.R, c.G, c.B));
-                    consoleOutput.Foreground = brush_alt;
-                 
-                }
+                consoleOutput.Foreground = Brushes.Red;
             };
         }
+        /// <summary>
+        /// if the color's brightness is under 610 (a+r+g+b) this continually gets a new color every ms for 1000 ms or until it's bright enough then returns it
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>A color with a brightness value greater than 610 </returns>
         private static async Task<System.Drawing.Color> VerifyColorBrightnessOrGetNew(System.Drawing.Color c)
         {
             int iterations = 0;
@@ -167,7 +162,7 @@ namespace pixel_editor
         {
             return (o) =>
             {
-                consoleOutput.Foreground = Brushes.White;
+                consoleOutput.Foreground = Brushes.Green;
                 consoleOutput.Background = Brushes.Black;
             };
         }
@@ -175,7 +170,6 @@ namespace pixel_editor
         {
             inspector.Update(sender, e);
 
-            // updates things relevant to to engine more or less.
             if (ShouldUpdate)
             {
                 Host?.Render(image);
@@ -190,27 +184,44 @@ namespace pixel_editor
             StartEditorRenderClock();
             timer.Tick += Update;    
             Runtime.InspectorEventRaised += QueueEvent;
-            Input.RegisterAction(action: delegate
-            {
-                if (!editorMessages.IsKeyboardFocusWithin)
-                    return;
 
-                if(!Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
-                    return;
 
-                OnCommandSent(new(), new());
+            Input.RegisterAction(SendCommandKeybind, Key.Return);
+            Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
+            Input.RegisterAction(ToggleKeybind, Key.LeftShift);
 
-                editorMessages.Clear();
-
-            }, Key.Return);
         }
+
+        private void ToggleKeybind(object[]? obj)
+        {
+            if (Input.GetInputValue(0, "P"))
+                Runtime.Instance.Toggle();
+
+        }
+
+        private void ClearKeyboardFocus(object[]? obj)
+        {
+            Keyboard.ClearFocus(); 
+        }
+
         private void StartEditorRenderClock()
         {
             timer.Interval = TimeSpan.FromTicks(1000);
             timer.Start();
         }
         
+        void SendCommandKeybind(object[]? o)
+        {
+            if (!editorMessages.IsKeyboardFocusWithin)
+                return;
 
+            if (!Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
+                return;
+
+            OnCommandSent(new(), new());
+
+            editorMessages.Clear();
+        }
         private void IncrementRenderState()
         {
             if (Runtime.Instance.GetStage() is null)
@@ -250,10 +261,10 @@ namespace pixel_editor
             var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
             var framerate = Runtime.Instance.renderHost.info.Framerate;
             gcAllocText.Content =
-                $"GC : {memory}";
+                $"{memory}";
 
             framerateLabel.Content = 
-                $"Framerate: {framerate}"; 
+                $"{framerate}"; 
 
         }
         
@@ -266,19 +277,43 @@ namespace pixel_editor
            consoleOutput.ScrollToEnd(); 
         }
 
-        private void OnCommandSent(object sender, RoutedEventArgs e)
+        private async void OnCommandSent(object sender, RoutedEventArgs e)
         {
             // the max amt of lines that a command can consist of
             int cap = 5;
 
-            string[] split = editorMessages.Text.Split('\n');
-            
-            if (split.Length < cap)
-                cap = split.Length;
+            int lineCt = editorMessages.LineCount;
+
+            if (lineCt < cap)
+                cap = lineCt - 1; 
 
             for (int i = 0; i < cap ; ++i)
             {
+
+                bool hasLine = lineCt > i;
+
+                if (!hasLine)
+                    continue; 
+
                 string line = editorMessages.GetLineText(i);
+
+                if(string.IsNullOrEmpty(line)) 
+                    continue;
+
+                if (line.Contains("wait(" ) && (line.Contains(')') || line.Contains(");")))
+                {
+                    CommandParser.ParseArguments(line, out string[] args);
+                    int delayMs = args[0].ToInt();
+                    if (delayMs == -1)
+                    {
+                        Runtime.Log("wait() was called with an invalid argument, it must be an integer.");
+                        continue;
+                    }
+                    Runtime.Log($"waiting for {delayMs} ms");
+                    await Task.Delay(i);
+                    continue; 
+                }
+
                 if (line != "") 
                     Command.Call(line);
             }
@@ -296,20 +331,32 @@ namespace pixel_editor
         private void Mouse0(object sender, MouseButtonEventArgs e)
         {
             inspector.DeselectNode();
+
             Stage stage = Runtime.Instance.GetStage();
-            if (stage is null) return;
+            
+            if (stage is null) 
+                return;
+
             StagingHost stagingHost = Runtime.Instance.stagingHost;
-            if (stagingHost is null) return;
+            
+            if (stagingHost is null) 
+                return;
 
             UIElement img = (UIElement)sender;
             Point pos = Mouse.GetPosition(img);
 
             pos = GetNormalizedPoint((Image)img, pos);
 
-            Node cams = stage.FindNodeWithComponent<Camera>();
-            if (cams is null) return;
-            Camera cam = cams.GetComponent<Camera>();
-            
+            Node cameraNode = stage.FindNodeWithComponent<Camera>();
+
+            if (cameraNode is null) 
+                return;
+
+            Camera cam = cameraNode.GetComponent<Camera>();
+
+            if (cam is null) 
+                return; 
+
             Vec2 globalPosition = cam.ScreenViewportToGlobal((Vec2)pos);
 
             bool foundNode = stagingHost.GetNodeAtPoint(stage, globalPosition, out var node);

@@ -2,6 +2,7 @@
 using System.Drawing;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
+using pixel_renderer.Scripts;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer
@@ -9,9 +10,12 @@ namespace pixel_renderer
     public class Texture : Asset
     {
         [JsonConstructor]
-        public Texture(Metadata imgData, Metadata maskData, Color? color, string Name, Type fileType, string? UUID = null) : base(Name, UUID)
+        public Texture(Metadata imgData, Metadata maskData, Color? color, string Name, string UUID) : base(Name, UUID)
         {
-
+            this.imgData = imgData;
+            this.maskData = maskData;
+            this.color = color;
+            this.Name = Name;
         }
         public Texture(Vec2Int scale, Metadata? imgData = null, Color? color = null)
         {
@@ -23,6 +27,7 @@ namespace pixel_renderer
                 this.imgData = imgData;
                 Image = new(imgData.fullPath);
             }
+            else imgData = Player.test_image_data;
 
             if(color is not null)  Image = CBit.SolidColorBitmap(this.scale, (Color)color);
             

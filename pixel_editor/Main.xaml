@@ -100,13 +100,14 @@
             <TextBox 
                 FontSize="3.75" 
                 FontFamily="MS Gothic"
-                Grid.Column="13" Grid.Row="15"
-                Grid.ColumnSpan="7" Grid.RowSpan="2" 
+                Grid.Column="12" Grid.Row="15"
+                Grid.ColumnSpan="8" Grid.RowSpan="3" 
                 x:Name="editorMessages" 
                 Background="Black"
                 Foreground="Green"
                 CaretBrush="Green"
-                VerticalScrollBarVisibility="Hidden" 
+                VerticalScrollBarVisibility="Auto" 
+                VerticalContentAlignment="Center"
                 Text =""
                 TextElement.FontStretch="SemiCondensed"
                 TextWrapping="Wrap"
@@ -116,15 +117,18 @@
             <TextBox 
                 
                 x:Name="consoleOutput" 
-                Background="Black"
                 TextWrapping="Wrap"
-                Foreground="White"
+                Background="Black"
+                Foreground="Green"
+                CaretBrush="Black"
+                AcceptsReturn="True"
+                IsReadOnly="true"
                 FontSize="3.75" 
                 FontFamily="MS Gothic"
-                Grid.Column="13" 
-                Grid.Row="11"
-                Grid.ColumnSpan="7" 
-                Grid.RowSpan="4" Text="                                &#xD;&#xA;" 
+                Grid.Column="12" 
+                Grid.Row="10"
+                Grid.ColumnSpan="8" 
+                Grid.RowSpan="5" Text="                                &#xD;&#xA;" 
                 >
             </TextBox>
             

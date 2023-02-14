@@ -139,15 +139,26 @@ namespace pixel_renderer
       
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
-            if(m_stage is null || !PhysicsInitialized) return;
-            Task.Run(() => Collision.Run());
-            StagingHost.Update(m_stage);
+            if(m_stage is null || !PhysicsInitialized) 
+                return;
+            
+            //Task.Run(() => Collision.Run());
+            //StagingHost.Update(m_stage);
+            
+            Task collisionTask = new(delegate { Collision.Run(); });
+            Task stageUpdateTask = new(delegate { StagingHost.Update(m_stage); });
+
+            collisionTask.Start();
+            collisionTask.Wait();
+
+            stageUpdateTask.Start();
+            stageUpdateTask.Wait();
+
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
-
             bool HasNoRenderSurface = renderHost.State is RenderState.Off;
-
+            
             if (!IsRunning || HasNoRenderSurface) 
                 return;
 

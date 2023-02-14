@@ -1,21 +1,16 @@
 ﻿using Newtonsoft.Json;
-using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Windows.Documents;
 
 namespace pixel_renderer
 {
-    public class Node
+    [JsonObject(MemberSerialization.OptIn)]
+    public class Node 
     {
         #region Json Constructor
-        [JsonConstructor] public Node(Stage parentStage, 
-            string name, string tag, 
-            Vec2 position, Vec2 scale,
-            Node? parentNode, List<Node> children,
-            string nodeUUID)
+        [JsonConstructor]
+        public Node(bool Enabled,  Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, List<Node> children, string nodeUUID)
         {
             this.ParentStage = parentStage;
             Name = name;
@@ -25,6 +20,9 @@ namespace pixel_renderer
             this.parentNode = parentNode;
             this.children = children;
             this.tag = tag;
+            this.Components = Components;
+            this.Enabled = Enabled;
+
         }
         #endregion
         #region Other Constructors
@@ -36,34 +34,36 @@ namespace pixel_renderer
             position = pos;
             this.scale = scale;
         }
-        public Node(string name, Vec2 pos, Vec2 scale, string UUID) : this(name, pos, scale)
-        {
-            position = pos;
-            this.scale = scale;
-        }
+        
         #endregion
 
         [JsonIgnore]
         public Stage ParentStage { get; set; }
-        
-        public bool Enabled { get { return _enabled; } }
-        private bool _enabled = true; 
-        
-        public string Name { get; set; }
-        public string tag = "untagged - nyi";
 
-        public string UUID { get { return _uuid; } set { } }
+        [JsonProperty]
+        public bool Enabled { get { return _enabled; } set => _enabled = value;  }
+
+        [JsonProperty]
+        public string UUID { get { return _uuid; } set { _uuid = value; } }
+
+        [JsonProperty]
+        public string Name { get; set; }
+
+        [JsonProperty]
+        public string tag = "Untagged";
+
+        private bool _enabled = true;
         private string _uuid = "";
 
         
-        public Vec2 position = new();
-        public Vec2 localPosition => parentNode == null ? position : parentNode.position - position;
-        public Vec2 scale = new();
+        public Vec2 LocalPos => parentNode == null ? position : parentNode.position - position;
         
+        [JsonProperty]public Vec2 position = new();
+        [JsonProperty] public Vec2 scale = new();
+        
+
         public Node? parentNode;
         public List<Node> children = new();
-        public static Node New => new("", Vec2.zero, Vec2.one);
-        
         public List<Component> ComponentsList
         {
             get
@@ -75,7 +75,7 @@ namespace pixel_renderer
                 return list ?? new();
             }
         }
-        public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
+        [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
         
         public void Awake()
         {
@@ -119,8 +119,10 @@ namespace pixel_renderer
             lock (Components)
             {
                 var type = component.GetType();
+                
                 if (type == typeof(Component))
-                    throw new Exception(); 
+                    throw new Exception("Generic type component was added."); 
+
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
 
@@ -175,6 +177,10 @@ namespace pixel_renderer
                     return false;
                 }
                 component = Components[typeof(T)][index ?? 0] as T;
+                
+                if (component is null) 
+                    return false;
+
                 return true;
             }
         }
@@ -210,6 +216,6 @@ namespace pixel_renderer
             }
         }
 
-        public NodeAsset ToAsset() => new(this);
+        public static Node New => new("", Vec2.zero, Vec2.one);
     }
 }
