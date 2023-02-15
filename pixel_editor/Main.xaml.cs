@@ -279,21 +279,19 @@ namespace pixel_editor
 
         private async void OnCommandSent(object sender, RoutedEventArgs e)
         {
-            // the max amt of lines that a command can consist of
+            if(e.RoutedEvent != null)
+                e.Handled = true; 
+
+            // the max amt of lines that a script can consist of
             int cap = 5;
 
-            int lineCt = editorMessages.LineCount;
+            int lineCt = editorMessages.LineCount - 1;
 
-            if (lineCt < cap)
-                cap = lineCt - 1; 
+            if (lineCt  < cap)
+                cap = lineCt; 
 
             for (int i = 0; i < cap ; ++i)
             {
-
-                bool hasLine = lineCt > i;
-
-                if (!hasLine)
-                    continue; 
 
                 string line = editorMessages.GetLineText(i);
 
@@ -306,11 +304,12 @@ namespace pixel_editor
                     int delayMs = args[0].ToInt();
                     if (delayMs == -1)
                     {
-                        Runtime.Log("wait() was called with an invalid argument, it must be an integer.");
+                        Command.Error("wait(int delay);", 0);
                         continue;
                     }
                     Runtime.Log($"waiting for {delayMs} ms");
                     await Task.Delay(i);
+                    Runtime.Log($"done waiting");
                     continue; 
                 }
 

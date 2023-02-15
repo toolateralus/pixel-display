@@ -11,20 +11,20 @@ namespace pixel_renderer.Assets
         static Dictionary<Metadata, Asset> Current = new();
         internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
 
-        public static void Register((Metadata, Asset) assetPair)
+        /// <summary>
+        /// Registers an asset to the AssetLibrary.
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <param name="asset"></param>
+        /// <returns>false if the asset was already in the library, and true if it was successfully added.</returns>
+        public static bool Register(Metadata metadata, Asset asset)
         {
-            Asset asset = assetPair.Item2;
-            Metadata metadata = assetPair.Item1;
-
-            if (Current.ContainsKey(metadata)) return;
+            if (Current.ContainsKey(metadata)) return false;
             Current.Add(metadata, asset);
-        }
-        public static void Register(Metadata metadata, Asset asset)
-        {
-            if (Current.ContainsKey(metadata)) return;
-            Current.Add(metadata, asset);
+            return true; 
         }
         public static void Unregister(Metadata metadata) => Current.Remove(metadata);
+        
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
         /// </summary>
@@ -87,6 +87,9 @@ namespace pixel_renderer.Assets
 
             foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
             {
+                // makes sure the metadata is appropriately synced.
+                assetPair.Value.Sync();
+
                 AssetIO.GuaranteeUniqueName(assetPair.Key, assetPair.Value);
                 AssetIO.WriteAsset(assetPair.Value, assetPair.Key);
             }

@@ -10,6 +10,8 @@ using pixel_renderer.FileIO;
 
 namespace pixel_editor
 {
+  
+
     public class Console
     {
         public static Console Current 
@@ -100,8 +102,10 @@ namespace pixel_editor
         public static object GetArgAtIndexIfExists<T>(int index, object[] o)
         {
             bool hasArg = o != null && o.Length > index;
+
             if (hasArg && o[index] is T arg)
                 return arg;
+
             return null; 
         }
 
@@ -113,7 +117,7 @@ namespace pixel_editor
         static void PrintLoadedStageMetaFileNames()
         {
             foreach (var stage in Runtime.Instance.LoadedProject.stagesMeta)
-                Console.Print(stage.Name);
+                Console.Print(stage?.Name ?? "null");
         }
         static void ListStages(string s)
         {
@@ -407,15 +411,26 @@ namespace pixel_editor
         };
         public static Command cmd_reload_stage() => new()
         {
-            phrase = "reload;|/r;|++r;",
-            syntax = "reload();",
+            phrase = "reload;",
+            syntax = "reload(int stageIndex);",
+            description = "reloads the currently loaded stage",
+            argumentTypes = new string[] { "int:" },
             action = (o) =>
             {
-                Runtime.TryLoadStageFromProject();
+                var arg = GetArgAtIndexIfExists<int>(0, o);
+                if (arg is not null)
+                {
+                    int index = (int)arg;
+                    Runtime.TryLoadStageFromProject(index);
+                }
+                else Command.Error("reload(int stageIndex);", 0);
+                    
             },
-            args = null,
-            description = "Reloads the currently loaded stage",
+        
         };
+
+       
+
         public static Command cmd_list_stages() => new()
         {
             phrase = "stages.List;",

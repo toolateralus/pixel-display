@@ -11,15 +11,15 @@ using pixel_renderer;
 namespace pixel_editor
 {
     public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
-    public class Command
+    public partial class Command
     {
         /// <summary>
         /// This is the keyword used to invoke the command
         /// </summary>
         public string phrase = "";
-
         public string description = "Please add a description to this command.";
         public string syntax = "Please add syntactical guidelines to this command. e.g. \"node.Get(str:{{target}});\"";
+
         public string[]? argumentTypes = null; 
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace pixel_editor
                     return true;
             return false;
         }
-
+        internal static void Success(string syntax) => Runtime.Log($"Invocation of {syntax} successful!");
     }
 }
 

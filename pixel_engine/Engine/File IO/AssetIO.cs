@@ -2,13 +2,7 @@
 using System;
 using System.Drawing;
 using System.IO;
-using System.Text.Json.Nodes;
-using System.Windows;
-using pixel_renderer.Assets;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Markup;
-using System.Windows.Documents.DocumentStructures;
 
 namespace pixel_renderer.FileIO
 {
@@ -76,15 +70,11 @@ namespace pixel_renderer.FileIO
 
         internal static void GuaranteeUniqueName(Metadata meta, Asset asset)
         {
-            string name, dir;
-
-            GetDir(meta, out name, out dir);
+            GetDir(meta, out string name, out string dir);
 
             _ = FindOrCreatePath(dir);
 
             name = DuplicateCheck(name, dir, asset);
-
-            meta.Name = name;
 
             UpdateMetadataPath(meta, name);
 
@@ -114,20 +104,24 @@ namespace pixel_renderer.FileIO
                     var extension = fileNameSplit[1];
 
                     // this metadata is created to check if there are any existing files in place of this one
+
                     Metadata meta = new(isolated_name, path, extension);
                     object obj = IO.ReadJson<object>(meta);
 
                     // this allows us to overwrite files that have already been
                     // read and or written this session by comparing their data
+
                     if (obj is Asset foundAsset && foundAsset == asset)
                         continue;
 
                     if (isolated_name == "")
                         isolated_name = "NamelessAsset";
+
                     if (filesWritten.ContainsKey(name))
                     {
                         isolated_name += filesWritten[name]++;
                         name = isolated_name + "." + extension;
+                        asset.Name = isolated_name; 
                     }
                     else filesWritten.Add(name, 1);
 

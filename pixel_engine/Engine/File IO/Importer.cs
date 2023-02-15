@@ -23,8 +23,8 @@ namespace pixel_renderer.Assets
                         return;
                 }
 
-            AssetIO.FindOrCreateAssetsDirectory();
-            ImportTask(); 
+            // TODO: reimplement importer.
+            //ImportTask(); 
             
             if (!Runtime.Instance.IsRunning)
                 if (showMessage)
@@ -41,7 +41,9 @@ namespace pixel_renderer.Assets
         private static void ImportTask()
         {
             foreach (var file in Directory.EnumerateFiles(DirectoryPath))
-                FinalImport(file);
+            {
+
+            }
 
             var subdirectories = Directory.EnumerateDirectories(DirectoryPath); 
             if (!subdirectories.Any())
@@ -49,18 +51,11 @@ namespace pixel_renderer.Assets
 
             foreach (var dir in subdirectories)
                 foreach (var file in Directory.EnumerateFiles(dir))
-                    FinalImport(file);
-        }
-        private static void FinalImport(string fullPath)
-        {
-            GetFileNameAndExtensionFromPath(fullPath, out string name, out string ext);
+                {
 
-            Metadata meta = new(name, fullPath, ext);
-            Asset? asset = TryPullObject(meta) as Asset;
-            
-            if (asset is not null)
-                AssetLibrary.Register((meta, asset));
+                }
         }
+        
         public static void GetFileNameAndExtensionFromPath(string path, out string name, out string ext)
         {
             var split = path.Split('\\');
@@ -68,17 +63,6 @@ namespace pixel_renderer.Assets
             split = nameAndExt.Split('.');
             name = split[0];
             ext = split[1];
-        }
-        /// <summary>
-        /// try to read from path specified in metadata and convert to asset type.
-        /// </summary>
-        /// <param name="path"> the file path that will be read from ie. C:\\User\\AppData\\Pixel\\ProjectA\\Asssets\\heanti.gif</param>
-        /// <returns>Asset if it exists at path, else null.</returns>
-        public static object? TryPullObject(Metadata meta)
-        {
-            if(meta.extension == Constants.BitmapFileExtension)
-                return !File.Exists(meta.fullPath) ? null : meta;
-            return null;
         }
 
         /// <summary>

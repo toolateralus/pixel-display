@@ -63,7 +63,7 @@ namespace pixel_renderer
         private Color[,] _colors; 
         public override void Awake()
         {
-
+            texture = new((Vec2Int)size, Player.test_image_data);
         }
         public override void FixedUpdate(float delta)
         {
@@ -134,7 +134,7 @@ namespace pixel_renderer
 
         public Sprite()
         {
-            texture = new((Vec2Int)size, Player.test_image_data);
+            
         }
         public Sprite(int x, int y) : this()
         {

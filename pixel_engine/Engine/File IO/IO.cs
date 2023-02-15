@@ -127,6 +127,7 @@ namespace pixel_renderer
         }
         public static void WriteStage(Stage stage)
         {
+            stage.Sync();
             FindOrCreateStagesDirectory();
             IO.WriteJson(stage, stage.Metadata);
         }

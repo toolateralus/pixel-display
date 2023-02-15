@@ -66,15 +66,22 @@ namespace pixel_editor
             int count = loop_param.ToInt();
             int cmds = 0;
 
-            foreach (var command in commands)
+            foreach (Command command in commands)
                 if (command.Equals(line))
                 {
                     ExecuteCommand(args, count, command);
+                    if (command.error != null)
+                    {
+                        Runtime.Log(command.error);
+                        continue;
+                    }
+                    Command.Success(command.syntax);
                     cmds++;
-            }
+                }
 
             if (cmds == 0)
                 Console.Print($"\n Command {line} not found.");
+
         }
 
         private static void ExecuteCommand(string[] args, int count, Command command)
@@ -101,27 +108,36 @@ namespace pixel_editor
         {
             // this string gets treated like a null/void variable.
             object? outArg = "";
+            
             arg = RemoveUnwantedChars(arg);
-            if (command.argumentTypes == null)
-                return outArg;
 
-            switch (command.argumentTypes[index])
+            if (command.argumentTypes is null || command.argumentTypes.Length < index)
+                return outArg; 
+
+            try
             {
-                case "vec:":
-                    outArg = Vec2(arg);
-                    break;
-                case "int:":
-                    outArg = int.Parse(arg);
-                    break;
-                case "str:":
-                    outArg = String(arg);
-                    break;
-                case "float:":
-                    outArg = float.Parse(arg);
-                    break;
-                case "bool:":
-                    outArg = bool.Parse(arg);
-                    break;
+                switch (command.argumentTypes[index])
+                {
+                    case "vec:":
+                        outArg = Vec2(arg);
+                        break;
+                    case "int:":
+                        outArg = int.Parse(arg);
+                        break;
+                    case "str:":
+                        outArg = String(arg);
+                        break;
+                    case "float:":
+                        outArg = float.Parse(arg);
+                        break;
+                    case "bool:":
+                        outArg = bool.Parse(arg);
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                Runtime.Log(e.Message);
             }
             return outArg;
         }

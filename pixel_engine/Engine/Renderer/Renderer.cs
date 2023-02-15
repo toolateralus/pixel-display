@@ -38,6 +38,7 @@ namespace pixel_renderer
                 }
 
                 List<UIComponent> uiComponents = new();
+
                 foreach (var comp in componentsFound)
                     if (comp is UIComponent uiComp)
                         uiComponents.Add(uiComp);

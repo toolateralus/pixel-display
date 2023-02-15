@@ -31,11 +31,15 @@ namespace pixel_renderer.FileIO
             this.UUID = UUID;
         }
 
-        public Asset() 
+        public Asset(bool shouldUpload = false)
         {
             Name = "New Asset";
             UUID = pixel_renderer.UUID.NewUUID();
+            if(shouldUpload) Upload();
+        }
 
+        public void Upload()
+        {
             Sync();
             AssetLibrary.Register(Metadata, this);
         }

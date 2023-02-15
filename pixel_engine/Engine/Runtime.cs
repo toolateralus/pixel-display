@@ -81,35 +81,36 @@ namespace pixel_renderer
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             instance ??= new(mainWnd, project);
-            TryLoadStageFromProject();
+            TryLoadStageFromProject(0);
         }
 
-        public static void TryLoadStageFromProject()
+        public static void TryLoadStageFromProject(int index)
         {
             List<Metadata> stagesMeta = Instance.LoadedProject.stagesMeta;
-            List<Stage> stages = Instance.LoadedProject.stages;
             
             Stage stage;
-            
-            if (stagesMeta.Count <= 0)
+
+            if (stagesMeta.Count - 1 > index)
             {
-                stage = InstantiateDefaultStageIntoProject();
-            }
-            else
-            {
-                Metadata stageMeta = stagesMeta[0];
+                Metadata stageMeta = stagesMeta[index];
                 stage = StageIO.ReadStage(stageMeta);
             }
+            else stage = InstantiateDefaultStageIntoProject();
+
             Instance.SetStage(stage);
         }
 
         private static Stage InstantiateDefaultStageIntoProject()
         {
-            Log("No stages were found in the project. A Default will be instantiated and added to the project.");
+            Log("No stage found, either the requested index was out of range or no stages were found in the project." +
+                " A Default will be instantiated and added to the project at the requested index.");
 
             Stage stage = Stage.Default();
+
             Instance.LoadedProject.AddStage(stage);
+
             StageIO.WriteStage(stage);
+
             return stage; 
         }
         internal int selectedStage = 0;
