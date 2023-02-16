@@ -177,12 +177,13 @@ namespace pixel_renderer
                     bool has_rb_b = B.TryGetComponent<Rigidbody>(out var rbB);
 
                     if (has_rb && has_rb_b)
-                        RigidbodyCollide(rbA, rbB);
+                        RigidbodyCollide(rbB, rbA);
 
 
                     else if (has_rb || has_rb_b)
-                        if (has_rb) Collide(rbA, col_B);
-                        else Collide(rbB, col_A);
+                        if (has_rb) Collide(rbB, col_A);
+                        else Collide(rbA, col_B);
+
                     AttemptCallbacks(col_A, col_B);
                 }
                 CollisionQueue.Clear();
@@ -201,19 +202,23 @@ namespace pixel_renderer
 
             var a_centroid = aCol.GetCentroid();
             var b_centroid = B.GetCentroid();
+
             Polygon pA = new()
             {
                 vertices = a_vertices,
                 centroid = a_centroid,
                 normals = a_normals,
             };
+
             Polygon pB = new()
             {
                 vertices = b_vertices,
                 centroid = b_centroid,
                 normals = b_normals,
             };
+
             var minDepth = SATCollision.GetMinimumDepthVector(pA, pB);
+
             A.parent.position += minDepth;
         }
         private static void AttemptCallbacks(Collider A, Collider B)
@@ -234,8 +239,8 @@ namespace pixel_renderer
                 if (HasTasks) FinalPhase();
                 return;
             }
-            var stage = Runtime.Instance.GetStage();
 
+            var stage = Runtime.Instance.GetStage();
             RegisterColliders(stage);
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);

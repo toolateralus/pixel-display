@@ -43,6 +43,7 @@ namespace pixel_renderer
                     {
                         overlap = o;
                         smallest = polygonB.normals[i];
+
                         if (Vec2.Dot(polygonA.centroid - polygonB.centroid, smallest) < 0)
                             smallest = CMath.Negate(smallest);
                     }

@@ -92,7 +92,6 @@ namespace pixel_renderer
         #region Engine Stuff
         public void Awake()
         {
-
             for (int i = 0; i < nodes.Count; i++)
             {
                 Node node = nodes[i];
@@ -197,12 +196,13 @@ namespace pixel_renderer
 
         public IEnumerable<Sprite> GetSprites()
         {
-            var sprite = new Sprite();
-            
             if (nodes is null) 
-                return null; 
+                return null;
+
             IEnumerable<Sprite> sprites = (from Node node in nodes
-                                           where node.TryGetComponent(out sprite)
+                                           where node.HasComponent<Sprite>()
+                                           let sprite = node.GetComponent<Sprite>()
+                                           where sprite is not null
                                            select sprite);
             return sprites;
         }
@@ -277,7 +277,7 @@ namespace pixel_renderer
                 r_dir 
             };
         }
-        
+
         [JsonConstructor]
         internal Stage(string name, List<Node> nodes, Metadata metadata, Metadata background, string UUID) : base(name, UUID)
         {
@@ -299,11 +299,12 @@ namespace pixel_renderer
                         Runtime.Log("JSON_ERROR: Null Component Removed From Node.");
                         node.RemoveComponent(component);
                     }
+                    component.parent ??= node;
                 }
             }
-
             Metadata = metadata;
             Background = background;
+            Awake();
         }
 
         private void RemoveNode(Node? node)
@@ -351,6 +352,7 @@ namespace pixel_renderer
         }
         public Stage()
         {
+            Awake();
         }
 
 

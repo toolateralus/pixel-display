@@ -54,6 +54,7 @@ namespace pixel_renderer
         };
 
         public Animation(Metadata[] frameData, int framePadding = 24) => CreateAnimation(frameData, framePadding);
+
         public void CreateAnimation(Metadata[] frameData, int framePadding = 24)
         {
             padding = framePadding;

@@ -21,6 +21,8 @@ namespace pixel_renderer
         private static JsonSerializerSettings Settings = new()
         {
             Formatting = Formatting.Indented,
+            TypeNameHandling = TypeNameHandling.Auto,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
         
         /// <summary>

@@ -60,8 +60,8 @@ namespace pixel_renderer
         
         [JsonProperty]public Vec2 position = new();
         [JsonProperty] public Vec2 scale = new();
-        
 
+        [JsonProperty]
         public Node? parentNode;
         public List<Node> children = new();
         public List<Component> ComponentsList
@@ -194,13 +194,13 @@ namespace pixel_renderer
                        select component;
             }
         }
-        public T GetComponent<T>(int? index = 0) where T : Component
+        public T GetComponent<T>(int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
             {
                 throw new MissingComponentException();
             }
-            T? component = Components[typeof(T)][index ?? 0] as T;
+            T? component = Components[typeof(T)][index] as T;
             return component;
         }
         public bool HasComponent<T>() where T : Component
