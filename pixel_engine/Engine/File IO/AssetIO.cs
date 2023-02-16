@@ -68,6 +68,18 @@ namespace pixel_renderer.FileIO
             return true;
         }
 
+        internal static void GuaranteeUniqueName(Metadata meta)
+        {
+            GetDir(meta, out string name, out string dir);
+
+            _ = FindOrCreatePath(dir);
+
+            name = DuplicateCheck(name, dir);
+
+            UpdateMetadataPath(meta, name);
+
+        }
+
         internal static void GuaranteeUniqueName(Metadata meta, Asset asset)
         {
             GetDir(meta, out string name, out string dir);
@@ -89,6 +101,45 @@ namespace pixel_renderer.FileIO
             name = split[^1];
             dir = meta.fullPath.Replace(name, "");
         }
+
+        public static string DuplicateCheck(string name, string dir)
+        {
+            foreach (var path in Directory.EnumerateFiles(dir))
+            {
+                var splitPath = path.Split("\\");
+                var fileName = splitPath[^1];
+
+                if (fileName == name)
+                {
+                    var fileNameSplit = name.Split(".");
+                    var isolated_name = fileNameSplit[0];
+                    var extension = fileNameSplit[1];
+
+                    // this metadata is created to check if there are any existing files in place of this one
+
+                    Metadata meta = new(isolated_name, path, extension);
+                    object obj = IO.ReadJson<object>(meta);
+
+                    // this allows us to overwrite files that have already been
+                    // read and or written this session by comparing their data
+
+
+                    if (isolated_name == "")
+                        isolated_name = "NamelessAsset";
+
+                    if (filesWritten.ContainsKey(name))
+                    {
+                        isolated_name += filesWritten[name]++;
+                        name = isolated_name + "." + extension;
+                    }
+                    else filesWritten.Add(name, 1);
+
+                    Runtime.Log($"Number added to file {name}");
+                }
+            }
+            return name;
+        }
+
 
         private static string DuplicateCheck(string name, string dir, Asset asset)
         {

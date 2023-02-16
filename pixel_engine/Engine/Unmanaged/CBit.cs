@@ -110,8 +110,9 @@ namespace pixel_renderer
         {
             var w = colors.GetLength(0);
             var h = colors.GetLength(1);
+
             stride = 4 + (w * 24 + 31) / 32;
-            data = new byte[stride * h];
+            data = new byte[stride * h * 4];
 
             for (int x = 0; x < w; x++)
                 for (int y = 0; y < h; y++)

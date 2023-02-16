@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
+using System.Net;
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 using pixel_renderer.Scripts;
@@ -7,39 +10,7 @@ using Color = System.Drawing.Color;
 
 namespace pixel_renderer
 {
-    public interface IAnimate
-    {
-        /// <summary>
-        /// Starts the animation.
-        /// </summary>
-        /// <param name="speed"></param>
-        /// <param name="looping"></param>
-        public abstract void Start(float speed = 1, bool looping = true);
-        /// <summary>
-        /// Stops the animation.
-        /// </summary>
-        /// <param name="reset"></param>
-        public abstract void Stop(bool reset = false);
-        public abstract void Reset();
 
-        /// <summary>
-        /// Gets the next frame in the animation, or skips frames if  an increment of greater than one is provided
-        /// /// </summary>
-        /// <param name="increment"></param>
-        public virtual void Next(int increment = 1)
-        {
-
-        }
-
-        /// <summary>
-        /// Gets the previous frame in the animation, or skips back multiple frames if an increment of greater than one is provided
-        /// </summary>
-        /// <param name="increment"></param>
-        public virtual void Previous(int increment = 1)
-        {
-
-        }
-    }
 
     public class Texture : Asset
     {
@@ -62,21 +33,25 @@ namespace pixel_renderer
                 this.imgData = imgData;
                 Image = new(imgData.fullPath);
             }
-            else imgData = Player.test_image_data;
+            else
+            {
+                this.imgData = Player.test_image_data;
+                Image = new(imgData.fullPath);
+            }
 
             if(color is not null)  Image = CBit.SolidColorBitmap(this.scale, (Color)color);
             
-            
         }
-         public Bitmap? Image { get; set; }
+
+        public Bitmap? Image { get; set; }
 
         [Field] public Bitmap? Mask;
 
         [JsonProperty] internal Metadata imgData;
         [JsonProperty] internal Metadata maskData;
 
-        [Field] [JsonProperty] public Color? color;
-        [Field] [JsonProperty] public Vec2Int scale = new(1, 1);
+        [Field][JsonProperty] public Color? color;
+        [Field][JsonProperty] public Vec2Int scale = new(1, 1);
         
         public bool HasImage => Image != null;
         internal bool HasImageMetadata => imgData != null;
@@ -85,5 +60,10 @@ namespace pixel_renderer
         internal bool HasMaskMetadata => imgData != null;
 
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
+        
+
+
+        
+
     }
 }

@@ -22,7 +22,9 @@ namespace pixel_renderer
             Task DrawTask = new(delegate
             {
                 stride = 4 * ((int)Resolution.x * 24 + 31) / 32;
-                if (frame.Length != stride * Resolution.y) frame = new byte[stride * (int)Resolution.y];
+
+                if (frame.Length != stride * Resolution.y)
+                    frame = new byte[stride * (int)Resolution.y];
 
                 //TODO: find a way to use this without causing an invalid cast exception
                 //IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>();

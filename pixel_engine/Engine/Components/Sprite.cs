@@ -18,13 +18,19 @@ namespace pixel_renderer
         [JsonProperty] public Color Color
         {
             get
-            { 
+            {
                 Color? color = texture?.color ?? Color.White;
-                return (Color)color; 
+                return (Color)color;
             }
-            set => texture.color = value;
+            set
+            {
+                if (texture is null)
+                    return; 
+
+                texture.color = value; 
+            }
         }
-        [JsonProperty] public SpriteType Type = SpriteType.Image;
+        [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
 
         public bool dirty = true;
         Vec2Int colorDataSize = new(1,1);
@@ -32,41 +38,47 @@ namespace pixel_renderer
         private Color[,]? cached_colors = null;
         internal Color[,] ColorData
         {
-            get
-            {
-                if (!dirty)
-                    return _colors;
-                switch (Type)
-                {
-                    case SpriteType.SolidColor:
-                        _colors = CBit.SolidColorSquare(size, Color);
-                        break;
-                    case SpriteType.Image:
-                        if (texture is null)
-                            _colors = CBit.SolidColorSquare(size, Color);
-                        else
-                            _colors = CBit.ColorArrayFromBitmap(texture.Image);
-                        break;
-                    default:
-                        throw new NotImplementedException("Custom Sprite render type not yet implemented");
-                }
-                colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
-                dirty = false;
-                return _colors;
-            }
+            get => _colors;
             set
             {
                 _colors = value;
                 colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
             }
         }
+
+        private void Refresh()
+        {
+            switch (Type)
+            {
+                case SpriteType.SolidColor:
+                    _colors = CBit.SolidColorSquare(size, Color);
+                    break;
+                case SpriteType.Image:
+                    if (texture is null)
+                        _colors = CBit.SolidColorSquare(size, Color);
+                    else
+                        _colors = CBit.ColorArrayFromBitmap(texture.Image);
+                    break;
+               
+                default: 
+                    return; 
+            }
+            colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+            dirty = false;
+        }
+
         private Color[,] _colors; 
+       
         public override void Awake()
         {
             texture = new((Vec2Int)size, Player.test_image_data);
+            Refresh();
+
         }
         public override void FixedUpdate(float delta)
         {
+            if (dirty)
+                Refresh();
         }
         public void Randomize()
         {
@@ -74,9 +86,12 @@ namespace pixel_renderer
             int y = (int)size.y;
             cached_colors = this.ColorData;
             var colorData = new Color[x, y];
+
             for (int j = 0; j < y; j++)
                 for (int i = 0; i < x; i++)
                     colorData[i, j] = JRandom.Color();
+
+
             Draw(size, colorData);
         }
         public void RestoreCachedColor(bool nullifyCache)

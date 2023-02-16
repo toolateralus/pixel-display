@@ -121,14 +121,14 @@ namespace pixel_renderer
                 var type = component.GetType();
                 
                 if (type == typeof(Component))
-                    throw new Exception("Generic type component was added."); 
+                    throw new InvalidOperationException("Generic type component was added."); 
 
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
 
                 Components[type].Add(component);
                 component.parent = this;
-
+                component.Awake();
                 return component;
             }
         }
@@ -141,7 +141,6 @@ namespace pixel_renderer
                     Components.Add(type, new());
 
                 T component = new T();
-
                 AddComponent(component);
                 return component;
             }

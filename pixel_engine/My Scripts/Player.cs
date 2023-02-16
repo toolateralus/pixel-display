@@ -9,6 +9,7 @@ using System.DirectoryServices;
 using System.Runtime.CompilerServices;
 using System.Drawing;
 using System.Xml.Linq;
+using System.Threading.Tasks;
 
 namespace pixel_renderer.Scripts
 {
@@ -22,9 +23,12 @@ namespace pixel_renderer.Scripts
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vec2 moveVector;
-        int resolution_increment; 
 
-        public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", ".bmp");
+        private Animator? anim;
+        private int resolution_increment; 
+        
+        public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
+        public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
 
         public override void Awake()
         {
@@ -33,10 +37,40 @@ namespace pixel_renderer.Scripts
             CreateInputEvents();
         }
 
-        void Up(object[]? e) => moveVector = new Vec2(0, -inputMagnitude);
-        void Down(object[]? e) => moveVector = new Vec2(0, inputMagnitude);
-        void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, 0);
-        void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, 0);
+        void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);
+        void Down(object[]? e) => moveVector = new Vec2(moveVector.x, inputMagnitude);
+        void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, moveVector.y);
+        void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, moveVector.y);
+
+        void StartAnim(object[]? e)
+        {
+            if (parent.TryGetComponent<Animator>(out anim))
+            {
+                anim.Start();
+                Runtime.Log("Animation Started.");
+            }
+            else
+            {
+                Runtime.Log("Animator not found. Creating one.");
+                anim = parent.AddComponent<Animator>();
+                anim.GetAnimation().looping = true;
+            }
+        }
+        void StopAnim(object[]? e)
+        {
+            if (parent.TryGetComponent<Animator>(out anim))
+            {
+                anim.Stop();
+                Runtime.Log("Animation Stopped.");
+            }
+            else
+            {
+                Runtime.Log("Animator not found. Creating one.");
+                anim = parent.AddComponent<Animator>();
+            }
+
+        }
+       
 
         void IncreaseResolution(object[]? e)
         {
@@ -72,12 +106,18 @@ namespace pixel_renderer.Scripts
         {
             RegisterAction(Up,  Key.W);
             RegisterAction(Down,Key.S);
+
             RegisterAction(Left,  Key.A);
             RegisterAction(Right, Key.D);
+            
+             
+            RegisterAction(StartAnim, Key.NumPad9);
+            RegisterAction(StopAnim, Key.NumPad6);
 
-            RegisterAction(IncreaseResolution, Key.OemPlus);
-            RegisterAction(DecreaseResolution, Key.OemMinus);
+            RegisterAction(IncreaseResolution, Key.NumPad2);
+            RegisterAction(DecreaseResolution, Key.NumPad1);
         }
+
         public override void FixedUpdate(float delta)
         {
             if (!takingInput) 
@@ -86,13 +126,16 @@ namespace pixel_renderer.Scripts
             Move(moveVector);
             moveVector = Vec2.zero; 
         }
-        public override void OnTrigger(Collider other) { }
+        public override void OnTrigger(Collider other) 
+        { 
+        }
         public override void OnCollision(Collider collider)
         {
             if (JRandom.Bool())
                 sprite.Randomize();
             else sprite.DrawSquare(sprite.size, JRandom.Color());
         }
+
         private void Move(Vec2 moveVector)
         {
             rb.velocity.x += moveVector.x * speed;
@@ -153,7 +196,6 @@ namespace pixel_renderer.Scripts
         public static Sprite AddSprite(Node playerNode)
         {
             var sprite = playerNode.AddComponent<Sprite>();
-
             sprite.size = Vec2.one * 36;
             return sprite;
         }
