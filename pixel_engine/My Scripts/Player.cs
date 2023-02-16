@@ -42,6 +42,9 @@ namespace pixel_renderer.Scripts
         void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, moveVector.y);
         void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, moveVector.y);
 
+        void MakeTransparent(object[]? e) => sprite?.DrawSquare(sprite.size, Color.FromArgb(5, 76, 185, 99));
+
+
         void StartAnim(object[]? e)
         {
             if (parent.TryGetComponent<Animator>(out anim))
@@ -109,13 +112,15 @@ namespace pixel_renderer.Scripts
 
             RegisterAction(Left,  Key.A);
             RegisterAction(Right, Key.D);
-            
-             
+
+
             RegisterAction(StartAnim, Key.NumPad9);
             RegisterAction(StopAnim, Key.NumPad6);
 
             RegisterAction(IncreaseResolution, Key.NumPad2);
             RegisterAction(DecreaseResolution, Key.NumPad1);
+
+            RegisterAction(MakeTransparent, Key.NumPad0);
         }
 
         public override void FixedUpdate(float delta)

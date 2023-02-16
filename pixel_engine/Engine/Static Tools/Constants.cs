@@ -16,8 +16,7 @@ namespace pixel_renderer
         public const float PhysicsRefreshInterval = .01f;
         public const float MaxDepenetrationForce = 3f;
         public static int TerminalVelocity = 4;
-        public const int CollisionCellSize = 128; // this value determines the area of a Broad Collision Cell, which segments the worlds physics into chunks. The area of the largest Object in the stage must be smaller than this value.
-
+        public const int CollisionCellSize = 48; 
         public static Vec2 TerminalVec2()
         {
             return new Vec2()
@@ -49,10 +48,12 @@ namespace pixel_renderer
         public static bool WithinTerminalVelocity(Rigidbody rigidbody) => WithinTerminalVelocity(rigidbody.velocity);
         #endregion
         #region General Constants
+
         public const int FramerateSampleThreshold = 60;
 
         public const int ScreenH = 256;
         public const int ScreenW = 256;
+
         public static Vec2 CurrentResolution => Runtime.Instance.renderHost.GetRenderer().Resolution;
         public static Vec2 DefaultResolution => new(ScreenW, ScreenH);
         public static Vec2 MaxResolution => new(3840, 3840);
@@ -88,6 +89,7 @@ namespace pixel_renderer
 
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel";    // Root directory for resources
         #endregion
+
         private static List<Type> GetInheritedTypesFromBase<T>()
         {
             var types = AppDomain.CurrentDomain.GetAssemblies()

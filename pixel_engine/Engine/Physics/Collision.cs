@@ -77,21 +77,18 @@ namespace pixel_renderer
             for (int i = 0; i < collisionCells.Count; i++)
             {
                 if (collisionCells is null || i > collisionCells.Count - 1) continue;
-                var cellArray = collisionCells.ToArray();
+                
+                 var cellArray = collisionCells.ToArray();
 
                 if (cellArray is null || i > cellArray.Length - 1)
-                    {
-                        //if(cellArray is null)
-                        //     Runtime.Log("Cell array was null");
-                        //else Runtime.Log("Cell array was empty");
                         return;
-                    }
 
-                if (cellArray[i].Count == 0) continue;
+                if (cellArray[i] == null || cellArray[i].Count == 0) continue;
+
+
                 var cell = cellArray[i].ToArray();
                
 
-                lock(cell)
                 for (int j = 0; j < cell.Length; j++)
                 {
                     var nodeA = cell[j];
