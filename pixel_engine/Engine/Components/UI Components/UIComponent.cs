@@ -9,7 +9,7 @@ namespace pixel_renderer
         [JsonProperty] public float angle = 0f;
         [JsonProperty] public Vec2 bottomRightCornerOffset = new(1, 1);
 
-        public Vec2 Center { get => parent.position; set => parent.position = value; }
+        public Vec2 Center { get => parent.Position; set => parent.Position = value; }
         public Vec2 Size
         {
             get => bottomRightCornerOffset * 2;

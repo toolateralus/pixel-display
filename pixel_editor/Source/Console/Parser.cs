@@ -9,6 +9,12 @@ namespace pixel_editor
 {
     public class CommandParser 
     {
+        private const char Loop = '$';
+        private const char EndLine = ';';
+        private const char ArgumentsStart = '(';
+        private const char ArgumentsEnd = ')';
+        private const string ParameterSeperator = ", ";
+
         // for the final cleanup of commands before execution
         internal static List<char> disallowed_chars = new()
         {
@@ -60,7 +66,7 @@ namespace pixel_editor
 
         internal static void TryCallLine(string line, List<Command> commands)
         {
-            _ = ParseArguments(line, out string[] args);
+            ParseArguments(line, out string[] args, out _);
             line = ParseLoopParams(line, out string loop_param);
 
             int count = loop_param.ToInt();
@@ -86,22 +92,35 @@ namespace pixel_editor
 
         private static void ExecuteCommand(string[] args, int count, Command command)
         {
-            if (args.Length > 0)
+            try
             {
-                List<object> init_args = new();
-                
-                for (int i = 0; i < args.Length; ++i)
+                if (args.Length > 0)
                 {
-                    object? parse_arg = ParseParam(args[i], command, i);
+                    List<object> init_args = new();
 
-                    if (parse_arg != null)
-                        init_args.Add(parse_arg);
+                    for (int i = 0; i < args.Length; ++i)
+                    {
+                        object? parse_arg = ParseParam(args[i], command, i);
+
+                        if (parse_arg != null)
+                            init_args.Add(parse_arg);
+                    }
+
+                    command.args = init_args.ToArray();
+
+                    if (count == 0)
+                    {
+                        command.Invoke();
+                        return;
+                    }
                 }
-                command.args = init_args.ToArray();
-                command.Invoke();
+                for (int i = 0; i < count; ++i)
+                    command.Invoke();
             }
-            for (int i = 0; i < count; ++i)
-                command.Invoke();
+            catch (Exception e)
+            {
+                command.error = e.Message;
+            }
         }
 
         public static object? ParseParam(string arg, Command command, int index)
@@ -145,62 +164,57 @@ namespace pixel_editor
         {
             string withoutArgs = "";
             repeaterArgs = ""; 
-            if (input.Contains('$'))
+            if (input.Contains(Loop))
             {
-                int indexOfStart = input.IndexOf('$');
-                int indexOfEnd = input.IndexOf(';');
+                int indexOfStart = input.IndexOf(Loop);
+                int indexOfEnd = input.IndexOf(EndLine);
+                
                 for (int i = indexOfStart; i < indexOfEnd; ++i)
                     repeaterArgs += input[i];
+
                 if(repeaterArgs.Length > 0)
                     withoutArgs = input.Replace(repeaterArgs, "");
             }
             else withoutArgs = input;
             return withoutArgs;
         } 
-        internal static string ParseArguments(string input, out string[] arguments)
+        internal static void ParseArguments(string input, out string[] arguments, out string commandPhrase)
         {
-            arguments = new string[]{};
-            var args_str = ""; 
-            string cmd_without_args = "";
+            var args_str = "";
+            arguments = Array.Empty<string>();
 
-            bool cmd_has_args = input.Contains('(') && input.Contains(')');
-            cmd_without_args = input.Split('(')[0] + ';';
+            commandPhrase = getCmdPhrase(input);
 
-            if (cmd_has_args)
-                arguments = parseArgumentsReturnCommand(input, ref args_str);
+            if (hasArgs(input))
+                arguments = getParameterArray(input, ref args_str);
 
-
-            return cmd_without_args;
-
-          
-            static string[] split_args_at_commas_with_trailing_whitespace(string args_str)
-            {
-                return args_str.Split(", ");
-            }
-            static string get_args_string(string input, string args_str, int argStartIndex, int argEndIndex)
+            static string[] splitArgsIntoParams(string args_str) => args_str.Split(ParameterSeperator);
+            static string getArguments(string input, string arguments, int argStartIndex, int argEndIndex)
             {
                 for (int i = argStartIndex; i < argEndIndex; ++i)
-                    args_str += input[i];
-                return args_str;
+                    arguments += input[i];
+                return arguments;
             }
-            static void args_indices(string input, out int argStartIndex, out int argEndIndex)
+            static void getArgumentIndices(string input, out int argStartIndex, out int argEndIndex)
             {
-                argStartIndex = input.IndexOf('(');
-                argEndIndex = input.IndexOf(';');
+                argStartIndex = input.IndexOf(ArgumentsStart);
+                argEndIndex = input.IndexOf(EndLine);
             }
-            static string[] parseArgumentsReturnCommand(string input, ref string args_str)
+            static string[] getParameterArray(string input, ref string args_str)
             {
                 string[] arguments;
-                int argStartIndex, argEndIndex;
-                args_indices(input, out argStartIndex, out argEndIndex);
-                args_str = get_args_string(input, args_str, argStartIndex, argEndIndex);
-
-                // causes whitespace to be neccessary to indicate void or null argument,
-                // might cause issues being unimplemented
-                // args_str = remove_parentheses(args_str);
-
-                arguments = split_args_at_commas_with_trailing_whitespace(args_str);
+                getArgumentIndices(input, out int argStartIndex, out int argEndIndex);
+                args_str = getArguments(input, args_str, argStartIndex, argEndIndex);
+                arguments = splitArgsIntoParams(args_str);
                 return arguments;
+            }
+            static bool hasArgs(string input)
+            {
+                return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
+            }
+            static string getCmdPhrase(string input)
+            {
+                return input.Split(ArgumentsStart)[0] + EndLine;
             }
         }
     }

@@ -300,7 +300,7 @@ namespace pixel_editor
 
                 if (line.Contains("wait(" ) && (line.Contains(')') || line.Contains(");")))
                 {
-                    CommandParser.ParseArguments(line, out string[] args);
+                    CommandParser.ParseArguments(line, out string[] args, out _);
                     int delayMs = args[0].ToInt();
                     if (delayMs == -1)
                     {

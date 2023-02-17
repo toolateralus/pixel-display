@@ -8,16 +8,16 @@ using System.Windows;
 namespace pixel_renderer
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class Node 
+    public class Node
     {
         #region Json Constructor
         [JsonConstructor]
-        public Node(bool Enabled,  Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, Dictionary<Vec2, Node> children, string nodeUUID)
+        public Node(bool Enabled, Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, Dictionary<Vec2, Node> children, string nodeUUID)
         {
             this.ParentStage = parentStage;
             Name = name;
             _uuid = nodeUUID;
-            this.position = position;
+            this.Position = position;
             this.scale = scale;
             this.parentNode = parentNode;
             this.children = children;
@@ -28,12 +28,12 @@ namespace pixel_renderer
         }
         #endregion
         #region Other Constructors
-        public Node() =>  _uuid = pixel_renderer.UUID.NewUUID(); 
+        public Node() => _uuid = pixel_renderer.UUID.NewUUID();
         public Node(string name) : this() => Name = name;
         public Node Clone() { return (Node)Clone(); }
         public Node(string name, Vec2 pos, Vec2 scale) : this(name)
         {
-            position = pos;
+            Position = pos;
             this.scale = scale;
         }
 
@@ -43,7 +43,7 @@ namespace pixel_renderer
         public Stage ParentStage { get; set; }
 
         [JsonProperty]
-        public bool Enabled { get { return _enabled; } set => _enabled = value;  }
+        public bool Enabled { get { return _enabled; } set => _enabled = value; }
 
         [JsonProperty]
         public string UUID { get { return _uuid; } set { _uuid = value; } }
@@ -60,11 +60,15 @@ namespace pixel_renderer
         Rigidbody? rb;
         public void Move(Vec2 destination)
         {
-            position = destination;
+            Position = destination;
         }
-        public Vec2 LocalPos => parentNode == null ? position : parentNode.position - position;
-        
-        [JsonProperty]public Vec2 position = new();
+        [JsonProperty] public Vec2 localPos = new();
+
+        public Vec2 Position
+        {
+            get => parentNode == null ? localPos : localPos + parentNode.Position;
+            set => localPos = parentNode == null ? value : value - parentNode.Position;
+        }
         [JsonProperty] public Vec2 scale = new();
 
         [JsonProperty]
@@ -86,19 +90,22 @@ namespace pixel_renderer
         
         public void Child(Node child)
         {
-            var distance = Vec2.Distance(child.position, position);
-            var direction = child.position - position;
-
+            var distance = Vec2.Distance(child.Position, Position);
+            var direction = child.Position - Position;
             if (children.ContainsKey(direction * distance))
                 return;
+            _ = child.parentNode?.TryRemoveChild(child);
+            child.localPos = child.Position - Position;
             children.Add(direction * distance, child);
+            child.parentNode = this;
         }
-        public bool RemoveChild(Node child)
+        public bool TryRemoveChild(Node child)
         {
             foreach (var kvp in children)
                 if (kvp.Value == child)
                 {
                     children.Remove(kvp.Key);
+                    child.parentNode = null;
                     return true;
                 }
             return false; 
@@ -116,11 +123,6 @@ namespace pixel_renderer
                 for (int i = 0; i < ComponentsList.Count; i++)
                       ComponentsList[i].FixedUpdate(delta);
             }
-
-            lock (children)
-                foreach (var v in children)
-                    v.Value.position = position + v.Key;
-
         }
         public void Update()
         {

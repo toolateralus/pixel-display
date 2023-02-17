@@ -14,7 +14,7 @@ namespace pixel_renderer
         
         private protected void ApplyVelocity()
         {
-            parent.position += velocity;
+            parent.Position += velocity;
         }
         private protected void ApplyDrag()
         {
@@ -36,7 +36,7 @@ namespace pixel_renderer
             
 
             node.Name = $"Node {JRandom.Bool()}";
-            node.position = JRandom.Vec2(Vec2.zero, screenSize);
+            node.Position = JRandom.Vec2(Vec2.zero, screenSize);
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();

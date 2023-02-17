@@ -34,7 +34,7 @@ namespace pixel_renderer
             for (int i = 0; i < sprites.Count(); ++i)
             {
                 Sprite sprite = sprites.ElementAt(i);
-                  spritePositions[i] = sprite.parent.position;
+                  spritePositions[i] = sprite.parent.Position;
                 spriteSizeVectors[i] = sprite.size;
                   spriteColorData[i] = sprite.ColorData;
                 spriteCamDistances[i] = sprite.camDistance;

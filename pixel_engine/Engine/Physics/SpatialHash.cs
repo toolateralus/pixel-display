@@ -80,12 +80,12 @@
             List<int> bucketsObjIsIn = new();
 
             Vec2 min = new Vec2(
-                obj.position.x,
-                obj.position.y);
+                obj.Position.x,
+                obj.Position.y);
 
             Vec2 max = new Vec2(
-                obj.position.x + sprite.size.x,
-                obj.position.y + sprite.size.y);
+                obj.Position.x + sprite.size.x,
+                obj.Position.y + sprite.size.y);
 
             float width = Constants.ScreenH / cellSize;
 

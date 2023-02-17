@@ -6,7 +6,7 @@
     internal class Floor : Component
     {
         public Vec2 startPos = new(256, 256);
-        public override void Update() => parent.position = startPos;
+        public override void Update() => parent.Position = startPos;
         public override void OnCollision(Collider collider) => GetComponent<Sprite>().Randomize();
     }
 }

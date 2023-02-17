@@ -36,7 +36,7 @@ namespace pixel_renderer
         /// <returns></returns>
         public Vec2[] GetNormals()
         {
-            Vec2 pos = parent.position;
+            Vec2 pos = parent.Position;
             var corners = GetVertices();
          
             return new Vec2[]
@@ -60,7 +60,7 @@ namespace pixel_renderer
         /// <returns></returns>
         public Vec2[] GetVertices()
         {
-            Vec2 position = new(parent.position);
+            Vec2 position = new(parent.Position);
             Vec2 size = new(this.size);
 
             Vec2 topLeft = position;

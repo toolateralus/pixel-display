@@ -1,4 +1,4 @@
-﻿using System;
+﻿                                                                                                                                                                                                                                                                                  using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,12 +13,14 @@ namespace pixel_editor
     public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
     public partial class Command
     {
+        public const char PhraseVariantSeperator = '|';
+
         /// <summary>
         /// This is the keyword used to invoke the command
         /// </summary>
         public string phrase = "";
         public string description = "Please add a description to this command.";
-        public string syntax = "Please add syntactical guidelines to this command. e.g. \"node.Get(str:{{target}});\"";
+        public string syntax = "Please add syntactical guidelines to this command. e.g. node.Get(str:{{target}});";
 
         public string[]? argumentTypes = null; 
 
@@ -40,18 +42,17 @@ namespace pixel_editor
         public void Invoke() => action?.Invoke(args);
         public bool Equals(string input)
         {
-            // TODO: Each command gets parsed twice, once for comparison and once for usage, instead we could parse the command once and if comparison true, return executable
-            string withoutArgs = CommandParser.ParseArguments(input, out _);
+            CommandParser.ParseArguments(input, out _, out var withoutArgs);
             withoutArgs = CommandParser.ParseLoopParams(withoutArgs, out _);
 
-            string[] split = phrase.Split('|');
+            string[] split = phrase.Split(PhraseVariantSeperator);
 
             foreach (var line in split)
                 if (line.Equals(withoutArgs))
                     return true;
             return false;
         }
-        internal static void Success(string syntax) => Runtime.Log($"Invocation of {syntax} successful!");
+        internal static void Success(string syntax) => Runtime.Log($"{syntax} call successful");
     }
 }
 

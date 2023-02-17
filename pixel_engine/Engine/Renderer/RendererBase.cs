@@ -51,7 +51,7 @@
         public void RenderSprites(Camera camera, StageRenderInfo renderInfo)
         {
             if (Resolution.y == 0 || Resolution.x == 0) return;
-            Node camNode = new("CamNode", camera.parent.position, Vec2.one);
+            Node camNode = new("CamNode", camera.parent.Position, Vec2.one);
             Camera cam = camNode.AddComponent(camera.Clone());
             
             if (cam.zBuffer.GetLength(0) != Resolution.x || cam.zBuffer.GetLength(1) != Resolution.y)
@@ -66,19 +66,19 @@
 
             for (int i = 0; i < renderInfo.Count; ++i)
             {
-                sprite.parent.position = renderInfo.spritePositions[i];
+                sprite.parent.Position = renderInfo.spritePositions[i];
                 sprite.ColorData = renderInfo.spriteColorData[i];
                 sprite.size = renderInfo.spriteSizeVectors[i];
                 sprite.camDistance = renderInfo.spriteCamDistances[i];
 
-                Vec2 firstCorner = cam.GlobalToScreenViewport(sprite.parent.position) * Resolution;
+                Vec2 firstCorner = cam.GlobalToScreenViewport(sprite.parent.Position) * Resolution;
                 //Bounding box on screen which fully captures sprite
                 BoundingBox2D drawArea = new(firstCorner, firstCorner);
                 List<Vec2> corners = new()
                 {
-                    cam.GlobalToScreenViewport(sprite.parent.position + new Vec2(sprite.size.x, 0)) * Resolution,
-                    cam.GlobalToScreenViewport(sprite.parent.position + new Vec2(0, sprite.size.y)) * Resolution,
-                    cam.GlobalToScreenViewport(sprite.parent.position + sprite.size) * Resolution
+                    cam.GlobalToScreenViewport(sprite.parent.Position + new Vec2(sprite.size.x, 0)) * Resolution,
+                    cam.GlobalToScreenViewport(sprite.parent.Position + new Vec2(0, sprite.size.y)) * Resolution,
+                    cam.GlobalToScreenViewport(sprite.parent.Position + sprite.size) * Resolution
                 };
 
                 foreach (Vec2 corner in corners) drawArea.ExpandTo(corner);

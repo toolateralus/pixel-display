@@ -299,6 +299,27 @@ namespace pixel_editor
                 node.Move(vec);
             },
         };
+        public static Command cmd_remove_component() => new()
+        {
+            phrase = "node.RemoveComponent;",
+            syntax = "node.RemoveComponent(string nodeName, string componentType);",
+            description = "Removes one componenet from node of specified type.",
+            argumentTypes = new string[] { "str:", "str:" },
+            action = (e) => 
+            {
+                if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
+                if (!TryGetArgAtIndex(1, out string type, e)) return;
+
+                if (Type.GetType(type) is not Type t)
+                {
+                    Command.Error("node.RemoveComponent(string nodeName, string componentType);", CmdError.NullReference);
+                    return;
+                }
+                foreach (var comp in node.ComponentsList)
+                    if (comp.GetType() == t)
+                        node.RemoveComponent(comp);
+            },
+        };
 
         #endregion
 
@@ -537,7 +558,7 @@ namespace pixel_editor
             Print(
                 $"Node Found! " +
                 $"\n Name : {node.Name} " +
-                $"\n Position : {node.position.AsString()} " +
+                $"\n Position : {node.Position.AsString()} " +
                 $"\n UUID : {node.UUID} " +
                 $"\n Tag: {node.tag} " +
                 $"\n Component Count : {node.ComponentsList.Count}");

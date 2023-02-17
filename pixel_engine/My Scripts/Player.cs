@@ -35,8 +35,8 @@ namespace pixel_renderer.Scripts
             Node node = new("Player Child");
 
             if (parent != null)
-                node.position = parent.position + Vec2.up * 16;
-            else node.position = JRandom.Vec2(Vec2.zero, Vec2.one * Constants.ScreenW); 
+                node.Position = parent.Position + Vec2.up * 16;
+            else node.Position = JRandom.Vec2(Vec2.zero, Vec2.one * Constants.ScreenW); 
 
             var sprite = AddSprite(node);
 
@@ -44,7 +44,6 @@ namespace pixel_renderer.Scripts
 
             Runtime.Instance.GetStage().AddNode(node);
 
-            node.AddComponent<Rigidbody>();
             return node;
         }
         public override void Awake()
@@ -52,15 +51,11 @@ namespace pixel_renderer.Scripts
             CreateInputEvents();
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
-
-
-
         }
 
         void MakeChildObject(object[]? e)
         {
             Node node = test_child_node();
-
             parent.Child(node);
         }
 
@@ -184,7 +179,7 @@ namespace pixel_renderer.Scripts
         {
             Node playerNode = new("Player")
             {
-                position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
+                Position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
             };
 
             playerNode.AddComponent<Rigidbody>();
@@ -201,7 +196,7 @@ namespace pixel_renderer.Scripts
         {
             Node playerNode = new("Player")
             {
-                position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
+                Position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
             };
 
             playerNode.AddComponent<Rigidbody>();

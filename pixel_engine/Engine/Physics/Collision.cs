@@ -28,12 +28,12 @@ namespace pixel_renderer
             var hasCollider = node.TryGetComponent(out Collider col);
             if (!hasCollider) return;
 
-            if (node.position.y > Constants.ScreenW - 4 - col.size.y)
-                 node.position.y = Constants.ScreenW - 4 - col.size.y;
-            if (node.position.x > Constants.ScreenH - col.size.x)
-                 node.position.x = Constants.ScreenH - col.size.x;
-            if (node.position.x < 0)
-                 node.position.x = 0;
+            if (node.Position.y > Constants.ScreenW - 4 - col.size.y)
+                node.Position = node.Position.WithValue(y: Constants.ScreenW - 4 - col.size.y);
+            if (node.Position.x > Constants.ScreenH - col.size.x)
+                node.Position = node.Position.WithValue(x: Constants.ScreenH - col.size.x);
+            if (node.Position.x < 0)
+                node.Position = node.Position.WithValue(x: 0);
         }
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
@@ -43,10 +43,10 @@ namespace pixel_renderer
         }
         private static bool GetBoxCollision(Node nodeA, Node nodeB, Collider col_A, Collider col_B)
         {
-            if (nodeA.position.x < nodeB.position.x + col_B.size.x &&
-                nodeA.position.y < nodeB.position.y + col_B.size.y &&
-                       col_A.size.x + nodeA.position.x > nodeB.position.x &&
-                       col_A.size.y + nodeA.position.y > nodeB.position.y)
+            if (nodeA.Position.x < nodeB.Position.x + col_B.size.x &&
+                nodeA.Position.y < nodeB.Position.y + col_B.size.y &&
+                       col_A.size.x + nodeA.Position.x > nodeB.Position.x &&
+                       col_A.size.y + nodeA.Position.y > nodeB.Position.y)
                 return true;
             return false;
         }
@@ -217,7 +217,7 @@ namespace pixel_renderer
 
             var minDepth = SATCollision.GetMinimumDepthVector(pA, pB);
 
-            A.parent.position += minDepth;
+            A.parent.Position += minDepth;
         }
         private static void AttemptCallbacks(Collider A, Collider B)
         {
@@ -253,7 +253,7 @@ namespace pixel_renderer
             if (velocityDifference < 0.1f)
                 velocityDifference = 1f;
 
-            Vec2 direction = (B.parent.position - A.parent.position).Normalize();
+            Vec2 direction = (B.parent.Position - A.parent.Position).Normalize();
 
             var depenetrationForce = direction * velocityDifference * 0.5f;
 
@@ -262,8 +262,8 @@ namespace pixel_renderer
             B.velocity = Vec2.zero;
             A.velocity = Vec2.zero;
 
-            B.parent.position += depenetrationForce;
-            A.parent.position += CMath.Negate(depenetrationForce);
+            B.parent.Position += depenetrationForce;
+            A.parent.Position += CMath.Negate(depenetrationForce);
 
             depenetrationForce *= 0.5f;
 

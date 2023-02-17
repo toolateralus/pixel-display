@@ -24,7 +24,7 @@ namespace pixel_renderer
                 bool hasSprite = !node.TryGetComponent(out Sprite sprite);
                 if (hasSprite) continue;
 
-                bool isWithin = ((Vec2)clickPosition).IsWithin(node.position, node.position + sprite.size);
+                bool isWithin = ((Vec2)clickPosition).IsWithin(node.Position, node.Position + sprite.size);
                 if (!isWithin) continue;
 
                 result = node;
