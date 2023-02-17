@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
+using pixel_renderer.Scripts;
 
 namespace pixel_editor
 {
@@ -99,14 +100,17 @@ namespace pixel_editor
             };
         }
 
-        public static object GetArgAtIndexIfExists<T>(int index, object[] o)
+        public static bool TryGetArgAtIndex<T>(int index, out T arg, object[] o)
         {
             bool hasArg = o != null && o.Length > index;
 
-            if (hasArg && o[index] is T arg)
-                return arg;
-
-            return null; 
+            if (hasArg && o[index] is T val)
+            {
+                arg = val;
+                return true; 
+            }
+            arg = (T)Convert.ChangeType(null, typeof(T));
+            return false ; 
         }
 
         static void PrintLoadedStageNames()
@@ -274,7 +278,30 @@ namespace pixel_editor
             action = (o) => Runtime.Instance.GetStage().AddNode(Rigidbody.Standard()),
             description = "Spawns a generic node with a Rigidbody , Sprite, and Collider, and adds it to the current Stage."
         };
+        public static Command cmd_add_child() => new()
+        {
+            phrase = "node.Child;",
+            syntax = "node.Child(string parentName);",
+            description = "Adds a child node underneath the target parent if found.",
+            argumentTypes = new string[] { "str:"},
+            action = AddChild,
+        };
+        public static Command cmd_move_node() => new()
+        {
+            phrase = "node.Move;",
+            syntax = "node.Move(string nodeName, Vec2 destination);",
+            description = "Sets the node's position to the provided vector.",
+            argumentTypes = new string[] { "str:", "vec:" },
+            action = (e) => 
+            {
+                if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
+                if (!TryGetArgAtIndex(1, out Vec2 vec, e)) return;
+                node.Move(vec);
+            },
+        };
+
         #endregion
+
 
         #region Asset/Project/Stage/IO Commands
         public static Command cmd_set_camera() => new()
@@ -417,14 +444,8 @@ namespace pixel_editor
             argumentTypes = new string[] { "int:" },
             action = (o) =>
             {
-                var arg = GetArgAtIndexIfExists<int>(0, o);
-                if (arg is not null)
-                {
-                    int index = (int)arg;
-                    Runtime.TryLoadStageFromProject(index);
-                }
-                else Command.Error("reload(int stageIndex);", 0);
-                    
+                if(!TryGetArgAtIndex<int>(0, out int index, o)) return;
+                Runtime.TryLoadStageFromProject(index);
             },
         
         };
@@ -439,19 +460,49 @@ namespace pixel_editor
             argumentTypes = new string[] { "str:" },
             action = (o) =>
             {
-                object? arg = GetArgAtIndexIfExists<string>(0, o);
-                if (arg is null)
-                {
-                    Console.Print("Argument was null. Expected argument :{ inst || file }");
-                    return;
-                }
 
-                string s = (string)arg;
-                ListStages(s);
+                if (!TryGetArgAtIndex<string>(0, out string stageListingType, o))
+                    return;
+                ListStages(stageListingType);
             },
             args = null,
         };
         #endregion
+
+        private static void AddChild(params object[]? e)
+        {
+            if (!TryGetNodeByNameAtIndex(e, out var node, 0)) return;
+            node.Child(Player.test_child_node(node));
+        }
+        public static bool TryGetNodeByNameAtIndex(object[]? e, out Node node, int index)
+        {
+            if(!TryGetArgAtIndex(0,out string nodeName, e))
+            { 
+                Command.Error("node.Child(string parentName)", CmdError.ArgumentNotFound);
+                node = null;
+                return false;
+            }
+
+            Stage? stage = Runtime.Instance.GetStage();
+
+            if (stage is null)
+            {
+                Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
+                node = null; 
+                return false;
+            }
+
+            node = stage.FindNode(nodeName);
+            
+            if (node is null)
+            {
+                Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
+                return false;
+            }
+
+            return true; 
+
+        }
 
 
         private static void RandomizeBackground(params object[]? args)

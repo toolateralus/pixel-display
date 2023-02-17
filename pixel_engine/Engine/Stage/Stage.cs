@@ -31,17 +31,101 @@ namespace pixel_renderer
             } 
         }
 
-        int genericNodeCt = 0;
+        public void AddNode(Node node)
+        {
+            void add_node(object[] o)
+            {
+                if (o[0] is not Node newNode) return;
+                if (nodes.Contains(newNode)) return;
+                newNode.ParentStage = this;
+                nodes.Add(newNode);
+            }
+            object[] args = { node };
+
+            if (NodesBusy)
+                delayedActionQueue.Enqueue((add_node, args));
+            else add_node(args); 
+
+        }
+        private void RemoveNode(Node? node)
+        {
+            object[] args = { node };
+            void remove_node(object[] o)
+            {
+                if (o[0] is not Node actionTimeNode) return;
+                if (!nodes.Contains(actionTimeNode)) return; 
+                nodes.Remove(actionTimeNode);
+            }
+
+            // this is a better way than using a lock statement, as far as i know
+            if (NodesBusy)
+            {
+                delayedActionQueue.Enqueue((remove_node, args));
+            }
+            else remove_node(args);
+        }
+        
+        public Node? FindNode(string name)
+        {
+            IEnumerable<Node> result = (
+                from node
+                in nodes
+                where node.Name.Equals(name)
+                select node); 
+            return result.Any() ? result.First() : null; 
+
+        }
+        public Node[] FindNodesByTag(string tag)
+        {
+            IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
+            return matchingNodes.ToArray();
+        }
+        public Node FindNodeByTag(string tag)
+        {
+            return nodes
+                    .Where(node => node.tag == tag)
+                    .First();
+        }
+        public Node? FindNodeWithComponent<T>() where T : Component
+        {
+            IEnumerable<Node> collec = from node in nodes where node.HasComponent<T>() select node;
+
+            if (!collec.Any())
+                return null;
+
+            Node first = collec.First();
+            return first;
+        }
+        
+        public List<Node>? FindNodesWithComponent<T>() where T : Component
+        {
+            IEnumerable<Node> outNodes = from node in nodes where node.HasComponent<T>() select node;
+            return outNodes.ToList();
+        }
+        public IEnumerable<T> GetAllComponents<T>() where T : Component
+        {
+            return from Node node in nodes
+                   from T component in node.GetComponents<T>()
+                   select component;
+        }
+        
+        public IEnumerable<Sprite> GetSprites()
+        {
+            if (nodes is null)
+                return null;
+
+            IEnumerable<Sprite> sprites = (from Node node in nodes
+                                           where node.HasComponent<Sprite>()
+                                           let sprite = node.GetComponent<Sprite>()
+                                           where sprite is not null
+                                           select sprite);
+            return sprites;
+        }
 
         #region Node Utils
-        public event Action OnNodeQueryMade;
-
         [JsonProperty]
         public List<Node> nodes = new();
-
         public bool NodesBusy { get; private set; }
-
-        public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
         #endregion
 
         #region  Misc Utils
@@ -62,13 +146,16 @@ namespace pixel_renderer
             set { stage_render_info = value; }
         }
 
-        Queue<Action<object[]>> DelayedActionQueue = new();
-        Queue<object[]> DelayedActionArgsQueue = new();
+        Queue<(Action<object[]>, object[])> delayedActionQueue = new();
+
         #endregion
 
+        #region Physics Stuff
 
+
+        #endregion
         #region development defaults
-        
+
         public static Metadata DefaultStageMetadata = new("Default Stage Asset", Constants.WorkingRoot + Constants.AssetsDir + "\\DefaultStage" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
         public static Metadata DefaultBackgroundMetadata = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
 
@@ -87,6 +174,7 @@ namespace pixel_renderer
         }
         #endregion
         #region Engine Stuff
+
         public void Awake()
         {
             for (int i = 0; i < nodes.Count; i++)
@@ -113,7 +201,6 @@ namespace pixel_renderer
             }
 
         }
-
         public void Update()
         {
             lock (nodes)
@@ -128,75 +215,21 @@ namespace pixel_renderer
                 NodesBusy = false;
             }
 
-            for (int i = 0; DelayedActionQueue.Count - 1 > 0; ++i)
+            for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
             {
-                Action<object[]> action = DelayedActionQueue.Dequeue();
-                object[] args = DelayedActionArgsQueue.Dequeue();
+                (Action<object[]>, object[]) kvp = delayedActionQueue.Dequeue();
+
+                object[] args = kvp.Item2;
+                Action<object[]> action = kvp.Item1;
 
                 action.Invoke(args);
             }
 
         }
-        public void RefreshStageDictionary()
-        {
-            foreach (Node node in nodes)
-            {
-                if (node.Name is null) continue;
-                if (!NodesByName.ContainsKey(node.Name))
-                    NodesByName.Add(node.Name, node);
-            }
 
-            List<Node> nodesToRemove = new();
+       
 
-            foreach (var pair in NodesByName)
-                if (!nodes.Contains(pair.Value))
-                    nodesToRemove.Add(pair.Value);
 
-            nodesToRemove.Clear();
-        }
-        public Node[] FindNodesByTag(string tag)
-        {
-            OnNodeQueryMade?.Invoke();
-            IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
-            return matchingNodes.ToArray();
-        }
-        public Node FindNodeByTag(string tag)
-        {
-            OnNodeQueryMade?.Invoke();
-            return nodes
-                    .Where(node => node.tag == tag)
-                    .First();
-        }
-        public Node? FindNode(string name)
-        {
-            OnNodeQueryMade?.Invoke();
-            IEnumerable<Node> result = (
-                from node
-                in nodes
-                where node.Name.Equals(name)
-                select node); 
-            return result.Any() ? result.First() : null; 
-
-        }
-        public void AddNode(Node node)
-        {
-            void add_node(object[] o)
-            {
-                if (o[0] is not Node newNode) return;
-                if (nodes.Contains(newNode)) return;
-                newNode.ParentStage = this;
-                nodes.Add(newNode);
-            }
-            object[] args = { node };
-
-            if (NodesBusy)
-            {
-                DelayedActionArgsQueue.Enqueue(args);
-                DelayedActionQueue.Enqueue(add_node);
-            }
-            else add_node(args); 
-
-        }
         public Stage Copy()
         {
             var output = new Stage(Name, Background, nodes, UUID);
@@ -208,90 +241,9 @@ namespace pixel_renderer
                 return new(Background.fullPath);
             throw new MissingMetadataException($"Metadata :\"{Background.fullPath}\". File not found.");
         }
-
-        public IEnumerable<Sprite> GetSprites()
-        {
-            if (nodes is null) 
-                return null;
-
-            IEnumerable<Sprite> sprites = (from Node node in nodes
-                                           where node.HasComponent<Sprite>()
-                                           let sprite = node.GetComponent<Sprite>()
-                                           where sprite is not null
-                                           select sprite);
-            return sprites;
-        }
         
-        public IEnumerable<T> GetAllComponents<T>() where T : Component
-        {
-            return from Node node in nodes
-                from T component in node.GetComponents<T>()
-                   select component;
-        }
         
-        public Node? FindNodeWithComponent<T>() where T : Component
-        {
-            IEnumerable<Node> collec = from node in nodes where node.HasComponent<T>() select node;
-
-            if (!collec.Any())
-                return null;
-
-            Node first = collec.First();
-            return first;
-        }
-        
-        public List<Node>? FindNodesWithComponent<T>() where T : Component
-        {
-            IEnumerable<Node> outNodes = from node in nodes where node.HasComponent<T>() select node;
-            return outNodes.ToList();
-        }
         #endregion
-
-        public void create_generic_node()
-        {
-            // random variables used here;
-            object[] args = r_node_args();
-
-            int name_ct = (int)args[0];
-            Vec2 pos = (Vec2)args[1];
-            Vec2 scale = Vec2.one;
-
-            var node = new Node($"node {name_ct}", pos, scale);
-
-            var sprite = new Sprite(24, 24);
-            node.AddComponent(sprite);
-            var collider = new Collider()
-            {
-                size = sprite.size,
-                IsTrigger = false
-            };
-            
-            node.AddComponent(collider);
-
-            if(JRandom.Bool()) 
-                node.AddComponent<Rigidbody>();
-
-            AddNode(node);
-        }
-        private object[] r_node_args()
-        {
-            int r_int = genericNodeCt++;
-            Vec2 r_pos = JRandom.Vec2(Vec2.zero, Vec2.one * 256);
-
-            Vec2 r_vec = JRandom.Vec2(Vec2.one * 2, Vec2.one * (Constants.CollisionCellSize - 1));
-            Color r_color = JRandom.Color();
-            bool r_bool = JRandom.Bool();
-            Direction r_dir = JRandom.Direction();
-            return new object[]
-            {
-                r_int,
-                r_pos,
-                r_vec,
-                r_color,
-                r_bool,
-                r_dir 
-            };
-        }
 
         [JsonConstructor]
         internal Stage(string name, List<Node> nodes, Metadata metadata, Metadata background, string UUID) : base(name, UUID) 
@@ -322,23 +274,11 @@ namespace pixel_renderer
             Awake();
         }
 
-        private void RemoveNode(Node? node)
+        public override bool Sync()
         {
-            object[] args = { node };
-            void remove_node(object[] o)
-            {
-                if (o[0] is not Node actionTimeNode) return;
-                if (!nodes.Contains(actionTimeNode)) return;
-                nodes.Remove(actionTimeNode);
-            }
-
-            // this is a better way than using a lock statement, as far as i know
-            if (NodesBusy)
-            {
-                DelayedActionArgsQueue.Enqueue(args);
-                DelayedActionQueue.Enqueue(remove_node);
-            }
-            else remove_node(args);
+            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
+            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
+            return true; 
         }
 
         /// <summary>
@@ -353,23 +293,12 @@ namespace pixel_renderer
             this.Name = Name;
             UUID = existingUUID ?? pixel_renderer.UUID.NewUUID();
             this.nodes = nodes;
-            OnNodeQueryMade = RefreshStageDictionary;
-
             Background = backgroundMeta;
-            
-        }
-        public override bool Sync()
-        {
-            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
-            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
-            return true; 
         }
         public Stage()
         {
             Awake();
         }
-
-
 
     }
 }

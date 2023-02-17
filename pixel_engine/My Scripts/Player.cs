@@ -30,7 +30,23 @@ namespace pixel_renderer.Scripts
         
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
+        public static Node test_child_node(Node? parent = null)
+        {
+            Node node = new("Player Child");
 
+            if (parent != null)
+                node.position = parent.position + Vec2.up * 16;
+            else node.position = JRandom.Vec2(Vec2.zero, Vec2.one * Constants.ScreenW); 
+
+            var sprite = AddSprite(node);
+
+            AddCollider(node, sprite);
+
+            Runtime.Instance.GetStage().AddNode(node);
+
+            node.AddComponent<Rigidbody>();
+            return node;
+        }
         public override void Awake()
         {
             CreateInputEvents();
@@ -43,20 +59,12 @@ namespace pixel_renderer.Scripts
 
         void MakeChildObject(object[]? e)
         {
-            Node node = new("Player Child")
-            {
-                position = JRandom.Vec2(parent.position, parent.position + Vec2.up * 48),
-            };
-            
-            var sprite = AddSprite(node);
-            AddCollider(node, sprite);
+            Node node = test_child_node();
 
-            Runtime.Instance.GetStage().AddNode(node);
-
-            node.AddComponent<Rigidbody>();
-
-            parent.Child(node);  
+            parent.Child(node);
         }
+
+       
 
         void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);
         void Down(object[]? e) => moveVector = new Vec2(moveVector.x, inputMagnitude);

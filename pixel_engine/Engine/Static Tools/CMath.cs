@@ -33,7 +33,11 @@
             y = -v.y,
             z = -v.z
         };
-
+       
+        internal static float Sqrt(float input)
+        {
+            return MathF.Sqrt(input);
+        }
     }
 
 }

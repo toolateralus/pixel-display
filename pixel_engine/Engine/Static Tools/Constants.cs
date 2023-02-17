@@ -16,7 +16,7 @@ namespace pixel_renderer
         public const float PhysicsRefreshInterval = .01f;
         public const float MaxDepenetrationForce = 3f;
         public static int TerminalVelocity = 4;
-        public const int CollisionCellSize = 48; 
+        public const int CollisionCellSize = 512; 
         public static Vec2 TerminalVec2()
         {
             return new Vec2()

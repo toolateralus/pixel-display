@@ -3,9 +3,9 @@ using System;
 
 namespace pixel_editor
 {
+    public enum CmdError { ArgumentNotFound, NullReference, InvalidOperation, InvalidCast };
     public partial class Command
     {
-        public enum CmdError { ArgumentNotFound, NullReference, InvalidOperation, InvalidCast };
 
         public static readonly string[] errorMessages = 
         { 

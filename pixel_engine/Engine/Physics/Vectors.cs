@@ -100,6 +100,18 @@
                 }
             }
         }
+
+        public static float DistanceSquared(Vec2 a, Vec2 b)
+        {
+            var _x = b.x - a.x;
+            var _y = b.y - a.y;
+            return _x * _x + _y * _y;
+        }
+        public static float Distance(Vec2 a, Vec2 b)
+        {
+            var distanceSquared = DistanceSquared(a, b);
+            return CMath.Sqrt(distanceSquared);
+        }
         public static float Dot(Vec2 a, Vec2 b)
         {
             return (a.x * b.x) - (a.y * b.y);

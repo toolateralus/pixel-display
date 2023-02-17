@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Windows;
 
 namespace pixel_renderer
@@ -56,7 +57,11 @@ namespace pixel_renderer
         private bool _enabled = true;
         private string _uuid = "";
 
-        
+        Rigidbody? rb;
+        public void Move(Vec2 destination)
+        {
+            position = destination;
+        }
         public Vec2 LocalPos => parentNode == null ? position : parentNode.position - position;
         
         [JsonProperty]public Vec2 position = new();
@@ -64,9 +69,7 @@ namespace pixel_renderer
 
         [JsonProperty]
         public Node? parentNode;
-        
         public Dictionary<Vec2, Node> children = new();
-
         public List<Component> ComponentsList
         {
             get
@@ -83,10 +86,12 @@ namespace pixel_renderer
         
         public void Child(Node child)
         {
-            Vec2 distance = child.position - position;
-            if (children.ContainsKey(distance))
+            var distance = Vec2.Distance(child.position, position);
+            var direction = child.position - position;
+
+            if (children.ContainsKey(direction * distance))
                 return;
-            children.Add(distance, child);
+            children.Add(direction * distance, child);
         }
         public bool RemoveChild(Node child)
         {
@@ -98,7 +103,6 @@ namespace pixel_renderer
                 }
             return false; 
         }
-        Rigidbody? rb;
         public void Awake()
         {
             for (int i = 0; i < ComponentsList.Count; i++)
@@ -115,10 +119,8 @@ namespace pixel_renderer
 
             lock (children)
                 foreach (var v in children)
-                {
-                    v.Value.
                     v.Value.position = position + v.Key;
-                }
+
         }
         public void Update()
         {
