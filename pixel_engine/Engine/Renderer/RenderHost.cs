@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Image = System.Windows.Controls.Image; 
 
 namespace pixel_renderer

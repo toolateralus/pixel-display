@@ -53,10 +53,11 @@ namespace pixel_renderer
             get
             {
                 if (instance is null)
-                    throw new Exception("Runtime not initialized.");
+                    throw new EngineInstanceException("The runtime domain is not yet initialized");
                 return instance;
             }
         }
+
         public void Toggle()
         {
             if (!PhysicsInitialized)
@@ -147,7 +148,7 @@ namespace pixel_renderer
             //StagingHost.Update(m_stage);
             
             Task collisionTask = new(delegate { Collision.Run(); });
-            Task stageUpdateTask = new(delegate { StagingHost.Update(m_stage); });
+            Task stageUpdateTask = new(delegate { StagingHost.FixedUpdate(m_stage); });
 
             collisionTask.Start();
             collisionTask.Wait();
@@ -165,6 +166,8 @@ namespace pixel_renderer
 
             if (renderHost.State is RenderState.Game) 
                 renderHost.Render(mainWnd.renderImage);
+
+            Task stageUpdateTask = new(delegate { StagingHost.Update(m_stage); });
 
         }
     }

@@ -1,4 +1,5 @@
 ﻿
+using System;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
@@ -38,11 +39,16 @@ namespace pixel_renderer
             result = null;
             return false;
         }
-        public static void Update(Stage stage)
+        public static void FixedUpdate(Stage stage)
         {
             var delta = runtime.renderHost.info.FrameTime;
             stage.FixedUpdate(delta);
             runtime.renderHost.info.frameCount++;
+        }
+
+        public static void Update(Stage m_stage)
+        {
+            m_stage.Update();
         }
     }
 }

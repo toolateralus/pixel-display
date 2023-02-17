@@ -56,6 +56,7 @@
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
+            
             <Grid 
                 x:Name="inspectorChildGrid"
                 Grid.ColumnSpan="8"
@@ -87,6 +88,7 @@
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
             </Grid>
+            
             <Image  x:Name="image"
                     Grid.Row="1" 
                     Grid.Column="0" 
@@ -97,6 +99,7 @@
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     />
+            
             <TextBox 
                 FontSize="3.75" 
                 FontFamily="MS Gothic"
@@ -132,7 +135,6 @@
                 >
             </TextBox>
             
-
             <Label  FontSize="4.5" 
                     FontWeight="Bold"
                     FontFamily="MS Gothic" 

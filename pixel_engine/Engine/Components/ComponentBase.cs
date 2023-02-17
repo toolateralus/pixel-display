@@ -8,27 +8,27 @@ namespace pixel_renderer
     [JsonObject(MemberSerialization.OptIn)]
     public class Component
     {
-        internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
-
+        [JsonProperty]
+        public Node parent;
+        [JsonProperty] 
+        public bool Enabled = true;
+        [JsonProperty] 
+        public string Name { get; set; } = "";
+        [JsonProperty] 
+        private string _uuid = "";
+        public string UUID => _uuid; 
+        
         public Component()
         {
             _uuid = pixel_renderer.UUID.NewUUID(); 
         }
-
-        [JsonProperty]
-        public Node parent { get { return _parent; } set { _parent = value; } }
-        [JsonProperty]
-
-        private protected Node _parent = null;
-        [JsonProperty] public bool Enabled = true;
-        public string UUID => _uuid; 
-        [JsonProperty] private string _uuid = "";
-        [JsonProperty] public string Name { get; set; } = "";
+        
         public virtual void Awake() { }
         public virtual void Update() { }
         public virtual void FixedUpdate(float delta) { }
         public virtual void OnTrigger(Collider other) { }
         public virtual void OnCollision(Collider collider) { }
+       
         /// <summary>
         /// Performs a 'Get Component' call on the Parent node object of the component this is called from.
         /// </summary>
@@ -44,6 +44,7 @@ namespace pixel_renderer
             Name = parent.Name + $" {GetType()}";
             Awake();
         }
+        internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
     }
 
 }

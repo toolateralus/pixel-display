@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace pixel_renderer
 {
@@ -10,7 +11,7 @@ namespace pixel_renderer
     {
         #region Json Constructor
         [JsonConstructor]
-        public Node(bool Enabled,  Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, List<Node> children, string nodeUUID)
+        public Node(bool Enabled,  Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vec2 position, Vec2 scale, Node? parentNode, Dictionary<Vec2, Node> children, string nodeUUID)
         {
             this.ParentStage = parentStage;
             Name = name;
@@ -34,10 +35,10 @@ namespace pixel_renderer
             position = pos;
             this.scale = scale;
         }
-        
+
         #endregion
 
-        [JsonIgnore]
+        [JsonProperty]
         public Stage ParentStage { get; set; }
 
         [JsonProperty]
@@ -63,7 +64,9 @@ namespace pixel_renderer
 
         [JsonProperty]
         public Node? parentNode;
-        public List<Node> children = new();
+        
+        public Dictionary<Vec2, Node> children = new();
+
         public List<Component> ComponentsList
         {
             get
@@ -75,8 +78,27 @@ namespace pixel_renderer
                 return list ?? new();
             }
         }
+
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
         
+        public void Child(Node child)
+        {
+            Vec2 distance = child.position - position;
+            if (children.ContainsKey(distance))
+                return;
+            children.Add(distance, child);
+        }
+        public bool RemoveChild(Node child)
+        {
+            foreach (var kvp in children)
+                if (kvp.Value == child)
+                {
+                    children.Remove(kvp.Key);
+                    return true;
+                }
+            return false; 
+        }
+        Rigidbody? rb;
         public void Awake()
         {
             for (int i = 0; i < ComponentsList.Count; i++)
@@ -84,11 +106,19 @@ namespace pixel_renderer
         }
         public void FixedUpdate(float delta)
         {
+            
             lock (Components)
             {
                 for (int i = 0; i < ComponentsList.Count; i++)
                       ComponentsList[i].FixedUpdate(delta);
             }
+
+            lock (children)
+                foreach (var v in children)
+                {
+                    v.Value.
+                    v.Value.position = position + v.Key;
+                }
         }
         public void Update()
         {
@@ -97,6 +127,8 @@ namespace pixel_renderer
                 for (int i = 0; i < ComponentsList.Count; i++)
                     ComponentsList[i].Update();
             }
+           
+
         }
         
         public void SetActive(bool value) => _enabled = value;
@@ -121,7 +153,10 @@ namespace pixel_renderer
                 var type = component.GetType();
                 
                 if (type == typeof(Component))
-                    throw new InvalidOperationException("Generic type component was added."); 
+                    throw new InvalidOperationException("Generic type component was added.");
+
+                if (type == typeof(Rigidbody))
+                    rb = component as Rigidbody;
 
                 if (!Components.ContainsKey(type))
                     Components.Add(type, new());
@@ -215,6 +250,6 @@ namespace pixel_renderer
             }
         }
 
-        public static Node New => new("", Vec2.zero, Vec2.one);
+        public static Node New => new("New Node", Vec2.zero, Vec2.one);
     }
 }

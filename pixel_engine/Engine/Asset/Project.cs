@@ -114,7 +114,7 @@ namespace pixel_renderer
             get
             {
                 Project defaultProj = new("Default project");
-                defaultProj.stages.Add(Stage.Default());
+                defaultProj.AddStage(Stage.Default());
                 return defaultProj;
             }
         }

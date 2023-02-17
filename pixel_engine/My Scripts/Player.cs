@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Drawing;
 using System.Xml.Linq;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace pixel_renderer.Scripts
 {
@@ -32,9 +33,29 @@ namespace pixel_renderer.Scripts
 
         public override void Awake()
         {
-            parent.TryGetComponent(out sprite);
-            parent.TryGetComponent(out rb);
             CreateInputEvents();
+            parent.TryGetComponent(out rb);
+            parent.TryGetComponent(out sprite);
+
+
+
+        }
+
+        void MakeChildObject(object[]? e)
+        {
+            Node node = new("Player Child")
+            {
+                position = JRandom.Vec2(parent.position, parent.position + Vec2.up * 48),
+            };
+            
+            var sprite = AddSprite(node);
+            AddCollider(node, sprite);
+
+            Runtime.Instance.GetStage().AddNode(node);
+
+            node.AddComponent<Rigidbody>();
+
+            parent.Child(node);  
         }
 
         void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);
@@ -43,7 +64,6 @@ namespace pixel_renderer.Scripts
         void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, moveVector.y);
 
         void MakeTransparent(object[]? e) => sprite?.DrawSquare(sprite.size, Color.FromArgb(5, 76, 185, 99));
-
 
         void StartAnim(object[]? e)
         {
@@ -61,7 +81,7 @@ namespace pixel_renderer.Scripts
         }
         void StopAnim(object[]? e)
         {
-            if (parent.TryGetComponent<Animator>(out anim))
+            if (parent.TryGetComponent(out anim))
             {
                 anim.Stop();
                 Runtime.Log("Animation Stopped.");
@@ -121,6 +141,7 @@ namespace pixel_renderer.Scripts
             RegisterAction(DecreaseResolution, Key.NumPad1);
 
             RegisterAction(MakeTransparent, Key.NumPad0);
+            RegisterAction(MakeChildObject, Key.NumPad4);
         }
 
         public override void FixedUpdate(float delta)
@@ -137,8 +158,8 @@ namespace pixel_renderer.Scripts
         public override void OnCollision(Collider collider)
         {
             if (JRandom.Bool())
-                sprite.Randomize();
-            else sprite.DrawSquare(sprite.size, JRandom.Color());
+                sprite?.Randomize();
+            else sprite?.DrawSquare(sprite.size, JRandom.Color());
         }
 
         private void Move(Vec2 moveVector)

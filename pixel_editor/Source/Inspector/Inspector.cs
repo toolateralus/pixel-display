@@ -113,8 +113,12 @@ namespace pixel_editor
         public static string GetComponentInfo(Component component)
         {
             IEnumerable<FieldInfo> fields = component.GetSerializedFields();
-            List<string >output = new List<string>();
-            output.Add($"{component.Name} \n");
+
+            List<string> output = new()
+            {
+                $"{component.parent.Name} \n {component.Name} \n"
+            };
+
             foreach (var field in fields)
             {
                 string valString = ""; 
@@ -122,8 +126,7 @@ namespace pixel_editor
 
                 if (field.FieldType == typeof(Vec2))
                     valString = ((Vec2)value).AsString();
-                if (field.FieldType.BaseType == typeof(Component))
-                    valString = "component view not yet implemented";
+
 
                 // default value type print
                 else valString = value?.ToString();

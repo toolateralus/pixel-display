@@ -17,10 +17,14 @@
         public SpatialHash(int screenWidth, int screenHeight, int cellSize)
         {
             busy = true; 
+            
             Buckets = new List<List<Node>>();
+
             rows = screenHeight / cellSize;
             columns = screenWidth / cellSize;
+
             this.cellSize = cellSize;
+
             for (int i = 0; i < columns * rows; i++)
                 Buckets.Add(new List<Node>());
             busy = false; 
@@ -37,7 +41,8 @@
             List<int> cells = Hash(obj);
             foreach (var index in cells)
             {
-                if (index < 0 || index >= rows * columns) continue;
+                if (index < 0 || index >= rows * columns)
+                    continue;
                 Buckets[index].Add(obj);
             }
         }
@@ -69,14 +74,19 @@
         }
         private List<int> Hash(Node obj)
         {
-            if (!obj.TryGetComponent(out Sprite sprite)) return new();
-            List<int> bucketsObjIsIn = new List<int>();
+            if (!obj.TryGetComponent(out Sprite sprite)) 
+                return new();
+
+            List<int> bucketsObjIsIn = new();
+
             Vec2 min = new Vec2(
                 obj.position.x,
                 obj.position.y);
+
             Vec2 max = new Vec2(
                 obj.position.x + sprite.size.x,
                 obj.position.y + sprite.size.y);
+
             float width = Constants.ScreenH / cellSize;
 
             //TopLeft

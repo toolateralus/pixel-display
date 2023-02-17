@@ -536,7 +536,7 @@ namespace pixel_editor
             string nodesList = "";
             char nonBreakingspace = '\u2007';
             foreach (Node node in Runtime.Instance.GetStage().nodes)
-                nodesList += node.Name.PadLeft(16, nonBreakingspace) + " ";
+                nodesList += node.Name + " ";
             Console.Print($"{nodesList}");
         }
         private static void SetNodeField(params object[]? e)

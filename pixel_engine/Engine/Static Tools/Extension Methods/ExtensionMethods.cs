@@ -109,6 +109,7 @@ namespace pixel_renderer
             from CustomAttributeData data in field.CustomAttributes
             where data.AttributeType == typeof(FieldAttribute)
             select field;
+
         public static Bitmap ToBitmap(this Color[,] colors)
         {
             int sizeX = colors.GetLength(0);

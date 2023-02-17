@@ -15,13 +15,14 @@ namespace pixel_renderer
     public enum TriggerInteraction { Colliders, Triggers, None, All };
     public static partial class Collision
     {
-        private static readonly ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
+        private static readonly Dictionary<Node, Node[]> CollisionQueue = new();
         private static readonly List<List<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true;
 
+        private readonly static SpatialHash Hash = new(Constants.ScreenW, Constants.ScreenH, Constants.CollisionCellSize);
+       
         public static void SetActive(bool value) => AllowEntries = value;
-        private readonly static SpatialHash hash = new(Constants.ScreenW, Constants.ScreenH, Constants.CollisionCellSize);
         public static void ViewportCollision(Node node)
         {
             var hasCollider = node.TryGetComponent(out Collider col);
@@ -34,14 +35,12 @@ namespace pixel_renderer
             if (node.position.x < 0)
                  node.position.x = 0;
         }
-
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             var colA = nodeA.TryGetComponent(out Collider col_A);
             var colB = nodeB.TryGetComponent(out Collider col_B);
             return colA && colB && GetBoxCollision(nodeA, nodeB, col_A, col_B);
         }
-
         private static bool GetBoxCollision(Node nodeA, Node nodeB, Collider col_A, Collider col_B)
         {
             if (nodeA.position.x < nodeB.position.x + col_B.size.x &&
@@ -51,7 +50,6 @@ namespace pixel_renderer
                 return true;
             return false;
         }
-
         public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
@@ -67,10 +65,8 @@ namespace pixel_renderer
             if (nodes is null)
                 return;
 
-            foreach (var stage_node in nodes)
-                collisionCells.Add(hash.GetNearby(stage_node));
+            collisionCells.AddRange(nodes.Select(stage_node => Hash.GetNearby(stage_node)));
         }
-
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
             lock(collisionCells)
@@ -103,7 +99,9 @@ namespace pixel_renderer
                         if (nodeB is null)
                             continue;
 
-                        bool hittingItself = nodeA.UUID.Equals(nodeB.UUID);
+                        bool hittingItself = nodeA.UUID.Equals(nodeB.UUID) 
+                                || nodeA.parentNode == nodeB 
+                                || nodeB.parentNode == nodeA;
 
                         if (hittingItself)
                             continue;
@@ -117,13 +115,13 @@ namespace pixel_renderer
         }
         public static void RegisterColliders(Stage stage)
         {
-            hash.ClearBuckets();
+            Hash.ClearBuckets();
             Action<Node> RegisterAction = (node) =>
             {
                 if (!node.TryGetComponent<Collider>(out _))
                     return;
                 ViewportCollision(node);
-                hash.RegisterObject(node);
+                Hash.RegisterObject(node);
             };
 
             List<Node> nodes = new(stage.nodes);
@@ -151,7 +149,7 @@ namespace pixel_renderer
                             var nodesArray = colliders.ToArray();
                             if (CollisionQueue.ContainsKey(A))
                                 CollisionQueue[A] = nodesArray;
-                            else _ = CollisionQueue.GetOrAdd(A, nodesArray);
+                            else CollisionQueue.Add(A, nodesArray);
                         }
                     }
                 }
@@ -188,6 +186,9 @@ namespace pixel_renderer
         }
         private static void Collide(Rigidbody A, Collider B)
         {
+            if (A is null || B is null)
+                return; 
+
             var aCol = A.GetComponent<Collider>();
             if (aCol.IsTrigger || B.IsTrigger) return;
 

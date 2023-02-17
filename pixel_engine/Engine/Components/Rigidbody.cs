@@ -5,9 +5,7 @@ namespace pixel_renderer
     {
         private float _drag = 0.0f;
         [Field] [JsonProperty] public float drag = .4f;
-                
         [Field] [JsonProperty] public bool usingGravity = true;
-
         [Field] [JsonProperty] public Vec2 velocity = new();
         [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
         [Field] public Sprite? sprite; 
@@ -16,8 +14,7 @@ namespace pixel_renderer
         
         private protected void ApplyVelocity()
         {
-            parent.position.y += velocity.y;
-            parent.position.x += velocity.x;
+            parent.position += velocity;
         }
         private protected void ApplyDrag()
         {
@@ -37,7 +34,10 @@ namespace pixel_renderer
             
             Vec2 screenSize = new(256, 256);
             
+
+            node.Name = $"Node {JRandom.Bool()}";
             node.position = JRandom.Vec2(Vec2.zero, screenSize);
+
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();
 
@@ -52,8 +52,6 @@ namespace pixel_renderer
             return node;
         }
 
-        // Todo: prevent these methods from being overridden.
-        // Immutable Method attribute or something.
         public override void Awake() => parent.TryGetComponent(out sprite);
         public override void FixedUpdate(float delta)
         {

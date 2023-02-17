@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -8,6 +9,7 @@ namespace pixel_renderer
 {
     public class CRenderer : RendererBase
     {
+       
         public override void Dispose() => Array.Clear(frame);
         public override void Draw(StageRenderInfo renderInfo)
         {
@@ -51,8 +53,7 @@ namespace pixel_renderer
                     if (uiComponent.Enabled && uiComponent is Camera camera)
                         RenderSprites(camera, renderInfo);
             });
-            DrawTask.Start();
-            DrawTask.Wait();
+            DrawTask.RunSynchronously();
         }
 
         public override void Render(Image output)

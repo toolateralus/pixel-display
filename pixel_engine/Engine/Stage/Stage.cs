@@ -26,10 +26,7 @@ namespace pixel_renderer
             {
                 if (init_bckground is null && Background != null)
                     init_bckground = GetBackground();
-                else if (init_bckground is null)
-                {
-                    init_bckground = new(Stage.DefaultBackgroundMetadata.fullPath);
-                }
+                else init_bckground ??= new(Stage.DefaultBackgroundMetadata.fullPath);
                 return init_bckground;
             } 
         }
@@ -42,7 +39,7 @@ namespace pixel_renderer
         [JsonProperty]
         public List<Node> nodes = new();
 
-        public bool FixedUpdateBusy { get; private set; }
+        public bool NodesBusy { get; private set; }
 
         public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
         #endregion
@@ -98,12 +95,13 @@ namespace pixel_renderer
                 node.ParentStage = this;
                 node.Awake();
             }
+            
         }
         public void FixedUpdate(float delta)
         {
             lock (nodes)
             {
-                FixedUpdateBusy = true;
+                NodesBusy = true;
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
@@ -111,16 +109,33 @@ namespace pixel_renderer
                     node.FixedUpdate(delta);
                 }
 
-                FixedUpdateBusy = false;
+                NodesBusy = false;
             }
 
-            for(int i = 0; DelayedActionQueue.Count - 1 > 0; ++i)
+        }
+
+        public void Update()
+        {
+            lock (nodes)
             {
-               Action<object[]> action = DelayedActionQueue.Dequeue();
-               object[] args = DelayedActionArgsQueue.Dequeue();
+                NodesBusy = true;
 
-               action.Invoke(args);
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    Node node = nodes[i];
+                    node.Update();
+                }
+                NodesBusy = false;
             }
+
+            for (int i = 0; DelayedActionQueue.Count - 1 > 0; ++i)
+            {
+                Action<object[]> action = DelayedActionQueue.Dequeue();
+                object[] args = DelayedActionArgsQueue.Dequeue();
+
+                action.Invoke(args);
+            }
+
         }
         public void RefreshStageDictionary()
         {
@@ -174,7 +189,7 @@ namespace pixel_renderer
             }
             object[] args = { node };
 
-            if (FixedUpdateBusy)
+            if (NodesBusy)
             {
                 DelayedActionArgsQueue.Enqueue(args);
                 DelayedActionQueue.Enqueue(add_node);
@@ -279,7 +294,7 @@ namespace pixel_renderer
         }
 
         [JsonConstructor]
-        internal Stage(string name, List<Node> nodes, Metadata metadata, Metadata background, string UUID) : base(name, UUID)
+        internal Stage(string name, List<Node> nodes, Metadata metadata, Metadata background, string UUID) : base(name, UUID) 
         {
             Name = name;
             this.UUID = UUID;
@@ -318,7 +333,7 @@ namespace pixel_renderer
             }
 
             // this is a better way than using a lock statement, as far as i know
-            if (FixedUpdateBusy)
+            if (NodesBusy)
             {
                 DelayedActionArgsQueue.Enqueue(args);
                 DelayedActionQueue.Enqueue(remove_node);
@@ -333,7 +348,7 @@ namespace pixel_renderer
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        internal Stage(string Name, Metadata backgroundMeta, List<Node> nodes, string? existingUUID = null)
+        internal Stage(string Name, Metadata backgroundMeta, List<Node> nodes, string? existingUUID = null) : this()
         {
             this.Name = Name;
             UUID = existingUUID ?? pixel_renderer.UUID.NewUUID();
@@ -342,7 +357,6 @@ namespace pixel_renderer
 
             Background = backgroundMeta;
             
-            Awake();
         }
         public override bool Sync()
         {
