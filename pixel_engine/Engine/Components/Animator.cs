@@ -61,7 +61,7 @@ namespace pixel_renderer
             };
 
             // 60 frame-padding value displays the animation frames at about 1fps (per new frame) (while engine is running at ~@30fps)
-            animation = new(anim_metas.ToArray(), 60)
+            animation = new(anim_metas.ToArray(), 10)
             {
                 Metadata = new("Animation", Constants.WorkingRoot + Constants.AssetsDir + Name + Constants.AssetsFileExtension, Constants.AssetsFileExtension)
             };
