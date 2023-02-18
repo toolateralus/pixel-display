@@ -59,6 +59,8 @@
 
             Array.Clear(cam.zBuffer);
 
+            //DrawBackground(cam);
+
             Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
             CreateBaseImageSprite(cam, sprite);
