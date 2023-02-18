@@ -127,9 +127,9 @@
                 FontSize="3.75" 
                 FontFamily="MS Gothic"
                 Grid.Column="12" 
-                Grid.Row="10"
+                Grid.Row="4"
                 Grid.ColumnSpan="8" 
-                Grid.RowSpan="5" Text="                                &#xD;&#xA;" 
+                Grid.RowSpan="11" Text="                                &#xD;&#xA;" 
                 >
             </TextBox>
 
