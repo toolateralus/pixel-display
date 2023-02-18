@@ -207,7 +207,7 @@ namespace pixel_editor
         {
             phrase = "cam;",
             syntax = "cam(Name, Field, Vector2 Value);",
-            argumentTypes = new string[] { "str:", "str:", "vec:" },
+            argumentTypes = new string[] { "str:", "str:", "float:" },
             action = (e) =>
             {
                 if (e.Length < 3)
