@@ -57,7 +57,7 @@ namespace pixel_renderer
                 Player.test_animation_data(6),
             };
 
-            animation = new(anim_metas.ToArray(), 60);
+            animation = new(anim_metas.ToArray(), 10);
             animation.Name = "Animation_Test";
             animation.Metadata = new("Animation_Test", Constants.WorkingRoot + Constants.AssetsDir + "Animation_Test" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
             animation.Upload();
