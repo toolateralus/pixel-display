@@ -65,7 +65,17 @@ namespace pixel_renderer
             if (nodes is null)
                 return;
 
-            collisionCells.AddRange(nodes.Select(stage_node => Hash.GetNearby(stage_node)));
+            Func<Node, List<Node>> selector = stage_node => Hash.GetNearby(stage_node);
+
+            IEnumerable<List<Node>> nearby = nodes.Select(selector);
+
+            var nearbyCt = nearby.Count();
+            for (int i = 0; i < nearbyCt - 1; ++i)
+            {
+                var nodesList = nearby.ElementAt(i);
+                collisionCells.Add(nodesList);
+            }
+
         }
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {

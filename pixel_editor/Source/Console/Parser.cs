@@ -76,6 +76,7 @@ namespace pixel_editor
                 if (command.Equals(line))
                 {
                     ExecuteCommand(args, count, command);
+
                     if (command.error != null)
                     {
                         Runtime.Log(command.error);
@@ -107,12 +108,7 @@ namespace pixel_editor
                     }
 
                     command.args = init_args.ToArray();
-
-                    if (count == 0)
-                    {
-                        command.Invoke();
-                        return;
-                    }
+                    command.Invoke();
                 }
                 for (int i = 0; i < count; ++i)
                     command.Invoke();

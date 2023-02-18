@@ -13,10 +13,10 @@ namespace pixel_editor
     {
         public Inspector(Label name, Label objInfo, Grid componentGrid)
         {
-            this.name = name ?? new();
+            this.name = name;
 
-            this.objInfo = objInfo ?? new();
-            this.componentGrid = componentGrid ?? new();
+            this.objInfo = objInfo;
+            this.componentGrid = componentGrid;
             
             this.name.Content = "_";
             this.objInfo.Content = "_";
@@ -26,6 +26,7 @@ namespace pixel_editor
 
         public Node? loadedNode;
         private List<Control> activeControls = new();
+        private List<Grid> activeGrids = new();
         private Label name;
         private Label objInfo;
         private Grid componentGrid; 
@@ -62,15 +63,15 @@ namespace pixel_editor
                 foreach (var component in componentType)
                 {
                     string info = GetComponentInfo(component);
-                    TextBox block = CreateBlock(info);
+                    Grid block = CreateGrid(info);
 
                     int lineCt = info.Split('\n').Length ;
 
-                    block.Width = 250;
-                    block.Height = Math.Max(3 * lineCt, 5);
+                    block.Width = 150;
+                    //block.Height = Math.Max(5 * lineCt, 25);
 
-                    SetRowAndColumn(block, 1, 4, 0, index + 2);
-                    AddControlToInspector(block);
+                    SetRowAndColumn(block, 4, 8, 0, index);
+                    AddGridToInspector(block);
 
                     index++;
                 }
@@ -84,16 +85,21 @@ namespace pixel_editor
             componentGrid.UpdateLayout();
             activeControls.Add(control);
         }
+        private void AddGridToInspector(Grid control)
+        {
+            componentGrid.Children.Add(control);
+            componentGrid.UpdateLayout();
+            activeGrids.Add(control);
+        }
 
         public void DeselectNode()
         {
             if (loadedNode != null)
             {
                 loadedNode = null;
-                foreach (var control in activeControls)
-                {
-                    componentGrid.Children.Remove(control);
-                }
+
+                foreach (var control in activeControls) componentGrid.Children.Remove(control);
+
                 activeControls.Clear();
                 OnObjectDeselected?.Invoke();
             }
@@ -103,13 +109,21 @@ namespace pixel_editor
             loadedNode = node;
             OnObjectSelected?.Invoke();
         }
-        public static void SetRowAndColumn(Control component, int height, int width, int x, int y)
+        public static void SetRowAndColumn(Control control, int height, int width, int x, int y)
         {
-            component.SetValue(Grid.RowSpanProperty, height);
-            component.SetValue(Grid.ColumnSpanProperty, width);
-            component.SetValue(Grid.RowProperty, y);
-            component.SetValue(Grid.ColumnProperty, x);
+            control.SetValue(Grid.RowSpanProperty, height);
+            control.SetValue(Grid.ColumnSpanProperty, width);
+            control.SetValue(Grid.RowProperty, y);
+            control.SetValue(Grid.ColumnProperty, x);
         }
+        public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
+        {
+            grid.SetValue(Grid.RowSpanProperty, height);
+            grid.SetValue(Grid.ColumnSpanProperty, width);
+            grid.SetValue(Grid.RowProperty, y);
+            grid.SetValue(Grid.ColumnProperty, x);
+        }
+
         public static string GetComponentInfo(Component component)
         {
             IEnumerable<FieldInfo> fields = component.GetSerializedFields();
@@ -152,36 +166,67 @@ namespace pixel_editor
             fields = component.GetType().GetFields();
             properties = component.GetType().GetProperties();
         }
-        public static Label CreateLabel(string componentInfo)
+     
+        public static Grid CreateGrid(string componentInfo)
         {
-            return new Label
+            Grid grid = new()
             {
-                Content = componentInfo,
-                FontSize = 3f,
-                Foreground = Brushes.White,
-                Padding = new(5, 5, 5, 5),
-                FontFamily = new System.Windows.Media.FontFamily("MS Gothic")
+                ClipToBounds = true,
+                Height = 100,
+                Width = 500,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top, 
             };
-        }
-        public static TextBox CreateBlock(string componentInfo)
-        {
-            return new()
+            var rows = grid.RowDefinitions;
+            var cols = grid.ColumnDefinitions;
+
+            for (int x = 0; x < 12; ++x)
             {
-                Text = componentInfo,
+                ColumnDefinition col = new();
+
+                col.Width = new GridLength(48);
+                cols.Add(col);
                 
-                FontSize = 3f,
-                FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
-                
-                AcceptsReturn = true, AcceptsTab = true, AllowDrop = true,
-                TextWrapping = TextWrapping.Wrap,
-                
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Visible,
-                HorizontalAlignment = HorizontalAlignment.Left, 
-                VerticalAlignment= VerticalAlignment.Top,
-                Foreground = Brushes.White,
-                Background = Brushes.Black,
-                
-            };
+
+                if (x % 2 == 0)
+                {
+                    RowDefinition row = new();
+                    row.Height = new GridLength(36);
+                    rows.Add(new());    
+                }
+
+            }
+
+            int i = 0;
+
+            foreach (var item in componentInfo.Split('\n'))
+            {
+                TextBox box = new()
+                {
+                    Text = item,
+
+                    FontSize = 4f,
+                    FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
+
+                    AcceptsReturn = false,
+                    AcceptsTab = false,
+                    AllowDrop = false,
+                    TextWrapping = TextWrapping.Wrap,
+
+                    HorizontalScrollBarVisibility = ScrollBarVisibility.Visible,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top,
+
+                    Foreground = Brushes.White,
+                    Background = Brushes.Black,
+
+                };
+                grid.Children.Add(box);
+                i++;
+                SetRowAndColumn(box, 1, 4, 0, i * 2);
+            }
+
+            return grid;
         }
         public static Button CreateButton(string content, Thickness margin) => new Button()
         {

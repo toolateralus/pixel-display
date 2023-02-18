@@ -35,20 +35,17 @@ namespace pixel_renderer
                 return;
             }
             animation.playing = false;
-        }
 
-        public void Reset()
-        {
-            parent.TryGetComponent(out sprite);
-            if (animation is null)
-            {
-                Runtime.Log("Animation was null.");
-                return;
-            }
-            Awake();
+            if (reset)
+                animation.frameIndex = animation.startIndex;
         }
 
         public override void Awake()
+        {
+            test_flame_anim_setup();
+        }
+
+        private void test_flame_anim_setup()
         {
             List<Metadata> anim_metas = new()
             {
@@ -60,15 +57,11 @@ namespace pixel_renderer
                 Player.test_animation_data(6),
             };
 
-            // 60 frame-padding value displays the animation frames at about 1fps (per new frame) (while engine is running at ~@30fps)
-            animation = new(anim_metas.ToArray(), 60)
-            {
-                Metadata = new("Animation", Constants.WorkingRoot + Constants.AssetsDir + Name + Constants.AssetsFileExtension, Constants.AssetsFileExtension)
-            };
-
+            animation = new(anim_metas.ToArray(), 60);
+            animation.Name = "Animation_Test";
+            animation.Metadata = new("Animation_Test", Constants.WorkingRoot + Constants.AssetsDir + "Animation_Test" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
             animation.Upload();
         }
-
 
         public override void FixedUpdate(float delta)
         {

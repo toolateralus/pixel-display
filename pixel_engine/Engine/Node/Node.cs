@@ -73,7 +73,9 @@ namespace pixel_renderer
 
         [JsonProperty]
         public Node? parentNode;
+        [JsonProperty]
         public Dictionary<Vec2, Node> children = new();
+
         public List<Component> ComponentsList
         {
             get

@@ -15,13 +15,12 @@ namespace pixel_renderer
     public class Texture : Asset
     {
         [JsonConstructor]
-        public Texture(Metadata imgData, Metadata maskData, Color? color, string Name, string UUID) : base(Name, UUID)
+        public Texture(Metadata imgData, Metadata maskData, Color? color, string Name = "Texture Asset") : base(Name, true)
         {
             this.imgData = imgData;
             this.maskData = maskData;
             this.color = color;
             this.Name = Name;
-            Upload();
         }
         public Texture(Vec2Int scale, Metadata? imgData = null, Color? color = null)
         {

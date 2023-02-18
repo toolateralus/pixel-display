@@ -7,13 +7,19 @@ namespace pixel_editor
     public partial class Command
     {
 
-        public static readonly string[] errorMessages = 
+        private static readonly string[] errorMessages = 
         { 
             " was not called: Argument provided was either invalid or null",
             " was not called: There was a null reference. check the command object's error object for more info.",
             " was not called: An invalid operation was attempted.",
             " was not called: An invalid cast operation was attempted."
         };
+
+        internal static void Error(string cmdName, string errorInfo)
+        {
+            Runtime.Log($"{cmdName} was not called : {errorInfo}");
+        }
+
 
         internal static void Error(string cmdName, CmdError error)
         {
