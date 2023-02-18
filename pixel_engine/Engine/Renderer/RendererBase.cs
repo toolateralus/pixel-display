@@ -30,24 +30,6 @@
                 _ => new(0, 0),
             };
         }
-        private void DrawBackground(Camera cam)
-        {
-            if (cam.DrawMode is DrawingType.None) return;
-
-            Vec2 backgroundSize = new(baseImage.GetLength(0), baseImage.GetLength(1));
-
-            for (Vec2 framePos = new(0,0); framePos.y < Resolution.y; framePos.Increment2D(Resolution.x))
-            {
-                Vec2 camViewport = cam.ScreenToCamViewport(framePos / Resolution);
-                if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
-
-                Vec2 global = cam.ViewportToGlobal(camViewport);
-                Vec2 bgViewportPos = global / backgroundSize.GetDivideSafe();
-                Vec2 bgPos = ViewportToPosWithDrawingType(cam, backgroundSize, bgViewportPos);
-
-                WriteColorToFrame(ref baseImage[(int)bgPos.x, (int)bgPos.y], ref framePos);
-            }
-        }
         public void RenderSprites(Camera camera, StageRenderInfo renderInfo)
         {
             if (Resolution.y == 0 || Resolution.x == 0) return;
@@ -58,8 +40,6 @@
                 cam.zBuffer = new float[(int)Resolution.x, (int)Resolution.y];
 
             Array.Clear(cam.zBuffer);
-
-            //DrawBackground(cam);
 
             Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
