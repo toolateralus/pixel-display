@@ -206,7 +206,7 @@ namespace pixel_editor
         public static Command cmd_set_camera() => new()
         {
             phrase = "cam;",
-            syntax = "cam(Name, Field, Vector2 Value);",
+            syntax = "cam(Name, Field, float Value);",
             argumentTypes = new string[] { "str:", "str:", "float:" },
             action = (e) =>
             {
