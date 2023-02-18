@@ -16,11 +16,6 @@
         public abstract void Stop(bool reset = false);
 
         /// <summary>
-        /// Resets the animation to it's first frame.
-        /// </summary>
-        public abstract void Reset();
-
-        /// <summary>
         /// Gets the next frame in the animation, or skips frames if  an increment of greater than one is provided
         /// /// </summary>
         /// <param name="increment"></param>

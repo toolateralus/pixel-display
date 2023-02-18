@@ -436,6 +436,26 @@ namespace pixel_editor
         {
             name = name.ToLower();   
         }
+
+        bool consoleOpen = true; 
+
+        private void OnToggleConsole(object sender, RoutedEventArgs e)
+        {
+            if (!consoleOpen)
+            {
+                consoleOpen = true;
+
+                editorMessages.Visibility = Visibility.Collapsed;
+                consoleOutput.Visibility = Visibility.Collapsed;
+
+                return;
+            }
+
+            editorMessages.Visibility = Visibility.Visible;
+            consoleOutput.Visibility = Visibility.Visible;
+
+            consoleOpen = false;
+        }
     }
 
 }

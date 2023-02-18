@@ -15,129 +15,6 @@ namespace pixel_editor
 
     public class Console
     {
-        public static Console Current 
-        {
-            get
-            {
-                if (_console == null)
-                {
-
-                    // init singleton and use it to fill cmd list; 
-                    _console = new();
-                    var type = _console.GetType();
-                    var methods = type.GetRuntimeMethods();
-                    foreach (var method in methods)
-                        if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
-                        {
-                            Command? item = (Command)method.Invoke(null, null);
-                            if (item != null && !Current.Active.Contains(item))
-                                Current.Active.Add(item);
-                        }
-                }
-
-                return _console; 
-            }
-            set => _console = value; 
-        }
-
-        private const string divider = "\n-- -- --\n";
-        private static Console _console; 
-
-        public static void Print(object? o, bool includeDateTime = false)
-        {
-            var msg = o.ToString();
-            var e = new EditorEvent(msg, includeDateTime);
-            Editor.QueueEvent(e); 
-        }
-        public static void Error(object? o = null, int? textColorAlterationDuration = null)
-        {
-            string? msg = o.ToString();
-            EditorEvent e = new(msg, true);
-           
-                if (textColorAlterationDuration is not null)
-                    e.action = RedTextForMsAsync( (int)textColorAlterationDuration);
-            Editor.QueueEvent(e);
-        }
-        internal static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
-        {
-            Console.Print(question);
-            for (int i = 0; i < waitDuration * 100; i++)
-            {
-                if (i % 100 == 0)
-                {
-                    int seconds = 10 * (5000 - i) / 1000;
-                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
-                }
-
-                if (Keyboard.IsKeyDown(Key.Y))
-                    return PromptResult.Yes;
-                if (Keyboard.IsKeyDown(Key.N))
-                    return PromptResult.No;
-                if (Keyboard.IsKeyDown(Key.End))
-                    return PromptResult.Cancel;
-
-                await Task.Delay(10);
-            };
-            return PromptResult.Timeout;
-        }
-        public static void Clear(bool randomColor = false)
-        {
-            EditorEvent editorEvent = new EditorEvent("");
-            editorEvent.ClearConsole = true;
-            Editor.QueueEvent(editorEvent);
-            
-            if(randomColor)
-                Error("Console Cleared", 1);
-        }
-
-        public static Action<object[]?> RedTextForMsAsync(int delay)
-        {
-            return async (o) =>
-            {
-                Editor.Current.RedText().Invoke(o);
-                await Task.Delay(delay * 1000);
-                Editor.Current.BlackText().Invoke(o);
-            };
-        }
-
-        public static bool TryGetArgAtIndex<T>(int index, out T arg, object[] o)
-        {
-            bool hasArg = o != null && o.Length > index;
-
-            if (hasArg && o[index] is T val)
-            {
-                arg = val;
-                return true; 
-            }
-            arg = (T)Convert.ChangeType(null, typeof(T));
-            return false ; 
-        }
-
-        static void PrintLoadedStageNames()
-        {
-            foreach (var stage in Runtime.Instance.LoadedProject.stages)
-                Console.Print(stage.Name);
-        }
-        static void PrintLoadedStageMetaFileNames()
-        {
-            foreach (var stage in Runtime.Instance.LoadedProject.stagesMeta)
-                Console.Print(stage?.Name ?? "null");
-        }
-        static void ListStages(string s)
-        {
-            switch (s)
-            {
-                case "inst":
-                    PrintLoadedStageNames();
-                    break;
-
-                case "file":
-                    PrintLoadedStageMetaFileNames();
-                    break;
-
-                default: break;
-            }
-        }
 
         #region General Commands
         public static Command cmd_help() => new()
@@ -283,7 +160,7 @@ namespace pixel_editor
             phrase = "node.Child;",
             syntax = "node.Child(string parentName);",
             description = "Adds a child node underneath the target parent if found.",
-            argumentTypes = new string[] { "str:"},
+            argumentTypes = new string[] { "str:" },
             action = AddChild,
         };
         public static Command cmd_move_node() => new()
@@ -292,7 +169,7 @@ namespace pixel_editor
             syntax = "node.Move(string nodeName, Vec2 destination);",
             description = "Sets the node's position to the provided vector.",
             argumentTypes = new string[] { "str:", "vec:" },
-            action = (e) => 
+            action = (e) =>
             {
                 if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
                 if (!TryGetArgAtIndex(1, out Vec2 vec, e)) return;
@@ -305,7 +182,7 @@ namespace pixel_editor
             syntax = "node.RemoveComponent(string nodeName, string componentType);",
             description = "Removes one componenet from node of specified type.",
             argumentTypes = new string[] { "str:", "str:" },
-            action = (e) => 
+            action = (e) =>
             {
                 if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
                 if (!TryGetArgAtIndex(1, out string type, e)) return;
@@ -317,12 +194,13 @@ namespace pixel_editor
                 }
                 foreach (var comp in node.ComponentsList)
                     if (comp.GetType() == t)
+                    {
                         node.RemoveComponent(comp);
+                        Print($"{nameof(t)} added to {node.Name}.");
+                    }
             },
         };
-
         #endregion
-
 
         #region Asset/Project/Stage/IO Commands
         public static Command cmd_set_camera() => new()
@@ -465,14 +343,11 @@ namespace pixel_editor
             argumentTypes = new string[] { "int:" },
             action = (o) =>
             {
-                if(!TryGetArgAtIndex<int>(0, out int index, o)) return;
+                if (!TryGetArgAtIndex<int>(0, out int index, o)) return;
                 Runtime.TryLoadStageFromProject(index);
             },
-        
+
         };
-
-       
-
         public static Command cmd_list_stages() => new()
         {
             phrase = "stages.List;",
@@ -489,6 +364,130 @@ namespace pixel_editor
             args = null,
         };
         #endregion
+        public static Console Current 
+        {
+            get
+            {
+                if (_console == null)
+                {
+
+                    // init singleton and use it to fill cmd list; 
+                    _console = new();
+                    var type = _console.GetType();
+                    var methods = type.GetRuntimeMethods();
+                    foreach (var method in methods)
+                        if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
+                        {
+                            Command? item = (Command)method.Invoke(null, null);
+                            if (item != null && !Current.Active.Contains(item))
+                                Current.Active.Add(item);
+                        }
+                }
+
+                return _console; 
+            }
+            set => _console = value; 
+        }
+
+        private const string divider = "\n-- -- --\n";
+        private static Console _console; 
+
+        public static void Print(object? o, bool includeDateTime = false)
+        {
+            var msg = o.ToString();
+            var e = new EditorEvent(msg, includeDateTime);
+            Editor.QueueEvent(e); 
+        }
+        public static void Error(object? o = null, int? textColorAlterationDuration = null)
+        {
+            string? msg = o.ToString();
+            EditorEvent e = new(msg, true);
+           
+                if (textColorAlterationDuration is not null)
+                    e.action = RedTextAsync( (int)textColorAlterationDuration);
+            Editor.QueueEvent(e);
+        }
+        internal static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
+        {
+            Console.Print(question);
+            for (int i = 0; i < waitDuration * 100; i++)
+            {
+                if (i % 100 == 0)
+                {
+                    int seconds = 10 * (5000 - i) / 1000;
+                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
+                }
+
+                if (Keyboard.IsKeyDown(Key.Y))
+                    return PromptResult.Yes;
+                if (Keyboard.IsKeyDown(Key.N))
+                    return PromptResult.No;
+                if (Keyboard.IsKeyDown(Key.End))
+                    return PromptResult.Cancel;
+
+                await Task.Delay(10);
+            };
+            return PromptResult.Timeout;
+        }
+        public static void Clear(bool randomColor = false)
+        {
+            EditorEvent editorEvent = new EditorEvent("");
+            editorEvent.ClearConsole = true;
+            Editor.QueueEvent(editorEvent);
+            
+            if(randomColor)
+                Error("Console Cleared", 1);
+        }
+
+        public static Action<object[]?> RedTextAsync(int delay)
+        {
+            return async (o) =>
+            {
+                Editor.Current.RedText().Invoke(o);
+                await Task.Delay(delay * 1000);
+                Editor.Current.BlackText().Invoke(o);
+            };
+        }
+
+        public static bool TryGetArgAtIndex<T>(int index, out T arg, object[] o)
+        {
+            bool hasArg = o != null && o.Length > index;
+
+            if (hasArg && o[index] is T val)
+            {
+                arg = val;
+                return true; 
+            }
+            arg = (T)Convert.ChangeType(null, typeof(T));
+            return false ; 
+        }
+
+        static void PrintLoadedStageNames()
+        {
+            foreach (var stage in Runtime.Instance.LoadedProject.stages)
+                Console.Print(stage.Name);
+        }
+        static void PrintLoadedStageMetaFileNames()
+        {
+            foreach (var stage in Runtime.Instance.LoadedProject.stagesMeta)
+                Console.Print(stage?.Name ?? "null");
+        }
+        static void ListStages(string s)
+        {
+            switch (s)
+            {
+                case "inst":
+                    PrintLoadedStageNames();
+                    break;
+
+                case "file":
+                    PrintLoadedStageMetaFileNames();
+                    break;
+
+                default: break;
+            }
+        }
+
 
         private static void AddChild(params object[]? e)
         {
@@ -524,7 +523,6 @@ namespace pixel_editor
             return true; 
 
         }
-
 
         private static void RandomizeBackground(params object[]? args)
         {
@@ -652,8 +650,6 @@ namespace pixel_editor
         }
 
         public List<Command> Active = new();
-
-
     }
 
 }

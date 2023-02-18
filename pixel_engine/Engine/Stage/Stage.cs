@@ -246,7 +246,7 @@ namespace pixel_renderer
         #endregion
 
         [JsonConstructor]
-        internal Stage(string name, List<Node> nodes, Metadata metadata, Metadata background, string UUID) : base(name, UUID) 
+        internal Stage(List<Node> nodes, Metadata metadata, Metadata background, string name = "Stage Asset") : base(name, true) 
         {
             Name = name;
             this.UUID = UUID;
@@ -274,11 +274,10 @@ namespace pixel_renderer
             Awake();
         }
 
-        public override bool Sync()
+        public override void Sync()
         {
             string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
             Metadata = new(Name, defaultPath, Constants.StageFileExtension);
-            return true; 
         }
 
         /// <summary>

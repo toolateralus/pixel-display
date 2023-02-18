@@ -128,4 +128,3 @@ namespace pixel_renderer.Assets
         }
     }
 }
-// save all meta next to assets, read meta to recognize as file and get type, call asset only when actually needing reading.
