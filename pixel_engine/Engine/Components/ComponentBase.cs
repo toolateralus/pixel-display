@@ -43,17 +43,14 @@ namespace pixel_renderer
         /// </summary>
         internal protected void init_component_internal()
         {
-            Name = parent.Name + $" {GetType()}";
+            Name = $"{GetType().Name}";
             Awake();
         }
         internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
 
-        public virtual void OnEditActionClicked(params object[] parameters)
+        public virtual void OnEditActionClicked()
         {
-            var componentInfo = parameters[0] as string;
-            var itemOrField = parameters[1] as string;
-
-            Runtime.Log($"Edit Action called on Component {Name} \n item clicked : {itemOrField}");
+            Runtime.Log($"{Name} had {nameof(OnEditActionClicked)} called at {DateTime.Now}");
         }
     }
 

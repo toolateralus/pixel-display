@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using pixel_renderer;
 using System.Windows.Media.Effects;
+using System.Linq;
 
 namespace pixel_editor
 {
@@ -35,8 +36,7 @@ namespace pixel_editor
         
         private Dictionary<Type, List<Component>> components = new();
 
-        public static List<Action<object[]>> EditActions = new();
-        public static List<object[]> EditActionArgs = new(); 
+        public static List<Action> EditActions = new();
 
         public event Action OnObjectSelected;
         public event Action OnObjectDeselected;
@@ -144,19 +144,28 @@ namespace pixel_editor
             
             AddGridToInspector(block);
 
-            SetRowAndColumn(block, 6, 8, 0, index);
+            SetRowAndColumn(block, 12, 8, 0, index);
 
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
                 {
-                    string info = GetComponentInfo(component);
 
-                    int lineCt = info.Split('\n').Length ;
+                    var box = GetTextBox(component.Name);
+                    
+                    Button button = CreateButton("Edit", new(0, 0, 0, 0));
+                    
+                    button.FontSize = 4;
 
-                    AddComponentTextBox(info, block, HandleEditPressed);
+                    button.Click += HandleEditPressed;
+                    button.Name = "edit_button_" + index.ToString();
+
+                    block.Children.Add(button);
+                    block.Children.Add(box);
+                    SetRowAndColumn(button, 2, 2, 4, index * 2);
+                    SetRowAndColumn(box, 2, 4, 0, index * 2);
 
                     EditActions.Add(component.OnEditActionClicked);
-
+            
                     index++;
                 }
 
@@ -188,18 +197,11 @@ namespace pixel_editor
             grid.SetValue(Grid.RowProperty, y);
             grid.SetValue(Grid.ColumnProperty, x);
         }
-        private static void AddComponentTextBox(string componentInfo, Grid grid, RoutedEventHandler onEditPressed)
+        private static TextBox GetTextBox(string componentName)
         {
-            int i = 0;
-
-            string[] splitComponentInfo = componentInfo.Split('\n');
-
-           
-            foreach (var item in splitComponentInfo)
-            {
-                TextBox box = new()
+            TextBox box = new()
                 {
-                    Text = item,
+                    Text = componentName,
                     FontSize = 4f,
                     FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
                     IsReadOnly = true,
@@ -218,30 +220,11 @@ namespace pixel_editor
                     Background = Brushes.Black,
 
                 };
-                Button button = CreateButton(item, new(0, 0, 0, 0));
-                button.FontSize = 4;
-                
-                button.Click += HandleEditPressed;
-                button.Name = "edit_button_" + i.ToString();
-
-                EditActionArgs.Add(new object[]
-                {
-                    splitComponentInfo,
-                    item,
-                    box, 
-                    grid
-                });
-
-                SetRowAndColumn(button, 2, 2, 8, i * 2);
-                   SetRowAndColumn(box, 2, 8, 0, i * 2);
-
-                grid.Children.Add(box);
-                grid.Children.Add(button);
-                i++;
-            }
-
-         
+            return box;
         }
+
+
+
         private void AddGridToInspector(Grid control)
         {
             componentGrid.Children.Add(control);
@@ -296,10 +279,9 @@ namespace pixel_editor
         private static void HandleEditPressed(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
-                if (button.Name.ToInt() is int i && EditActions.Count > i && EditActionArgs.Count > i)
-                    EditActions[i]?.Invoke(EditActionArgs[i]);
+                if (button.Name.ToInt() is int i && EditActions.Count > i)
+                    EditActions[i]?.Invoke();
                 else Runtime.Log("Edit pressed failed.");
-            else Runtime.Log("sender wasnt button");
         }
         #endregion
 
