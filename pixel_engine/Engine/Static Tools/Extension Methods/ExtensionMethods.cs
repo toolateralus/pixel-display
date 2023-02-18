@@ -15,7 +15,7 @@ namespace pixel_renderer
         public static bool WithinRange(this int v, int min, int max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
-        public static float Wrapped(this float v, float max) => v % max >= 0 ? v % max : v % max + max;
+        public static float Wrapped(this float v, float max) => (v % max + max) % max;
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
         public static bool IsWithinMaxExclusive(this float v, float min, float max) => v >= min && v < max;
         public static float GetDivideSafe(this float v) => v == 0 ? float.Epsilon : v;

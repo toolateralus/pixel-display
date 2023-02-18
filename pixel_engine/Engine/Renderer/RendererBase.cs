@@ -25,7 +25,7 @@
             Vec2 maxIndex = size - Vec2.one;
             return cam.DrawMode switch
             {
-                DrawingType.Wrapped => ViewportPos.Wrapped(Vec2.one) * maxIndex,
+                DrawingType.Wrapped => ViewportPos.Wrapped(Vec2.one) * size,
                 DrawingType.Clamped => (ViewportPos.Clamped(Vec2.zero, Vec2.one) * maxIndex).Clamped(Vec2.zero, maxIndex),
                 _ => new(0, 0),
             };
@@ -64,11 +64,19 @@
             Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
 
+            //sprite.parent.Position = Vec2.zero;
+            //sprite.ColorData = baseImage;
+            //sprite.size = new Vec2(Constants.ScreenH, Constants.ScreenW);
+            //sprite.camDistance = float.Epsilon;
+
+            //DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vec2.zero, Resolution));
+
             for (int i = 0; i < renderInfo.Count; ++i)
             {
                 sprite.parent.Position = renderInfo.spritePositions[i];
                 sprite.ColorData = renderInfo.spriteColorData[i];
                 sprite.size = renderInfo.spriteSizeVectors[i];
+                sprite.viewportOffset = renderInfo.spriteVPOffsetVectors[i];
                 sprite.camDistance = renderInfo.spriteCamDistances[i];
 
                 Vec2 firstCorner = cam.GlobalToScreenViewport(sprite.parent.Position) * Resolution;
@@ -99,9 +107,11 @@
                 if (!framePos.IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
                 if (sprite.camDistance <= cam.zBuffer[(int)framePos.x, (int)framePos.y]) continue;
 
+                //this is actually cam viewport here, just reusing Vec2 to avoid new() calls
                 Vec2 colorPos = cam.ScreenToCamViewport(framePos / Resolution);
                 if (!colorPos.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
+                //this is also sprite viewport here
                 colorPos = cam.ViewportToSpriteViewport(sprite, colorPos);
                 if (!colorPos.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
@@ -137,5 +147,5 @@
             baseImageDirty = true;
         }
     }
-    }
+}
 
