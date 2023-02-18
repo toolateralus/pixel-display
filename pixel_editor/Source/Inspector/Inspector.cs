@@ -35,6 +35,9 @@ namespace pixel_editor
         
         private Dictionary<Type, List<Component>> components = new();
 
+        public static List<Action<object[]>> EditActions = new();
+        public static List<object[]> EditActionArgs = new(); 
+
         public event Action OnObjectSelected;
         public event Action OnObjectDeselected;
         public event Action OnInspectorUpdated;
@@ -76,96 +79,6 @@ namespace pixel_editor
             }
             return (false, null);
         } 
-
-
-
-        public void Awake()
-        {
-            OnObjectSelected += Refresh;
-            OnObjectDeselected += Refresh;
-            OnComponentAdded += Refresh;
-            OnComponentRemoved += Refresh;
-        }
-        public void Update(object? sender, EventArgs e) { }
-        
-        private void Refresh()
-        {
-            if (selectedNode == null) return;
-            name.Content = selectedNode.Name;
-            components = selectedNode.Components;
-            objInfo.Content = $"#{components.Count} Components";
-            var thickness = new Thickness(0, 0, 0, 0);
-            int index = 0;
-
-            Grid block = NodeInspectorGrid();
-            
-            AddGridToInspector(block);
-
-            SetRowAndColumn(block, 6, 8, 0, index);
-
-            foreach (var componentType in components.Values)
-                foreach (var component in componentType)
-                {
-                    string info = GetComponentInfo(component);
-
-                    int lineCt = info.Split('\n').Length ;
-
-
-                    block.Width = 150;
-
-
-                    AddComponentTextBox(info, block);
-
-                    index++;
-                }
-
-            OnInspectorUpdated?.Invoke();
-        }
-
-        private void AddControlToInspector(Control control)
-        {
-            componentGrid.Children.Add(control);
-            componentGrid.UpdateLayout();
-            activeControls.Add(control);
-        }
-        private void AddGridToInspector(Grid control)
-        {
-            componentGrid.Children.Add(control);
-            componentGrid.UpdateLayout();
-            activeGrids.Add(control);
-        }
-
-        public void DeselectNode()
-        {
-            if (selectedNode != null)
-            {
-                selectedNode = null;
-
-                foreach (var control in activeControls) componentGrid.Children.Remove(control);
-
-                activeControls.Clear();
-                OnObjectDeselected?.Invoke();
-            }
-        }
-        public void SelectNode(Node node)
-        {
-            selectedNode = node;
-            OnObjectSelected?.Invoke();
-        }
-        public static void SetRowAndColumn(Control control, int height, int width, int x, int y)
-        {
-            control.SetValue(Grid.RowSpanProperty, height);
-            control.SetValue(Grid.ColumnSpanProperty, width);
-            control.SetValue(Grid.RowProperty, y);
-            control.SetValue(Grid.ColumnProperty, x);
-        }
-        public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
-        {
-            grid.SetValue(Grid.RowSpanProperty, height);
-            grid.SetValue(Grid.ColumnSpanProperty, width);
-            grid.SetValue(Grid.RowProperty, y);
-            grid.SetValue(Grid.ColumnProperty, x);
-        }
 
         public static string GetComponentInfo(Component component)
         {
@@ -209,82 +122,168 @@ namespace pixel_editor
             fields = component.GetType().GetFields();
             properties = component.GetType().GetProperties();
         }
-     
-        public static Grid NodeInspectorGrid()
+
+        public void Awake()
         {
-            Grid grid;
-            GetNodeInspectorGrid(out grid);
-            return grid; 
+            OnObjectSelected += Refresh;
+            OnObjectDeselected += Refresh;
+            OnComponentAdded += Refresh;
+            OnComponentRemoved += Refresh;
+        }
+        public void Update(object? sender, EventArgs e) { }
+        private void Refresh()
+        {
+            if (selectedNode == null) return;
+            name.Content = selectedNode.Name;
+            components = selectedNode.Components;
+            objInfo.Content = $"#{components.Count} Components";
+            var thickness = new Thickness(0, 0, 0, 0);
+            int index = 0;
+
+            Grid block = GetNodeInspectorGrid();
+            
+            AddGridToInspector(block);
+
+            SetRowAndColumn(block, 6, 8, 0, index);
+
+            foreach (var componentType in components.Values)
+                foreach (var component in componentType)
+                {
+                    string info = GetComponentInfo(component);
+
+                    int lineCt = info.Split('\n').Length ;
+
+                    AddComponentTextBox(info, block, HandleEditPressed);
+
+                    EditActions.Add(component.OnEditActionClicked);
+
+                    index++;
+                }
+
+            OnInspectorUpdated?.Invoke();
         }
 
-        private static void AddComponentTextBox(string componentInfo, Grid grid)
+        public void DeselectNode()
+        {
+            if (selectedNode != null)
+            {
+                selectedNode = null;
+
+                foreach (var control in activeControls) componentGrid.Children.Remove(control);
+
+                activeControls.Clear();
+                OnObjectDeselected?.Invoke();
+            }
+        }
+        public void SelectNode(Node node)
+        {
+            selectedNode = node;
+            OnObjectSelected?.Invoke();
+        }
+
+        public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
+        {
+            grid.SetValue(Grid.RowSpanProperty, height);
+            grid.SetValue(Grid.ColumnSpanProperty, width);
+            grid.SetValue(Grid.RowProperty, y);
+            grid.SetValue(Grid.ColumnProperty, x);
+        }
+        private static void AddComponentTextBox(string componentInfo, Grid grid, RoutedEventHandler onEditPressed)
         {
             int i = 0;
 
             string[] splitComponentInfo = componentInfo.Split('\n');
 
-            TextBox box = new()
-            {
-                FontSize = 4f,
-                FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
-                IsReadOnly = true,
-
-                AcceptsReturn = false,
-                AcceptsTab = false,
-                AllowDrop = false,
-
-                TextWrapping = TextWrapping.NoWrap,
-
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-
-
-                Foreground = Brushes.Green,
-                Background = Brushes.Black,
-
-            };
-
-            Button button = CreateButton("Edit", new(0,0,0,0));
-
+           
             foreach (var item in splitComponentInfo)
-                box.Text += "\n " + item;
+            {
+                TextBox box = new()
+                {
+                    Text = item,
+                    FontSize = 4f,
+                    FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
+                    IsReadOnly = true,
 
-            SetRowAndColumn(button, 1, 1, 6, i);
-            SetRowAndColumn(box, 1, 6, 0, i);
+                    AcceptsReturn = false,
+                    AcceptsTab = false,
+                    AllowDrop = false,
 
-            grid.Children.Add(box);
-            grid.Children.Add(button);
+                    TextWrapping = TextWrapping.NoWrap,
+
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+
+
+                    Foreground = Brushes.Green,
+                    Background = Brushes.Black,
+
+                };
+                Button button = CreateButton(item, new(0, 0, 0, 0));
+                button.FontSize = 4;
+                
+                button.Click += HandleEditPressed;
+                button.Name = "edit_button_" + i.ToString();
+
+                EditActionArgs.Add(new object[]
+                {
+                    splitComponentInfo,
+                    item,
+                    box, 
+                    grid
+                });
+
+                SetRowAndColumn(button, 2, 2, 8, i * 2);
+                   SetRowAndColumn(box, 2, 8, 0, i * 2);
+
+                grid.Children.Add(box);
+                grid.Children.Add(button);
+                i++;
+            }
+
          
         }
-
-        private static Grid GetNodeInspectorGrid(out Grid grid)
+        private void AddGridToInspector(Grid control)
         {
-            grid = new()
+            componentGrid.Children.Add(control);
+            componentGrid.UpdateLayout();
+            activeGrids.Add(control);
+        }
+
+        public static void SetRowAndColumn(Control control, int height, int width, int x, int y)
+        {
+            control.SetValue(Grid.RowSpanProperty, height);
+            control.SetValue(Grid.ColumnSpanProperty, width);
+            control.SetValue(Grid.RowProperty, y);
+            control.SetValue(Grid.ColumnProperty, x);
+        }
+        private static Grid GetNodeInspectorGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
+        {
+            Grid grid = new()
             {
                 ClipToBounds = true,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
             };
+
             var rows = grid.RowDefinitions;
             var cols = grid.ColumnDefinitions;
 
-            for (int x = 0; x < 6; ++x)
+            for (int x = 0; x < width; ++x)
             {
                 ColumnDefinition col = new();
-
-                col.Width = new GridLength(12);
+                col.Width = new GridLength(colWidth);
                 cols.Add(col);
+            }
 
-
+            for (int x = 0; x < height; ++x)
+            {
                 RowDefinition row = new();
-                row.Height = new GridLength(12);
+                row.Height = new GridLength(rowHeight);
                 rows.Add(new());
-
             }
 
             return grid;
         }
-
         public static Button CreateButton(string content, Thickness margin) => new Button()
         {
             Content = content,
@@ -293,6 +292,16 @@ namespace pixel_editor
             BorderThickness = new Thickness(1, 1, 1, 1),
         };
 
+        #region Events
+        private static void HandleEditPressed(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+                if (button.Name.ToInt() is int i && EditActions.Count > i && EditActionArgs.Count > i)
+                    EditActions[i]?.Invoke(EditActionArgs[i]);
+                else Runtime.Log("Edit pressed failed.");
+            else Runtime.Log("sender wasnt button");
+        }
+        #endregion
 
     }
 }

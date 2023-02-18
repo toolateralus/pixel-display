@@ -2,6 +2,8 @@
 using pixel_renderer.Assets;
 using Newtonsoft.Json;
 using System;
+using System.Windows.Media.TextFormatting;
+using System.Windows.Controls;
 
 namespace pixel_renderer
 {
@@ -45,6 +47,14 @@ namespace pixel_renderer
             Awake();
         }
         internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
+
+        public virtual void OnEditActionClicked(params object[] parameters)
+        {
+            var componentInfo = parameters[0] as string;
+            var itemOrField = parameters[1] as string;
+
+            Runtime.Log($"Edit Action called on Component {Name} \n item clicked : {itemOrField}");
+        }
     }
 
 }
