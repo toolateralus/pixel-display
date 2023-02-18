@@ -53,23 +53,16 @@
             if (Resolution.y == 0 || Resolution.x == 0) return;
             Node camNode = new("CamNode", camera.parent.Position, Vec2.one);
             Camera cam = camNode.AddComponent(camera.Clone());
-            
+
             if (cam.zBuffer.GetLength(0) != Resolution.x || cam.zBuffer.GetLength(1) != Resolution.y)
                 cam.zBuffer = new float[(int)Resolution.x, (int)Resolution.y];
 
             Array.Clear(cam.zBuffer);
 
-            DrawBackground(cam);
-
             Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
-
-            //sprite.parent.Position = Vec2.zero;
-            //sprite.ColorData = baseImage;
-            //sprite.size = new Vec2(Constants.ScreenH, Constants.ScreenW);
-            //sprite.camDistance = float.Epsilon;
-
-            //DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vec2.zero, Resolution));
+            CreateBaseImageSprite(cam, sprite);
+            DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vec2.zero, Resolution));
 
             for (int i = 0; i < renderInfo.Count; ++i)
             {
@@ -96,6 +89,27 @@
 
                 DrawTransparentSprite(cam, sprite, drawArea);
             }
+        }
+
+        private void CreateBaseImageSprite(Camera cam, Sprite sprite)
+        {
+            Vec2 baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
+            Vec2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
+            BoundingBox2D camBoundingBox = new(topLeft, topLeft);
+            List<Vec2> camCorners = new()
+            {
+                cam.Center + cam.bottomRightCornerOffset.WithScale(-1, 1).Rotated(cam.angle),
+                cam.Center + cam.bottomRightCornerOffset.WithScale(1, -1).Rotated(cam.angle),
+                cam.Center + cam.bottomRightCornerOffset.Rotated(cam.angle)
+            };
+
+            foreach (Vec2 corner in camCorners) camBoundingBox.ExpandTo(corner);
+
+            sprite.parent.Position = camBoundingBox.min;
+            sprite.size = camBoundingBox.max - camBoundingBox.min;
+            sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize;
+            sprite.ColorData = baseImage;
+            sprite.camDistance = float.Epsilon;
         }
 
         private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea)
