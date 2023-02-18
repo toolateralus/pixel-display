@@ -27,6 +27,11 @@ namespace pixel_renderer
     public struct BoundingBox2D
     {
         public Vec2 min, max;
+        public BoundingBox2D(float min_x, float min_y, float max_x, float max_y)
+        {
+            this.min = new Vec2(min_x, min_y);
+            this.max = new Vec2(max_x, max_y);
+        }
         public BoundingBox2D(Vec2 min, Vec2 max)
         {
             this.min = min;

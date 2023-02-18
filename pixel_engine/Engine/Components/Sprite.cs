@@ -13,6 +13,7 @@ namespace pixel_renderer
     public class Sprite : Component
     {
         [JsonProperty] public Vec2 size = Vec2.one * 16;
+        [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] public Texture texture;
         [JsonProperty] public Color Color
@@ -138,7 +139,7 @@ namespace pixel_renderer
 
         
 
-        public Vec2Int ViewportToColorPos(Vec2 spriteViewport) => (Vec2Int)(spriteViewport.Wrapped(Vec2.one) * colorDataSize);
+        public Vec2 ViewportToColorPos(Vec2 spriteViewport) => (spriteViewport + viewportOffset).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
 
 

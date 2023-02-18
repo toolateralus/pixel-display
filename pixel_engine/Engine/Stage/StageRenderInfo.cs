@@ -10,6 +10,7 @@ namespace pixel_renderer
         
         public List<Vec2> spritePositions= new ();
         public List<Vec2> spriteSizeVectors = new();
+        public List<Vec2> spriteVPOffsetVectors = new();
         public List<float> spriteCamDistances = new();
         public List<Color[,]> spriteColorData = new();
 
@@ -34,15 +35,17 @@ namespace pixel_renderer
             for (int i = 0; i < sprites.Count(); ++i)
             {
                 Sprite sprite = sprites.ElementAt(i);
-                  spritePositions[i] = sprite.parent.Position;
+                spritePositions[i] = sprite.parent.Position;
                 spriteSizeVectors[i] = sprite.size;
-                  spriteColorData[i] = sprite.ColorData;
+                spriteVPOffsetVectors[i] = sprite.viewportOffset;
+                spriteColorData[i] = sprite.ColorData;
                 spriteCamDistances[i] = sprite.camDistance;
             }
             void addMemberOnTop()
             {
                 spritePositions.Add(Vec2.zero);
                 spriteSizeVectors.Add(Vec2.zero);
+                spriteVPOffsetVectors.Add(Vec2.zero);
                 spriteColorData.Add(new Color[1, 1]);
                 spriteCamDistances.Add(1f);
             }
@@ -50,6 +53,7 @@ namespace pixel_renderer
             {
                 spritePositions.RemoveAt(0);
                 spriteSizeVectors.RemoveAt(0);
+                spriteVPOffsetVectors.RemoveAt(0);
                 spriteColorData.RemoveAt(0);
                 spriteCamDistances.RemoveAt(0);
 
