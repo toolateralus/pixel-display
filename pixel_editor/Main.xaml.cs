@@ -437,7 +437,8 @@ namespace pixel_editor
             name = name.ToLower();   
         }
 
-        bool consoleOpen = true; 
+        bool consoleOpen = true;
+        public ComponentEditor? componentEditor;
 
         private void OnToggleConsole(object sender, RoutedEventArgs e)
         {

@@ -120,7 +120,6 @@ namespace pixel_renderer
         }
         public void FixedUpdate(float delta)
         {
-            
             lock (Components)
             {
                 for (int i = 0; i < ComponentsList.Count; i++)

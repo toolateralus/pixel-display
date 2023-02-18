@@ -36,15 +36,16 @@ namespace pixel_editor
         
         private Dictionary<Type, List<Component>> components = new();
 
-        public static List<Action> EditActions = new();
+        private Grid inspectorGrid;
 
-        public event Action OnObjectSelected;
-        public event Action OnObjectDeselected;
-        public event Action OnInspectorUpdated;
+        public static List<Action<Action>> EditActions = new();
+        public static List<Action> EditActionArgs = new(); 
 
-        public event Action OnComponentAdded;
-
-        public event Action OnComponentRemoved;
+        public event Action<Grid> OnObjectSelected;
+        public event Action<Grid> OnObjectDeselected;
+        public event Action<Grid> OnInspectorUpdated;
+        public event Action<Grid> OnComponentAdded;
+        public event Action<Grid> OnComponentRemoved;
 
         public (bool, T) TryGetComponent<T>() where T : Component, new()
         {
@@ -62,7 +63,7 @@ namespace pixel_editor
 
             T t = new();
             var obj = selectedNode.AddComponent(t);
-            OnComponentAdded?.Invoke();
+            OnComponentAdded?.Invoke(inspectorGrid);
             return (true, obj);
 
         }
@@ -74,7 +75,7 @@ namespace pixel_editor
             if (selectedNode is not null && selectedNode.HasComponent<T>()) 
             {
                 selectedNode.RemoveComponent(t);
-                OnComponentAdded?.Invoke();
+                OnComponentAdded?.Invoke(inspectorGrid);
                 return (true, t);
             }
             return (false, null);
@@ -131,7 +132,8 @@ namespace pixel_editor
             OnComponentRemoved += Refresh;
         }
         public void Update(object? sender, EventArgs e) { }
-        private void Refresh()
+        ComponentEditor? lastKnownComponentEditor; 
+        private void Refresh(Grid grid)
         {
             if (selectedNode == null) return;
             name.Content = selectedNode.Name;
@@ -140,11 +142,11 @@ namespace pixel_editor
             var thickness = new Thickness(0, 0, 0, 0);
             int index = 0;
 
-            Grid block = GetNodeInspectorGrid();
+            grid = GetNodeInspectorGrid();
             
-            AddGridToInspector(block);
+            AddGridToInspector(grid);
 
-            SetRowAndColumn(block, 12, 8, 0, index);
+            SetRowAndColumn(grid, 12, 8, 0, index);
 
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
@@ -157,19 +159,26 @@ namespace pixel_editor
                     button.FontSize = 4;
 
                     button.Click += HandleEditPressed;
+
+                    EditActions.Add(component.OnEditActionClicked);
+                    EditActionArgs.Add(delegate 
+                    {
+                      lastKnownComponentEditor = new ComponentEditor(Editor.Current, component);
+                        lastKnownComponentEditor.Show();
+                    });
+
                     button.Name = "edit_button_" + index.ToString();
 
-                    block.Children.Add(button);
-                    block.Children.Add(box);
+                    grid.Children.Add(button);
+                    grid.Children.Add(box);
+
                     SetRowAndColumn(button, 2, 2, 4, index * 2);
                     SetRowAndColumn(box, 2, 4, 0, index * 2);
 
-                    EditActions.Add(component.OnEditActionClicked);
-            
                     index++;
                 }
 
-            OnInspectorUpdated?.Invoke();
+            OnInspectorUpdated?.Invoke(inspectorGrid);
         }
 
         public void DeselectNode()
@@ -181,13 +190,14 @@ namespace pixel_editor
                 foreach (var control in activeControls) componentGrid.Children.Remove(control);
 
                 activeControls.Clear();
-                OnObjectDeselected?.Invoke();
+
+                OnObjectDeselected?.Invoke(inspectorGrid);
             }
         }
         public void SelectNode(Node node)
         {
             selectedNode = node;
-            OnObjectSelected?.Invoke();
+            OnObjectSelected?.Invoke(inspectorGrid = GetNodeInspectorGrid());
         }
 
         public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
@@ -279,8 +289,8 @@ namespace pixel_editor
         private static void HandleEditPressed(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
-                if (button.Name.ToInt() is int i && EditActions.Count > i)
-                    EditActions[i]?.Invoke();
+                if (button.Name.ToInt() is int i && EditActions.Count > i && EditActionArgs.Count > i)
+                    EditActions[i]?.Invoke(EditActionArgs[i]);
                 else Runtime.Log("Edit pressed failed.");
         }
         #endregion

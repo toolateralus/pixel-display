@@ -12,25 +12,25 @@ namespace pixel_renderer
     {
         [JsonProperty]
         public Node parent;
-        [JsonProperty] 
+        [JsonProperty]
         public bool Enabled = true;
-        [JsonProperty] 
+        [JsonProperty]
         public string Name { get; set; } = "";
-        [JsonProperty] 
+        [JsonProperty]
         private string _uuid = "";
-        public string UUID => _uuid; 
-        
+        public string UUID => _uuid;
+
         public Component()
         {
-            _uuid = pixel_renderer.UUID.NewUUID(); 
+            _uuid = pixel_renderer.UUID.NewUUID();
         }
-        
+
         public virtual void Awake() { }
         public virtual void Update() { }
         public virtual void FixedUpdate(float delta) { }
         public virtual void OnTrigger(Collider other) { }
         public virtual void OnCollision(Collider collider) { }
-       
+
         /// <summary>
         /// Performs a 'Get Component' call on the Parent node object of the component this is called from.
         /// </summary>
@@ -48,8 +48,9 @@ namespace pixel_renderer
         }
         internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
 
-        public virtual void OnEditActionClicked()
+        public virtual void OnEditActionClicked(Action action) 
         {
+            action?.Invoke();
             Runtime.Log($"{Name} had {nameof(OnEditActionClicked)} called at {DateTime.Now}");
         }
     }
