@@ -114,8 +114,9 @@ namespace pixel_renderer
         }
         public void Awake()
         {
-            for (int i = 0; i < ComponentsList.Count; i++)
-                  ComponentsList[i].init_component_internal();
+            foreach(var Components in Components.Values)
+                foreach(var component in Components)
+                    component.init_component_internal();
         }
         public void FixedUpdate(float delta)
         {
