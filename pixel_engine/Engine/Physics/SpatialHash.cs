@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class SpatialHash
     {
@@ -48,13 +49,13 @@
         }
         internal List<Node> GetNearby(Node node)
         {
-
-            List<Node> nodes = new List<Node>(256);
-
+            List<Node> nodes = new(256);
             List<int> buckets = Hash(node);
+
             foreach (var index in buckets)
             {
-                if (index < 0 || index >= rows * columns - 1) continue;
+                if (index < 0 || index >= rows * columns - 1)
+                    continue;
 
                 if (Buckets[index].Count > nodes.Capacity)
                     nodes.Capacity = Buckets[index].Count;

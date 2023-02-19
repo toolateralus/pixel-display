@@ -170,7 +170,7 @@ namespace pixel_editor
             foreach (var info in fields)
                 if (info.Name == o)
                 {
-                    bool gotValue = CommandParser.TryParse(inputFields[i].Text, out List<object> results);
+                    CommandParser.TryParse(inputFields[i].Text, out List<object> results);
 
                     foreach(var obj in results)
                         if (obj.GetType() == info.FieldType)

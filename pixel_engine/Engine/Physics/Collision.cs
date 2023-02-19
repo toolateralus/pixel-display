@@ -53,28 +53,12 @@ namespace pixel_renderer
         public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
-
-            if (stage.nodes is null ||
-                stage.nodes.Count == 0) return;
-
-            IReadOnlyCollection<Node> nodes;
-            
             lock (stage.nodes)
-                nodes = stage.nodes;
-
-            if (nodes is null)
-                return;
-
-            Func<Node, List<Node>> selector = stage_node => Hash.GetNearby(stage_node);
-
-            IEnumerable<List<Node>> nearby = nodes.Select(selector);
-
-            var nearbyCt = nearby.Count();
-            for (int i = 0; i < nearbyCt - 1; ++i)
-            {
-                var nodesList = nearby.ElementAt(i);
-                collisionCells.Add(nodesList);
-            }
+                foreach (var node in stage.nodes)
+                {
+                    List<Node> nearby = Hash.GetNearby(node);
+                    collisionCells.Add(nearby);
+                }
 
         }
         public static void NarrowPhase(List<List<Node>> collisionCells)
