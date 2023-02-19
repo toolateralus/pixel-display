@@ -190,6 +190,20 @@ namespace pixel_renderer
 
             A.parent.Position += minDepth;
         }
+        private static void Collide(Rigidbody A, Rigidbody B)
+        {
+            if (A is null || B is null)
+                return; 
+
+            var aCol = A.GetComponent<Collider>();
+            var bCol = B.GetComponent<Collider>();
+            if (aCol.IsTrigger || bCol.IsTrigger) return;
+
+            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, bCol.Mesh);
+
+            A.parent.Position += minDepth / 2;
+            B.parent.Position -= minDepth / 2;
+        }
         private static void AttemptCallbacks(Collider A, Collider B)
         {
             if (A.IsTrigger || B.IsTrigger)
