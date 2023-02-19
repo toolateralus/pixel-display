@@ -90,7 +90,14 @@ namespace pixel_editor
             foreach (var x in fields)
             {
                 var display = Inspector.GetTextBox(x.Key);
-                var input = Inspector.GetTextBox(x.Value.ToString() ?? "null");
+                string valStr;
+                
+                if (x.Value != null)
+                    valStr = x.Value.ToString();
+                else valStr = "null";
+
+                var input = Inspector.GetTextBox(valStr);
+                
                 var button = Inspector.CreateButton("set", new(0, 0, 0, 0));
 
                 Inspector.SetControlColors(display, Brushes.DarkSlateGray, Brushes.White);
