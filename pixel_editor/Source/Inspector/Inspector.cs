@@ -32,6 +32,7 @@ namespace pixel_editor
         
         private Label name;
         private Label objInfo;
+
         private Grid mainGrid;
         private Grid grid; 
         
@@ -41,12 +42,12 @@ namespace pixel_editor
         public static List<Action<Action>> EditActions = new();
         public static List<Action> EditActionArgs = new(); 
 
-        public event Action<Grid> OnObjectSelected;
-        public event Action<Grid> OnObjectDeselected;
-        public event Action<Grid> OnInspectorUpdated;
-        public event Action<Grid> OnComponentAdded;
-        public event Action<Grid> OnComponentRemoved;
-        public event Action<Grid> OnInspectorMoved;
+        public static event Action<Grid> OnObjectSelected;
+        public static event Action<Grid> OnObjectDeselected;
+        public static event Action<Grid> OnInspectorUpdated;
+        public static event Action<Grid> OnComponentAdded;
+        public static event Action<Grid> OnComponentRemoved;
+        public static Action<int, int> OnInspectorMoved;
 
         public (bool, T) TryGetComponent<T>() where T : Component, new()
         {
@@ -130,10 +131,17 @@ namespace pixel_editor
             OnObjectDeselected += Refresh;
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
-
+            OnInspectorMoved += Inspector_OnInspectorMoved;
             RegisterAction((e) => DeselectNode(), System.Windows.Input.Key.Escape);
 
         }
+        private void Inspector_OnInspectorMoved(int x = 0, int y = 0)
+        {
+            Constants.InspectorPosition.x = x;
+            Constants.InspectorPosition.y = y;
+            Refresh(grid);
+        }
+
         public void Update(object? sender, EventArgs e) { }
         ComponentEditor? lastKnownComponentEditor; 
         private void Refresh(Grid grid)
@@ -141,14 +149,14 @@ namespace pixel_editor
             activeGrids.Clear();
             activeControls.Clear();
 
+            grid = NewInspectorGrid();
+
             if (selectedNode == null)
                 return;
 
             components = selectedNode.Components;
 
             int index = 0;
-
-            grid ??= NewInspectorGrid();
 
 
             foreach (var componentType in components.Values)
@@ -203,6 +211,7 @@ namespace pixel_editor
             if (selectedNode != null)
             {
                 selectedNode = null;
+                
 
                 foreach( var x in activeGrids)
                     x.Visibility = Visibility.Collapsed;

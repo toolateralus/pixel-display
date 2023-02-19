@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Security.Policy;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
 using pixel_renderer.Scripts;
 using Bitmap = System.Drawing.Bitmap;
@@ -43,10 +44,15 @@ namespace pixel_renderer
             get => _colors;
             set
             {
-                _colors = value;
-                colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+                if (!IsReadOnly)
+                {
+                    _colors = value;
+                    colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+                }
             }
         }
+
+        public bool IsReadOnly = false;
 
         private void Refresh()
         {
@@ -96,9 +102,16 @@ namespace pixel_renderer
 
             Draw(size, colorData);
         }
-        public void RestoreCachedColor(bool nullifyCache)
+        public void RestoreCachedColor(bool nullifyCache, bool IsReadOnly = false)
         {
-            if (cached_colors == null) Randomize();
+            this.IsReadOnly = IsReadOnly;
+            if (cached_colors == null)
+            {
+                Bitmap bmp = new(Player.test_image_data.fullPath);
+                cached_colors = CBit.ColorArrayFromBitmap(bmp);
+                Runtime.Log("Sprite color cache was null upon returning to original color. Instantiating backup.");
+            }
+
             Draw(size, cached_colors);
             if (nullifyCache) cached_colors = null;
         }
@@ -106,7 +119,7 @@ namespace pixel_renderer
         /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
         /// </summary>
         /// <param name="borderColor"></param>
-        public void Highlight(Color borderColor, Vec2? widthIn = null)
+        public void Highlight(Color borderColor, Vec2? widthIn = null, bool IsReadOnly = false)
         {
             cached_colors = this.ColorData;
             
@@ -125,6 +138,7 @@ namespace pixel_renderer
                         colorData[x, y] = borderColor;
                 }
             Draw(size, colorData);
+            this.IsReadOnly = IsReadOnly;
         }
         
         public void Draw(Vec2 size, Color[,] color)
