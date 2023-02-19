@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using pixel_renderer;
+using static System.Net.Mime.MediaTypeNames;
+using Component = pixel_renderer.Component;
 
 namespace pixel_editor
 {
@@ -55,15 +58,93 @@ namespace pixel_editor
         #endregion
 
         public Component component;
-        public ComponentViewer viewer;
         public ComponentEditor (Editor mainWnd, Component component)
         {
             InitializeComponent();
             this.component = component;
             mainWnd.componentEditor = this;
-            viewer = new ComponentViewer(component, MainGrid);
+            data = new(component);
+            AddTextBoxes(MainGrid);
         }
-        
+
+
+        public ViewerData data;
+        public Grid mainGrid;
+        public List<Action<string, int>> editEvents = new();
+        public List<TextBox> inputFields = new();
+
+        private void SetupViewer(Grid grid)
+        {
+            mainGrid = grid;
+            int colCt = mainGrid.ColumnDefinitions.Count;
+            int rowCt = mainGrid.RowDefinitions.Count;
+
+            mainGrid = Inspector.GetGrid(colCt, rowCt);
+
+            Inspector.SetRowAndColumn(mainGrid, colCt, rowCt, 0, 0);
+            mainGrid.Children.Add(mainGrid);
+            mainGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
+            mainGrid.VerticalAlignment = VerticalAlignment.Stretch;
+        }
+        public void AddTextBoxes(Grid viewer)
+        {
+            var fields = data.Fields;
+            int i = 0;
+
+            var saveBtn = Inspector.CreateButton("Save", new(0, 0, 0, 0));
+            Inspector.SetRowAndColumn(saveBtn, 2, 2, 20, 20);
+            viewer.Children.Add(saveBtn);
+
+            foreach (var x in fields)
+            {
+                var display = Inspector.GetTextBox(x.Key);
+                var input = Inspector.GetTextBox(x.Value.ToString() ?? "null");
+                var button = Inspector.CreateButton("set", new(0, 0, 0, 0));
+
+
+                button.Name = "edit_confirm_button_" + i.ToString();
+                button.Click += ExecuteEditEvent;
+
+                viewer.Children.Add(display);
+                viewer.Children.Add(input);
+                viewer.Children.Add(button);
+
+                inputFields.Add(input);
+
+                editEvents.Add((o, e) => SetVariable(o, e));
+
+                Inspector.SetRowAndColumn(display, 10, 8, 0, i * 4);
+                Inspector.SetRowAndColumn(input, 10, 8, 8, i * 4);
+                Inspector.SetRowAndColumn(button, 3, 2, 16, i * 4);
+
+                i++;
+            }
+        }
+        private bool SetVariable(string o, int i)
+        {
+            Inspector.GetComponentRuntimeInfo(component, out var fields, out _);
+
+            foreach (var info in fields)
+                if (info.Name == o)
+                {
+                    TypeConverter tc = TypeDescriptor.GetConverter(info.FieldType);
+                    object value = tc.ConvertFromString(null, CultureInfo.InvariantCulture, inputFields[i].Text);
+                    info.SetValue(component, value);
+                    return true; 
+                }
+            return false;
+        }
+        private void ExecuteEditEvent(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+                if (button.Name.ToInt() is int i)
+                    if (inputFields.Count > i)
+                        if (data.Fields.ElementAt(i) is KeyValuePair<string, object> kvp)
+                        {
+                            string field = inputFields.ElementAt(i).Text;
+                            editEvents[i].Invoke(kvp.Key, i);
+                        }
+        }
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
     }
 
@@ -83,87 +164,5 @@ namespace pixel_editor
         public Dictionary<string, object> Fields { get; private set; } = new();
     }
 
-    public class ComponentViewer
-    {
-        public ViewerData data;
-        public Grid viewerGrid;
-        public Grid mainGrid;
-        public List<Action<string, object>> FinalizeEditEvents = new();
-
-
-        public ComponentViewer(Component component, Grid mainGrid)
-        {
-            data = new(component);
-            this.mainGrid = mainGrid;
-            viewerGrid = mainGrid;
-            AddTextBoxes(viewerGrid);
-        }
-
-        private void SetupViewer(Grid grid)
-        {
-            mainGrid = grid;
-            int colCt = mainGrid.ColumnDefinitions.Count;
-            int rowCt = mainGrid.RowDefinitions.Count;
-
-            viewerGrid = Inspector.GetGrid(colCt, rowCt);
-
-            Inspector.SetRowAndColumn(viewerGrid, colCt, rowCt, 0, 0);
-            mainGrid.Children.Add(viewerGrid);
-            viewerGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
-            viewerGrid.VerticalAlignment = VerticalAlignment.Stretch;
-        }
-
-        public void AddTextBoxes(Grid viewer)
-        {
-            var fields = data.Fields;
-            int i = 0;
-
-            var saveBtn = Inspector.CreateButton("Save", new(0,0,0,0));
-            Inspector.SetRowAndColumn(saveBtn, 2, 2, 20, 20);
-            viewer.Children.Add(saveBtn);
-
-            foreach (var x in fields)
-            {
-                var display = Inspector.GetTextBox(x.Key);
-                var input = Inspector.GetTextBox(x.Value.ToString() ?? "null");
-                var button = Inspector.CreateButton("set", new(0,0,0,0));
-
-
-                button.Name = "edit_confirm_button_" + i.ToString();
-                button.Click += ExecuteEditEvent; 
-
-                viewer.Children.Add(display);
-                viewer.Children.Add(input);
-                viewer.Children.Add(button);
-
-                FinalizeEditEvents.Add((o, e) => SetVariable(o, e));
-                
-                Inspector.SetRowAndColumn(display, 10, 8, 0 , i * 4);
-                Inspector.SetRowAndColumn(input, 10, 8, 8 , i * 4);
-                Inspector.SetRowAndColumn(button, 3, 2, 16 , i * 4);
-                
-                i++;
-            }
-        }
-
-        private bool SetVariable(string o, object e)
-        {
-            if (data.Fields.ContainsKey(o))
-            {
-                data.Fields[o] = e;
-                return true;
-            }
-            return false; 
-        }
-
-        private void ExecuteEditEvent(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button)
-                if (button.Name.ToInt() is int i)
-                    if(data.Fields.ElementAt(i) is KeyValuePair<string, object> kvp)
-                        FinalizeEditEvents[i].Invoke(kvp.Key, kvp.Value);
-        }
-
       
-    }
 }

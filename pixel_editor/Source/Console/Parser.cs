@@ -184,34 +184,35 @@ namespace pixel_editor
             if (hasArgs(input))
                 arguments = getParameterArray(input, ref args_str);
 
-            static string[] splitArgsIntoParams(string args_str) => args_str.Split(ParameterSeperator);
-            static string getArguments(string input, string arguments, int argStartIndex, int argEndIndex)
-            {
-                for (int i = argStartIndex; i < argEndIndex; ++i)
-                    arguments += input[i];
-                return arguments;
-            }
-            static void getArgumentIndices(string input, out int argStartIndex, out int argEndIndex)
-            {
-                argStartIndex = input.IndexOf(ArgumentsStart);
-                argEndIndex = input.IndexOf(EndLine);
-            }
-            static string[] getParameterArray(string input, ref string args_str)
-            {
-                string[] arguments;
-                getArgumentIndices(input, out int argStartIndex, out int argEndIndex);
-                args_str = getArguments(input, args_str, argStartIndex, argEndIndex);
-                arguments = splitArgsIntoParams(args_str);
-                return arguments;
-            }
-            static bool hasArgs(string input)
-            {
-                return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
-            }
-            static string getCmdPhrase(string input)
-            {
-                return input.Split(ArgumentsStart)[0] + EndLine;
-            }
+           
+        }
+        public static string[] splitArgsIntoParams(string args_str) => args_str.Split(ParameterSeperator);
+        public static string getArguments(string input, string arguments, int argStartIndex, int argEndIndex)
+        {
+            for (int i = argStartIndex; i < argEndIndex; ++i)
+                arguments += input[i];
+            return arguments;
+        }
+        public static void getArgumentIndices(string input, out int argStartIndex, out int argEndIndex)
+        {
+            argStartIndex = input.IndexOf(ArgumentsStart);
+            argEndIndex = input.IndexOf(EndLine);
+        }
+        public static string[] getParameterArray(string input, ref string args_str)
+        {
+            string[] arguments;
+            getArgumentIndices(input, out int argStartIndex, out int argEndIndex);
+            args_str = getArguments(input, args_str, argStartIndex, argEndIndex);
+            arguments = splitArgsIntoParams(args_str);
+            return arguments;
+        }
+        public static bool hasArgs(string input)
+        {
+            return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
+        }
+        public static string getCmdPhrase(string input)
+        {
+            return input.Split(ArgumentsStart)[0] + EndLine;
         }
     }
 }
