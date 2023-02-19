@@ -89,37 +89,33 @@ namespace pixel_editor
 
             foreach (var x in fields)
             {
-                var display = Inspector.GetTextBox(x.Key);
                 string valStr;
                 
                 if (x.Value != null)
                 {
                     if (x.Value is Vec2 vec)
                         valStr = vec.AsString();
-                   
                     else valStr = x.Value.ToString();
                 }
                 else valStr = "null";
 
-                var input = Inspector.GetTextBox(valStr);
-                
-                var button = Inspector.CreateButton("set", new(0, 0, 0, 0));
+                string name = x.Key;
+                var nameDisplay = Inspector.GetTextBox(name);
+                var inputBox = Inspector.GetTextBox(valStr);
 
-                Inspector.SetControlColors(display, Brushes.DarkSlateGray, Brushes.White);
-                Inspector.SetControlColors(input, Brushes.DarkSlateGray, Brushes.White);
-                Inspector.SetControlColors(button, Brushes.SlateGray, Brushes.White);
+                Inspector.SetControlColors(nameDisplay, Brushes.DarkSlateGray, Brushes.White);
+                Inspector.SetControlColors(inputBox, Brushes.DarkSlateGray, Brushes.White);
 
+                inputBox.IsReadOnly = false;
+                inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
+                inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
 
-                input.IsReadOnly = false;
-                input.GotKeyboardFocus += Input_GotKeyboardFocus;
-                input.LostKeyboardFocus += Input_LostKeyboardFocus;
-
-                viewer.Children.Add(display);
-                viewer.Children.Add(input);
-                inputFields.Add(input);
+                viewer.Children.Add(nameDisplay);
+                viewer.Children.Add(inputBox);
+                inputFields.Add(inputBox);
                 editEvents.Add((o, e) => SetVariable(o, e));
-                Inspector.SetRowAndColumn(display, 10, 8, 0, i * 4);
-                Inspector.SetRowAndColumn(input, 10, 8, 8, i * 4);
+                Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, i);
+                Inspector.SetRowAndColumn(inputBox, 1, 8, 8, i);
 
                 i++;
             }
@@ -142,13 +138,13 @@ namespace pixel_editor
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
-            Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.White);
+            Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
         }
 
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
-            Inspector.SetControlColors(box, Brushes.Black, Brushes.DarkSlateGray);
+            Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
         }
 
         private bool SetVariable(string o, int i)
