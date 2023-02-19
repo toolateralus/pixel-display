@@ -16,7 +16,7 @@ namespace pixel_renderer
         public const float PhysicsRefreshInterval = .01f;
         public const float MaxDepenetrationForce = 3f;
         public static int TerminalVelocity = 4;
-        public const int CollisionCellSize = 512; 
+        public const int CollisionCellSize = 128; 
         public static Vec2 TerminalVec2()
         {
             return new Vec2()
@@ -51,13 +51,15 @@ namespace pixel_renderer
 
         public const int FramerateSampleThreshold = 60;
 
+        public static Vec2 PhysicsArea = new Vec2(2048, 2048);
+
         public const int ScreenH = 256;
         public const int ScreenW = 256;
 
         public static Vec2 CurrentResolution => Runtime.Instance.renderHost.GetRenderer().Resolution;
         public static Vec2 DefaultResolution => new(ScreenW, ScreenH);
-        public static Vec2 MaxResolution => new(3840, 3840);
-        public static Vec2 MinResolution => new(4, 4);
+        public static Vec2 MaxResolution = new(3840, 3840);
+        public static Vec2 MinResolution = new(4, 4);
 
 
         public static Color EditorHighlightColor = Color.Orange;

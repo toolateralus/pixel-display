@@ -20,7 +20,7 @@ namespace pixel_renderer
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true;
 
-        private readonly static SpatialHash Hash = new(Constants.ScreenW, Constants.ScreenH, Constants.CollisionCellSize);
+        private readonly static SpatialHash Hash = new((int)Constants.PhysicsArea.x, (int)Constants.PhysicsArea.y, Constants.CollisionCellSize);
        
         public static void SetActive(bool value) => AllowEntries = value;
         public static void ViewportCollision(Node node)
@@ -186,30 +186,7 @@ namespace pixel_renderer
             var aCol = A.GetComponent<Collider>();
             if (aCol.IsTrigger || B.IsTrigger) return;
 
-            var a_vertices = aCol.GetVertices(); 
-            var b_vertices = B.GetVertices();
-
-            var a_normals = aCol.normals;
-            var b_normals = B.normals;
-
-            var a_centroid = aCol.GetCentroid();
-            var b_centroid = B.GetCentroid();
-
-            Polygon pA = new()
-            {
-                vertices = a_vertices,
-                centroid = a_centroid,
-                normals = a_normals,
-            };
-
-            Polygon pB = new()
-            {
-                vertices = b_vertices,
-                centroid = b_centroid,
-                normals = b_normals,
-            };
-
-            var minDepth = SATCollision.GetMinimumDepthVector(pA, pB);
+            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, B.Mesh);
 
             A.parent.Position += minDepth;
         }
