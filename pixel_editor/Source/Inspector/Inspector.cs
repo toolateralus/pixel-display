@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Collections.Generic;
 using Brushes = System.Windows.Media.Brushes;
+using static pixel_renderer.Input;
 using System.Windows;
 using System.Windows.Controls;
 using pixel_renderer;
@@ -129,6 +130,9 @@ namespace pixel_editor
             OnObjectDeselected += Refresh;
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
+
+            RegisterAction((e) => DeselectNode(), System.Windows.Input.Key.Escape);
+
         }
         public void Update(object? sender, EventArgs e) { }
         ComponentEditor? lastKnownComponentEditor; 
@@ -200,9 +204,11 @@ namespace pixel_editor
             {
                 selectedNode = null;
 
-                foreach (var control in activeControls) grid.Children.Remove(control);
-
+                foreach( var x in activeGrids)
+                    x.Visibility = Visibility.Collapsed;
+               
                 activeControls.Clear();
+                activeGrids.Clear();
 
                 OnObjectDeselected?.Invoke(grid);
             }
