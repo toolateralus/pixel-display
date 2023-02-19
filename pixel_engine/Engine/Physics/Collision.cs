@@ -205,9 +205,9 @@ namespace pixel_renderer
 
             //flatten velocities
             Vec2 colNormal = minDepth.Normalized();
-            float colSpeedA = Vec2.Dot(A.velocity, colNormal);
+            float colSpeedA = Vec2.Dot(A.velocity, colNormal * -1);
             float colSpeedB = Vec2.Dot(B.velocity, colNormal);
-            A.velocity -= colNormal * colSpeedA;
+            A.velocity -= colNormal * colSpeedA * -1;
             B.velocity -= colNormal * colSpeedB;
         }
         private static void AttemptCallbacks(Collider A, Collider B)

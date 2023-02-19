@@ -58,7 +58,7 @@ namespace pixel_renderer
         #endregion
         #region Strings
         /// <summary>
-        /// Takes a string of any format and returns a numerical value. If the string contains no number chars, it will return -1.
+        /// Takes a string of any format and returns a integer value. If the string contains no number chars, it will return -1.
         /// </summary>
         /// <param name="input"></param>
         /// <returns>an integer of value based on the order and frequency of numbers in the input string.</returns>
@@ -72,6 +72,7 @@ namespace pixel_renderer
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }
+        public static float ToFloat(this string input) => float.Parse(input);
         /// <summary>
         /// Since the assets system handles the file 
         /// 
