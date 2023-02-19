@@ -114,20 +114,12 @@ namespace pixel_editor
                 input.GotKeyboardFocus += Input_GotKeyboardFocus;
                 input.LostKeyboardFocus += Input_LostKeyboardFocus;
 
-                button.Name = "edit_confirm_button_" + i.ToString();
-                button.Click += ExecuteEditEvent;
-
                 viewer.Children.Add(display);
                 viewer.Children.Add(input);
-                viewer.Children.Add(button);
-
                 inputFields.Add(input);
-
                 editEvents.Add((o, e) => SetVariable(o, e));
-
                 Inspector.SetRowAndColumn(display, 10, 8, 0, i * 4);
                 Inspector.SetRowAndColumn(input, 10, 8, 8, i * 4);
-                Inspector.SetRowAndColumn(button, 3, 2, 16, i * 4);
 
                 i++;
             }
@@ -136,19 +128,15 @@ namespace pixel_editor
             viewer.Children.Add(saveBtn);
             saveBtn.Click += SaveBtn_Click;
 
-            Inspector.SetRowAndColumn(saveBtn, 1,1, 16,16);
+            Inspector.SetRowAndColumn(saveBtn, 1,1, 18,15);
 
         }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             e.Handled = true; 
-            int i = 0; 
-            foreach (var field in data.Fields)
-            {
-                editEvents[i].Invoke(field.Key, i);
-                i++;
-            }
+            for(int i = 0; i< data.Fields.Count - 1; ++i)
+                ExecuteEditEvent(i);
         }
 
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -183,16 +171,16 @@ namespace pixel_editor
                 }
             return false;
         }
-        private void ExecuteEditEvent(object sender, RoutedEventArgs e)
+        private void ExecuteEditEvent(int index)
         {
-            if (sender is Button button)
-                if (button.Name.ToInt() is int i)
-                    if (inputFields.Count > i)
-                        if (data.Fields.ElementAt(i) is KeyValuePair<string, object> kvp)
-                        {
-                            string field = inputFields.ElementAt(i).Text;
-                            editEvents[i].Invoke(kvp.Key, i);
-                        }
+            if (inputFields.Count > index)
+                if (data.Fields.ElementAt(index) is KeyValuePair<string, object> kvp)
+                {
+                    string field = inputFields.ElementAt(index).Text;
+                    Action<string, int> action = editEvents[index];
+                    string name = kvp.Key;
+                    action.Invoke(name, index);
+                }
         }
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
     }
