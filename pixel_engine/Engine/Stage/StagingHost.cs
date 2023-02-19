@@ -29,9 +29,9 @@ namespace pixel_renderer
 
                 result = node;
                 
-                sprite.Highlight(Constants.EditorHighlightColor);
+                sprite.Highlight(Constants.EditorHighlightColor, IsReadOnly : true);
                 
-                lastSelected?.GetComponent<Sprite>().RestoreCachedColor(false);
+                lastSelected?.GetComponent<Sprite>().RestoreCachedColor(false, false);
                 lastSelected = node;
 
                 return true;

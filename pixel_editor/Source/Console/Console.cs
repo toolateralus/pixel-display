@@ -8,6 +8,7 @@ using System.Windows.Input;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using pixel_renderer.Scripts;
+using System.Drawing;
 
 namespace pixel_editor
 {
@@ -130,6 +131,8 @@ namespace pixel_editor
             args = null,
             description = "Retrieves the node of name specified",
         };
+
+
         public static Command cmd_list_node() => new()
         {
             phrase = "node.List;",
@@ -364,6 +367,95 @@ namespace pixel_editor
             args = null,
         };
         #endregion
+
+        #region Editor Commands
+
+        public static Command cmd_show_colliders() => new()
+        {
+           phrase = "showColliders;",
+           syntax = "showColliders();",
+           action = showColliders,
+           description = "highlights all of the colliders bounds in green",
+        };
+        static bool collidersHighlighted = false;
+        private static void showColliders(object[]? obj)
+        {
+
+            if (!collidersHighlighted)
+            {
+                Stage? stage = Runtime.Instance.GetStage();
+
+                if (stage is null)
+                {
+                    Command.Error("showColliders", CmdError.NullReference);
+                    return;
+                }
+                var colliders = stage.GetAllComponents<Collider>();
+                foreach (var x in colliders)
+                {
+                    if (x.sprite is null && x.parent.HasComponent<Sprite>())
+                        x.sprite = x.parent.GetComponent<Sprite>();
+
+                    if (x.sprite is null)
+                        continue;
+
+                    if (x.IsTrigger)
+                        x.sprite?.Highlight(Color.White, IsReadOnly: true);
+                    else x.sprite?.Highlight(Color.Green,IsReadOnly: true);
+
+                    x.sprite.IsReadOnly = true;
+                }
+
+                collidersHighlighted = true;
+            }
+            else
+            {
+                Stage? stage = Runtime.Instance.GetStage();
+
+                if (stage is null)
+                {
+                    Command.Error("showColliders", CmdError.NullReference);
+                    return;
+                }
+                var colliders = stage.GetAllComponents<Collider>();
+
+                foreach (var x in colliders)
+                {
+                    if (x.sprite is null && x.parent.HasComponent<Sprite>())
+                        x.sprite = x.parent.GetComponent<Sprite>();
+
+                    if (x.sprite is null)
+                        continue;
+
+                    x.sprite.RestoreCachedColor(true);
+                    x.sprite.IsReadOnly = false; 
+                }
+            }
+          
+
+        }
+
+        public static Command cmd_move_inspector() => new()
+        {
+            phrase = "inspector.Move;",
+            syntax = "inspector.Move(Vec2 newPosition)",
+            action = moveInspector,
+            description = "Sets the inspectors current position",
+            argumentTypes = new string[] { "vec:"},
+        };
+
+        private static void moveInspector(object[]? obj)
+        {
+            if (!TryGetArgAtIndex(0, out Vec2 vec, obj))
+            {
+                Command.Error("inspector.Position(Vec2 newPosition)", CmdError.ArgumentNotFound);
+                return;
+            }
+            Inspector.OnInspectorMoved.Invoke((int)vec.x, (int)vec.y);
+        }
+        #endregion
+
+
         public static Console Current 
         {
             get
