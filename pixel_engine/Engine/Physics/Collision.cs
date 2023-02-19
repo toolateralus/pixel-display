@@ -162,16 +162,15 @@ namespace pixel_renderer
                         !B.TryGetComponent(out Collider col_B))
                         return;
 
-                    bool has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
-                    bool has_rb_b = B.TryGetComponent<Rigidbody>(out var rbB);
+                    bool a_has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
+                    bool b_has_rb = B.TryGetComponent<Rigidbody>(out var rbB);
 
-                    if (has_rb && has_rb_b)
-                        RigidbodyCollide(rbB, rbA);
-
-
-                    else if (has_rb || has_rb_b)
-                        if (has_rb) Collide(rbB, col_A);
-                        else Collide(rbA, col_B);
+                    if (a_has_rb && b_has_rb)
+                        Collide(rbB, rbA);
+                    if (a_has_rb && !b_has_rb)
+                        Collide(rbB, col_A);
+                    if (!a_has_rb && b_has_rb)
+                        Collide(rbA, col_B);
 
                     AttemptCallbacks(col_A, col_B);
                 }
@@ -199,10 +198,17 @@ namespace pixel_renderer
             var bCol = B.GetComponent<Collider>();
             if (aCol.IsTrigger || bCol.IsTrigger) return;
 
+            //depenetrate
             var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, bCol.Mesh);
-
             A.parent.Position += minDepth / 2;
             B.parent.Position -= minDepth / 2;
+
+            //flatten velocities
+            Vec2 colNormal = minDepth.Normalized();
+            float colSpeedA = Vec2.Dot(A.velocity, colNormal);
+            float colSpeedB = Vec2.Dot(B.velocity, colNormal);
+            A.velocity -= colNormal * colSpeedA;
+            B.velocity -= colNormal * colSpeedB;
         }
         private static void AttemptCallbacks(Collider A, Collider B)
         {
@@ -228,30 +234,6 @@ namespace pixel_renderer
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
             FinalPhase();
-        }
-        private static void RigidbodyCollide(Rigidbody A, Rigidbody B)
-        {
-            // check collider for trigger
-            ///if (A.IsTrigger || B.IsTrigger) return;
-
-            var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
-            if (velocityDifference < 0.1f)
-                velocityDifference = 1f;
-
-            Vec2 direction = (B.parent.Position - A.parent.Position).Normalize();
-
-            var depenetrationForce = direction * velocityDifference * 0.5f;
-
-            Vec2.Clamp(ref depenetrationForce, Vec2.zero, Vec2.one * Constants.MaxDepenetrationForce);
-
-            B.velocity = Vec2.zero;
-            A.velocity = Vec2.zero;
-
-            B.parent.Position += depenetrationForce;
-            A.parent.Position += CMath.Negate(depenetrationForce);
-
-            depenetrationForce *= 0.5f;
-
         }
     }
 

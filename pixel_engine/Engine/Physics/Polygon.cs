@@ -19,7 +19,7 @@
             {
                 var vert1 = vertices[i];
                 var vert2 = vertices[(i + 1) % vertCount];
-                normals[i] = (vert2 - vert1).Normal_RHS.Normalize();
+                normals[i] = (vert2 - vert1).Normal_RHS.Normalized();
                 centroid += vert1;
             }
             centroid /= vertCount;

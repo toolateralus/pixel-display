@@ -39,7 +39,7 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="v"></param>
         /// <returns>A normalized Vector from the length of the current</returns>
-        public static Vec2 Normalize(this Vec2 v)
+        public static Vec2 Normalized(this Vec2 v)
         {
             if (v.Equals(Vec2.zero))
                 return Vec2.zero;

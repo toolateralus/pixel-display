@@ -77,8 +77,8 @@
 
         [JsonProperty]
         public float y;
-        public Vec2 Normal_RHS => new Vec2(-y, x).Normalize();
-        public Vec2 Normal_LHS => new Vec2(y, -x).Normalize();
+        public Vec2 Normal_RHS => new Vec2(-y, x).Normalized();
+        public Vec2 Normal_LHS => new Vec2(y, -x).Normalized();
         public float this[int index]
         {
             get
