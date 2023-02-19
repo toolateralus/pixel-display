@@ -5,9 +5,9 @@ namespace pixel_renderer
 {
     public abstract class UIComponent : Component
     {
-        [JsonProperty] public float drawOrder = 0f;
-        [JsonProperty] public float angle = 0f;
-        [JsonProperty] public Vec2 bottomRightCornerOffset = new(1, 1);
+        [Field][JsonProperty] public float drawOrder = 0f;
+        [Field][JsonProperty] public float angle = 0f;
+        [Field][JsonProperty] public Vec2 bottomRightCornerOffset = new(1, 1);
 
         public Vec2 Center { get => parent.Position; set => parent.Position = value; }
         public Vec2 Size

@@ -4,9 +4,9 @@ namespace pixel_renderer
 {
     public class Camera : UIComponent
     {
-        [JsonProperty] public Vec2 viewportPosition = Vec2.zero;
-        [JsonProperty] public Vec2 viewportSize = Vec2.one;
-        [JsonProperty] public DrawingType DrawMode = DrawingType.Clamped;
+        [Field] [JsonProperty] public Vec2 viewportPosition = Vec2.zero;
+        [Field] [JsonProperty] public Vec2 viewportSize = Vec2.one;
+        [Field] [JsonProperty] public DrawingType DrawMode = DrawingType.Clamped;
         public float[,] zBuffer = new float[0, 0];
 
         public Vec2 LocalToCamViewport(Vec2 local) => local / Size.GetDivideSafe();
