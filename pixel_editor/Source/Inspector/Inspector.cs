@@ -13,13 +13,12 @@ namespace pixel_editor
 {
     public class Inspector
     {
-        public Inspector(Label name, Label objInfo, Grid componentGrid)
+        public Inspector(Label name, Label objInfo, Grid grid)
         {
             this.name = name;
 
             this.objInfo = objInfo;
-            this.componentGrid = componentGrid;
-            
+            this.mainGrid = grid;
             this.name.Content = "_";
             this.objInfo.Content = "_";
             
@@ -32,12 +31,11 @@ namespace pixel_editor
         
         private Label name;
         private Label objInfo;
-
-        private Grid componentGrid; 
+        private Grid mainGrid;
+        private Grid grid; 
         
         private Dictionary<Type, List<Component>> components = new();
 
-        private Grid inspectorGrid;
 
         public static List<Action<Action>> EditActions = new();
         public static List<Action> EditActionArgs = new(); 
@@ -47,6 +45,7 @@ namespace pixel_editor
         public event Action<Grid> OnInspectorUpdated;
         public event Action<Grid> OnComponentAdded;
         public event Action<Grid> OnComponentRemoved;
+        public event Action<Grid> OnInspectorMoved;
 
         public (bool, T) TryGetComponent<T>() where T : Component, new()
         {
@@ -64,7 +63,7 @@ namespace pixel_editor
 
             T t = new();
             var obj = selectedNode.AddComponent(t);
-            OnComponentAdded?.Invoke(inspectorGrid);
+            OnComponentAdded?.Invoke(grid);
             return (true, obj);
 
         }
@@ -76,7 +75,7 @@ namespace pixel_editor
             if (selectedNode is not null && selectedNode.HasComponent<T>()) 
             {
                 selectedNode.RemoveComponent(t);
-                OnComponentAdded?.Invoke(inspectorGrid);
+                OnComponentAdded?.Invoke(grid);
                 return (true, t);
             }
             return (false, null);
@@ -135,50 +134,64 @@ namespace pixel_editor
         ComponentEditor? lastKnownComponentEditor; 
         private void Refresh(Grid grid)
         {
-            if (selectedNode == null) return;
-            name.Content = selectedNode.Name;
+            activeGrids.Clear();
+            activeControls.Clear();
+
+            if (selectedNode == null)
+                return;
+
             components = selectedNode.Components;
-            objInfo.Content = $"#{components.Count} Components";
-            var thickness = new Thickness(0, 0, 0, 0);
+
             int index = 0;
 
-            grid = GetGrid();
-            
-            AddGridToInspector(grid);
+            grid ??= NewInspectorGrid();
 
-            SetRowAndColumn(grid, 12, 8, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
 
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
-                {
+                    index = AddComponentToInspector(grid, index, component);
 
-                    var box = GetTextBox(component.Name);
-                    
-                    Button button = CreateButton("Edit", new(0, 0, 0, 0));
-                    
-                    button.FontSize = 4;
+            OnInspectorUpdated?.Invoke(grid);
+        }
 
-                    button.Click += HandleEditPressed;
+        private Grid NewInspectorGrid()
+        {
+            Grid grid = GetGrid();
+            AddGridToInspector(grid);
+            RePositionInspectorGrid(grid);
+            return grid;
+        }
 
-                    EditActions.Add(component.OnEditActionClicked);
-                    EditActionArgs.Add(delegate 
-                    {
-                      lastKnownComponentEditor = new ComponentEditor(Editor.Current, component);
-                        lastKnownComponentEditor.Show();
-                    });
+        private static void RePositionInspectorGrid(Grid grid)
+        {
+            SetRowAndColumn(grid, Constants.InspectorWidth, Constants.InspectorHeight, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
+        }
 
-                    button.Name = "edit_button_" + index.ToString();
+        private int AddComponentToInspector(Grid grid, int index, Component component)
+        {
+            var box = GetTextBox(component.Name);
+            Button editComponentButton = GetEditComponentButton(index);
+            grid.Children.Add(editComponentButton);
+            grid.Children.Add(box);
+            SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
+            SetRowAndColumn(box, 2, 4, 0, index * 2);
+            EditActions.Add(component.OnEditActionClicked);
+            EditActionArgs.Add(delegate
+            {
+                lastKnownComponentEditor = new ComponentEditor(Editor.Current, component);
+                lastKnownComponentEditor.Show();
+            });
+            index++;
+            return index;
+        }
 
-                    grid.Children.Add(button);
-                    grid.Children.Add(box);
-
-                    SetRowAndColumn(button, 2, 2, 4, index * 2);
-                    SetRowAndColumn(box, 2, 4, 0, index * 2);
-
-                    index++;
-                }
-
-            OnInspectorUpdated?.Invoke(inspectorGrid);
+        private static Button GetEditComponentButton(int index)
+        {
+            Button editComponentButton = CreateButton("Edit", new(0, 0, 0, 0));
+            editComponentButton.FontSize = 4;
+            editComponentButton.Click += HandleEditPressed;
+            editComponentButton.Name = "edit_button_" + index.ToString();
+            return editComponentButton;
         }
 
         public void DeselectNode()
@@ -187,17 +200,17 @@ namespace pixel_editor
             {
                 selectedNode = null;
 
-                foreach (var control in activeControls) componentGrid.Children.Remove(control);
+                foreach (var control in activeControls) grid.Children.Remove(control);
 
                 activeControls.Clear();
 
-                OnObjectDeselected?.Invoke(inspectorGrid);
+                OnObjectDeselected?.Invoke(grid);
             }
         }
         public void SelectNode(Node node)
         {
             selectedNode = node;
-            OnObjectSelected?.Invoke(inspectorGrid = GetGrid());
+            OnObjectSelected?.Invoke(grid);
         }
 
         public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
@@ -234,8 +247,8 @@ namespace pixel_editor
         }
         public void AddGridToInspector(Grid grid)
         {
-            componentGrid.Children.Add(grid);
-            componentGrid.UpdateLayout();
+            this.mainGrid.Children.Add(grid);
+            this.mainGrid.UpdateLayout();
             activeGrids.Add(grid);
         }
         public static void SetRowAndColumn(Control control, int height, int width, int x, int y)
