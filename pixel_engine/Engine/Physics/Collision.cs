@@ -235,30 +235,6 @@ namespace pixel_renderer
             NarrowPhase(collisionMap);
             FinalPhase();
         }
-        private static void RigidbodyCollide(Rigidbody A, Rigidbody B)
-        {
-            // check collider for trigger
-            ///if (A.IsTrigger || B.IsTrigger) return;
-
-            var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
-            if (velocityDifference < 0.1f)
-                velocityDifference = 1f;
-
-            Vec2 direction = (B.parent.Position - A.parent.Position).Normalized();
-
-            var depenetrationForce = direction * velocityDifference * 0.5f;
-
-            Vec2.Clamp(ref depenetrationForce, Vec2.zero, Vec2.one * Constants.MaxDepenetrationForce);
-
-            B.velocity = Vec2.zero;
-            A.velocity = Vec2.zero;
-
-            B.parent.Position += depenetrationForce;
-            A.parent.Position += CMath.Negate(depenetrationForce);
-
-            depenetrationForce *= 0.5f;
-
-        }
     }
 
 }
