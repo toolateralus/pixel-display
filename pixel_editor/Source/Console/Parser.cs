@@ -92,17 +92,18 @@ namespace pixel_editor
                 Console.Print($"\n Command {line} not found.");
 
         }
-        public static bool TryParse(string input, out List<object> value)
+        public static void TryParse(string input, out List<object> value)
         {
             value = new();
             for (int i = 0; i < 5; ++i)
-            {
                 switch (i)
                 {
+                    // string
                     case 0:
                         try { value.Add(input); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
+                        // bool
                     case 1:
                         try {
 
@@ -112,15 +113,17 @@ namespace pixel_editor
                             value.Add(bool.Parse(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
+                        // int
                     case 2:
                         try { value.Add(int.Parse(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
+                        // float
                     case 3:
                         try { value.Add(float.Parse(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
-
+                        // vec2
                     case 4:
                         try {
                             if (!input.Contains(','))
@@ -128,13 +131,8 @@ namespace pixel_editor
                             value.Add(Vec2(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
-              
 
                 }
-                if (i == 4)
-                    return true; 
-            }
-            return false;
         }
         
         public static object? ParseParam(string arg, Command command, int index)

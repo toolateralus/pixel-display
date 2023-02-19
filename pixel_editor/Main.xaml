@@ -90,7 +90,7 @@
             <Image  x:Name="image"
                     Grid.Row="1" 
                     Grid.Column="0" 
-                    RenderOptions.BitmapScalingMode ="NearestNeighbor"
+                    RenderOptions.BitmapScalingMode = "NearestNeighbor"
                     RenderOptions.CachingHint="Cache"
                     Grid.RowSpan="14"
                     Grid.ColumnSpan="14" 
