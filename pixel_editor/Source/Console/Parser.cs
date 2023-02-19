@@ -2,7 +2,10 @@
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Windows.Documents;
 
 namespace pixel_editor
@@ -118,6 +121,52 @@ namespace pixel_editor
                 command.error = e.Message;
             }
         }
+
+        public static bool TryParse(string input, out List<object> value)
+        {
+            value = new();
+            for (int i = 0; i < 5; ++i)
+            {
+                switch (i)
+                {
+                    case 0:
+                        try { value.Add(input); }
+                        catch (Exception e) { Runtime.Log(e.Message); };
+                        continue;
+                    case 1:
+                        try {
+
+                            if (input.ToLower() is not "true" or "false")
+                                continue; 
+
+                            value.Add(bool.Parse(input)); }
+                        catch (Exception e) { Runtime.Log(e.Message); };
+                        continue;
+                    case 2:
+                        try { value.Add(int.Parse(input)); }
+                        catch (Exception e) { Runtime.Log(e.Message); };
+                        continue;
+                    case 3:
+                        try { value.Add(float.Parse(input)); }
+                        catch (Exception e) { Runtime.Log(e.Message); };
+                        continue;
+
+                    case 4:
+                        try {
+                            if (!input.Contains(','))
+                                continue;
+
+                            value.Add(Vec2(input)); }
+                        catch (Exception e) { Runtime.Log(e.Message); };
+                        continue;
+                }
+                if (i == 4)
+                    return true; 
+            }
+            return false;
+        }
+
+
 
         public static object? ParseParam(string arg, Command command, int index)
         {

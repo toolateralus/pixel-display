@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using static pixel_renderer.Input;
 using pixel_renderer;
-using static System.Net.Mime.MediaTypeNames;
 using Component = pixel_renderer.Component;
+using System.Windows.Input;
 
 namespace pixel_editor
 {
@@ -65,35 +64,28 @@ namespace pixel_editor
             mainWnd.componentEditor = this;
             data = new(component);
             AddTextBoxes(MainGrid);
+            CompositionTarget.Rendering += Update;
+            RegisterAction(delegate { Keyboard.ClearFocus(); }, Key.Escape);
         }
 
+        private void Update(object? sender, EventArgs e)
+        {
+
+
+        }
 
         public ViewerData data;
         public Grid mainGrid;
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
 
-        private void SetupViewer(Grid grid)
-        {
-            mainGrid = grid;
-            int colCt = mainGrid.ColumnDefinitions.Count;
-            int rowCt = mainGrid.RowDefinitions.Count;
-
-            mainGrid = Inspector.GetGrid(colCt, rowCt);
-
-            Inspector.SetRowAndColumn(mainGrid, colCt, rowCt, 0, 0);
-            mainGrid.Children.Add(mainGrid);
-            mainGrid.HorizontalAlignment = HorizontalAlignment.Stretch;
-            mainGrid.VerticalAlignment = VerticalAlignment.Stretch;
-        }
+       
         public void AddTextBoxes(Grid viewer)
         {
             var fields = data.Fields;
             int i = 0;
 
-            var saveBtn = Inspector.CreateButton("Save", new(0, 0, 0, 0));
-            Inspector.SetRowAndColumn(saveBtn, 2, 2, 20, 20);
-            viewer.Children.Add(saveBtn);
+          
 
             foreach (var x in fields)
             {
@@ -101,6 +93,14 @@ namespace pixel_editor
                 var input = Inspector.GetTextBox(x.Value.ToString() ?? "null");
                 var button = Inspector.CreateButton("set", new(0, 0, 0, 0));
 
+                Inspector.SetControlColors(display, Brushes.DarkSlateGray, Brushes.White);
+                Inspector.SetControlColors(input, Brushes.DarkSlateGray, Brushes.White);
+                Inspector.SetControlColors(button, Brushes.SlateGray, Brushes.White);
+
+
+                input.IsReadOnly = false;
+                input.GotKeyboardFocus += Input_GotKeyboardFocus;
+                input.LostKeyboardFocus += Input_LostKeyboardFocus;
 
                 button.Name = "edit_confirm_button_" + i.ToString();
                 button.Click += ExecuteEditEvent;
@@ -119,7 +119,38 @@ namespace pixel_editor
 
                 i++;
             }
+            var saveBtn = Inspector.CreateButton("Save", new(0, 0, 0, 0));
+
+            viewer.Children.Add(saveBtn);
+            saveBtn.Click += SaveBtn_Click;
+
+            Inspector.SetRowAndColumn(saveBtn, 1,1, 16,16);
+
         }
+
+        private void SaveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true; 
+            int i = 0; 
+            foreach (var field in data.Fields)
+            {
+                editEvents[i].Invoke(field.Key, i);
+                i++;
+            }
+        }
+
+        private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        {
+            if (sender is not TextBox box) return;
+            Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.White);
+        }
+
+        private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        {
+            if (sender is not TextBox box) return;
+            Inspector.SetControlColors(box, Brushes.Black, Brushes.DarkSlateGray);
+        }
+
         private bool SetVariable(string o, int i)
         {
             Inspector.GetComponentRuntimeInfo(component, out var fields, out _);
@@ -127,9 +158,17 @@ namespace pixel_editor
             foreach (var info in fields)
                 if (info.Name == o)
                 {
-                    TypeConverter tc = TypeDescriptor.GetConverter(info.FieldType);
-                    object value = tc.ConvertFromString(null, CultureInfo.InvariantCulture, inputFields[i].Text);
-                    info.SetValue(component, value);
+                    bool gotValue = CommandParser.TryParse(inputFields[i].Text, out List<object> results);
+                    if (!gotValue)
+                        return false; 
+
+                    foreach(var obj in results)
+                        if (obj.GetType() == info.FieldType)
+                        {
+                            Runtime.Log($"ComponentEditor field was successfully parsed back into an object of type {info.FieldType}");
+                            info.SetValue(component, obj);
+                        }
+
                     return true; 
                 }
             return false;
