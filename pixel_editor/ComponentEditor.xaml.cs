@@ -124,7 +124,7 @@ namespace pixel_editor
             viewer.Children.Add(saveBtn);
             saveBtn.Click += SaveBtn_Click;
 
-            Inspector.SetRowAndColumn(saveBtn, 1,1, 18,15);
+            Inspector.SetRowAndColumn(saveBtn, 1,2, 20,20);
 
         }
 
