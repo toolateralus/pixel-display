@@ -93,7 +93,12 @@ namespace pixel_editor
                 string valStr;
                 
                 if (x.Value != null)
-                    valStr = x.Value.ToString();
+                {
+                    if (x.Value is Vec2 vec)
+                        valStr = vec.AsString();
+                   
+                    else valStr = x.Value.ToString();
+                }
                 else valStr = "null";
 
                 var input = Inspector.GetTextBox(valStr);

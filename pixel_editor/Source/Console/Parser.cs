@@ -125,10 +125,11 @@ namespace pixel_editor
                         try {
                             if (!input.Contains(','))
                                 continue;
-
                             value.Add(Vec2(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
+              
+
                 }
                 if (i == 4)
                     return true; 
