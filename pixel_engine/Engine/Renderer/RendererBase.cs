@@ -52,6 +52,7 @@
                 sprite.ColorData = renderInfo.spriteColorData[i];
                 sprite.size = renderInfo.spriteSizeVectors[i];
                 sprite.viewportOffset = renderInfo.spriteVPOffsetVectors[i];
+                sprite.viewportScale = renderInfo.spriteVPScaleVectors[i];
                 sprite.camDistance = renderInfo.spriteCamDistances[i];
 
                 Vec2 firstCorner = cam.GlobalToScreenViewport(sprite.parent.Position) * Resolution;
@@ -89,7 +90,8 @@
 
             sprite.parent.Position = camBoundingBox.min;
             sprite.size = camBoundingBox.max - camBoundingBox.min;
-            sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize;
+            sprite.viewportScale = sprite.size / baseImageSize;
+            sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
             sprite.ColorData = baseImage;
             sprite.camDistance = float.Epsilon;
         }
