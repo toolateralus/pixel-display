@@ -146,7 +146,7 @@ namespace pixel_editor
             
             AddGridToInspector(grid);
 
-            SetRowAndColumn(grid, 12, 8, 0, index);
+            SetRowAndColumn(grid, 12, 8, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
 
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
