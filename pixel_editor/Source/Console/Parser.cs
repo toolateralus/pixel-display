@@ -39,61 +39,6 @@ namespace pixel_editor
             "bool:",
         };
         
-        private static string RemoveUnwantedChars(string? arg0)
-        {
-            foreach (var _char in arg0)
-                if (disallowed_chars.Contains(_char))
-                    arg0 = arg0.Replace($"{_char}", "");
-            return arg0;
-        }
-        
-        private static Vec2 Vec2(string? arg0)
-        {
-            string[] values = arg0.Split(',');
-            
-            if(values.Length < 2 )
-             return pixel_renderer.Vec2.zero; 
-
-            var x = values[0].ToInt();
-            var y = values[1].ToInt();
-
-            return new Vec2(x,y);
-        }
-        private static string String(string arg0)
-        {
-            foreach (var x in arg0)
-                if (disallowed_chars.Contains(x))
-                    arg0 = arg0.Replace(x, (char)0);
-            return arg0;
-        }
-
-        internal static void TryCallLine(string line, List<Command> commands)
-        {
-            ParseArguments(line, out string[] args, out _);
-            line = ParseLoopParams(line, out string loop_param);
-
-            int count = loop_param.ToInt();
-            int cmds = 0;
-
-            foreach (Command command in commands)
-                if (command.Equals(line))
-                {
-                    ExecuteCommand(args, count, command);
-
-                    if (command.error != null)
-                    {
-                        Runtime.Log(command.error);
-                        continue;
-                    }
-                    Command.Success(command.syntax);
-                    cmds++;
-                }
-
-            if (cmds == 0)
-                Console.Print($"\n Command {line} not found.");
-
-        }
-
         private static void ExecuteCommand(string[] args, int count, Command command)
         {
             try
@@ -121,7 +66,32 @@ namespace pixel_editor
                 command.error = e.Message;
             }
         }
+        internal static void TryCallLine(string line, List<Command> commands)
+        {
+            ParseArguments(line, out string[] args, out _);
+            line = ParseLoopParams(line, out string loop_param);
 
+            int count = loop_param.ToInt();
+            int cmds = 0;
+
+            foreach (Command command in commands)
+                if (command.Equals(line))
+                {
+                    ExecuteCommand(args, count, command);
+
+                    if (command.error != null)
+                    {
+                        Runtime.Log(command.error);
+                        continue;
+                    }
+                    Command.Success(command.syntax);
+                    cmds++;
+                }
+
+            if (cmds == 0)
+                Console.Print($"\n Command {line} not found.");
+
+        }
         public static bool TryParse(string input, out List<object> value)
         {
             value = new();
@@ -165,9 +135,7 @@ namespace pixel_editor
             }
             return false;
         }
-
-
-
+        
         public static object? ParseParam(string arg, Command command, int index)
         {
             // this string gets treated like a null/void variable.
@@ -235,7 +203,39 @@ namespace pixel_editor
 
            
         }
+       
+        private static Vec2 Vec2(string? arg0)
+        {
+            string[] values = arg0.Split(',');
+            
+            if(values.Length < 2 )
+             return pixel_renderer.Vec2.zero; 
+
+            var x = values[0].ToInt();
+            var y = values[1].ToInt();
+
+            return new Vec2(x,y);
+        }
+        private static string String(string arg0)
+        {
+            foreach (var x in arg0)
+                if (disallowed_chars.Contains(x))
+                    arg0 = arg0.Replace(x, (char)0);
+            return arg0;
+        }
+        private static string RemoveUnwantedChars(string? arg0)
+        {
+            foreach (var _char in arg0)
+                if (disallowed_chars.Contains(_char))
+                    arg0 = arg0.Replace($"{_char}", "");
+            return arg0;
+        }
+
         public static string[] splitArgsIntoParams(string args_str) => args_str.Split(ParameterSeperator);
+        public static string getCmdPhrase(string input)
+        {
+            return input.Split(ArgumentsStart)[0] + EndLine;
+        }
         public static string getArguments(string input, string arguments, int argStartIndex, int argEndIndex)
         {
             for (int i = argStartIndex; i < argEndIndex; ++i)
@@ -259,9 +259,6 @@ namespace pixel_editor
         {
             return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
         }
-        public static string getCmdPhrase(string input)
-        {
-            return input.Split(ArgumentsStart)[0] + EndLine;
-        }
+
     }
 }

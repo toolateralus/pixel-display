@@ -159,8 +159,6 @@ namespace pixel_editor
                 if (info.Name == o)
                 {
                     bool gotValue = CommandParser.TryParse(inputFields[i].Text, out List<object> results);
-                    if (!gotValue)
-                        return false; 
 
                     foreach(var obj in results)
                         if (obj.GetType() == info.FieldType)
