@@ -8,45 +8,16 @@ namespace pixel_renderer
 {
     public class Collider : Component
     {
+        [JsonProperty] Polygon mesh;
+        public Polygon Mesh
+        {
+            get => mesh ??= new(GetVertices());
+            set => mesh = value;
+        }
         [JsonProperty] [Field] public Vec2 size = new(0,0);
         [JsonProperty] [Field] public Sprite? sprite;
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
         [JsonProperty]public bool IsTrigger { get; internal set; } = false;
-        public Vec2[] normals => GetNormals();
-        /*
-          * CORNERS
-     
-
-         NORMALS
-         Top,
-         Left,
-         Bottom,
-         Right
-
-         */
-        /// <summary>
-        /// <code>
-        /// returns a list of the normals organizes as such
-        /// Top
-        /// Left
-        /// Bottom
-        /// Right
-        /// </code>
-        /// </summary>
-        /// <returns></returns>
-        public Vec2[] GetNormals()
-        {
-            Vec2 pos = parent.Position;
-            var corners = GetVertices();
-         
-            return new Vec2[]
-            {
-                (corners[1] - corners[0]).Normal_RHS.Normalize(),
-                (corners[2] - corners[1]).Normal_RHS.Normalize(),
-                (corners[3] - corners[2]).Normal_RHS.Normalize(),
-                (corners[0] - corners[3]).Normal_RHS.Normalize(),
-            };
-        }
         /// <summary>
         /// <code>
         /// Gets the colliders corners in a list organized as such
@@ -76,21 +47,6 @@ namespace pixel_renderer
             };
 
             return vertices;
-        }
-        /// <summary>
-        /// returns the center of the polygon the collider represents.
-        /// </summary>
-        /// <returns></returns>
-        internal Vec2 GetCentroid()
-        {
-            var corners = GetVertices();
-            Vec2 centroid = new();
-            for (int i = 0; i < corners.Length; i++)
-            {
-                Vec2 vec = corners[i];
-                centroid += vec;
-            }
-            return centroid / corners.Length;
         }
 
         public override void Awake()
