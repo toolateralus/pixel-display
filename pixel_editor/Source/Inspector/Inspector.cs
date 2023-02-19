@@ -142,7 +142,7 @@ namespace pixel_editor
             var thickness = new Thickness(0, 0, 0, 0);
             int index = 0;
 
-            grid = GetNodeInspectorGrid();
+            grid = GetGrid();
             
             AddGridToInspector(grid);
 
@@ -197,7 +197,7 @@ namespace pixel_editor
         public void SelectNode(Node node)
         {
             selectedNode = node;
-            OnObjectSelected?.Invoke(inspectorGrid = GetNodeInspectorGrid());
+            OnObjectSelected?.Invoke(inspectorGrid = GetGrid());
         }
 
         public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
@@ -207,7 +207,7 @@ namespace pixel_editor
             grid.SetValue(Grid.RowProperty, y);
             grid.SetValue(Grid.ColumnProperty, x);
         }
-        private static TextBox GetTextBox(string componentName)
+        public static TextBox GetTextBox(string componentName)
         {
             TextBox box = new()
                 {
@@ -232,16 +232,12 @@ namespace pixel_editor
                 };
             return box;
         }
-
-
-
-        private void AddGridToInspector(Grid control)
+        public void AddGridToInspector(Grid grid)
         {
-            componentGrid.Children.Add(control);
+            componentGrid.Children.Add(grid);
             componentGrid.UpdateLayout();
-            activeGrids.Add(control);
+            activeGrids.Add(grid);
         }
-
         public static void SetRowAndColumn(Control control, int height, int width, int x, int y)
         {
             control.SetValue(Grid.RowSpanProperty, height);
@@ -249,7 +245,7 @@ namespace pixel_editor
             control.SetValue(Grid.RowProperty, y);
             control.SetValue(Grid.ColumnProperty, x);
         }
-        private static Grid GetNodeInspectorGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
+        public static Grid GetGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
         {
             Grid grid = new()
             {
