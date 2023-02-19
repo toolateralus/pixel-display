@@ -202,16 +202,16 @@ namespace pixel_editor
 
            
         }
-       
+        
         private static Vec2 Vec2(string? arg0)
         {
             string[] values = arg0.Split(',');
             
             if(values.Length < 2 )
-             return pixel_renderer.Vec2.zero; 
+            return pixel_renderer.Vec2.zero; 
 
-            var x = values[0].ToInt();
-            var y = values[1].ToInt();
+            var x = RemoveUnwantedChars(values[0]).ToFloat();
+            var y = RemoveUnwantedChars(values[1]).ToFloat();
 
             return new Vec2(x,y);
         }
