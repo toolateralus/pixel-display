@@ -16,38 +16,25 @@ namespace pixel_editor
     {
         public Inspector(Label name, Label objInfo, Grid grid)
         {
-            this.name = name;
-
-            this.objInfo = objInfo;
-            this.mainGrid = grid;
-            this.name.Content = "_";
-            this.objInfo.Content = "_";
-            
+            MainGrid = grid;
             Awake();
         }
 
         public Node? selectedNode;
         private List<Control> activeControls = new();
         private List<Grid> activeGrids = new();
-        
-        private Label name;
-        private Label objInfo;
-
-        private Grid mainGrid;
+        private Grid MainGrid;
         private Grid grid; 
-        
         private Dictionary<Type, List<Component>> components = new();
-
-
         public static List<Action<Action>> EditActions = new();
         public static List<Action> EditActionArgs = new(); 
-
         public static event Action<Grid> OnObjectSelected;
         public static event Action<Grid> OnObjectDeselected;
         public static event Action<Grid> OnInspectorUpdated;
         public static event Action<Grid> OnComponentAdded;
         public static event Action<Grid> OnComponentRemoved;
         public static Action<int, int> OnInspectorMoved;
+        ComponentEditor? lastKnownComponentEditor; 
 
         public (bool, T) TryGetComponent<T>() where T : Component, new()
         {
@@ -143,11 +130,12 @@ namespace pixel_editor
         }
 
         public void Update(object? sender, EventArgs e) { }
-        ComponentEditor? lastKnownComponentEditor; 
         private void Refresh(Grid grid)
         {
             activeGrids.Clear();
             activeControls.Clear();
+
+            grid = null;
 
             grid = NewInspectorGrid();
 
@@ -212,7 +200,6 @@ namespace pixel_editor
             {
                 selectedNode = null;
                 
-
                 foreach( var x in activeGrids)
                     x.Visibility = Visibility.Collapsed;
                
@@ -221,6 +208,7 @@ namespace pixel_editor
 
                 OnObjectDeselected?.Invoke(grid);
             }
+            Runtime.Instance.stagingHost.DeselectNode();
         }
         public void SelectNode(Node node)
         {
@@ -262,8 +250,8 @@ namespace pixel_editor
         }
         public void AddGridToInspector(Grid grid)
         {
-            this.mainGrid.Children.Add(grid);
-            this.mainGrid.UpdateLayout();
+            this.MainGrid.Children.Add(grid);
+            this.MainGrid.UpdateLayout();
             activeGrids.Add(grid);
         }
         public static void SetRowAndColumn(Control control, int height, int width, int x, int y)
