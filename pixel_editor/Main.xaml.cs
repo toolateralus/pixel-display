@@ -105,7 +105,7 @@ namespace pixel_editor
             InitializeComponent();
             GetEvents();
 
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorChildGrid);
+            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorGrid);
             Runtime.inspector = inspector;
 
             Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
