@@ -141,12 +141,6 @@ namespace pixel_renderer
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
 
-
-        internal void Highlight(object editorHighlightColor)
-        {
-            throw new NotImplementedException();
-        }
-
         public Sprite()
         {
             
