@@ -13,6 +13,7 @@ namespace pixel_renderer
     public class Sprite : Component
     {
         [JsonProperty] public Vec2 size = Vec2.one * 16;
+        [JsonProperty] public Vec2 viewportScale = Vec2.one;
         [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] public Texture texture;
@@ -137,9 +138,7 @@ namespace pixel_renderer
             ColorData = CBit.SolidColorSquare(size, color);
         }
 
-        
-
-        public Vec2 ViewportToColorPos(Vec2 spriteViewport) => (spriteViewport + viewportOffset).Wrapped(Vec2.one) * colorDataSize;
+        public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
 
 
