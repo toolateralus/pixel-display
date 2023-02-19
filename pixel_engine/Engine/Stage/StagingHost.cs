@@ -28,10 +28,11 @@ namespace pixel_renderer
                 if (!isWithin) continue;
 
                 result = node;
-                
-                sprite.Highlight(Constants.EditorHighlightColor, IsReadOnly : true);
-                
-                lastSelected?.GetComponent<Sprite>().RestoreCachedColor(false, false);
+
+                SelectNode(sprite);
+
+                DeselectNode();
+
                 lastSelected = node;
 
                 return true;
@@ -39,6 +40,16 @@ namespace pixel_renderer
             result = null;
             return false;
         }
+
+        private static void SelectNode(Sprite sprite) =>
+           sprite.Highlight(Constants.EditorHighlightColor, IsReadOnly: true);
+
+        public void DeselectNode()
+        {
+            lastSelected?.GetComponent<Sprite>().RestoreCachedColor(true, false);
+            lastSelected = null;
+        }
+
         public static void FixedUpdate(Stage stage)
         {
             var delta = runtime.renderHost.info.FrameTime;
