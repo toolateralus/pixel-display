@@ -37,14 +37,14 @@
                 Buckets[i].Clear();
             busy = false;
         }
-        internal void RegisterObject(Node obj)
+        internal void RegisterNode(Node node)
         {
-            List<int> cells = Hash(obj);
+            List<int> cells = Hash(node);
             foreach (var index in cells)
             {
                 if (index < 0 || index >= rows * columns)
                     continue;
-                Buckets[index].Add(obj);
+                Buckets[index].Add(node);
             }
         }
         internal List<Node> GetNearby(Node node)

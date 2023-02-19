@@ -115,7 +115,7 @@ namespace pixel_renderer
                 if (!node.TryGetComponent<Collider>(out _))
                     return;
                 ViewportCollision(node);
-                Hash.RegisterObject(node);
+                Hash.RegisterNode(node);
             };
 
             List<Node> nodes = new(stage.nodes);
