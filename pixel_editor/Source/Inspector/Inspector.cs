@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using pixel_renderer;
 using System.Windows.Media.Effects;
 using System.Linq;
+using System.Windows.Media;
 
 namespace pixel_editor
 {
@@ -99,7 +100,6 @@ namespace pixel_editor
                     valString = ((Vec2)value).AsString();
 
 
-                // default value type print
                 else valString = value?.ToString();
                 output.Add($" \n{field.Name} {valString}");
             }
@@ -226,8 +226,8 @@ namespace pixel_editor
                     VerticalAlignment = VerticalAlignment.Stretch,
 
 
-                    Foreground = Brushes.Green,
-                    Background = Brushes.Black,
+                    Foreground = Brushes.Black,
+                    Background = Brushes.Gray,
 
                 };
             return box;
@@ -288,6 +288,12 @@ namespace pixel_editor
                 if (button.Name.ToInt() is int i && EditActions.Count > i && EditActionArgs.Count > i)
                     EditActions[i]?.Invoke(EditActionArgs[i]);
                 else Runtime.Log("Edit pressed failed.");
+        }
+
+        internal static void SetControlColors(Control control, SolidColorBrush background, SolidColorBrush foreground)
+        {
+            control.Foreground = foreground;
+            control.Background = background;
         }
         #endregion
 
