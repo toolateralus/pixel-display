@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Drawing;
 using System.Windows.Documents;
 
 namespace pixel_renderer
@@ -22,6 +23,9 @@ namespace pixel_renderer
         [JsonProperty] [Field] public Vec2 size = new(0,0);
         [JsonProperty] [Field] public Sprite? sprite;
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
+        [Field] public bool drawCollider = false;
+        [Field] public bool drawNormals = false;
+        [Field] public Color colliderColor = Color.LimeGreen;
         [JsonProperty]public bool IsTrigger { get; internal set; } = false;
         /// <summary>
         /// <code>
@@ -51,27 +55,23 @@ namespace pixel_renderer
 
             return vertices;
         }
-
-        public override void Awake()
-        { 
-
-        }
-        public override void Update()
+        public override void OnDrawShapes()
         {
-        }
-        public override void FixedUpdate(float delta)
-        {
-
-        }
-        public override void OnCollision(Collider collider)
-        {
-
-
-        }
-        public override void OnTrigger(Collider other)
-        {
-
-
+            if (!(drawCollider || drawNormals))
+                return;
+            var mesh = Mesh;
+            int vertLength = mesh.vertices.Length;
+            for (int i = 0; i < vertLength; i++)
+            {
+                var nextIndex = (i + 1) % vertLength;
+                if(drawCollider)
+                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], colliderColor);
+                if (drawNormals)
+                {
+                    var midpoint = (mesh.vertices[i] + mesh.vertices[nextIndex]) / 2;
+                    ShapeDrawer.DrawLine(midpoint, midpoint + (mesh.normals[i] * 10), Color.Blue);
+                }
+            }
         }
     }
 }

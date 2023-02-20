@@ -62,15 +62,6 @@ namespace pixel_renderer.Scripts
             var mesh = parent.GetComponent<Collider>().Mesh;
             foreach (var child in parent.children)
                 ShapeDrawer.DrawLine(mesh.centroid, child.Value.GetComponent<Collider>().Mesh.centroid, JRandom.Color());
-            int vertLength = mesh.vertices.Length;
-            for (int i = 0; i < vertLength; i++)
-            {
-                var nextIndex = (i + 1) % vertLength;
-                ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Color.LimeGreen);
-                var midpoint = (mesh.vertices[i] + mesh.vertices[nextIndex]) / 2;
-                ShapeDrawer.DrawLine(midpoint, midpoint + (mesh.normals[i] * 10), Color.Blue);
-            }
-
         }
 
         void MakeChildObject(object[]? e)
