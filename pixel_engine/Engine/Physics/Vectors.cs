@@ -153,6 +153,8 @@
         }
 
         public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y);
+        public static bool operator ==(Vec2 a, Vec2 b) => a.x == b.x && a.y == b.y;
+        public static bool operator !=(Vec2 a, Vec2 b) => a.x != b.x || a.y != b.y;
         public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y);
         public static Vec2 operator /(Vec2 a, float b) => new(a.x / b, a.y / b);
         public static Vec2 operator *(Vec2 a, float b) => new(a.x * b, a.y * b);

@@ -42,26 +42,51 @@
         {
             Vec2 framePos = new Vec2();
             foreach(Line line in ShapeDrawer.lines)
-            {            
-                if (line.startPoint.x == line.endPoint.x)
-                    return;
-                
+            {
+                if (line.startPoint == line.endPoint)
+                {
+                    WriteColorToFrame(ref line.color, ref line.startPoint);
+                    continue;
+                }
+
                 Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;
                 Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * Resolution;
-                
-                float slope = (startPos.y - endPos.y) / (startPos.x - endPos.x);
-                float yIntercept = startPos.y - (slope * startPos.x);
-                
-                int startX = (int)MathF.Max(startPos.x, 0);
-                int endX = (int)MathF.Min(endPos.x, Resolution.x);
-                
-                for (int x = startX; x < endX; x++)
+                float xDiff = startPos.x - endPos.x;
+                float yDiff = startPos.y - endPos.y;
+
+                if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
                 {
-                    framePos.x = x;
-                    framePos.y = slope * x + yIntercept;
-                    if (framePos.y < 0 || framePos.y >= Resolution.x)
-                        continue;
-                    WriteColorToFrame(ref line.color, ref framePos);
+                    float slope = yDiff / xDiff;
+                    float yIntercept = startPos.y - (slope * startPos.x);
+                
+                    int startX = (int)MathF.Max(startPos.x, 0);
+                    int endX = (int)MathF.Min(endPos.x, Resolution.x);
+                
+                    for (int x = startX; x < endX; x++)
+                    {
+                        framePos.x = x;
+                        framePos.y = slope * x + yIntercept;
+                        if (framePos.y < 0 || framePos.y >= Resolution.x)
+                            continue;
+                        WriteColorToFrame(ref line.color, ref framePos);
+                    }
+                }
+                else
+                {
+                    float slope = xDiff / yDiff;
+                    float xIntercept = startPos.x - (slope * startPos.y);
+
+                    int startY = (int)MathF.Max(startPos.y, 0);
+                    int endY = (int)MathF.Min(endPos.y, Resolution.y);
+
+                    for (int y = startY; y < endY; y++)
+                    {
+                        framePos.y = y;
+                        framePos.x = slope * y + xIntercept;
+                        if (framePos.y < 0 || framePos.y >= Resolution.y)
+                            continue;
+                        WriteColorToFrame(ref line.color, ref framePos);
+                    }
                 }
             }
         }
