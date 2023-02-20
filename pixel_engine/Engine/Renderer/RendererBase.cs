@@ -15,9 +15,10 @@
         private protected Color[,] baseImage = new Color[1,1];
         
         private protected byte[] frame = Array.Empty<byte>();
+        private protected byte[] latestFrame = Array.Empty<byte>();
         private protected int stride = 0;
         
-        public byte[] Frame => frame;
+        public byte[] Frame => latestFrame;
         public int Stride => stride;
         public Vec2 Resolution 
         { 
@@ -45,6 +46,9 @@
             DrawBaseImage(cam);
             DrawSprites(renderInfo, cam);
             DrawGraphics(cam);
+            if (latestFrame.Length != frame.Length)
+                latestFrame = new byte[frame.Length];
+            Array.Copy(frame, latestFrame, frame.Length);
         }
 
         private void DrawGraphics(Camera cam)
