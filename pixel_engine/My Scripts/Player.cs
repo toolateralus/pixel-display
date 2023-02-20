@@ -50,11 +50,17 @@ namespace pixel_renderer.Scripts
             CreateInputEvents();
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
+
+            var child = test_child_node();
+            parent.Child(child);
+
+
         }
 
         public override void OnDrawShapes()
         {
-            ShapeDrawer.DrawLine(parent.Position, parent.Position + (Vec2.right * 5), Color.Blue);
+            foreach (var child in parent.children)
+                ShapeDrawer.DrawLine(parent.Position, child.Value.Position, JRandom.Color());
         }
 
         void MakeChildObject(object[]? e)

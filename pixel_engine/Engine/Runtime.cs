@@ -26,8 +26,8 @@ namespace pixel_renderer
         public static event Action<EditorEvent>? InspectorEventRaised;
 
         public bool IsRunning { get; private set; }
-        private protected bool PhysicsInitialized = false;
-        private protected bool Initialized = false;
+        public static bool PhysicsInitialized = false;
+        public static bool Initialized = false;
         
         public static object? inspector = null;
 
