@@ -24,12 +24,8 @@ namespace pixel_renderer
         /// start point of each line will always have an x value less than or equal to the end point
         /// </summary>
         internal static List<Line> lines = new();
-        public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Color? color = null)
-        {
-            Vec2 leftSide = startPoint.x < endPoint.x ? startPoint : endPoint;
-            Vec2 rightSide = startPoint.x >= endPoint.x ? startPoint : endPoint;
-            lines.Add(new Line(leftSide, rightSide, color ?? Color.White));
-        }
+        public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Color? color = null) =>
+            lines.Add(new Line(startPoint, endPoint, color ?? Color.White));
     }
     public class Line
     {
