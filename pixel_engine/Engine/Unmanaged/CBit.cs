@@ -71,6 +71,12 @@ namespace pixel_renderer
         
         public static void RenderFromFrame(byte[] frame, int stride, Vec2 resolution, Image output)
         {
+            if (stride <= 0)
+            {
+                Runtime.Log("Stride cannot be zero or less;");
+                return; 
+            }
+
             output.Source = BitmapSource.Create(
                 (int)resolution.x, (int)resolution.y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
                 frame, stride);

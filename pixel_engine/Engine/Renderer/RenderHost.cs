@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using Image = System.Windows.Controls.Image; 
 
 namespace pixel_renderer
@@ -11,17 +13,25 @@ namespace pixel_renderer
         public RenderState State = RenderState.Game;
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
-
+        DispatcherTimer timer = new();
         public RenderHost()
         {
             info = new(this);
+            timer.Interval = TimeSpan.FromTicks(1000);
+            timer.Start();
+            timer.Tick += Timer_Tick;
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            Render();
         }
 
         public event Action<long>? OnRenderCompleted; 
 
         public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
 
-        public void Render(Image renderSurface)
+        public void Render()
         {
             if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded."); 
             switch (State)
@@ -32,14 +42,14 @@ namespace pixel_renderer
                 default:
                     throw new InvalidOperationException("Invalid case passed into RenderState selection");
             }
-            Cycle(renderSurface);
+            Cycle();
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
         }
         /// <summary>
         /// performs the rendering loop for one cycle or frame.
         /// </summary>
         /// <param name="renderSurface"></param>
-        private protected void Cycle(Image renderSurface)
+        private protected void Cycle()
         {
             m_renderer.Dispose();
             if (Runtime.Instance.GetStage() is Stage stage)
@@ -47,7 +57,6 @@ namespace pixel_renderer
                 ShapeDrawer.Refresh(stage);
                 m_renderer.Draw(stage.StageRenderInfo);
             }
-            m_renderer.Render(renderSurface);
         }
 
         public void MarkDirty()

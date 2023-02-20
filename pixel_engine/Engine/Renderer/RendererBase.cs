@@ -13,9 +13,12 @@
     public abstract class  RendererBase 
     {
         private protected Color[,] baseImage = new Color[1,1];
+        
         private protected byte[] frame = Array.Empty<byte>();
         private protected int stride = 0;
-
+        
+        public byte[] Frame => frame;
+        public int Stride => stride;
         public Vec2 Resolution = Constants.DefaultResolution;
 
         public bool baseImageDirty = true;

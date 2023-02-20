@@ -91,6 +91,7 @@ namespace pixel_editor
         }
         #endregion
 
+        
         private int renderStateIndex = 0;
         private static bool ShouldUpdate =>
             Runtime.Instance.IsRunning &&
@@ -166,13 +167,17 @@ namespace pixel_editor
                 consoleOutput.Background = Brushes.Black;
             };
         }
+        public byte[] Frame => Runtime.Instance.renderHost.GetRenderer().Frame;
+        public int Stride => Runtime.Instance.renderHost.GetRenderer().Stride;
+        public Vec2 Resolution => Runtime.Instance.renderHost.GetRenderer().Resolution;
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
 
             if (ShouldUpdate)
             {
-                Host?.Render(image);
+                if(Stride > 0)
+                    CBit.RenderFromFrame(Frame, Stride, Resolution, image);
                 UpdateMetrics();
             }
             Events.ExecuteAll();

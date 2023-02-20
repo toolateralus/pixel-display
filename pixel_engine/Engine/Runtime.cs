@@ -84,6 +84,8 @@ namespace pixel_renderer
             instance ??= new(mainWnd, project);
             TryLoadStageFromProject(0);
             Instance.m_stage?.Awake();
+            Log($"{Instance.GetStage().Name} instantiated & engine started.");
+
         }
 
         public static void TryLoadStageFromProject(int index)
@@ -164,8 +166,7 @@ namespace pixel_renderer
             if (!IsRunning || HasNoRenderSurface) 
                 return;
 
-            if (renderHost.State is RenderState.Game) 
-                renderHost.Render(mainWnd.renderImage);
+          // render game view maybe;
 
             if (m_stage is null) return; 
 
