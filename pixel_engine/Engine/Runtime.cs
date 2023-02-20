@@ -168,7 +168,8 @@ namespace pixel_renderer
                 renderHost.Render(mainWnd.renderImage);
 
             Task stageUpdateTask = new(delegate { StagingHost.Update(m_stage); });
-
+            stageUpdateTask.Start();
+            stageUpdateTask.Wait();
         }
     }
 }
