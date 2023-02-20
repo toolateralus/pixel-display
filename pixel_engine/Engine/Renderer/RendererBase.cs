@@ -20,32 +20,25 @@
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
-        private static Vec2 ViewportToPosWithDrawingType(Camera cam, Vec2 size, Vec2 ViewportPos)
-        {
-            Vec2 maxIndex = size - Vec2.one;
-            return cam.DrawMode switch
-            {
-                DrawingType.Wrapped => ViewportPos.Wrapped(Vec2.one) * size,
-                DrawingType.Clamped => (ViewportPos.Clamped(Vec2.zero, Vec2.one) * maxIndex).Clamped(Vec2.zero, maxIndex),
-                _ => new(0, 0),
-            };
-        }
-        public void RenderSprites(Camera camera, StageRenderInfo renderInfo)
+        public void RenderCamera(Camera camera, StageRenderInfo renderInfo)
         {
             if (Resolution.y == 0 || Resolution.x == 0) return;
+
             Node camNode = new("CamNode", camera.parent.Position, Vec2.one);
             Camera cam = camNode.AddComponent(camera.Clone());
-
             if (cam.zBuffer.GetLength(0) != Resolution.x || cam.zBuffer.GetLength(1) != Resolution.y)
                 cam.zBuffer = new float[(int)Resolution.x, (int)Resolution.y];
-
             Array.Clear(cam.zBuffer);
 
+            DrawBaseImage(cam);
+            DrawSprites(renderInfo, cam);
+            //TODO: Draw Other Graphical Info
+        }
+
+        private void DrawSprites(StageRenderInfo renderInfo, Camera cam)
+        {
             Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
-            CreateBaseImageSprite(cam, sprite);
-            DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vec2.zero, Resolution));
-
             for (int i = 0; i < renderInfo.Count; ++i)
             {
                 sprite.parent.Position = renderInfo.spritePositions[i];
@@ -74,8 +67,10 @@
             }
         }
 
-        private void CreateBaseImageSprite(Camera cam, Sprite sprite)
+        private void DrawBaseImage(Camera cam)
         {
+            Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
+            Sprite sprite = spriteNode.AddComponent<Sprite>();
             Vec2 baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
             Vec2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
             BoundingBox2D camBoundingBox = new(topLeft, topLeft);
@@ -94,6 +89,7 @@
             sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
             sprite.ColorData = baseImage;
             sprite.camDistance = float.Epsilon;
+            DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vec2.zero, Resolution));
         }
 
         private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea)

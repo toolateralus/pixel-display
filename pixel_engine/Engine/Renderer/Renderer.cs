@@ -51,7 +51,7 @@ namespace pixel_renderer
                 // TODO : Fix invalid cast exception from Component to UIComponent, likely a JSON problem
                 foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                     if (uiComponent.Enabled && uiComponent is Camera camera)
-                        RenderSprites(camera, renderInfo);
+                        RenderCamera(camera, renderInfo);
             });
             DrawTask.RunSynchronously();
         }
