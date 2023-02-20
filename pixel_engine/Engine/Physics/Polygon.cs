@@ -1,4 +1,6 @@
-﻿namespace pixel_renderer
+﻿using System;
+
+namespace pixel_renderer
 {
     public class Polygon
     {
@@ -39,6 +41,32 @@
             {
                 uv[i] = (vertices[i] - uvBox.min) / bbSize;
             }
+        }
+        public Polygon()
+        {
+            normals = Array.Empty<Vec2>();
+            centroid = Vec2.zero;
+            uv = Array.Empty<Vec2>();
+            vertices = Array.Empty<Vec2>();
+        }
+        public Polygon(Polygon polygon)
+        {
+            vertices = new Vec2[polygon.vertices.Length];
+            normals = new Vec2[polygon.normals.Length];
+            uv = new Vec2[polygon.uv.Length];
+            centroid = new Vec2(polygon.centroid);
+            Array.Copy(polygon.vertices,vertices,vertices.Length);
+            Array.Copy(polygon.normals, normals, normals.Length);
+            Array.Copy(polygon.uv, uv, uv.Length);
+        }
+        public Polygon OffsetBy(Vec2 offset)
+        {
+            Polygon polygon = new(this);
+            int vertCount = polygon.vertices.Length;
+            for (int i = 0; i < vertCount; i++)
+                polygon.vertices[i] += offset;
+            polygon.centroid += offset;
+            return polygon;
         }
     }
     
