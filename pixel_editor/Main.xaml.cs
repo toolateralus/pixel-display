@@ -475,7 +475,7 @@ namespace pixel_editor
                 int i = 0;
                 foreach (var item in objects)
                 {
-                    Button button = Inspector.CreateButton(item.Key, new(0, 0, 0, 0));
+                    Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
                     button.Name = $"button{i}";
                     AddItemActions.Add(() => AddObject(item));
                     button.FontSize = 2;

@@ -119,7 +119,7 @@ namespace pixel_editor
 
                 i++;
             }
-            var saveBtn = Inspector.CreateButton("Save", new(0, 0, 0, 0));
+            var saveBtn = Inspector.GetButton("Save", new(0, 0, 0, 0));
 
             viewer.Children.Add(saveBtn);
             saveBtn.Click += SaveBtn_Click;

@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 
-namespace pixel_renderer.Engine.Renderer
+namespace pixel_renderer
 {
-    internal static class Graphics
+    public static class Graphics
     {
         /// <summary>
         /// start point of each line will always have an x value less than or equal to the end point
