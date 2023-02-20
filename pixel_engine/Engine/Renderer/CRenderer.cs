@@ -22,9 +22,6 @@ namespace pixel_renderer
                 baseImageDirty = false;
             }
 
-            // TODO: restore the original synchronous rendering, just seeing if this would be faster.
-            Task DrawTask = new(delegate
-            {
                 stride = 4 * ((int)Resolution.x * 24 + 31) / 32;
 
                 if (frame.Length != stride * Resolution.y)
@@ -54,8 +51,11 @@ namespace pixel_renderer
                 foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                     if (uiComponent.Enabled && uiComponent is Camera camera)
                         RenderCamera(camera, renderInfo);
-            });
-            DrawTask.RunSynchronously();
+            // TODO: restore the original synchronous rendering, just seeing if this would be faster.
+            //Task DrawTask = new(delegate
+            //{
+            //});
+            //DrawTask.RunSynchronously();
         }
 
 

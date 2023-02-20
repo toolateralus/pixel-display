@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Security.Policy;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using pixel_renderer.Scripts;
 using Bitmap = System.Drawing.Bitmap;
 using Color = System.Drawing.Color;
@@ -41,12 +43,12 @@ namespace pixel_renderer
         private Color[,]? cached_colors = null;
         internal Color[,] ColorData
         {
-            get => _colors;
+            get => _colors ?? throw new ArgumentNullException(nameof(_colors));
             set
             {
                 if (!IsReadOnly)
                 {
-                    _colors = value;
+                    _colors = value ?? throw new ArgumentNullException(nameof(value));
                     colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
                 }
             }
@@ -75,7 +77,7 @@ namespace pixel_renderer
             dirty = false;
         }
 
-        private Color[,] _colors; 
+        private Color[,] _colors = new Color[1,1]; 
        
         public override void Awake()
         {
