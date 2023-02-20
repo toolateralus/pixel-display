@@ -12,20 +12,21 @@ namespace pixel_renderer
         private RendererBase m_renderer = new CRenderer();
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
+        
         DispatcherTimer timer = new();
+
         public RenderHost()
-        { 
+        {
             info = new(this);
             timer.Tick += Timer_Tick;
-            timer.Interval = new(10);
+            timer.Interval = new(1);
             timer.Start();
         }
 
         private void Timer_Tick(object? o, EventArgs e)
         {
-            if(Runtime.Instance.IsRunning)
+            if (Runtime.Instance.IsRunning) 
                 Render();
-           
         }
 
         public event Action<long>? OnRenderCompleted; 
