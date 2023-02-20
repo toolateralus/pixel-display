@@ -169,7 +169,10 @@ namespace pixel_renderer
 
                 Components[type].Add(component);
                 component.parent = this;
-                component.Awake();
+
+                if(Runtime.PhysicsInitialized)
+                    component.Awake();
+
                 return component;
             }
         }

@@ -52,10 +52,17 @@ namespace pixel_renderer.Scripts
             CreateInputEvents();
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
+
+            var child = test_child_node();
+            parent.Child(child);
+
+
         }
 
         public override void OnDrawShapes()
         {
+            foreach (var child in parent.children)
+                ShapeDrawer.DrawLine(parent.Position, child.Value.Position, JRandom.Color());
             ShapeDrawer.DrawLine(parent.Position, parent.Position + (Vec2.up.Rotated(lineAngle) * 50), Color.Blue);
             lineAngle += 0.1f;
         }
