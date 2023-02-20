@@ -13,18 +13,18 @@ namespace pixel_renderer
         public RenderState State = RenderState.Game;
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
-        DispatcherTimer timer = new();
+        Timer timer;
         public RenderHost()
         {
             info = new(this);
-            timer.Interval = TimeSpan.FromTicks(1000);
-            timer.Start();
-            timer.Tick += Timer_Tick;
+            timer = new(Timer_Tick, null, 0, 10);
+            timer.ConfigureAwait(true);
         }
 
-        private void Timer_Tick(object? sender, EventArgs e)
+        private void Timer_Tick(object o)
         {
-            Render();
+            if(!Rendering)
+                Render();
         }
 
         public event Action<long>? OnRenderCompleted; 
@@ -32,6 +32,9 @@ namespace pixel_renderer
         public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
 
         public Vec2? newResolution = null;
+
+        public bool Rendering { get; private set; }
+
         private void UpdateResolution()
         {
             if (newResolution != null)
@@ -43,6 +46,7 @@ namespace pixel_renderer
 
         public void Render()
         {
+            Rendering = true;
             if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded."); 
             switch (State)
             {
@@ -54,6 +58,7 @@ namespace pixel_renderer
             }
             Cycle();
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
+            Rendering = false; 
         }
         /// <summary>
         /// performs the rendering loop for one cycle or frame.
