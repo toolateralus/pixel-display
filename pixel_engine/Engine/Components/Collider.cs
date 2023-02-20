@@ -11,7 +11,12 @@ namespace pixel_renderer
         [JsonProperty] Polygon mesh;
         public Polygon Mesh
         {
-            get => mesh ??= new(GetVertices());
+            get
+            {
+                mesh ??= new(GetVertices());
+                return mesh.OffsetBy(parent.Position);
+            }
+                
             set => mesh = value;
         }
         [JsonProperty] [Field] public Vec2 size = new(0,0);
@@ -31,15 +36,13 @@ namespace pixel_renderer
         /// <returns></returns>
         public Vec2[] GetVertices()
         {
-            Vec2 position = new(parent.Position);
-            Vec2 size = new(this.size);
+            Vec2 topLeft = Vec2.zero;
+            Vec2 topRight = new(size.x, 0);
+            Vec2 bottomRight = size;
+            Vec2 bottomLeft = new(0, size.y);
 
-            Vec2 topLeft = position;
-            Vec2 topRight = position.WithValue(x: position.x + size.x);
-            Vec2 bottomRight = position + size;
-            Vec2 bottomLeft = position.WithValue(y: position.y + size.y);
-
-            var vertices = new Vec2[] {
+            var vertices = new Vec2[]
+            {
                     topLeft,
                     topRight,
                     bottomRight,
