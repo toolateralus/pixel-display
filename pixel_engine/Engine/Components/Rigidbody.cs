@@ -1,4 +1,7 @@
 ﻿using Newtonsoft.Json;
+using System;
+using System.Windows.Documents;
+
 namespace pixel_renderer
 {
     public class Rigidbody : Component
@@ -59,7 +62,15 @@ namespace pixel_renderer
             ApplyDrag();
             ApplyVelocity();
         }
-        
+
+        public static Node StaticBody()
+        {
+            Node node = Rigidbody.Standard();
+            Rigidbody rb = node.GetComponent<Rigidbody>();
+            node.RemoveComponent(rb);
+            return node; 
+            
+        }
     }
 }
 

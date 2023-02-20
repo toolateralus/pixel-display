@@ -207,6 +207,7 @@ namespace pixel_renderer
 
                     if (toRemove is not null)
                         compList.Remove(toRemove);
+                    if (compList.Count == 0) Components.Remove(type);
                 }
             }
         }

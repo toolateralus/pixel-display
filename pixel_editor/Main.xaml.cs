@@ -498,6 +498,7 @@ namespace pixel_editor
 
         private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
         {
+            e.Handled = true; 
             if (sender is not Button button) return;
             foreach (var item in objects)
                 if (button.Name.ToInt() is int i && AddItemActions.Count > i)
@@ -505,7 +506,8 @@ namespace pixel_editor
         }
         public static Dictionary<string, Func<Node>> objects = new()
         {
-            {"Node", Rigidbody.Standard },
+            {"Static Body", Rigidbody.StaticBody },
+            {"Rigid Body", Rigidbody.Standard },
             {"Animator", Animator.Standard}
         };
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Threading;
 using Image = System.Windows.Controls.Image; 
 
@@ -11,15 +12,16 @@ namespace pixel_renderer
         private RendererBase m_renderer = new CRenderer();
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
-        Timer timer;
+        DispatcherTimer timer = new();
         public RenderHost()
-        {
+        { 
             info = new(this);
-            timer = new(Timer_Tick, null, 0, 100);
-            timer.ConfigureAwait(true);
+            timer.Tick += Timer_Tick;
+            timer.Interval = new(10);
+            timer.Start();
         }
 
-        private void Timer_Tick(object o)
+        private void Timer_Tick(object? o, EventArgs e)
         {
             if(Runtime.Instance.IsRunning)
                 Render();
