@@ -41,7 +41,6 @@
         private void DrawGraphics(Camera cam)
         {
             Vec2 framePos = new Vec2();
-            
             foreach(Line line in ShapeDrawer.lines)
             {            
                 if (line.startPoint.x == line.endPoint.x)
@@ -54,7 +53,7 @@
                 float yIntercept = startPos.y - (slope * startPos.x);
                 
                 int startX = (int)MathF.Max(startPos.x, 0);
-                int endX = (int)MathF.Max(endPos.x, Resolution.x);
+                int endX = (int)MathF.Min(endPos.x, Resolution.x);
                 
                 for (int x = startX; x < endX; x++)
                 {
