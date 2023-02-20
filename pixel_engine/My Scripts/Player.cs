@@ -1,5 +1,4 @@
-﻿using pixel_renderer;
-using static pixel_renderer.Input;
+﻿using static pixel_renderer.Input;
 using System;
 using Key = System.Windows.Input.Key;
 using System.Collections.Generic;
@@ -153,6 +152,7 @@ namespace pixel_renderer.Scripts
                 return;
             Jump(moveVector);
             Move(moveVector);
+            ShapeDrawer.DrawLine(parent.Position, parent.Position + (moveVector * 100), Color.DarkBlue);
             moveVector = Vec2.zero;
         }
         public override void OnTrigger(Collider other) 

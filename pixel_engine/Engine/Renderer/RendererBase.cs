@@ -1,6 +1,5 @@
 ﻿namespace pixel_renderer
 {
-    using pixel_renderer.Engine.Renderer;
     using System;
     using System.Collections.Generic;
     using System.Net;
@@ -41,11 +40,11 @@
 
         private void DrawGraphics(Camera cam)
         {
-            int numOfShapes = Graphics.lines.Count;
+            int numOfShapes = ShapeDrawer.lines.Count;
             Vec2 framePos = new Vec2();
             for (int i = 0; i < numOfShapes; i++)
             {
-                Line line = Graphics.lines.Dequeue();
+                Line line = ShapeDrawer.lines.Dequeue();
                 if (line.startPoint.x == line.endPoint.x)
                     return;
                 Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;

@@ -8,7 +8,7 @@ using System.Drawing;
 
 namespace pixel_renderer
 {
-    public static class Graphics
+    public static class ShapeDrawer
     {
         /// <summary>
         /// start point of each line will always have an x value less than or equal to the end point
