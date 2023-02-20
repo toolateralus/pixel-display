@@ -50,8 +50,12 @@ namespace pixel_renderer.Scripts
             CreateInputEvents();
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
+            ShapeDrawer.TryRegister(this, OnDrawShapes);
         }
-
+        public void OnDrawShapes()
+        {
+            ShapeDrawer.DrawLine(parent.Position - moveVector, parent.Position + (Vec2.right * 100), Color.Orange);
+        }
         void MakeChildObject(object[]? e)
         {
             Node node = test_child_node();
@@ -152,7 +156,6 @@ namespace pixel_renderer.Scripts
                 return;
             Jump(moveVector);
             Move(moveVector);
-            ShapeDrawer.DrawLine(parent.Position, parent.Position + (moveVector * 100), Color.DarkBlue);
             moveVector = Vec2.zero;
         }
         public override void OnTrigger(Collider other) 
