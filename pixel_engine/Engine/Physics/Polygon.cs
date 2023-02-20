@@ -6,7 +6,10 @@
         public Vec2 centroid;
         public Vec2[] uv;
         public Vec2[] vertices;
-
+        /// <summary>
+        /// Expects vertices to be structed clockwise
+        /// </summary>
+        /// <param name="vertices"></param>
         public Polygon(Vec2[] vertices)
         {
             this.vertices = vertices;
@@ -19,7 +22,7 @@
             {
                 var vert1 = vertices[i];
                 var vert2 = vertices[(i + 1) % vertCount];
-                normals[i] = (vert2 - vert1).Normal_RHS.Normalized();
+                normals[i] = (vert2 - vert1).Normal_LHS.Normalized();
                 centroid += vert1;
             }
             centroid /= vertCount;

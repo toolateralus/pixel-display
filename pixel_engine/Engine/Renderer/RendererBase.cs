@@ -59,14 +59,13 @@
                     float slope = yDiff / xDiff;
                     float yIntercept = startPos.y - (slope * startPos.x);
                 
-                    int startX = (int)MathF.Max(startPos.x, 0);
-                    int endX = (int)MathF.Min(endPos.x, Resolution.x);
+                    int endX = (int)MathF.Min(MathF.Max(startPos.x, endPos.x), Resolution.x);
                 
-                    for (int x = startX; x < endX; x++)
+                    for (int x = (int)MathF.Max(MathF.Min(startPos.x, endPos.x), 0); x < endX; x++)
                     {
                         framePos.x = x;
                         framePos.y = slope * x + yIntercept;
-                        if (framePos.y < 0 || framePos.y >= Resolution.x)
+                        if (framePos.y < 0 || framePos.y >= Resolution.y)
                             continue;
                         WriteColorToFrame(ref line.color, ref framePos);
                     }
@@ -76,14 +75,13 @@
                     float slope = xDiff / yDiff;
                     float xIntercept = startPos.x - (slope * startPos.y);
 
-                    int startY = (int)MathF.Max(startPos.y, 0);
-                    int endY = (int)MathF.Min(endPos.y, Resolution.y);
+                    int endY = (int)MathF.Min(MathF.Max(startPos.y, endPos.y), Resolution.y);
 
-                    for (int y = startY; y < endY; y++)
+                    for (int y = (int)MathF.Max(MathF.Min(startPos.y, endPos.y), 0); y < endY; y++)
                     {
                         framePos.y = y;
                         framePos.x = slope * y + xIntercept;
-                        if (framePos.x < 0 || framePos.x >= Resolution.y)
+                        if (framePos.x < 0 || framePos.x >= Resolution.x)
                             continue;
                         WriteColorToFrame(ref line.color, ref framePos);
                     }
