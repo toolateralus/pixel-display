@@ -14,17 +14,20 @@ namespace pixel_editor
 {
     public class Inspector
     {
-        public Inspector(Label name, Label objInfo, Grid grid)
+        public Inspector(Grid grid)
         {
             MainGrid = grid;
             Awake();
         }
 
         public Node? selectedNode;
+        
         private List<Control> activeControls = new();
         private List<Grid> activeGrids = new();
+        
         private Grid MainGrid;
         private Grid grid; 
+
         private Dictionary<Type, List<Component>> components = new();
         public static List<Action<Action>> EditActions = new();
         public static List<Action> EditActionArgs = new(); 
@@ -164,7 +167,7 @@ namespace pixel_editor
 
         private static void RePositionInspectorGrid(Grid grid)
         {
-            SetRowAndColumn(grid, Constants.InspectorWidth, Constants.InspectorHeight, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
+            SetRowAndColumn(grid, Constants.InspectorWidth , Constants.InspectorHeight, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
         }
 
         private int AddComponentToInspector(Grid grid, int index, Component component)
@@ -188,7 +191,7 @@ namespace pixel_editor
         private static Button GetEditComponentButton(int index)
         {
             Button editComponentButton = CreateButton("Edit", new(0, 0, 0, 0));
-            editComponentButton.FontSize = 4;
+            editComponentButton.FontSize = 3;
             editComponentButton.Click += HandleEditPressed;
             editComponentButton.Name = "edit_button_" + index.ToString();
             return editComponentButton;
@@ -223,31 +226,39 @@ namespace pixel_editor
             grid.SetValue(Grid.RowProperty, y);
             grid.SetValue(Grid.ColumnProperty, x);
         }
-        public static TextBox GetTextBox(string componentName)
+        public static TextBox GetTextBox(string componentName, string style = "default")
         {
-            TextBox box = new()
-                {
-                    Text = componentName,
-                    FontSize = 4f,
-                    FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
-                    IsReadOnly = true,
-
-                    AcceptsReturn = false,
-                    AcceptsTab = false,
-                    AllowDrop = false,
-
-                    TextWrapping = TextWrapping.NoWrap,
-
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-
-
-                    Foreground = Brushes.Black,
-                    Background = Brushes.Gray,
-
-                };
-            return box;
+            return style switch
+            {
+                _ => DefaultStyle(componentName),
+            };
         }
+
+        private static TextBox DefaultStyle(string componentName)
+        {
+            return new()
+            {
+                Text = componentName,
+                FontSize = 4f,
+                FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
+                IsReadOnly = true,
+
+                AcceptsReturn = false,
+                AcceptsTab = false,
+                AllowDrop = false,
+
+                TextWrapping = TextWrapping.NoWrap,
+
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+
+                BorderThickness = new Thickness(0.1, 0.1, 0.1, 0.1),
+                Foreground = Brushes.Black,
+                Background = Brushes.Gray,
+
+            };
+        }
+
         public void AddGridToInspector(Grid grid)
         {
             this.MainGrid.Children.Add(grid);
@@ -293,8 +304,7 @@ namespace pixel_editor
         {
             Content = content,
             Margin = margin,
-            BorderBrush = Brushes.Black,
-            BorderThickness = new Thickness(1, 1, 1, 1),
+            BorderThickness = new Thickness(0.1,0.1,0.1,0.1),
         };
 
         #region Events

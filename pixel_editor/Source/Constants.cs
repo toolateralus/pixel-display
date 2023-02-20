@@ -7,7 +7,8 @@ namespace pixel_editor
         public const int InspectorQueueMaxLength = 6;
 
         public static Vec2Int InspectorPosition = new(12, 6);
-        public static int InspectorWidth = 10;
-        public static int InspectorHeight = 14;
+
+        public static int InspectorWidth = 6;
+        public static int InspectorHeight = 8;
     }
 }
