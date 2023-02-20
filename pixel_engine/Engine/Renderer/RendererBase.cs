@@ -1,9 +1,13 @@
 ﻿namespace pixel_renderer
 {
+    using pixel_renderer.Engine.Renderer;
     using System;
     using System.Collections.Generic;
+    using System.Net;
+    using System.Security.Policy;
     using System.Threading.Tasks;
     using System.Windows.Controls;
+    using System.Windows.Media;
     using Bitmap = System.Drawing.Bitmap;
     using Color = System.Drawing.Color;
 
@@ -32,7 +36,31 @@
 
             DrawBaseImage(cam);
             DrawSprites(renderInfo, cam);
-            //TODO: Draw Other Graphical Info
+            DrawGraphics(cam);
+        }
+
+        private void DrawGraphics(Camera cam)
+        {
+            int numOfShapes = Graphics.lines.Count;
+            Vec2 framePos = new Vec2();
+            for (int i = 0; i < numOfShapes; i++)
+            {
+                Line line = Graphics.lines.Dequeue();
+                if (line.startPoint.x == line.endPoint.x)
+                    return;
+                Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;
+                Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * Resolution;
+                startPos.Clamp(Vec2.zero, Resolution - Vec2.one);
+                endPos.Clamp(Vec2.zero, Resolution - Vec2.one);
+                float slope = (startPos.y - endPos.y) / (startPos.x - endPos.x);
+                float yIntercept = startPos.y - (slope * startPos.x);
+                for (int x = (int)startPos.x; x < endPos.x; x++)
+                {
+                    framePos.x = x;
+                    framePos.y = slope * x + yIntercept;
+                    WriteColorToFrame(ref line.color, ref framePos);
+                }
+            }
         }
 
         private void DrawSprites(StageRenderInfo renderInfo, Camera cam)
