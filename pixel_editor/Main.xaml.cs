@@ -112,7 +112,24 @@ namespace pixel_editor
 
             Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
 
+            Runtime.OnProjectSet += OnProjectSet;
+            Runtime.OnStageSet += OnStageSet;
+            OnStageSet(Runtime.Instance.GetStage());
+            OnProjectSet(Runtime.Instance.LoadedProject);
+
         }
+        string stageName, projectName;
+        private void OnProjectSet(Project obj)
+        {
+            projectName = obj.Name;
+            Current.Title = $"{projectName} : : {stageName}";
+        }
+        private void OnStageSet(Stage obj)
+        {
+            stageName = obj.Name;
+            Current.Title = $"{projectName} : : {stageName}";
+        }
+
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
 

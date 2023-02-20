@@ -21,15 +21,27 @@ namespace pixel_renderer
         public Timer physicsClock;
         public Project LoadedProject;
 
-        private protected volatile Stage? m_stage;
-        
-        public static event Action<EditorEvent>? InspectorEventRaised;
-
         public bool IsRunning { get; private set; }
         public static bool PhysicsInitialized = false;
         public static bool Initialized = false;
-        
         public static object? inspector = null;
+        internal int selectedStage = 0;
+        
+        private protected volatile Stage? m_stage;
+        private protected volatile static Runtime? instance;
+        public static Runtime Instance
+        {
+            get
+            {
+                if (instance is null)
+                    throw new EngineInstanceException("The runtime domain is not yet initialized");
+                return instance;
+            }
+        }
+
+        public static event Action<EditorEvent>? InspectorEventRaised;
+        public static event Action<Project> OnProjectSet = new(delegate { });
+        public static event Action<Stage> OnStageSet = new(delegate { });
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
@@ -46,18 +58,6 @@ namespace pixel_renderer
             CompositionTarget.Rendering += GlobalUpdateRoot;
             CompositionTarget.Rendering += Input.Refresh;
         }
-
-        private protected volatile static Runtime? instance;
-        public static Runtime Instance
-        {
-            get
-            {
-                if (instance is null)
-                    throw new EngineInstanceException("The runtime domain is not yet initialized");
-                return instance;
-            }
-        }
-
         public void Toggle()
         {
             if (!PhysicsInitialized)
@@ -73,12 +73,6 @@ namespace pixel_renderer
             IsRunning = false;
             return;
         }
-
-        public Stage? GetStage()
-        {
-            return m_stage;
-        }
-
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             instance ??= new(mainWnd, project);
@@ -87,7 +81,10 @@ namespace pixel_renderer
             Log($"{Instance.GetStage().Name} instantiated & engine started.");
 
         }
-
+        private void InitializePhysics()
+        {
+            PhysicsInitialized = true;
+        }
         public static void TryLoadStageFromProject(int index)
         {
             List<Metadata> stagesMeta = Instance.LoadedProject.stagesMeta;
@@ -103,7 +100,6 @@ namespace pixel_renderer
 
             Instance.SetStage(stage);
         }
-
         private static Stage InstantiateDefaultStageIntoProject()
         {
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
@@ -117,17 +113,22 @@ namespace pixel_renderer
 
             return stage; 
         }
-        internal int selectedStage = 0;
-        public void SetStage(Stage stage) {
-            m_stage = stage;
-        }
-        private void InitializePhysics()
+
+        public void SetStage(Stage stage) 
         {
-            PhysicsInitialized = true;
+            m_stage = stage;
+            OnStageSet?.Invoke(stage);
         }
-        public void SetProject(Project project) => LoadedProject = project;
-        
-       
+        public Stage? GetStage()
+        {
+            return m_stage;
+        }
+        public void SetProject(Project project)
+        {
+            LoadedProject = project;
+            OnProjectSet?.Invoke(project);
+        }
+
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -139,8 +140,6 @@ namespace pixel_renderer
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
 
-        
-      
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
             if(m_stage is null || !PhysicsInitialized) 
