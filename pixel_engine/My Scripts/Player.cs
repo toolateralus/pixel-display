@@ -153,7 +153,6 @@ namespace pixel_renderer.Scripts
                 return;
             Jump(moveVector);
             Move(moveVector);
-            Pixelrenderer.Graphics
             moveVector = Vec2.zero;
         }
         public override void OnTrigger(Collider other) 
