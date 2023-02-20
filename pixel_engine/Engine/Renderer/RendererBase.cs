@@ -50,14 +50,16 @@
                     return;
                 Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;
                 Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * Resolution;
-                startPos.Clamp(Vec2.zero, Resolution - Vec2.one);
-                endPos.Clamp(Vec2.zero, Resolution - Vec2.one);
                 float slope = (startPos.y - endPos.y) / (startPos.x - endPos.x);
                 float yIntercept = startPos.y - (slope * startPos.x);
-                for (int x = (int)startPos.x; x < endPos.x; x++)
+                int startX = (int)MathF.Max(startPos.x, 0);
+                int endX = (int)MathF.Max(endPos.x, Resolution.x);
+                for (int x = startX; x < endX; x++)
                 {
                     framePos.x = x;
                     framePos.y = slope * x + yIntercept;
+                    if (framePos.y < 0 || framePos.y >= Resolution.x)
+                        continue;
                     WriteColorToFrame(ref line.color, ref framePos);
                 }
             }
