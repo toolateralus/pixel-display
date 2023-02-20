@@ -56,14 +56,15 @@
             Vec2 framePos = new Vec2();
             foreach(Line line in ShapeDrawer.lines)
             {
-                if (line.startPoint == line.endPoint)
+                Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;
+                Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * Resolution;
+                if (startPos == endPos)
                 {
-                    WriteColorToFrame(ref line.color, ref line.startPoint);
+                    if (startPos.IsWithinMaxExclusive(Vec2.zero, Resolution))
+                        WriteColorToFrame(ref line.color, ref startPos);
                     continue;
                 }
 
-                Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;
-                Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * Resolution;
                 float xDiff = startPos.x - endPos.x;
                 float yDiff = startPos.y - endPos.y;
 
