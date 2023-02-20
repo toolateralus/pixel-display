@@ -356,7 +356,7 @@ namespace pixel_editor
             if (sender is Button button)
             {
                 button.FontSize = 2;
-                button.Content = $"{Environment.MachineName}}";
+                button.Content = $"{Environment.MachineName}";
             }
 
         }
