@@ -34,7 +34,7 @@
             {
                 uvBox.ExpandTo(v);
             }
-            Vec2 bbSize = uvBox.max - uvBox.min;
+            Vec2 bbSize = uvBox.max - uvBox.min - Vec2.one;
             for (int i = 0; i < vertCount; i++)
             {
                 uv[i] = (vertices[i] - uvBox.min) / bbSize;
