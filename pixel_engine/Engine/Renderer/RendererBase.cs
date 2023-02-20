@@ -41,15 +41,11 @@
         private void DrawGraphics(Camera cam)
         {
             ShapeDrawer.Refresh();
-            
-            int numOfShapes = ShapeDrawer.lines.Count;
 
             Vec2 framePos = new Vec2();
             
-            for (int i = 0; i < numOfShapes; i++)
-            {
-                Line line = ShapeDrawer.lines.Dequeue();
-            
+            foreach(Line line in ShapeDrawer.lines)
+            {            
                 if (line.startPoint.x == line.endPoint.x)
                     return;
                 

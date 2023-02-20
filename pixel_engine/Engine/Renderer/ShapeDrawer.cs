@@ -37,12 +37,12 @@ namespace pixel_renderer
         /// <summary>
         /// start point of each line will always have an x value less than or equal to the end point
         /// </summary>
-        internal static Queue<Line> lines = new();
+        internal static List<Line> lines = new();
         public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Color? color = null)
         {
             Vec2 leftSide = startPoint.x < endPoint.x ? startPoint : endPoint;
             Vec2 rightSide = startPoint.x >= endPoint.x ? startPoint : endPoint;
-            lines.Enqueue(new Line(leftSide, rightSide, color ?? Color.White));
+            lines.Add(new Line(leftSide, rightSide, color ?? Color.White));
         }
     }
     public class Line

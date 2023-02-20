@@ -54,7 +54,7 @@ namespace pixel_renderer.Scripts
         }
         public void OnDrawShapes()
         {
-            ShapeDrawer.DrawLine(parent.Position - moveVector, parent.Position + (Vec2.right * 100), Color.Orange);
+            ShapeDrawer.DrawLine(parent.Position, parent.Position + (Vec2.right), Color.Orange);
         }
         void MakeChildObject(object[]? e)
         {
