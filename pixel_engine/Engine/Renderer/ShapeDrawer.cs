@@ -13,10 +13,10 @@ namespace pixel_renderer
         public static void Refresh(Stage stage)
         {
             lines.Clear();
-            foreach (Component component in stage.GetAllComponents<Component>())
-            {
-                component.OnDrawShapes();
-            }
+            var components = stage.GetAllComponents<Component>();
+            lock (components)
+                foreach (Component component in components)
+                    component.OnDrawShapes();
 
         }
 
