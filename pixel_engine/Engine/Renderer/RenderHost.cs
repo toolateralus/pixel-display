@@ -42,7 +42,8 @@ namespace pixel_renderer
         private protected void Cycle(Image renderSurface)
         {
             m_renderer.Dispose();
-            if(Runtime.Instance.GetStage() is Stage stage)
+            ShapeDrawer.Refresh(Runtime.Instance.GetStage());
+            if (Runtime.Instance.GetStage() is Stage stage)
                 m_renderer.Draw(stage.StageRenderInfo);
             m_renderer.Render(renderSurface);
         }
