@@ -50,12 +50,13 @@ namespace pixel_renderer.Scripts
             CreateInputEvents();
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
-            ShapeDrawer.TryRegister(this, OnDrawShapes);
         }
-        public void OnDrawShapes()
+
+        public override void OnDrawShapes()
         {
-            ShapeDrawer.DrawLine(parent.Position, parent.Position + (Vec2.right), Color.Orange);
+            ShapeDrawer.DrawLine(parent.Position, parent.Position + (Vec2.right * 5), Color.Blue);
         }
+
         void MakeChildObject(object[]? e)
         {
             Node node = test_child_node();

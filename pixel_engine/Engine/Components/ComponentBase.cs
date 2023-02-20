@@ -53,6 +53,9 @@ namespace pixel_renderer
             action?.Invoke();
             Runtime.Log($"{Name} had {nameof(OnEditActionClicked)} called at {DateTime.Now}");
         }
+        public virtual void OnDrawShapes()
+        {
+        }
     }
 
 }

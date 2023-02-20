@@ -40,7 +40,7 @@
 
         private void DrawGraphics(Camera cam)
         {
-            ShapeDrawer.Refresh();
+            ShapeDrawer.Refresh(Runtime.Instance.GetStage());
 
             Vec2 framePos = new Vec2();
             

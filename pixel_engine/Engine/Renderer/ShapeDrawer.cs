@@ -10,26 +10,12 @@ namespace pixel_renderer
 {
     public static class ShapeDrawer
     {
-
-        static Dictionary<object, Action> DrawEvents = new();  
-
-        public static bool TryRegister(object sender, Action action)
-        {
-            if (DrawEvents.ContainsKey(sender))
-                return false;
-
-            DrawEvents.Add(sender, action);
-            return true;
-        }
-
-        public static void Refresh()
+        public static void Refresh(Stage stage)
         {
             lines.Clear();
-            foreach (var x in DrawEvents)
+            foreach (Component component in stage.GetAllComponents<Component>())
             {
-                if (x.Key != null)
-                    x.Value.Invoke();
-                else DrawEvents.Remove(x);
+                component.OnDrawShapes();
             }
 
         }
