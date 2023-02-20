@@ -15,14 +15,15 @@ namespace pixel_renderer
         public RenderHost()
         {
             info = new(this);
-            timer = new(Timer_Tick, null, 0, 10);
+            timer = new(Timer_Tick, null, 0, 100);
             timer.ConfigureAwait(true);
         }
 
         private void Timer_Tick(object o)
         {
-            if(!Rendering && Runtime.Instance.IsRunning)
+            if(Runtime.Instance.IsRunning)
                 Render();
+           
         }
 
         public event Action<long>? OnRenderCompleted; 
@@ -44,11 +45,19 @@ namespace pixel_renderer
 
         public void Render()
         {
-            Rendering = true;
-            if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded."); 
-            Cycle();
+            if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded.");
+            try
+            {
+
+                Cycle();
+            }
+            catch
+            (Exception e)
+            {
+                Runtime.Log(e.Message);
+            }
+
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
-            Rendering = false; 
         }
         /// <summary>
         /// performs the rendering loop for one cycle or frame.

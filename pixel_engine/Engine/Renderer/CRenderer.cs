@@ -31,7 +31,7 @@ namespace pixel_renderer
                 //IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>();
 
                 List<Component> componentsFound = new();
-
+                lock(stage.nodes)
                 foreach (var node in stage.nodes)
                 {
                     var result = componentsFound.Concat(node.ComponentsList);

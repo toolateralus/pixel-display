@@ -46,8 +46,10 @@
             DrawBaseImage(cam);
             DrawSprites(renderInfo, cam);
             DrawGraphics(cam);
+
             if (latestFrame.Length != frame.Length)
                 latestFrame = new byte[frame.Length];
+
             Array.Copy(frame, latestFrame, frame.Length);
         }
 

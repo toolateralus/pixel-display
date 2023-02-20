@@ -93,6 +93,7 @@ namespace pixel_renderer
         {
             var distance = Vec2.Distance(child.Position, Position);
             var direction = child.Position - Position;
+            if (children is null) children = new();
             if (children.ContainsKey(direction * distance))
                 return;
             _ = child.parentNode?.TryRemoveChild(child);
