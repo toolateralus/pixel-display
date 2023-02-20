@@ -23,7 +23,7 @@ namespace pixel_renderer
 
         private void Timer_Tick(object o)
         {
-            if(!Rendering)
+            if(!Rendering && Runtime.Instance.IsRunning)
                 Render();
         }
 
