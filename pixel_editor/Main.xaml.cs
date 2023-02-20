@@ -187,7 +187,6 @@ namespace pixel_editor
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
             StartEditorRenderClock();
-            timer.Tick += Update;
 
             Runtime.InspectorEventRaised += QueueEvent;
 
@@ -208,10 +207,10 @@ namespace pixel_editor
         {
             Keyboard.ClearFocus();
         }
-
         private void StartEditorRenderClock()
         {
-            timer.Interval = TimeSpan.FromTicks(1000);
+            timer.Interval = TimeSpan.FromTicks(100);
+            timer.Tick += Update;
             timer.Start();
         }
 
