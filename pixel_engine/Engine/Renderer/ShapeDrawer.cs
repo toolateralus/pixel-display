@@ -10,10 +10,34 @@ namespace pixel_renderer
 {
     public static class ShapeDrawer
     {
+
+        static Dictionary<object, Action> DrawEvents = new();  
+
+        public static bool TryRegister(object sender, Action action)
+        {
+            if (DrawEvents.ContainsKey(sender))
+                return false;
+
+            DrawEvents.Add(sender, action);
+            return true;
+        }
+
+        public static void Refresh()
+        {
+            lines.Clear();
+            foreach (var x in DrawEvents)
+            {
+                if (x.Key != null)
+                    x.Value.Invoke();
+                else DrawEvents.Remove(x);
+            }
+
+        }
+
         /// <summary>
         /// start point of each line will always have an x value less than or equal to the end point
         /// </summary>
-        public static Queue<Line> lines = new();
+        internal static Queue<Line> lines = new();
         public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Color? color = null)
         {
             Vec2 leftSide = startPoint.x < endPoint.x ? startPoint : endPoint;

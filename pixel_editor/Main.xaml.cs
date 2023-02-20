@@ -183,8 +183,8 @@ namespace pixel_editor
             image.MouseLeftButtonDown += Mouse0;
             StartEditorRenderClock();
             timer.Tick += Update;
-            Runtime.InspectorEventRaised += QueueEvent;
 
+            Runtime.InspectorEventRaised += QueueEvent;
 
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);

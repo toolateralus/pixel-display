@@ -40,19 +40,28 @@
 
         private void DrawGraphics(Camera cam)
         {
+            ShapeDrawer.Refresh();
+            
             int numOfShapes = ShapeDrawer.lines.Count;
+
             Vec2 framePos = new Vec2();
+            
             for (int i = 0; i < numOfShapes; i++)
             {
                 Line line = ShapeDrawer.lines.Dequeue();
+            
                 if (line.startPoint.x == line.endPoint.x)
                     return;
+                
                 Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;
                 Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * Resolution;
+                
                 float slope = (startPos.y - endPos.y) / (startPos.x - endPos.x);
                 float yIntercept = startPos.y - (slope * startPos.x);
+                
                 int startX = (int)MathF.Max(startPos.x, 0);
                 int endX = (int)MathF.Max(endPos.x, Resolution.x);
+                
                 for (int x = startX; x < endX; x++)
                 {
                     framePos.x = x;

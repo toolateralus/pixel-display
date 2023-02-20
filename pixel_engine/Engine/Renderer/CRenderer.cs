@@ -55,7 +55,6 @@ namespace pixel_renderer
             });
             DrawTask.RunSynchronously();
         }
-
         public override void Render(Image output)
         {
             if(stride != 0)
