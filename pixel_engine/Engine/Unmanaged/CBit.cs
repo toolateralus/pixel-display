@@ -35,18 +35,24 @@ namespace pixel_renderer
        
         public static Color[,] ColorArrayFromBitmap(Bitmap bmp)
         {
-            if (bmp == null)
-                return new Color[0, 0];
-            Color[,] _colors = new Color[bmp.Width, bmp.Height];
-
-            for (int y = 0; y < bmp.Height; y++)
+            lock (bmp)
             {
-                for (int x = 0; x < bmp.Width; x++)
-                { 
-                    _colors[x, y] = bmp.GetPixel(x, y);
+                int i = bmp.Width;
+                int j = bmp.Height;
+
+                if (bmp == null)
+                    return new Color[0, 0];
+                Color[,] _colors = new Color[i,j];
+
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    for (int x = 0; x < bmp.Width; x++)
+                    { 
+                        _colors[x, y] = bmp.GetPixel(x, y);
+                    }
                 }
+                return _colors;
             }
-            return _colors;
         }
         public static Bitmap SolidColorBitmap(Vec2 size, Color color)
         {
