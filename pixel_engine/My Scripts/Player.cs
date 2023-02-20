@@ -186,13 +186,13 @@ namespace pixel_renderer.Scripts
             };
 
             playerNode.AddComponent<Rigidbody>();
-            playerNode.AddComponent<Player>().takingInput = true;
-            
             Sprite sprite = AddSprite(playerNode);
+            
             AddCollider(playerNode, sprite);
             AddCamera(playerNode);
-
             nodes.Add(playerNode);
+
+            playerNode.AddComponent<Player>().takingInput = true;
 
         }
         public static Node Standard()
