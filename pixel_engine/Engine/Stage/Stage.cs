@@ -35,8 +35,17 @@ namespace pixel_renderer
         {
             void add_node(object[] o)
             {
-                if (o[0] is not Node newNode) return;
-                if (nodes.Contains(newNode)) return;
+                if (o[0] is not Node newNode)
+                {
+                    Runtime.Log("AddNode Failed: input was not valid node.");
+                    return;
+                }
+
+                if (nodes.Contains(newNode))
+                {
+                    Runtime.Log("AddNode Failed: node already belongs to this stage."); 
+                    return;
+                }
                 newNode.ParentStage = this;
                 nodes.Add(newNode);
             }

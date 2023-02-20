@@ -33,7 +33,7 @@ namespace pixel_editor
             {
                 e = Pending.Dequeue();
                 if (e is null)
-                    return; 
+                    return;
                 Editor.Current.EditorEvent(e);
             }
         }
@@ -93,23 +93,23 @@ namespace pixel_editor
 
         private int renderStateIndex = 0;
         private static bool ShouldUpdate =>
-            Runtime.Instance.IsRunning && 
-            Runtime.Instance.GetStage() is not null && 
+            Runtime.Instance.IsRunning &&
+            Runtime.Instance.GetStage() is not null &&
             Host?.State == RenderState.Scene;
 
         public Editor()
         {
             engine = new();
-            current = this; 
+            current = this;
 
             InitializeComponent();
             GetEvents();
 
-            inspector = new Inspector(inspectorObjName, inspectorObjInfo, inspectorGrid);
+            inspector = new Inspector(inspectorGrid);
             Runtime.inspector = inspector;
 
             Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
-                
+
         }
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Instance.renderHost;
@@ -127,11 +127,11 @@ namespace pixel_editor
         }
 
         DispatcherTimer timer = new();
-        public Inspector? Inspector => inspector; 
+        public Inspector? Inspector => inspector;
         private readonly Inspector inspector;
         // for stage creation, hopefully a better solution eventually.
         private StageWnd? stageWnd;
-        public readonly EditorEventHandler Events = new(); 
+        public readonly EditorEventHandler Events = new();
         internal Action<object?> RedText(object? o = null)
         {
             return (o) =>
@@ -154,7 +154,7 @@ namespace pixel_editor
                 iterations++;
 
                 if (iterations > 1000)
-                    break; 
+                    break;
             }
             return c;
         }
@@ -182,7 +182,7 @@ namespace pixel_editor
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
             StartEditorRenderClock();
-            timer.Tick += Update;    
+            timer.Tick += Update;
             Runtime.InspectorEventRaised += QueueEvent;
 
 
@@ -201,7 +201,7 @@ namespace pixel_editor
 
         private void ClearKeyboardFocus(object[]? obj)
         {
-            Keyboard.ClearFocus(); 
+            Keyboard.ClearFocus();
         }
 
         private void StartEditorRenderClock()
@@ -209,7 +209,7 @@ namespace pixel_editor
             timer.Interval = TimeSpan.FromTicks(1000);
             timer.Start();
         }
-        
+
         void SendCommandKeybind(object[]? o)
         {
             if (!editorMessages.IsKeyboardFocusWithin)
@@ -234,8 +234,8 @@ namespace pixel_editor
                     Console.Error("Stage was null!! Please create a new one.", 3);
                     Current.OnStagePressed(this, null);
                 }
-                
-               
+
+
             }
 
             renderStateIndex++;
@@ -249,7 +249,7 @@ namespace pixel_editor
                 return;
 
             var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
-             if (msg != MessageBoxResult.Yes)
+            if (msg != MessageBoxResult.Yes)
                 return;
 
             Runtime.Instance.mainWnd = new();
@@ -263,42 +263,42 @@ namespace pixel_editor
             gcAllocText.Content =
                 $"{memory}";
 
-            framerateLabel.Content = 
-                $"{framerate}"; 
+            framerateLabel.Content =
+                $"{framerate}";
 
         }
-        
+
         internal protected void EditorEvent(EditorEvent e)
         {
-           e.action?.Invoke(e.args);
-           if (e.message is ""|| e.message.Contains("$nolog")) return;
+            e.action?.Invoke(e.args);
+            if (e.message is "" || e.message.Contains("$nolog")) return;
 
-           consoleOutput.Text += e.message + '\n';
-           consoleOutput.ScrollToEnd(); 
+            consoleOutput.Text += e.message + '\n';
+            consoleOutput.ScrollToEnd();
         }
 
         private async void OnCommandSent(object sender, RoutedEventArgs e)
         {
-            if(e.RoutedEvent != null)
-                e.Handled = true; 
+            if (e.RoutedEvent != null)
+                e.Handled = true;
 
             // the max amt of lines that a script can consist of
             int cap = 5;
 
             int lineCt = editorMessages.LineCount - 1;
 
-            if (lineCt  < cap)
-                cap = lineCt; 
+            if (lineCt < cap)
+                cap = lineCt;
 
-            for (int i = 0; i < cap ; ++i)
+            for (int i = 0; i < cap; ++i)
             {
 
                 string line = editorMessages.GetLineText(i);
 
-                if(string.IsNullOrEmpty(line)) 
+                if (string.IsNullOrEmpty(line))
                     continue;
 
-                if (line.Contains("wait(" ) && (line.Contains(')') || line.Contains(");")))
+                if (line.Contains("wait(") && (line.Contains(')') || line.Contains(");")))
                 {
                     CommandParser.ParseArguments(line, out string[] args, out _);
                     int delayMs = args[0].ToInt();
@@ -310,10 +310,10 @@ namespace pixel_editor
                     Runtime.Log($"waiting for {delayMs} ms");
                     await Task.Delay(i);
                     Runtime.Log($"done waiting");
-                    continue; 
+                    continue;
                 }
 
-                if (line != "") 
+                if (line != "")
                     Command.Call(line);
             }
         }
@@ -324,7 +324,7 @@ namespace pixel_editor
             pos.Y /= img.ActualHeight;
             return pos;
         }
-        
+
         #region UI Events
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void Mouse0(object sender, MouseButtonEventArgs e)
@@ -332,13 +332,13 @@ namespace pixel_editor
             inspector.DeselectNode();
 
             Stage stage = Runtime.Instance.GetStage();
-            
-            if (stage is null) 
+
+            if (stage is null)
                 return;
 
             StagingHost stagingHost = Runtime.Instance.stagingHost;
-            
-            if (stagingHost is null) 
+
+            if (stagingHost is null)
                 return;
 
             UIElement img = (UIElement)sender;
@@ -348,13 +348,13 @@ namespace pixel_editor
 
             Node cameraNode = stage.FindNodeWithComponent<Camera>();
 
-            if (cameraNode is null) 
+            if (cameraNode is null)
                 return;
 
             Camera cam = cameraNode.GetComponent<Camera>();
 
-            if (cam is null) 
-                return; 
+            if (cam is null)
+                return;
 
             Vec2 globalPosition = cam.ScreenViewportToGlobal((Vec2)pos);
 
@@ -390,12 +390,12 @@ namespace pixel_editor
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-          
+
             AssetLibrary.Sync();
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
-            if(e != null)
+            if (e != null)
                 e.Handled = true;
 
             stageWnd = new StageWnd(this);
@@ -423,7 +423,7 @@ namespace pixel_editor
         {
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
-           Current.Events.Pending.Enqueue(e);
+            Current.Events.Pending.Enqueue(e);
         }
         #endregion
 
@@ -434,7 +434,7 @@ namespace pixel_editor
 
         internal void SetTheme(string name)
         {
-            name = name.ToLower();   
+            name = name.ToLower();
         }
 
         bool consoleOpen = true;
@@ -457,15 +457,71 @@ namespace pixel_editor
 
             consoleOpen = false;
         }
+
+        bool newMenuOpen = false;
+        Grid newMenuGrid;
+        List<Action> AddItemActions = new();
+
+        private void New(object sender, RoutedEventArgs e)
+        {
+
+            if (!newMenuOpen)
+            {
+                newMenuOpen = true;
+                newMenuGrid = Inspector.GetGrid();
+                inspectorGrid.Children.Add(newMenuGrid);
+                Inspector.SetRowAndColumn(newMenuGrid, 10, 10, 0, 0);
+
+                int i = 0;
+                foreach (var item in objects)
+                {
+                    Button button = Inspector.CreateButton(item.Key, new(0, 0, 0, 0));
+                    button.Name = $"button{i}";
+                    AddItemActions.Add(() => AddObject(item));
+                    button.FontSize = 2;
+                    button.Click += NewObjectButtonClicked;
+                    newMenuGrid.Children.Add(button);
+                    Inspector.SetRowAndColumn(button, 2, 3, 15, i * 2);
+                    i++;
+
+                }
+                return;
+            }
+            newMenuOpen = false;
+            newMenuGrid.Children.Clear();
+            newMenuGrid = null;
+        }
+
+        private void AddObject(KeyValuePair<string, object> item)
+        {
+            if (item.Value.GetType() == typeof(Node))
+            {
+                Runtime.Log("Node added!");
+                Runtime.Instance.GetStage().AddNode((Node)item.Value); 
+            }
+
+
+        }
+
+        private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button) return;
+            foreach (var item in objects)
+            {
+                if (button.Name.ToInt() is int i && AddItemActions.Count > i)
+                {
+                    AddItemActions[i]?.Invoke();
+                }
+            }
+        }
+        public static Dictionary<string, object> objects = new()
+        {
+            {"Node", Rigidbody.Standard() },
+        };
     }
 
-}
-public class EditorTheme
-{
-    public static EditorTheme Dark => new() { Foreground = Brushes.White, Background = Brushes.DarkGray };
-    public static EditorTheme Light => new() { Foreground = Brushes.Black, Background = Brushes.WhiteSmoke };
 
-    public SolidColorBrush Foreground = Brushes.White;
-    public SolidColorBrush Background = Brushes.White;
 
+  
 }
+

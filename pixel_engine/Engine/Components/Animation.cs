@@ -57,6 +57,9 @@ namespace pixel_renderer
 
         public void CreateAnimation(Metadata[] frameData, int framePadding = 24)
         {
+            if (frameData is null) 
+                return;
+
             padding = framePadding;
 
             for (int i = 0; i < frameData.Length * padding; i += padding)
