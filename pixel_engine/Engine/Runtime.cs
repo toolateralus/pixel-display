@@ -83,6 +83,7 @@ namespace pixel_renderer
         {
             instance ??= new(mainWnd, project);
             TryLoadStageFromProject(0);
+            Instance.m_stage?.Awake();
         }
 
         public static void TryLoadStageFromProject(int index)
@@ -118,7 +119,6 @@ namespace pixel_renderer
         public void SetStage(Stage stage) {
             m_stage = stage;
         }
-
         private void InitializePhysics()
         {
             PhysicsInitialized = true;
@@ -166,6 +166,8 @@ namespace pixel_renderer
 
             if (renderHost.State is RenderState.Game) 
                 renderHost.Render(mainWnd.renderImage);
+
+            if (m_stage is null) return; 
 
             Task stageUpdateTask = new(delegate { StagingHost.Update(m_stage); });
             stageUpdateTask.Start();

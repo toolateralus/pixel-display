@@ -280,7 +280,6 @@ namespace pixel_renderer
             }
             Metadata = metadata;
             Background = background;
-            Awake();
         }
 
         public override void Sync()
@@ -305,7 +304,6 @@ namespace pixel_renderer
         }
         public Stage()
         {
-            Awake();
         }
 
     }

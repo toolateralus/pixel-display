@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using pixel_renderer.FileIO;
 using pixel_renderer.Scripts;
@@ -80,6 +81,13 @@ namespace pixel_renderer
             sprite.Draw(new (32, 32), animation?.frames[(animation.frameIndex, animation.frameIndex -= increment)]);
         }
 
-
+        public static Node Standard()
+        {
+            var node = Rigidbody.Standard();
+            var anim = node.AddComponent<Animator>();
+            anim.test_flame_anim_setup();
+            anim.Start();
+            return node;
+        }
     }
 }

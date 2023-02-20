@@ -477,7 +477,7 @@ namespace pixel_editor
                 {
                     Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
                     button.Name = $"button{i}";
-                    AddItemActions.Add(() => AddObject(item));
+                    AddItemActions.Add(() => AddObject(new(item.Key, item.Value)));
                     button.FontSize = 2;
                     button.Click += NewObjectButtonClicked;
                     newMenuGrid.Children.Add(button);
@@ -494,29 +494,24 @@ namespace pixel_editor
 
         private void AddObject(KeyValuePair<string, object> item)
         {
-            if (item.Value.GetType() == typeof(Node))
+            if (item.Value is Func<Node> funct)
             {
                 Runtime.Log("Node added!");
-                Runtime.Instance.GetStage().AddNode((Node)item.Value); 
+                Runtime.Instance.GetStage().AddNode(funct.Invoke()); 
             }
-
-
         }
 
         private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button) return;
             foreach (var item in objects)
-            {
                 if (button.Name.ToInt() is int i && AddItemActions.Count > i)
-                {
                     AddItemActions[i]?.Invoke();
-                }
-            }
         }
-        public static Dictionary<string, object> objects = new()
+        public static Dictionary<string, Func<Node>> objects = new()
         {
-            {"Node", Rigidbody.Standard() },
+            {"Node", Rigidbody.Standard },
+            {"Animator", Animator.Standard}
         };
     }
 
