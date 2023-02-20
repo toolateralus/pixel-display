@@ -146,8 +146,6 @@ namespace pixel_renderer
             if(m_stage is null || !PhysicsInitialized) 
                 return;
             
-            //Task.Run(() => Collision.Run());
-            //StagingHost.Update(m_stage);
             
             Task collisionTask = new(delegate { Collision.Run(); });
             Task stageUpdateTask = new(delegate { StagingHost.FixedUpdate(m_stage); });
@@ -161,16 +159,12 @@ namespace pixel_renderer
         }
         public void GlobalUpdateRoot(object? sender, EventArgs e)
         {
-            bool HasNoRenderSurface = renderHost.State is RenderState.Off;
-            
-            if (!IsRunning || HasNoRenderSurface) 
+            if (!IsRunning || m_stage is null) 
                 return;
 
-          // render game view maybe;
-
-            if (m_stage is null) return; 
-
-            Task stageUpdateTask = new(delegate { StagingHost.Update(m_stage); });
+            Task stageUpdateTask = new( delegate
+            {  StagingHost.Update(m_stage); });
+               
             stageUpdateTask.Start();
             stageUpdateTask.Wait();
         }

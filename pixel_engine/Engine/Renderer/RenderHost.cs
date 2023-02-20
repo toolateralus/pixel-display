@@ -6,11 +6,9 @@ using Image = System.Windows.Controls.Image;
 
 namespace pixel_renderer
 {
-    public enum RenderState { Game, Scene, Off , Error}
     public class RenderHost
     {
         private RendererBase m_renderer = new CRenderer();
-        public RenderState State = RenderState.Game;
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
         Timer timer;
@@ -48,14 +46,6 @@ namespace pixel_renderer
         {
             Rendering = true;
             if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded."); 
-            switch (State)
-            {
-                case RenderState.Game: break;
-                case RenderState.Scene: break;
-                case RenderState.Off: return;
-                default:
-                    throw new InvalidOperationException("Invalid case passed into RenderState selection");
-            }
             Cycle();
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
             Rendering = false; 

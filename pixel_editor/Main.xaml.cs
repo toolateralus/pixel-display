@@ -16,6 +16,8 @@ using System.Drawing;
 using System.Windows.Media;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
+using System.Net.NetworkInformation;
+using System.Linq;
 
 namespace pixel_editor
 {
@@ -95,8 +97,7 @@ namespace pixel_editor
         private int renderStateIndex = 0;
         private static bool ShouldUpdate =>
             Runtime.Instance.IsRunning &&
-            Runtime.Instance.GetStage() is not null &&
-            Host?.State == RenderState.Scene;
+            Runtime.Instance.GetStage() is not null;
 
         public Editor()
         {
@@ -226,39 +227,7 @@ namespace pixel_editor
 
             editorMessages.Clear();
         }
-        private void IncrementRenderState()
-        {
-            if (Runtime.Instance.GetStage() is null)
-            {
-                Console.cmd_reload_stage().Invoke();
-
-
-                if (Runtime.Instance.GetStage() is null)
-                {
-                    Console.Error("Stage was null!! Please create a new one.", 3);
-                    Current.OnStagePressed(this, null);
-                }
-
-
-            }
-
-            renderStateIndex++;
-            if (renderStateIndex == sizeof(RenderState) - 1)
-                renderStateIndex = 0;
-
-            Host.State = (RenderState)renderStateIndex;
-            viewBtn.Content = Host.State.ToString();
-
-            if (Host.State != RenderState.Game)
-                return;
-
-            var msg = MessageBox.Show("Enter Game View?", "Game View", MessageBoxButton.YesNo);
-            if (msg != MessageBoxResult.Yes)
-                return;
-
-            Runtime.Instance.mainWnd = new();
-            Runtime.Instance.mainWnd.Show();
-        }
+        
 
         private void UpdateMetrics()
         {
@@ -384,7 +353,12 @@ namespace pixel_editor
         private void OnViewChanged(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            IncrementRenderState();
+            if (sender is Button button)
+            {
+                button.FontSize = 2;
+                button.Content = $"{Environment.MachineName}}";
+            }
+
         }
         private void OnImportBtnPressed(object sender, RoutedEventArgs e)
         {
