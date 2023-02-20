@@ -114,38 +114,24 @@ namespace pixel_renderer.Scripts
                 Runtime.Log("Animator not found. Creating one.");
                 anim = parent.AddComponent<Animator>();
             }
-
         }
        
 
         void IncreaseResolution(object[]? e)
         {
-            var renderer = Runtime.Instance.renderHost.GetRenderer();
-            var incrementAmt = 1;
+            RenderHost renderHost = Runtime.Instance.renderHost;
+            var renderer = renderHost.GetRenderer();
 
-            for (int i = 0; i < 2; i++)
-            {
-                if (renderer.Resolution[i] < Constants.MaxResolution[i])
-                    renderer.Resolution[i] += incrementAmt;
-            }
-            resolution_increment++;
-
-            if(resolution_increment % 25 == 0)
-                Runtime.Log(renderer.Resolution.AsString());
-
+            if (renderer.Resolution.x < Constants.MaxResolution.x)
+                renderHost.newResolution = renderer.Resolution + Vec2.one;
         }
         void DecreaseResolution(object[]? e)
         {
             var renderer = Runtime.Instance.renderHost.GetRenderer();
-            var decrementAmt = 1;
+            RenderHost renderHost = Runtime.Instance.renderHost;
 
-            for (int i = 0; i < 2; i++)
-                if (renderer.Resolution[i] > Constants.MinResolution[i])
-                    renderer.Resolution[i] -= decrementAmt;
-
-            if (resolution_increment % 25 == 0)
-                Runtime.Log(((Vec2)renderer.Resolution).AsString());
-            resolution_increment--;
+            if (renderer.Resolution.x > Constants.MaxResolution.x)
+                renderHost.newResolution = renderer.Resolution - Vec2.one;
         }
 
         private void CreateInputEvents()

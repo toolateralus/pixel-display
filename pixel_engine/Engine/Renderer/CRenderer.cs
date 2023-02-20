@@ -9,10 +9,12 @@ namespace pixel_renderer
 {
     public class CRenderer : RendererBase
     {
-       
+      
+
         public override void Dispose() => Array.Clear(frame);
         public override void Draw(StageRenderInfo renderInfo)
         {
+
             if (Runtime.Instance.GetStage() is not Stage stage) return;
             if (baseImageDirty)
             {
@@ -55,6 +57,8 @@ namespace pixel_renderer
             });
             DrawTask.RunSynchronously();
         }
+
+
         public override void Render(Image output)
         {
             if(stride != 0)

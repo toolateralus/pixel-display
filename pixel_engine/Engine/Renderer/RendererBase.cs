@@ -19,7 +19,13 @@
         
         public byte[] Frame => frame;
         public int Stride => stride;
-        public Vec2 Resolution = Constants.DefaultResolution;
+        public Vec2 Resolution 
+        { 
+            get => resolution;
+            set => Runtime.Instance.renderHost.newResolution = (Vec2?)value; 
+        }
+
+        internal protected Vec2 resolution = Constants.DefaultResolution;
 
         public bool baseImageDirty = true;
 

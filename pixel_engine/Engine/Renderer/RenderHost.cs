@@ -31,6 +31,16 @@ namespace pixel_renderer
 
         public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
 
+        public Vec2? newResolution = null;
+        private void UpdateResolution()
+        {
+            if (newResolution != null)
+            {
+                m_renderer.resolution = (Vec2)newResolution;
+                newResolution = null;
+            }
+        }
+
         public void Render()
         {
             if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded."); 
@@ -52,6 +62,7 @@ namespace pixel_renderer
         private protected void Cycle()
         {
             m_renderer.Dispose();
+            UpdateResolution();
             if (Runtime.Instance.GetStage() is Stage stage)
             {
                 ShapeDrawer.Refresh(stage);
