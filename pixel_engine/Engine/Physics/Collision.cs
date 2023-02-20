@@ -2,14 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Xml.Linq;
-using static pixel_renderer.Collision;
-
 namespace pixel_renderer
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };

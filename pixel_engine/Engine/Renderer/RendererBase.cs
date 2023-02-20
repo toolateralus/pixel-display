@@ -83,7 +83,7 @@
                     {
                         framePos.y = y;
                         framePos.x = slope * y + xIntercept;
-                        if (framePos.y < 0 || framePos.y >= Resolution.y)
+                        if (framePos.x < 0 || framePos.x >= Resolution.y)
                             continue;
                         WriteColorToFrame(ref line.color, ref framePos);
                     }

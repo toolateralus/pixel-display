@@ -23,8 +23,8 @@ namespace pixel_renderer
         /// Gets the colliders corners in a list organized as such
         /// Top Left, 
         /// Top Right,
+        /// Bottom Right,
         /// Bottom Left,
-        /// Bottom Right
         /// </code>
         /// </summary>
         /// <param name="pos"></param>
@@ -36,14 +36,14 @@ namespace pixel_renderer
 
             Vec2 topLeft = position;
             Vec2 topRight = position.WithValue(x: position.x + size.x);
-            Vec2 bottomLeft = position.WithValue(y: position.y + size.y);
             Vec2 bottomRight = position + size;
+            Vec2 bottomLeft = position.WithValue(y: position.y + size.y);
 
             var vertices = new Vec2[] {
                     topLeft,
                     topRight,
-                    bottomLeft,
                     bottomRight,
+                    bottomLeft,
             };
 
             return vertices;

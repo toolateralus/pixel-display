@@ -28,8 +28,6 @@ namespace pixel_renderer.Scripts
         private int resolution_increment; 
         
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
-        private float lineAngle;
-
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
         public static Node test_child_node(Node? parent = null)
         {
@@ -61,10 +59,18 @@ namespace pixel_renderer.Scripts
 
         public override void OnDrawShapes()
         {
+            var mesh = parent.GetComponent<Collider>().Mesh;
             foreach (var child in parent.children)
-                ShapeDrawer.DrawLine(parent.Position, child.Value.Position, JRandom.Color());
-            ShapeDrawer.DrawLine(parent.Position, parent.Position + (Vec2.up.Rotated(lineAngle) * 50), Color.Blue);
-            lineAngle += 0.1f;
+                ShapeDrawer.DrawLine(mesh.centroid, child.Value.GetComponent<Collider>().Mesh.centroid, JRandom.Color());
+            int vertLength = mesh.vertices.Length;
+            for (int i = 0; i < vertLength; i++)
+            {
+                var nextIndex = (i + 1) % vertLength;
+                ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Color.LimeGreen);
+                var midpoint = (mesh.vertices[i] + mesh.vertices[nextIndex]) / 2;
+                ShapeDrawer.DrawLine(midpoint, midpoint + (mesh.normals[i] * 10), Color.Blue);
+            }
+
         }
 
         void MakeChildObject(object[]? e)
