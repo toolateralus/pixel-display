@@ -89,7 +89,7 @@ namespace pixel_editor
                 }
 
             if (cmds == 0)
-                Console.Print($"\n Command {line} not found.");
+                Console.Print($"command {line} not found.");
 
         }
         public static void TryParse(string input, out List<object> value)

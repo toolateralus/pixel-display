@@ -94,6 +94,7 @@ namespace pixel_editor
 
         public Editor()
         {
+            EngineInstance.FromEditor = true; 
             engine = new();
             current = this;
 
