@@ -104,13 +104,13 @@ namespace pixel_renderer
             return result.ToArray();
         }
         #endregion
-     
-        public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
-            from FieldInfo field in component.GetType().GetRuntimeFields()
-            from CustomAttributeData data in field.CustomAttributes
-            where data.AttributeType == typeof(FieldAttribute)
-            select field;
-
+        #region Image
+        public static System.Windows.Point GetNormalizedPoint(this System.Windows.Controls.Image img, System.Windows.Point pos)
+        {
+            pos.X /= img.ActualWidth;
+            pos.Y /= img.ActualHeight;
+            return pos;
+        }
         public static Bitmap ToBitmap(this Color[,] colors)
         {
             int sizeX = colors.GetLength(0);
@@ -124,6 +124,13 @@ namespace pixel_renderer
 
             return bitmap;
         }
+        #endregion
+        public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
+            from FieldInfo field in component.GetType().GetRuntimeFields()
+            from CustomAttributeData data in field.CustomAttributes
+            where data.AttributeType == typeof(FieldAttribute)
+            select field;
+
         public static System.Windows.Media.PixelFormat ToMediaFormat(this System.Drawing.Imaging.PixelFormat sourceFormat)
         {
             switch (sourceFormat)

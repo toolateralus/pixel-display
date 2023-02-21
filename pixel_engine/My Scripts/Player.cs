@@ -151,7 +151,7 @@ namespace pixel_renderer.Scripts
 
             Vec2 thisPos = parent.Position; 
 
-            if (GetInputValue(Key.LeftShift) && moveVector.SqrMagnitude() > 0)
+            if (GetInputValue(Key.LeftShift))
             {
                 foreach (var child in parent.children)
                     child.Value.localPos += moveVector;

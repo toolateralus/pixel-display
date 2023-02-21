@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Linq;
 
 namespace pixel_renderer
 {
@@ -21,7 +22,7 @@ namespace pixel_renderer
 
         public Vec2 ViewportToSpriteViewport(Sprite sprite, Vec2 viewportPos) =>
             sprite.GlobalToViewport(ViewportToGlobal(viewportPos));
-
+        public static Camera? First => Runtime.Current.GetStage()?.GetAllComponents<Camera>().First();
     }
     public enum DrawingType { Wrapped, Clamped, None }
 }

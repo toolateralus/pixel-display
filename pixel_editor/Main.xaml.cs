@@ -21,8 +21,6 @@ using System.Linq;
 
 namespace pixel_editor
 {
-
-
     public class EditorEventHandler
     {
         internal protected static Editor Editor => Editor.Current;
@@ -92,7 +90,8 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-        
+        Vec2 mouseSelectedNodeOffset = new Vec2();
+
         public Editor()
         {
             engine = new();
@@ -194,17 +193,18 @@ namespace pixel_editor
 
         private void TryDragNode()
         {
-            if (CMouse.LastPosition == CMouse.Position)
-                return;
+            if (!CMouse.LeftPressedLastFrame && CMouse.Left)
+                CMouse.LeftPressedThisFrame = true;
+            else
+                CMouse.LeftPressedThisFrame = false;
+            CMouse.LeftPressedLastFrame = CMouse.Left;
 
             if (CMouse.Left && Input.GetInputValue(Key.LeftShift) && selectedNode != null)
             {
-                var camNode = Runtime.Current.GetStage().FindNodeWithComponent<Camera>();
-                var cam = camNode.GetComponent<Camera>();
+                if (CMouse.LeftPressedThisFrame)
+                    mouseSelectedNodeOffset = CMouse.GlobalPosition - selectedNode.Position;
 
-                Vec2 mouseDelta = CMouse.Delta;
-
-                selectedNode.Position -= mouseDelta / 10; 
+                selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset; 
             }
         }
 
@@ -321,13 +321,6 @@ namespace pixel_editor
             }
         }
 
-        private static Point GetNormalizedPoint(Image img, Point pos)
-        {
-            pos.X /= img.ActualWidth;
-            pos.Y /= img.ActualHeight;
-            return pos;
-        }
-
         #region UI Events
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         Node? selectedNode = null;
@@ -349,26 +342,9 @@ namespace pixel_editor
             StagingHost stagingHost = Runtime.Current.stagingHost;
 
             if (stagingHost is null)
-                return false; 
-
-            UIElement img = (UIElement)sender;
-            Point pos = Mouse.GetPosition(img);
-
-            pos = GetNormalizedPoint((Image)img, pos);
-
-            Node cameraNode = stage.FindNodeWithComponent<Camera>();
-
-            if (cameraNode is null)
                 return false;
 
-            Camera cam = cameraNode.GetComponent<Camera>();
-
-            if (cam is null)
-                return false;
-
-            Vec2 globalPosition = cam.ScreenViewportToGlobal((Vec2)pos);
-
-            bool foundNode = stagingHost.GetNodeAtPoint(stage, globalPosition, out var node);
+            bool foundNode = stagingHost.GetNodeAtPoint(stage, CMouse.GlobalPosition, out var node);
 
             if (foundNode)
                 inspector.SelectNode(node);
@@ -533,9 +509,5 @@ namespace pixel_editor
             {"Animator", Animator.Standard}
         };
     }
-
-
-
-
 }
 

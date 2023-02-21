@@ -12,12 +12,15 @@ namespace pixel_renderer
     public class CMouse
     {
         public static bool Left;
+        public static bool LeftPressedLastFrame;
+        public static bool LeftPressedThisFrame;
         public static bool Middle;
         public static bool Right;
         public static bool XButton1;
         public static bool XButton2;
         
         public static Vec2 Position;
+        public static Vec2 GlobalPosition;
         public static Vec2 LastPosition { get; set; }
         public static Vec2 Delta { get { return LastPosition - Position; } }
 
@@ -70,11 +73,11 @@ namespace pixel_renderer
         public static void Refresh(MouseEventArgs e)
         {
             LastPosition = Position;
-            Position = (Vec2)e.GetPosition(Runtime.OutputImages.First());
-
-            if (Runtime.Current.renderHost.info.frameCount % 1 == 0
-                || Runtime.Current.renderHost.info.frameCount % 2 == 0)
-                Runtime.Log(Position.AsString());
+            var img = Runtime.OutputImages.First();
+            var point = e.GetPosition(img);
+            var normalizedPos = (Vec2)img.GetNormalizedPoint(point);
+            GlobalPosition = Camera.First.ScreenViewportToGlobal(normalizedPos);
+            Position = (Vec2)point;
         }
     }
 
