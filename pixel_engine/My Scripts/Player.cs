@@ -27,6 +27,8 @@ namespace pixel_renderer.Scripts
 
         
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
+        private bool freezeButtonPressedLastFrame = false;
+        private Vec2 thisPos;
 
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
         public static Node test_child_node(Node? parent = null)
@@ -148,10 +150,11 @@ namespace pixel_renderer.Scripts
         {
             if (!takingInput) 
                 return;
-
-            Vec2 thisPos = parent.Position; 
-
-            if (GetInputValue(Key.LeftShift))
+            var freezeButtonPressed = GetInputValue(Key.LeftShift);
+            if (freezeButtonPressed && !freezeButtonPressedLastFrame)
+                thisPos = parent.Position;
+            freezeButtonPressedLastFrame = freezeButtonPressed;
+            if (freezeButtonPressed)
             {
                 foreach (var child in parent.children)
                     child.Value.localPos += moveVector;
