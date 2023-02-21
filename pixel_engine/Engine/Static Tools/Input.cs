@@ -12,7 +12,7 @@ namespace pixel_renderer
     {
         private static readonly List<InputAction> InputActions = new(250);
        
-        internal static void Refresh(object? sender, EventArgs e)
+        internal static void Refresh()
         {
             lock (InputActions)
             {

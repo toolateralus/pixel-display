@@ -58,8 +58,6 @@ namespace pixel_renderer
             this.LoadedProject = project;
             Initialized = true;
 
-            CompositionTarget.Rendering += Input.Refresh;
-
             renderHost = new();
 
             renderThread = new(RenderTick);
@@ -137,8 +135,9 @@ namespace pixel_renderer
                     continue;     
 
                 Collision.Run(); 
-                StagingHost.FixedUpdate(m_stage); 
+                StagingHost.FixedUpdate(m_stage);
 
+                Application.Current.Dispatcher.Invoke(() => Input.Refresh());
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
                 if (IsTerminating)
                     return;
