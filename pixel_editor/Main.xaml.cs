@@ -147,7 +147,6 @@ namespace pixel_editor
             }
         }
 
-        DispatcherTimer timer = new();
         public Inspector? Inspector => inspector;
         private readonly Inspector inspector;
         // for stage creation, hopefully a better solution eventually.
@@ -193,23 +192,17 @@ namespace pixel_editor
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
-
-            if (ShouldUpdate)
-            {
-                if(Stride > 0)
-                    CBit.RenderFromFrame(Frame, Stride, Resolution, image);
-                UpdateMetrics();
-            }
+            UpdateMetrics();
             Events.ExecuteAll();
         }
         private void GetEvents()
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Mouse0;
-            StartEditorRenderClock();
 
             Runtime.InspectorEventRaised += QueueEvent;
-
+            CompositionTarget.Rendering += Update; 
+             
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(ToggleKeybind, Key.LeftShift);
@@ -227,13 +220,7 @@ namespace pixel_editor
         {
             Keyboard.ClearFocus();
         }
-        private void StartEditorRenderClock()
-        {
-            timer.Interval = TimeSpan.FromTicks(100);
-            timer.Tick += Update;
-            timer.Start();
-        }
-
+     
         void SendCommandKeybind(object[]? o)
         {
             if (!editorMessages.IsKeyboardFocusWithin)
