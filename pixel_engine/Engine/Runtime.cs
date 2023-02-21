@@ -48,6 +48,7 @@ namespace pixel_renderer
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
         private protected Thread renderThread;
+        private protected Thread physicsThread;
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
@@ -67,6 +68,7 @@ namespace pixel_renderer
 
             renderThread = new(RenderTick);
             renderThread.Start();
+
             mainWnd.Closing += (e, o) =>
             {
                 IsTerminating = true; 
@@ -74,6 +76,7 @@ namespace pixel_renderer
                 renderThread = null;
             };
         }
+        
         public void Toggle()
         {
             if (!PhysicsInitialized)
