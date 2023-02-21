@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Markup;
 
 namespace pixel_renderer
 {
@@ -19,6 +21,8 @@ namespace pixel_renderer
         private static JsonSerializerSettings Settings = new()
         {
             Formatting = Formatting.Indented,
+            TypeNameHandling = TypeNameHandling.Auto,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
         
         /// <summary>
@@ -50,11 +54,11 @@ namespace pixel_renderer
                         reader.Close();
                     return obj;
                 }
-                throw new FileNotFoundException("File was not found at provided path, or had an unsupported file extension");
+                throw new FileNotFoundException($"JSON file was not found at provided path, or had an unsupported file extension \n Path: {meta.fullPath} \n Extension: {meta.extension}");
             }
             catch(Exception e)
             {
-                Runtime.Log("File read exception occured : \n\t" + e.Message, true, false);
+                Runtime.Log("JSON Read Failed : \n" + e.Message, true, false);
             }
             return obj;
         }
@@ -78,7 +82,24 @@ namespace pixel_renderer
             return writer;
 
         }
-        
+
+        public static void Write<T>(T data, Metadata meta)
+        {
+            using StreamWriter writer = new(meta.fullPath);
+            writer.Write(data);
+            writer.Close();
+        }
+
+        public static Bitmap ReadBitmap(Metadata meta)
+        {
+            var obj = IO.ReadJson<object>(meta);
+            
+            if (obj is Bitmap bitmap)
+                return bitmap;
+
+            return new(512,512);
+        }
+
         public static MessageBoxResult FileOverrideWarning(string path)
         {
             return MessageBox.Show($"Are you sure you want to overwrite {path}?",
@@ -127,6 +148,7 @@ namespace pixel_renderer
         }
         public static void WriteStage(Stage stage)
         {
+            stage.Sync();
             FindOrCreateStagesDirectory();
             IO.WriteJson(stage, stage.Metadata);
         }

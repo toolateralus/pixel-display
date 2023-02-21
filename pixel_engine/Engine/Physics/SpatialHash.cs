@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class SpatialHash
     {
@@ -17,10 +18,14 @@
         public SpatialHash(int screenWidth, int screenHeight, int cellSize)
         {
             busy = true; 
+            
             Buckets = new List<List<Node>>();
+
             rows = screenHeight / cellSize;
             columns = screenWidth / cellSize;
+
             this.cellSize = cellSize;
+
             for (int i = 0; i < columns * rows; i++)
                 Buckets.Add(new List<Node>());
             busy = false; 
@@ -32,24 +37,25 @@
                 Buckets[i].Clear();
             busy = false;
         }
-        internal void RegisterObject(Node obj)
+        internal void RegisterNode(Node node)
         {
-            List<int> cells = Hash(obj);
+            List<int> cells = Hash(node);
             foreach (var index in cells)
             {
-                if (index < 0 || index >= rows * columns) continue;
-                Buckets[index].Add(obj);
+                if (index < 0 || index >= rows * columns)
+                    continue;
+                Buckets[index].Add(node);
             }
         }
         internal List<Node> GetNearby(Node node)
         {
-
-            List<Node> nodes = new List<Node>(256);
-
+            List<Node> nodes = new(256);
             List<int> buckets = Hash(node);
+
             foreach (var index in buckets)
             {
-                if (index < 0 || index >= rows * columns - 1) continue;
+                if (index < 0 || index >= rows * columns - 1)
+                    continue;
 
                 if (Buckets[index].Count > nodes.Capacity)
                     nodes.Capacity = Buckets[index].Count;
@@ -69,14 +75,19 @@
         }
         private List<int> Hash(Node obj)
         {
-            if (!obj.TryGetComponent(out Sprite sprite)) return new();
-            List<int> bucketsObjIsIn = new List<int>();
+            if (!obj.TryGetComponent(out Sprite sprite)) 
+                return new();
+
+            List<int> bucketsObjIsIn = new();
+
             Vec2 min = new Vec2(
-                obj.position.x,
-                obj.position.y);
+                obj.Position.x,
+                obj.Position.y);
+
             Vec2 max = new Vec2(
-                obj.position.x + sprite.size.x,
-                obj.position.y + sprite.size.y);
+                obj.Position.x + sprite.size.x,
+                obj.Position.y + sprite.size.y);
+
             float width = Constants.ScreenH / cellSize;
 
             //TopLeft

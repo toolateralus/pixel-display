@@ -7,11 +7,455 @@ using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
+using pixel_renderer.Scripts;
+using System.Drawing;
 
 namespace pixel_editor
 {
+  
+
     public class Console
     {
+
+        #region General Commands
+        public static Command cmd_help() => new()
+        {
+            phrase = "help;|help|Help|/h",
+            syntax = "help();",
+            action = (o) =>
+            {
+                string output = "";
+                foreach (var cmd in Current.Active)
+                    output += "\n" + cmd.syntax + "\n" + cmd.description + "\n" + divider;
+                Print(output);
+            },
+        };
+        public static Command cmd_clear_console() => new()
+        {
+            phrase = "cclear;",
+            syntax = "cclear();",
+            action = (e) =>
+            {
+                if (e is not null && e[0] is bool color)
+                    Clear(color);
+                else Clear();
+            },
+            description = "Clears the console's output",
+        };
+        public static Command cmd_log() => new()
+        {
+            phrase = "log;",
+            syntax = "log(message);",
+            argumentTypes = new string[] { "str:" },
+            action = (o) => Console.Print(o[0]),
+            description = "Logs a message to the console, Some characters will cause this to fail."
+        };
+        public static Command cmd_swap_theme() => new()
+        {
+            phrase = "theme;",
+            description = "Swaps the current theme [DOES NOT WORK CURRENTLY]",
+            syntax = "theme(light_or_dark);",
+            argumentTypes = new string[] { "str:" },
+            action = (o) =>
+            {
+                bool hasArg = o != null && o.Length > 0;
+                if (hasArg)
+                {
+                    if (o[0] is string arg)
+                    {
+                        Editor.Current.SetTheme(arg);
+                        return;
+                    }
+                }
+            },
+            args = null,
+        };
+        #endregion
+
+        #region Renderer Commands
+        public static Command cmd_set_resolution() => new()
+        {
+            phrase = "resolution.Set;",
+            syntax = "resolution.Set(1024,1024);",
+            argumentTypes = new string[] { "vec:" },
+            action = (e) =>
+            {
+                Vec2 vector = (Vec2)e[0];
+                Vec2Int newRes = (Vec2Int)vector;
+                Console.Print(vector.AsString());
+                Runtime.Current.renderHost.GetRenderer().Resolution = newRes;
+            },
+            description = "sets the resolution to the specified Vec2"
+        };
+        public static Command cmd_get_resolution() => new()
+        {
+            phrase = "resolution.Get;",
+            syntax = "resolution.Get();",
+            action = (e) =>
+            {
+                Console.Print(((Vec2)Runtime.Current.renderHost.GetRenderer().Resolution).AsString());
+            },
+            description = "gets the resolution and prints it to the console"
+        };
+        #endregion
+
+        #region Node Commands
+        public static Command cmd_set_node_field() => new()
+        {
+            phrase = "node.Set;",
+            syntax = "node.Set(nodeName, fieldName, value);",
+            argumentTypes = new string[] { "str:", "str:", "bool:" },
+            args = null,
+            action = SetNodeField,
+            description = "gets a node and attempts to write the provided value to specified field.",
+
+        };
+        public static Command cmd_get_node() => new()
+        {
+            phrase = "node.Get;",
+            syntax = "node.Get(nodeName);",
+            argumentTypes = new string[] { "str:" },
+            action = (e) =>
+            {
+                string name = (string)e[0];
+                Node node = Runtime.Current.GetStage().FindNode(name);
+                Editor.Current.Inspector.DeselectNode();
+                Editor.Current.Inspector.SelectNode(node);
+                if (node is not null)
+                {
+                    PrintNodeInformation(node);
+                    return;
+                }
+                Print($"getNode({name}) \n Node with name {name} not found.");
+            },
+            args = null,
+            description = "Retrieves the node of name specified",
+        };
+
+
+        public static Command cmd_list_node() => new()
+        {
+            phrase = "node.List;",
+            syntax = "node.List();",
+            action = ListNodes,
+            args = null,
+            description = "Lists all nodes in currently loaded stage.",
+        };
+        public static Command cmd_call_node_method() => new()
+        {
+            phrase = "node.Call;",
+            syntax = "node.Call(nodeName, methodName);",
+            argumentTypes = new string[] { "str:", "str:" },
+            action = CallNodeMethod,
+            args = null,
+            description = "Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
+
+        };
+        public static Command cmd_spawn_generic() => new()
+        {
+            phrase = "++n;",
+            syntax = "++n();",
+            action = (o) => Runtime.Current.GetStage().AddNode(Rigidbody.Standard()),
+            description = "Spawns a generic node with a Rigidbody , Sprite, and Collider, and adds it to the current Stage."
+        };
+        public static Command cmd_add_child() => new()
+        {
+            phrase = "node.Child;",
+            syntax = "node.Child(string parentName);",
+            description = "Adds a child node underneath the target parent if found.",
+            argumentTypes = new string[] { "str:" },
+            action = AddChild,
+        };
+        public static Command cmd_move_node() => new()
+        {
+            phrase = "node.Move;",
+            syntax = "node.Move(string nodeName, Vec2 destination);",
+            description = "Sets the node's position to the provided vector.",
+            argumentTypes = new string[] { "str:", "vec:" },
+            action = (e) =>
+            {
+                if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
+                if (!TryGetArgAtIndex(1, out Vec2 vec, e)) return;
+                node.Move(vec);
+            },
+        };
+        public static Command cmd_remove_component() => new()
+        {
+            phrase = "node.RemoveComponent;",
+            syntax = "node.RemoveComponent(string nodeName, string componentType);",
+            description = "Removes one componenet from node of specified type.",
+            argumentTypes = new string[] { "str:", "str:" },
+            action = (e) =>
+            {
+                if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
+                if (!TryGetArgAtIndex(1, out string type, e)) return;
+
+                if (Type.GetType(type) is not Type t)
+                {
+                    Command.Error("node.RemoveComponent(string nodeName, string componentType);", CmdError.NullReference);
+                    return;
+                }
+                foreach (var comp in node.ComponentsList)
+                    if (comp.GetType() == t)
+                    {
+                        node.RemoveComponent(comp);
+                        Print($"{nameof(t)} added to {node.Name}.");
+                    }
+            },
+        };
+        #endregion
+
+        #region Asset/Project/Stage/IO Commands
+        public static Command cmd_set_camera() => new()
+        {
+            phrase = "cam;",
+            syntax = "cam(Name, Field, float Value);",
+            argumentTypes = new string[] { "str:", "str:", "float:" },
+            action = (e) =>
+            {
+                if (e.Length < 3)
+                    return;
+
+                string nName = (string)e[0];
+                string fName = (string)e[1];
+                object value = e[2];
+
+                Node? node = Runtime.Current.GetStage().FindNode(nName);
+                if (node is null)
+                    Console.Print("Node was not found.");
+                Camera cam = node.GetComponent<Camera>();
+                Type type = cam.GetType();
+                FieldInfo? field = type.GetRuntimeField(fName);
+                field.SetValue(cam, value);
+            },
+            description = "\n {must not be a property or method} Sets Field in camera by name on node of provided name \n syntax : cam(str:<nodeName>, str:<fieldName>, object:value)",
+        };
+        public static Command cmd_random_background() => new()
+        {
+            phrase = "stage.Background.Randomize;",
+            syntax = "stage.Background.Randomize();",
+            action = RandomizeBackground,
+            description = "Sets the current stage's background to a random array of colors until reloaded.",
+        };
+        public static Command cmd_asset_exists() => new()
+        {
+            description = "Shows a count of all loaded assets, and an option to see more info.",
+            syntax = "fetch(assetName);",
+            argumentTypes = new string[] { "str:" },
+            phrase = "fetch;",
+            action = AssetExists,
+        };
+        public static Command cmd_load_project() => new()
+        {
+            phrase = "loadProject;",
+            syntax = "loadProject(projectName);",
+            argumentTypes = new string[] { "str:" },
+            action = async (e) =>
+            {
+                string name = (string)e[0];
+                var project = ProjectIO.ReadProject(name);
+
+                if (project is not null)
+                {
+                    string question = $"Project Found! " +
+                                            $"\n Name : {project.Name} " +
+                                            $"Do you want to load this project?";
+
+                    Task<PromptResult> result = PromptAsync(question, 60f);
+
+                    await result;
+
+                    switch (result.Result)
+                    {
+                        case PromptResult.Yes:
+                            Console.Print($"Project {name} set.");
+                            Runtime.Current.SetProject(project);
+                            break;
+                        case PromptResult.No:
+                            Console.Print("Project not set.");
+                            break;
+                        case PromptResult.Cancel:
+                            Console.Print("Load Project cancelled.");
+                            break;
+                        case PromptResult.Timeout:
+                            Console.Print("Load Project timed out.");
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            },
+            args = new object[] { },
+            description = "Loads a project @../Pixel/Projects of specified name, and if found, prompts the user to load the project as the current project."
+        };
+        public static Command cmd_set_stage() => new()
+        {
+            phrase = "stage.Set;",
+            syntax = "stage.Set(stageName);",
+            argumentTypes = new string[] { "str:" },
+            action = async (o) =>
+            {
+                string stageName = (string)o[0];
+                bool loadAsynchronously = false;
+
+                if (o.Length > 1 && o[1] is bool)
+                    loadAsynchronously = (bool)o[1];
+
+                Project project = Runtime.Current.LoadedProject;
+
+                if (project is null) return;
+
+                var stage = Project.GetStageByName(stageName);
+
+                if (stage == null)
+                {
+                    Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
+                    return;
+                }
+
+                var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
+                await prompt;
+
+                switch (prompt.Result)
+                {
+                    case PromptResult.Yes:
+                        Print($"Stage {stage.Name} set.");
+                        Runtime.Current.SetStage(stage);
+                        break;
+                    case PromptResult.No:
+                        Print("Stage not set.");
+                        break;
+                    case PromptResult.Cancel:
+                        Print("Set Stage cancelled.");
+                        break;
+                    case PromptResult.Timeout:
+                        Print("Set Stage timed out.");
+                        break;
+                    default:
+                        break;
+                }
+            },
+            description = "[STAGE MUST BE IN PROJECT] \nAttempts to find a stage by name, and if found, prompts the user to load it or not."
+        };
+        public static Command cmd_reload_stage() => new()
+        {
+            phrase = "reload;",
+            syntax = "reload(int stageIndex);",
+            description = "reloads the currently loaded stage",
+            argumentTypes = new string[] { "int:" },
+            action = (o) =>
+            {
+                if (!TryGetArgAtIndex<int>(0, out int index, o)) return;
+                Runtime.TryLoadStageFromProject(index);
+            },
+
+        };
+        public static Command cmd_list_stages() => new()
+        {
+            phrase = "stages.List;",
+            description = "Lists the names of the stage metadata loaded for the current project",
+            syntax = "stages.List(inst || file); \n \n{must use either inst or file to get a result, \n inst == instanced/loaded stages | \n file == loaded metadata for stage files in project.}",
+            argumentTypes = new string[] { "str:" },
+            action = (o) =>
+            {
+
+                if (!TryGetArgAtIndex<string>(0, out string stageListingType, o))
+                    return;
+                ListStages(stageListingType);
+            },
+            args = null,
+        };
+        #endregion
+
+        #region Editor Commands
+
+        public static Command cmd_show_colliders() => new()
+        {
+           phrase = "showColliders;",
+           syntax = "showColliders();",
+           action = showColliders,
+           description = "highlights all of the colliders bounds in green",
+        };
+        static bool collidersHighlighted = false;
+        private static void showColliders(object[]? obj)
+        {
+
+            if (!collidersHighlighted)
+            {
+                Stage? stage = Runtime.Current.GetStage();
+
+                if (stage is null)
+                {
+                    Command.Error("showColliders", CmdError.NullReference);
+                    return;
+                }
+                var colliders = stage.GetAllComponents<Collider>();
+                foreach (var x in colliders)
+                {
+                    if (x.sprite is null && x.parent.HasComponent<Sprite>())
+                        x.sprite = x.parent.GetComponent<Sprite>();
+
+                    if (x.sprite is null)
+                        continue;
+
+                    if (x.IsTrigger)
+                        x.sprite?.Highlight(Color.White, IsReadOnly: true);
+                    else x.sprite?.Highlight(Color.Green,IsReadOnly: true);
+
+                    x.sprite.IsReadOnly = true;
+                }
+
+                collidersHighlighted = true;
+            }
+            else
+            {
+                Stage? stage = Runtime.Current.GetStage();
+
+                if (stage is null)
+                {
+                    Command.Error("showColliders", CmdError.NullReference);
+                    return;
+                }
+                var colliders = stage.GetAllComponents<Collider>();
+
+                foreach (var x in colliders)
+                {
+                    if (x.sprite is null && x.parent.HasComponent<Sprite>())
+                        x.sprite = x.parent.GetComponent<Sprite>();
+
+                    if (x.sprite is null)
+                        continue;
+
+                    x.sprite.RestoreCachedColor(true);
+                    x.sprite.IsReadOnly = false; 
+                }
+            }
+          
+
+        }
+
+        public static Command cmd_move_inspector() => new()
+        {
+            phrase = "inspector.Move;",
+            syntax = "inspector.Move(Vec2 newPosition)",
+            action = moveInspector,
+            description = "Sets the inspectors current position",
+            argumentTypes = new string[] { "vec:"},
+        };
+
+        private static void moveInspector(object[]? obj)
+        {
+            if (!TryGetArgAtIndex(0, out Vec2 vec, obj))
+            {
+                Command.Error("inspector.Position(Vec2 newPosition)", CmdError.ArgumentNotFound);
+                return;
+            }
+            Inspector.OnInspectorMoved.Invoke((int)vec.x, (int)vec.y);
+        }
+        #endregion
+
+
         public static Console Current 
         {
             get
@@ -52,27 +496,8 @@ namespace pixel_editor
             EditorEvent e = new(msg, true);
            
                 if (textColorAlterationDuration is not null)
-                    e.action = RedTextForMsAsync( (int)textColorAlterationDuration);
+                    e.action = RedTextAsync( (int)textColorAlterationDuration);
             Editor.QueueEvent(e);
-        }
-
-        public static Action<object[]?> RedTextForMsAsync(int delay)
-        {
-            return async (o) =>
-            {
-                Editor.Current.RedText().Invoke(o);
-                await Task.Delay(delay * 1000);
-                Editor.Current.BlackText().Invoke(o);
-            };
-        }
-        public static void Clear(bool randomColor = false)
-        {
-            EditorEvent editorEvent = new EditorEvent("");
-            editorEvent.ClearConsole = true;
-            Editor.QueueEvent(editorEvent);
-            
-            if(randomColor)
-                Error("Console Cleared", 1);
         }
         internal static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
         {
@@ -96,48 +521,48 @@ namespace pixel_editor
             };
             return PromptResult.Timeout;
         }
-
-        public static object GetArgAtIndexIfExists<T>(int index, object[] o)
+        public static void Clear(bool randomColor = false)
         {
-            bool hasArg = o != null && o.Length > index;
-            if (hasArg && o[index] is T arg)
-                return arg;
-            return null; 
+            EditorEvent editorEvent = new EditorEvent("");
+            editorEvent.ClearConsole = true;
+            Editor.QueueEvent(editorEvent);
+            
+            if(randomColor)
+                Error("Console Cleared", 1);
         }
 
-        public static Command cmd_list_stages()
+        public static Action<object[]?> RedTextAsync(int delay)
         {
-            return new() 
+            return async (o) =>
             {
-                phrase = "stages.List;",
-                description = "Lists the names of the stage metadata loaded for the current project",
-                syntax = "stages.List(inst || file); \n \n{must use either inst or file to get a result, \n inst == instanced/loaded stages | \n file == loaded metadata for stage files in project.}",
-                argumentTypes = new string[] { "str:" },
-                action = (o) =>
-                {
-                    object? arg = GetArgAtIndexIfExists<string>(0, o);
-                    if (arg is null)
-                    {
-                        Console.Print("Argument was null. Expected argument :{ inst || file }");
-                        return; 
-                    }
-
-                    string s = (string)arg;
-                    ListStages(s);
-                },
-                args = null,
+                Editor.Current.RedText().Invoke(o);
+                await Task.Delay(delay * 1000);
+                Editor.Current.BlackText().Invoke(o);
             };
         }
-        static void PrintLoadedStageNames()
+
+        public static bool TryGetArgAtIndex<T>(int index, out T arg, object[] o)
         {
-            foreach (var stage in Runtime.Instance.LoadedProject.stages)
-                Console.Print(stage.Name);
+            bool hasArg = o != null && o.Length > index;
+
+            if (hasArg && o[index] is T val)
+            {
+                arg = val;
+                return true; 
+            }
+            arg = (T)Convert.ChangeType(null, typeof(T));
+            return false ; 
         }
 
+        static void PrintLoadedStageNames()
+        {
+            foreach (var stage in Runtime.Current.LoadedProject.stages)
+                Console.Print(stage.Name);
+        }
         static void PrintLoadedStageMetaFileNames()
         {
-            foreach (var stage in Runtime.Instance.LoadedProject.stagesMeta)
-                Console.Print(stage.Name);
+            foreach (var stage in Runtime.Current.LoadedProject.stagesMeta)
+                Console.Print(stage?.Name ?? "null");
         }
         static void ListStages(string s)
         {
@@ -155,342 +580,47 @@ namespace pixel_editor
             }
         }
 
-        public static Command cmd_swap_theme()
+
+        private static void AddChild(params object[]? e)
         {
-            return new()
-            {
-                phrase = "theme;",
-                description = "Swaps the current theme [DOES NOT WORK CURRENTLY]",
-                syntax = "theme(light_or_dark);",
-                argumentTypes = new string[] {"str:"},
-                action = (o) =>
-                {
-                    bool hasArg = o != null && o.Length > 0;
-                    if (hasArg)
-                    {
-                        if (o[0] is string arg)
-                        {
-                            Editor.Current.SetTheme(arg);
-                            return;
-                        }
-                    }
-                },
-                args = null,
-            };
+            if (!TryGetNodeByNameAtIndex(e, out var node, 0)) return;
+            node.Child(Player.test_child_node(node));
         }
-        public static Command cmd_load_project()
+        public static bool TryGetNodeByNameAtIndex(object[]? e, out Node node, int index)
         {
-            return new()
+            if(!TryGetArgAtIndex(0,out string nodeName, e))
+            { 
+                Command.Error("node.Child(string parentName)", CmdError.ArgumentNotFound);
+                node = null;
+                return false;
+            }
+
+            Stage? stage = Runtime.Current.GetStage();
+
+            if (stage is null)
             {
-                phrase = "loadProject;",
-                syntax = "loadProject(projectName);",
-                argumentTypes = new string[] { "str:" },
-                action = async (e) =>
-                {
-                    string name = (string)e[0];
-                    var project = ProjectIO.ReadProject(name);
+                Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
+                node = null; 
+                return false;
+            }
 
-                    if (project is not null)
-                    {
-                        string question = $"Project Found! " +
-                                                $"\n Name : {project.Name} " +
-                                                $"Do you want to load this project?";
-
-                        Task<PromptResult> result = PromptAsync(question, 60f);
-
-                        await result;
-
-                        switch (result.Result)
-                        {
-                            case PromptResult.Yes:
-                                Console.Print($"Project {name} set.");
-                                Runtime.Instance.SetProject(project);
-                                break;
-                            case PromptResult.No:
-                                Console.Print("Project not set.");
-                                break;
-                            case PromptResult.Cancel:
-                                Console.Print("Load Project cancelled.");
-                                break;
-                            case PromptResult.Timeout:
-                                Console.Print("Load Project timed out.");
-                                break;
-                            default:
-                                break;
-                        }
-
-                    }
-                },
-                args = new object[] { },
-                description = "Loads a project @../Pixel/Projects of specified name, and if found, prompts the user to load the project as the current project."
-            };
-        }
-        public static Command cmd_reload_stage()
-        {
-            return new()
-            {
-                phrase = "reload;|/r;|++r;",
-                syntax = "reload();",
-                action = (o) =>
-                {
-                    Runtime.TryLoadStageFromProject();
-                },
-                args = null,
-                description = "Reloads the currently loaded stage",
-            };
-        }
-        public static Command cmd_random_background()
-        {
-            return new()
-            {
-                phrase = "stage.Background.Randomize;",
-                syntax = "stage.Background.Randomize();",
-                action = RandomizeBackground,
-                description = "Sets the current stage's background to a random array of colors until reloaded.",
-            };
-        }
-        public static Command cmd_set_stage()
-        {
-            return new()
-            {
-                phrase = "stage.Set;",
-                syntax = "stage.Set(stageName);",
-                argumentTypes = new string[] { "str:" },
-                action = async (o) =>
-                {
-                    string stageName = (string)o[0];
-                    bool loadAsynchronously = false;
-
-                    if (o.Length > 1 && o[1] is bool)
-                        loadAsynchronously = (bool)o[1];
-
-                    Project project = Runtime.Instance.LoadedProject;
-
-                    if (project is null) return;
-
-                    var stage = Project.GetStageByName(stageName);
-                    
-                    if (stage == null)
-                    {
-                        Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
-                        return; 
-                    }
-
-                    var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
-                    await prompt;
-                  
-                    switch (prompt.Result)
-                    {
-                        case PromptResult.Yes:
-                            Print($"Stage {stage.Name} set.");
-                            Runtime.Instance.SetStage(stage);
-                            break;
-                        case PromptResult.No:
-                            Print("Stage not set.");
-                            break;
-                        case PromptResult.Cancel:
-                            Print("Set Stage cancelled.");
-                            break;
-                        case PromptResult.Timeout:
-                            Print("Set Stage timed out.");
-                            break;
-                        default:
-                            break;
-                    }
-                },
-                description = "[STAGE MUST BE IN PROJECT] \nAttempts to find a stage by name, and if found, prompts the user to load it or not."
-            };
-        }
-        public static Command cmd_asset_exists()
-        {
-            return new()
-            {
-                description = "Shows a count of all loaded assets, and an option to see more info.",
-                syntax = "fetch(assetName);",
-                argumentTypes = new string[] { "str:" },
-                phrase = "fetch;",
-                action = AssetExists,
-            };
-        }
-        public static Command cmd_get_node()
-        {
-            return new()
-            {
-                phrase = "node.Get;",
-                syntax = "node.Get(nodeName);",
-                argumentTypes = new string[] { "str:" },
-                action = (e) =>
-                {
-                    string name = (string)e[0];
-                    Node node = Runtime.Instance.GetStage().FindNode(name);
-                    Editor.Current.Inspector.DeselectNode();
-                    Editor.Current.Inspector.SelectNode(node);
-                    if (node is not null)
-                    {
-                        PrintNodeInformation(node);
-                        return;
-                    }
-                    Print($"getNode({name}) \n Node with name {name} not found.");
-                },
-                args = null,
-                description = "Retrieves the node of name specified",
-            };
-        }
-        public static Command cmd_list_node()
-        {
-            return new()
-            {
-                phrase = "node.List;",
-                syntax = "node.List();",
-                action = ListNodes,
-                args = null,
-                description = "Lists all nodes in currently loaded stage.",
-            };
-
-        }
-        public static Command cmd_set_node_field()
-        {
-            return new()
-            {
-                phrase = "node.Set;",
-                syntax = "node.Set(nodeName, fieldName, value);",
-                argumentTypes = new string[] { "str:", "str:", "bool:" },
-                args = null,
-                action = SetNodeField,
-                description = "gets a node and attempts to write the provided value to specified field.",
+            node = stage.FindNode(nodeName);
             
-            };
-        }
-        public static Command cmd_call_node_method()
-        {
-            return new()
+            if (node is null)
             {
-                phrase = "node.Call;",
-                syntax = "node.Call(nodeName, methodName);",
-                argumentTypes = new string[] {"str:", "str:"},
-                action = CallNodeMethod,
-                args = null,
-                description = "Gets a node by Name, finds the provided method by MethodName, and invokes the method.",
-                             
-            };
-        }
-        public static Command cmd_set_resolution()
-        {
-            return new()
-            {
-                phrase = "resolution.Set;",
-                syntax = "resolution.Set(1024,1024);",
-                argumentTypes = new string[] { "vec:"},
-                action = (e) =>
-                {
-                    Vec2 vector = (Vec2)e[0];
-                    Vec2Int newRes = (Vec2Int)vector;
-                    Console.Print(vector.AsString());
-                    Runtime.Instance.renderHost.GetRenderer().Resolution = newRes;
-                },
-                description = "sets the resolution to the specified Vec2"
-            };
+                Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
+                return false;
+            }
 
-        }
-        public static Command cmd_get_resolution()
-        {
-            return new()
-            {
-                phrase = "resolution.Get;",
-                syntax = "resolution.Get();",
-                action = (e) =>
-                {
-                    Console.Print(((Vec2)Runtime.Instance.renderHost.GetRenderer().Resolution).AsString());
-                },
-                description = "gets the resolution and prints it to the console"
-            };
-        }
-        public static Command cmd_clear_console()
-        {
-            return new()
-            {
-                phrase = "cclear;",
-                syntax = "cclear();",
-                action = (e) =>
-                {
-                    if (e is not null && e[0] is bool color)
-                        Clear(color);
-                    else Clear(); 
-                },
-                description = "Clears the console's output",
-            };
-        }
+            return true; 
 
-        public static Command cmd_spawn_generic()
-        {
-            return new()
-            {
-                phrase = "++n;",
-                syntax = "++n();",
-                action = (o) => Runtime.Instance.GetStage().create_generic_node(),
-                description = "Spawns a generic node with a Rigidbody , Sprite, and Collider, and adds it to the current Stage."
-            };
-
-        }
-        public static Command cmd_help()
-        {
-            return new()
-            {
-                phrase = "help;|help|Help|/h",
-                syntax = "help();",
-                action = (o) =>
-                {
-                    string output = "";
-                    foreach (var cmd in Current.Active)
-                        output += "\n" + cmd.syntax  + "\n" + cmd.description + "\n" + divider;
-                    Print(output);
-                },
-            };
-        }
-        public static Command cmd_log()
-        {
-            return new()
-            {
-                phrase = "log;",
-                syntax = "log(message);",
-                argumentTypes = new string[] {"str:"},
-                action = (o) => Console.Print(o[0]),
-                description = "Logs a message to the console, Some characters will cause this to fail."
-            };
-        }
-        public static Command cmd_set_camera()
-        {
-            return new()
-            {
-                phrase = "cam;",
-                syntax = "cam(Name, Field, Vector2 Value);",
-                argumentTypes = new string[] { "str:", "str:", "vec:"},
-                action = (e) =>
-                {
-                    if (e.Length < 3)
-                        return;
-
-                    string nName = (string)e[0];
-                    string fName = (string)e[1];
-                    object value = e[2];
-
-                    Node? node = Runtime.Instance.GetStage().FindNode(nName);
-                    if (node is null) 
-                        Console.Print("Node was not found."); 
-                    Camera cam = node.GetComponent<Camera>();
-                    Type type = cam.GetType();
-                    FieldInfo? field = type.GetRuntimeField(fName);
-                    field.SetValue(cam, value);
-                },
-                description = "\n {must not be a property or method} Sets Field in camera by name on node of provided name \n syntax : cam(str:<nodeName>, str:<fieldName>, object:value)",
-            };
         }
 
         private static void RandomizeBackground(params object[]? args)
         {
-            var stage = Runtime.Instance.GetStage();
+            var stage = Runtime.Current.GetStage();
 
-            var background = stage.initializedBackground;
+            var background = stage.InitializedBackground;
 
             if (background == null)
             {
@@ -511,14 +641,14 @@ namespace pixel_editor
                 for (int j = 0; j < y - 1; ++j)
                     background.SetPixel(i, j, JRandom.Color());
 
-            Runtime.Instance.renderHost.MarkDirty();
+            Runtime.Current.renderHost.MarkDirty();
         }
         private static void PrintNodeInformation(Node node)
         {
             Print(
                 $"Node Found! " +
                 $"\n Name : {node.Name} " +
-                $"\n Position : {node.position.AsString()} " +
+                $"\n Position : {node.Position.AsString()} " +
                 $"\n UUID : {node.UUID} " +
                 $"\n Tag: {node.tag} " +
                 $"\n Component Count : {node.ComponentsList.Count}");
@@ -567,8 +697,8 @@ namespace pixel_editor
         {
             string nodesList = "";
             char nonBreakingspace = '\u2007';
-            foreach (Node node in Runtime.Instance.GetStage().nodes)
-                nodesList += node.Name.PadLeft(16, nonBreakingspace) + " ";
+            foreach (Node node in Runtime.Current.GetStage().nodes)
+                nodesList += node.Name + " ";
             Console.Print($"{nodesList}");
         }
         private static void SetNodeField(params object[]? e)
@@ -579,7 +709,7 @@ namespace pixel_editor
                 string fName = (string)e[1];
                 object value = e[2];
 
-                Node? node = Runtime.Instance.GetStage().FindNode(nName);
+                Node? node = Runtime.Current.GetStage().FindNode(nName);
                 Type type = node.GetType();
                 FieldInfo? field = type.GetRuntimeField(fName);
                 field?.SetValue(node, value);
@@ -592,7 +722,7 @@ namespace pixel_editor
                 string nName = (string)e[0];
                 string fName = (string)e[1];
 
-                if (Runtime.Instance.GetStage().FindNode(nName) is not Node node)
+                if (Runtime.Current.GetStage().FindNode(nName) is not Node node)
                 {
                     Error($"\"{nName}.{fName}()\" Node not found!", 2);
                     return;
@@ -612,8 +742,6 @@ namespace pixel_editor
         }
 
         public List<Command> Active = new();
-
-
     }
 
 }

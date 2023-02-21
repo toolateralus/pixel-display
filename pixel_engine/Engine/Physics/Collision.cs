@@ -2,88 +2,74 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Xml.Linq;
-using static pixel_renderer.Collision;
-
 namespace pixel_renderer
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };
     public static partial class Collision
     {
-        private static readonly ConcurrentDictionary<Node, Node[]> CollisionQueue = new();
+        private static readonly Dictionary<Node, Node[]> CollisionQueue = new();
         private static readonly List<List<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true;
 
+        private readonly static SpatialHash Hash = new((int)Constants.PhysicsArea.x, (int)Constants.PhysicsArea.y, Constants.CollisionCellSize);
+       
         public static void SetActive(bool value) => AllowEntries = value;
-        private readonly static SpatialHash hash = new(Constants.ScreenW, Constants.ScreenH, Constants.CollisionCellSize);
         public static void ViewportCollision(Node node)
         {
             var hasCollider = node.TryGetComponent(out Collider col);
             if (!hasCollider) return;
 
-            if (node.position.y > Constants.ScreenW - 4 - col.size.y)
-                 node.position.y = Constants.ScreenW - 4 - col.size.y;
-            if (node.position.x > Constants.ScreenH - col.size.x)
-                 node.position.x = Constants.ScreenH - col.size.x;
-            if (node.position.x < 0)
-                 node.position.x = 0;
+            if (node.Position.y > Constants.PhysicsArea.y - col.size.y)
+                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.y - col.size.y);
+            if (node.Position.x > Constants.PhysicsArea.x - col.size.x)
+                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.x - col.size.x);
+            if (node.Position.x < 0)
+                node.Position = node.Position.WithValue(x: 0);
         }
-
         private static bool CheckOverlap(this Node nodeA, Node nodeB)
         {
             var colA = nodeA.TryGetComponent(out Collider col_A);
             var colB = nodeB.TryGetComponent(out Collider col_B);
             return colA && colB && GetBoxCollision(nodeA, nodeB, col_A, col_B);
         }
-
         private static bool GetBoxCollision(Node nodeA, Node nodeB, Collider col_A, Collider col_B)
         {
-            if (nodeA.position.x < nodeB.position.x + col_B.size.x &&
-                nodeA.position.y < nodeB.position.y + col_B.size.y &&
-                       col_A.size.x + nodeA.position.x > nodeB.position.x &&
-                       col_A.size.y + nodeA.position.y > nodeB.position.y)
+            if (nodeA.Position.x < nodeB.Position.x + col_B.size.x &&
+                nodeA.Position.y < nodeB.Position.y + col_B.size.y &&
+                       col_A.size.x + nodeA.Position.x > nodeB.Position.x &&
+                       col_A.size.y + nodeA.Position.y > nodeB.Position.y)
                 return true;
             return false;
         }
-
         public static void BroadPhase(Stage stage, List<List<Node>> collisionCells)
         {
             collisionCells.Clear();
-
-            if (stage.nodes is null ||
-                stage.nodes.Count == 0) return;
-
-            IReadOnlyCollection<Node> nodes;
-            
             lock (stage.nodes)
-                nodes = stage.nodes;
+                foreach (var node in stage.nodes)
+                {
+                    List<Node> nearby = Hash.GetNearby(node);
+                    collisionCells.Add(nearby);
+                }
 
-            if (nodes is null)
-                return;
-
-            foreach (var stage_node in nodes)
-                collisionCells.Add(hash.GetNearby(stage_node));
         }
-
         public static void NarrowPhase(List<List<Node>> collisionCells)
         {
             lock(collisionCells)
             for (int i = 0; i < collisionCells.Count; i++)
             {
-                if (i >= collisionCells.Count) return;
-                var cellArray = collisionCells.ToArray();
+                if (collisionCells is null || i > collisionCells.Count - 1) continue;
+                
+                 var cellArray = collisionCells.ToArray();
 
-                if (i >= cellArray.Length) return;
+                if (cellArray is null || i > cellArray.Length - 1)
+                        return;
+
+                if (cellArray[i] == null || cellArray[i].Count == 0) continue;
+
+
                 var cell = cellArray[i].ToArray();
-
-                if (cell is null) return;
-                if (cell.Length <= 0) return;
+               
 
                 for (int j = 0; j < cell.Length; j++)
                 {
@@ -99,7 +85,9 @@ namespace pixel_renderer
                         if (nodeB is null)
                             continue;
 
-                        bool hittingItself = nodeA.UUID.Equals(nodeB.UUID);
+                        bool hittingItself = nodeA.UUID.Equals(nodeB.UUID) 
+                                || nodeA.parentNode == nodeB 
+                                || nodeB.parentNode == nodeA;
 
                         if (hittingItself)
                             continue;
@@ -113,13 +101,13 @@ namespace pixel_renderer
         }
         public static void RegisterColliders(Stage stage)
         {
-            hash.ClearBuckets();
+            Hash.ClearBuckets();
             Action<Node> RegisterAction = (node) =>
             {
                 if (!node.TryGetComponent<Collider>(out _))
                     return;
                 ViewportCollision(node);
-                hash.RegisterObject(node);
+                Hash.RegisterNode(node);
             };
 
             List<Node> nodes = new(stage.nodes);
@@ -147,7 +135,7 @@ namespace pixel_renderer
                             var nodesArray = colliders.ToArray();
                             if (CollisionQueue.ContainsKey(A))
                                 CollisionQueue[A] = nodesArray;
-                            else _ = CollisionQueue.GetOrAdd(A, nodesArray);
+                            else CollisionQueue.Add(A, nodesArray);
                         }
                     }
                 }
@@ -166,16 +154,16 @@ namespace pixel_renderer
                         !B.TryGetComponent(out Collider col_B))
                         return;
 
-                    bool has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
-                    bool has_rb_b = B.TryGetComponent<Rigidbody>(out var rbB);
+                    bool a_has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
+                    bool b_has_rb = B.TryGetComponent<Rigidbody>(out var rbB);
 
-                    if (has_rb && has_rb_b)
-                        RigidbodyCollide(rbA, rbB);
+                    if (a_has_rb && b_has_rb)
+                        Collide(rbB, rbA);
+                    if (a_has_rb && !b_has_rb)
+                        Collide(rbB, col_A);
+                    if (!a_has_rb && b_has_rb)
+                        Collide(rbA, col_B);
 
-
-                    else if (has_rb || has_rb_b)
-                        if (has_rb) Collide(rbA, col_B);
-                        else Collide(rbB, col_A);
                     AttemptCallbacks(col_A, col_B);
                 }
                 CollisionQueue.Clear();
@@ -183,31 +171,39 @@ namespace pixel_renderer
         }
         private static void Collide(Rigidbody A, Collider B)
         {
+            if (A is null || B is null)
+                return; 
+
             var aCol = A.GetComponent<Collider>();
             if (aCol.IsTrigger || B.IsTrigger) return;
 
-            var a_vertices = aCol.GetVertices(); 
-            var b_vertices = B.GetVertices();
+            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, B.Mesh);
 
-            var a_normals = aCol.normals;
-            var b_normals = B.normals;
+            A.parent.Position += minDepth;
+        }
+        private static void Collide(Rigidbody A, Rigidbody B)
+        {
+            if (A is null || B is null)
+                return; 
 
-            var a_centroid = aCol.GetCentroid();
-            var b_centroid = B.GetCentroid();
-            Polygon pA = new()
-            {
-                vertices = a_vertices,
-                centroid = a_centroid,
-                normals = a_normals,
-            };
-            Polygon pB = new()
-            {
-                vertices = b_vertices,
-                centroid = b_centroid,
-                normals = b_normals,
-            };
-            var minDepth = SATCollision.GetMinimumDepthVector(pA, pB);
-            A.parent.position += minDepth;
+            var aCol = A.GetComponent<Collider>();
+            var bCol = B.GetComponent<Collider>();
+            if (aCol.IsTrigger || bCol.IsTrigger) return;
+
+            //depenetrate
+            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, bCol.Mesh);
+            if (minDepth == Vec2.zero)
+                return;
+            A.parent.Position += minDepth / 2;
+            B.parent.Position -= minDepth / 2;
+
+            //flatten velocities
+            Vec2 colNormal = minDepth.Normalized();
+            float colSpeedA = Vec2.Dot(A.velocity, colNormal);
+            float colSpeedB = Vec2.Dot(B.velocity, colNormal);
+            float averageSpeed = (colSpeedA + colSpeedB) / 2;
+            A.velocity -= colNormal * (averageSpeed - colSpeedA);
+            B.velocity -= colNormal * (averageSpeed - colSpeedB);
         }
         private static void AttemptCallbacks(Collider A, Collider B)
         {
@@ -227,36 +223,12 @@ namespace pixel_renderer
                 if (HasTasks) FinalPhase();
                 return;
             }
-            var stage = Runtime.Instance.GetStage();
 
+            var stage = Runtime.Current.GetStage();
             RegisterColliders(stage);
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);
             FinalPhase();
-        }
-        private static void RigidbodyCollide(Rigidbody A, Rigidbody B)
-        {
-            // check collider for trigger
-            ///if (A.IsTrigger || B.IsTrigger) return;
-
-            var velocityDifference = A.velocity.Distance(B.velocity) * 0.5f;
-            if (velocityDifference < 0.1f)
-                velocityDifference = 1f;
-
-            Vec2 direction = (B.parent.position - A.parent.position).Normalize();
-
-            var depenetrationForce = direction * velocityDifference * 0.5f;
-
-            Vec2.Clamp(ref depenetrationForce, Vec2.zero, Vec2.one * Constants.MaxDepenetrationForce);
-
-            B.velocity = Vec2.zero;
-            A.velocity = Vec2.zero;
-
-            B.parent.position += depenetrationForce;
-            A.parent.position += CMath.Negate(depenetrationForce);
-
-            depenetrationForce *= 0.5f;
-
         }
     }
 

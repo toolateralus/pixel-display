@@ -77,8 +77,8 @@
 
         [JsonProperty]
         public float y;
-        public Vec2 Normal_RHS => new Vec2(-y, x).Normalize();
-        public Vec2 Normal_LHS => new Vec2(y, -x).Normalize();
+        public Vec2 Normal_RHS => new Vec2(-y, x).Normalized();
+        public Vec2 Normal_LHS => new Vec2(y, -x).Normalized();
         public float this[int index]
         {
             get
@@ -99,6 +99,18 @@
                     default: throw new IndexOutOfRangeException();
                 }
             }
+        }
+
+        public static float DistanceSquared(Vec2 a, Vec2 b)
+        {
+            var _x = b.x - a.x;
+            var _y = b.y - a.y;
+            return _x * _x + _y * _y;
+        }
+        public static float Distance(Vec2 a, Vec2 b)
+        {
+            var distanceSquared = DistanceSquared(a, b);
+            return CMath.Sqrt(distanceSquared);
         }
         public static float Dot(Vec2 a, Vec2 b)
         {
@@ -141,6 +153,8 @@
         }
 
         public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y);
+        public static bool operator ==(Vec2 a, Vec2 b) => a.x == b.x && a.y == b.y;
+        public static bool operator !=(Vec2 a, Vec2 b) => a.x != b.x || a.y != b.y;
         public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y);
         public static Vec2 operator /(Vec2 a, float b) => new(a.x / b, a.y / b);
         public static Vec2 operator *(Vec2 a, float b) => new(a.x * b, a.y * b);

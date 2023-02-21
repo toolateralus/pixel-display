@@ -20,5 +20,10 @@
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta2" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="ComponentEditor.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
+	</ItemGroup>
 
 </Project>

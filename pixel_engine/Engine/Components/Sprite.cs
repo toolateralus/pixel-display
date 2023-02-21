@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Security.Policy;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using pixel_renderer.Scripts;
 using Bitmap = System.Drawing.Bitmap;
 using Color = System.Drawing.Color;
@@ -13,18 +16,26 @@ namespace pixel_renderer
     public class Sprite : Component
     {
         [JsonProperty] public Vec2 size = Vec2.one * 16;
+        [JsonProperty] public Vec2 viewportScale = Vec2.one;
+        [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] public Texture texture;
         [JsonProperty] public Color Color
         {
             get
-            { 
+            {
                 Color? color = texture?.color ?? Color.White;
-                return (Color)color; 
+                return (Color)color;
             }
-            set => texture.color = value;
+            set
+            {
+                if (texture is null)
+                    return; 
+
+                texture.color = value; 
+            }
         }
-        [JsonProperty] public SpriteType Type = SpriteType.Image;
+        [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
 
         public bool dirty = true;
         Vec2Int colorDataSize = new(1,1);
@@ -32,41 +43,52 @@ namespace pixel_renderer
         private Color[,]? cached_colors = null;
         internal Color[,] ColorData
         {
-            get
-            {
-                if (!dirty)
-                    return _colors;
-                switch (Type)
-                {
-                    case SpriteType.SolidColor:
-                        _colors = CBit.SolidColorSquare(size, Color);
-                        break;
-                    case SpriteType.Image:
-                        if (texture is null)
-                            _colors = CBit.SolidColorSquare(size, Color);
-                        else
-                            _colors = CBit.ColorArrayFromBitmap(texture.Image);
-                        break;
-                    default:
-                        throw new NotImplementedException("Custom Sprite render type not yet implemented");
-                }
-                colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
-                dirty = false;
-                return _colors;
-            }
+            get => _colors ?? throw new ArgumentNullException(nameof(_colors));
             set
             {
-                _colors = value;
-                colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+                if (!IsReadOnly)
+                {
+                    _colors = value ?? throw new ArgumentNullException(nameof(value));
+                    colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+                }
             }
         }
-        private Color[,] _colors; 
+
+        public bool IsReadOnly = false;
+
+        private void Refresh()
+        {
+            switch (Type)
+            {
+                case SpriteType.SolidColor:
+                    _colors = CBit.SolidColorSquare(size, Color);
+                    break;
+                case SpriteType.Image:
+                    if (texture is null)
+                        _colors = CBit.SolidColorSquare(size, Color);
+                    else
+                        _colors = CBit.ColorArrayFromBitmap(texture.Image);
+                    break;
+               
+                default: 
+                    return; 
+            }
+            colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+            dirty = false;
+        }
+
+        private Color[,] _colors = new Color[1,1]; 
+       
         public override void Awake()
         {
+            texture = new((Vec2Int)size, Player.test_image_data);
+            Refresh();
 
         }
         public override void FixedUpdate(float delta)
         {
+            if (dirty)
+                Refresh();
         }
         public void Randomize()
         {
@@ -74,14 +96,24 @@ namespace pixel_renderer
             int y = (int)size.y;
             cached_colors = this.ColorData;
             var colorData = new Color[x, y];
+
             for (int j = 0; j < y; j++)
                 for (int i = 0; i < x; i++)
                     colorData[i, j] = JRandom.Color();
+
+
             Draw(size, colorData);
         }
-        public void RestoreCachedColor(bool nullifyCache)
+        public void RestoreCachedColor(bool nullifyCache, bool IsReadOnly = false)
         {
-            if (cached_colors == null) Randomize();
+            this.IsReadOnly = IsReadOnly;
+            if (cached_colors == null)
+            {
+                Bitmap bmp = new(Player.test_image_data.fullPath);
+                cached_colors = CBit.ColorArrayFromBitmap(bmp);
+                Runtime.Log("Sprite color cache was null upon returning to original color. Instantiating backup.");
+            }
+
             Draw(size, cached_colors);
             if (nullifyCache) cached_colors = null;
         }
@@ -89,7 +121,7 @@ namespace pixel_renderer
         /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
         /// </summary>
         /// <param name="borderColor"></param>
-        public void Highlight(Color borderColor, Vec2? widthIn = null)
+        public void Highlight(Color borderColor, Vec2? widthIn = null, bool IsReadOnly = false)
         {
             cached_colors = this.ColorData;
             
@@ -108,6 +140,7 @@ namespace pixel_renderer
                         colorData[x, y] = borderColor;
                 }
             Draw(size, colorData);
+            this.IsReadOnly = IsReadOnly;
         }
         
         public void Draw(Vec2 size, Color[,] color)
@@ -121,20 +154,12 @@ namespace pixel_renderer
             ColorData = CBit.SolidColorSquare(size, color);
         }
 
-        
-
-        public Vec2Int ViewportToColorPos(Vec2 spriteViewport) => (Vec2Int)(spriteViewport.Wrapped(Vec2.one) * colorDataSize);
-        internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.position) / size.GetDivideSafe();
-
-
-        internal void Highlight(object editorHighlightColor)
-        {
-            throw new NotImplementedException();
-        }
+        public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
+        internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
 
         public Sprite()
         {
-            texture = new((Vec2Int)size, Player.test_image_data);
+            
         }
         public Sprite(int x, int y) : this()
         {

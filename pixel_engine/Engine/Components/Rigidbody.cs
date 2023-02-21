@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
+using System;
+using System.Windows.Documents;
+
 namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
         private float _drag = 0.0f;
-        [Field] [JsonProperty] public float drag = .4f;
-                
-        [Field] [JsonProperty] public bool usingGravity = true;
-
+        [Field] [JsonProperty] public float drag = .6f;
+        [Field] [JsonProperty] public bool usingGravity = false;
         [Field] [JsonProperty] public Vec2 velocity = new();
         [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
         [Field] public Sprite? sprite; 
@@ -16,8 +17,7 @@ namespace pixel_renderer
         
         private protected void ApplyVelocity()
         {
-            parent.position.y += velocity.y;
-            parent.position.x += velocity.x;
+            parent.Position += velocity;
         }
         private protected void ApplyDrag()
         {
@@ -37,7 +37,10 @@ namespace pixel_renderer
             
             Vec2 screenSize = new(256, 256);
             
-            node.position = JRandom.Vec2(Vec2.zero, screenSize);
+
+            node.Name = $"Node {JRandom.Bool()}";
+            node.Position = JRandom.Vec2(Vec2.zero, screenSize);
+
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();
 
@@ -52,16 +55,23 @@ namespace pixel_renderer
             return node;
         }
 
-        // Todo: prevent these methods from being overridden.
-        // Immutable Method attribute or something.
         public override void Awake() => parent.TryGetComponent(out sprite);
         public override void FixedUpdate(float delta)
         {
-            if (usingGravity) velocity.y += CMath.Gravity;
+            if (usingGravity) 
+                velocity.y += CMath.Gravity;
             ApplyDrag();
             ApplyVelocity();
         }
-        
+
+        public static Node StaticBody()
+        {
+            Node node = Rigidbody.Standard();
+            Rigidbody rb = node.GetComponent<Rigidbody>();
+            node.RemoveComponent(rb);
+            return node; 
+            
+        }
     }
 }
 

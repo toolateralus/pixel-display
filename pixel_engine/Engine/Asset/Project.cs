@@ -42,7 +42,7 @@ namespace pixel_renderer
 
         public void Save()
         {
-            ProjectIO.WriteProject(Runtime.Instance.LoadedProject, Metadata);
+            ProjectIO.WriteProject(Runtime.Current.LoadedProject, Metadata);
         }
 
        
@@ -114,7 +114,7 @@ namespace pixel_renderer
             get
             {
                 Project defaultProj = new("Default project");
-                defaultProj.stages.Add(Stage.Default());
+                defaultProj.AddStage(Stage.Default());
                 return defaultProj;
             }
         }

@@ -1,12 +1,13 @@
 ﻿using Newtonsoft.Json;
+using System.Linq;
 
 namespace pixel_renderer
 {
     public class Camera : UIComponent
     {
-        [JsonProperty] public Vec2 viewportPosition = Vec2.zero;
-        [JsonProperty] public Vec2 viewportSize = Vec2.one;
-        [JsonProperty] public DrawingType DrawMode = DrawingType.Clamped;
+        [Field] [JsonProperty] public Vec2 viewportPosition = Vec2.zero;
+        [Field] [JsonProperty] public Vec2 viewportSize = Vec2.one;
+        [Field] [JsonProperty] public DrawingType DrawMode = DrawingType.Clamped;
         public float[,] zBuffer = new float[0, 0];
 
         public Vec2 LocalToCamViewport(Vec2 local) => local / Size.GetDivideSafe();
@@ -21,7 +22,7 @@ namespace pixel_renderer
 
         public Vec2 ViewportToSpriteViewport(Sprite sprite, Vec2 viewportPos) =>
             sprite.GlobalToViewport(ViewportToGlobal(viewportPos));
-
+        public static Camera? First => Runtime.Current.GetStage()?.GetAllComponents<Camera>().First();
     }
     public enum DrawingType { Wrapped, Clamped, None }
 }

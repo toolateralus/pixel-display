@@ -6,9 +6,9 @@ namespace pixel_renderer.Assets
     public class ScriptAsset : Asset
     {
         public Component component;
-        public ScriptAsset(Component c, string name, Type type) : base(name, c.UUID)
+        public ScriptAsset(Component runtimeValue, string name = "Script Asset") : base(name, false)
         {
-            component = c;
+            component = runtimeValue;
         }
 
       

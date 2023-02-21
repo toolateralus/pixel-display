@@ -14,28 +14,21 @@ namespace pixel_renderer.FileIO
         [JsonProperty] public string UUID;
         [JsonProperty] public Metadata Metadata;
 
-        public virtual bool Sync()
+        public virtual void Sync()
         {
-            try
-            {
-                string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsFileExtension;
-                Metadata = new(Name, defaultPath, Constants.AssetsFileExtension);
-                return true;
-            }
-            catch { return false; }
-               
+            string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsFileExtension;
+            Metadata = new(Name, defaultPath, Constants.AssetsFileExtension);
         }
-        public Asset(string Name, string UUID) : this()
+    
+        public Asset(string name = "New Asset", bool shouldUpload = false)
         {
-            this.Name = Name;
-            this.UUID = UUID;
-        }
-
-        public Asset() 
-        {
-            Name = "New Asset";
+            Name = name;
             UUID = pixel_renderer.UUID.NewUUID();
+            if(shouldUpload) Upload();
+        }
 
+        public void Upload()
+        {
             Sync();
             AssetLibrary.Register(Metadata, this);
         }

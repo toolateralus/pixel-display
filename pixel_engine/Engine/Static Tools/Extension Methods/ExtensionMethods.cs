@@ -12,9 +12,10 @@ namespace pixel_renderer
     {
         #region Numbers
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
+        public static bool WithinRange(this int v, int min, int max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
-        public static float Wrapped(this float v, float max) => v % max >= 0 ? v % max : v % max + max;
+        public static float Wrapped(this float v, float max) => (v % max + max) % max;
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
         public static bool IsWithinMaxExclusive(this float v, float min, float max) => v >= min && v < max;
         public static float GetDivideSafe(this float v) => v == 0 ? float.Epsilon : v;
@@ -38,7 +39,7 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="v"></param>
         /// <returns>A normalized Vector from the length of the current</returns>
-        public static Vec2 Normalize(this Vec2 v)
+        public static Vec2 Normalized(this Vec2 v)
         {
             if (v.Equals(Vec2.zero))
                 return Vec2.zero;
@@ -57,7 +58,7 @@ namespace pixel_renderer
         #endregion
         #region Strings
         /// <summary>
-        /// Takes a string of any format and returns a numerical value. If the string contains no number chars, it will return -1.
+        /// Takes a string of any format and returns a integer value. If the string contains no number chars, it will return -1.
         /// </summary>
         /// <param name="input"></param>
         /// <returns>an integer of value based on the order and frequency of numbers in the input string.</returns>
@@ -71,6 +72,7 @@ namespace pixel_renderer
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }
+        public static float ToFloat(this string input) => float.Parse(input);
         /// <summary>
         /// Since the assets system handles the file 
         /// 
@@ -102,29 +104,13 @@ namespace pixel_renderer
             return result.ToArray();
         }
         #endregion
-        #region Node
-
-        public static List<NodeAsset> ToNodeAssets(this List<Node> input)
+        #region Image
+        public static System.Windows.Point GetNormalizedPoint(this System.Windows.Controls.Image img, System.Windows.Point pos)
         {
-            List<NodeAsset> output = new();
-            foreach (var node in input)
-                output.Add(node.ToAsset());
-            return output;
+            pos.X /= img.ActualWidth;
+            pos.Y /= img.ActualHeight;
+            return pos;
         }
-        public static List<Node> ToNodeList(this List<NodeAsset> input)
-        {
-            List<Node> output = new();
-            foreach (var asset in input)
-                output.Add(asset.Copy());
-            return output;
-        }
-
-        #endregion
-        public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
-            from FieldInfo field in component.GetType().GetRuntimeFields()
-            from CustomAttributeData data in field.CustomAttributes
-            where data.AttributeType == typeof(FieldAttribute)
-            select field;
         public static Bitmap ToBitmap(this Color[,] colors)
         {
             int sizeX = colors.GetLength(0);
@@ -138,6 +124,13 @@ namespace pixel_renderer
 
             return bitmap;
         }
+        #endregion
+        public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
+            from FieldInfo field in component.GetType().GetRuntimeFields()
+            from CustomAttributeData data in field.CustomAttributes
+            where data.AttributeType == typeof(FieldAttribute)
+            select field;
+
         public static System.Windows.Media.PixelFormat ToMediaFormat(this System.Drawing.Imaging.PixelFormat sourceFormat)
         {
             switch (sourceFormat)

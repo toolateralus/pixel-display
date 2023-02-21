@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 using Image = System.Windows.Controls.Image; 
 
 namespace pixel_renderer
 {
-    public enum RenderState { Game, Scene, Off , Error}
     public class RenderHost
     {
         private RendererBase m_renderer = new CRenderer();
-        public RenderState State = RenderState.Game;
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
 
+     
         public RenderHost()
         {
             info = new(this);
@@ -20,30 +24,38 @@ namespace pixel_renderer
 
         public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
 
-        public void Render(Image renderSurface)
+        public Vec2? newResolution = null;
+
+        public bool Rendering { get; private set; }
+
+        private void UpdateResolution()
         {
-            if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded."); 
-            switch (State)
+            if (newResolution != null)
             {
-                case RenderState.Game: break;
-                case RenderState.Scene: break;
-                case RenderState.Off: return;
-                default:
-                    throw new InvalidOperationException("Invalid case passed into RenderState selection");
+                m_renderer.resolution = (Vec2)newResolution;
+                newResolution = null;
             }
-            Cycle(renderSurface);
+        }
+
+        public void Render()
+        {
+            if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded.");
+            Cycle();
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
         }
         /// <summary>
         /// performs the rendering loop for one cycle or frame.
         /// </summary>
         /// <param name="renderSurface"></param>
-        private protected void Cycle(Image renderSurface)
+        private protected void Cycle()
         {
             m_renderer.Dispose();
-            if(Runtime.Instance.GetStage() is Stage stage)
+            UpdateResolution();
+            if (Runtime.Current.GetStage() is Stage stage)
+            {
+                ShapeDrawer.Refresh(stage);
                 m_renderer.Draw(stage.StageRenderInfo);
-            m_renderer.Render(renderSurface);
+            }
         }
 
         public void MarkDirty()

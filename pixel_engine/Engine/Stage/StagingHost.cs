@@ -1,4 +1,5 @@
 ﻿
+using System;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
@@ -6,7 +7,7 @@ namespace pixel_renderer
     public class StagingHost
     {
         public Node? lastSelected;
-        static Runtime runtime => Runtime.Instance;
+        static Runtime runtime => Runtime.Current;
         /// <summary>
         /// this is used for editor clicking.
         /// </summary>
@@ -23,14 +24,15 @@ namespace pixel_renderer
                 bool hasSprite = !node.TryGetComponent(out Sprite sprite);
                 if (hasSprite) continue;
 
-                bool isWithin = ((Vec2)clickPosition).IsWithin(node.position, node.position + sprite.size);
+                bool isWithin = ((Vec2)clickPosition).IsWithin(node.Position, node.Position + sprite.size);
                 if (!isWithin) continue;
 
                 result = node;
-                
-                sprite.Highlight(Constants.EditorHighlightColor);
-                
-                lastSelected?.GetComponent<Sprite>().RestoreCachedColor(false);
+
+                SelectNode(sprite);
+
+                DeselectNode();
+
                 lastSelected = node;
 
                 return true;
@@ -38,11 +40,26 @@ namespace pixel_renderer
             result = null;
             return false;
         }
-        public static void Update(Stage stage)
+
+        private static void SelectNode(Sprite sprite) =>
+           sprite.Highlight(Constants.EditorHighlightColor, IsReadOnly: true);
+
+        public void DeselectNode()
+        {
+            lastSelected?.GetComponent<Sprite>().RestoreCachedColor(true, false);
+            lastSelected = null;
+        }
+
+        public static void FixedUpdate(Stage stage)
         {
             var delta = runtime.renderHost.info.FrameTime;
-            stage.FixedUpdate(delta);
             runtime.renderHost.info.frameCount++;
+            stage.FixedUpdate(delta);
+        }
+
+        public static void Update(Stage m_stage)
+        {
+            m_stage.Update();
         }
     }
 }

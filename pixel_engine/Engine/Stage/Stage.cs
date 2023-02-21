@@ -13,190 +13,69 @@ using System.Security.Policy;
 namespace pixel_renderer
 {
 
-    public class StageRenderInfo
-    {
-        public int Count => spritePositions.Count;
-        
-        public List<Vec2> spritePositions= new ();
-        public List<Vec2> spriteSizeVectors = new();
-        public List<float> spriteCamDistances = new();
-        public List<Color[,]> spriteColorData = new();
-
-        public StageRenderInfo(Stage stage)
-        {
-             Refresh(stage);
-        }
-        public void Refresh(Stage stage)
-        {
-            var sprites = stage.GetSprites();
-            int numOfSprites = sprites.Count();
-            var listSize = spritePositions.Count; 
-            if (numOfSprites != listSize)
-            {
-                for (int i = spritePositions.Count; i < numOfSprites; ++i)
-                    addMemberOnTop();
-                for (int i = spritePositions.Count; i > numOfSprites; --i)
-                    removeFirst();
-            }
-            for (int i = 0; i < sprites.Count(); ++i)
-            {
-                Sprite sprite = sprites.ElementAt(i);
-                  spritePositions[i] = sprite.parent.position;
-                spriteSizeVectors[i] = sprite.size;
-                  spriteColorData[i] = sprite.ColorData;
-                spriteCamDistances[i] = sprite.camDistance;
-            }
-            void addMemberOnTop()
-            {
-                spritePositions.Add(Vec2.zero);
-                spriteSizeVectors.Add(Vec2.zero);
-                spriteColorData.Add(new Color[1, 1]);
-                spriteCamDistances.Add(1f);
-            }
-            void removeFirst()
-            {
-                spritePositions.RemoveAt(0);
-                spriteSizeVectors.RemoveAt(0);
-                spriteColorData.RemoveAt(0);
-                spriteCamDistances.RemoveAt(0);
-
-            }
-        }
-    }
-
     public class Stage : Asset
     {
-       
-        [JsonProperty]
-        public List<NodeAsset> NodeAssets;
-      
-        public string Name { get; set; }
-        private string _uuid = "";
-        public string UUID => _uuid;
-
-        public bool FixedUpdateBusy { get; private set; }
         
         [JsonProperty]
         public Metadata Background;
 
-        public Bitmap? initializedBackground;
-
-        int genericNodeCt = 0;
-        #region Node Utils
-        public event Action OnNodeQueryMade;
-
-        public List<Node> nodes { get; private set; } = new();
-        public Dictionary<string, Node> NodesByName { get; private set; } = new Dictionary<string, Node>();
-        #endregion
-
-        #region  Misc Utils
-        private StageRenderInfo? stage_render_info = null;
-        public StageRenderInfo StageRenderInfo
-        {
-            get
+        private Bitmap init_bckground;
+        public Bitmap? InitializedBackground 
+        { 
+            get 
             {
-                var wasNull = stage_render_info is null;
-                var stage = Runtime.Instance.GetStage(); 
-                stage_render_info ??= new(stage);
-                
-                if (!wasNull)
-                    stage_render_info.Refresh(stage); 
-
-                return stage_render_info;
-            }
-            set { stage_render_info = value; }
+                if (init_bckground is null && Background != null)
+                    init_bckground = GetBackground();
+                else init_bckground ??= new(Stage.DefaultBackgroundMetadata.fullPath);
+                return init_bckground;
+            } 
         }
 
-        Queue<Action<object[]>> DelayedActionQueue = new();
-        Queue<object[]> DelayedActionArgsQueue = new();
-        #endregion
-
-
-        #region development defaults
-        public static Metadata DefaultMetadata = new("Default Stage Asset", Constants.WorkingRoot + Constants.AssetsDir + "\\DefaultStage" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
-        public static Metadata DefaultBackground = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
-        public static Stage Default()
+        public void AddNode(Node node)
         {
-            var nodes = new List<NodeAsset>();
-            nodes.Add(Player.Standard().ToAsset());
-
-            for (int i = 0; i < 5; i++)
-                nodes.Add(Rigidbody.Standard().ToAsset());
-
-            var stage = new Stage("Default Stage", DefaultBackground, nodes);
-          
-            return stage;
-        }
-        #endregion
-        #region Engine Stuff
-        public void Awake()
-        {
-            if (Background != null)
-                initializedBackground = GetBackground();
-
-            for (int i = 0; i < nodes.Count; i++)
+            void add_node(object[] o)
             {
-                Node node = nodes[i];
-                node.ParentStage = this;
-                node.Awake();
-            }
-        }
-        public void FixedUpdate(float delta)
-        {
-            lock (nodes)
-            {
-                FixedUpdateBusy = true;
-
-                for (int i = 0; i < nodes.Count; i++)
+                if (o[0] is not Node newNode)
                 {
-                    Node node = nodes[i];
-                    node.FixedUpdate(delta);
+                    Runtime.Log("AddNode Failed: input was not valid node.");
+                    return;
                 }
 
-                FixedUpdateBusy = false;
+                if (nodes.Contains(newNode))
+                {
+                    Runtime.Log("AddNode Failed: node already belongs to this stage."); 
+                    return;
+                }
+                newNode.ParentStage = this;
+                nodes.Add(newNode);
             }
+            object[] args = { node };
 
-            for(int i = 0; DelayedActionQueue.Count - 1 > 0; ++i)
+            if (NodesBusy)
+                delayedActionQueue.Enqueue((add_node, args));
+            else add_node(args); 
+
+        }
+        private void RemoveNode(Node? node)
+        {
+            object[] args = { node };
+            void remove_node(object[] o)
             {
-               Action<object[]> action = DelayedActionQueue.Dequeue();
-               object[] args = DelayedActionArgsQueue.Dequeue();
-
-               action(args);
+                if (o[0] is not Node actionTimeNode) return;
+                if (!nodes.Contains(actionTimeNode)) return; 
+                nodes.Remove(actionTimeNode);
             }
-        }
-        public void RefreshStageDictionary()
-        {
-            foreach (Node node in nodes)
+
+            // this is a better way than using a lock statement, as far as i know
+            if (NodesBusy)
             {
-                if (node.Name is null) continue;
-                if (!NodesByName.ContainsKey(node.Name))
-                    NodesByName.Add(node.Name, node);
+                delayedActionQueue.Enqueue((remove_node, args));
             }
-
-            List<Node> nodesToRemove = new();
-
-            foreach (var pair in NodesByName)
-                if (!nodes.Contains(pair.Value))
-                    nodesToRemove.Add(pair.Value);
-
-            nodesToRemove.Clear();
+            else remove_node(args);
         }
-        public Node[] FindNodesByTag(string tag)
-        {
-            OnNodeQueryMade?.Invoke();
-            IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
-            return matchingNodes.ToArray();
-        }
-        public Node FindNodeByTag(string tag)
-        {
-            OnNodeQueryMade?.Invoke();
-            return nodes
-                    .Where(node => node.tag == tag)
-                    .First();
-        }
+        
         public Node? FindNode(string name)
         {
-            OnNodeQueryMade?.Invoke();
             IEnumerable<Node> result = (
                 from node
                 in nodes
@@ -205,53 +84,17 @@ namespace pixel_renderer
             return result.Any() ? result.First() : null; 
 
         }
-        public void AddNode(Node node)
+        public Node[] FindNodesByTag(string tag)
         {
-            void add_node(object[] o)
-            {
-                if (o[0] is not Node newNode) return;
-                if (nodes.Contains(newNode)) return;
-                newNode.ParentStage = this;
-                nodes.Add(newNode);
-            }
-            object[] args = { node };
-
-            if (FixedUpdateBusy)
-            {
-                DelayedActionArgsQueue.Enqueue(args);
-                DelayedActionQueue.Enqueue(add_node);
-            }
-            else add_node(args); 
-
+            IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
+            return matchingNodes.ToArray();
         }
-        public Stage Copy()
+        public Node FindNodeByTag(string tag)
         {
-            var output = new Stage(Name, Background, NodeAssets, UUID);
-            return output;
+            return nodes
+                    .Where(node => node.tag == tag)
+                    .First();
         }
-        public Bitmap GetBackground()
-        {
-            if (File.Exists(Background.fullPath))
-                return new(Background.fullPath);
-            throw new MissingMetadataException($"Metadata :\"{Background.fullPath}\". File not found.");
-        }
-
-        public IEnumerable<Sprite> GetSprites()
-        {
-            var sprite = new Sprite();
-            IEnumerable<Sprite> sprites = (from Node node in nodes
-                                           where node.TryGetComponent(out sprite)
-                                           select sprite);
-            return sprites;
-        }
-        
-        public IEnumerable<T> GetAllComponents<T>() where T : Component
-        {
-            return from Node node in nodes
-                from T component in node.GetComponents<T>()
-                   select component;
-        }
-        
         public Node? FindNodeWithComponent<T>() where T : Component
         {
             IEnumerable<Node> collec = from node in nodes where node.HasComponent<T>() select node;
@@ -268,60 +111,183 @@ namespace pixel_renderer
             IEnumerable<Node> outNodes = from node in nodes where node.HasComponent<T>() select node;
             return outNodes.ToList();
         }
-        #endregion
-
-        public void create_generic_node()
+        public IEnumerable<T> GetAllComponents<T>() where T : Component
         {
-            // random variables used here;
-            object[] args = r_node_args();
-
-            int name_ct = (int)args[0];
-            Vec2 pos = (Vec2)args[1];
-            Vec2 scale = Vec2.one;
-            var node = new Node($"NODE {name_ct}", pos, scale);
-
-            var sprite = new Sprite(24, 24);
-            node.AddComponent(sprite);
-            var collider = new Collider()
-            {
-                size = sprite.size,
-                IsTrigger = false
-            };
-            
-            node.AddComponent(collider);
-
-            if(JRandom.Bool()) 
-                node.AddComponent<Rigidbody>();
-
-            AddNode(node);
-        }
-        private object[] r_node_args()
-        {
-            int r_int = genericNodeCt++;
-            Vec2 r_pos = JRandom.Vec2(Vec2.zero, Vec2.one * 256);
-
-            Vec2 r_vec = JRandom.Vec2(Vec2.one * 2, Vec2.one * (Constants.CollisionCellSize - 1));
-            Color r_color = JRandom.Color();
-            bool r_bool = JRandom.Bool();
-            Direction r_dir = JRandom.Direction();
-            return new object[]
-            {
-                r_int,
-                r_pos,
-                r_vec,
-                r_color,
-                r_bool,
-                r_dir 
-            };
+            return from Node node in nodes
+                   from T component in node.GetComponents<T>()
+                   select component;
         }
         
-        [JsonConstructor]
-        internal Stage(string name, List<NodeAsset> nodes, Metadata metadata, Metadata background, string UUID) : base(name, UUID)
+        public IEnumerable<Sprite> GetSprites()
         {
-            NodeAssets = nodes;
+            if (nodes is null)
+                return null;
+
+            IEnumerable<Sprite> sprites = (from Node node in nodes
+                                           where node.HasComponent<Sprite>()
+                                           let sprite = node.GetComponent<Sprite>()
+                                           where sprite is not null
+                                           select sprite);
+            return sprites;
+        }
+
+        #region Node Utils
+        [JsonProperty]
+        public List<Node> nodes = new();
+        public bool NodesBusy { get; private set; }
+        #endregion
+
+        #region  Misc Utils
+        private StageRenderInfo? stage_render_info = null;
+        public StageRenderInfo StageRenderInfo
+        {
+            get
+            {
+                var wasNull = stage_render_info is null;
+                var stage = Runtime.Current.GetStage(); 
+                stage_render_info ??= new(stage);
+                
+                if (!wasNull)
+                    stage_render_info.Refresh(stage); 
+
+                return stage_render_info;
+            }
+            set { stage_render_info = value; }
+        }
+
+        Queue<(Action<object[]>, object[])> delayedActionQueue = new();
+
+        #endregion
+
+        #region Physics Stuff
+
+
+        #endregion
+        #region development defaults
+
+        public static Metadata DefaultStageMetadata = new("Default Stage Asset", Constants.WorkingRoot + Constants.AssetsDir + "\\DefaultStage" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
+        public static Metadata DefaultBackgroundMetadata = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
+
+
+        public static Stage Default()
+        {
+            var nodes = new List<Node>();
+            nodes.Add(Player.Standard());
+
+            for (int i = 0; i < 5; i++)
+                nodes.Add(Rigidbody.Standard());
+
+            var stage = new Stage("Default Stage", DefaultBackgroundMetadata, nodes);
+          
+            return stage;
+        }
+        #endregion
+        #region Engine Stuff
+
+        public void Awake()
+        {
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                Node node = nodes[i];
+                node.ParentStage = this;
+                node.Awake();
+            }
+            
+        }
+        public void FixedUpdate(float delta)
+        {
+            lock (nodes)
+            {
+                NodesBusy = true;
+
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    Node node = nodes[i];
+                    node.FixedUpdate(delta);
+                }
+
+                NodesBusy = false;
+            }
+
+        }
+        public void Update()
+        {
+            lock (nodes)
+            {
+                NodesBusy = true;
+
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    Node node = nodes[i];
+                    node.Update();
+                }
+                NodesBusy = false;
+            }
+
+            for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
+            {
+                (Action<object[]>, object[]) kvp = delayedActionQueue.Dequeue();
+
+                object[] args = kvp.Item2;
+                Action<object[]> action = kvp.Item1;
+
+                action.Invoke(args);
+            }
+
+        }
+
+       
+
+
+        public Stage Copy()
+        {
+            var output = new Stage(Name, Background, nodes, UUID);
+            return output;
+        }
+        public Bitmap GetBackground()
+        {
+            if (File.Exists(Background.fullPath))
+                return new(Background.fullPath);
+            throw new MissingMetadataException($"Metadata :\"{Background.fullPath}\". File not found.");
+        }
+        
+        
+        #endregion
+
+        [JsonConstructor]
+        internal Stage(List<Node> nodes, Metadata metadata, Metadata background, string name = "Stage Asset") : base(name, true) 
+        {
+            Name = name;
+            this.UUID = UUID;
+            this.nodes = nodes;
+            foreach (var node in this.nodes)
+            {
+                if (node is null)
+                {
+                    Runtime.Log("JSON_ERROR: Null Node Removed From Stage.");
+                    RemoveNode(node);
+                }
+
+                foreach (var component in node.ComponentsList)
+                {
+                    if (component is null)
+                    {
+                        Runtime.Log("JSON_ERROR: Null Component Removed From Node.");
+                        node.RemoveComponent(component);
+                    }
+                    component.parent ??= node;
+                }
+            }
             Metadata = metadata;
             Background = background;
         }
+
+        public override void Sync()
+        {
+            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
+            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
+        }
+
         /// <summary>
         /// Memberwise copy constructor
         /// </summary>
@@ -329,28 +295,16 @@ namespace pixel_renderer
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        internal Stage(string Name, Metadata backgroundMeta, List<NodeAsset> nodes, string? existingUUID = null)
+        internal Stage(string Name, Metadata backgroundMeta, List<Node> nodes, string? existingUUID = null) : this()
         {
             this.Name = Name;
-            _uuid = existingUUID ?? pixel_renderer.UUID.NewUUID();
-            this.nodes = nodes.ToNodeList();
-            OnNodeQueryMade = RefreshStageDictionary;
-
+            UUID = existingUUID ?? pixel_renderer.UUID.NewUUID();
+            this.nodes = nodes;
             Background = backgroundMeta;
-            initializedBackground = GetBackground();
-            
-            Awake();
-        }
-        public override bool Sync()
-        {
-            Metadata = new(Name, Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension, Constants.StageFileExtension);
-            return true; 
         }
         public Stage()
         {
         }
-
-
 
     }
 }

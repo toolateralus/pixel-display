@@ -57,7 +57,7 @@ namespace pixel_editor
         #endregion
         
         bool usingStarterAssets = false;
-        Metadata background_meta = Stage.DefaultBackground;
+        Metadata background_meta = Stage.DefaultBackgroundMetadata;
         
         public StageWnd(Editor mainWnd)
         {
@@ -74,7 +74,7 @@ namespace pixel_editor
             background_meta = FileDialog.ImportFileDialog();
 
             if (background_meta.fullPath is "" or null)
-                background_meta = Stage.DefaultBackground;
+                background_meta = Stage.DefaultBackgroundMetadata;
 
             if (File.Exists(background_meta.fullPath))
                 CBit.Render(new Bitmap(background_meta.fullPath), imgPreview);
@@ -104,8 +104,8 @@ namespace pixel_editor
 
             if (msgResult == MessageBoxResult.Yes)
             {
-                Runtime.Instance.SetStage(stage);
-                Runtime.Instance.LoadedProject.AddStage(stage);
+                Runtime.Current.SetStage(stage);
+                Runtime.Current.LoadedProject.AddStage(stage);
             }
             Close(); 
         }
