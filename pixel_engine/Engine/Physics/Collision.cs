@@ -192,15 +192,18 @@ namespace pixel_renderer
 
             //depenetrate
             var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, bCol.Mesh);
+            if (minDepth == Vec2.zero)
+                return;
             A.parent.Position += minDepth / 2;
             B.parent.Position -= minDepth / 2;
 
             //flatten velocities
             Vec2 colNormal = minDepth.Normalized();
-            float colSpeedA = Vec2.Dot(A.velocity, colNormal * -1);
+            float colSpeedA = Vec2.Dot(A.velocity, colNormal);
             float colSpeedB = Vec2.Dot(B.velocity, colNormal);
-            A.velocity -= colNormal * colSpeedA * -1;
-            B.velocity -= colNormal * colSpeedB;
+            float averageSpeed = (colSpeedA + colSpeedB) / 2;
+            A.velocity -= colNormal * (averageSpeed - colSpeedA);
+            B.velocity -= colNormal * (averageSpeed - colSpeedB);
         }
         private static void AttemptCallbacks(Collider A, Collider B)
         {

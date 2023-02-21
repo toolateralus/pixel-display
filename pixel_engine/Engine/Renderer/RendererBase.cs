@@ -156,7 +156,7 @@
             sprite.parent.Position = camBoundingBox.min;
             sprite.size = camBoundingBox.max - camBoundingBox.min;
             sprite.viewportScale = sprite.size / baseImageSize;
-            sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
+            sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale.GetDivideSafe();
             sprite.ColorData = baseImage;
             sprite.camDistance = float.Epsilon;
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vec2.zero, Resolution));
