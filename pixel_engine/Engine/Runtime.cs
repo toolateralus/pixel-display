@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -150,14 +151,13 @@ namespace pixel_renderer
 
         private void RenderTick()
         {
-            if (Instance.IsRunning)
-                renderHost?.Render();
-
             while (renderThread.IsAlive)
-            {
-                CompositionTarget.Rendering += OnRendering;
-                Thread.Sleep(1);
-            }
+                if (IsRunning)
+                {
+                    CompositionTarget.Rendering += OnRendering;
+                    renderHost?.Render();
+                    Thread.Sleep(1);
+                }
         }
         private void OnRendering(object? sender, EventArgs e)
         {
