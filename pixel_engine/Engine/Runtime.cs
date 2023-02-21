@@ -77,7 +77,6 @@ namespace pixel_renderer
             Task.Run(()=> renderThread?.Join());
             renderThread = null;
         }
-      
 
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
@@ -100,7 +99,7 @@ namespace pixel_renderer
 
 
         }
-
+        
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -144,14 +143,14 @@ namespace pixel_renderer
         {
             while (!_stopWorker)
             {
-                if (IsTerminating && _stopWorker)
+                if (IsTerminating)
                     return;
                 if (m_stage is null || !PhysicsInitialized)
                     continue;     
 
                 Collision.Run(); 
                 StagingHost.FixedUpdate(m_stage);
-                Application.Current.Dispatcher?.Invoke(() => Input.Refresh());
+                Application.Current.Dispatcher.Invoke(() => Input.Refresh());
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
                
             }

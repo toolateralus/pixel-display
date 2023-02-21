@@ -73,8 +73,7 @@ namespace pixel_renderer
             }
             else remove_node(args);
         }
-
-
+        
         public Node? FindNode(string name)
         {
             IEnumerable<Node> result = (
@@ -85,17 +84,6 @@ namespace pixel_renderer
             return result.Any() ? result.First() : null; 
 
         }
-        public IEnumerable<Node> FindNodes(string name)
-        {
-            IEnumerable<Node> result = (
-                from node
-                in nodes
-                where node.Name.Equals(name)
-                select node);
-            return result; 
-
-        }
-
         public Node[] FindNodesByTag(string tag)
         {
             IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
@@ -129,6 +117,7 @@ namespace pixel_renderer
                    from T component in node.GetComponents<T>()
                    select component;
         }
+        
         public IEnumerable<Sprite> GetSprites()
         {
             if (nodes is null)
