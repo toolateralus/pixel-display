@@ -183,10 +183,86 @@ namespace pixel_editor
         Grid newMenuGrid;
         List<Action> AddItemActions = new();
 
-        private void New(object sender, RoutedEventArgs e)
+     
+
+        private void AddObject(KeyValuePair<string, object> item)
         {
-            RefreshFunctions();
+            if (item.Value is Func<Component> funct)
+            {
+                Runtime.Log($"Component {nameof(funct.Method.ReturnType)} added!");
+                funct.Invoke();
+            }
+        }
+
+        private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
+        {
             e.Handled = true;
+            RefreshFunctions();
+
+            if (sender is not Button button) return;
+            foreach (var item in addComponentFunctions)
+                if (button.Name.ToInt() is int i && AddItemActions.Count > i)
+                {
+                    AddItemActions[i]?.Invoke();
+                    return; 
+                }
+        }
+
+        private void RefreshFunctions()
+        {
+            addComponentFunctions = new()
+            {
+                {"Player",    AddPlayer},
+                {"Animator",  AddAnimator},
+                {"Sprite",    AddSprite},
+                {"Collider",  AddCollider},
+                {"Rigidbody", AddRigidbody},
+            };
+
+            pixel_renderer.Scripts.Player AddPlayer()
+            {
+                var x= selectedNode.AddComponent<pixel_renderer.Scripts.Player>();
+                Runtime.Log($"Player Added!");
+                return x;
+            }
+
+            Animator AddAnimator()
+            {
+                var x= selectedNode.AddComponent<Animator>();
+                Runtime.Log($"Animator Added!");
+
+                return x;
+            }
+
+            Sprite AddSprite()
+            {
+                var x = selectedNode.AddComponent<Sprite>();
+                Runtime.Log($"Sprite Added!");
+                return x;
+            }
+
+            Collider AddCollider()
+            {
+                var x = selectedNode.AddComponent<Collider>();
+                Runtime.Log($"Collider Added!");
+                return x;
+            }
+
+            Rigidbody AddRigidbody()
+            {
+                var x= selectedNode.AddComponent<Rigidbody>();
+                Runtime.Log($"Rigidbody Added!");
+                return x;
+            }
+        }
+
+
+        Dictionary<string, Func<Component>> addComponentFunctions; 
+
+        private void AddComponentButton_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            RefreshFunctions();
             if (!newMenuOpen)
             {
                 newMenuOpen = true;
@@ -212,46 +288,6 @@ namespace pixel_editor
             newMenuOpen = false;
             newMenuGrid.Children.Clear();
             newMenuGrid = null;
-        }
-
-        private void AddObject(KeyValuePair<string, object> item)
-        {
-            if (item.Value is Func<Component> funct)
-            {
-                Runtime.Log($"Component {nameof(funct.Method.ReturnType)} added!");
-                funct.Invoke();
-            }
-        }
-
-        private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-            RefreshFunctions();
-
-            if (sender is not Button button) return;
-            foreach (var item in addComponentFunctions)
-                if (button.Name.ToInt() is int i && AddItemActions.Count > i)
-                    AddItemActions[i]?.Invoke();
-        }
-
-        private void RefreshFunctions()
-        {
-            addComponentFunctions = new()
-            {
-                {"Player", selectedNode.AddComponent<pixel_renderer.Scripts.Player>},
-                {"Animator", selectedNode.AddComponent<Animator>},
-                {"Sprite", selectedNode.AddComponent<Sprite>},
-                {"Collider", selectedNode.AddComponent<Collider>},
-                {"Rigidbody", selectedNode.AddComponent<Rigidbody>},
-            };
-        }
-
-       
-        Dictionary<string, Func<Component>> addComponentFunctions; 
-
-        private void AddComponentButton_Click(object sender, RoutedEventArgs e)
-        {
-            New(sender, e);
         }
 
         private Grid NewInspectorGrid()

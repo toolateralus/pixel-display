@@ -4,17 +4,90 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Xml;
 using System.Windows;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace pixel_renderer
 {
+    public class CMouse
+    {
+        public static bool Left;
+        public static bool Middle;
+        public static bool Right;
+        public static bool XButton1;
+        public static bool XButton2;
+        
+        public static Vec2 Position;
+        public static Vec2 LastPosition { get; set; }
+        public static Vec2 Delta { get { return LastPosition - Position; } }
+
+        private static CMouse current = null; 
+        public static CMouse Current
+        {
+            get
+            {
+                current ??= new();
+                return current;
+            }
+        }
+
+
+        public CMouse(MouseButtonEventArgs? e = null)
+        {
+            if (current != this)
+                current = null;
+
+            current = this;
+
+            if(e is not null)
+                Refresh(e);
+        }
+
+        public static void Refresh(MouseButtonEventArgs e)
+        {
+            switch (e.ChangedButton)
+            {
+                case MouseButton.Left:
+                    Left = e.LeftButton is MouseButtonState.Pressed;
+                    break;
+                case MouseButton.Middle:
+                    Middle = e.MiddleButton is MouseButtonState.Pressed;
+                    break;
+                case MouseButton.Right:
+                    Right = e.RightButton is MouseButtonState.Pressed;
+                    break;
+                case MouseButton.XButton1:
+                    XButton1 = e.XButton1 is MouseButtonState.Pressed;
+                    break;
+                case MouseButton.XButton2:
+                    XButton2 = e.XButton2 is MouseButtonState.Pressed;
+                    break;
+            }
+
+          
+        }
+
+        public static void Refresh(MouseEventArgs e)
+        {
+            LastPosition = Position;
+            Position = (Vec2)e.GetPosition(Runtime.OutputImages.First());
+
+            if (Runtime.Current.renderHost.info.frameCount % 1 == 0
+                || Runtime.Current.renderHost.info.frameCount % 2 == 0)
+                Runtime.Log(Position.AsString());
+        }
+    }
 
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
+
+
         private static readonly List<InputAction> InputActions = new(250);
        
         internal static void Refresh()
         {
+
             lock (InputActions)
             {
                 InputAction[] actions = new InputAction[InputActions.Count];

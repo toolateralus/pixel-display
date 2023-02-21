@@ -92,13 +92,7 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-
         
-        private int renderStateIndex = 0;
-        private static bool ShouldUpdate =>
-            Runtime.Current.IsRunning &&
-            Runtime.Current.GetStage() is not null;
-
         public Editor()
         {
             engine = new();
@@ -194,12 +188,32 @@ namespace pixel_editor
             inspector.Update(sender, e);
             UpdateMetrics();
             Events.ExecuteAll();
+            TryDragNode();
+
         }
+
+        private void TryDragNode()
+        {
+            if (CMouse.LastPosition == CMouse.Position)
+                return;
+
+            if (CMouse.Left && Input.GetInputValue(Key.LeftShift) && selectedNode != null)
+            {
+                var camNode = Runtime.Current.GetStage().FindNodeWithComponent<Camera>();
+                var cam = camNode.GetComponent<Camera>();
+
+                Vec2 mouseDelta = CMouse.Delta;
+
+                selectedNode.Position -= mouseDelta / 10; 
+            }
+        }
+
         private void GetEvents()
         {
             Closing += OnDisable;
-            image.MouseLeftButtonDown += Mouse0;
-
+            image.MouseLeftButtonDown += Image_Mouse0;
+            image.MouseDown += Image_MouseDown;
+            image.MouseMove += Image_MouseMove;
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update; 
              
@@ -207,6 +221,16 @@ namespace pixel_editor
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(ToggleKeybind, Key.LeftShift);
 
+        }
+
+        private void Image_MouseMove(object sender, MouseEventArgs e)
+        {
+            CMouse.Refresh(e);
+        }
+
+        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            CMouse.Refresh(e);
         }
 
         private void ToggleKeybind(object[]? obj)
@@ -306,19 +330,26 @@ namespace pixel_editor
 
         #region UI Events
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
-        private void Mouse0(object sender, MouseButtonEventArgs e)
+        Node? selectedNode = null;
+        private void Image_Mouse0(object sender, MouseButtonEventArgs e)
+        {
+            if (!TryClickNodeOnScreen(sender, out selectedNode) || selectedNode is null)
+                return; 
+        }
+
+        private bool TryClickNodeOnScreen(object sender, out Node? result)
         {
             inspector.DeselectNode();
-
+            result = null; 
             Stage stage = Runtime.Current.GetStage();
 
             if (stage is null)
-                return;
+                return false;
 
             StagingHost stagingHost = Runtime.Current.stagingHost;
 
             if (stagingHost is null)
-                return;
+                return false; 
 
             UIElement img = (UIElement)sender;
             Point pos = Mouse.GetPosition(img);
@@ -328,12 +359,12 @@ namespace pixel_editor
             Node cameraNode = stage.FindNodeWithComponent<Camera>();
 
             if (cameraNode is null)
-                return;
+                return false;
 
             Camera cam = cameraNode.GetComponent<Camera>();
 
             if (cam is null)
-                return;
+                return false;
 
             Vec2 globalPosition = cam.ScreenViewportToGlobal((Vec2)pos);
 
@@ -342,7 +373,10 @@ namespace pixel_editor
             if (foundNode)
                 inspector.SelectNode(node);
 
+            result = node;
+            return foundNode; 
         }
+
         private void OnDisable(object? sender, EventArgs e)
         {
             stageWnd?.Close();
@@ -361,7 +395,7 @@ namespace pixel_editor
             e.Handled = true;
             if (sender is Button button)
             {
-                button.FontSize = 2;
+                button.FontSize = 4 ;
                 button.Content = $"{Environment.MachineName}";
             }
         }
@@ -502,6 +536,6 @@ namespace pixel_editor
 
 
 
-  
+
 }
 
