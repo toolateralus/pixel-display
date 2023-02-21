@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Timer = System.Timers.Timer;
 
 namespace pixel_renderer
@@ -15,9 +17,9 @@ namespace pixel_renderer
     public class Runtime
     {
         public EngineInstance mainWnd;
-        public RenderHost renderHost = new();
+        public RenderHost renderHost;
         public StagingHost stagingHost = new();
-        
+        public static List<Image> OutputImages = new();
         public Timer physicsClock;
         public Project LoadedProject;
 
@@ -42,6 +44,7 @@ namespace pixel_renderer
         public static event Action<EditorEvent>? InspectorEventRaised;
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
+        private protected Thread renderThread;
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
@@ -54,9 +57,14 @@ namespace pixel_renderer
             physicsClock = new Timer(interval.TotalSeconds);
             physicsClock.Elapsed += GlobalFixedUpdateRoot;
 
-
             CompositionTarget.Rendering += GlobalUpdateRoot;
             CompositionTarget.Rendering += Input.Refresh;
+
+            renderHost = new();
+
+            renderThread = new(RenderTick);
+            renderThread.Start();
+
         }
         public void Toggle()
         {
@@ -139,6 +147,31 @@ namespace pixel_renderer
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
+
+        private void RenderTick()
+        {
+            if (Instance.IsRunning)
+                renderHost?.Render();
+
+            while (renderThread.IsAlive)
+            {
+                CompositionTarget.Rendering += OnRendering;
+                Thread.Sleep(1);
+            }
+        }
+        private void OnRendering(object? sender, EventArgs e)
+        {
+            // Detach the rendering event so we don't get called again until the next frame
+            CompositionTarget.Rendering -= OnRendering;
+
+            // Update your UI as needed, using the Dispatcher to ensure it's done on the UI thread
+            Dispatcher.CurrentDispatcher.Invoke(() =>
+            {
+                if (OutputImages.Count == 0 || OutputImages.First() is null) return; 
+                var renderer = renderHost.GetRenderer(); 
+                CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
+            });
+        }
 
         public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
         {
