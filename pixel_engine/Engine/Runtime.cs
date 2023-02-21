@@ -66,13 +66,26 @@ namespace pixel_renderer
 
             mainWnd.Closing += (e, o) =>
             {
-                IsTerminating = true; 
-                StopPhysicsLoop();
-                renderThread.Join();
-                renderThread = null;
+                Dispose();
             };
         }
-       
+
+        private void Dispose()
+        {
+            IsTerminating = true;
+            _stopWorker = true;
+            Task.Run(()=> renderThread?.Join());
+            renderThread = null;
+        }
+
+        public static void Initialize(EngineInstance mainWnd, Project project)
+        {
+            instance ??= new(mainWnd, project);
+            TryLoadStageFromProject(0);
+            Instance.m_stage?.Awake();
+            Log($"{Instance.GetStage().Name} instantiated & engine started.");
+
+        }
         public void Toggle()
         {
             if (IsRunning)
@@ -86,14 +99,7 @@ namespace pixel_renderer
 
 
         }
-        public static void Initialize(EngineInstance mainWnd, Project project)
-        {
-            instance ??= new(mainWnd, project);
-            TryLoadStageFromProject(0);
-            Instance.m_stage?.Awake();
-            Log($"{Instance.GetStage().Name} instantiated & engine started.");
-
-        }
+        
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -104,16 +110,10 @@ namespace pixel_renderer
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
-        private void InitializePhysics()
-        {
-            PhysicsInitialized = true;
-            _worker = new BackgroundWorker();
-            _worker.DoWork += OnPhysicsTick;
-            _worker.RunWorkerAsync();
-        }
+        
         private void OnRenderTick()
         {
-            while (renderThread.IsAlive)
+            while (renderThread != null && renderThread.IsAlive)
             {
                 if (IsTerminating)
                     return;
@@ -131,6 +131,14 @@ namespace pixel_renderer
                 }
             }
         }
+
+        private void InitializePhysics()
+        {
+            PhysicsInitialized = true;
+            _worker = new BackgroundWorker();
+            _worker.DoWork += OnPhysicsTick;
+            _worker.RunWorkerAsync();
+        }
         private void OnPhysicsTick(object sender, DoWorkEventArgs e)
         {
             while (!_stopWorker)
@@ -147,11 +155,7 @@ namespace pixel_renderer
                
             }
         }
-        private void StopPhysicsLoop()
-        {
-            _stopWorker = true;
-        }
-       
+        
         public static void TryLoadStageFromProject(int index)
         {
             List<Metadata> stagesMeta = Instance.LoadedProject.stagesMeta;
@@ -180,19 +184,21 @@ namespace pixel_renderer
 
             return stage; 
         }
-        public void SetStage(Stage stage) 
-        {
-            m_stage = stage;
-            OnStageSet?.Invoke(stage);
-        }
-        public Stage? GetStage()
-        {
-            return m_stage;
-        }
+
         public void SetProject(Project project)
         {
             LoadedProject = project;
             OnProjectSet?.Invoke(project);
+        }
+
+        public Stage? GetStage()
+        {
+            return m_stage;
+        }
+        public void SetStage(Stage stage) 
+        {
+            m_stage = stage;
+            OnStageSet?.Invoke(stage);
         }
     }
 }
