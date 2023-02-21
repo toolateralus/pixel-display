@@ -188,8 +188,7 @@ namespace pixel_editor
             Events.ExecuteAll();
             TryDragNode();
             TryZoomCamera();
-            //TODO: Fix this hacky fix;
-            CMouse.MouseWheelDelta = 0;
+            
 
         }
 

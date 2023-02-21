@@ -145,7 +145,12 @@ namespace pixel_renderer
 
                     Collision.Run();
                     StagingHost.FixedUpdate(stage);
-                    Application.Current.Dispatcher.Invoke(() => Input.Refresh());
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        //TODO: Fix this hacky fix;
+                        CMouse.MouseWheelDelta = 0;
+                        Input.Refresh();
+                    });
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
             }
         }
