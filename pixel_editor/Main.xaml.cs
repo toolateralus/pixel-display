@@ -117,6 +117,8 @@ namespace pixel_editor
             OnStageSet(Runtime.Instance.GetStage());
             OnProjectSet(Runtime.Instance.LoadedProject);
 
+            Runtime.OutputImages.Add(image);
+
         }
         string stageName, projectName;
         private void OnProjectSet(Project obj)
