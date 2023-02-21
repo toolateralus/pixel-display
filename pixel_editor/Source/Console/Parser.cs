@@ -122,7 +122,6 @@ namespace pixel_editor
                         // vec2
                     case 4:
                         try {
-                            
                             value.Add(Vec2(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
