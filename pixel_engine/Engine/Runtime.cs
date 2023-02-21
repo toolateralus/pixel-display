@@ -67,7 +67,12 @@ namespace pixel_renderer
 
             renderThread = new(RenderTick);
             renderThread.Start();
-            mainWnd.Closing += (e, o) => IsTerminating = true;
+            mainWnd.Closing += (e, o) =>
+            {
+                IsTerminating = true; 
+                renderThread.Join();
+                renderThread = null;
+            };
         }
         public void Toggle()
         {
@@ -161,10 +166,9 @@ namespace pixel_renderer
                     renderHost?.Render();
                     Thread.Sleep(1);
                 }
-                if (IsTerminating) break; 
-
+                if (IsTerminating)
+                    return;
             }
-
         }
         private void OnRendering(object? sender, EventArgs e)
         {
