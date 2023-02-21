@@ -40,17 +40,7 @@ namespace pixel_renderer
         public void Render()
         {
             if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded.");
-            try
-            {
-
-                Cycle();
-            }
-            catch
-            (Exception e)
-            {
-                Runtime.Log(e.Message);
-            }
-
+            Cycle();
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
         }
         /// <summary>
