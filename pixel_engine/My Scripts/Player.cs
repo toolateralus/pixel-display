@@ -29,6 +29,8 @@ namespace pixel_renderer.Scripts
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
         private bool freezeButtonPressedLastFrame = false;
         private Vec2 thisPos;
+        private Node cameraNode;
+        private Camera camera;
 
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
         public static Node test_child_node(Node? parent = null)
@@ -40,30 +42,65 @@ namespace pixel_renderer.Scripts
             else node.Position = JRandom.Vec2(Vec2.zero, Vec2.one * Constants.ScreenW); 
 
             var sprite = AddSprite(node);
-
+            sprite.DrawSquare(Vec2.one * 16, Color.Red);
             AddCollider(node, sprite);
 
             Runtime.Current.GetStage().AddNode(node);
 
             return node;
         }
+     
         public override void Awake()
         {
             CreateInputEvents();
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
 
-            var child = test_child_node();
-            parent.Child(child);
+            cameraNode = test_child_node();
+            parent.Child(cameraNode);
 
+            cameraNode.localPos = Vec3.zero;
+            cameraNode.Position = parent.Position; 
+            camera = Player.AddCamera(cameraNode);
 
         }
 
-        public override void OnDrawShapes()
+     
+
+
+        public override void FixedUpdate(float delta)
         {
-            var mesh = parent.GetComponent<Collider>().Mesh;
-            foreach (var child in parent?.children)
-                ShapeDrawer.DrawLine(mesh.centroid, child.Value.GetComponent<Collider>().Mesh.centroid, JRandom.Color());
+            if (!takingInput) 
+                return;
+            var freezeButtonPressed = GetInputValue(Key.LeftShift);
+            if (freezeButtonPressed && !freezeButtonPressedLastFrame)
+                thisPos = parent.Position;
+            freezeButtonPressedLastFrame = freezeButtonPressed;
+            if (freezeButtonPressed)
+            {
+                foreach (var child in parent.children)
+                    child.Value.localPos += moveVector;
+                parent.Position = thisPos;
+                moveVector = Vec2.zero;
+                return;
+            }
+
+            if (CMouse.MouseWheelDelta != 0)
+                camera.Size += Vec2.one * CMouse.MouseWheelDelta;
+
+            Jump(moveVector);
+            Move(moveVector);
+
+            moveVector = Vec2.zero;
+        }
+        public override void OnTrigger(Collider other) 
+        { 
+        }
+        public override void OnCollision(Collider collider)
+        {
+            if (JRandom.Bool())
+                sprite?.Randomize();
+            else sprite?.DrawSquare(sprite.size, JRandom.Color());
         }
 
         void MakeChildObject(object[]? e)
@@ -145,39 +182,6 @@ namespace pixel_renderer.Scripts
             RegisterAction(MakeTransparent, Key.NumPad0);
             RegisterAction(MakeChildObject, Key.NumPad4);
         }
-
-        public override void FixedUpdate(float delta)
-        {
-            if (!takingInput) 
-                return;
-            var freezeButtonPressed = GetInputValue(Key.LeftShift);
-            if (freezeButtonPressed && !freezeButtonPressedLastFrame)
-                thisPos = parent.Position;
-            freezeButtonPressedLastFrame = freezeButtonPressed;
-            if (freezeButtonPressed)
-            {
-                foreach (var child in parent.children)
-                    child.Value.localPos += moveVector;
-                parent.Position = thisPos;
-                moveVector = Vec2.zero;
-                return;
-            }
-            
-            Jump(moveVector);
-            Move(moveVector);
-
-            moveVector = Vec2.zero;
-        }
-        public override void OnTrigger(Collider other) 
-        { 
-        }
-        public override void OnCollision(Collider collider)
-        {
-            if (JRandom.Bool())
-                sprite?.Randomize();
-            else sprite?.DrawSquare(sprite.size, JRandom.Color());
-        }
-
         private void Move(Vec2 moveVector)
         {
             rb.velocity.x += moveVector.x * speed;
@@ -188,52 +192,38 @@ namespace pixel_renderer.Scripts
             rb.velocity.y = moveVector.y * jumpVel;
         }
 
-        public static void AddPlayer(List<Node> nodes)
-        {
-            Node playerNode = new("Player")
-            {
-                Position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
-            };
-
-            playerNode.AddComponent<Rigidbody>();
-            Sprite sprite = AddSprite(playerNode);
-            
-            AddCollider(playerNode, sprite);
-            AddCamera(playerNode);
-            nodes.Add(playerNode);
-
-            playerNode.AddComponent<Player>().takingInput = true;
-
-        }
         public static Node Standard()
         {
             Node playerNode = new("Player")
             {
                 Position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
             };
+           
 
             playerNode.AddComponent<Rigidbody>();
             playerNode.AddComponent<Player>().takingInput = true;
+
             Sprite sprite = AddSprite(playerNode);
 
             AddCollider(playerNode, sprite);
-            AddCamera(playerNode);
 
             return playerNode;
         }
 
-        public static void AddCamera(Node playerNode, int height = 256, int width = 256, DrawingType type = DrawingType.Wrapped)
+        public static Camera AddCamera(Node node, int height = 256, int width = 256, DrawingType type = DrawingType.Wrapped)
         {
-            var cam = playerNode.AddComponent<Camera>();
+            var cam = node.AddComponent<Camera>();
             cam.DrawMode = type;
             cam.Size = new(width, height);
+            return cam;
         }
-        public static void AddCollider(Node playerNode, Sprite sprite)
+        public static Collider AddCollider(Node playerNode, Sprite sprite)
         {
             var col = playerNode.AddComponent<Collider>();
 
             col.IsTrigger = false;
             col.size = sprite.size;
+            return col;
         }
         public static Sprite AddSprite(Node playerNode)
         {
@@ -241,6 +231,18 @@ namespace pixel_renderer.Scripts
             sprite.size = Vec2.one * 36;
             return sprite;
         }
+
+        public override void OnDrawShapes()
+        {
+            var mesh = parent.GetComponent<Collider>().Mesh;
+            foreach (var child in parent?.children)
+            {
+                if (!child.Value.TryGetComponent(out Collider col)) return;
+                var centroid = col.Mesh.centroid;
+                ShapeDrawer.DrawLine(mesh.centroid, centroid, Color.LightCyan);
+            }
+        }
+
     }
 
 }

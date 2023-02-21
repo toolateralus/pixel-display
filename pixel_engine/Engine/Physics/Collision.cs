@@ -20,10 +20,10 @@ namespace pixel_renderer
             var hasCollider = node.TryGetComponent(out Collider col);
             if (!hasCollider) return;
 
-            if (node.Position.y > Constants.ScreenW - 4 - col.size.y)
-                node.Position = node.Position.WithValue(y: Constants.ScreenW - 4 - col.size.y);
-            if (node.Position.x > Constants.ScreenH - col.size.x)
-                node.Position = node.Position.WithValue(x: Constants.ScreenH - col.size.x);
+            if (node.Position.y > Constants.PhysicsArea.y - col.size.y)
+                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.y - col.size.y);
+            if (node.Position.x > Constants.PhysicsArea.x - col.size.x)
+                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.x - col.size.x);
             if (node.Position.x < 0)
                 node.Position = node.Position.WithValue(x: 0);
         }

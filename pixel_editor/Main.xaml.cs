@@ -109,7 +109,6 @@ namespace pixel_editor
             Runtime.OnStageSet += OnStageSet;
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.LoadedProject);
-
             Runtime.OutputImages.Add(image);
 
         }
@@ -188,7 +187,13 @@ namespace pixel_editor
             UpdateMetrics();
             Events.ExecuteAll();
             TryDragNode();
+            TryZoomCamera();
+            
 
+        }
+
+        private void TryZoomCamera()
+        {
         }
 
         private void TryDragNode()
@@ -211,6 +216,9 @@ namespace pixel_editor
         private void GetEvents()
         {
             Closing += OnDisable;
+            MouseWheel += OnMouseWheelMoved;
+            
+
             image.MouseLeftButtonDown += Image_Mouse0;
             image.MouseDown += Image_MouseBtnChanged;
             image.MouseUp += Image_MouseBtnChanged;
@@ -222,6 +230,11 @@ namespace pixel_editor
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(ToggleKeybind, Key.LeftShift);
 
+        }
+
+        private void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
+        {
+            CMouse.Refresh(e); 
         }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)

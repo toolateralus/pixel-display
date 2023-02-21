@@ -115,8 +115,6 @@ namespace pixel_renderer
                     return;
                 if (IsRunning)
                 {
-                    try
-                    {
                         StagingHost.Update(stage);
                         renderHost?.Render();
                         Application.Current.Dispatcher.Invoke(() =>
@@ -125,11 +123,6 @@ namespace pixel_renderer
                             var renderer = renderHost.GetRenderer();
                             CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
                         });
-                    }
-                    catch (Exception exception)
-                    {
-                        Runtime.Log(exception.Message);
-                    }
                     Thread.Sleep(1);
                 }
             }
@@ -150,16 +143,14 @@ namespace pixel_renderer
                 if (stage is null || !PhysicsInitialized)
                     continue;
 
-                try
-                {
                     Collision.Run();
                     StagingHost.FixedUpdate(stage);
-                    Application.Current.Dispatcher.Invoke(() => Input.Refresh());
-                }
-                catch (Exception exception)
-                {
-                    Runtime.Log(exception.Message);
-                }
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        //TODO: Fix this hacky fix;
+                        CMouse.MouseWheelDelta = 0;
+                        Input.Refresh();
+                    });
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
             }
         }

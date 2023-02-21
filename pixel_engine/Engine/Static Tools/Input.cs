@@ -34,6 +34,7 @@ namespace pixel_renderer
             }
         }
 
+        public static int MouseWheelDelta { get; set; }
 
         public CMouse(MouseButtonEventArgs? e = null)
         {
@@ -48,6 +49,7 @@ namespace pixel_renderer
 
         public static void Refresh(MouseButtonEventArgs e)
         {
+            e.Handled = true;
             switch (e.ChangedButton)
             {
                 case MouseButton.Left:
@@ -69,9 +71,14 @@ namespace pixel_renderer
 
           
         }
-
+        public static void Refresh(MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+            MouseWheelDelta = e.Delta;
+        }
         public static void Refresh(MouseEventArgs e)
         {
+            e.Handled = true; 
             LastPosition = Position;
             var img = Runtime.OutputImages.First();
             var point = e.GetPosition(img);
