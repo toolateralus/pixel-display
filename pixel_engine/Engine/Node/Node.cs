@@ -121,10 +121,8 @@ namespace pixel_renderer
         public void FixedUpdate(float delta)
         {
             lock (Components)
-            {
                 for (int i = 0; i < ComponentsList.Count; i++)
                       ComponentsList[i].FixedUpdate(delta);
-            }
         }
         public void Update()
         {
@@ -154,90 +152,75 @@ namespace pixel_renderer
 
         public T AddComponent<T>(T component) where T : Component
         {
-            lock (Components)
-            {
-                var type = component.GetType();
+            var type = component.GetType();
                 
-                if (type == typeof(Component))
-                    throw new InvalidOperationException("Generic type component was added.");
+            if (type == typeof(Component))
+                throw new InvalidOperationException("Generic type component was added.");
 
-                if (type == typeof(Rigidbody))
-                    rb = component as Rigidbody;
+            if (type == typeof(Rigidbody))
+                rb = component as Rigidbody;
 
-                if (!Components.ContainsKey(type))
-                    Components.Add(type, new());
+            if (!Components.ContainsKey(type))
+                Components.Add(type, new());
 
-                Components[type].Add(component);
-                component.parent = this;
+            Components[type].Add(component);
+            component.parent = this;
 
-                if(Runtime.PhysicsInitialized)
-                    component.Awake();
+            if(Runtime.PhysicsInitialized)
+                component.Awake();
 
-                return component;
-            }
+            return component;
         }
         public T AddComponent<T>() where T : Component, new()
         {
-            lock (Components)
-            {
-                Type type = typeof(T);
-                if (!Components.ContainsKey(type))
-                    Components.Add(type, new());
+            Type type = typeof(T);
+            if (!Components.ContainsKey(type))
+                Components.Add(type, new());
 
-                T component = new T();
-                AddComponent(component);
-                return component;
-            }
+            T component = new T();
+            AddComponent(component);
+            return component;
         }
 
         public void RemoveComponent(Component component)
         {
-            lock (Components)
+            var type = component.GetType();
+            if (ComponentsList.Contains(component))
             {
-                var type = component.GetType();
-                if (ComponentsList.Contains(component))
-                {
-                    var compList = Components[type];
-                    var toRemove = new Component();
-                    foreach (var comp in from comp in compList
-                                         where comp is not null &&
-                                         comp.UUID.Equals(component.UUID)
-                                         select comp)
-                    toRemove = comp;
+                var compList = Components[type];
+                var toRemove = new Component();
+                foreach (var comp in from comp in compList
+                                        where comp is not null &&
+                                        comp.UUID.Equals(component.UUID)
+                                        select comp)
+                toRemove = comp;
 
-                    if (toRemove is not null)
-                        compList.Remove(toRemove);
-                    if (compList.Count == 0) Components.Remove(type);
-                }
+                if (toRemove is not null)
+                    compList.Remove(toRemove);
+                if (compList.Count == 0) Components.Remove(type);
             }
         }
         public bool TryGetComponent<T>(out T? component, int? index = 0) where T : Component
         {
-            lock (Components)
+            if (!Components.ContainsKey(typeof(T)))
             {
-                if (!Components.ContainsKey(typeof(T)))
-                {
-                    component = null;
-                    return false;
-                }
-                component = Components[typeof(T)][index ?? 0] as T;
-                
-                if (component is null) 
-                    return false;
-
-                return true;
+                component = null;
+                return false;
             }
+            component = Components[typeof(T)][index ?? 0] as T;
+                
+            if (component is null) 
+                return false;
+
+            return true;
         }
 
         public IEnumerable<T> GetComponents<T>() where T : Component
         {
-            lock (Components)
-            {
-                return from Type type in Components.Keys
-                       where type.IsAssignableTo(typeof(T))
-                       from T component in Components[type]
-                       select component;
-            }
+            return from Type type in Components.Keys
+                    where type.IsAssignableTo(typeof(T))
+                    from T component in Components[type]
+                    select component;
         }
         public T GetComponent<T>(int index = 0) where T : Component
         {
@@ -250,14 +233,11 @@ namespace pixel_renderer
         }
         public bool HasComponent<T>() where T : Component
         {
-            lock (Components)
+            if (!Components.ContainsKey(typeof(T)))
             {
-                if (!Components.ContainsKey(typeof(T)))
-                {
-                    return false;
-                }
-                return true;
+                return false;
             }
+            return true;
         }
 
         public static Node New => new("New Node", Vec2.zero, Vec2.one);

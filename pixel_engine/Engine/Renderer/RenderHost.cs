@@ -61,7 +61,7 @@ namespace pixel_renderer
         {
             m_renderer.Dispose();
             UpdateResolution();
-            if (Runtime.Instance.GetStage() is Stage stage)
+            if (Runtime.Current.GetStage() is Stage stage)
             {
                 ShapeDrawer.Refresh(stage);
                 m_renderer.Draw(stage.StageRenderInfo);

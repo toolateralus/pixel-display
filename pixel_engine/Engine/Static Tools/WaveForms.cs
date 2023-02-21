@@ -31,7 +31,7 @@
         {
             float progress = (float)vertexIndex / (vertices - 1);
             int x = (int)CMath.Lerp(startPosition, endPosition, progress);
-            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Instance.renderHost.info.frameCount * movementSpeed));
+            int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Current.renderHost.info.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
         /// <summary>
@@ -43,7 +43,7 @@
             int vertexIndex = JRandom.Int(0, vertices);
             float progress = (float)vertexIndex / (vertices - 1);
             int x = (int)CMath.Lerp(0, 1, progress);
-            int y = (int)(amplitude * Math.Sin(CMath.Tau * frequency * x + Runtime.Instance.renderHost.info.frameCount * movementSpeed));
+            int y = (int)(amplitude * Math.Sin(CMath.Tau * frequency * x + Runtime.Current.renderHost.info.frameCount * movementSpeed));
             return new Vec2(x, y);
         }
     }

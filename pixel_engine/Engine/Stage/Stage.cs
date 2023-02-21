@@ -144,7 +144,7 @@ namespace pixel_renderer
             get
             {
                 var wasNull = stage_render_info is null;
-                var stage = Runtime.Instance.GetStage(); 
+                var stage = Runtime.Current.GetStage(); 
                 stage_render_info ??= new(stage);
                 
                 if (!wasNull)

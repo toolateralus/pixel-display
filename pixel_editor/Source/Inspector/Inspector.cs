@@ -9,6 +9,7 @@ using pixel_renderer;
 using System.Windows.Media.Effects;
 using System.Linq;
 using System.Windows.Media;
+using System.Net.NetworkInformation;
 
 namespace pixel_editor
 {
@@ -106,7 +107,7 @@ namespace pixel_editor
 
                 OnObjectDeselected?.Invoke(grid);
             }
-            Runtime.Instance.stagingHost.DeselectNode();
+            Runtime.Current.stagingHost.DeselectNode();
         }
         public void SelectNode(Node node)
         {
@@ -165,13 +166,94 @@ namespace pixel_editor
 
             int index = 0;
 
-
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
                     index = AddComponentToInspector(grid, index, component);
 
+            var addComponentButton = Inspector.GetButton("Add Component", new(0, 0, 0, 0));
+            addComponentButton.FontSize = 2;
+            grid.Children.Add(addComponentButton);
+            addComponentButton.Click += AddComponentButton_Click;
+            Inspector.SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
+
             OnInspectorUpdated?.Invoke(grid);
         }
+
+        bool newMenuOpen = false;
+        Grid newMenuGrid;
+        List<Action> AddItemActions = new();
+
+        private void New(object sender, RoutedEventArgs e)
+        {
+            RefreshFunctions();
+            e.Handled = true;
+            if (!newMenuOpen)
+            {
+                newMenuOpen = true;
+                newMenuGrid = Inspector.GetGrid();
+                MainGrid.Children.Add(newMenuGrid);
+                Inspector.SetRowAndColumn(newMenuGrid, 10, 10, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
+
+                int i = 0;
+                foreach (var item in addComponentFunctions)
+                {
+                    Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
+                    button.Name = $"button{i}";
+                    AddItemActions.Add(() => AddObject(new(item.Key, item.Value)));
+                    button.FontSize = 2;
+                    button.Click += NewObjectButtonClicked;
+                    newMenuGrid.Children.Add(button);
+                    Inspector.SetRowAndColumn(button, 1, 2, 0, i);
+                    i++;
+
+                }
+                return;
+            }
+            newMenuOpen = false;
+            newMenuGrid.Children.Clear();
+            newMenuGrid = null;
+        }
+
+        private void AddObject(KeyValuePair<string, object> item)
+        {
+            if (item.Value is Func<Component> funct)
+            {
+                Runtime.Log($"Component {nameof(funct.Method.ReturnType)} added!");
+                funct.Invoke();
+            }
+        }
+
+        private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            RefreshFunctions();
+
+            if (sender is not Button button) return;
+            foreach (var item in addComponentFunctions)
+                if (button.Name.ToInt() is int i && AddItemActions.Count > i)
+                    AddItemActions[i]?.Invoke();
+        }
+
+        private void RefreshFunctions()
+        {
+            addComponentFunctions = new()
+            {
+                {"Player", selectedNode.AddComponent<pixel_renderer.Scripts.Player>},
+                {"Animator", selectedNode.AddComponent<Animator>},
+                {"Sprite", selectedNode.AddComponent<Sprite>},
+                {"Collider", selectedNode.AddComponent<Collider>},
+                {"Rigidbody", selectedNode.AddComponent<Rigidbody>},
+            };
+        }
+
+       
+        Dictionary<string, Func<Component>> addComponentFunctions; 
+
+        private void AddComponentButton_Click(object sender, RoutedEventArgs e)
+        {
+            New(sender, e);
+        }
+
         private Grid NewInspectorGrid()
         {
             Grid grid = GetGrid();

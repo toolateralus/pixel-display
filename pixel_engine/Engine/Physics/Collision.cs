@@ -221,7 +221,7 @@ namespace pixel_renderer
                 return;
             }
 
-            var stage = Runtime.Instance.GetStage();
+            var stage = Runtime.Current.GetStage();
             RegisterColliders(stage);
             BroadPhase(stage, collisionMap);
             NarrowPhase(collisionMap);

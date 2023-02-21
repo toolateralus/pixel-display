@@ -15,7 +15,7 @@ namespace pixel_renderer
         public override void Draw(StageRenderInfo renderInfo)
         {
 
-            if (Runtime.Instance.GetStage() is not Stage stage) return;
+            if (Runtime.Current.GetStage() is not Stage stage) return;
             if (baseImageDirty)
             {
                 baseImage = ColorArrayFromBitmap(stage.InitializedBackground);

@@ -15,7 +15,7 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
-            if (Runtime.Instance.IsRunning)
+            if (Runtime.Current.IsRunning)
                 if (showMessage)
                 {
                     var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OKCancel);
@@ -26,7 +26,7 @@ namespace pixel_renderer.Assets
             // TODO: reimplement importer.
             //ImportTask(); 
             
-            if (!Runtime.Instance.IsRunning)
+            if (!Runtime.Current.IsRunning)
                 if (showMessage)
                 {
                     var syncResult = MessageBox

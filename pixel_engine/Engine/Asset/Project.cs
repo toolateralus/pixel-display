@@ -42,7 +42,7 @@ namespace pixel_renderer
 
         public void Save()
         {
-            ProjectIO.WriteProject(Runtime.Instance.LoadedProject, Metadata);
+            ProjectIO.WriteProject(Runtime.Current.LoadedProject, Metadata);
         }
 
        

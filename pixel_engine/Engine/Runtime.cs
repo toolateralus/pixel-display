@@ -21,18 +21,20 @@ namespace pixel_renderer
         public EngineInstance mainWnd;
         public RenderHost renderHost;
         public StagingHost stagingHost = new();
-        public static List<Image> OutputImages = new();
         public Project LoadedProject;
 
+        public static List<Image> OutputImages = new();
+
         public bool IsRunning { get; private set; }
-        public static bool PhysicsInitialized = false;
-        public static bool Initialized = false;
-        public static object? inspector = null;
+        public static bool PhysicsInitialized { get; private set; }
+        public static bool Initialized { get; private set; }
+        public static object? Editor = null;
+
         internal int selectedStage = 0;
         
-        private protected volatile Stage? m_stage;
+        private protected volatile Stage? stage;
         private protected volatile static Runtime? instance;
-        public static Runtime Instance
+        public static Runtime Current
         {
             get
             {
@@ -70,22 +72,7 @@ namespace pixel_renderer
             };
         }
 
-        private void Dispose()
-        {
-            IsTerminating = true;
-            _stopWorker = true;
-            Task.Run(()=> renderThread?.Join());
-            renderThread = null;
-        }
 
-        public static void Initialize(EngineInstance mainWnd, Project project)
-        {
-            instance ??= new(mainWnd, project);
-            TryLoadStageFromProject(0);
-            Instance.m_stage?.Awake();
-            Log($"{Instance.GetStage().Name} instantiated & engine started.");
-
-        }
         public void Toggle()
         {
             if (IsRunning)
@@ -97,6 +84,15 @@ namespace pixel_renderer
             if (!PhysicsInitialized)
                 InitializePhysics();
 
+
+        }
+
+        public static void Initialize(EngineInstance mainWnd, Project project)
+        {
+            instance ??= new(mainWnd, project);
+            TryLoadStageFromProject(0);
+            Current.stage?.Awake();
+            Log($"{Current.GetStage().Name} instantiated & engine started.");
 
         }
         
@@ -119,19 +115,25 @@ namespace pixel_renderer
                     return;
                 if (IsRunning)
                 {
-                    StagingHost.Update(m_stage);
-                    renderHost?.Render();
-                    Application.Current.Dispatcher.Invoke(() =>
+                    try
                     {
-                        if (OutputImages.Count == 0 || OutputImages.First() is null) return;
-                        var renderer = renderHost.GetRenderer();
-                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
-                    });
+                        StagingHost.Update(stage);
+                        renderHost?.Render();
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (OutputImages.Count == 0 || OutputImages.First() is null) return;
+                            var renderer = renderHost.GetRenderer();
+                            CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
+                        });
+                    }
+                    catch (Exception exception)
+                    {
+                        Runtime.Log(exception.Message);
+                    }
                     Thread.Sleep(1);
                 }
             }
         }
-
         private void InitializePhysics()
         {
             PhysicsInitialized = true;
@@ -145,19 +147,39 @@ namespace pixel_renderer
             {
                 if (IsTerminating)
                     return;
-                if (m_stage is null || !PhysicsInitialized)
-                    continue;     
+                if (stage is null || !PhysicsInitialized)
+                    continue;
 
-                Collision.Run(); 
-                StagingHost.FixedUpdate(m_stage);
-                Application.Current.Dispatcher.Invoke(() => Input.Refresh());
+                try
+                {
+                    Collision.Run();
+                    StagingHost.FixedUpdate(stage);
+                    Application.Current.Dispatcher.Invoke(() => Input.Refresh());
+                }
+                catch (Exception exception)
+                {
+                    Runtime.Log(exception.Message);
+                }
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
             }
         }
-        
+        private void Dispose()
+        {
+            IsTerminating = true;
+            _stopWorker = true;
+            Task.Run(()=> renderThread?.Join());
+            renderThread = null;
+        }
+
+        public void SetProject(Project project)
+        {
+            LoadedProject = project;
+            OnProjectSet?.Invoke(project);
+        }
+
         public static void TryLoadStageFromProject(int index)
         {
-            List<Metadata> stagesMeta = Instance.LoadedProject.stagesMeta;
+            List<Metadata> stagesMeta = Current.LoadedProject.stagesMeta;
             
             Stage stage;
 
@@ -168,7 +190,7 @@ namespace pixel_renderer
             }
             else stage = InstantiateDefaultStageIntoProject();
 
-            Instance.SetStage(stage);
+            Current.SetStage(stage);
         }
         private static Stage InstantiateDefaultStageIntoProject()
         {
@@ -177,26 +199,19 @@ namespace pixel_renderer
 
             Stage stage = Stage.Default();
 
-            Instance.LoadedProject.AddStage(stage);
+            Current.LoadedProject.AddStage(stage);
 
             StageIO.WriteStage(stage);
 
             return stage; 
         }
-
-        public void SetProject(Project project)
-        {
-            LoadedProject = project;
-            OnProjectSet?.Invoke(project);
-        }
-
         public Stage? GetStage()
         {
-            return m_stage;
+            return stage;
         }
         public void SetStage(Stage stage) 
         {
-            m_stage = stage;
+            this.stage = stage;
             OnStageSet?.Invoke(stage);
         }
     }

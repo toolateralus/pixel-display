@@ -23,7 +23,7 @@
         public Vec2 Resolution 
         { 
             get => resolution;
-            set => Runtime.Instance.renderHost.newResolution = (Vec2?)value; 
+            set => Runtime.Current.renderHost.newResolution = (Vec2?)value; 
         }
 
         internal protected Vec2 resolution = Constants.DefaultResolution;

@@ -56,7 +56,7 @@ namespace pixel_renderer
         public const int ScreenH = 256;
         public const int ScreenW = 256;
 
-        public static Vec2 CurrentResolution => Runtime.Instance.renderHost.GetRenderer().Resolution;
+        public static Vec2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         public static Vec2 DefaultResolution => new(ScreenW, ScreenH);
         public static Vec2 MaxResolution = new(3840, 3840);
         public static Vec2 MinResolution = new(4, 4);

@@ -83,7 +83,7 @@ namespace pixel_editor
                 Vec2 vector = (Vec2)e[0];
                 Vec2Int newRes = (Vec2Int)vector;
                 Console.Print(vector.AsString());
-                Runtime.Instance.renderHost.GetRenderer().Resolution = newRes;
+                Runtime.Current.renderHost.GetRenderer().Resolution = newRes;
             },
             description = "sets the resolution to the specified Vec2"
         };
@@ -93,7 +93,7 @@ namespace pixel_editor
             syntax = "resolution.Get();",
             action = (e) =>
             {
-                Console.Print(((Vec2)Runtime.Instance.renderHost.GetRenderer().Resolution).AsString());
+                Console.Print(((Vec2)Runtime.Current.renderHost.GetRenderer().Resolution).AsString());
             },
             description = "gets the resolution and prints it to the console"
         };
@@ -118,7 +118,7 @@ namespace pixel_editor
             action = (e) =>
             {
                 string name = (string)e[0];
-                Node node = Runtime.Instance.GetStage().FindNode(name);
+                Node node = Runtime.Current.GetStage().FindNode(name);
                 Editor.Current.Inspector.DeselectNode();
                 Editor.Current.Inspector.SelectNode(node);
                 if (node is not null)
@@ -155,7 +155,7 @@ namespace pixel_editor
         {
             phrase = "++n;",
             syntax = "++n();",
-            action = (o) => Runtime.Instance.GetStage().AddNode(Rigidbody.Standard()),
+            action = (o) => Runtime.Current.GetStage().AddNode(Rigidbody.Standard()),
             description = "Spawns a generic node with a Rigidbody , Sprite, and Collider, and adds it to the current Stage."
         };
         public static Command cmd_add_child() => new()
@@ -220,7 +220,7 @@ namespace pixel_editor
                 string fName = (string)e[1];
                 object value = e[2];
 
-                Node? node = Runtime.Instance.GetStage().FindNode(nName);
+                Node? node = Runtime.Current.GetStage().FindNode(nName);
                 if (node is null)
                     Console.Print("Node was not found.");
                 Camera cam = node.GetComponent<Camera>();
@@ -269,7 +269,7 @@ namespace pixel_editor
                     {
                         case PromptResult.Yes:
                             Console.Print($"Project {name} set.");
-                            Runtime.Instance.SetProject(project);
+                            Runtime.Current.SetProject(project);
                             break;
                         case PromptResult.No:
                             Console.Print("Project not set.");
@@ -302,7 +302,7 @@ namespace pixel_editor
                 if (o.Length > 1 && o[1] is bool)
                     loadAsynchronously = (bool)o[1];
 
-                Project project = Runtime.Instance.LoadedProject;
+                Project project = Runtime.Current.LoadedProject;
 
                 if (project is null) return;
 
@@ -321,7 +321,7 @@ namespace pixel_editor
                 {
                     case PromptResult.Yes:
                         Print($"Stage {stage.Name} set.");
-                        Runtime.Instance.SetStage(stage);
+                        Runtime.Current.SetStage(stage);
                         break;
                     case PromptResult.No:
                         Print("Stage not set.");
@@ -383,7 +383,7 @@ namespace pixel_editor
 
             if (!collidersHighlighted)
             {
-                Stage? stage = Runtime.Instance.GetStage();
+                Stage? stage = Runtime.Current.GetStage();
 
                 if (stage is null)
                 {
@@ -410,7 +410,7 @@ namespace pixel_editor
             }
             else
             {
-                Stage? stage = Runtime.Instance.GetStage();
+                Stage? stage = Runtime.Current.GetStage();
 
                 if (stage is null)
                 {
@@ -556,12 +556,12 @@ namespace pixel_editor
 
         static void PrintLoadedStageNames()
         {
-            foreach (var stage in Runtime.Instance.LoadedProject.stages)
+            foreach (var stage in Runtime.Current.LoadedProject.stages)
                 Console.Print(stage.Name);
         }
         static void PrintLoadedStageMetaFileNames()
         {
-            foreach (var stage in Runtime.Instance.LoadedProject.stagesMeta)
+            foreach (var stage in Runtime.Current.LoadedProject.stagesMeta)
                 Console.Print(stage?.Name ?? "null");
         }
         static void ListStages(string s)
@@ -595,7 +595,7 @@ namespace pixel_editor
                 return false;
             }
 
-            Stage? stage = Runtime.Instance.GetStage();
+            Stage? stage = Runtime.Current.GetStage();
 
             if (stage is null)
             {
@@ -618,7 +618,7 @@ namespace pixel_editor
 
         private static void RandomizeBackground(params object[]? args)
         {
-            var stage = Runtime.Instance.GetStage();
+            var stage = Runtime.Current.GetStage();
 
             var background = stage.InitializedBackground;
 
@@ -641,7 +641,7 @@ namespace pixel_editor
                 for (int j = 0; j < y - 1; ++j)
                     background.SetPixel(i, j, JRandom.Color());
 
-            Runtime.Instance.renderHost.MarkDirty();
+            Runtime.Current.renderHost.MarkDirty();
         }
         private static void PrintNodeInformation(Node node)
         {
@@ -697,7 +697,7 @@ namespace pixel_editor
         {
             string nodesList = "";
             char nonBreakingspace = '\u2007';
-            foreach (Node node in Runtime.Instance.GetStage().nodes)
+            foreach (Node node in Runtime.Current.GetStage().nodes)
                 nodesList += node.Name + " ";
             Console.Print($"{nodesList}");
         }
@@ -709,7 +709,7 @@ namespace pixel_editor
                 string fName = (string)e[1];
                 object value = e[2];
 
-                Node? node = Runtime.Instance.GetStage().FindNode(nName);
+                Node? node = Runtime.Current.GetStage().FindNode(nName);
                 Type type = node.GetType();
                 FieldInfo? field = type.GetRuntimeField(fName);
                 field?.SetValue(node, value);
@@ -722,7 +722,7 @@ namespace pixel_editor
                 string nName = (string)e[0];
                 string fName = (string)e[1];
 
-                if (Runtime.Instance.GetStage().FindNode(nName) is not Node node)
+                if (Runtime.Current.GetStage().FindNode(nName) is not Node node)
                 {
                     Error($"\"{nName}.{fName}()\" Node not found!", 2);
                     return;

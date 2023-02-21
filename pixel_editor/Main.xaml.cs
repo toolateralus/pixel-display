@@ -96,8 +96,8 @@ namespace pixel_editor
         
         private int renderStateIndex = 0;
         private static bool ShouldUpdate =>
-            Runtime.Instance.IsRunning &&
-            Runtime.Instance.GetStage() is not null;
+            Runtime.Current.IsRunning &&
+            Runtime.Current.GetStage() is not null;
 
         public Editor()
         {
@@ -108,14 +108,14 @@ namespace pixel_editor
             GetEvents();
 
             inspector = new Inspector(inspectorGrid);
-            Runtime.inspector = inspector;
+            Runtime.Editor = inspector;
 
             Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
 
             Runtime.OnProjectSet += OnProjectSet;
             Runtime.OnStageSet += OnStageSet;
-            OnStageSet(Runtime.Instance.GetStage());
-            OnProjectSet(Runtime.Instance.LoadedProject);
+            OnStageSet(Runtime.Current.GetStage());
+            OnProjectSet(Runtime.Current.LoadedProject);
 
             Runtime.OutputImages.Add(image);
 
@@ -133,7 +133,7 @@ namespace pixel_editor
         }
 
         internal EngineInstance? engine;
-        internal static RenderHost? Host => Runtime.Instance.renderHost;
+        internal static RenderHost? Host => Runtime.Current.renderHost;
 
         private static Editor current;
         public static Editor Current
@@ -186,9 +186,9 @@ namespace pixel_editor
                 consoleOutput.Background = Brushes.Black;
             };
         }
-        public byte[] Frame => Runtime.Instance.renderHost.GetRenderer().Frame;
-        public int Stride => Runtime.Instance.renderHost.GetRenderer().Stride;
-        public Vec2 Resolution => Runtime.Instance.renderHost.GetRenderer().Resolution;
+        public byte[] Frame => Runtime.Current.renderHost.GetRenderer().Frame;
+        public int Stride => Runtime.Current.renderHost.GetRenderer().Stride;
+        public Vec2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
@@ -212,7 +212,7 @@ namespace pixel_editor
         private void ToggleKeybind(object[]? obj)
         {
             if (Input.GetInputValue(0, "P"))
-                Runtime.Instance.Toggle();
+                Runtime.Current.Toggle();
 
         }
 
@@ -237,8 +237,8 @@ namespace pixel_editor
 
         private void UpdateMetrics()
         {
-            var memory = Runtime.Instance.renderHost.info.GetTotalMemory();
-            var framerate = Runtime.Instance.renderHost.info.Framerate;
+            var memory = Runtime.Current.renderHost.info.GetTotalMemory();
+            var framerate = Runtime.Current.renderHost.info.Framerate;
             gcAllocText.Content =
                 $"{memory}";
 
@@ -310,12 +310,12 @@ namespace pixel_editor
         {
             inspector.DeselectNode();
 
-            Stage stage = Runtime.Instance.GetStage();
+            Stage stage = Runtime.Current.GetStage();
 
             if (stage is null)
                 return;
 
-            StagingHost stagingHost = Runtime.Instance.stagingHost;
+            StagingHost stagingHost = Runtime.Current.stagingHost;
 
             if (stagingHost is null)
                 return;
@@ -346,15 +346,15 @@ namespace pixel_editor
         private void OnDisable(object? sender, EventArgs e)
         {
             stageWnd?.Close();
-            Runtime.Instance.mainWnd.Close();
+            Runtime.Current.mainWnd.Close();
             engine?.Close();
         }
         private void OnPlay(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            Runtime.Instance.Toggle();
-            playBtn.Content = Runtime.Instance.IsRunning ? "On" : "Off";
-            playBtn.Background = Runtime.Instance.IsRunning ? Brushes.LightGreen : Brushes.LightPink;
+            Runtime.Current.Toggle();
+            playBtn.Content = Runtime.Current.IsRunning ? "On" : "Off";
+            playBtn.Background = Runtime.Current.IsRunning ? Brushes.LightGreen : Brushes.LightPink;
         }
         private void OnViewChanged(object sender, RoutedEventArgs e)
         {
@@ -364,7 +364,6 @@ namespace pixel_editor
                 button.FontSize = 2;
                 button.Content = $"{Environment.MachineName}";
             }
-
         }
         private void OnImportBtnPressed(object sender, RoutedEventArgs e)
         {
@@ -396,7 +395,7 @@ namespace pixel_editor
             e.Handled = true;
             Project project = Project.Load();
             if (project is not null)
-                Runtime.Instance.SetProject(project);
+                Runtime.Current.SetProject(project);
         }
 
         /// <summary>
@@ -448,7 +447,7 @@ namespace pixel_editor
 
         private void New(object sender, RoutedEventArgs e)
         {
-
+            e.Handled = true; 
             if (!newMenuOpen)
             {
                 newMenuOpen = true;
@@ -481,7 +480,7 @@ namespace pixel_editor
             if (item.Value is Func<Node> funct)
             {
                 Runtime.Log("Node added!");
-                Runtime.Instance.GetStage().AddNode(funct.Invoke()); 
+                Runtime.Current.GetStage().AddNode(funct.Invoke()); 
             }
         }
 

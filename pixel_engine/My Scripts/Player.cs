@@ -41,7 +41,7 @@ namespace pixel_renderer.Scripts
 
             AddCollider(node, sprite);
 
-            Runtime.Instance.GetStage().AddNode(node);
+            Runtime.Current.GetStage().AddNode(node);
 
             return node;
         }
@@ -110,7 +110,7 @@ namespace pixel_renderer.Scripts
 
         void IncreaseResolution(object[]? e)
         {
-            RenderHost renderHost = Runtime.Instance.renderHost;
+            RenderHost renderHost = Runtime.Current.renderHost;
             var renderer = renderHost.GetRenderer();
 
             if (renderer.Resolution.x < Constants.MaxResolution.x)
@@ -118,8 +118,8 @@ namespace pixel_renderer.Scripts
         }
         void DecreaseResolution(object[]? e)
         {
-            var renderer = Runtime.Instance.renderHost.GetRenderer();
-            RenderHost renderHost = Runtime.Instance.renderHost;
+            var renderer = Runtime.Current.renderHost.GetRenderer();
+            RenderHost renderHost = Runtime.Current.renderHost;
 
             if (renderer.Resolution.x > Constants.MaxResolution.x)
                 renderHost.newResolution = renderer.Resolution - Vec2.one;

@@ -7,7 +7,7 @@ namespace pixel_renderer
     public class StagingHost
     {
         public Node? lastSelected;
-        static Runtime runtime => Runtime.Instance;
+        static Runtime runtime => Runtime.Current;
         /// <summary>
         /// this is used for editor clicking.
         /// </summary>
