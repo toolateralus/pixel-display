@@ -202,7 +202,7 @@ namespace pixel_editor
             if (CMouse.Left && Input.GetInputValue(Key.LeftShift) && selectedNode != null)
             {
                 if (CMouse.LeftPressedThisFrame)
-                    mouseSelectedNodeOffset = CMouse.GlobalPosition - selectedNode.Position;
+                    mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
 
                 selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset; 
             }
@@ -212,7 +212,8 @@ namespace pixel_editor
         {
             Closing += OnDisable;
             image.MouseLeftButtonDown += Image_Mouse0;
-            image.MouseDown += Image_MouseDown;
+            image.MouseDown += Image_MouseBtnChanged;
+            image.MouseUp += Image_MouseBtnChanged;
             image.MouseMove += Image_MouseMove;
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update; 
@@ -228,7 +229,7 @@ namespace pixel_editor
             CMouse.Refresh(e);
         }
 
-        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Image_MouseBtnChanged(object sender, MouseButtonEventArgs e)
         {
             CMouse.Refresh(e);
         }
