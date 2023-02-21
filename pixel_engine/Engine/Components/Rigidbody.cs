@@ -7,8 +7,8 @@ namespace pixel_renderer
     public class Rigidbody : Component
     {
         private float _drag = 0.0f;
-        [Field] [JsonProperty] public float drag = .4f;
-        [Field] [JsonProperty] public bool usingGravity = true;
+        [Field] [JsonProperty] public float drag = .6f;
+        [Field] [JsonProperty] public bool usingGravity = false;
         [Field] [JsonProperty] public Vec2 velocity = new();
         [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
         [Field] public Sprite? sprite; 
@@ -58,7 +58,8 @@ namespace pixel_renderer
         public override void Awake() => parent.TryGetComponent(out sprite);
         public override void FixedUpdate(float delta)
         {
-            if (usingGravity) velocity.y += CMath.Gravity;
+            if (usingGravity) 
+                velocity.y += CMath.Gravity;
             ApplyDrag();
             ApplyVelocity();
         }

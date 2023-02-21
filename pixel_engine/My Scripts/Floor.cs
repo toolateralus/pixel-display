@@ -1,12 +1,30 @@
-﻿namespace pixel_renderer
+﻿using System.Drawing;
+using System.Windows.Media.Media3D;
+
+namespace pixel_renderer
 {
     /// <summary>
     /// temporary script to keep the floor in place while there is no Kinematic Body (non rigidbodies cannot participate in collision)
     /// </summary>
-    internal class Floor : Component
+    public class Floor : Component
     {
-        public Vec2 startPos = new(256, 256);
-        public override void Update() => parent.Position = startPos;
-        public override void OnCollision(Collider collider) => GetComponent<Sprite>().Randomize();
+        public const float height = 10; 
+        public const float width = Constants.CollisionCellSize - 10;
+        private Polygon poly;
+
+        public static Node Standard()
+        {
+            Node node = new("Floor Node");
+            node.AddComponent<Floor>();
+            return node;
+        }
+        Vec2 zero = Vec2.zero;
+        public override void FixedUpdate(float delta) => parent.Position = zero;
+        public override void Awake()
+        {
+            Collider col = parent.AddComponent<Collider>();
+            poly = Polygon.Rectangle(width, height);
+            col.Mesh = poly;
+        }
     }
 }

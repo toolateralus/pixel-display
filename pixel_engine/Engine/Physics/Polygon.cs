@@ -68,6 +68,18 @@ namespace pixel_renderer
             polygon.centroid += offset;
             return polygon;
         }
+        public static Polygon Rectangle(float width, float height)
+        {
+            return new(new Vec2[] { new(0, 0), new(width, 0), new(width, height), new(0, height) });
+        }
+        public static Polygon Triangle(float length)
+        {
+            Vec2 zero = new Vec2(0,length);
+            Vec2 one = new Vec2(0.5f * length, length);
+            Vec2 two = new Vec2(length, length);
+
+            return new(new Vec2[] { zero, one, two});
+        }
     }
     
 }

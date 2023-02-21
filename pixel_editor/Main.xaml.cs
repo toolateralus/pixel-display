@@ -520,7 +520,8 @@ namespace pixel_editor
         {
             {"Static Body", Rigidbody.StaticBody },
             {"Rigid Body", Rigidbody.Standard },
-            {"Animator", Animator.Standard}
+            {"Animator", Animator.Standard},
+            {"Floor",Floor.Standard},
         };
     }
 }

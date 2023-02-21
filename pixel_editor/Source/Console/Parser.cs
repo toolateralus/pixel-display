@@ -106,10 +106,6 @@ namespace pixel_editor
                         // bool
                     case 1:
                         try {
-
-                            if (input.ToLower() is not "true" or "false")
-                                continue; 
-
                             value.Add(bool.Parse(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
@@ -126,8 +122,7 @@ namespace pixel_editor
                         // vec2
                     case 4:
                         try {
-                            if (!input.Contains(','))
-                                continue;
+                            
                             value.Add(Vec2(input)); }
                         catch (Exception e) { Runtime.Log(e.Message); };
                         continue;
