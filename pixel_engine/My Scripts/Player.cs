@@ -16,18 +16,18 @@ namespace pixel_renderer.Scripts
 
     public class Player : Component
     {
-        [Field] [JsonProperty] public bool takingInput = true;
-        [Field] [JsonProperty] public int speed = 8;
-        [Field] [JsonProperty] public float inputMagnitude = 1f;
+        [Field][JsonProperty] public bool takingInput = true;
+        [Field][JsonProperty] public int speed = 8;
+        [Field][JsonProperty] public float inputMagnitude = 1f;
+        [Field] [JsonProperty] private Animator? anim;
 
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vec2 moveVector;
 
-        private Animator? anim;
-        private int resolution_increment; 
         
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
+
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
         public static Node test_child_node(Node? parent = null)
         {
@@ -60,7 +60,7 @@ namespace pixel_renderer.Scripts
         public override void OnDrawShapes()
         {
             var mesh = parent.GetComponent<Collider>().Mesh;
-            foreach (var child in parent.children)
+            foreach (var child in parent?.children)
                 ShapeDrawer.DrawLine(mesh.centroid, child.Value.GetComponent<Collider>().Mesh.centroid, JRandom.Color());
         }
 
@@ -148,8 +148,21 @@ namespace pixel_renderer.Scripts
         {
             if (!takingInput) 
                 return;
+
+            Vec2 thisPos = parent.Position; 
+
+            if (GetInputValue(Key.LeftShift) && moveVector.SqrMagnitude() > 0)
+            {
+                foreach (var child in parent.children)
+                    child.Value.localPos += moveVector;
+                parent.Position = thisPos;
+                moveVector = Vec2.zero;
+                return;
+            }
+            
             Jump(moveVector);
             Move(moveVector);
+
             moveVector = Vec2.zero;
         }
         public override void OnTrigger(Collider other) 

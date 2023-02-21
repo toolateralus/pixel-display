@@ -152,7 +152,6 @@ namespace pixel_renderer
                 StagingHost.FixedUpdate(m_stage);
                 Application.Current.Dispatcher.Invoke(() => Input.Refresh());
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
-               
             }
         }
         

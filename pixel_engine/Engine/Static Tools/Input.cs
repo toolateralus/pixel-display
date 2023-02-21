@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Xml;
+using System.Windows;
 
 namespace pixel_renderer
 {
@@ -21,7 +22,7 @@ namespace pixel_renderer
                 foreach (var action in actions)
                 {
                     var type = action.EventType;
-                    bool input_value = GetInputValueByType(type, ref action.Key);
+                    bool input_value = GetInputValueByType(ref action.Key, type);
                     if (input_value)
                         if (action.ExecuteAsynchronously) Task.Run(() => action.InvokeAsync());
                         else action.Invoke();
@@ -30,6 +31,7 @@ namespace pixel_renderer
         }
         public static bool GetInputValue(InputEventType type, string key)
         {
+            return Application.Current.Dispatcher.Invoke(() => { 
             Key key_ = Enum.Parse<Key>(key);
             var input_value = type switch
             {
@@ -39,25 +41,29 @@ namespace pixel_renderer
                 _ => false,
             };
             return input_value;
+            });
         }
-        public static bool GetInputValueByType(InputEventType type, ref Key key)
+
+        public static bool GetInputValue(Key key, InputEventType type = InputEventType.KeyDown)
         {
-            
-            var input_value = type switch
-            {
-                InputEventType.KeyDown => Keyboard.IsKeyDown(key),
-                InputEventType.KeyUp => Keyboard.IsKeyUp(key),
-                InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
-                _ => false,
-            };
-            return input_value;
+            return Application.Current.Dispatcher.Invoke(() => {
+                var input_value = type switch
+                {
+                    InputEventType.KeyDown => Keyboard.IsKeyDown(key),
+                    InputEventType.KeyUp => Keyboard.IsKeyUp(key),
+                    InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
+                    _ => false,
+                };
+                return input_value;
+            });
         }
-        public static void RegisterAction(Action<object[]?> action, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
+        public static bool GetInputValueByType(ref Key key, InputEventType type = InputEventType.KeyDown)
         {
-            lock (InputActions)
-            {
-                InputActions.Add(new(action, key));
-            }
+            return GetInputValue(key, type);
+        }
+        public static void RegisterAction(Action<object[]?> action, Key key, InputEventType type = InputEventType.KeyDown)
+        {
+             InputActions.Add(new(action, key, type: type));
         }
     }
 
