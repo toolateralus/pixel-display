@@ -3,11 +3,12 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Xml;
+using System.Windows;
 
 namespace pixel_renderer
 {
 
-    public enum InputEventType { KeyDown, KeyUp, KeyToggle }
+    public enum InputEventType { Down, Up, Toggle }
     public static class Input
     {
         private static readonly List<InputAction> InputActions = new(250);
@@ -30,45 +31,52 @@ namespace pixel_renderer
         }
         public static bool GetInputValue(InputEventType type, string key)
         {
-            Key key_ = Enum.Parse<Key>(key);
-            var input_value = type switch
+            return Application.Current.Dispatcher.Invoke(() =>
             {
-                InputEventType.KeyDown => Keyboard.IsKeyDown(key_),
-                InputEventType.KeyUp => Keyboard.IsKeyUp(key_),
-                InputEventType.KeyToggle => Keyboard.IsKeyToggled(key_),
-                _ => false,
-            };
-            return input_value;
+                Key key_ = Enum.Parse<Key>(key);
+                var input_value = type switch
+                {
+                    InputEventType.Down => Keyboard.IsKeyDown(key_),
+                    InputEventType.Up => Keyboard.IsKeyUp(key_),
+                    InputEventType.Toggle => Keyboard.IsKeyToggled(key_),
+                    _ => false,
+                };
+                return input_value;
+            });
         }
         public static bool GetInputValueByType(InputEventType type, ref Key key)
         {
-            
-            var input_value = type switch
+            Key _key = key; 
+            return Application.Current.Dispatcher.Invoke(() =>
             {
-                InputEventType.KeyDown => Keyboard.IsKeyDown(key),
-                InputEventType.KeyUp => Keyboard.IsKeyUp(key),
-                InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
-                _ => false,
-            };
-            return input_value;
+                var input_value = type switch
+                {
+                    InputEventType.Down => Keyboard.IsKeyDown(_key),
+                    InputEventType.Up => Keyboard.IsKeyUp(_key),
+                    InputEventType.Toggle => Keyboard.IsKeyToggled(_key),
+                    _ => false,
+                };
+                    return input_value;
+            });
         }
-        public static void RegisterAction(Action<object[]?> action, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
+        public static void RegisterAction(Action<object[]?> action, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.Down)
         {
-            lock (InputActions)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                InputActions.Add(new(action, key));
-            }
+                lock (InputActions)
+                    InputActions.Add(new(action, key));
+            });
         }
     }
 
     public class InputAction
     {
         internal Key Key;
-        internal InputEventType EventType = InputEventType.KeyDown; 
+        internal InputEventType EventType = InputEventType.Down; 
         internal readonly bool ExecuteAsynchronously = false;
         private ValueTuple<Action<object[]?>, object[]?> Action_Args = new();
 
-        public InputAction(Action<object[]?> expression, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
+        public InputAction(Action<object[]?> expression, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.Down)
         {
             ExecuteAsynchronously = async;
             Action_Args.Item1 = expression;

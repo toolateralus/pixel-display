@@ -25,7 +25,6 @@ namespace pixel_renderer.Scripts
         [Field] public Vec2 moveVector;
 
         private Animator? anim;
-        private int resolution_increment; 
         
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
@@ -53,6 +52,8 @@ namespace pixel_renderer.Scripts
 
             var child = test_child_node();
             parent.Child(child);
+
+            foreach(var node in Runtime.Instance.GetStage().FindNode(""))
 
 
         }
@@ -148,25 +149,36 @@ namespace pixel_renderer.Scripts
         {
             if (!takingInput) 
                 return;
-            Jump(moveVector);
-            Move(moveVector);
+
             moveVector = Vec2.zero;
+
+            if (GetInputValue(InputEventType.Down, "LeftShift"))
+            {
+                foreach (var child in parent.children)
+                    child.Value.localPos += moveVector;
+                return; 
+            }
+
+            Jump(rb, moveVector);
+            Move(rb, moveVector);
+
+            Runtime.Log(moveVector.AsString());
+
         }
         public override void OnTrigger(Collider other) 
         { 
+
         }
         public override void OnCollision(Collider collider)
         {
-            if (JRandom.Bool())
-                sprite?.Randomize();
-            else sprite?.DrawSquare(sprite.size, JRandom.Color());
+
         }
 
-        private void Move(Vec2 moveVector)
+        private void Move(Rigidbody rb, Vec2 moveVector)
         {
             rb.velocity.x += moveVector.x * speed;
         }
-        private void Jump(Vec2 moveVector)
+        private void Jump(Rigidbody rb, Vec2 moveVector)
         {
             var jumpVel = speed * 2;
             rb.velocity.y = moveVector.y * jumpVel;

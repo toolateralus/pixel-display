@@ -226,7 +226,7 @@ namespace pixel_editor
             if (!editorMessages.IsKeyboardFocusWithin)
                 return;
 
-            if (!Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
+            if (!Input.GetInputValue(InputEventType.Down, "LeftShift"))
                 return;
 
             OnCommandSent(new(), new());
