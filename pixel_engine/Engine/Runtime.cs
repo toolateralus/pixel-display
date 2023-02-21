@@ -2,6 +2,7 @@
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -21,7 +22,6 @@ namespace pixel_renderer
         public RenderHost renderHost;
         public StagingHost stagingHost = new();
         public static List<Image> OutputImages = new();
-        public Timer physicsClock;
         public Project LoadedProject;
 
         public bool IsRunning { get; private set; }
@@ -48,7 +48,8 @@ namespace pixel_renderer
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
         private protected Thread renderThread;
-        private protected Thread physicsThread;
+        private BackgroundWorker _worker;
+        private bool _stopWorker = false;
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
@@ -57,17 +58,13 @@ namespace pixel_renderer
             this.LoadedProject = project;
             Initialized = true;
 
-            var interval = TimeSpan.FromSeconds(Constants.PhysicsRefreshInterval);
-            physicsClock = new Timer(interval.TotalSeconds);
-            physicsClock.Elapsed += GlobalFixedUpdateRoot;
-
-            CompositionTarget.Rendering += GlobalUpdateRoot;
             CompositionTarget.Rendering += Input.Refresh;
 
             renderHost = new();
 
             renderThread = new(RenderTick);
             renderThread.Start();
+
 
             mainWnd.Closing += (e, o) =>
             {
@@ -76,21 +73,18 @@ namespace pixel_renderer
                 renderThread = null;
             };
         }
-        
         public void Toggle()
         {
+            if (IsRunning)
+            {
+                IsRunning = false;
+                return;
+            }
+            IsRunning = true; 
             if (!PhysicsInitialized)
                 InitializePhysics();
 
-            if (!physicsClock.Enabled)
-            {
-                physicsClock.Start();
-                IsRunning = true;
-                return;
-            }
-            physicsClock.Stop();
-            IsRunning = false;
-            return;
+
         }
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
@@ -103,6 +97,76 @@ namespace pixel_renderer
         private void InitializePhysics()
         {
             PhysicsInitialized = true;
+            _worker = new BackgroundWorker();
+            _worker.DoWork += OnPhysicsTick;
+            _worker.RunWorkerAsync();
+        }
+        /// <summary>
+        /// Prints a message in the editor console.
+        /// </summary>
+        /// <param name="message"></param>
+        public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
+        {
+           EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
+           RaiseInspectorEvent(e);
+        }
+        public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
+        private void RenderTick()
+        {
+            while (renderThread.IsAlive)
+            {
+                if (IsRunning)
+                {
+                    CompositionTarget.Rendering += OnRendering;
+                    renderHost?.Render();
+                    Thread.Sleep(1);
+                }
+                if (IsTerminating)
+                    return;
+            }
+        }
+        private void StopPhysicsLoop()
+        {
+            _stopWorker = true;
+        }
+        private void OnPhysicsTick(object sender, DoWorkEventArgs e)
+        {
+            while (!_stopWorker)
+            {
+                if (m_stage is null || !PhysicsInitialized)
+                    continue;     
+
+                Collision.Run(); 
+                StagingHost.FixedUpdate(m_stage); 
+
+                Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
+                if (IsTerminating)
+                    return;
+            }
+        }
+        private void OnRendering(object? sender, EventArgs e)
+        {
+            // Detach the rendering event so we don't get called again until the next frame
+            CompositionTarget.Rendering -= OnRendering;
+
+            // Update your UI as needed, using the Dispatcher to ensure it's done on the UI thread
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (OutputImages.Count == 0 || OutputImages.First() is null) return; 
+                var renderer = renderHost.GetRenderer(); 
+                CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
+            });
+        }
+        public void GlobalUpdateRoot(object? sender, EventArgs e)
+        {
+            if (!IsRunning || m_stage is null) 
+                return;
+
+            Task stageUpdateTask = new( delegate
+            {  StagingHost.Update(m_stage); });
+               
+            stageUpdateTask.Start();
+            stageUpdateTask.Wait();
         }
         public static void TryLoadStageFromProject(int index)
         {
@@ -132,7 +196,6 @@ namespace pixel_renderer
 
             return stage; 
         }
-
         public void SetStage(Stage stage) 
         {
             m_stage = stage;
@@ -146,73 +209,6 @@ namespace pixel_renderer
         {
             LoadedProject = project;
             OnProjectSet?.Invoke(project);
-        }
-
-        /// <summary>
-        /// Prints a message in the editor console.
-        /// </summary>
-        /// <param name="message"></param>
-        public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
-        {
-           EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
-           RaiseInspectorEvent(e);
-        }
-        public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
-
-        private void RenderTick()
-        {
-            while (renderThread.IsAlive)
-            {
-                if (IsRunning)
-                {
-                    CompositionTarget.Rendering += OnRendering;
-                    renderHost?.Render();
-                    Thread.Sleep(1);
-                }
-                if (IsTerminating)
-                    return;
-            }
-        }
-        private void OnRendering(object? sender, EventArgs e)
-        {
-            // Detach the rendering event so we don't get called again until the next frame
-            CompositionTarget.Rendering -= OnRendering;
-
-            // Update your UI as needed, using the Dispatcher to ensure it's done on the UI thread
-            Dispatcher.CurrentDispatcher.Invoke(() =>
-            {
-                if (OutputImages.Count == 0 || OutputImages.First() is null) return; 
-                var renderer = renderHost.GetRenderer(); 
-                CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
-            });
-        }
-
-        public void GlobalFixedUpdateRoot(object? sender, EventArgs e)
-        {
-            if(m_stage is null || !PhysicsInitialized) 
-                return;
-            
-            
-            Task collisionTask = new(delegate { Collision.Run(); });
-            Task stageUpdateTask = new(delegate { StagingHost.FixedUpdate(m_stage); });
-
-            collisionTask.Start();
-            collisionTask.Wait();
-
-            stageUpdateTask.Start();
-            stageUpdateTask.Wait();
-
-        }
-        public void GlobalUpdateRoot(object? sender, EventArgs e)
-        {
-            if (!IsRunning || m_stage is null) 
-                return;
-
-            Task stageUpdateTask = new( delegate
-            {  StagingHost.Update(m_stage); });
-               
-            stageUpdateTask.Start();
-            stageUpdateTask.Wait();
         }
     }
 }
