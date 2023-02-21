@@ -42,6 +42,8 @@ namespace pixel_renderer
             }
         }
 
+        public bool IsTerminating { get; private set; }
+
         public static event Action<EditorEvent>? InspectorEventRaised;
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
@@ -65,7 +67,7 @@ namespace pixel_renderer
 
             renderThread = new(RenderTick);
             renderThread.Start();
-
+            mainWnd.Closing += (e, o) => IsTerminating = true;
         }
         public void Toggle()
         {
@@ -152,12 +154,17 @@ namespace pixel_renderer
         private void RenderTick()
         {
             while (renderThread.IsAlive)
+            {
                 if (IsRunning)
                 {
                     CompositionTarget.Rendering += OnRendering;
                     renderHost?.Render();
                     Thread.Sleep(1);
                 }
+                if (IsTerminating) break; 
+
+            }
+
         }
         private void OnRendering(object? sender, EventArgs e)
         {
