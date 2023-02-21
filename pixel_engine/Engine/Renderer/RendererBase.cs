@@ -164,6 +164,9 @@
 
         private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea)
         {
+            Vec2 colorPos = new();
+            Vec2 camViewport = new();
+            //Vec2 colorPos = new();
             for (Vec2 framePos = drawArea.min;
                 framePos.y < drawArea.max.y;
                 framePos.Increment2D(drawArea.max.x, drawArea.min.x))
@@ -172,11 +175,11 @@
                 if (sprite.camDistance <= cam.zBuffer[(int)framePos.x, (int)framePos.y]) continue;
 
                 //this is actually cam viewport here, just reusing Vec2 to avoid new() calls
-                Vec2 colorPos = cam.ScreenToCamViewport(framePos / Resolution);
-                if (!colorPos.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                camViewport = cam.ScreenToCamViewport(framePos / Resolution);
+                if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
                 //this is also sprite viewport here
-                colorPos = cam.ViewportToSpriteViewport(sprite, colorPos);
+                colorPos = cam.ViewportToSpriteViewport(sprite, camViewport);
                 if (!colorPos.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
 
                 colorPos = sprite.ViewportToColorPos(colorPos);
