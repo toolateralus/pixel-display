@@ -91,14 +91,23 @@ namespace pixel_renderer
         
         public void Child(Node child)
         {
+            if (!Runtime.Current.GetStage().nodes.Contains(child))
+                Runtime.Current.GetStage().AddNode(child);
+
             var distance = Vec2.Distance(child.Position, Position);
             var direction = child.Position - Position;
-            if (children is null) children = new();
+
+            children ??= new();
+
             if (children.ContainsKey(direction * distance))
                 return;
+
             _ = child.parentNode?.TryRemoveChild(child);
+
             child.localPos = child.Position - Position;
+
             children.Add(direction * distance, child);
+
             child.parentNode = this;
         }
         public bool TryRemoveChild(Node child)

@@ -141,6 +141,7 @@ namespace pixel_editor
                 return;
 
             IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            if (!enumerable.Any()) return;
             enumerable.First().Size *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
         }
 

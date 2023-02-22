@@ -52,10 +52,10 @@ namespace pixel_renderer
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
-            Importer.Import(true);
-            
             current = this;
             this.mainWnd = mainWnd;
+            Importer.Import(true);
+
             LoadedProject = project;
 
             renderHost = new();
