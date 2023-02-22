@@ -62,17 +62,32 @@
             Vec2 framePos = new Vec2();
             foreach (Circle circle in ShapeDrawer.circles)
             {
+                float sqrtOfHalf = MathF.Sqrt(0.5f);
                 Vec2 radius = circle.center + new Vec2(circle.radius, circle.radius);
                 Vec2 centerPos = cam.GlobalToScreenViewport(circle.center) * resolution;
                 Vec2 pixelRadius = cam.GlobalToScreenViewport(radius) * resolution - centerPos;
-                for (int x = -(int)pixelRadius.x; x < (int)pixelRadius.x; x++)
+                Vec2 quaterArc = pixelRadius * sqrtOfHalf;
+                int quarterArcAsInt = (int)quaterArc.x;
+                for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
                 {
-                    float y = MathF.Cos(MathF.Asin((float)x / pixelRadius.x)) * pixelRadius.y;
+                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.x)) * pixelRadius.y;
                     framePos.x = centerPos.x + x;
                     framePos.y = centerPos.y + y;
                     if (framePos.IsWithinMaxExclusive(zero, resolution))
                         WriteColorToFrame(ref circle.color, ref framePos);
                     framePos.y = centerPos.y - y;
+                    if (framePos.IsWithinMaxExclusive(zero, resolution))
+                        WriteColorToFrame(ref circle.color, ref framePos);
+                }
+                quarterArcAsInt = (int)quaterArc.y;
+                for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
+                {
+                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.y)) * pixelRadius.x;
+                    framePos.y = centerPos.y + y;
+                    framePos.x = centerPos.x + x;
+                    if (framePos.IsWithinMaxExclusive(zero, resolution))
+                        WriteColorToFrame(ref circle.color, ref framePos);
+                    framePos.x = centerPos.x - x;
                     if (framePos.IsWithinMaxExclusive(zero, resolution))
                         WriteColorToFrame(ref circle.color, ref framePos);
                 }
