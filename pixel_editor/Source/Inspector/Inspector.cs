@@ -119,6 +119,7 @@ namespace pixel_editor
         {
             activeGrids.Clear();
             activeControls.Clear();
+            editComponentActions.Clear();
 
             grid = null;
 
