@@ -76,17 +76,17 @@ namespace pixel_renderer
         {
             if (!(drawCollider || drawNormals))
                 return;
-            var mesh = Polygon;
-            int vertLength = mesh.vertices.Length;
+            var poly = Polygon;
+            int vertLength = poly.vertices.Length;
             for (int i = 0; i < vertLength; i++)
             {
                 var nextIndex = (i + 1) % vertLength;
                 if(drawCollider)
-                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], colliderColor);
+                    ShapeDrawer.DrawLine(poly.vertices[i], poly.vertices[nextIndex], colliderColor);
                 if (drawNormals)
                 {
-                    var midpoint = (mesh.vertices[i] + mesh.vertices[nextIndex]) / 2;
-                    ShapeDrawer.DrawLine(midpoint, midpoint + (mesh.normals[i] * 10), Color.Blue);
+                    var midpoint = (poly.vertices[i] + poly.vertices[nextIndex]) / 2;
+                    ShapeDrawer.DrawLine(midpoint, midpoint + (poly.normals[i] * 10), Color.Blue);
                 }
             }
         }
