@@ -25,9 +25,9 @@ namespace pixel_renderer.Assets
                 }
 
             foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.BitmapFileExtension))
-            {
                 AssetLibrary.Register(x, null);
-            }
+
+
             
             if (!Runtime.IsRunning)
                 if (showMessage)

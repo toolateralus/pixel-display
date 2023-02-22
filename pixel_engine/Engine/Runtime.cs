@@ -95,19 +95,16 @@ namespace pixel_renderer
         {
             while (renderThread != null && renderThread.IsAlive)
             {
-
-                if (Application.Current is null)
-                    return;
+               
                 if (IsTerminating)
                     return;
-
                 if (IsRunning)
                 {
                         StagingHost.Update(stage);
                         renderHost?.Render();
-                  
-
-                        Application.Current.Dispatcher.Invoke(() =>
+                    if (Application.Current is null)
+                        return;
+                    Application.Current.Dispatcher.Invoke(() =>
                         {
                             if (OutputImages.Count == 0 || OutputImages.First() is null) return;
                             var renderer = renderHost.GetRenderer();
@@ -121,8 +118,7 @@ namespace pixel_renderer
         {
             while (!stopPhysics)
             {
-                if (Application.Current == null)
-                    return;
+            
                 if (IsTerminating)
                     return;
                 if (stage is null || !PhysicsInitialized)
@@ -130,9 +126,11 @@ namespace pixel_renderer
 
                 Collision.Run();
                 StagingHost.FixedUpdate(stage);
+                if (Application.Current == null)
+                    return;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    //TODO: Fix this hacky fix;
+                   
                     CMouse.MouseWheelDelta = 0;
                     Input.Refresh();
                 });
