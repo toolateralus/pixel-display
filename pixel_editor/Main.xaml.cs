@@ -119,11 +119,11 @@ namespace pixel_editor
 
             Runtime.OnProjectSet += OnProjectSet;
             Runtime.OnStageSet += OnStageSet;
+            
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.LoadedProject);
+            
             Runtime.OutputImages.Add(image);
-            Runtime.Log(System.Windows.Media.RenderCapability.Tier >> 16);
-
         }
         
         private void Update(object? sender, EventArgs e)
