@@ -164,8 +164,15 @@ namespace pixel_renderer
         #endregion
         #region development defaults
 
-        public static Metadata DefaultBackgroundMetadata = AssetLibrary.FetchMeta("Background");
-
+        public static Metadata DefaultBackgroundMetadata
+        {
+            get
+            {
+                if(AssetLibrary.FetchMeta("Background") is not Metadata meta)
+                    return new("Error", Constants.WorkingRoot + Constants.AssetsDir + "Error" + Constants.BitmapFileExtension, Constants.BitmapFileExtension);
+                return meta;
+            }
+        }
 
         public static Stage Default()
         {
