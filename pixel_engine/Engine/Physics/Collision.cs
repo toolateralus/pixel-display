@@ -130,29 +130,26 @@ namespace pixel_renderer
         }
         public static void FinalPhase()
         {
-            lock(CollisionQueue)
-            for (int i = 0; i < CollisionQueue.Count; ++i)
+            if (Runtime.Current.GetStage() is not Stage stage)
+                return;
+            foreach(Collider A in stage.GetAllComponents<Collider>())
             {
-                Node A = CollisionQueue.Keys.ElementAt(i);
-                if (!CollisionQueue.TryGetValue(A, out var nodes)) return;
-                for (int j = 0; j < nodes.Count; ++j)
+                foreach(Collider B in stage.GetAllComponents<Collider>())
                 {
-                    Node B = nodes[j];
-                    if (!A.TryGetComponent(out Collider col_A) ||
-                        !B.TryGetComponent(out Collider col_B))
-                        return;
+                    if (B == A)
+                        continue;
 
-                    bool a_has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
-                    bool b_has_rb = B.TryGetComponent<Rigidbody>(out var rbB);
+                    bool a_has_rb = A.parent.TryGetComponent<Rigidbody>(out var rbA);
+                    bool b_has_rb = B.parent.TryGetComponent<Rigidbody>(out var rbB);
 
                     if (a_has_rb && b_has_rb)
                         Collide(rbB, rbA);
                     if (a_has_rb && !b_has_rb)
-                        Collide(rbA, col_B);
+                        Collide(rbA, B);
                     if (!a_has_rb && b_has_rb)
-                        Collide(rbB, col_A);
+                        Collide(rbB, A);
 
-                    AttemptCallbacks(col_A, col_B);
+                    AttemptCallbacks(A, B);
                 }
                 CollisionQueue.Clear();
             }
