@@ -52,8 +52,9 @@ namespace pixel_renderer
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
-            current = this;
+            Importer.Import(true);
             
+            current = this;
             this.mainWnd = mainWnd;
             LoadedProject = project;
 
@@ -64,7 +65,6 @@ namespace pixel_renderer
             mainWnd.Closing += (e, o) => Dispose();
             
             Initialized = true;
-            Importer.Import(true);
 
         }
 
