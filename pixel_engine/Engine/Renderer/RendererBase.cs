@@ -7,11 +7,15 @@
     using System.Threading.Tasks;
     using System.Windows.Controls;
     using System.Windows.Media;
+    using System.Windows.Shapes;
     using Bitmap = System.Drawing.Bitmap;
     using Color = System.Drawing.Color;
 
     public abstract class  RendererBase 
     {
+        Vec2 zero = Vec2.zero;
+        Vec2 one = Vec2.one;
+
         private protected Color[,] baseImage = new Color[1,1];
         
         private protected byte[] frame = Array.Empty<byte>();
@@ -22,30 +26,30 @@
         public int Stride => stride;
         public Vec2 Resolution 
         { 
-            get => resolution;
+            get => _resolution;
             set => Runtime.Current.renderHost.newResolution = (Vec2?)value; 
         }
 
-        internal protected Vec2 resolution = Constants.DefaultResolution;
+        internal protected Vec2 _resolution = Constants.DefaultResolution;
 
         public bool baseImageDirty = true;
 
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
-        public void RenderCamera(Camera camera, StageRenderInfo renderInfo)
+        public void RenderCamera(Camera camera, StageRenderInfo renderInfo, Vec2 resolution)
         {
-            if (Resolution.y == 0 || Resolution.x == 0) return;
+            if (resolution.y == 0 || resolution.x == 0) return;
 
-            Node camNode = new("CamNode", camera.parent.Position, Vec2.one);
+            Node camNode = new("CamNode", camera.parent.Position, one);
             Camera cam = camNode.AddComponent(camera.Clone());
-            if (cam.zBuffer.GetLength(0) != Resolution.x || cam.zBuffer.GetLength(1) != Resolution.y)
-                cam.zBuffer = new float[(int)Resolution.x, (int)Resolution.y];
+            if (cam.zBuffer.GetLength(0) != resolution.x || cam.zBuffer.GetLength(1) != resolution.y)
+                cam.zBuffer = new float[(int)resolution.x, (int)resolution.y];
             Array.Clear(cam.zBuffer);
 
-            DrawBaseImage(cam);
-            DrawSprites(renderInfo, cam);
-            DrawGraphics(cam);
+            DrawBaseImage(cam, resolution);
+            DrawSprites(renderInfo, cam, resolution);
+            DrawGraphics(cam, resolution);
 
             if (latestFrame.Length != frame.Length)
                 latestFrame = new byte[frame.Length];
@@ -53,16 +57,31 @@
             Array.Copy(frame, latestFrame, frame.Length);
         }
 
-        private void DrawGraphics(Camera cam)
+        private void DrawGraphics(Camera cam, Vec2 resolution)
         {
             Vec2 framePos = new Vec2();
+            foreach (Circle circle in ShapeDrawer.circles)
+            {
+                Vec2 centerPos = cam.GlobalToScreenViewport(circle.center) * resolution;
+                float pixelRadius = (cam.GlobalToScreenViewport(new Vec2(circle.radius,0)) * resolution).x;
+                for (Vec2 pixel = one * -pixelRadius; pixel.y < pixelRadius; pixel.Increment2D(pixelRadius, -pixelRadius))
+                {
+                    if ((int)pixel.SqrMagnitude() == (int)pixelRadius * (int)pixelRadius)
+                    {
+                        framePos = centerPos + pixel;
+                        if (!framePos.IsWithinMaxExclusive(zero, resolution))
+                            continue;
+                        WriteColorToFrame(ref circle.color, ref framePos);
+                    }
+                }
+            }
             foreach(Line line in ShapeDrawer.lines)
             {
-                Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * Resolution;
-                Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * Resolution;
+                Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * resolution;
+                Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * resolution;
                 if (startPos == endPos)
                 {
-                    if (startPos.IsWithinMaxExclusive(Vec2.zero, Resolution))
+                    if (startPos.IsWithinMaxExclusive(zero, resolution))
                         WriteColorToFrame(ref line.color, ref startPos);
                     continue;
                 }
@@ -75,13 +94,13 @@
                     float slope = yDiff / xDiff;
                     float yIntercept = startPos.y - (slope * startPos.x);
                 
-                    int endX = (int)MathF.Min(MathF.Max(startPos.x, endPos.x), Resolution.x);
+                    int endX = (int)MathF.Min(MathF.Max(startPos.x, endPos.x), resolution.x);
                 
                     for (int x = (int)MathF.Max(MathF.Min(startPos.x, endPos.x), 0); x < endX; x++)
                     {
                         framePos.x = x;
                         framePos.y = slope * x + yIntercept;
-                        if (framePos.y < 0 || framePos.y >= Resolution.y)
+                        if (framePos.y < 0 || framePos.y >= resolution.y)
                             continue;
                         WriteColorToFrame(ref line.color, ref framePos);
                     }
@@ -91,13 +110,13 @@
                     float slope = xDiff / yDiff;
                     float xIntercept = startPos.x - (slope * startPos.y);
 
-                    int endY = (int)MathF.Min(MathF.Max(startPos.y, endPos.y), Resolution.y);
+                    int endY = (int)MathF.Min(MathF.Max(startPos.y, endPos.y), resolution.y);
 
                     for (int y = (int)MathF.Max(MathF.Min(startPos.y, endPos.y), 0); y < endY; y++)
                     {
                         framePos.y = y;
                         framePos.x = slope * y + xIntercept;
-                        if (framePos.x < 0 || framePos.x >= Resolution.x)
+                        if (framePos.x < 0 || framePos.x >= resolution.x)
                             continue;
                         WriteColorToFrame(ref line.color, ref framePos);
                     }
@@ -105,9 +124,9 @@
             }
         }
 
-        private void DrawSprites(StageRenderInfo renderInfo, Camera cam)
+        private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vec2 resolution)
         {
-            Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
+            Node spriteNode = new("SpriteNode", zero, one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
             for (int i = 0; i < renderInfo.Count; ++i)
             {
@@ -118,28 +137,28 @@
                 sprite.viewportScale = renderInfo.spriteVPScaleVectors[i];
                 sprite.camDistance = renderInfo.spriteCamDistances[i];
 
-                Vec2 firstCorner = cam.GlobalToScreenViewport(sprite.parent.Position) * Resolution;
+                Vec2 firstCorner = cam.GlobalToScreenViewport(sprite.parent.Position) * resolution;
                 //Bounding box on screen which fully captures sprite
                 BoundingBox2D drawArea = new(firstCorner, firstCorner);
                 List<Vec2> corners = new()
                 {
-                    cam.GlobalToScreenViewport(sprite.parent.Position + new Vec2(sprite.size.x, 0)) * Resolution,
-                    cam.GlobalToScreenViewport(sprite.parent.Position + new Vec2(0, sprite.size.y)) * Resolution,
-                    cam.GlobalToScreenViewport(sprite.parent.Position + sprite.size) * Resolution
+                    cam.GlobalToScreenViewport(sprite.parent.Position + new Vec2(sprite.size.x, 0)) * resolution,
+                    cam.GlobalToScreenViewport(sprite.parent.Position + new Vec2(0, sprite.size.y)) * resolution,
+                    cam.GlobalToScreenViewport(sprite.parent.Position + sprite.size) * resolution
                 };
 
                 foreach (Vec2 corner in corners) drawArea.ExpandTo(corner);
 
-                if (!(drawArea.min).IsWithinMaxExclusive(Vec2.zero, Resolution) &&
-                    !(drawArea.max).IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
+                if (!(drawArea.min).IsWithinMaxExclusive(zero, resolution) &&
+                    !(drawArea.max).IsWithinMaxExclusive(zero, resolution)) continue;
 
-                DrawTransparentSprite(cam, sprite, drawArea);
+                DrawTransparentSprite(cam, sprite, drawArea, resolution);
             }
         }
 
-        private void DrawBaseImage(Camera cam)
+        private void DrawBaseImage(Camera cam, Vec2 resolution)
         {
-            Node spriteNode = new("SpriteNode", Vec2.zero, Vec2.one);
+            Node spriteNode = new("SpriteNode", zero, one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
             Vec2 baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
             Vec2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
@@ -159,10 +178,10 @@
             sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale.GetDivideSafe();
             sprite.ColorData = baseImage;
             sprite.camDistance = float.Epsilon;
-            DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vec2.zero, Resolution));
+            DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
 
-        private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea)
+        private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vec2 resolution)
         {
             Vec2 colorPos = new();
             Vec2 camViewport = new();
@@ -171,16 +190,16 @@
                 framePos.y < drawArea.max.y;
                 framePos.Increment2D(drawArea.max.x, drawArea.min.x))
             {
-                if (!framePos.IsWithinMaxExclusive(Vec2.zero, Resolution)) continue;
+                if (!framePos.IsWithinMaxExclusive(zero, resolution)) continue;
                 if (sprite.camDistance <= cam.zBuffer[(int)framePos.x, (int)framePos.y]) continue;
 
                 //this is actually cam viewport here, just reusing Vec2 to avoid new() calls
-                camViewport = cam.ScreenToCamViewport(framePos / Resolution);
-                if (!camViewport.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                camViewport = cam.ScreenToCamViewport(framePos / resolution);
+                if (!camViewport.IsWithinMaxExclusive(zero, one)) continue;
 
                 //this is also sprite viewport here
                 colorPos = cam.ViewportToSpriteViewport(sprite, camViewport);
-                if (!colorPos.IsWithinMaxExclusive(Vec2.zero, Vec2.one)) continue;
+                if (!colorPos.IsWithinMaxExclusive(zero, one)) continue;
 
                 colorPos = sprite.ViewportToColorPos(colorPos);
                 if (sprite.ColorData[(int)colorPos.x, (int)colorPos.y].A == 0) continue;

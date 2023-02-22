@@ -50,7 +50,7 @@ namespace pixel_renderer
                 // TODO : Fix invalid cast exception from Component to UIComponent, likely a JSON problem
                 foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                     if (uiComponent.Enabled && uiComponent is Camera camera)
-                        RenderCamera(camera, renderInfo);
+                        RenderCamera(camera, renderInfo, Resolution);
             // TODO: restore the original synchronous rendering, just seeing if this would be faster.
             //Task DrawTask = new(delegate
             //{

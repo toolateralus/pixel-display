@@ -32,7 +32,7 @@ namespace pixel_renderer
         {
             if (newResolution != null)
             {
-                m_renderer.resolution = (Vec2)newResolution;
+                m_renderer._resolution = (Vec2)newResolution;
                 newResolution = null;
             }
         }
