@@ -169,7 +169,6 @@ namespace pixel_editor
 
         private void TryMoveCamera()
         {
-            followNode = false; 
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any()) return;
 
@@ -180,7 +179,10 @@ namespace pixel_editor
             CMouse.RightPressedThisFrame = CMouse.Left;
 
             if (CMouse.Right)
+            {
+                followNode = false;
                 cams.First().parent.Position += CMouse.Delta * Constants.MouseSensitivity;
+            }
 
         }
 
