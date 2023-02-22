@@ -73,7 +73,7 @@ namespace pixel_renderer
             using TextWriter writer = new StreamWriter(meta.fullPath);
             var jsonSerializer = JsonSerializer.Create(Settings);
             jsonSerializer.Serialize(writer, data);
-            Runtime.Log($"Data written to {meta.fullPath}");
+            Runtime.Log($"Data: typeof({data.GetType()}) written to Path: {meta.fullPath}");
             if (closeStreamWhenFinished)
             {
                 writer.Close();
@@ -137,34 +137,6 @@ namespace pixel_renderer
             var project = IO.ReadJson<Project>(meta);
             if (project is null) throw new FileNotFoundException(); 
             return project;  
-        }
-    }
-    public class StageIO
-    {
-        private static void FindOrCreateStagesDirectory()
-        {
-            if (!Directory.Exists(Constants.WorkingRoot + Constants.StagesDir))
-                Directory.CreateDirectory(Constants.WorkingRoot + Constants.StagesDir);
-        }
-        public static void WriteStage(Stage stage)
-        {
-            stage.Sync();
-            FindOrCreateStagesDirectory();
-            IO.WriteJson(stage, stage.Metadata);
-        }
-
-        public static Stage? ReadStage(Metadata meta)
-        {
-            FindOrCreateStagesDirectory();
-
-            // this is an inevitability of using a reference type based metadata,
-            // consider using a struct if it makes sense to structure it that way
-            
-            if (meta is null)
-                return null;
-
-            Stage? stage = IO.ReadJson<Stage>(meta);
-            return stage;
         }
     }
 }

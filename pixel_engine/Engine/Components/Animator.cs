@@ -9,13 +9,27 @@ namespace pixel_renderer
 {
     public class Animator : Component, IAnimate
     {
-        
         private Animation? animation;
         private Sprite? sprite;
-
-        public void SetAnimation(Animation animation) => this.animation = animation;
-        public Animation? GetAnimation() => animation;
-
+        
+        public override void Awake()
+        {
+            test_flame_anim_setup();
+        }
+        public override void FixedUpdate(float delta)
+        {
+            if (animation is null || !animation.playing) 
+                return;
+            Next(animation.padding);
+        }
+        public void Next(int increment = 1)
+        {
+           sprite.Draw(sprite.size, animation.GetFrame());
+        }
+        public void Previous(int increment = 1)
+        {
+            sprite.Draw(new (32, 32), animation?.frames[(animation.frameIndex, animation.frameIndex -= increment)]);
+        }
         public void Start(float speed = 1, bool looping = true)
         {
             parent.TryGetComponent(out sprite);
@@ -26,7 +40,6 @@ namespace pixel_renderer
             }
             animation.playing = true;
         }
-
         public void Stop(bool reset = false)
         {
             parent.TryGetComponent(out sprite);
@@ -40,12 +53,16 @@ namespace pixel_renderer
             if (reset)
                 animation.frameIndex = animation.startIndex;
         }
-
-        public override void Awake()
+        public void SetAnimation(Animation animation) => this.animation = animation;
+        public Animation? GetAnimation() => animation;
+        public static Node Standard()
         {
-            test_flame_anim_setup();
+            var node = Rigidbody.Standard();
+            var anim = node.AddComponent<Animator>();
+            anim.test_flame_anim_setup();
+            anim.Start();
+            return node;
         }
-
         private void test_flame_anim_setup()
         {
             List<Metadata> anim_metas = new()
@@ -62,32 +79,6 @@ namespace pixel_renderer
             animation.Name = "Animation_Test";
             animation.Metadata = new("Animation_Test", Constants.WorkingRoot + Constants.AssetsDir + "Animation_Test" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
             animation.Upload();
-        }
-
-        public override void FixedUpdate(float delta)
-        {
-            if (animation is null || !animation.playing) 
-                return;
-            Next(animation.padding);
-        }
-
-        public void Next(int increment = 1)
-        {
-           sprite.Draw(sprite.size, animation.GetFrame());
-        }
-
-        public void Previous(int increment = 1)
-        {
-            sprite.Draw(new (32, 32), animation?.frames[(animation.frameIndex, animation.frameIndex -= increment)]);
-        }
-
-        public static Node Standard()
-        {
-            var node = Rigidbody.Standard();
-            var anim = node.AddComponent<Animator>();
-            anim.test_flame_anim_setup();
-            anim.Start();
-            return node;
         }
     }
 }

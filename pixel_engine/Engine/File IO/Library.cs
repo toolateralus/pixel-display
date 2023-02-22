@@ -57,8 +57,10 @@ namespace pixel_renderer.Assets
         public static bool Fetch<T>(string name, out T result) where T : Asset
         {
             Fetch<T>(out List<T> list);
+
             bool r = false;
             result = null; 
+
             foreach (var item in list)
                 if (item.Name == name)
                 {
@@ -68,11 +70,7 @@ namespace pixel_renderer.Assets
                 }
             return r; 
         }
-        /// <summary>
-        /// Attempts to retrieve metadata by asset file path (asset.pathFromRoot).
-        /// </summary>
-        /// <param name="asset"></param>
-        /// <returns>Metadata if found, else null</returns>
+        
 
         /// <summary>
         /// Save the currently loaded asset Library and project to the disk.
