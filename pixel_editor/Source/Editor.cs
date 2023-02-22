@@ -171,11 +171,7 @@ namespace pixel_editor
             IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!enumerable.Any()) return;
 
-            if (!CMouse.RightPressedLastFrame && CMouse.Right)
-                CMouse.RightPressedThisFrame = true;
-            else
-                CMouse.RightPressedLastFrame = false;
-            CMouse.RightPressedThisFrame = CMouse.Left;
+       
 
             if (CMouse.Right)
             {
@@ -197,11 +193,7 @@ namespace pixel_editor
 
         private void TryDragNode()
         {
-            if (!CMouse.LeftPressedLastFrame && CMouse.Left)
-                CMouse.LeftPressedThisFrame = true;
-            else
-                CMouse.LeftPressedThisFrame = false;
-            CMouse.LeftPressedLastFrame = CMouse.Left;
+         
 
             if (CMouse.Left && selectedNode != null)
             {

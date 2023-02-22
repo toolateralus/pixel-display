@@ -174,6 +174,7 @@ namespace pixel_renderer
             Node camera = new("Camera");
             camera.AddComponent<Camera>();
             nodes.Add(camera);
+            nodes.Add(Floor.Standard());
             for (int i = 0; i < 5; i++)
                 nodes.Add(Rigidbody.Standard());
 
