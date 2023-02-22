@@ -25,7 +25,7 @@ namespace pixel_renderer
             {
                 if (init_bckground is null && Background != null)
                     init_bckground = GetBackground();
-                else init_bckground ??= new(Stage.DefaultBackgroundMetadata.fullPath);
+                else init_bckground ??= new(256,256);
                 return init_bckground;
             } 
         }
@@ -164,8 +164,7 @@ namespace pixel_renderer
         #endregion
         #region development defaults
 
-        public static Metadata DefaultStageMetadata = new("Default Stage Asset", Constants.WorkingRoot + Constants.AssetsDir + "\\DefaultStage" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
-        public static Metadata DefaultBackgroundMetadata = new("Default Stage Asset Background", Constants.WorkingRoot + Constants.ImagesDir + "\\home.bmp", ".bmp");
+        public static Metadata DefaultBackgroundMetadata = AssetLibrary.FetchMeta("Background");
 
 
         public static Stage Default()
