@@ -18,36 +18,18 @@ namespace pixel_editor
         public Inspector(Grid grid)
         {
             MainGrid = grid;
-            Awake();
-        }
-        ComponentEditor? lastKnownComponentEditor; 
-
-        public Node? selectedNode;
-
-        #region
-        private List<Control> activeControls = new();
-        private List<Grid> activeGrids = new();
-        
-        private Grid MainGrid;
-        private Grid grid;
-
-        #endregion
-        private Dictionary<Type, List<Component>> components = new();
-        public static List<Action<Action>> EditActions = new();
-        public static List<Action> EditActionArgs = new();
-        
-        public void Awake()
-        {
             OnObjectSelected += Refresh;
             OnObjectDeselected += Refresh;
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
             OnInspectorMoved += Inspector_OnInspectorMoved;
             RegisterAction((e) => DeselectNode(), System.Windows.Input.Key.Escape);
+        }
+        public void Update(object? sender, EventArgs e)
+        {
+
 
         }
-        public void Update(object? sender, EventArgs e) { }
-
         #region Reflection Functions
         public static string GetComponentInfo(Component component)
         {
@@ -92,7 +74,7 @@ namespace pixel_editor
         }
         #endregion
         #region Node Function
-
+        public Node? selectedNode;
         public void DeselectNode()
         {
             if (selectedNode != null)
@@ -114,42 +96,28 @@ namespace pixel_editor
             selectedNode = node;
             OnObjectSelected?.Invoke(grid);
         }
-        public (bool, T) TryGetComponent<T>() where T : Component, new()
-        {
-            if (selectedNode is null)
-                return (false, null);
-
-            var hasComp = selectedNode.TryGetComponent(out T obj);
-            return (hasComp, obj);
-
-        }
-        public (bool, T) TryAddComponent<T>() where T : Component, new()
-        {
-            if (selectedNode is null)
-                return (false, null);
-
-            T t = new();
-            var obj = selectedNode.AddComponent(t);
-            OnComponentAdded?.Invoke(grid);
-            return (true, obj);
-
-        }
-        public (bool, T) TryRemoveComponent<T>() where T : Component, new()
-        {
-            if (selectedNode is null)
-                return (false, null);
-            T t = new();
-            if (selectedNode is not null && selectedNode.HasComponent<T>())
-            {
-                selectedNode.RemoveComponent(t);
-                OnComponentAdded?.Invoke(grid);
-                return (true, t);
-            }
-            return (false, null);
-        }
 
         #endregion
         #region UI Function
+        ComponentEditor? lastKnownComponentEditor;
+
+        List<Action> addComponentActions = new();
+        Dictionary<string, Func<Component>> addComponentFunctions;
+        Grid addComponentGrid;
+        
+        bool addComponentMenuOpen = false;
+        
+        private List<Control> activeControls = new();
+        private List<Grid> activeGrids = new();
+
+        private Grid MainGrid;
+        private Grid grid;
+
+        private Dictionary<Type, List<Component>> components = new();
+        
+        public static List<Action<Action>> editComponentActions = new();
+        public static List<Action> editComponentActionArgs = new();
+        
         private void Refresh(Grid grid)
         {
             activeGrids.Clear();
@@ -178,14 +146,32 @@ namespace pixel_editor
 
             OnInspectorUpdated?.Invoke(grid);
         }
-
-        bool newMenuOpen = false;
-        Grid newMenuGrid;
-        List<Action> AddItemActions = new();
-
      
+        private int AddComponentToInspector(Grid grid, int index, Component component)
+        {
+            var box = GetTextBox(component.Name);
+            Button editComponentButton = GetEditComponentButton(index);
+            grid.Children.Add(editComponentButton);
+            grid.Children.Add(box);
+            SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
+            SetRowAndColumn(box, 2, 4, 0, index * 2);
+            editComponentActions.Add(component.OnEditActionClicked);
+            editComponentActionArgs.Add(delegate
+            {
+                lastKnownComponentEditor = new ComponentEditor(Editor.Current, component);
+                lastKnownComponentEditor.Show();
+            });
+            index++;
+            return index;
+        }
+        public void AddGridToInspector(Grid grid)
+        {
+            this.MainGrid.Children.Add(grid);
+            this.MainGrid.UpdateLayout();
+            activeGrids.Add(grid);
+        }
 
-        private void AddObject(KeyValuePair<string, object> item)
+        private void AddComponent(KeyValuePair<string, object> item)
         {
             if (item.Value is Func<Component> funct)
             {
@@ -193,22 +179,21 @@ namespace pixel_editor
                 funct.Invoke();
             }
         }
-
-        private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
+        private void AddComponentClicked(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            RefreshFunctions();
+            RefreshAddComponentFunctions();
 
             if (sender is not Button button) return;
             foreach (var item in addComponentFunctions)
-                if (button.Name.ToInt() is int i && AddItemActions.Count > i)
+                if (button.Name.ToInt() is int i && addComponentActions.Count > i)
                 {
-                    AddItemActions[i]?.Invoke();
+                    addComponentActions[i]?.Invoke();
                     return; 
                 }
         }
 
-        private void RefreshFunctions()
+        private void RefreshAddComponentFunctions()
         {
             addComponentFunctions = new()
             {
@@ -255,41 +240,37 @@ namespace pixel_editor
                 return x;
             }
         }
-
-
-        Dictionary<string, Func<Component>> addComponentFunctions; 
-
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            RefreshFunctions();
-            if (!newMenuOpen)
+            RefreshAddComponentFunctions();
+            if (!addComponentMenuOpen)
             {
-                newMenuOpen = true;
-                newMenuGrid = Inspector.GetGrid();
-                MainGrid.Children.Add(newMenuGrid);
-                Inspector.SetRowAndColumn(newMenuGrid, 10, 10, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
+                addComponentMenuOpen = true;
+                addComponentGrid = Inspector.GetGrid();
+                MainGrid.Children.Add(addComponentGrid);
+                Inspector.SetRowAndColumn(addComponentGrid, 10, 10, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
 
                 int i = 0;
                 foreach (var item in addComponentFunctions)
                 {
                     Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
                     button.Name = $"button{i}";
-                    AddItemActions.Add(() => AddObject(new(item.Key, item.Value)));
+                    addComponentActions.Add(() => AddComponent(new(item.Key, item.Value)));
                     button.FontSize = 2;
-                    button.Click += NewObjectButtonClicked;
-                    newMenuGrid.Children.Add(button);
+                    button.Click += AddComponentClicked;
+                    addComponentGrid.Children.Add(button);
                     Inspector.SetRowAndColumn(button, 1, 2, 0, i);
                     i++;
 
                 }
                 return;
             }
-            newMenuOpen = false;
-            newMenuGrid.Children.Clear();
-            newMenuGrid = null;
+            addComponentMenuOpen = false;
+            addComponentGrid.Children.Clear();
+            addComponentGrid = null;
         }
-
+        
         private Grid NewInspectorGrid()
         {
             Grid grid = GetGrid();
@@ -301,59 +282,6 @@ namespace pixel_editor
         {
             SetRowAndColumn(grid, Constants.InspectorWidth , Constants.InspectorHeight, Constants.InspectorPosition.x, Constants.InspectorPosition.y);
         }
-        private int AddComponentToInspector(Grid grid, int index, Component component)
-        {
-            var box = GetTextBox(component.Name);
-            Button editComponentButton = GetEditComponentButton(index);
-            grid.Children.Add(editComponentButton);
-            grid.Children.Add(box);
-            SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
-            SetRowAndColumn(box, 2, 4, 0, index * 2);
-            EditActions.Add(component.OnEditActionClicked);
-            EditActionArgs.Add(delegate
-            {
-                lastKnownComponentEditor = new ComponentEditor(Editor.Current, component);
-                lastKnownComponentEditor.Show();
-            });
-            index++;
-            return index;
-        }
-        public void AddGridToInspector(Grid grid)
-        {
-            this.MainGrid.Children.Add(grid);
-            this.MainGrid.UpdateLayout();
-            activeGrids.Add(grid);
-        }
-        
-        public static Grid GetGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
-        {
-            Grid grid = new()
-            {
-                ClipToBounds = true,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-            };
-
-            var rows = grid.RowDefinitions;
-            var cols = grid.ColumnDefinitions;
-
-            for (int x = 0; x < width; ++x)
-            {
-                ColumnDefinition col = new();
-                col.Width = new GridLength(colWidth);
-                cols.Add(col);
-            }
-
-            for (int x = 0; x < height; ++x)
-            {
-                RowDefinition row = new();
-                row.Height = new GridLength(rowHeight);
-                rows.Add(new());
-            }
-
-            return grid;
-        }
-        
         public static TextBox GetTextBox(string componentName, string style = "default")
         {
             return style switch
@@ -385,7 +313,6 @@ namespace pixel_editor
 
             };
         }
-        
         public static Button GetButton(string content, Thickness margin) => new Button()
         {
             Content = content,
@@ -401,6 +328,34 @@ namespace pixel_editor
             return editComponentButton;
         }
         
+        public static Grid GetGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
+        {
+            Grid grid = new()
+            {
+                ClipToBounds = true,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+            };
+
+            var rows = grid.RowDefinitions;
+            var cols = grid.ColumnDefinitions;
+
+            for (int x = 0; x < width; ++x)
+            {
+                ColumnDefinition col = new();
+                col.Width = new GridLength(colWidth);
+                cols.Add(col);
+            }
+
+            for (int x = 0; x < height; ++x)
+            {
+                RowDefinition row = new();
+                row.Height = new GridLength(rowHeight);
+                rows.Add(new());
+            }
+
+            return grid;
+        }
         public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
         {
             grid.SetValue(Grid.RowSpanProperty, height);
@@ -440,8 +395,8 @@ namespace pixel_editor
         private static void HandleEditPressed(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
-                if (button.Name.ToInt() is int i && EditActions.Count > i && EditActionArgs.Count > i)
-                    EditActions[i]?.Invoke(EditActionArgs[i]);
+                if (button.Name.ToInt() is int i && editComponentActions.Count > i && editComponentActionArgs.Count > i)
+                    editComponentActions[i]?.Invoke(editComponentActionArgs[i]);
                 else Runtime.Log("Edit pressed failed.");
         }
         #endregion

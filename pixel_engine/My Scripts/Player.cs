@@ -96,8 +96,6 @@ namespace pixel_renderer.Scripts
                 return;
             }
 
-            if (CMouse.MouseWheelDelta != 0)
-                camera.Size += Vec2.one * CMouse.MouseWheelDelta;
 
             Jump(moveVector);
             Move(moveVector);
