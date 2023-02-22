@@ -90,7 +90,7 @@ namespace pixel_renderer.Assets
             
             RefreshStageMetadataWithinLoadedProject();
             
-            Runtime.Current.LoadedProject.Save();
+            Runtime.Current.LoadedProject?.Save();
 
             foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
             {

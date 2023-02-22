@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Windows.Data;
 using pixel_renderer.Assets;
+using System.Linq;
 
 namespace pixel_renderer
 {
@@ -19,9 +20,8 @@ namespace pixel_renderer
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
-        [Field][JsonProperty] public float speed = 8;
+        [Field][JsonProperty] public float speed = 1;
         [Field][JsonProperty] public float inputMagnitude = 1f;
-        [Field] [JsonProperty] private Animator? anim;
 
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
@@ -31,11 +31,7 @@ namespace pixel_renderer
         
         private bool freezeButtonPressedLastFrame = false;
         private Vec2 thisPos;
-
-        private Node cameraNode;
-        private Camera camera;
-        Curve curve;
-        private int scrollSpeed;
+        private Curve curve;
 
         public static Metadata? PlayerSprite
         {
@@ -62,9 +58,7 @@ namespace pixel_renderer
             var sprite = AddSprite(node);
             sprite.DrawSquare(Vec2.one * 16, Color.Red);
             AddCollider(node, sprite);
-
-            Runtime.Current.GetStage().AddNode(node);
-
+            AddCamera(node);
             return node;
         }
 
@@ -74,24 +68,29 @@ namespace pixel_renderer
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
 
-            cameraNode = test_child_node();
-            parent.Child(cameraNode);
+            var childNode = test_child_node();
+            parent.Child(childNode);
 
-            cameraNode.localPos = Vec3.zero;
-            cameraNode.Position = parent.Position;
+            childNode.localPos = Vec3.zero;
+            childNode.Position = parent.Position;
 
-            camera = Player.AddCamera(cameraNode);
             curve = Curve.Circlular(1, 16, radius: 64, looping: true);
 
 
             Task task = new(async delegate
             {
+                if (sprite is null) return; 
                 while (sprite.texture is null)
                     await Task.Delay(25);
                 sprite.texture.SetImage(PlayerSprite, (Vec2Int)sprite.size, Color.Red);
             });
 
             task.Start();
+
+
+
+            DrawCircle();
+            sprite.Type = SpriteType.Image;
 
         }
      
@@ -101,14 +100,14 @@ namespace pixel_renderer
         {
 
 
-            if (!takingInput) 
+            if (!takingInput)
                 return;
 
             var freezeButtonPressed = GetInputValue(Key.LeftShift);
 
             if (freezeButtonPressed && !freezeButtonPressedLastFrame)
                 thisPos = parent.Position;
-        
+
 
             freezeButtonPressedLastFrame = freezeButtonPressed;
 
@@ -116,10 +115,6 @@ namespace pixel_renderer
             {
                 foreach (var child in parent.children)
                     child.Value.localPos += moveVector;
-
-                if (CMouse.MouseWheelDelta > 0)
-                    scrollSpeed += 1;
-                else scrollSpeed -= 1;
 
                 parent.Position = thisPos;
                 moveVector = Vec2.zero;
@@ -132,6 +127,25 @@ namespace pixel_renderer
 
             moveVector = Vec2.zero;
         }
+
+        private void DrawCircle()
+        {
+            Color[,] colors = new Color[(int)sprite.size.x, (int)sprite.size.y];
+
+            for (int i = 0; i < sprite.size.x; ++i)
+                for (int j = 0; j < sprite.size.y; ++j)
+                {
+
+                    Vec2 pt = new Vec2(i, j);
+                    if (curve.points.Values.Contains(pt))
+                        colors[i, j] = Color.RebeccaPurple;
+                    else colors[i, j] = Color.FromArgb(0, 0, 0, 0);
+
+                }
+
+            sprite.Draw(sprite.size, colors);
+        }
+
         void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);
         void Down(object[]? e) => moveVector = new Vec2(moveVector.x, inputMagnitude);
         void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, moveVector.y);

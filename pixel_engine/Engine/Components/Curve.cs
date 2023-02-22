@@ -7,7 +7,7 @@ namespace pixel_renderer
 
     public class Curve
     {
-        public Dictionary<Vec2, Vec2> curve = new();
+        public Dictionary<Vec2, Vec2> points = new();
 
         private int padding;
         private int index;
@@ -38,7 +38,7 @@ namespace pixel_renderer
             for (int i = 0; i < vertices.Length * padding; i += padding)
             {
                 var point = vertices[i / padding];
-                curve.Add(new Vec2(i, i + padding - 1), point);
+                points.Add(new Vec2(i, i + padding - 1), point);
             }
         }
         public Vec2 Next()
@@ -49,10 +49,10 @@ namespace pixel_renderer
         {
             var outVec = new Vec2();
 
-            if (curve.index > curve.curve.Count * curve.padding - 1 && curve.looping)
+            if (curve.index > curve.points.Count * curve.padding - 1 && curve.looping)
                 curve.index = curve.startIndex;
 
-            foreach (var pt in curve.curve)
+            foreach (var pt in curve.points)
             {
                 float i = curve.index;
                 if (i.IsWithin(pt.Key.x, pt.Key.y))
