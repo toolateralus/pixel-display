@@ -31,11 +31,7 @@ namespace pixel_renderer
 
             //calc uvs (simple)
             uv = new Vec2[vertCount];
-            BoundingBox2D uvBox = new(vertices[0], vertices[0]);
-            foreach (Vec2 v in vertices)
-            {
-                uvBox.ExpandTo(v);
-            }
+            BoundingBox2D uvBox = GetBoundingBox(vertices);
             Vec2 bbSize = uvBox.max - uvBox.min - Vec2.one;
             if (bbSize.x == 0 || bbSize.y == 0)
                 return;
@@ -44,6 +40,15 @@ namespace pixel_renderer
                 uv[i] = (vertices[i] - uvBox.min) / bbSize;
             }
         }
+
+        public static BoundingBox2D GetBoundingBox(Vec2[] vertices)
+        {
+            BoundingBox2D uvBox = new(vertices[0], vertices[0]);
+            foreach (Vec2 v in vertices)
+                uvBox.ExpandTo(v);
+            return uvBox;
+        }
+
         public Polygon()
         {
             normals = Array.Empty<Vec2>();
