@@ -24,7 +24,9 @@ namespace pixel_renderer
         public static Vec2 LastPosition { get; set; }
         public static Vec2 Delta { get { return LastPosition - Position; } }
 
-        private static CMouse current = null; 
+        private static CMouse current = null;
+        public static bool RightPressedThisFrame;
+
         public static CMouse Current
         {
             get
@@ -35,6 +37,7 @@ namespace pixel_renderer
         }
 
         public static int MouseWheelDelta { get; set; }
+        public static bool RightPressedLastFrame { get; set; }
 
         public CMouse(MouseButtonEventArgs? e = null)
         {
