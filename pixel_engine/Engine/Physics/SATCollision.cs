@@ -13,9 +13,6 @@ namespace pixel_renderer
             List<Vec2> normals = new List<Vec2>(polygonA.normals);
             normals.AddRange(polygonB.normals);
 
-            // Sort the normals based on their angle with the x-axis
-            //normals.Sort((a, b) => MathF.Atan2(a.y, a.x).CompareTo(MathF.Atan2(b.y, b.x)));
-
             foreach (Vec2 normal in normals)
             {
                 SATProjection p1 = Project(polygonA, normal);
@@ -30,10 +27,9 @@ namespace pixel_renderer
                 smallest = normal;
             }
 
-
             if (Vec2.Dot(polygonB.centroid - polygonA.centroid, smallest) < 0)
                 smallest *= -1;
-
+            smallest.x *= -1;
             return smallest * overlap;
         }
         private static float GetOverlap(SATProjection p1, SATProjection p2) => MathF.Min(p1.max, p2.max) - MathF.Max(p1.min, p2.min);
