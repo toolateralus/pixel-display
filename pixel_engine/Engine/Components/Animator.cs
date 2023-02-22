@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using pixel_renderer.FileIO;
-using pixel_renderer.Scripts;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer

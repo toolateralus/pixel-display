@@ -6,7 +6,6 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using pixel_renderer.Scripts;
 using Bitmap = System.Drawing.Bitmap;
 using Color = System.Drawing.Color;
 

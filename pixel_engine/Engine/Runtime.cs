@@ -66,7 +66,6 @@ namespace pixel_renderer
             Initialized = true;
         }
 
-
         public void Toggle()
         {
             if (IsRunning)
@@ -80,16 +79,6 @@ namespace pixel_renderer
 
 
         }
-
-        public static void Initialize(EngineInstance mainWnd, Project project)
-        {
-            current ??= new(mainWnd, project);
-            Project.LoadStage(0);
-            Current.stage?.Awake();
-            Log($"{Current.GetStage().Name} instantiated & engine started.");
-
-        }
-        
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -100,7 +89,6 @@ namespace pixel_renderer
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
-        
         private void OnRenderTick()
         {
             while (renderThread != null && renderThread.IsAlive)
@@ -121,13 +109,6 @@ namespace pixel_renderer
                 }
             }
         }
-        private void InitializePhysics()
-        {
-            PhysicsInitialized = true;
-            physicsWorker = new BackgroundWorker();
-            physicsWorker.DoWork += OnPhysicsTick;
-            physicsWorker.RunWorkerAsync();
-        }
         private void OnPhysicsTick(object sender, DoWorkEventArgs e)
         {
             while (!stopPhysics)
@@ -139,30 +120,39 @@ namespace pixel_renderer
 
                     Collision.Run();
                     StagingHost.FixedUpdate(stage);
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        //TODO: Fix this hacky fix;
-                        CMouse.MouseWheelDelta = 0;
-                        Input.Refresh();
-                    });
+
+                if (Application.Current == null)
+                    return;
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    //TODO: Fix this hacky fix;
+                    CMouse.MouseWheelDelta = 0;
+                    Input.Refresh();
+                });
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
             }
         }
-        private void Dispose()
+        public static void Initialize(EngineInstance mainWnd, Project project)
         {
-            IsTerminating = true;
-            stopPhysics = true;
-            Task.Run(()=> renderThread?.Join());
-            renderThread = null;
-        }
+            current ??= new(mainWnd, project);
+            Project.LoadStage(0);
+            Current.stage?.Awake();
+            Log($"{Current.GetStage().Name} instantiated & engine started.");
 
+        }
+        private void InitializePhysics()
+        {
+            PhysicsInitialized = true;
+            physicsWorker = new BackgroundWorker();
+            physicsWorker.DoWork += OnPhysicsTick;
+            physicsWorker.RunWorkerAsync();
+        }
         public void SetProject(Project project)
         {
             LoadedProject = project;
             OnProjectSet?.Invoke(project);
         }
-
-     
         internal protected static Stage InstantiateDefaultStageIntoProject()
         {
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
@@ -176,7 +166,6 @@ namespace pixel_renderer
 
             return stage; 
         }
-        
         public Stage? GetStage()
         {
             return stage;
@@ -185,6 +174,13 @@ namespace pixel_renderer
         {
             this.stage = stage;
             OnStageSet?.Invoke(stage);
+        }
+        private void Dispose()
+        {
+            IsTerminating = true;
+            stopPhysics = true;
+            Task.Run(()=> renderThread?.Join());
+            renderThread = null;
         }
     }
 }

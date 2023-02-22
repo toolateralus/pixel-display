@@ -13,7 +13,7 @@ namespace pixel_renderer
         private int index;
         private int startIndex;
         public bool looping;
-        public static Curve Circlular(float speed, int length, float magnitude = 1f, bool looping = true)
+        public static Curve Circlular(float speed, int length, float radius = 1f, bool looping = true)
         {
             Curve curve = new();
             curve.padding = (int)(length / speed);
@@ -24,7 +24,7 @@ namespace pixel_renderer
             for (int i = 0; i < totalLength; i++)
             {
                 float t = (float)i / totalLength * CMath.Tau;
-                vecs[i] = new Vec2(MathF.Sin(t), MathF.Cos(t)) * magnitude;
+                vecs[i] = new Vec2(MathF.Sin(t), MathF.Cos(t)) * radius;
             }
 
             curve.CreateCurve(vecs);

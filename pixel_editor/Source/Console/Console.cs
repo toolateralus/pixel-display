@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Windows.Input;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
-using pixel_renderer.Scripts;
 using System.Drawing;
 
 namespace pixel_editor
