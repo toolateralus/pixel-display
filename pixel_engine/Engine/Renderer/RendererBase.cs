@@ -220,12 +220,12 @@
                     continue;
                 Vec2 colorPos = sprite.ViewportToColorPos(spriteViewportPos);
 
-                float xOffset = colorPos.x - (int)colorPos.x;
-                float yOffset = colorPos.y - (int)colorPos.y;
-                Color color1 = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
-                Color color2 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)((colorPos.y + 1) % sprite.size.x)];
-                Color color3 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)((colorPos.y + 1) % sprite.size.x)];
-                if (xOffset > yOffset)
+                //float xOffset = colorPos.x - (int)colorPos.x;
+                //float yOffset = colorPos.y - (int)colorPos.y;
+                //Color color1 = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
+                //Color color2 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)((colorPos.y + 1) % sprite.size.x)];
+                //Color color3 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)((colorPos.y + 1) % sprite.size.x)];
+                //if (xOffset > yOffset)
                 Color color = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
                 if (color.A == 0)
                     continue;
