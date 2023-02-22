@@ -159,7 +159,7 @@ namespace pixel_editor
                     foreach(var obj in results)
                         if (obj.GetType() == info.FieldType)
                         {
-                            Runtime.Log($"ComponentEditor field was successfully parsed back into an object of type {info.FieldType}");
+                            Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType}");
                             info.SetValue(component, obj);
                         }
 
