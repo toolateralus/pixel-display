@@ -1,0 +1,45 @@
+﻿using System.Collections.Generic;
+
+namespace pixel_renderer
+{
+    public class Curve
+    {
+        public Dictionary<Vec2, Vec2> curve = new();
+
+        private int padding;
+        private int index;
+        private int startIndex;
+        public bool looping;
+
+        public void CreateCurve(Vec2[] vertices, int padding = 1)
+        {
+            this.padding = padding;
+            for (int i = 0; i < vertices.Length * padding; i += padding)
+            {
+                var point = vertices[i / padding];
+                curve.Add(new Vec2(i, i + padding - 1), point);
+            }
+        }
+        public Vec2 Next()
+        {
+            return Next(this);
+        }
+        public static Vec2 Next(Curve curve)
+        {
+            var outVec = new Vec2();
+            if (curve.index > curve.curve.Count * curve.padding - 1 && curve.looping)
+                curve.index = curve.startIndex;
+
+            foreach (var pt in curve.curve)
+            {
+                float i = curve.index;
+                if (i.IsWithin(pt.Key.x, pt.Key.y))
+                    outVec =  pt.Value;
+            }
+
+            curve.index++;
+
+            return outVec;
+        }
+    }
+}
