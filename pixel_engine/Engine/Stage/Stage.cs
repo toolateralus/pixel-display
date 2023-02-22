@@ -3,31 +3,27 @@ using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
 
 namespace pixel_renderer
 {
-
     public class Stage : Asset
     {
-        
         [JsonProperty]
         public Metadata Background;
 
         private Bitmap init_bckground;
-        public Bitmap? InitializedBackground 
-        { 
-            get 
+        public Bitmap? InitializedBackground
+        {
+            get
             {
                 if (init_bckground is null && Background != null)
                     init_bckground = GetBackground();
-                else init_bckground ??= new(256,256);
+                else init_bckground ??= new(256, 256);
                 return init_bckground;
-            } 
+            }
         }
 
         public void AddNode(Node node)
@@ -42,7 +38,7 @@ namespace pixel_renderer
 
                 if (nodes.Contains(newNode))
                 {
-                    Runtime.Log("AddNode Failed: node already belongs to this stage."); 
+                    Runtime.Log("AddNode Failed: node already belongs to this stage.");
                     return;
                 }
                 newNode.ParentStage = this;
@@ -52,47 +48,32 @@ namespace pixel_renderer
 
             if (NodesBusy)
                 delayedActionQueue.Enqueue((add_node, args));
-            else add_node(args); 
-
+            else add_node(args);
         }
-        private void RemoveNode(Node? node)
-        {
-            object[] args = { node };
-            void remove_node(object[] o)
-            {
-                if (o[0] is not Node actionTimeNode) return;
-                if (!nodes.Contains(actionTimeNode)) return; 
-                nodes.Remove(actionTimeNode);
-            }
-
-            // this is a better way than using a lock statement, as far as i know
-            if (NodesBusy)
-            {
-                delayedActionQueue.Enqueue((remove_node, args));
-            }
-            else remove_node(args);
-        }
-        
         public Node? FindNode(string name)
         {
             IEnumerable<Node> result = (
                 from node
                 in nodes
                 where node.Name.Equals(name)
-                select node); 
-            return result.Any() ? result.First() : null; 
-
-        }
-        public Node[] FindNodesByTag(string tag)
-        {
-            IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
-            return matchingNodes.ToArray();
+                select node);
+            return result.Any() ? result.First() : null;
         }
         public Node FindNodeByTag(string tag)
         {
             return nodes
                     .Where(node => node.tag == tag)
                     .First();
+        }
+        public Node[] FindNodesByTag(string tag)
+        {
+            IEnumerable<Node> matchingNodes = nodes.Where(node => node.tag == tag);
+            return matchingNodes.ToArray();
+        }
+        public List<Node>? FindNodesWithComponent<T>() where T : Component
+        {
+            IEnumerable<Node> outNodes = from node in nodes where node.HasComponent<T>() select node;
+            return outNodes.ToList();
         }
         public Node? FindNodeWithComponent<T>() where T : Component
         {
@@ -104,19 +85,12 @@ namespace pixel_renderer
             Node first = collec.First();
             return first;
         }
-        
-        public List<Node>? FindNodesWithComponent<T>() where T : Component
-        {
-            IEnumerable<Node> outNodes = from node in nodes where node.HasComponent<T>() select node;
-            return outNodes.ToList();
-        }
         public IEnumerable<T> GetAllComponents<T>() where T : Component
         {
             return from Node node in nodes
                    from T component in node.GetComponents<T>()
                    select component;
         }
-        
         public IEnumerable<Sprite> GetSprites()
         {
             if (nodes is null)
@@ -129,46 +103,65 @@ namespace pixel_renderer
                                            select sprite);
             return sprites;
         }
+        public override void Sync()
+        {
+            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
+            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
+        }
+        private void RemoveNode(Node? node)
+        {
+            object[] args = { node };
+            void remove_node(object[] o)
+            {
+                if (o[0] is not Node actionTimeNode) return;
+                if (!nodes.Contains(actionTimeNode)) return;
+                nodes.Remove(actionTimeNode);
+            }
 
+            if (NodesBusy)
+            {
+                delayedActionQueue.Enqueue((remove_node, args));
+            }
+            else remove_node(args);
+        }
         #region Node Utils
+
         [JsonProperty]
         public List<Node> nodes = new();
         public bool NodesBusy { get; private set; }
-        #endregion
 
-        #region  Misc Utils
+        #endregion Node Utils
+
+        #region Misc Utils
+
+        private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
         private StageRenderInfo? stage_render_info = null;
         public StageRenderInfo StageRenderInfo
         {
             get
             {
                 var wasNull = stage_render_info is null;
-                var stage = Runtime.Current.GetStage(); 
+                var stage = Runtime.Current.GetStage();
                 stage_render_info ??= new(stage);
-                
+
                 if (!wasNull)
-                    stage_render_info.Refresh(stage); 
+                    stage_render_info.Refresh(stage);
 
                 return stage_render_info;
             }
             set { stage_render_info = value; }
         }
-
-        Queue<(Action<object[]>, object[])> delayedActionQueue = new();
-
-        #endregion
-
-        #region Physics Stuff
+        #endregion Misc Utils
 
 
-        #endregion
+
         #region development defaults
 
         public static Metadata DefaultBackgroundMetadata
         {
             get
             {
-                if(AssetLibrary.FetchMeta("Background") is not Metadata meta)
+                if (AssetLibrary.FetchMeta("Background") is not Metadata meta)
                     return new("Background", Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.BitmapFileExtension, Constants.BitmapFileExtension);
                 return meta;
             }
@@ -183,10 +176,12 @@ namespace pixel_renderer
                 nodes.Add(Rigidbody.Standard());
 
             var stage = new Stage("Default Stage", DefaultBackgroundMetadata, nodes);
-          
+
             return stage;
         }
-        #endregion
+
+        #endregion development defaults
+
         #region Engine Stuff
 
         public void Awake()
@@ -197,13 +192,17 @@ namespace pixel_renderer
                 node.ParentStage = this;
                 node.Awake();
             }
-            
+        }
+        public Stage Copy()
+        {
+            var output = new Stage(Name, Background, nodes, UUID);
+            return output;
         }
         public void FixedUpdate(float delta)
         {
+                NodesBusy = true;
             lock (nodes)
             {
-                NodesBusy = true;
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
@@ -211,23 +210,28 @@ namespace pixel_renderer
                     node.FixedUpdate(delta);
                 }
 
-                NodesBusy = false;
             }
-
+                NodesBusy = false;
+        }
+        public Bitmap GetBackground()
+        {
+            if (File.Exists(Background.fullPath))
+                return new(Background.fullPath);
+            throw new MissingMetadataException($"Metadata :\"{Background.fullPath}\". File not found.");
         }
         public void Update()
         {
+            NodesBusy = true;
             lock (nodes)
             {
-                NodesBusy = true;
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     Node node = nodes[i];
                     node.Update();
                 }
-                NodesBusy = false;
             }
+            NodesBusy = false;
 
             for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
             {
@@ -238,29 +242,14 @@ namespace pixel_renderer
 
                 action.Invoke(args);
             }
-
         }
+        #endregion Engine Stuff
 
-       
-
-
-        public Stage Copy()
+        public Stage()
         {
-            var output = new Stage(Name, Background, nodes, UUID);
-            return output;
         }
-        public Bitmap GetBackground()
-        {
-            if (File.Exists(Background.fullPath))
-                return new(Background.fullPath);
-            throw new MissingMetadataException($"Metadata :\"{Background.fullPath}\". File not found.");
-        }
-        
-        
-        #endregion
-
         [JsonConstructor]
-        internal Stage(List<Node> nodes, Metadata metadata, Metadata background, string name = "Stage Asset") : base(name, true) 
+        internal Stage(List<Node> nodes, Metadata metadata, Metadata background, string name = "Stage Asset") : base(name, true)
         {
             Name = name;
             this.UUID = UUID;
@@ -286,13 +275,6 @@ namespace pixel_renderer
             Metadata = metadata;
             Background = background;
         }
-
-        public override void Sync()
-        {
-            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
-            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
-        }
-
         /// <summary>
         /// Memberwise copy constructor
         /// </summary>
@@ -307,9 +289,5 @@ namespace pixel_renderer
             this.nodes = nodes;
             Background = backgroundMeta;
         }
-        public Stage()
-        {
-        }
-
     }
 }
