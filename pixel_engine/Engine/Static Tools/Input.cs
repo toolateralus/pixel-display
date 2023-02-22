@@ -13,23 +13,27 @@ namespace pixel_renderer
     public class CMouse
     {
         public static bool Left;
+
+
         public static bool LeftPressedLastFrame;
-
-        public static Vec2 LastClickGlobalPosition { get; private set; }
-
         public static bool LeftPressedThisFrame;
+        public static bool RightPressedThisFrame;
+        public static bool RightPressedLastFrame { get; set; }
         public static bool Middle;
         public static bool Right;
         public static bool XButton1;
         public static bool XButton2;
+     
+        public static int MouseWheelDelta { get; set; }
         
+        public static Vec2 LastClickPosition { get; set; }
         public static Vec2 Position;
+        public static Vec2 LastClickGlobalPosition { get; private set; }
         public static Vec2 GlobalPosition;
         public static Vec2 LastPosition { get; set; }
         public static Vec2 Delta { get { return LastPosition - Position; } }
 
         private static CMouse current = null;
-        public static bool RightPressedThisFrame;
 
         public static CMouse Current
         {
@@ -40,9 +44,6 @@ namespace pixel_renderer
             }
         }
 
-        public static int MouseWheelDelta { get; set; }
-        public static bool RightPressedLastFrame { get; set; }
-        public static Vec2 LastClickPosition { get; set; }
 
         public CMouse(MouseButtonEventArgs? e = null)
         {
@@ -54,10 +55,9 @@ namespace pixel_renderer
             if(e is not null)
                 Refresh(e);
 
-            CompositionTarget.Rendering += Update;
         }
 
-        private void Update(object? sender, EventArgs e)
+        public static void Update()
         {
             if (!RightPressedLastFrame && Right)
                 RightPressedThisFrame = true;
