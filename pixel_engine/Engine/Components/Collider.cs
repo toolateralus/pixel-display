@@ -9,16 +9,16 @@ namespace pixel_renderer
 {
     public class Collider : Component
     {
-        [JsonProperty] Polygon mesh;
-        public Polygon Mesh
+        [JsonProperty] Polygon polygon;
+        public Polygon Polygon
         {
             get
             {
-                mesh ??= new(GetVertices());
-                return mesh.OffsetBy(parent.Position);
+                polygon ??= new(GetVertices());
+                return polygon.OffsetBy(parent.Position);
             }
                 
-            set => mesh = value;
+            set => polygon = value;
         }
         [JsonProperty] [Field] public Vec2 size = new(0,0);
         [JsonProperty] [Field] public Sprite? sprite;
@@ -76,7 +76,7 @@ namespace pixel_renderer
         {
             if (!(drawCollider || drawNormals))
                 return;
-            var mesh = Mesh;
+            var mesh = Polygon;
             int vertLength = mesh.vertices.Length;
             for (int i = 0; i < vertLength; i++)
             {

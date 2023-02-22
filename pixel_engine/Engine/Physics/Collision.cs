@@ -177,7 +177,7 @@ namespace pixel_renderer
             var aCol = A.GetComponent<Collider>();
             if (aCol.IsTrigger || B.IsTrigger) return;
 
-            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, B.Mesh);
+            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Polygon, B.Polygon);
 
             A.parent.Position += minDepth;
         }
@@ -191,7 +191,7 @@ namespace pixel_renderer
             if (aCol.IsTrigger || bCol.IsTrigger) return;
 
             //depenetrate
-            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Mesh, bCol.Mesh);
+            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Polygon, bCol.Polygon);
             if (minDepth == Vec2.zero)
                 return;
             A.parent.Position += minDepth / 2;
