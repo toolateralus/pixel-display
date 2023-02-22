@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace pixel_renderer
 {
@@ -9,46 +10,30 @@ namespace pixel_renderer
             float overlap = float.MaxValue;
             Vec2 smallest = Vec2.zero;
 
-            for (int i = 0; i < polygonA.normals.Length; i++)
+            List<Vec2> normals = new List<Vec2>(polygonA.normals);
+            normals.AddRange(polygonB.normals);
+
+            // Sort the normals based on their angle with the x-axis
+            //normals.Sort((a, b) => MathF.Atan2(a.y, a.x).CompareTo(MathF.Atan2(b.y, b.x)));
+
+            foreach (Vec2 normal in normals)
             {
-                SATProjection p1 = Project(polygonA, polygonA.normals[i]);
-                SATProjection p2 = Project(polygonB, polygonA.normals[i]);
+                SATProjection p1 = Project(polygonA, normal);
+                SATProjection p2 = Project(polygonB, normal);
 
                 if (!Overlap(p1, p2))
                     return Vec2.zero;
-                else
-                {
-                    float o = GetOverlap(p1, p2);
-                    if (o < overlap)
-                    {
-                        overlap = o;
-                        smallest = polygonA.normals[i];
-                        if (Vec2.Dot(polygonB.centroid - polygonA.centroid, smallest) < 0)
-                            smallest = CMath.Negate(smallest);
-                    }
-                }
+                float o = GetOverlap(p1, p2);
+                if (o >= overlap)
+                    continue;
+                overlap = o;
+                smallest = normal;
             }
-               
-            for (int i = 0; i < polygonB.normals.Length; i++)
-            {
-                SATProjection p1 = Project(polygonA, polygonB.normals[i]);
-                SATProjection p2 = Project(polygonB, polygonB.normals[i]);
 
-                if (!Overlap(p1, p2))
-                    return Vec2.zero;
-                else
-                {
-                    float o = GetOverlap(p1, p2);
-                    if (o < overlap)
-                    {
-                        overlap = o;
-                        smallest = polygonB.normals[i];
 
-                        if (Vec2.Dot(polygonA.centroid - polygonB.centroid, smallest) < 0)
-                            smallest = CMath.Negate(smallest);
-                    }
-                }
-            }
+            if (Vec2.Dot(polygonB.centroid - polygonA.centroid, smallest) < 0)
+                smallest *= -1;
+
             return smallest * overlap;
         }
         private static float GetOverlap(SATProjection p1, SATProjection p2) => MathF.Min(p1.max, p2.max) - MathF.Max(p1.min, p2.min);
