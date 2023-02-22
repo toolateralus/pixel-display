@@ -18,7 +18,7 @@
         {
             Collider col = parent.AddComponent<Collider>();
             poly = Polygon.Rectangle(width, height);
-            col.Mesh = poly;
+            col.Polygon = poly;
         }
     }
 }

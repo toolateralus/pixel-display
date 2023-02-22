@@ -13,6 +13,7 @@ namespace pixel_renderer
         public static void Refresh(Stage stage)
         {
             lines.Clear();
+            circles.Clear();
             var components = stage.GetAllComponents<Component>();
             lock (components)
                 foreach (Component component in components)
@@ -24,8 +25,11 @@ namespace pixel_renderer
         /// start point of each line will always have an x value less than or equal to the end point
         /// </summary>
         internal static List<Line> lines = new();
+        internal static List<Circle> circles = new();
         public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Color? color = null) =>
             lines.Add(new Line(startPoint, endPoint, color ?? Color.White));
+        public static void DrawCircle(Vec2 center, float radius, Color? color = null) =>
+            circles.Add(new Circle(center, radius, color ?? Color.White));
     }
     public class Line
     {
@@ -38,11 +42,17 @@ namespace pixel_renderer
             this.endPoint = endPoint;
             this.color = color;
         }
-        public float GetSlope()
+    }
+    public class Circle
+    {
+        public Color color;
+        public Vec2 center;
+        public float radius;
+        public Circle(Vec2 center, float radius, Color color)
         {
-            if (startPoint.x == endPoint.x)
-                return float.PositiveInfinity;
-            return (startPoint.y - endPoint.y) / (startPoint.x - endPoint.x);
+            this.color = color;
+            this.center = center;
+            this.radius = radius;
         }
     }
 }

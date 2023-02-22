@@ -243,11 +243,11 @@ namespace pixel_renderer.Scripts
 
         public override void OnDrawShapes()
         {
-            var mesh = parent.GetComponent<Collider>().Mesh;
+            var mesh = parent.GetComponent<Collider>().Polygon;
             foreach (var child in parent?.children)
             {
                 if (!child.Value.TryGetComponent(out Collider col)) return;
-                var centroid = col.Mesh.centroid;
+                var centroid = col.Polygon.centroid;
                 ShapeDrawer.DrawLine(mesh.centroid, centroid, Color.LightCyan);
             }
         }
