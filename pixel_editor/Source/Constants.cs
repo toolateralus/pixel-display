@@ -6,7 +6,7 @@ namespace pixel_editor
     {
         public const int EditorEventQueueMaxLength = 12;
 
-        public static Vec2Int InspectorPosition = new(16, 4);
+        public static Vec2Int InspectorPosition = new(16, 1);
 
         public const float MouseZoomSensitivityFactor = 1.001f;
 

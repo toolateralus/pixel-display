@@ -327,7 +327,7 @@ namespace pixel_editor
             action = (o) =>
             {
                 if (!TryGetArgAtIndex<int>(0, out int index, o)) return;
-                Runtime.TryLoadStageFromProject(index);
+                Project.LoadStage(index);
             },
 
         };
@@ -360,7 +360,6 @@ namespace pixel_editor
         static bool collidersHighlighted = false;
         private static void showColliders(object[]? obj)
         {
-
             if (!collidersHighlighted)
             {
                 Stage? stage = Runtime.Current.GetStage();
@@ -411,10 +410,7 @@ namespace pixel_editor
                     x.sprite.IsReadOnly = false; 
                 }
             }
-          
-
         }
-
         public static Command cmd_move_inspector() => new()
         {
             phrase = "inspector.Move;",

@@ -134,13 +134,13 @@ namespace pixel_editor
             TryZoomCamera();
         }
 
-        private void TryZoomCamera()
+        private static void TryZoomCamera()
         {
-            if (CMouse.MouseWheelDelta != 0)
-            {
-                IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
-                enumerable.First().Size *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
-            }
+            if (CMouse.MouseWheelDelta == 0)
+                return;
+
+            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            enumerable.First().Size *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
         }
 
         private void TryDragNode()
@@ -387,8 +387,8 @@ namespace pixel_editor
         {
             e.Handled = true;
             Runtime.Current.Toggle();
-            playBtn.Content = Runtime.Current.IsRunning ? "On" : "Off";
-            playBtn.Background = Runtime.Current.IsRunning ? Brushes.LightGreen : Brushes.LightPink;
+            playBtn.Content = Runtime.IsRunning ? "On" : "Off";
+            playBtn.Background = Runtime.IsRunning ? Brushes.LightGreen : Brushes.LightPink;
         }
         private void OnViewChanged(object sender, RoutedEventArgs e)
         {

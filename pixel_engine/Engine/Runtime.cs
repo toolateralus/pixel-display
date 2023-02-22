@@ -23,53 +23,47 @@ namespace pixel_renderer
         public StagingHost stagingHost = new();
         public Project LoadedProject;
 
-        public static List<Image> OutputImages = new();
-
-        public bool IsRunning { get; private set; }
-        public static bool PhysicsInitialized { get; private set; }
-        public static bool Initialized { get; private set; }
-        public static object? Editor = null;
-
-        internal int selectedStage = 0;
-        
-        private protected volatile Stage? stage;
-        private protected volatile static Runtime? instance;
         public static Runtime Current
         {
             get
             {
-                if (instance is null)
+                if (current is null)
                     throw new EngineInstanceException("The runtime domain is not yet initialized");
-                return instance;
+                return current;
             }
         }
-
-        public bool IsTerminating { get; private set; }
+        private protected volatile static Runtime? current;
+        private protected volatile Stage? stage;
 
         public static event Action<EditorEvent>? InspectorEventRaised;
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
+        public static List<Image> OutputImages = new();
+        
         private protected Thread renderThread;
-        private BackgroundWorker _worker;
-        private bool _stopWorker = false;
+        private BackgroundWorker physicsWorker;
+     
+        public static object? Editor = null;
+        private bool stopPhysics = false;
+        public static bool IsRunning { get; private set; }
+        public static bool PhysicsInitialized { get; private set; }
+        public static bool Initialized { get; private set; }
+        public static bool IsTerminating { get; private set; }
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
-            instance = this;
+            current = this;
+            
             this.mainWnd = mainWnd;
-            this.LoadedProject = project;
-            Initialized = true;
+            LoadedProject = project;
 
             renderHost = new();
-
             renderThread = new(OnRenderTick);
             renderThread.Start();
 
-
-            mainWnd.Closing += (e, o) =>
-            {
-                Dispose();
-            };
+            mainWnd.Closing += (e, o) => Dispose();
+            
+            Initialized = true;
         }
 
 
@@ -89,8 +83,8 @@ namespace pixel_renderer
 
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
-            instance ??= new(mainWnd, project);
-            TryLoadStageFromProject(0);
+            current ??= new(mainWnd, project);
+            Project.LoadStage(0);
             Current.stage?.Awake();
             Log($"{Current.GetStage().Name} instantiated & engine started.");
 
@@ -130,13 +124,13 @@ namespace pixel_renderer
         private void InitializePhysics()
         {
             PhysicsInitialized = true;
-            _worker = new BackgroundWorker();
-            _worker.DoWork += OnPhysicsTick;
-            _worker.RunWorkerAsync();
+            physicsWorker = new BackgroundWorker();
+            physicsWorker.DoWork += OnPhysicsTick;
+            physicsWorker.RunWorkerAsync();
         }
         private void OnPhysicsTick(object sender, DoWorkEventArgs e)
         {
-            while (!_stopWorker)
+            while (!stopPhysics)
             {
                 if (IsTerminating)
                     return;
@@ -157,7 +151,7 @@ namespace pixel_renderer
         private void Dispose()
         {
             IsTerminating = true;
-            _stopWorker = true;
+            stopPhysics = true;
             Task.Run(()=> renderThread?.Join());
             renderThread = null;
         }
@@ -168,22 +162,8 @@ namespace pixel_renderer
             OnProjectSet?.Invoke(project);
         }
 
-        public static void TryLoadStageFromProject(int index)
-        {
-            List<Metadata> stagesMeta = Current.LoadedProject.stagesMeta;
-            
-            Stage stage;
-
-            if (stagesMeta.Count - 1 > index)
-            {
-                Metadata stageMeta = stagesMeta[index];
-                stage = StageIO.ReadStage(stageMeta);
-            }
-            else stage = InstantiateDefaultStageIntoProject();
-
-            Current.SetStage(stage);
-        }
-        private static Stage InstantiateDefaultStageIntoProject()
+     
+        internal protected static Stage InstantiateDefaultStageIntoProject()
         {
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
                 " A Default will be instantiated and added to the project at the requested index.");
@@ -196,6 +176,7 @@ namespace pixel_renderer
 
             return stage; 
         }
+        
         public Stage? GetStage()
         {
             return stage;

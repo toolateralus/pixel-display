@@ -24,7 +24,21 @@ namespace pixel_renderer
 
         [JsonProperty]
         private readonly int Hash;
+        public static void LoadStage(int index)
+        {
+            List<Metadata> stagesMeta = Runtime.Current.LoadedProject.stagesMeta;
 
+            Stage stage;
+
+            if (stagesMeta.Count - 1 > index)
+            {
+                Metadata stageMeta = stagesMeta[index];
+                stage = StageIO.ReadStage(stageMeta);
+            }
+            else stage = Runtime.InstantiateDefaultStageIntoProject();
+
+            Runtime.Current.SetStage(stage);
+        }
         private int NameHash()
         {
             object[] o = new object[] { Name, stages };
