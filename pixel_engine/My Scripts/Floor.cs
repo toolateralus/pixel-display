@@ -2,8 +2,8 @@
 {
     public class Floor : Component
     {
-        public const float height = 10; 
-        public const float width = Constants.CollisionCellSize - 10;
+        public const float height = 10;
+        public const float width = 2500;
         private Polygon poly;
 
         public static Node Standard()
@@ -19,6 +19,8 @@
             Collider col = parent.AddComponent<Collider>();
             poly = Polygon.Rectangle(width, height);
             col.Polygon = poly;
+            col.drawCollider = true;
+            col.drawNormals = true;
         }
     }
 }

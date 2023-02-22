@@ -20,7 +20,7 @@ namespace pixel_renderer
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
-        [Field][JsonProperty] public float speed = 1;
+        [Field][JsonProperty] public float speed = 3;
         [Field][JsonProperty] public float inputMagnitude = 1f;
 
         [Field] Sprite sprite = new();

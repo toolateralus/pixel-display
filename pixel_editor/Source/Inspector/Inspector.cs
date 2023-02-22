@@ -99,13 +99,6 @@ namespace pixel_editor
 
         #endregion
         #region UI Function
-        ComponentEditor? lastKnownComponentEditor;
-
-        List<Action> addComponentActions = new();
-        Dictionary<string, Func<Component>> addComponentFunctions;
-        Grid addComponentGrid;
-        
-        bool addComponentMenuOpen = false;
         
         private List<Control> activeControls = new();
         private List<Grid> activeGrids = new();
@@ -114,9 +107,13 @@ namespace pixel_editor
         private Grid grid;
 
         private Dictionary<Type, List<Component>> components = new();
+        List<Action> addComponentActions = new();
+        ComponentEditor? lastKnownComponentEditor;
+        Dictionary<string, Func<Component>> addComponentFunctions;
+        Grid addComponentGrid;
+        bool addComponentMenuOpen = false;
         
-        public static List<Action<Action>> editComponentActions = new();
-        public static List<Action> editComponentActionArgs = new();
+        public static List<Action> editComponentActions = new();
         
         private void Refresh(Grid grid)
         {
@@ -155,8 +152,7 @@ namespace pixel_editor
             grid.Children.Add(box);
             SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
             SetRowAndColumn(box, 2, 4, 0, index * 2);
-            editComponentActions.Add(component.OnEditActionClicked);
-            editComponentActionArgs.Add(delegate
+            editComponentActions.Add(delegate
             {
                 lastKnownComponentEditor = new ComponentEditor(Editor.Current, component);
                 lastKnownComponentEditor.Show();
@@ -392,8 +388,8 @@ namespace pixel_editor
         private static void HandleEditPressed(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
-                if (button.Name.ToInt() is int i && editComponentActions.Count > i && editComponentActionArgs.Count > i)
-                    editComponentActions[i]?.Invoke(editComponentActionArgs[i]);
+                if (button.Name.ToInt() is int i && editComponentActions.Count > i && editComponentActions.Count > i)
+                    editComponentActions[i]?.Invoke();
                 else Runtime.Log("Edit pressed failed.");
         }
         #endregion

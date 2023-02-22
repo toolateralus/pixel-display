@@ -124,6 +124,7 @@ namespace pixel_renderer
                 if (stage is null || !PhysicsInitialized)
                     continue;
 
+
                 Collision.Run();
                 StagingHost.FixedUpdate(stage);
                 if (Application.Current == null)

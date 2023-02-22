@@ -110,7 +110,7 @@ namespace pixel_editor
 
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
-            Input.RegisterAction(ToggleKeybind, Key.LeftShift);
+            Input.RegisterAction(StartStop, Key.LeftShift);
 
             inspector = new Inspector(inspectorGrid);
             Runtime.Editor = inspector;
@@ -212,7 +212,7 @@ namespace pixel_editor
         public Vec2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         #endregion
         #region Input Events
-        private void ToggleKeybind(object[]? obj)
+        private void StartStop(object[]? obj)
         {
             if (Input.GetInputValue(0, "P"))
                 Runtime.Current.Toggle();
@@ -225,9 +225,6 @@ namespace pixel_editor
         void SendCommandKeybind(object[]? o)
         {
             if (!editorMessages.IsKeyboardFocusWithin)
-                return;
-
-            if (!Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
                 return;
 
             OnCommandSent(new(), new());
