@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using System.Threading.Tasks;
 using System.Data;
 using System.Windows.Data;
+using pixel_renderer.Assets;
 
 namespace pixel_renderer
 {
@@ -27,7 +28,6 @@ namespace pixel_renderer
         [Field] public Vec2 moveVector;
 
         
-        public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
         
         private bool freezeButtonPressedLastFrame = false;
         private Vec2 thisPos;
@@ -37,7 +37,20 @@ namespace pixel_renderer
         Curve curve;
         private int scrollSpeed;
 
-        public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
+        public static Metadata? PlayerSprite
+        {
+            get
+            {
+                return AssetLibrary.FetchMeta("PlayerSprite");
+            }
+       
+        }
+        public static Metadata test_animation_data(int index)
+        {
+            string x = $"Animation{index}"; 
+            return AssetLibrary.FetchMeta(x);
+        }
+
         public static Node test_child_node(Node? parent = null)
         {
             Node node = new("Player Child");
@@ -54,7 +67,7 @@ namespace pixel_renderer
 
             return node;
         }
-     
+
         public override void Awake()
         {
             CreateInputEvents();
@@ -65,13 +78,22 @@ namespace pixel_renderer
             parent.Child(cameraNode);
 
             cameraNode.localPos = Vec3.zero;
-            cameraNode.Position = parent.Position; 
+            cameraNode.Position = parent.Position;
 
             camera = Player.AddCamera(cameraNode);
-            curve = Curve.Circlular(1, 16, radius : 64, looping: true);
+            curve = Curve.Circlular(1, 16, radius: 64, looping: true);
+
+
+            Task task = new(async delegate
+            {
+                while (sprite.texture is null)
+                    await Task.Delay(25);
+                sprite.texture.SetImage(PlayerSprite, (Vec2Int)sprite.size, Color.Red);
+            });
+
+            task.Start();
 
         }
-
      
 
 

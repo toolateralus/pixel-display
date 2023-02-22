@@ -83,6 +83,7 @@ namespace pixel_renderer
         public const string BitmapFileExtension = ".bmp"; // .bmp {The only image format currently supported.}
         public static string[] ReadableExtensions = 
         { 
+            BitmapFileExtension,
             MetadataFileExtension,
             AssetsFileExtension,
             ProjectFileExtension,

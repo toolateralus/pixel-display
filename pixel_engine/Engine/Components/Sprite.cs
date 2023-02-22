@@ -81,7 +81,7 @@ namespace pixel_renderer
 
         public override void Awake()
         {
-            texture = new((Vec2Int)size, Player.test_image_data);
+            texture = new((Vec2Int)size, Player.PlayerSprite);
             Refresh();
 
         }
@@ -109,7 +109,7 @@ namespace pixel_renderer
             this.IsReadOnly = IsReadOnly;
             if (cached_colors == null)
             {
-                Bitmap bmp = new(Player.test_image_data.fullPath);
+                Bitmap bmp = new(Player.PlayerSprite.fullPath);
                 cached_colors = CBit.ColorArrayFromBitmap(bmp);
                 Runtime.Log("Sprite color cache was null upon returning to original color. Instantiating backup.");
             }

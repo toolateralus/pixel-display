@@ -43,12 +43,21 @@ namespace pixel_renderer.Assets
                 }
             return false;
         }
+        public static Metadata FetchMeta(string name)
+        {
+            foreach (var asset in Current)
+                if (asset.Value is null && asset.Key is not null && name == asset.Key.Name)
+                    return asset.Key;
+            return null; 
+        }
+
+
         public static bool Fetch<T>(out List<T> output) where T : Asset
         {
 
             output = new List<T>();
             foreach (var obj in Current.Values)
-                if (obj.GetType() == typeof(T))
+                if (obj is not null && obj.GetType() == typeof(T))
                     output.Add((T)obj);
 
             if(output.Count > 0) return true;
@@ -86,6 +95,9 @@ namespace pixel_renderer.Assets
             foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
             {
                 // makes sure the metadata is appropriately synced.
+                if (assetPair.Value is null)
+                    continue; 
+
                 assetPair.Value.Sync();
 
                 AssetIO.GuaranteeUniqueName(assetPair.Key, assetPair.Value);

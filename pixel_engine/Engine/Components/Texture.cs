@@ -21,10 +21,10 @@ namespace pixel_renderer
             this.color = color;
             this.Name = Name;
         }
-        public Texture(Vec2Int scale, Metadata? imgData = null, Color? color = null)
+
+        public void SetImage(Metadata imgData, Vec2Int scale, Color? color = null)
         {
-            this.scale = scale; 
-            this.color = color;
+            this.scale = scale;
 
             if (imgData is not null)
             {
@@ -33,12 +33,18 @@ namespace pixel_renderer
             }
             else
             {
-                this.imgData = Player.test_image_data;
+                this.imgData = Player.PlayerSprite;
                 Image = new(imgData.fullPath);
             }
 
-            if(color is not null)  Image = CBit.SolidColorBitmap(this.scale, (Color)color);
-            
+            if (color is not null) 
+                Image = CBit.SolidColorBitmap(this.scale, (Color)color);
+        }
+
+        public Texture(Vec2Int scale, Metadata? imgData = null, Color? color = null)
+        {
+            this.color = color;
+            SetImage(imgData, scale, color);
         }
 
         public Bitmap? Image { get; set; }

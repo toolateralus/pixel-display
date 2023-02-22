@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -23,8 +24,10 @@ namespace pixel_renderer.Assets
                         return;
                 }
 
-            // TODO: reimplement importer.
-            //ImportTask(); 
+            foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.BitmapFileExtension))
+            {
+                AssetLibrary.Register(x, null);
+            }
             
             if (!Runtime.IsRunning)
                 if (showMessage)
@@ -38,6 +41,29 @@ namespace pixel_renderer.Assets
                         AssetLibrary.Sync();
                 }
         }
+
+        private static List<Metadata> Import(string directory, string ext)
+        {
+
+            List<Metadata> collection = new();
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            if (Constants.ReadableExtensions.Contains(ext))
+            {
+                var files = Directory.GetFiles(directory, $"*{ext}");
+                foreach (var item in files)
+                {
+                    var split = item.Split('\\');
+                    var name = split[^1].Replace($"{ext}", "");
+                    Metadata file = new(name, item, ext);
+                    collection.Add(file);
+                }
+            }
+            return collection;
+        }
+
         private static void ImportTask()
         {
             foreach (var file in Directory.EnumerateFiles(DirectoryPath))

@@ -402,7 +402,6 @@ namespace pixel_editor
         private void OnImportBtnPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            Importer.Import(true);
         }
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {

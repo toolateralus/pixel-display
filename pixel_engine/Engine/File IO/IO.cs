@@ -89,6 +89,13 @@ namespace pixel_renderer
             writer.Write(data);
             writer.Close();
         }
+        public static string Read<T>(Metadata meta)
+        {
+            using StreamReader writer = new(meta.fullPath);
+            string data = writer.ReadToEnd();
+            writer.Close();
+            return data; 
+        }
 
         public static Bitmap ReadBitmap(Metadata meta)
         {

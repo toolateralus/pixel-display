@@ -64,6 +64,8 @@ namespace pixel_renderer
             mainWnd.Closing += (e, o) => Dispose();
             
             Initialized = true;
+            Importer.Import(true);
+
         }
 
         public void Toggle()
@@ -93,12 +95,18 @@ namespace pixel_renderer
         {
             while (renderThread != null && renderThread.IsAlive)
             {
+
+                if (Application.Current is null)
+                    return;
                 if (IsTerminating)
                     return;
+
                 if (IsRunning)
                 {
                         StagingHost.Update(stage);
                         renderHost?.Render();
+                  
+
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             if (OutputImages.Count == 0 || OutputImages.First() is null) return;
@@ -113,17 +121,15 @@ namespace pixel_renderer
         {
             while (!stopPhysics)
             {
+                if (Application.Current == null)
+                    return;
                 if (IsTerminating)
                     return;
                 if (stage is null || !PhysicsInitialized)
                     continue;
 
-                    Collision.Run();
-                    StagingHost.FixedUpdate(stage);
-
-                if (Application.Current == null)
-                    return;
-
+                Collision.Run();
+                StagingHost.FixedUpdate(stage);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     //TODO: Fix this hacky fix;
