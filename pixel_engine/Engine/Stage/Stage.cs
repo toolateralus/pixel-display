@@ -169,7 +169,7 @@ namespace pixel_renderer
             get
             {
                 if(AssetLibrary.FetchMeta("Background") is not Metadata meta)
-                    return new("Error", Constants.WorkingRoot + Constants.AssetsDir + "Error" + Constants.BitmapFileExtension, Constants.BitmapFileExtension);
+                    return new("Background", Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.BitmapFileExtension, Constants.BitmapFileExtension);
                 return meta;
             }
         }

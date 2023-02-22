@@ -122,6 +122,7 @@ namespace pixel_editor
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.LoadedProject);
             Runtime.OutputImages.Add(image);
+            Runtime.Log(System.Windows.Media.RenderCapability.Tier >> 16);
 
         }
         
