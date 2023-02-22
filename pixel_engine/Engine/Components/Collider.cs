@@ -9,7 +9,7 @@ namespace pixel_renderer
 {
     public class Collider : Component
     {
-        [JsonProperty] Polygon polygon;
+        [JsonProperty] Polygon? polygon;
         public Polygon Polygon
         {
             get
