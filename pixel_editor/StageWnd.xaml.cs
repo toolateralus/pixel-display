@@ -1,12 +1,9 @@
 ﻿using pixel_renderer;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
-using pixel_renderer.Scripts;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 
 

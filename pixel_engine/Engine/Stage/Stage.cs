@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
-using pixel_renderer.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using pixel_renderer.FileIO;
-using pixel_renderer.Scripts;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer
@@ -22,6 +21,7 @@ namespace pixel_renderer
                 return;
             Next(animation.padding);
         }
+        
         public void Next(int increment = 1)
         {
            sprite.Draw(sprite.size, animation.GetFrame());
@@ -30,6 +30,7 @@ namespace pixel_renderer
         {
             sprite.Draw(new (32, 32), animation?.frames[(animation.frameIndex, animation.frameIndex -= increment)]);
         }
+        
         public void Start(float speed = 1, bool looping = true)
         {
             parent.TryGetComponent(out sprite);
@@ -53,6 +54,7 @@ namespace pixel_renderer
             if (reset)
                 animation.frameIndex = animation.startIndex;
         }
+        
         public void SetAnimation(Animation animation) => this.animation = animation;
         public Animation? GetAnimation() => animation;
         public static Node Standard()
@@ -63,6 +65,7 @@ namespace pixel_renderer
             anim.Start();
             return node;
         }
+        
         private void test_flame_anim_setup()
         {
             List<Metadata> anim_metas = new()

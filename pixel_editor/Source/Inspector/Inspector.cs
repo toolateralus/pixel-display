@@ -170,7 +170,6 @@ namespace pixel_editor
             this.MainGrid.UpdateLayout();
             activeGrids.Add(grid);
         }
-
         private void AddComponent(KeyValuePair<string, object> item)
         {
             if (item.Value is Func<Component> funct)
@@ -192,7 +191,6 @@ namespace pixel_editor
                     return; 
                 }
         }
-
         private void RefreshAddComponentFunctions()
         {
             addComponentFunctions = new()
@@ -204,9 +202,9 @@ namespace pixel_editor
                 {"Rigidbody", AddRigidbody},
             };
 
-            pixel_renderer.Scripts.Player AddPlayer()
+            Player AddPlayer()
             {
-                var x= selectedNode.AddComponent<pixel_renderer.Scripts.Player>();
+                var x= selectedNode.AddComponent<Player>();
                 Runtime.Log($"Player Added!");
                 return x;
             }
@@ -270,7 +268,6 @@ namespace pixel_editor
             addComponentGrid.Children.Clear();
             addComponentGrid = null;
         }
-        
         private Grid NewInspectorGrid()
         {
             Grid grid = GetGrid();

@@ -5,7 +5,6 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
-using pixel_renderer.Scripts;
 using Color = System.Drawing.Color;
 
 namespace pixel_renderer

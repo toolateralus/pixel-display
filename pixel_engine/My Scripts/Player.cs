@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Windows.Data;
 
-namespace pixel_renderer.Scripts
+namespace pixel_renderer
 {
 
     public class Player : Component
@@ -34,7 +34,9 @@ namespace pixel_renderer.Scripts
 
         private Node cameraNode;
         private Camera camera;
-        Curve curve; 
+        Curve curve;
+        private int scrollSpeed;
+
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
         public static Node test_child_node(Node? parent = null)
         {
@@ -66,7 +68,7 @@ namespace pixel_renderer.Scripts
             cameraNode.Position = parent.Position; 
 
             camera = Player.AddCamera(cameraNode);
-            curve = Curve.Circlular(1, 16, magnitude : 64, looping: true);
+            curve = Curve.Circlular(1, 16, radius : 64, looping: true);
 
         }
 
@@ -79,17 +81,23 @@ namespace pixel_renderer.Scripts
 
             if (!takingInput) 
                 return;
+
             var freezeButtonPressed = GetInputValue(Key.LeftShift);
 
             if (freezeButtonPressed && !freezeButtonPressedLastFrame)
                 thisPos = parent.Position;
+        
 
             freezeButtonPressedLastFrame = freezeButtonPressed;
 
             if (freezeButtonPressed)
             {
                 foreach (var child in parent.children)
-                    child.Value.localPos = curve.Next();
+                    child.Value.localPos += moveVector;
+
+                if (CMouse.MouseWheelDelta > 0)
+                    scrollSpeed += 1;
+                else scrollSpeed -= 1;
 
                 parent.Position = thisPos;
                 moveVector = Vec2.zero;
@@ -102,76 +110,10 @@ namespace pixel_renderer.Scripts
 
             moveVector = Vec2.zero;
         }
-        public override void OnTrigger(Collider other) 
-        { 
-        }
-        public override void OnCollision(Collider collider)
-        {
-            if (JRandom.Bool())
-                sprite?.Randomize();
-            else sprite?.DrawSquare(sprite.size, JRandom.Color());
-        }
-
-        void MakeChildObject(object[]? e)
-        {
-            Node node = test_child_node();
-            parent.Child(node);
-        }
-
-       
-
         void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);
         void Down(object[]? e) => moveVector = new Vec2(moveVector.x, inputMagnitude);
         void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, moveVector.y);
         void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, moveVector.y);
-
-        void MakeTransparent(object[]? e) => sprite?.DrawSquare(sprite.size, Color.FromArgb(5, 76, 185, 99));
-
-        void StartAnim(object[]? e)
-        {
-            if (parent.TryGetComponent<Animator>(out anim))
-            {
-                anim.Start();
-                Runtime.Log("Animation Started.");
-            }
-            else
-            {
-                Runtime.Log("Animator not found. Creating one.");
-                anim = parent.AddComponent<Animator>();
-                anim.GetAnimation().looping = true;
-            }
-        }
-        void StopAnim(object[]? e)
-        {
-            if (parent.TryGetComponent(out anim))
-            {
-                anim.Stop();
-                Runtime.Log("Animation Stopped.");
-            }
-            else
-            {
-                Runtime.Log("Animator not found. Creating one.");
-                anim = parent.AddComponent<Animator>();
-            }
-        }
-       
-
-        void IncreaseResolution(object[]? e)
-        {
-            RenderHost renderHost = Runtime.Current.renderHost;
-            var renderer = renderHost.GetRenderer();
-
-            if (renderer.Resolution.x < Constants.MaxResolution.x)
-                renderHost.newResolution = renderer.Resolution + Vec2.one;
-        }
-        void DecreaseResolution(object[]? e)
-        {
-            var renderer = Runtime.Current.renderHost.GetRenderer();
-            RenderHost renderHost = Runtime.Current.renderHost;
-
-            if (renderer.Resolution.x > Constants.MaxResolution.x)
-                renderHost.newResolution = renderer.Resolution - Vec2.one;
-        }
 
         private void CreateInputEvents()
         {
@@ -180,16 +122,6 @@ namespace pixel_renderer.Scripts
 
             RegisterAction(Left,  Key.A);
             RegisterAction(Right, Key.D);
-
-
-            RegisterAction(StartAnim, Key.NumPad9);
-            RegisterAction(StopAnim, Key.NumPad6);
-
-            RegisterAction(IncreaseResolution, Key.NumPad2);
-            RegisterAction(DecreaseResolution, Key.NumPad1);
-
-            RegisterAction(MakeTransparent, Key.NumPad0);
-            RegisterAction(MakeChildObject, Key.NumPad4);
         }
         private void Move(Vec2 moveVector)
         {
