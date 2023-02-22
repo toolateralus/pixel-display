@@ -7,7 +7,7 @@ namespace pixel_renderer
     public enum TriggerInteraction { Colliders, Triggers, None, All };
     public static partial class Collision
     {
-        private static readonly Dictionary<Node, Node[]> CollisionQueue = new();
+        private static readonly Dictionary<Node, List<Node>> CollisionQueue = new();
         private static readonly List<List<Node>> collisionMap = new();
         public static bool HasTasks => CollisionQueue.Count > 0;
         public static bool AllowEntries { get; private set; } = true;
@@ -102,43 +102,31 @@ namespace pixel_renderer
         public static void RegisterColliders(Stage stage)
         {
             Hash.ClearBuckets();
-            Action<Node> RegisterAction = (node) =>
+            List<Node> nodes = new(stage.nodes);
+            foreach (var node in nodes)
             {
                 if (!node.TryGetComponent<Collider>(out _))
                     return;
                 ViewportCollision(node);
                 Hash.RegisterNode(node);
-            };
-
-            List<Node> nodes = new(stage.nodes);
-                foreach (var node in nodes)
-                    RegisterAction(node);
-
+            }
         }
         private static void RegisterCollisionEvent(Node A, List<Node> colliders)
         {
-                if (A is null)
-                    return;
-                ConcurrentBag<Node> collidersCopy = new();
+            if (A is null)
+                return;
                 
-                lock (colliders)
-                     collidersCopy = new(colliders.AsReadOnly());
-
-                for (int i = 0; i < colliders.Count; i++)
+            for (int i = 0; i < colliders.Count; i++)
+            {
+                if (colliders[i] is null)
+                    continue;
+                if (A.CheckOverlap(colliders[i]))
                 {
-                    if (colliders[i] is null)
-                        continue;
-                    if (A.CheckOverlap(colliders[i]))
-                    {
-                        lock (CollisionQueue)
-                        {
-                            var nodesArray = colliders.ToArray();
-                            if (CollisionQueue.ContainsKey(A))
-                                CollisionQueue[A] = nodesArray;
-                            else CollisionQueue.Add(A, nodesArray);
-                        }
-                    }
+                    if (CollisionQueue.ContainsKey(A))
+                        CollisionQueue[A] = colliders;
+                    else CollisionQueue.Add(A, colliders);
                 }
+            }
         }
         public static void FinalPhase()
         {
@@ -147,7 +135,7 @@ namespace pixel_renderer
             {
                 Node A = CollisionQueue.Keys.ElementAt(i);
                 if (!CollisionQueue.TryGetValue(A, out var nodes)) return;
-                for (int j = 0; j < nodes.Length; ++j)
+                for (int j = 0; j < nodes.Count; ++j)
                 {
                     Node B = nodes[j];
                     if (!A.TryGetComponent(out Collider col_A) ||
