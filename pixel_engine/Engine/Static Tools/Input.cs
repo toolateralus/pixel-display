@@ -15,7 +15,7 @@ namespace pixel_renderer
         public static bool Left;
         public static bool LeftPressedLastFrame;
 
-        public Vec2 LastClickGlobalPosition { get; private set; }
+        public static Vec2 LastClickGlobalPosition { get; private set; }
 
         public static bool LeftPressedThisFrame;
         public static bool Middle;

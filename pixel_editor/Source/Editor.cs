@@ -515,7 +515,10 @@ namespace pixel_editor
             if (item.Value is Func<Node> funct)
             {
                 Runtime.Log("Node added!");
-                Runtime.Current.GetStage().AddNode(funct.Invoke()); 
+                Node node = funct.Invoke();
+                node.Position = CMouse.LastClickGlobalPosition;
+                Runtime.Current.GetStage().AddNode(node);
+                return;
             }
         }
         private void newNodeButtonClicked(object sender, RoutedEventArgs e)

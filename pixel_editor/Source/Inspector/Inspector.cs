@@ -202,7 +202,6 @@ namespace pixel_editor
             Player AddPlayer()
             {
                 var x= selectedNode.AddComponent<Player>();
-                CMouse.GlobalPosition()
                 Runtime.Log($"Player Added!");
                 return x;
             }
