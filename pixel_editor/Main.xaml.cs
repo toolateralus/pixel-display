@@ -90,7 +90,6 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-        Vec2 mouseSelectedNodeOffset = new Vec2();
 
         public Editor()
         {
@@ -99,7 +98,19 @@ namespace pixel_editor
             current = this;
 
             InitializeComponent();
-            GetEvents();
+            Closing += OnDisable;
+            MouseWheel += OnMouseWheelMoved;
+
+            image.MouseLeftButtonDown += Image_Mouse0;
+            image.MouseDown += Image_MouseBtnChanged;
+            image.MouseUp += Image_MouseBtnChanged;
+            image.MouseMove += Image_MouseMove;
+            Runtime.InspectorEventRaised += QueueEvent;
+            CompositionTarget.Rendering += Update;
+
+            Input.RegisterAction(SendCommandKeybind, Key.Return);
+            Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
+            Input.RegisterAction(ToggleKeybind, Key.LeftShift);
 
             inspector = new Inspector(inspectorGrid);
             Runtime.Editor = inspector;
@@ -113,75 +124,7 @@ namespace pixel_editor
             Runtime.OutputImages.Add(image);
 
         }
-        string stageName, projectName;
-        private void OnProjectSet(Project obj)
-        {
-            projectName = obj.Name;
-            Current.Title = $"{projectName} : : {stageName}";
-        }
-        private void OnStageSet(Stage obj)
-        {
-            stageName = obj.Name;
-            Current.Title = $"{projectName} : : {stageName}";
-        }
-
-        internal EngineInstance? engine;
-        internal static RenderHost? Host => Runtime.Current.renderHost;
-
-        private static Editor current;
-        public static Editor Current
-        {
-            get
-            {
-                if (current is not null)
-                    return current;
-                else current = new();
-                return current;
-            }
-        }
-
-        public Inspector? Inspector => inspector;
-        private readonly Inspector inspector;
-        // for stage creation, hopefully a better solution eventually.
-        private StageWnd? stageWnd;
-        public readonly EditorEventHandler Events = new();
-        internal Action<object?> RedText(object? o = null)
-        {
-            return (o) =>
-            {
-                consoleOutput.Foreground = Brushes.Red;
-            };
-        }
-        /// <summary>
-        /// if the color's brightness is under 610 (a+r+g+b) this continually gets a new color every ms for 1000 ms or until it's bright enough then returns it
-        /// </summary>
-        /// <param name="c"></param>
-        /// <returns>A color with a brightness value greater than 610 </returns>
-        private static async Task<System.Drawing.Color> VerifyColorBrightnessOrGetNew(System.Drawing.Color c)
-        {
-            int iterations = 0;
-            while (255 + c.B + c.R + c.G < 610)
-            {
-                c = JRandom.Color();
-                await Task.Delay(1);
-                iterations++;
-
-                if (iterations > 1000)
-                    break;
-            }
-            return c;
-        }
-        internal Action<object?> BlackText(object? o = null)
-        {
-            return (o) =>
-            {
-                consoleOutput.Foreground = Brushes.Green;
-                consoleOutput.Background = Brushes.Black;
-            };
-        }
-        public byte[] Frame => Runtime.Current.renderHost.GetRenderer().Frame;
-        public int Stride => Runtime.Current.renderHost.GetRenderer().Stride;
-        public Vec2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
+        
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
@@ -189,12 +132,15 @@ namespace pixel_editor
             Events.ExecuteAll();
             TryDragNode();
             TryZoomCamera();
-            
-
         }
 
         private void TryZoomCamera()
         {
+            if (CMouse.MouseWheelDelta != 0)
+            {
+                IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
+                enumerable.First().Size *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
+            }
         }
 
         private void TryDragNode()
@@ -213,67 +159,7 @@ namespace pixel_editor
                 selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset; 
             }
         }
-
-        private void GetEvents()
-        {
-            Closing += OnDisable;
-            MouseWheel += OnMouseWheelMoved;
-            
-
-            image.MouseLeftButtonDown += Image_Mouse0;
-            image.MouseDown += Image_MouseBtnChanged;
-            image.MouseUp += Image_MouseBtnChanged;
-            image.MouseMove += Image_MouseMove;
-            Runtime.InspectorEventRaised += QueueEvent;
-            CompositionTarget.Rendering += Update; 
-             
-            Input.RegisterAction(SendCommandKeybind, Key.Return);
-            Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
-            Input.RegisterAction(ToggleKeybind, Key.LeftShift);
-
-        }
-
-        private void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
-        {
-            CMouse.Refresh(e); 
-        }
-
-        private void Image_MouseMove(object sender, MouseEventArgs e)
-        {
-            CMouse.Refresh(e);
-        }
-
-        private void Image_MouseBtnChanged(object sender, MouseButtonEventArgs e)
-        {
-            CMouse.Refresh(e);
-        }
-
-        private void ToggleKeybind(object[]? obj)
-        {
-            if (Input.GetInputValue(0, "P"))
-                Runtime.Current.Toggle();
-
-        }
-
-        private void ClearKeyboardFocus(object[]? obj)
-        {
-            Keyboard.ClearFocus();
-        }
-     
-        void SendCommandKeybind(object[]? o)
-        {
-            if (!editorMessages.IsKeyboardFocusWithin)
-                return;
-
-            if (!Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
-                return;
-
-            OnCommandSent(new(), new());
-
-            editorMessages.Clear();
-        }
         
-
         private void UpdateMetrics()
         {
             var memory = Runtime.Current.renderHost.info.GetTotalMemory();
@@ -295,6 +181,104 @@ namespace pixel_editor
             consoleOutput.ScrollToEnd();
         }
 
+        #region Fields/Properties
+        Vec2 mouseSelectedNodeOffset = new Vec2();
+        string stageName, projectName;
+        internal EngineInstance? engine;
+        internal static RenderHost? Host => Runtime.Current.renderHost;
+
+        private static Editor current;
+        public static Editor Current
+        {
+            get
+            {
+                if (current is not null)
+                    return current;
+                else current = new();
+                return current;
+            }
+        }
+        Node? selectedNode = null;
+
+        public Inspector? Inspector => inspector;
+        private readonly Inspector inspector;
+        // for stage creation, hopefully a better solution eventually.
+        private StageWnd? stageWnd;
+        public readonly EditorEventHandler Events = new();
+        public byte[] Frame => Runtime.Current.renderHost.GetRenderer().Frame;
+        public int Stride => Runtime.Current.renderHost.GetRenderer().Stride;
+        public Vec2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
+        #endregion
+        #region Input Events
+        private void ToggleKeybind(object[]? obj)
+        {
+            if (Input.GetInputValue(0, "P"))
+                Runtime.Current.Toggle();
+
+        }
+        private void ClearKeyboardFocus(object[]? obj)
+        {
+            Keyboard.ClearFocus();
+        }
+        void SendCommandKeybind(object[]? o)
+        {
+            if (!editorMessages.IsKeyboardFocusWithin)
+                return;
+
+            if (!Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
+                return;
+
+            OnCommandSent(new(), new());
+
+            editorMessages.Clear();
+        }
+        #endregion
+        #region UI Events
+
+        internal Action<object?> RedText(object? o = null)
+        {
+            return (o) =>
+            {
+                consoleOutput.Foreground = Brushes.Red;
+            };
+        }
+        /// <summary>
+        /// if the color's brightness is under 610 (a+r+g+b) this continually gets a new color every ms for 1000 ms or until it's bright enough then returns it
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>A color with a brightness value greater than 610 </returns>
+        internal Action<object?> BlackText(object? o = null)
+        {
+            return (o) =>
+            {
+                consoleOutput.Foreground = Brushes.Green;
+                consoleOutput.Background = Brushes.Black;
+            };
+        }
+
+        private void OnProjectSet(Project obj)
+        {
+            projectName = obj.Name;
+            Current.Title = $"{projectName} : : {stageName}";
+        }
+        private void OnStageSet(Stage obj)
+        {
+            stageName = obj.Name;
+            Current.Title = $"{projectName} : : {stageName}";
+        }
+
+        private void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
+        {
+            CMouse.Refresh(e);
+        }
+        private void Image_MouseMove(object sender, MouseEventArgs e)
+        {
+            CMouse.Refresh(e);
+        }
+        private void Image_MouseBtnChanged(object sender, MouseButtonEventArgs e)
+        {
+            CMouse.Refresh(e);
+        }
         private async void OnCommandSent(object sender, RoutedEventArgs e)
         {
             if (e.RoutedEvent != null)
@@ -335,10 +319,35 @@ namespace pixel_editor
                     Command.Call(line);
             }
         }
+        private void OnToggleConsole(object sender, RoutedEventArgs e)
+        {
+            if (!consoleOpen)
+            {
+                consoleOpen = true;
 
-        #region UI Events
+                editorMessages.Visibility = Visibility.Collapsed;
+                consoleOutput.Visibility = Visibility.Collapsed;
+
+                return;
+            }
+
+            editorMessages.Visibility = Visibility.Visible;
+            consoleOutput.Visibility = Visibility.Visible;
+
+            consoleOpen = false;
+        }
+
+        /// <summary>
+        /// For users to pass an event to the inspector to be executed as soon as possible
+        /// </summary>
+        /// <param name="e"></param>
+        public static void QueueEvent(EditorEvent e)
+        {
+            if (e.ClearConsole)
+                Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
+            Current.Events.Pending.Enqueue(e);
+        }
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
-        Node? selectedNode = null;
         private void Image_Mouse0(object sender, MouseButtonEventArgs e)
         {
             if (!TryClickNodeOnScreen(sender, out selectedNode) || selectedNode is null)
@@ -423,84 +432,44 @@ namespace pixel_editor
                 Runtime.Current.SetProject(project);
         }
 
-        /// <summary>
-        /// For users to pass an event to the inspector to be executed as soon as possible
-        /// </summary>
-        /// <param name="e"></param>
-        public static void QueueEvent(EditorEvent e)
-        {
-            if (e.ClearConsole)
-                Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
-            Current.Events.Pending.Enqueue(e);
-        }
         #endregion
-
-        private void consoleOutput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-
-        }
-
-        internal void SetTheme(string name)
-        {
-            name = name.ToLower();
-        }
-
+        #region Add Node Menu
         bool consoleOpen = true;
         public ComponentEditor? componentEditor;
+        bool addNodeContextMenuOpen = false;
+        Grid addNodeContextMenu;
+        List<Action> addNodeActions = new();
 
-        private void OnToggleConsole(object sender, RoutedEventArgs e)
-        {
-            if (!consoleOpen)
-            {
-                consoleOpen = true;
-
-                editorMessages.Visibility = Visibility.Collapsed;
-                consoleOutput.Visibility = Visibility.Collapsed;
-
-                return;
-            }
-
-            editorMessages.Visibility = Visibility.Visible;
-            consoleOutput.Visibility = Visibility.Visible;
-
-            consoleOpen = false;
-        }
-
-        bool newMenuOpen = false;
-        Grid newMenuGrid;
-        List<Action> AddItemActions = new();
-
-        private void New(object sender, RoutedEventArgs e)
+        private void NewNodeButtonPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true; 
-            if (!newMenuOpen)
+            if (!addNodeContextMenuOpen)
             {
-                newMenuOpen = true;
-                newMenuGrid = Inspector.GetGrid();
-                inspectorGrid.Children.Add(newMenuGrid);
-                Inspector.SetRowAndColumn(newMenuGrid, 10, 10, 0, 0);
+                addNodeContextMenuOpen = true;
+                addNodeContextMenu = Inspector.GetGrid();
+                inspectorGrid.Children.Add(addNodeContextMenu);
+                Inspector.SetRowAndColumn(addNodeContextMenu, 10, 10, 0, 0);
 
                 int i = 0;
-                foreach (var item in objects)
+                foreach (var item in addNodeFunctions)
                 {
                     Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
                     button.Name = $"button{i}";
-                    AddItemActions.Add(() => AddObject(new(item.Key, item.Value)));
+                    addNodeActions.Add(() => AddNodePrefab(new(item.Key, item.Value)));
                     button.FontSize = 2;
-                    button.Click += NewObjectButtonClicked;
-                    newMenuGrid.Children.Add(button);
+                    button.Click += newNodeButtonClicked;
+                    addNodeContextMenu.Children.Add(button);
                     Inspector.SetRowAndColumn(button, 2, 3, 15, i * 2);
                     i++;
 
                 }
                 return;
             }
-            newMenuOpen = false;
-            newMenuGrid.Children.Clear();
-            newMenuGrid = null;
+            addNodeContextMenuOpen = false;
+            addNodeContextMenu.Children.Clear();
+            addNodeContextMenu = null;
         }
-
-        private void AddObject(KeyValuePair<string, object> item)
+        private void AddNodePrefab(KeyValuePair<string, object> item)
         {
             if (item.Value is Func<Node> funct)
             {
@@ -508,22 +477,22 @@ namespace pixel_editor
                 Runtime.Current.GetStage().AddNode(funct.Invoke()); 
             }
         }
-
-        private void NewObjectButtonClicked(object sender, RoutedEventArgs e)
+        private void newNodeButtonClicked(object sender, RoutedEventArgs e)
         {
             e.Handled = true; 
             if (sender is not Button button) return;
-            foreach (var item in objects)
-                if (button.Name.ToInt() is int i && AddItemActions.Count > i)
-                    AddItemActions[i]?.Invoke();
+            foreach (var item in addNodeFunctions)
+                if (button.Name.ToInt() is int i && addNodeActions.Count > i)
+                    addNodeActions[i]?.Invoke();
         }
-        public static Dictionary<string, Func<Node>> objects = new()
+        public static Dictionary<string, Func<Node>> addNodeFunctions = new()
         {
             {"Static Body", Rigidbody.StaticBody },
             {"Rigid Body", Rigidbody.Standard },
             {"Animator", Animator.Standard},
             {"Floor",Floor.Standard},
         };
+        #endregion
     }
 }
 

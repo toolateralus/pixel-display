@@ -1,11 +1,5 @@
-﻿using System.Drawing;
-using System.Windows.Media.Media3D;
-
-namespace pixel_renderer
+﻿namespace pixel_renderer
 {
-    /// <summary>
-    /// temporary script to keep the floor in place while there is no Kinematic Body (non rigidbodies cannot participate in collision)
-    /// </summary>
     public class Floor : Component
     {
         public const float height = 10; 
@@ -14,7 +8,7 @@ namespace pixel_renderer
 
         public static Node Standard()
         {
-            Node node = new("Floor Node");
+            Node node = new("Floor");
             node.AddComponent<Floor>();
             return node;
         }

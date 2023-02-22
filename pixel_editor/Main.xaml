@@ -258,7 +258,7 @@
                     Grid.ColumnSpan="2"
                     
                     Content="New"
-                    Click="New"
+                    Click="NewNodeButtonPressed"
                     x:Name="newButton"/>
         </Grid>
     </Grid>

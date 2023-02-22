@@ -50,26 +50,6 @@ namespace pixel_editor
             action = (o) => Console.Print(o[0]),
             description = "Logs a message to the console, Some characters will cause this to fail."
         };
-        public static Command cmd_swap_theme() => new()
-        {
-            phrase = "theme;",
-            description = "Swaps the current theme [DOES NOT WORK CURRENTLY]",
-            syntax = "theme(light_or_dark);",
-            argumentTypes = new string[] { "str:" },
-            action = (o) =>
-            {
-                bool hasArg = o != null && o.Length > 0;
-                if (hasArg)
-                {
-                    if (o[0] is string arg)
-                    {
-                        Editor.Current.SetTheme(arg);
-                        return;
-                    }
-                }
-            },
-            args = null,
-        };
         #endregion
 
         #region Renderer Commands
