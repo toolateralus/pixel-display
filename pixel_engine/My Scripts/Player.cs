@@ -74,7 +74,7 @@ namespace pixel_renderer
             childNode.localPos = Vec3.zero;
             childNode.Position = parent.Position;
 
-            curve = Curve.Circlular(1, 16, radius: 64, looping: true);
+            curve = Curve.Circlular(1, 16, radius: sprite.size.x /2, looping: true);
 
 
             Task task = new(async delegate
@@ -84,14 +84,9 @@ namespace pixel_renderer
                     await Task.Delay(25);
                 sprite.texture.SetImage(PlayerSprite, (Vec2Int)sprite.size, Color.Red);
             });
-
             task.Start();
-
-
-
-            DrawCircle();
             sprite.Type = SpriteType.Image;
-
+            DrawCircle();
         }
      
 
@@ -132,17 +127,16 @@ namespace pixel_renderer
         {
             Color[,] colors = new Color[(int)sprite.size.x, (int)sprite.size.y];
 
-            for (int i = 0; i < sprite.size.x; ++i)
-                for (int j = 0; j < sprite.size.y; ++j)
-                {
 
-                    Vec2 pt = new Vec2(i, j);
-                    if (curve.points.Values.Contains(pt))
-                        colors[i, j] = Color.RebeccaPurple;
-                    else colors[i, j] = Color.FromArgb(0, 0, 0, 0);
+            for(int i = 0; i < curve.points.Values.Count; ++i)
+            {
+                Vec2 pos = curve.points.Values.ElementAt(i);
+                pos += sprite.size / 2; 
 
-                }
-
+                if(pos.IsWithinMaxExclusive(Vec2.zero, new(sprite.size.x, sprite.size.y)))
+                    colors[(int)pos.x, (int)pos.y] = Color.Red;
+                
+            }
             sprite.Draw(sprite.size, colors);
         }
 
