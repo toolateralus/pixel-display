@@ -74,8 +74,6 @@ namespace pixel_renderer
         }
         public override void OnDrawShapes()
         {
-            float radius = Vec2.Distance(Polygon.GetBoundingBox(Polygon.vertices).min, Polygon.centroid);
-            ShapeDrawer.DrawCircle(Polygon.centroid, radius, Color.Crimson);
             if (!(drawCollider || drawNormals))
                 return;
             var mesh = Polygon;
