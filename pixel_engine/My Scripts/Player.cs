@@ -84,6 +84,7 @@ namespace pixel_renderer
                     await Task.Delay(25);
                 sprite.texture.SetImage(PlayerSprite, (Vec2Int)sprite.size, Color.Red);
             });
+
             task.Start();
             sprite.Type = SpriteType.Image;
             DrawCircle();
