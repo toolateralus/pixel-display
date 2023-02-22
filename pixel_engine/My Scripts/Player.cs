@@ -50,14 +50,9 @@ namespace pixel_renderer
         public static Node test_child_node(Node? parent = null)
         {
             Node node = new("Player Child");
-
             if (parent != null)
                 node.Position = parent.Position + Vec2.up * 16;
             else node.Position = JRandom.Vec2(Vec2.zero, Vec2.one * Constants.ScreenW); 
-
-            var sprite = AddSprite(node);
-            sprite.DrawSquare(Vec2.one * 16, Color.Red);
-            AddCollider(node, sprite);
             AddCamera(node);
             return node;
         }

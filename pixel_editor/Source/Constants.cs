@@ -9,5 +9,7 @@ namespace pixel_editor
         public const int EditorEventQueueMaxLength = 12;
         public static int InspectorWidth = 6;
         public static int InspectorHeight = 10;
+
+        public static Vec2 MouseSensitivity = new(1.5f, 1.5f);
     }
 }

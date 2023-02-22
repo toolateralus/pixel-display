@@ -133,6 +133,23 @@ namespace pixel_editor
             Events.ExecuteAll();
             TryDragNode();
             TryZoomCamera();
+            TryMoveCamera();
+
+        }
+        private void TryMoveCamera()
+        {
+            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            if (!enumerable.Any()) return;
+
+            if (!CMouse.RightPressedLastFrame && CMouse.Right)
+                CMouse.RightPressedThisFrame = true;
+            else
+                CMouse.RightPressedLastFrame = false;
+            CMouse.RightPressedThisFrame = CMouse.Left;
+
+            if (CMouse.Right)
+                enumerable.First().parent.Position += CMouse.Delta * Constants.MouseSensitivity;
+
         }
 
         private static void TryZoomCamera()
@@ -153,7 +170,7 @@ namespace pixel_editor
                 CMouse.LeftPressedThisFrame = false;
             CMouse.LeftPressedLastFrame = CMouse.Left;
 
-            if (CMouse.Left && Input.GetInputValue(Key.LeftShift) && selectedNode != null)
+            if (CMouse.Left && selectedNode != null)
             {
                 if (CMouse.LeftPressedThisFrame)
                     mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
