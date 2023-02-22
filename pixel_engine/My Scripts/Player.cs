@@ -62,15 +62,7 @@ namespace pixel_renderer
             CreateInputEvents();
             parent.TryGetComponent(out rb);
             parent.TryGetComponent(out sprite);
-
-            var childNode = test_child_node();
-            parent.Child(childNode);
-
-            childNode.localPos = Vec3.zero;
-            childNode.Position = parent.Position;
-
             curve = Curve.Circlular(1, 16, radius: sprite.size.x /2, looping: true);
-
 
             Task task = new(async delegate
             {
@@ -84,8 +76,6 @@ namespace pixel_renderer
             sprite.Type = SpriteType.Image;
             DrawCircle();
         }
-     
-
 
         public override void FixedUpdate(float delta)
         {

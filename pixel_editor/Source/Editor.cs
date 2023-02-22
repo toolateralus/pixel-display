@@ -134,10 +134,41 @@ namespace pixel_editor
             TryDragNode();
             TryZoomCamera();
             TryMoveCamera();
-
+            TryFocusNode();
+            TryFollowNode();
         }
+
+        private void TryFollowNode()
+        {
+            if (selectedNode is null) return;
+            if (followNode)
+            {
+                IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
+                if (!enumerable.Any()) return;
+                enumerable.First().parent.Position = selectedNode.Position;
+                if (!Input.GetInputValue(Key.Escape)) return;
+                followNode = false; 
+            }
+        }
+
+        private void TryFocusNode()
+        {
+            
+            if (selectedNode == null) return;
+            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            if (!enumerable.Any()) return;
+            if (!Input.GetInputValue(Key.F)) return;
+
+            enumerable.First().parent.Position = selectedNode.Position;
+
+            if (!Input.GetInputValue(Key.LeftShift)) return;
+
+            followNode = true;
+        }
+
         private void TryMoveCamera()
         {
+            followNode = false; 
             IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!enumerable.Any()) return;
 
@@ -507,6 +538,7 @@ namespace pixel_editor
             {"Animator", Animator.Standard},
             {"Floor",Floor.Standard},
         };
+        private bool followNode;
         #endregion
     }
 }
