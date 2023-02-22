@@ -160,9 +160,9 @@ namespace pixel_renderer
                     if (a_has_rb && b_has_rb)
                         Collide(rbB, rbA);
                     if (a_has_rb && !b_has_rb)
-                        Collide(rbB, col_A);
-                    if (!a_has_rb && b_has_rb)
                         Collide(rbA, col_B);
+                    if (!a_has_rb && b_has_rb)
+                        Collide(rbB, col_A);
 
                     AttemptCallbacks(col_A, col_B);
                 }
