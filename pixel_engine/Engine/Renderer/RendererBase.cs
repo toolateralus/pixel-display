@@ -62,22 +62,12 @@
             Vec2 framePos = new Vec2();
             foreach (Circle circle in ShapeDrawer.circles)
             {
+                Vec2 radius = circle.center + new Vec2(circle.radius, circle.radius);
                 Vec2 centerPos = cam.GlobalToScreenViewport(circle.center) * resolution;
-                float pixelRadius = (cam.GlobalToScreenViewport(new Vec2(circle.radius,0)) * resolution).x;
-                float sqrRadius = pixelRadius * pixelRadius;
-                //for (Vec2 pixel = one * -(int)pixelRadius; pixel.y < (int)pixelRadius; pixel.Increment2D((int)pixelRadius, -(int)pixelRadius))
-                //{
-                //    if ((int)pixel.SqrMagnitude() == (int)sqrRadius)
-                //    {
-                //        framePos = centerPos + pixel;
-                //        if (!framePos.IsWithinMaxExclusive(zero, resolution))
-                //            continue;
-                //        WriteColorToFrame(ref circle.color, ref framePos);
-                //    }
-                //}
-                for (int x = -(int)pixelRadius; x < pixelRadius; x++)
+                Vec2 pixelRadius = cam.GlobalToScreenViewport(radius) * resolution - centerPos;
+                for (int x = -(int)pixelRadius.x; x < (int)pixelRadius.x; x++)
                 {
-                    float y = MathF.Cos(MathF.Asin((float)x / pixelRadius)) * pixelRadius;
+                    float y = MathF.Cos(MathF.Asin((float)x / pixelRadius.x)) * pixelRadius.y;
                     framePos.x = centerPos.x + x;
                     framePos.y = centerPos.y + y;
                     if (framePos.IsWithinMaxExclusive(zero, resolution))
