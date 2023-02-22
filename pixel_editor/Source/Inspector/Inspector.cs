@@ -149,7 +149,7 @@ namespace pixel_editor
      
         private int AddComponentToInspector(Grid grid, int index, Component component)
         {
-            var box = GetTextBox(component.Name);
+            var box = GetTextBox(component.GetType().Name);
             Button editComponentButton = GetEditComponentButton(index);
             grid.Children.Add(editComponentButton);
             grid.Children.Add(box);
