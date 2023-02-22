@@ -17,7 +17,7 @@ namespace pixel_renderer.Scripts
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
-        [Field][JsonProperty] public int speed = 8;
+        [Field][JsonProperty] public float speed = 8;
         [Field][JsonProperty] public float inputMagnitude = 1f;
         [Field] [JsonProperty] private Animator? anim;
 
@@ -27,8 +27,10 @@ namespace pixel_renderer.Scripts
 
         
         public static Metadata test_image_data = new("test_sprite_image", Constants.WorkingRoot + Constants.ImagesDir + "\\sprite_24x24.bmp", Constants.BitmapFileExtension);
+        
         private bool freezeButtonPressedLastFrame = false;
         private Vec2 thisPos;
+
         private Node cameraNode;
         private Camera camera;
 
@@ -61,8 +63,8 @@ namespace pixel_renderer.Scripts
 
             cameraNode.localPos = Vec3.zero;
             cameraNode.Position = parent.Position; 
-            camera = Player.AddCamera(cameraNode);
 
+            camera = Player.AddCamera(cameraNode);
         }
 
      
@@ -73,13 +75,17 @@ namespace pixel_renderer.Scripts
             if (!takingInput) 
                 return;
             var freezeButtonPressed = GetInputValue(Key.LeftShift);
+
             if (freezeButtonPressed && !freezeButtonPressedLastFrame)
                 thisPos = parent.Position;
+
             freezeButtonPressedLastFrame = freezeButtonPressed;
+
             if (freezeButtonPressed)
             {
                 foreach (var child in parent.children)
                     child.Value.localPos += moveVector;
+
                 parent.Position = thisPos;
                 moveVector = Vec2.zero;
                 return;
