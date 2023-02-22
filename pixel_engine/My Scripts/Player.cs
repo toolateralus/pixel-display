@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Xml.Linq;
 using System.Threading.Tasks;
 using System.Data;
+using System.Windows.Data;
 
 namespace pixel_renderer.Scripts
 {
@@ -33,7 +34,7 @@ namespace pixel_renderer.Scripts
 
         private Node cameraNode;
         private Camera camera;
-
+        Curve curve; 
         public static Metadata test_animation_data(int index) => new("test animation image data", Constants.WorkingRoot + Constants.ImagesDir + $"\\sprite_24x24 {index}.bmp", Constants.BitmapFileExtension);
         public static Node test_child_node(Node? parent = null)
         {
@@ -65,6 +66,8 @@ namespace pixel_renderer.Scripts
             cameraNode.Position = parent.Position; 
 
             camera = Player.AddCamera(cameraNode);
+            curve = Curve.Circlular(1, 16, magnitude : 64, looping: true);
+
         }
 
      
@@ -72,6 +75,8 @@ namespace pixel_renderer.Scripts
 
         public override void FixedUpdate(float delta)
         {
+
+
             if (!takingInput) 
                 return;
             var freezeButtonPressed = GetInputValue(Key.LeftShift);
@@ -84,7 +89,7 @@ namespace pixel_renderer.Scripts
             if (freezeButtonPressed)
             {
                 foreach (var child in parent.children)
-                    child.Value.localPos += moveVector;
+                    child.Value.localPos = curve.Next();
 
                 parent.Position = thisPos;
                 moveVector = Vec2.zero;

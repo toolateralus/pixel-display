@@ -7,6 +7,8 @@ namespace pixel_renderer
     public class StagingHost
     {
         public Node? lastSelected;
+        private static bool selected_by_editor;
+
         static Runtime runtime => Runtime.Current;
         /// <summary>
         /// this is used for editor clicking.
@@ -41,12 +43,13 @@ namespace pixel_renderer
             return false;
         }
 
-        private static void SelectNode(Sprite sprite) =>
-           sprite.Highlight(Constants.EditorHighlightColor, IsReadOnly: true);
+        private static void SelectNode(Sprite sprite) => sprite.selected_by_editor = true;
 
         public void DeselectNode()
         {
-            lastSelected?.GetComponent<Sprite>().RestoreCachedColor(true, false);
+            if (lastSelected is null) return;
+            var x = lastSelected.GetComponent<Sprite>();
+            x.selected_by_editor = false;
             lastSelected = null;
         }
 

@@ -77,8 +77,9 @@ namespace pixel_renderer
             dirty = false;
         }
 
-        private Color[,] _colors = new Color[1,1]; 
-       
+        private Color[,] _colors = new Color[1,1];
+        internal protected bool selected_by_editor;
+
         public override void Awake()
         {
             texture = new((Vec2Int)size, Player.test_image_data);
@@ -165,6 +166,21 @@ namespace pixel_renderer
         {
             size = new(x, y);
             
+        }
+
+        public override void OnDrawShapes()
+        {
+            if (selected_by_editor)
+            {
+                var verts = Collider.GetVertices(this);
+                Polygon mesh = new(verts);
+                int vertLength = mesh.vertices.Length;
+                for (int i = 0; i < vertLength; i++)
+                {
+                    var nextIndex = (i + 1) % vertLength;
+                    ShapeDrawer.DrawLine(mesh.vertices[i] + parent.Position, mesh.vertices[nextIndex] + parent.Position, Constants.EditorHighlightColor);
+                }
+            }
         }
     }
 }

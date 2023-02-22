@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace pixel_renderer
 {
+
     public class Curve
     {
         public Dictionary<Vec2, Vec2> curve = new();
@@ -10,7 +13,25 @@ namespace pixel_renderer
         private int index;
         private int startIndex;
         public bool looping;
+        public static Curve Circlular(float speed, int length, float magnitude = 1f, bool looping = true)
+        {
+            Curve curve = new();
+            curve.padding = (int)(length / speed);
+            int totalLength = length * curve.padding;
+            Vec2[] vecs = new Vec2[totalLength];
 
+
+            for (int i = 0; i < totalLength; i++)
+            {
+                float t = (float)i / totalLength * CMath.Tau;
+                vecs[i] = new Vec2(MathF.Sin(t), MathF.Cos(t)) * magnitude;
+            }
+
+            curve.CreateCurve(vecs);
+            curve.looping = looping;
+            return curve;
+
+        }
         public void CreateCurve(Vec2[] vertices, int padding = 1)
         {
             this.padding = padding;
@@ -27,6 +48,7 @@ namespace pixel_renderer
         public static Vec2 Next(Curve curve)
         {
             var outVec = new Vec2();
+
             if (curve.index > curve.curve.Count * curve.padding - 1 && curve.looping)
                 curve.index = curve.startIndex;
 

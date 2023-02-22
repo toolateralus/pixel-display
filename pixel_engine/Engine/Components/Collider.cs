@@ -55,6 +55,23 @@ namespace pixel_renderer
 
             return vertices;
         }
+        public static Vec2[] GetVertices(Sprite sprite)
+        {
+            Vec2 topLeft = Vec2.zero;
+            Vec2 topRight = new(sprite.size.x, 0);
+            Vec2 bottomRight = sprite.size;
+            Vec2 bottomLeft = new(0, sprite.size.y);
+
+            var vertices = new Vec2[]
+            {
+                    topLeft,
+                    topRight,
+                    bottomRight,
+                    bottomLeft,
+            };
+
+            return vertices;
+        }
         public override void OnDrawShapes()
         {
             if (!(drawCollider || drawNormals))
