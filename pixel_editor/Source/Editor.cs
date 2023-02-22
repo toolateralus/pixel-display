@@ -143,10 +143,11 @@ namespace pixel_editor
             if (selectedNode is null) return;
             if (followNode)
             {
-                IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
-                if (!enumerable.Any()) return;
-                enumerable.First().parent.Position = selectedNode.Position;
-                if (!Input.GetInputValue(Key.Escape)) return;
+                IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
+                if (!cams.Any()) return;
+                cams.First().parent.Position = selectedNode.Position;
+                if (!Input.GetInputValue(Key.Escape))
+                    return;
                 followNode = false; 
             }
         }
@@ -155,11 +156,11 @@ namespace pixel_editor
         {
             
             if (selectedNode == null) return;
-            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
-            if (!enumerable.Any()) return;
+            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            if (!cams.Any()) return;
             if (!Input.GetInputValue(Key.F)) return;
 
-            enumerable.First().parent.Position = selectedNode.Position;
+            cams.First().parent.Position = selectedNode.Position;
 
             if (!Input.GetInputValue(Key.LeftShift)) return;
 
@@ -169,8 +170,8 @@ namespace pixel_editor
         private void TryMoveCamera()
         {
             followNode = false; 
-            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
-            if (!enumerable.Any()) return;
+            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            if (!cams.Any()) return;
 
             if (!CMouse.RightPressedLastFrame && CMouse.Right)
                 CMouse.RightPressedThisFrame = true;
@@ -179,7 +180,7 @@ namespace pixel_editor
             CMouse.RightPressedThisFrame = CMouse.Left;
 
             if (CMouse.Right)
-                enumerable.First().parent.Position += CMouse.Delta * Constants.MouseSensitivity;
+                cams.First().parent.Position += CMouse.Delta * Constants.MouseSensitivity;
 
         }
 
