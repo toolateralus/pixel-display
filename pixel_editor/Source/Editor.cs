@@ -80,7 +80,7 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-
+        List<Tool> tools = new List<Tool>();
         public Editor()
         {
             EngineInstance.FromEditor = true;
@@ -104,6 +104,7 @@ namespace pixel_editor
 
             inspector = new Inspector(inspectorGrid);
             Runtime.Editor = inspector;
+
 
             Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
 
