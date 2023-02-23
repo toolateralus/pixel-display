@@ -73,13 +73,13 @@ namespace pixel_renderer
         {
             return new(new Vec2[] { new(0, 0), new(width, 0), new(width, height), new(0, height) });
         }
-        public static Polygon Triangle(float length)
+        public static Polygon Triangle(float width, float height, float topPosScale = 0.5f)
         {
-            Vec2 zero = new Vec2(0,length);
-            Vec2 one = new Vec2(0.5f * length, length);
-            Vec2 two = new Vec2(length, length); 
+            Vec2 top = new(topPosScale * width, 0);
+            Vec2 right = new(0, height);
+            Vec2 left = new(width, height); 
 
-            return new(new Vec2[] { zero, one, two});
+            return new(new Vec2[] { top, right, left});
         }
     }
     

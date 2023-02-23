@@ -531,7 +531,7 @@ namespace pixel_editor
             {"Static Body", Rigidbody.StaticBody },
             {"Rigid Body", Rigidbody.Standard },
             {"Animator", Animator.Standard},
-            {"Floor",Floor.Standard},
+            {"Floor", Floor.Standard},
         };
         private bool followNode;
         #endregion
