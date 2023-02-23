@@ -1,10 +1,20 @@
-﻿using System;
+﻿using pixel_renderer;
+using System;
 using System.Collections.Generic;
 
 namespace pixel_editor
 {
     public class Tool
     {
+
+        internal protected void init_internal()
+        {
+            ShapeDrawer.DrawShapeActions += OnDrawShapes;
+        }
+        public virtual void OnDrawShapes()
+        {
+
+        }
         public virtual void Awake()
         {
 

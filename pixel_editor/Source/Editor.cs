@@ -99,6 +99,10 @@ namespace pixel_editor
             CompositionTarget.Rendering += Update;
 
             tools = Tool.InitializedDerived();
+
+            foreach (Tool tool in tools)
+                tool.init_internal();
+
             foreach (Tool tool in tools)
                 tool.Awake();
 
