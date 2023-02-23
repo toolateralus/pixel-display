@@ -194,13 +194,10 @@ namespace pixel_editor
 
         private void TryDragNode()
         {
-         
-
             if (CMouse.Left && selectedNode != null)
             {
                 if (CMouse.LeftPressedThisFrame)
                     mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
-
                 selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset; 
             }
         }
