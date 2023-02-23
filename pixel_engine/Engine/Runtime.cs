@@ -106,11 +106,11 @@ namespace pixel_renderer
                
                 if (IsTerminating)
                     return;
+                CMouse.Update();
                 if (IsRunning)
                 {
                         StagingHost.Update(stage);
                         renderHost?.Render();
-                        CMouse.Update();
                     if (Application.Current is null)
                         return;
                     Application.Current.Dispatcher.Invoke(() =>
@@ -129,9 +129,9 @@ namespace pixel_renderer
         {
             while (!PhysicsStopping)
             {
-            
                 if (IsTerminating)
                     return;
+                CMouse.Update();
                 if (stage is null)
                     continue;
                 if (!IsRunning) 

@@ -13,10 +13,9 @@ namespace pixel_renderer
     public class CMouse
     {
         public static bool Left;
-
-
         public static bool LeftPressedLastFrame;
         public static bool LeftPressedThisFrame;
+        public static Action? OnLeftPressedThisFrame;
         public static bool RightPressedThisFrame;
         public static bool RightPressedLastFrame { get; set; }
         public static bool Middle;
@@ -62,8 +61,8 @@ namespace pixel_renderer
             if (!RightPressedLastFrame && Right)
                 RightPressedThisFrame = true;
             else
-                RightPressedLastFrame = false;
-            RightPressedThisFrame = Left;
+                RightPressedThisFrame = false;
+            RightPressedLastFrame = Right;
 
             if (!LeftPressedLastFrame && Left)
             {
@@ -74,6 +73,7 @@ namespace pixel_renderer
                 var normalizedPos = (Vec2)img.GetNormalizedPoint(LastClickPosition);
 
                 LastClickGlobalPosition = Camera.First.ScreenViewportToGlobal(normalizedPos);
+                OnLeftPressedThisFrame?.Invoke();
             }
             else
                 LeftPressedThisFrame = false;

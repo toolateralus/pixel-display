@@ -1,32 +1,23 @@
-﻿using System;
-using Brushes = System.Windows.Media.Brushes;
-using Point = System.Windows.Point;
-using Image = System.Windows.Controls.Image;
-using System.Windows;
-using System.Windows.Input;
-using pixel_renderer;
+﻿using pixel_renderer;
 using pixel_renderer.Assets;
-using pixel_renderer.FileIO;
+using System;
 using System.Collections.Generic;
-using System.Windows.Threading;
-using System.Threading;
-using Newtonsoft.Json.Serialization;
-using System.Threading.Tasks;
-using System.Drawing;
-using System.Windows.Media;
-using System.Runtime.CompilerServices;
-using System.Windows.Controls;
-using System.Net.NetworkInformation;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace pixel_editor
 {
     public class EditorEventHandler
     {
-        internal protected static Editor Editor => Editor.Current;
-        internal protected Action<EditorEvent> InspectorEventRaised;
-        internal protected Queue<EditorEvent> Pending = new();
-        internal protected void ExecuteAll()
+        protected internal static Editor Editor => Editor.Current;
+        protected internal Action<EditorEvent> InspectorEventRaised;
+        protected internal Queue<EditorEvent> Pending = new();
+        protected internal void ExecuteAll()
         {
             EditorEvent e;
             for (int i = 0; Pending.Count > 0; ++i)
@@ -60,8 +51,7 @@ namespace pixel_editor
         private static void OnScaleValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             Editor mainWindow = o as Editor;
-            if (mainWindow != null)
-                mainWindow.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
+            mainWindow?.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
         }
         protected virtual double OnCoerceScaleValue(double value)
         {
@@ -93,7 +83,7 @@ namespace pixel_editor
 
         public Editor()
         {
-            EngineInstance.FromEditor = true; 
+            EngineInstance.FromEditor = true;
             engine = new();
             current = this;
 
@@ -105,6 +95,7 @@ namespace pixel_editor
             image.MouseDown += Image_MouseBtnChanged;
             image.MouseUp += Image_MouseBtnChanged;
             image.MouseMove += Image_MouseMove;
+            CMouse.OnLeftPressedThisFrame += SetSelectedNodeOffest;
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
@@ -119,17 +110,25 @@ namespace pixel_editor
 
             Runtime.OnProjectSet += OnProjectSet;
             Runtime.OnStageSet += OnStageSet;
-            
+
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.LoadedProject);
-            
+
             Runtime.OutputImages.Add(image);
             Runtime.ToggleRendering();
 
         }
 
+        private void SetSelectedNodeOffest()
+        {
+            if(selectedNode == null)
+                return;
+            mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
+        }
+
         private void Update(object? sender, EventArgs e)
         {
+            CMouse.Update();
             inspector.Update(sender, e);
             UpdateMetrics();
             Events.ExecuteAll();
@@ -150,18 +149,18 @@ namespace pixel_editor
                 cams.First().parent.Position = selectedNode.Position;
                 if (!Input.GetInputValue(Key.Escape))
                     return;
-                followNode = false; 
+                followNode = false;
             }
         }
 
         private void TryFocusNode()
         {
-            
-            if (selectedNode == null) 
+
+            if (selectedNode == null)
                 return;
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any()) return;
-            if (!Input.GetInputValue(Key.F)) 
+            if (!Input.GetInputValue(Key.F))
                 return;
 
             cams.First().parent.Position = selectedNode.Position;
@@ -175,7 +174,7 @@ namespace pixel_editor
         private void TryMoveCamera()
         {
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
-            
+
             if (!cams.Any())
                 return;
 
@@ -200,14 +199,9 @@ namespace pixel_editor
         private void TryDragNode()
         {
             if (CMouse.Left && selectedNode != null)
-            {
-                if (CMouse.LeftPressedThisFrame)
-                    mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
-
-                selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset; 
-            }
+                selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset;
         }
-        
+
         private void UpdateMetrics()
         {
             var memory = Runtime.Current.renderHost.info.GetTotalMemory();
@@ -220,7 +214,7 @@ namespace pixel_editor
 
         }
 
-        internal protected void EditorEvent(EditorEvent e)
+        protected internal void EditorEvent(EditorEvent e)
         {
             e.action?.Invoke(e.args);
             if (e.message is "" || e.message.Contains("$nolog")) return;
@@ -396,13 +390,13 @@ namespace pixel_editor
         private void Image_Mouse0(object sender, MouseButtonEventArgs e)
         {
             if (!TryClickNodeOnScreen(sender, out selectedNode) || selectedNode is null)
-                return; 
+                return;
         }
 
         private bool TryClickNodeOnScreen(object sender, out Node? result)
         {
             inspector.DeselectNode();
-            result = null; 
+            result = null;
             Stage stage = Runtime.Current.GetStage();
 
             if (stage is null)
@@ -419,7 +413,7 @@ namespace pixel_editor
                 inspector.SelectNode(node);
 
             result = node;
-            return foundNode; 
+            return foundNode;
         }
 
         private void OnDisable(object? sender, EventArgs e)
@@ -440,7 +434,7 @@ namespace pixel_editor
             e.Handled = true;
             if (sender is Button button)
             {
-                button.FontSize = 4 ;
+                button.FontSize = 4;
                 button.Content = $"{Environment.MachineName}";
             }
         }
@@ -486,7 +480,7 @@ namespace pixel_editor
 
         private void NewNodeButtonPressed(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; 
+            e.Handled = true;
             if (!addNodeContextMenuOpen)
             {
                 addNodeContextMenuOpen = true;
@@ -526,7 +520,7 @@ namespace pixel_editor
         }
         private void newNodeButtonClicked(object sender, RoutedEventArgs e)
         {
-            e.Handled = true; 
+            e.Handled = true;
             if (sender is not Button button) return;
             foreach (var item in addNodeFunctions)
                 if (button.Name.ToInt() is int i && addNodeActions.Count > i)
