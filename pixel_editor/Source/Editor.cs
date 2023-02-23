@@ -98,6 +98,10 @@ namespace pixel_editor
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
+            tools = Tool.InitializedDerived();
+            foreach (Tool tool in tools)
+                tool.Awake();
+
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(StartStop, Key.LeftShift);
@@ -125,6 +129,8 @@ namespace pixel_editor
             UpdateMetrics();
             Events.ExecuteAll();
             TryDragNode();
+            foreach (Tool tool in tools)
+                tool.Update();
         }
         private void TryDragNode()
         {
