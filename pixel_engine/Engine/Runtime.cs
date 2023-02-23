@@ -65,19 +65,20 @@ namespace pixel_renderer
             mainWnd.Closing += (e, o) => Dispose();
             
             Initialized = true;
-
+            Project.LoadStage(0);
+            Current.stage?.Awake();
         }
 
         public void Toggle()
         {
             if (IsRunning)
             {
-                IsRunning = false;
                 stopPhysics = true;
+                IsRunning = false;
                 return;
             }
-            IsRunning = true;
             stopPhysics = false;
+            IsRunning = true;
             InitializePhysics();
         }
         /// <summary>
@@ -139,13 +140,14 @@ namespace pixel_renderer
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
             }
         }
+        /// <summary>
+        /// this is a method since it has to be initialized externally but the fields are hidden.
+        /// </summary>
+        /// <param name="mainWnd"></param>
+        /// <param name="project"></param>
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             current ??= new(mainWnd, project);
-            Project.LoadStage(0);
-            Current.stage?.Awake();
-            Log($"{Current.GetStage().Name} instantiated & engine started.");
-
         }
         private void InitializePhysics()
         {
