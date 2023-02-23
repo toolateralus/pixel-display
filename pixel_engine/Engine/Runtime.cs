@@ -131,12 +131,14 @@ namespace pixel_renderer
             {
                 if (IsTerminating)
                     return;
-                CMouse.Update();
+                Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
+
                 if (stage is null)
                     continue;
                 if (!IsRunning) 
                     continue;
-
+                //TODO: make frmerate here
+                CMouse.Update();
                 Collision.Run();
                 StagingHost.FixedUpdate(stage);
                 if (Application.Current == null)
@@ -145,7 +147,6 @@ namespace pixel_renderer
                 {
                     Input.Refresh();
                 });
-                Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
             }
         }
         /// <summary>

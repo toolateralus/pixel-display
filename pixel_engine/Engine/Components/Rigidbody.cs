@@ -62,7 +62,6 @@ namespace pixel_renderer
             Rigidbody rb = node.GetComponent<Rigidbody>();
             node.RemoveComponent(rb);
             return node; 
-            
         }
     }
 }

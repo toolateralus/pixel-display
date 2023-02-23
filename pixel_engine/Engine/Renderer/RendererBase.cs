@@ -15,13 +15,10 @@
     {
         Vec2 zero = Vec2.zero;
         Vec2 one = Vec2.one;
-
         private protected Color[,] baseImage = new Color[1,1];
-        
         private protected byte[] frame = Array.Empty<byte>();
         private protected byte[] latestFrame = Array.Empty<byte>();
         private protected int stride = 0;
-        
         public byte[] Frame => latestFrame;
         public int Stride => stride;
         public Vec2 Resolution 
@@ -29,11 +26,8 @@
             get => _resolution;
             set => Runtime.Current.renderHost.newResolution = (Vec2?)value; 
         }
-
         internal protected Vec2 _resolution = Constants.DefaultResolution;
-
         public bool baseImageDirty = true;
-
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
@@ -56,7 +50,6 @@
 
             Array.Copy(frame, latestFrame, frame.Length);
         }
-
         private void DrawGraphics(Camera cam, Vec2 resolution)
         {
             Vec2 framePos = new Vec2();
@@ -140,7 +133,6 @@
                 }
             }
         }
-
         private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vec2 resolution)
         {
             Node spriteNode = new("SpriteNode", zero, one);
@@ -176,7 +168,6 @@
                 DrawTransparentSprite(cam, sprite, drawArea, resolution);
             }
         }
-
         private void DrawBaseImage(Camera cam, Vec2 resolution)
         {
             Node spriteNode = new("SpriteNode", zero, one);
@@ -201,7 +192,6 @@
             sprite.camDistance = float.Epsilon;
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
-
         private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vec2 resolution)
         {
             for (Vec2 framePos = drawArea.min;
@@ -224,8 +214,10 @@
                 //float yOffset = colorPos.y - (int)colorPos.y;
                 //Color color1 = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
                 //Color color2 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)((colorPos.y + 1) % sprite.size.x)];
-                //Color color3 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)((colorPos.y + 1) % sprite.size.x)];
+                //Color color3 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)colorPos.y];
                 //if (xOffset > yOffset)
+                //    color3 = sprite.ColorData[(int)colorPos.x, (int)((colorPos.y + 1) % sprite.size.x)];
+
                 Color color = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
                 if (color.A == 0)
                     continue;
@@ -234,7 +226,6 @@
                 WriteColorToFrame(ref color, ref framePos);
             }
         }
-
         private void WriteColorToFrame(ref Color color, ref Vec2 framePos)
         {
             int index = (int)framePos.y * stride + ((int)framePos.x * 3);
@@ -251,7 +242,6 @@
             frame[index + 1] = (byte)(colorG + frameG);
             frame[index + 2] = (byte)(colorR + frameR);
         }
-
         internal void MarkDirty()
         {
             baseImageDirty = true;
