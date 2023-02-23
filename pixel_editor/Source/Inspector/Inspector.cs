@@ -114,7 +114,11 @@ namespace pixel_editor
         bool addComponentMenuOpen = false;
         
         public static List<Action> editComponentActions = new();
-        
+        private static void RemoveComponent(Component obj)
+        {
+            obj.parent.RemoveComponent(obj);
+        }
+
         private void Refresh(Grid grid)
         {
             activeGrids.Clear();
@@ -142,6 +146,8 @@ namespace pixel_editor
             addComponentButton.Click += AddComponentButton_Click;
             Inspector.SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
 
+
+
             OnInspectorUpdated?.Invoke(grid);
         }
      
@@ -149,9 +155,12 @@ namespace pixel_editor
         {
             var box = GetTextBox(component.GetType().Name);
             Button editComponentButton = GetEditComponentButton(index);
+            Button removeButton = GetRemoveComponentButton(index, component);
+            grid.Children.Add(removeButton);
             grid.Children.Add(editComponentButton);
             grid.Children.Add(box);
             SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
+            SetRowAndColumn(removeButton, 2, 2, 6, index * 2);
             SetRowAndColumn(box, 2, 4, 0, index * 2);
             editComponentActions.Add(delegate
             {
@@ -313,6 +322,18 @@ namespace pixel_editor
             Margin = margin,
             BorderThickness = new Thickness(0.1,0.1,0.1,0.1),
         };
+        private static Button GetRemoveComponentButton(int index, Component component)
+        {
+            Button editComponentButton = GetButton("Remove", new(0, 0, 0, 0));
+            editComponentButton.FontSize = 3;
+            editComponentButton.Click += (_, e) =>
+            {
+                e.Handled = true; 
+                RemoveComponent(component);
+            };
+            editComponentButton.Name = "remove_button_" + index.ToString();
+            return editComponentButton;
+        }
         private static Button GetEditComponentButton(int index)
         {
             Button editComponentButton = GetButton("Edit", new(0, 0, 0, 0));

@@ -55,7 +55,7 @@ namespace pixel_renderer
                         Collide(rbA, B);
                     if (!a_has_rb && b_has_rb)
                         Collide(rbB, A);
-                    AttemptCallbacks(A, B);
+
                 }
             }
         }
@@ -70,6 +70,10 @@ namespace pixel_renderer
             var minDepth = SATCollision.GetMinimumDepthVector(aCol.Polygon, B.Polygon);
 
             A.parent.Position += minDepth;
+
+            if(minDepth != Vec2.zero)
+                AttemptCallbacks(aCol, B);
+
         }
         private static void Collide(Rigidbody A, Rigidbody B)
         {
@@ -108,8 +112,6 @@ namespace pixel_renderer
         }
         public static void Run()
         {
-            
-            var stage = Runtime.Current.GetStage();
             FinalPhase();
         }
     }

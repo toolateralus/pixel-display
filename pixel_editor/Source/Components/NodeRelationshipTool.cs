@@ -32,7 +32,6 @@ namespace pixel_editor
                             ResetTool();
                             break;
                         }
-
                         if (CMouse.Left &&  parent != null && Editor.Current.Selected is Node other && other != parent)
                         {
                             Child(other, parent);
