@@ -34,13 +34,14 @@ namespace pixel_renderer
         public static Node Standard()
         {
             Node node = Node.New;
-            node.Name = $"Rigidbody Node";
+            string tag = $"{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}";
+            node.Name = $"Rigidbody Node {tag}";
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();
             Sprite sprite = node.AddComponent<Sprite>();
             col.SetVertices(sprite.GetVertices());
-            sprite.color = Color.FromArgb(JRandom.Int(128, 255), JRandom.Int(0, 255), JRandom.Int(0, 255), JRandom.Int(0, 255));
+            sprite.color = JRandom.Color(aMin: 128);
             col.IsTrigger = false;
             return node;
         }

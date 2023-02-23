@@ -1,5 +1,6 @@
 ﻿namespace pixel_renderer
 {
+    using System;
     using System.Security.Cryptography;
     using Color = System.Drawing.Color;
     using Random = System.Random;
@@ -53,6 +54,9 @@
                 y = Int((int)min.y, (int)max.y),
             };
         }
+
+        internal static char Hexadecimal() =>
+            Convert.ToChar(Int(0,16) + Convert.ToByte('0'));
     }
 
 }
