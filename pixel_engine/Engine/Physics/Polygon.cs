@@ -4,10 +4,10 @@ namespace pixel_renderer
 {
     public class Polygon
     {
-        public Vec2[] normals;
-        public Vec2 centroid;
-        public Vec2[] uv;
-        public Vec2[] vertices;
+        public Vec2[] normals = Array.Empty<Vec2>();
+        public Vec2 centroid = Vec2.zero;
+        public Vec2[] uv = Array.Empty<Vec2>();
+        public Vec2[] vertices = Array.Empty<Vec2>();
         /// <summary>
         /// Expects vertices to be structed clockwise
         /// </summary>
@@ -49,13 +49,7 @@ namespace pixel_renderer
             return uvBox;
         }
 
-        public Polygon()
-        {
-            normals = Array.Empty<Vec2>();
-            centroid = Vec2.zero;
-            uv = Array.Empty<Vec2>();
-            vertices = Array.Empty<Vec2>();
-        }
+        public Polygon() { }
         public Polygon(Polygon polygon)
         {
             vertices = new Vec2[polygon.vertices.Length];
@@ -83,7 +77,7 @@ namespace pixel_renderer
         {
             Vec2 zero = new Vec2(0,length);
             Vec2 one = new Vec2(0.5f * length, length);
-            Vec2 two = new Vec2(length, length);
+            Vec2 two = new Vec2(length, length); 
 
             return new(new Vec2[] { zero, one, two});
         }

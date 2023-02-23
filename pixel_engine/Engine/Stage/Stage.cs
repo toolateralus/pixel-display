@@ -167,16 +167,21 @@ namespace pixel_renderer
             }
         }
 
-        public static Stage Default()
+        public static Stage Standard()
         {
             var nodes = new List<Node>();
             nodes.Add(Player.Standard());
             Node camera = new("Camera");
-            camera.AddComponent<Camera>();
+            camera.AddComponent<Camera>().Size = new(256,256);
             nodes.Add(camera);
-            nodes.Add(Floor.Standard());
+            Node floorNode = Floor.Standard();
+            nodes.Add(floorNode);
             for (int i = 0; i < 5; i++)
-                nodes.Add(Rigidbody.Standard());
+            {
+                Node rbNode = Rigidbody.Standard();
+                rbNode.Position = new(i * 20, -20);
+                nodes.Add(rbNode);
+            }
 
             var stage = new Stage("Default Stage", DefaultBackgroundMetadata, nodes);
 
@@ -255,7 +260,6 @@ namespace pixel_renderer
         internal Stage(List<Node> nodes, Metadata metadata, Metadata background, string name = "Stage Asset") : base(name, true)
         {
             Name = name;
-            this.UUID = UUID;
             this.nodes = nodes;
             foreach (var node in this.nodes)
             {

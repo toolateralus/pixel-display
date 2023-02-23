@@ -35,8 +35,8 @@
             }
 
         }
-        public static Vec3 one = new Vec3(1, 1, 1);
-        public static Vec3 zero = new Vec3(0, 0, 0);
+        public readonly static Vec3 one = new(1, 1, 1);
+        public readonly static Vec3 zero = new(0, 0, 0);
 
         public Vec3()
         {
@@ -79,28 +79,6 @@
         public float y;
         public Vec2 Normal_RHS => new Vec2(-y, x).Normalized();
         public Vec2 Normal_LHS => new Vec2(y, -x).Normalized();
-        public float this[int index]
-        {
-            get
-            {
-                return index switch
-                {
-                    0 => x,
-                    1 => y,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            }
-            set
-            {
-                switch (index)
-                {
-                    case 0: x = value; break;
-                    case 1: y = value; break;
-                    default: throw new IndexOutOfRangeException();
-                }
-            }
-        }
-
         public static float DistanceSquared(Vec2 a, Vec2 b)
         {
             var _x = b.x - a.x;
@@ -129,8 +107,8 @@
             y = (MathF.Sin(angle) * x) + (MathF.Cos(angle) * y);
         }
         public float SqrMagnitude() => x * x + y * y;
-        public static Vec2 one = new(1, 1);
-        public static Vec2 zero = new(0, 0);
+        public readonly static Vec2 one = new(1, 1);
+        public readonly static Vec2 zero = new(0, 0);
         internal static Vec2 up = new(0, -1);
         internal static Vec2 down = new(0, 1);
         internal static Vec2 left = new(-1, 0);
@@ -199,8 +177,18 @@
         internal bool IsWithinMaxExclusive(Vec2 min, Vec2 max) => x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
 
         internal void Set(Vec2 size) => this = size; 
-        internal void Set(int axis, float value) => this[axis] = value;
-    
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not Vec2 vec)
+                return false;
+            return x.Equals(vec.x) && y.Equals(vec.y);
+        }
+
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() ^ y.GetHashCode();
+        }
     }
     public struct Vec2Int
     {
@@ -235,12 +223,12 @@
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0: return x;
-                    case 1: return y;
-                }
-                return 0; 
+                    0 => x,
+                    1 => y,
+                    _ => 0,
+                };
             }
             set
             {

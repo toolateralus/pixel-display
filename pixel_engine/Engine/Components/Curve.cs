@@ -15,8 +15,10 @@ namespace pixel_renderer
         public bool looping;
         public static Curve Circlular(float speed, int length, float radius = 1f, bool looping = true)
         {
-            Curve curve = new();
-            curve.padding = (int)(length / speed);
+            Curve curve = new()
+            {
+                padding = (int)(length / speed)
+            };
             int totalLength = length * curve.padding;
             Vec2[] vecs = new Vec2[totalLength];
 

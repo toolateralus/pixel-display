@@ -69,7 +69,7 @@ namespace pixel_renderer
                 if (sprite is null) return; 
                 while (sprite.texture is null)
                     await Task.Delay(25);
-                sprite.texture.SetImage(PlayerSprite, (Vec2Int)sprite.size, Color.Red);
+                sprite.texture.SetImage(PlayerSprite, (Vec2Int)sprite.size);
             });
 
             task.Start();
@@ -153,7 +153,7 @@ namespace pixel_renderer
         {
             Node playerNode = new("Player")
             {
-                Position = JRandom.Vec2(Vec2.zero, Vec2.one * 256)
+                Position = new Vec2(0, -20)
             };
            
 
@@ -177,9 +177,8 @@ namespace pixel_renderer
         public static Collider AddCollider(Node playerNode, Sprite sprite)
         {
             var col = playerNode.AddComponent<Collider>();
-
+            col.SetVertices(sprite.GetVertices());
             col.IsTrigger = false;
-            col.size = sprite.size;
             return col;
         }
         public static Sprite AddSprite(Node playerNode)

@@ -16,10 +16,10 @@ namespace pixel_renderer
             var hasCollider = node.TryGetComponent(out Collider col);
             if (!hasCollider) return;
 
-            if (node.Position.y > Constants.PhysicsArea.y - col.size.y)
-                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.y - col.size.y);
-            if (node.Position.x > Constants.PhysicsArea.x - col.size.x)
-                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.x - col.size.x);
+            if (node.Position.y > Constants.PhysicsArea.y - col.scale.y)
+                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.y - col.scale.y);
+            if (node.Position.x > Constants.PhysicsArea.x - col.scale.x)
+                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.x - col.scale.x);
             if (node.Position.x < 0)
                 node.Position = node.Position.WithValue(x: 0);
         }
@@ -35,10 +35,10 @@ namespace pixel_renderer
                 if (nodes[i].TryGetComponent(out Collider col))
                     cols.Add(col);
 
-            for (int i = 0; i < cols.Count(); i++)
+            for (int i = 1; i < cols.Count; i++)
             {
                 var A = cols.ElementAt(i);
-                for (int j = 0; j < cols.Count(); ++j)
+                for (int j = 0; j < i; ++j)
                 {
                     var B = cols.ElementAt(j);
 

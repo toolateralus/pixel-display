@@ -19,21 +19,7 @@ namespace pixel_renderer
         [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] public Texture texture;
-        [JsonProperty] public Color Color
-        {
-            get
-            {
-                Color? color = texture?.color ?? Color.White;
-                return (Color)color;
-            }
-            set
-            {
-                if (texture is null)
-                    return; 
-
-                texture.color = value; 
-            }
-        }
+        [Field][JsonProperty] public Color color = Color.White;
         [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
 
         public bool dirty = true;
@@ -42,7 +28,7 @@ namespace pixel_renderer
         private Color[,]? cached_colors = null;
         internal Color[,] ColorData
         {
-            get => _colors ?? throw new ArgumentNullException(nameof(_colors));
+            get => _colors ?? throw new NullReferenceException(nameof(_colors));
             set
             {
                 if (!IsReadOnly)
@@ -60,11 +46,11 @@ namespace pixel_renderer
             switch (Type)
             {
                 case SpriteType.SolidColor:
-                    _colors = CBit.SolidColorSquare(size, Color);
+                    _colors = CBit.SolidColorSquare(size, color);
                     break;
                 case SpriteType.Image:
                     if (texture is null)
-                        _colors = CBit.SolidColorSquare(size, Color);
+                        _colors = CBit.SolidColorSquare(size, color);
                     else
                         _colors = CBit.ColorArrayFromBitmap(texture.Image);
                     break;
@@ -166,13 +152,28 @@ namespace pixel_renderer
             size = new(x, y);
             
         }
+        public Vec2[] GetVertices()
+        {
+            Vec2 topLeft = Vec2.zero;
+            Vec2 topRight = new(size.x, 0);
+            Vec2 bottomRight = size;
+            Vec2 bottomLeft = new(0, size.y);
 
+            var vertices = new Vec2[]
+            {
+                    topLeft,
+                    topRight,
+                    bottomRight,
+                    bottomLeft,
+            };
+
+            return vertices;
+        }
         public override void OnDrawShapes()
         {
             if (selected_by_editor)
             {
-                var verts = Collider.GetVertices(this);
-                Polygon mesh = new(verts);
+                Polygon mesh = new(GetVertices());
                 int vertLength = mesh.vertices.Length;
                 for (int i = 0; i < vertLength; i++)
                 {

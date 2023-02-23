@@ -11,7 +11,6 @@ namespace pixel_renderer
         [Field] [JsonProperty] public bool usingGravity = true;
         [Field] [JsonProperty] public Vec2 velocity = new();
         [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
-        [Field] public Sprite? sprite; 
         
         const double dragCoefficient = 1;
         
@@ -34,28 +33,21 @@ namespace pixel_renderer
         public static Node Standard()
         {
             Node node = Node.New;
-            
-            Vec2 screenSize = new(256, 256);
-
-            node.Name = $"Node {JRandom.Bool()}";
-            node.Position = JRandom.Vec2(Vec2.zero, screenSize);
+            node.Name = $"Rigidbody Node";
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();
-
-            rb.parent = node;
-            rb.sprite = new(16, 16);
-            rb.sprite.Color = JRandom.Color();
-
-            node.AddComponent(rb.sprite);
-
-            col.size = rb.sprite.size;
+            Sprite sprite = node.AddComponent<Sprite>();
+            col.SetVertices(sprite.GetVertices());
+            sprite.color = JRandom.Color();
             col.IsTrigger = false;
-
             return node;
         }
 
-        public override void Awake() => parent.TryGetComponent(out sprite);
+        public override void Awake()
+        {
+
+        }
         public override void FixedUpdate(float delta)
         {
             if (usingGravity) 

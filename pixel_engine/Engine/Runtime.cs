@@ -166,7 +166,7 @@ namespace pixel_renderer
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
                 " A Default will be instantiated and added to the project at the requested index.");
 
-            Stage stage = Stage.Default();
+            Stage stage = Stage.Standard();
 
             Current.LoadedProject.AddStage(stage);
 

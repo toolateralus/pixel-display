@@ -7,7 +7,6 @@ namespace pixel_renderer
     public class StagingHost
     {
         public Node? lastSelected;
-        private static bool selected_by_editor;
 
         static Runtime runtime => Runtime.Current;
         /// <summary>

@@ -371,19 +371,9 @@ namespace pixel_editor
                 var colliders = stage.GetAllComponents<Collider>();
                 foreach (var x in colliders)
                 {
-                    if (x.sprite is null && x.parent.HasComponent<Sprite>())
-                        x.sprite = x.parent.GetComponent<Sprite>();
-
-                    if (x.sprite is null)
-                        continue;
-
-                    if (x.IsTrigger)
-                        x.sprite?.Highlight(Color.White, IsReadOnly: true);
-                    else x.sprite?.Highlight(Color.Green,IsReadOnly: true);
-
-                    x.sprite.IsReadOnly = true;
+                    x.drawCollider = true;
+                    x.drawNormals = true;
                 }
-
                 collidersHighlighted = true;
             }
             else
@@ -399,14 +389,8 @@ namespace pixel_editor
 
                 foreach (var x in colliders)
                 {
-                    if (x.sprite is null && x.parent.HasComponent<Sprite>())
-                        x.sprite = x.parent.GetComponent<Sprite>();
-
-                    if (x.sprite is null)
-                        continue;
-
-                    x.sprite.RestoreCachedColor(true);
-                    x.sprite.IsReadOnly = false; 
+                    x.drawCollider = false;
+                    x.drawNormals = false;
                 }
             }
         }
@@ -671,7 +655,6 @@ namespace pixel_editor
         private static void ListNodes(params object[]? e)
         {
             string nodesList = "";
-            char nonBreakingspace = '\u2007';
             foreach (Node node in Runtime.Current.GetStage().nodes)
                 nodesList += node.Name + " ";
             Console.Print($"{nodesList}");

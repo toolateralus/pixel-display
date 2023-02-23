@@ -7,6 +7,8 @@ namespace pixel_renderer
     {
         public static Vec2 GetMinimumDepthVector(Polygon polygonA, Polygon polygonB)
         {
+            if (polygonA.vertices.Length == 0 || polygonB.vertices.Length == 0)
+                return Vec2.zero;
             float overlap = float.MaxValue;
             Vec2 smallest = Vec2.zero;
 
