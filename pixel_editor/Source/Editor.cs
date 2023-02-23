@@ -91,7 +91,6 @@ namespace pixel_editor
             Closing += OnDisable;
             MouseWheel += OnMouseWheelMoved;
 
-            image.MouseLeftButtonDown += Image_Mouse0;
             image.MouseDown += Image_MouseBtnChanged;
             image.MouseUp += Image_MouseBtnChanged;
             image.MouseMove += Image_MouseMove;
@@ -316,10 +315,6 @@ namespace pixel_editor
             Current.Events.Pending.Enqueue(e);
         }
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
-        private void Image_Mouse0(object sender, MouseButtonEventArgs e)
-        {
-
-        }
 
 
         private void OnDisable(object? sender, EventArgs e)

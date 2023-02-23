@@ -4,10 +4,9 @@ namespace pixel_editor
 {
     public class ClickTool : Tool
     {
-        public Node? selected;
         public override void Awake()
         {
-            Editor.Current.image.MouseDown += delegate { if (!TryClickNodeOnScreen(out Editor.Current.Selected)); };
+            Editor.Current.image.MouseLeftButtonDown += delegate { TryClickNodeOnScreen(out Editor.Current.Selected); };
         }
         private bool TryClickNodeOnScreen(out Node? result)
         {
