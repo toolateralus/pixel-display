@@ -26,7 +26,6 @@ namespace pixel_renderer
             
             int spriteCt = sprites.Count();
             int spritePosCt = Count; 
-            
             if (spriteCt != spritePosCt)
             {
                 for (int i = Count; i < spriteCt; ++i)
@@ -34,7 +33,6 @@ namespace pixel_renderer
                 for (int i = Count; i > spriteCt; --i)
                     removeFirst();
             }
-
             for (int i = 0; i < sprites.Count(); ++i)
             {
                 Sprite sprite = sprites.ElementAt(i);
