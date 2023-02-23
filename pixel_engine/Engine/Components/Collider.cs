@@ -24,20 +24,32 @@ namespace pixel_renderer
         [JsonProperty]public bool IsTrigger { get; internal set; } = false;
         public override void OnDrawShapes()
         {
-            if (!(drawCollider || drawNormals))
-                return;
+            if(drawCollider)
+                DrawCollider();
+            if(drawNormals)
+                DrawNormals();
+        }
+
+        public void DrawCollider()
+        {
             var poly = Polygon;
             int vertLength = poly.vertices.Length;
             for (int i = 0; i < vertLength; i++)
             {
                 var nextIndex = (i + 1) % vertLength;
-                if(drawCollider)
-                    ShapeDrawer.DrawLine(poly.vertices[i], poly.vertices[nextIndex], colliderColor);
-                if (drawNormals)
-                {
-                    var midpoint = (poly.vertices[i] + poly.vertices[nextIndex]) / 2;
-                    ShapeDrawer.DrawLine(midpoint, midpoint + (poly.normals[i] * 10), Color.Blue);
-                }
+                ShapeDrawer.DrawLine(poly.vertices[i], poly.vertices[nextIndex], colliderColor);
+            }
+        }
+
+        public void DrawNormals()
+        {
+            var poly = Polygon;
+            int vertLength = poly.vertices.Length;
+            for (int i = 0; i < vertLength; i++)
+            {
+                var nextIndex = (i + 1) % vertLength;
+                var midpoint = (poly.vertices[i] + poly.vertices[nextIndex]) / 2;
+                ShapeDrawer.DrawLine(midpoint, midpoint + (poly.normals[i] * 10), Color.Blue);
             }
         }
 

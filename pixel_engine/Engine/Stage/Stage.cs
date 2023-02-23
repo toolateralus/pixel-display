@@ -282,6 +282,20 @@ namespace pixel_renderer
             Metadata = metadata;
             Background = background;
         }
+        public List<Node> GetNodesAtGlobalPosition(Vec2 position)
+        {
+            List<Node> outNodes = new List<Node>();
+            for(int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+                if (node.GetComponent<Sprite>() is not Sprite sprite)
+                    continue;
+                if (!position.IsWithin(node.Position, node.Position + sprite.size))
+                    continue;
+                outNodes.Add(node);
+            }
+            return outNodes;
+        }
         /// <summary>
         /// Memberwise copy constructor
         /// </summary>
