@@ -56,8 +56,8 @@ namespace pixel_editor
         }
         #endregion
 
-        public Component component;
-        public ComponentEditor (Editor mainWnd, Component component)
+        public Editor component;
+        public ComponentEditor (Editor mainWnd, Editor component)
         {
             InitializeComponent();
             this.component = component;
@@ -183,11 +183,11 @@ namespace pixel_editor
 
     public record ViewerData
     {
-        public ViewerData(Component component)
+        public ViewerData(Editor component)
         {
             init_fields(component);
 
-            void init_fields(Component component)
+            void init_fields(Editor component)
             {
                 var fields = component.GetSerializedFields();
                 foreach (var field in fields)

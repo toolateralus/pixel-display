@@ -31,7 +31,7 @@ namespace pixel_editor
 
         }
         #region Reflection Functions
-        public static string GetComponentInfo(Component component)
+        public static string GetComponentInfo(Editor component)
         {
             IEnumerable<FieldInfo> fields = component.GetSerializedFields();
 
@@ -61,13 +61,13 @@ namespace pixel_editor
             }
             return output_string;
         }
-        public static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
+        public static void GetComponentRuntimeInfo(Editor component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetRuntimeFields();
             properties = component.GetType().GetRuntimeProperties();
 
         }
-        public static void GetComponentInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
+        public static void GetComponentInfo(Editor component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetFields();
             properties = component.GetType().GetProperties();
@@ -106,10 +106,10 @@ namespace pixel_editor
         private Grid MainGrid;
         private Grid grid;
 
-        private Dictionary<Type, List<Component>> components = new();
+        private Dictionary<Type, List<Editor>> components = new();
         List<Action> addComponentActions = new();
         ComponentEditor? lastKnownComponentEditor;
-        Dictionary<string, Func<Component>> addComponentFunctions;
+        Dictionary<string, Func<Editor>> addComponentFunctions;
         Grid addComponentGrid;
         bool addComponentMenuOpen = false;
         
@@ -145,7 +145,7 @@ namespace pixel_editor
             OnInspectorUpdated?.Invoke(grid);
         }
      
-        private int AddComponentToInspector(Grid grid, int index, Component component)
+        private int AddComponentToInspector(Grid grid, int index, Editor component)
         {
             var box = GetTextBox(component.GetType().Name);
             Button editComponentButton = GetEditComponentButton(index);
@@ -169,7 +169,7 @@ namespace pixel_editor
         }
         private void AddComponent(KeyValuePair<string, object> item)
         {
-            if (item.Value is Func<Component> funct)
+            if (item.Value is Func<Editor> funct)
             {
                 Runtime.Log($"Component {nameof(funct.Method.ReturnType)} added!");
                 funct.Invoke();
