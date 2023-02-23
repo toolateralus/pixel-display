@@ -172,11 +172,7 @@ namespace pixel_editor
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any()) return;
 
-            if (!CMouse.RightPressedLastFrame && CMouse.Right)
-                CMouse.RightPressedThisFrame = true;
-            else
-                CMouse.RightPressedLastFrame = false;
-            CMouse.RightPressedThisFrame = CMouse.Left;
+       
 
             if (CMouse.Right)
             {
@@ -198,17 +194,10 @@ namespace pixel_editor
 
         private void TryDragNode()
         {
-            if (!CMouse.LeftPressedLastFrame && CMouse.Left)
-                CMouse.LeftPressedThisFrame = true;
-            else
-                CMouse.LeftPressedThisFrame = false;
-            CMouse.LeftPressedLastFrame = CMouse.Left;
-
             if (CMouse.Left && selectedNode != null)
             {
                 if (CMouse.LeftPressedThisFrame)
                     mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
-
                 selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset; 
             }
         }
@@ -523,7 +512,10 @@ namespace pixel_editor
             if (item.Value is Func<Node> funct)
             {
                 Runtime.Log("Node added!");
-                Runtime.Current.GetStage().AddNode(funct.Invoke()); 
+                Node node = funct.Invoke();
+                node.Position = CMouse.LastClickGlobalPosition;
+                Runtime.Current.GetStage().AddNode(node);
+                return;
             }
         }
         private void newNodeButtonClicked(object sender, RoutedEventArgs e)

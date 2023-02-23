@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 namespace pixel_renderer
 {
@@ -26,13 +27,25 @@ namespace pixel_renderer
         {
             if (Runtime.Current.GetStage() is not Stage stage)
                 return;
-            foreach(Collider A in stage.GetAllComponents<Collider>())
+
+            var nodes = new List<Node>(stage.nodes);
+            var cols = new List<Collider>(); ;
+
+            for (int i = 0; i < nodes.Count; i++)
+                if (nodes[i].TryGetComponent(out Collider col))
+                    cols.Add(col);
+
+            for (int i = 0; i < cols.Count(); i++)
             {
-                foreach(Collider B in stage.GetAllComponents<Collider>())
+                var A = cols.ElementAt(i);
+                for (int j = 0; j < cols.Count(); ++j)
                 {
+                    var B = cols.ElementAt(j);
+
+                    if (A is null || B is null)
+                            continue;
                     if (B == A)
                         continue;
-
                     bool a_has_rb = A.parent.TryGetComponent<Rigidbody>(out var rbA);
                     bool b_has_rb = B.parent.TryGetComponent<Rigidbody>(out var rbB);
 
@@ -42,7 +55,6 @@ namespace pixel_renderer
                         Collide(rbA, B);
                     if (!a_has_rb && b_has_rb)
                         Collide(rbB, A);
-
                     AttemptCallbacks(A, B);
                 }
             }

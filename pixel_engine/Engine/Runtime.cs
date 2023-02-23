@@ -102,6 +102,7 @@ namespace pixel_renderer
                 {
                         StagingHost.Update(stage);
                         renderHost?.Render();
+                        CMouse.Update();
                     if (Application.Current is null)
                         return;
                     Application.Current.Dispatcher.Invoke(() =>

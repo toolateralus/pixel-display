@@ -6,26 +6,34 @@ using System.Xml;
 using System.Windows;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 
 namespace pixel_renderer
 {
     public class CMouse
     {
         public static bool Left;
+
+
         public static bool LeftPressedLastFrame;
         public static bool LeftPressedThisFrame;
+        public static bool RightPressedThisFrame;
+        public static bool RightPressedLastFrame { get; set; }
         public static bool Middle;
         public static bool Right;
         public static bool XButton1;
         public static bool XButton2;
+     
+        public static int MouseWheelDelta { get; set; }
         
+        public static Vec2 LastClickPosition { get; set; }
         public static Vec2 Position;
+        public static Vec2 LastClickGlobalPosition { get; private set; }
         public static Vec2 GlobalPosition;
         public static Vec2 LastPosition { get; set; }
         public static Vec2 Delta { get { return LastPosition - Position; } }
 
         private static CMouse current = null;
-        public static bool RightPressedThisFrame;
 
         public static CMouse Current
         {
@@ -36,8 +44,6 @@ namespace pixel_renderer
             }
         }
 
-        public static int MouseWheelDelta { get; set; }
-        public static bool RightPressedLastFrame { get; set; }
 
         public CMouse(MouseButtonEventArgs? e = null)
         {
@@ -48,10 +54,37 @@ namespace pixel_renderer
 
             if(e is not null)
                 Refresh(e);
+
+        }
+
+        public static void Update()
+        {
+            if (!RightPressedLastFrame && Right)
+                RightPressedThisFrame = true;
+            else
+                RightPressedLastFrame = false;
+            RightPressedThisFrame = Left;
+
+            if (!LeftPressedLastFrame && Left)
+            {
+                LeftPressedThisFrame = true;
+                LastClickPosition = Position;
+                
+                var img = Runtime.OutputImages.First();
+                var normalizedPos = (Vec2)img.GetNormalizedPoint(LastClickPosition);
+
+                LastClickGlobalPosition = Camera.First.ScreenViewportToGlobal(normalizedPos);
+            }
+            else
+                LeftPressedThisFrame = false;
+            LeftPressedLastFrame = Left;
         }
 
         public static void Refresh(MouseButtonEventArgs e)
         {
+
+
+
             e.Handled = true;
             switch (e.ChangedButton)
             {
