@@ -31,7 +31,7 @@ namespace pixel_editor
 
         }
         #region Reflection Functions
-        public static string GetComponentInfo(Editor component)
+        public static string GetComponentInfo(Component component)
         {
             IEnumerable<FieldInfo> fields = component.GetSerializedFields();
 
@@ -106,10 +106,10 @@ namespace pixel_editor
         private Grid MainGrid;
         private Grid grid;
 
-        private Dictionary<Type, List<Editor>> components = new();
+        private Dictionary<Type, List<Component>> components = new();
         List<Action> addComponentActions = new();
         ComponentEditor? lastKnownComponentEditor;
-        Dictionary<string, Func<Editor>> addComponentFunctions;
+        Dictionary<string, Func<Component>> addComponentFunctions;
         Grid addComponentGrid;
         bool addComponentMenuOpen = false;
         
@@ -145,7 +145,7 @@ namespace pixel_editor
             OnInspectorUpdated?.Invoke(grid);
         }
      
-        private int AddComponentToInspector(Grid grid, int index, Editor component)
+        private int AddComponentToInspector(Grid grid, int index, Component component)
         {
             var box = GetTextBox(component.GetType().Name);
             Button editComponentButton = GetEditComponentButton(index);
