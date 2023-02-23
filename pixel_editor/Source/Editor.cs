@@ -95,6 +95,7 @@ namespace pixel_editor
             image.MouseDown += Image_MouseBtnChanged;
             image.MouseUp += Image_MouseBtnChanged;
             image.MouseMove += Image_MouseMove;
+
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
@@ -123,12 +124,6 @@ namespace pixel_editor
             inspector.Update(sender, e);
             UpdateMetrics();
             Events.ExecuteAll();
-            TryDragNode();
-        }
-        private void TryDragNode()
-        {
-            if (CMouse.Left && selectedNode != null)
-                selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset;
         }
         private void UpdateMetrics()
         {
@@ -167,7 +162,7 @@ namespace pixel_editor
                 return current;
             }
         }
-        internal Node? selectedNode = null;
+        internal Node? Selected = null;
 
         public Inspector? Inspector => inspector;
         private readonly Inspector inspector;
@@ -316,32 +311,9 @@ namespace pixel_editor
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void Image_Mouse0(object sender, MouseButtonEventArgs e)
         {
-            if (!TryClickNodeOnScreen(sender, out selectedNode) || selectedNode is null)
-                return;
+
         }
 
-        private bool TryClickNodeOnScreen(object sender, out Node? result)
-        {
-            inspector.DeselectNode();
-            result = null;
-            Stage stage = Runtime.Current.GetStage();
-
-            if (stage is null)
-                return false;
-
-            StagingHost stagingHost = Runtime.Current.stagingHost;
-
-            if (stagingHost is null)
-                return false;
-
-            bool foundNode = stagingHost.GetNodeAtPoint(stage, CMouse.GlobalPosition, out var node);
-
-            if (foundNode)
-                inspector.SelectNode(node);
-
-            result = node;
-            return foundNode;
-        }
 
         private void OnDisable(object? sender, EventArgs e)
         {
