@@ -80,7 +80,7 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-
+        List<Tool> tools = new List<Tool>();
         public Editor()
         {
             EngineInstance.FromEditor = true;
@@ -99,12 +99,17 @@ namespace pixel_editor
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
+            tools = Tool.InitializedDerived();
+            foreach (Tool tool in tools)
+                tool.Awake();
+
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(StartStop, Key.LeftShift);
 
             inspector = new Inspector(inspectorGrid);
             Runtime.Editor = inspector;
+
 
             Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
 
@@ -124,6 +129,8 @@ namespace pixel_editor
             inspector.Update(sender, e);
             UpdateMetrics();
             Events.ExecuteAll();
+            foreach (Tool tool in tools)
+                tool.Update();
         }
         private void UpdateMetrics()
         {
