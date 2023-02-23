@@ -10,6 +10,7 @@ namespace pixel_renderer
 {
     public static class ShapeDrawer
     {
+        public static event Action? DrawShapeActions;
         public static void Refresh(Stage stage)
         {
             lines.Clear();
@@ -18,7 +19,7 @@ namespace pixel_renderer
             lock (components)
                 foreach (Component component in components)
                     component.OnDrawShapes();
-
+            DrawShapeActions?.Invoke();
         }
 
         /// <summary>
