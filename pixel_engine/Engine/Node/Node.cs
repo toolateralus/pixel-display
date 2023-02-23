@@ -295,12 +295,10 @@ namespace pixel_renderer
                     from T component in Components[type]
                     select component;
         }
-        public T GetComponent<T>(int index = 0) where T : Component
+        public T? GetComponent<T>(int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
-            {
-                throw new MissingComponentException();
-            }
+                return null;
             T? component = Components[typeof(T)][index] as T;
             return component;
         }

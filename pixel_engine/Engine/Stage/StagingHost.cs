@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
