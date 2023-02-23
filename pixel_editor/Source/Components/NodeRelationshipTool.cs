@@ -18,34 +18,37 @@ namespace pixel_editor
         {
             if (Editor.Current.Selected is Node _parent)
             {
-                parent = _parent; 
-                if (CMouse.Left && !busy)
+                if (CMouse.LeftPressedThisFrame && Input.GetInputValue(Key.RightShift) && !busy)
                 {
+                    parent = _parent;
                     busy = true;
-                    shouldDraw = true;
+
                     while (busy)
                     {
+                        shouldDraw = true;
+                        await Task.Delay(30);
                         if (!Input.GetInputValue(Key.RightShift))
-                            break;
-
-                        if (CMouse.Left && Editor.Current.Selected is Node other && other != parent)
                         {
-                            Child(other);
-                            return;
+                            ResetTool();
+                            break;
                         }
-                        await Task.Delay(250);
+
+                        if (CMouse.Left &&  parent != null && Editor.Current.Selected is Node other && other != parent)
+                        {
+                            Child(other, parent);
+                            Console.Print($"{parent.Name} had child {other.Name} added to it");
+                            ResetTool();
+                            break;
+                        }
                     }
                 }
-                  
-                busy = false;
             }
+            else ResetTool();
            
         }
 
-        private void Child(Node other)
+        private void ResetTool()
         {
-            Child(parent, other);
-            Console.Print($"{parent.Name} had child {other.Name} added to it");
             busy = false;
             shouldDraw = false;
             parent = null;
