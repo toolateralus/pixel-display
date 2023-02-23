@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Drawing;
 using System.Windows.Documents;
 
 namespace pixel_renderer
@@ -39,7 +40,7 @@ namespace pixel_renderer
             Collider col = node.AddComponent<Collider>();
             Sprite sprite = node.AddComponent<Sprite>();
             col.SetVertices(sprite.GetVertices());
-            sprite.color = JRandom.Color();
+            sprite.color = Color.FromArgb(JRandom.Int(128, 255), JRandom.Int(0, 255), JRandom.Int(0, 255), JRandom.Int(0, 255));
             col.IsTrigger = false;
             return node;
         }

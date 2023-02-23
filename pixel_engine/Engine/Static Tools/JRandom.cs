@@ -10,6 +10,15 @@
         public static Direction Direction() => (Direction)Int(0, sizeof(Direction) - 1);
 
 
+        public static Color TransparentColor()
+        {
+            byte r = Byte(),
+                 g = Byte(),
+                 b = Byte(),
+                 a = Byte();
+
+            return System.Drawing.Color.FromArgb(r, g, b, a);
+        }
         public static Color Color()
         {
             byte r = Byte(),

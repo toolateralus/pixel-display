@@ -10,7 +10,7 @@ namespace pixel_editor
     {
         public Camera camera;
         public Node? selected; 
-        private bool followNode;
+        private bool followNode = false;
         
         public override void Awake()
         {
@@ -27,30 +27,29 @@ namespace pixel_editor
 
         private void TryFollowNode()
         {
-            if (selected is null) return;
+            if (selected is null || !followNode)
+                return;
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
-            if (!cams.Any()) return;
+            if (!cams.Any())
+                return;
             cams.First().parent.Position = selected.Position;
             if (!Input.GetInputValue(Key.Escape))
                 return;
+            followNode = false;
         }
 
         private void TryFocusNode()
         {
-
             if (selected == null)
                 return;
-
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any()) return;
             if (!Input.GetInputValue(Key.F))
                 return;
-
             cams.First().parent.Position = selected.Position;
-
             if (!Input.GetInputValue(Key.LeftShift))
                 return;
-
+            followNode = true;
         }
 
         private void TryZoomCamera()
