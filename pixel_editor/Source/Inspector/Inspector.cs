@@ -61,7 +61,7 @@ namespace pixel_editor
             }
             return output_string;
         }
-        public static void GetComponentRuntimeInfo(Editor component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
+        public static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties)
         {
             fields = component.GetType().GetRuntimeFields();
             properties = component.GetType().GetRuntimeProperties();
