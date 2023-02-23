@@ -32,6 +32,7 @@ namespace pixel_renderer
         private bool freezeButtonPressedLastFrame = false;
         private Vec2 thisPos;
         private Curve curve;
+        [Field] private bool isGrounded;
 
         public static Metadata? PlayerSprite
         {
@@ -76,11 +77,13 @@ namespace pixel_renderer
             sprite.Type = SpriteType.Image;
             DrawCircle();
         }
-
+        public override void OnCollision(Collider collider)
+        {
+            isGrounded = true; 
+        }
         public override void FixedUpdate(float delta)
         {
-
-
+            
             if (!takingInput)
                 return;
 
@@ -102,9 +105,13 @@ namespace pixel_renderer
                 return;
             }
 
-
-            Jump(moveVector);
-            Move(moveVector);
+            if (isGrounded)
+            {
+                Jump(moveVector);
+                Move(moveVector);
+            }
+            if (isGrounded)
+                isGrounded = false;
 
             moveVector = Vec2.zero;
         }

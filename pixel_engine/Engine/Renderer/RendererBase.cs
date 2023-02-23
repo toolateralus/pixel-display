@@ -138,8 +138,13 @@
             Node spriteNode = new("SpriteNode", zero, one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
             BoundingBox2D drawArea = new();
+            
+          
+
+
             for (int i = 0; i < renderInfo.Count; ++i)
             {
+
                 sprite.parent.Position = renderInfo.spritePositions[i];
                 sprite.ColorData = renderInfo.spriteColorData[i];
                 sprite.size = renderInfo.spriteSizeVectors[i];

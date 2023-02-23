@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 
 namespace pixel_renderer
@@ -33,6 +34,7 @@ namespace pixel_renderer
                 for (int i = Count; i > spriteCt; --i)
                     removeFirst();
             }
+
             for (int i = 0; i < sprites.Count(); ++i)
             {
                 Sprite sprite = sprites.ElementAt(i);

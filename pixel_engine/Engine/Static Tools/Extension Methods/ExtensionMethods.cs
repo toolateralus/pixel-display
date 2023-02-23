@@ -1,7 +1,6 @@
 ﻿
 namespace pixel_renderer
 {
-    using pixel_renderer.Assets;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
@@ -125,6 +124,17 @@ namespace pixel_renderer
             return bitmap;
         }
         #endregion
+
+        public static System.Drawing.Color Lerp(this Color color1, Color color2, float t)
+        {
+            t = Math.Max(0, Math.Min(1, t));
+            int r = (int)Math.Round(color1.R + (color2.R - color1.R) * t);
+            int g = (int)Math.Round(color1.G + (color2.G - color1.G) * t);
+            int b = (int)Math.Round(color1.B + (color2.B - color1.B) * t);
+            int a = (int)Math.Round(color1.A + (color2.A - color1.A) * t);
+            return Color.FromArgb(a, r, g, b);
+        }
+
         public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
             from FieldInfo field in component.GetType().GetRuntimeFields()
             from CustomAttributeData data in field.CustomAttributes

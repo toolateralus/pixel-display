@@ -189,6 +189,15 @@
         {
             return x.GetHashCode() ^ y.GetHashCode();
         }
+
+        public static Vec2 ClampMagnitude(Vec2 vector, float maxLength)
+        {
+            if (vector.SqrMagnitude() > maxLength * maxLength)
+            {
+                return vector.Normalized() * maxLength;
+            }
+            return vector;
+        }
     }
     public struct Vec2Int
     {
