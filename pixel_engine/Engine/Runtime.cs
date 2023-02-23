@@ -73,13 +73,12 @@ namespace pixel_renderer
             if (IsRunning)
             {
                 IsRunning = false;
+                stopPhysics = true;
                 return;
             }
-            IsRunning = true; 
-            if (!PhysicsInitialized)
-                InitializePhysics();
-
-
+            IsRunning = true;
+            stopPhysics = false;
+            InitializePhysics();
         }
         /// <summary>
         /// Prints a message in the editor console.
@@ -122,9 +121,10 @@ namespace pixel_renderer
             
                 if (IsTerminating)
                     return;
-                if (stage is null || !PhysicsInitialized)
+                if (stage is null)
                     continue;
-
+                if (!IsRunning) 
+                    continue;
 
                 Collision.Run();
                 StagingHost.FixedUpdate(stage);
@@ -150,7 +150,7 @@ namespace pixel_renderer
         private void InitializePhysics()
         {
             PhysicsInitialized = true;
-            physicsWorker = new BackgroundWorker();
+            physicsWorker ??= new BackgroundWorker();
             physicsWorker.DoWork += OnPhysicsTick;
             physicsWorker.RunWorkerAsync();
         }

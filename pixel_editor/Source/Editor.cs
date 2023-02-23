@@ -155,14 +155,17 @@ namespace pixel_editor
         private void TryFocusNode()
         {
             
-            if (selectedNode == null) return;
+            if (selectedNode == null) 
+                return;
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any()) return;
-            if (!Input.GetInputValue(Key.F)) return;
+            if (!Input.GetInputValue(Key.F)) 
+                return;
 
             cams.First().parent.Position = selectedNode.Position;
 
-            if (!Input.GetInputValue(Key.LeftShift)) return;
+            if (!Input.GetInputValue(Key.LeftShift))
+                return;
 
             followNode = true;
         }
@@ -170,9 +173,9 @@ namespace pixel_editor
         private void TryMoveCamera()
         {
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
-            if (!cams.Any()) return;
-
-       
+            
+            if (!cams.Any())
+                return;
 
             if (CMouse.Right)
             {
@@ -198,6 +201,7 @@ namespace pixel_editor
             {
                 if (CMouse.LeftPressedThisFrame)
                     mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
+
                 selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset; 
             }
         }
