@@ -16,15 +16,15 @@
         public static bool FromEditor; 
         public EngineInstance()
         {
-           
             Project project = Project.Load();
             InitializeComponent();
             Runtime.Initialize(this, project);
             if (!FromEditor)
             {
-                Runtime.Current.Toggle();
+                Runtime.ToggleRendering();
+                Runtime.TogglePhysics();
                 Runtime.OutputImages.Add(renderImage);
-            }
+            } 
         }
     }
 }

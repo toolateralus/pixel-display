@@ -44,8 +44,9 @@ namespace pixel_renderer
         private BackgroundWorker physicsWorker;
      
         public static object? Editor = null;
-        private bool stopPhysics = false;
+
         public static bool IsRunning { get; private set; }
+        public static bool PhysicsStopping { get; private set; }
         public static bool PhysicsInitialized { get; private set; }
         public static bool Initialized { get; private set; }
         public static bool IsTerminating { get; private set; }
@@ -69,17 +70,24 @@ namespace pixel_renderer
             Current.stage?.Awake();
         }
 
-        public void Toggle()
+        public static void TogglePhysics()
+        {
+            if (!PhysicsStopping)
+            {
+                PhysicsStopping = true;
+                return;
+            }
+            PhysicsStopping = false;
+            Current.InitializePhysics();
+        }
+        public static void ToggleRendering()
         {
             if (IsRunning)
             {
-                stopPhysics = true;
                 IsRunning = false;
                 return;
             }
-            stopPhysics = false;
             IsRunning = true;
-            InitializePhysics();
         }
         /// <summary>
         /// Prints a message in the editor console.
@@ -106,18 +114,20 @@ namespace pixel_renderer
                     if (Application.Current is null)
                         return;
                     Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            if (OutputImages.Count == 0 || OutputImages.First() is null) return;
-                            var renderer = renderHost.GetRenderer();
-                            CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
-                        });
+                    {
+                        CMouse.MouseWheelDelta = 0;
+
+                        if (OutputImages.Count == 0 || OutputImages.First() is null) return;
+                        var renderer = renderHost.GetRenderer();
+                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
+                    });
                     Thread.Sleep(1);
                 }
             }
         }
         private void OnPhysicsTick(object sender, DoWorkEventArgs e)
         {
-            while (!stopPhysics)
+            while (!PhysicsStopping)
             {
             
                 if (IsTerminating)
@@ -133,8 +143,6 @@ namespace pixel_renderer
                     return;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                   
-                    CMouse.MouseWheelDelta = 0;
                     Input.Refresh();
                 });
                 Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
@@ -186,7 +194,7 @@ namespace pixel_renderer
         private void Dispose()
         {
             IsTerminating = true;
-            stopPhysics = true;
+            PhysicsStopping = true;
             Task.Run(()=> renderThread?.Join());
             renderThread = null;
         }

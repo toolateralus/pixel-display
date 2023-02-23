@@ -124,8 +124,10 @@ namespace pixel_editor
             OnProjectSet(Runtime.Current.LoadedProject);
             
             Runtime.OutputImages.Add(image);
+            Runtime.ToggleRendering();
+
         }
-        
+
         private void Update(object? sender, EventArgs e)
         {
             inspector.Update(sender, e);
@@ -259,7 +261,7 @@ namespace pixel_editor
         private void StartStop(object[]? obj)
         {
             if (Input.GetInputValue(0, "P"))
-                Runtime.Current.Toggle();
+                Runtime.TogglePhysics();
 
         }
         private void ClearKeyboardFocus(object[]? obj)
@@ -429,7 +431,7 @@ namespace pixel_editor
         private void OnPlay(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            Runtime.Current.Toggle();
+            Runtime.TogglePhysics();
             playBtn.Content = Runtime.IsRunning ? "On" : "Off";
             playBtn.Background = Runtime.IsRunning ? Brushes.LightGreen : Brushes.LightPink;
         }
