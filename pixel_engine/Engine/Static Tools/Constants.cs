@@ -93,7 +93,7 @@ namespace pixel_renderer
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel";    // Root directory for resources
         #endregion
 
-        private static List<Type> GetInheritedTypesFromBase<T>()
+        public static List<Type> GetInheritedTypesFromBase<T>()
         {
             var types = AppDomain.CurrentDomain.GetAssemblies()
                .SelectMany(domainAssembly => domainAssembly.GetTypes())

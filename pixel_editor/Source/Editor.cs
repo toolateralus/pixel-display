@@ -95,7 +95,6 @@ namespace pixel_editor
             image.MouseDown += Image_MouseBtnChanged;
             image.MouseUp += Image_MouseBtnChanged;
             image.MouseMove += Image_MouseMove;
-            CMouse.OnLeftPressedThisFrame += SetSelectedNodeOffest;
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
@@ -118,14 +117,6 @@ namespace pixel_editor
             Runtime.ToggleRendering();
 
         }
-
-        private void SetSelectedNodeOffest()
-        {
-            if(selectedNode == null)
-                return;
-            mouseSelectedNodeOffset = selectedNode.Position - CMouse.GlobalPosition;
-        }
-
         private void Update(object? sender, EventArgs e)
         {
             CMouse.Update();
@@ -133,75 +124,12 @@ namespace pixel_editor
             UpdateMetrics();
             Events.ExecuteAll();
             TryDragNode();
-            TryZoomCamera();
-            TryMoveCamera();
-            TryFocusNode();
-            TryFollowNode();
         }
-
-        private void TryFollowNode()
-        {
-            if (selectedNode is null) return;
-            if (followNode)
-            {
-                IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
-                if (!cams.Any()) return;
-                cams.First().parent.Position = selectedNode.Position;
-                if (!Input.GetInputValue(Key.Escape))
-                    return;
-                followNode = false;
-            }
-        }
-
-        private void TryFocusNode()
-        {
-
-            if (selectedNode == null)
-                return;
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
-            if (!cams.Any()) return;
-            if (!Input.GetInputValue(Key.F))
-                return;
-
-            cams.First().parent.Position = selectedNode.Position;
-
-            if (!Input.GetInputValue(Key.LeftShift))
-                return;
-
-            followNode = true;
-        }
-
-        private void TryMoveCamera()
-        {
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
-
-            if (!cams.Any())
-                return;
-
-            if (CMouse.Right)
-            {
-                followNode = false;
-                cams.First().parent.Position += CMouse.Delta * Constants.MouseSensitivity;
-            }
-
-        }
-
-        private static void TryZoomCamera()
-        {
-            if (CMouse.MouseWheelDelta == 0)
-                return;
-
-            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
-            if (!enumerable.Any()) return;
-            enumerable.First().Size *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
-        }
-
         private void TryDragNode()
         {
             if (CMouse.Left && selectedNode != null)
                 selectedNode.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset;
         }
-
         private void UpdateMetrics()
         {
             var memory = Runtime.Current.renderHost.info.GetTotalMemory();
@@ -213,7 +141,6 @@ namespace pixel_editor
                 $"{framerate}";
 
         }
-
         protected internal void EditorEvent(EditorEvent e)
         {
             e.action?.Invoke(e.args);
@@ -240,7 +167,7 @@ namespace pixel_editor
                 return current;
             }
         }
-        Node? selectedNode = null;
+        internal Node? selectedNode = null;
 
         public Inspector? Inspector => inspector;
         private readonly Inspector inspector;
@@ -533,7 +460,6 @@ namespace pixel_editor
             {"Animator", Animator.Standard},
             {"Floor", Floor.Standard},
         };
-        private bool followNode;
         #endregion
     }
 }
