@@ -130,7 +130,7 @@ namespace pixel_editor
             UpdateMetrics();
             Events.ExecuteAll();
             foreach (Tool tool in tools)
-                tool.Update();
+                tool.Update(1f);
         }
         private void UpdateMetrics()
         {

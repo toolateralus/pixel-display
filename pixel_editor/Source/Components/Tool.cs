@@ -1,11 +1,18 @@
-﻿using System.Windows.Controls.Primitives;
+﻿using System;
+using System.Collections.Generic;
 
 namespace pixel_editor
 {
-    public abstract class Tool
+    public class Tool
     {
-        public abstract void Awake();
-        public abstract void Update(float delta);
+        public virtual void Awake()
+        {
+
+        }
+        public virtual void Update(float delta)
+        {
+
+        }
         public static List<Tool> InitializedDerived()
         {
             List<Tool> list = new List<Tool>();
