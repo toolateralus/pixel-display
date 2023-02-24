@@ -88,9 +88,7 @@ namespace pixel_editor
                 
                 if (x.Value != null)
                 {
-                    if (x.Value is Vec2 vec)
-                        valStr = vec.AsString();
-                    else valStr = x.Value.ToString();
+                     valStr = x.Value.ToString();
                 }
                 else valStr = "null";
 
@@ -111,6 +109,7 @@ namespace pixel_editor
                 viewer.Children.Add(inputBox);
                 inputFields.Add(inputBox);
                 editEvents.Add((o, e) => SetVariable(o, e));
+
                 Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, i);
                 Inspector.SetRowAndColumn(inputBox, 1, 8, 8, i);
 
