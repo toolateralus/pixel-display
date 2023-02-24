@@ -10,7 +10,6 @@ namespace pixel_renderer.Assets
     {
         static Dictionary<Metadata, Asset> Current = new();
         internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
-
         /// <summary>
         /// Registers an asset to the AssetLibrary.
         /// </summary>
@@ -19,12 +18,13 @@ namespace pixel_renderer.Assets
         /// <returns>false if the asset was already in the library, and true if it was successfully added.</returns>
         public static bool Register(Metadata metadata, Asset asset)
         {
-            if (Current.ContainsKey(metadata)) return false;
+            if (Current.ContainsKey(metadata)) 
+                return false;
+         
             Current.Add(metadata, asset);
             return true; 
         }
         public static void Unregister(Metadata metadata) => Current.Remove(metadata);
-        
         /// <summary>
         /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
         /// </summary>
@@ -34,6 +34,7 @@ namespace pixel_renderer.Assets
         /// 
         public static bool Fetch<T>(out T result) where T : Asset
         {
+            
             result = null;
             foreach(var asset in Current.Values)
                 if (asset.GetType() == typeof(T))
@@ -50,8 +51,6 @@ namespace pixel_renderer.Assets
                     return asset.Key;
             return null; 
         }
-
-
         public static bool Fetch<T>(out List<T> output) where T : Asset
         {
 
@@ -79,8 +78,6 @@ namespace pixel_renderer.Assets
                 }
             return r; 
         }
-        
-
         /// <summary>
         /// Save the currently loaded asset Library and project to the disk.
         /// </summary>
@@ -104,7 +101,6 @@ namespace pixel_renderer.Assets
                 AssetIO.WriteAsset(assetPair.Value, assetPair.Key);
             }
         }
-
         private static void RefreshStageMetadataWithinLoadedProject()
         {
             if (Runtime.Current.LoadedProject == null)
