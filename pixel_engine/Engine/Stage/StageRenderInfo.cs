@@ -8,17 +8,28 @@ namespace pixel_renderer
     public class StageRenderInfo
     {
         public int Count => spritePositions.Count;
-        
+
         public List<Vec2> spritePositions= new ();
         public List<Vec2> spriteSizeVectors = new();
         public List<Vec2> spriteVPOffsetVectors = new();
         public List<Vec2> spriteVPScaleVectors = new();
         public List<float> spriteCamDistances = new();
+        public List<TextureFiltering> spriteFiltering = new();
         public List<Color[,]> spriteColorData = new();
 
         public StageRenderInfo(Stage stage)
         {
            Refresh(stage);
+        }
+        public void SetSprite(Sprite sprite, int index)
+        {
+            sprite.parent.Position = spritePositions[index];
+            sprite.ColorData = spriteColorData[index];
+            sprite.size = spriteSizeVectors[index];
+            sprite.viewportOffset = spriteVPOffsetVectors[index];
+            sprite.viewportScale = spriteVPScaleVectors[index];
+            sprite.textureFiltering = spriteFiltering[index];
+            sprite.camDistance = spriteCamDistances[index];
         }
         public void Refresh(Stage stage)
         {
@@ -41,7 +52,7 @@ namespace pixel_renderer
                 spriteVPOffsetVectors[i] = sprite.viewportOffset;
                 spriteVPScaleVectors[i] = sprite.viewportScale;
                 spriteColorData[i] = sprite.ColorData;
-                
+                spriteFiltering[i] = sprite.textureFiltering;
                 spriteCamDistances[i] = sprite.camDistance;
             }
             void addMemberOnTop()
@@ -50,6 +61,7 @@ namespace pixel_renderer
                 spriteSizeVectors.Add(Vec2.zero);
                 spriteVPOffsetVectors.Add(Vec2.zero);
                 spriteVPScaleVectors.Add(Vec2.zero);
+                spriteFiltering.Add(0);
                 spriteColorData.Add(new Color[1, 1]);
                 spriteCamDistances.Add(1f);
             }
@@ -59,6 +71,7 @@ namespace pixel_renderer
                 spriteSizeVectors.RemoveAt(0);
                 spriteVPOffsetVectors.RemoveAt(0);
                 spriteVPScaleVectors.RemoveAt(0);
+                spriteFiltering.RemoveAt(0);
                 spriteColorData.RemoveAt(0);
                 spriteCamDistances.RemoveAt(0);
 

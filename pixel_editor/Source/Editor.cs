@@ -108,7 +108,7 @@ namespace pixel_editor
 
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
-            Input.RegisterAction(StartStop, Key.LeftShift);
+            Input.RegisterAction(StartStop, Key.LeftCtrl);
 
             inspector = new Inspector(inspectorGrid);
             Runtime.Editor = inspector;
