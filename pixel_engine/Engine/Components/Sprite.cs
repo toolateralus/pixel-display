@@ -32,11 +32,23 @@ namespace pixel_renderer
         [Field][JsonProperty] public bool lit = false;
         [Field][JsonProperty] public Color color = Color.White;
 
-        public bool dirty = true;
+        public Sprite()
+        {
+
+        }
+        public Sprite(int x, int y) : this()
+        {
+            size = new(x, y);
+
+        }
+
+        internal protected bool dirty = true;
         internal protected bool selected_by_editor;
 
         private Color[,]? cached_colors = null;
         private Color[,]? lightmap; 
+        private Color[,] _colors = new Color[1,1];
+
         private Color[,] LitColorData
         {
             get 
@@ -83,7 +95,6 @@ namespace pixel_renderer
                 }
             }
         }
-        private Color[,] _colors = new Color[1,1];
 
         public override void Awake()
         {
@@ -110,9 +121,7 @@ namespace pixel_renderer
                     else
                         _colors = CBit.ColorArrayFromBitmap(texture.Image);
                     break;
-               
-                default: 
-                    return; 
+                default: throw new NotImplementedException();
             }
             colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
             dirty = false;
@@ -163,15 +172,6 @@ namespace pixel_renderer
             if (nullifyCache) cached_colors = null;
         }
         
-        public Sprite()
-        {
-            
-        }
-        public Sprite(int x, int y) : this()
-        {
-            size = new(x, y);
-            
-        }
         
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
@@ -207,7 +207,6 @@ namespace pixel_renderer
             }
             return c;
         }
-
         public Light GetFirstLight()
         {
             var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
