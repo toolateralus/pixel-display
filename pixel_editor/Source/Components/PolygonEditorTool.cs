@@ -35,11 +35,20 @@ namespace pixel_editor
             if (selectedCollider == null)
                 return;
             Vec2[] vertices = selectedCollider.Polygon.vertices;
+            if (vertices.Count() == 0)
+                return;
             Vec2 mPos = CMouse.GlobalPosition;
-            Vec2 closestVert = vertices.OrderBy((v) => v.SqrDistanceFrom(mPos)).First();
-            if (closestVert.SqrDistanceFrom(mPos) < minHighlightDistance * minHighlightDistance)
+            Vec2 cPos = selectedCollider.parent.Position;
+            int closest = 0;
+            for(int i = 1; i < vertices.Count(); i++)
+                if (vertices[i].SqrDistanceFrom(mPos) <
+                    vertices[closest].SqrDistanceFrom(mPos))
+                    closest = i;
+            if (vertices[closest].SqrDistanceFrom(mPos) < minHighlightDistance * minHighlightDistance)
             {
-                highlightedVertices.Add(closestVert);
+                vertices[closest] = mPos;
+                selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
+                highlightedVertices.Add(vertices[closest]);
                 vertSize = 4;
             }
             else
@@ -53,12 +62,10 @@ namespace pixel_editor
         Collider? GetSelectedCollider()
         {
             if (Runtime.Current.GetStage() is not Stage stage ||
-                !Input.GetInputValue(InputEventType.KeyDown, "LeftCtrl") ||
-                !Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
+                !Input.GetInputValue(Key.LeftCtrl) ||
+                !Input.GetInputValue(Key.LeftShift))
                 return null;
-            if (Editor.Current.Selected is not Node node)
-                node = stage.GetNodesAtGlobalPosition(CMouse.GlobalPosition).FirstOrDefault();
-            return node?.GetComponent<Collider>();
+            return Editor.Current.Selected?.GetComponent<Collider>();
         }
     }
 }

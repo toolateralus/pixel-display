@@ -20,7 +20,7 @@ namespace pixel_renderer
         [Field] public bool drawCollider = false;
         [Field] public bool drawNormals = false;
         [Field] public Color colliderColor = Color.LimeGreen;
-        public Polygon GetUntransformedPolygon() => Polygon;
+        public Polygon GetUntransformedPolygon() => polygon;
         [JsonProperty]public bool IsTrigger { get; internal set; } = false;
         public override void OnDrawShapes()
         {
