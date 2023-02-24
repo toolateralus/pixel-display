@@ -138,19 +138,9 @@
             Node spriteNode = new("SpriteNode", zero, one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
             BoundingBox2D drawArea = new();
-            
-          
-
-
             for (int i = 0; i < renderInfo.Count; ++i)
             {
-
-                sprite.parent.Position = renderInfo.spritePositions[i];
-                sprite.ColorData = renderInfo.spriteColorData[i];
-                sprite.size = renderInfo.spriteSizeVectors[i];
-                sprite.viewportOffset = renderInfo.spriteVPOffsetVectors[i];
-                sprite.viewportScale = renderInfo.spriteVPScaleVectors[i];
-                sprite.camDistance = renderInfo.spriteCamDistances[i];
+                renderInfo.SetSprite(sprite, i);
 
                 Vec2 spritePos = sprite.parent.Position;
                 Vec2 firstCorner = cam.GlobalToScreenViewport(spritePos) * resolution;

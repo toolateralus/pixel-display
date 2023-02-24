@@ -89,6 +89,44 @@ namespace pixel_editor
             description = "gets a node and attempts to write the provided value to specified field.",
 
         };
+        public static Command cmd_set_sprite_filtering() => new()
+        {
+            phrase = "sprite.Filtering;",
+            syntax = "sprite.Filtering(string: nodeName, string: enumValue);",
+            argumentTypes = new string[] { "str:", "str:"},
+            args = null,
+            action = SetSpriteFiltering,
+            description = "Gets a node and attempts to set the texture filtering on the sprite if available.",
+
+        };
+
+        private static void SetSpriteFiltering(object[]? obj)
+        {
+            if (obj is null || obj.Length != 2)
+                Command.Error("SetSpriteFiltering", CmdError.ArgumentNotFound);
+            if (!TryGetNodeByNameAtIndex(obj, out Node node, 0))
+            {
+                Command.Error("SetSpriteFiltering", $"Node \"{obj?[0]}\" not found in hierarchy.");
+                return;
+            }
+            if (node.GetComponent<Sprite>() is not Sprite sprite)
+            {
+                Command.Error("SetSpriteFiltering", $"Sprite not found on node \"{node.Name}\".");
+                return;
+            }
+            if (!TryGetArgAtIndex(1, out string filteringString, obj))
+            {
+                Command.Error("SetSpriteFiltering", CmdError.InvalidCast);
+                return;
+            }
+            if (Enum.Parse(typeof(TextureFiltering), filteringString) is not TextureFiltering textureFiltering)
+            {
+                Command.Error("SetSpriteFiltering", $"\"{filteringString}\" not valid TextureFiltering enum.");
+                return;
+            }
+            sprite.textureFiltering = textureFiltering;
+        }
+
         public static Command cmd_get_node() => new()
         {
             phrase = "node.Get;",
