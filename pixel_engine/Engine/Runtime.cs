@@ -139,8 +139,8 @@ namespace pixel_renderer
                     continue;
                 //TODO: make frmerate here
                 CMouse.Update();
-                Collision.Run();
                 StagingHost.FixedUpdate(stage);
+                Collision.Run();
                 if (Application.Current == null)
                     return;
                 Application.Current.Dispatcher.Invoke(() =>

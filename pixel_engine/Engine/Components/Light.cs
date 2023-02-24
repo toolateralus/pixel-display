@@ -7,15 +7,11 @@ namespace pixel_renderer
 {
     public class Light : Component
     {
-        public float brightness = 100f;
-        public Vec2 startPos = Vec2.one;
-        public float radius = 24;
-        public Color color = Color.FromArgb(255, 235, 255, 245);
-
-        public override void Update()
-        {
-            parent.Position = startPos;
-        }
+        [Field] public float brightness = .5f;
+        [Field] public Vec2 startPos = Vec2.one;
+        [Field] public float radius = 55;
+        [Field] public Color color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
+       
         public override void OnDrawShapes()
         {
             float sliceAngle = 360f / 6; // divide circle into 6 equal slices
@@ -31,6 +27,7 @@ namespace pixel_renderer
                 Vec2 endPt = startPt + new Vec2(MathF.Cos(endAngle * CMath.PI / 180) * radius, (float)(Math.Sin(endAngle *  CMath.PI / 180) * radius));
 
                 ShapeDrawer.DrawLine(startPt, endPt, Color.Yellow);
+                ShapeDrawer.DrawLine(endPt, endPt + center);
             }
         }
         public static Node Standard()

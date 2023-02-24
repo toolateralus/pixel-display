@@ -125,13 +125,13 @@ namespace pixel_renderer
         }
         #endregion
 
-        public static System.Drawing.Color Lerp(this Color color1, Color color2, float t)
+        public static Color Lerp(this Color A, Color B, float T)
         {
-            t = Math.Max(0, Math.Min(1, t));
-            int r = (int)Math.Round(color1.R + (color2.R - color1.R) * t);
-            int g = (int)Math.Round(color1.G + (color2.G - color1.G) * t);
-            int b = (int)Math.Round(color1.B + (color2.B - color1.B) * t);
-            int a = (int)Math.Round(color1.A + (color2.A - color1.A) * t);
+            T = Math.Max(0, Math.Min(1, T));
+            int r = (int)Math.Round(A.R + (B.R - A.R) * T);
+            int g = (int)Math.Round(A.G + (B.G - A.G) * T);
+            int b = (int)Math.Round(A.B + (B.B - A.B) * T);
+            int a = (int)Math.Round(A.A + (B.A - A.A) * T);
             return Color.FromArgb(a, r, g, b);
         }
 

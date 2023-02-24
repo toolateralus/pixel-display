@@ -101,29 +101,29 @@ namespace pixel_editor
                     // string
                     case 0:
                         try { value.Add(input); }
-                        catch (Exception e) { Runtime.Log(e.Message); };
+                        catch (Exception e) {  };
                         continue;
                         // bool
                     case 1:
                         try {
                             value.Add(bool.Parse(input)); }
-                        catch (Exception e) { Runtime.Log(e.Message); };
+                        catch (Exception e) {  };
                         continue;
                         // int
                     case 2:
                         try { value.Add(int.Parse(input)); }
-                        catch (Exception e) { Runtime.Log(e.Message); };
+                        catch (Exception e) {  };
                         continue;
                         // float
                     case 3:
                         try { value.Add(float.Parse(input)); }
-                        catch (Exception e) { Runtime.Log(e.Message); };
+                        catch (Exception e) {  };
                         continue;
                         // vec2
                     case 4:
                         try {
                             value.Add(Vec2(input)); }
-                        catch (Exception e) { Runtime.Log(e.Message); };
+                        catch (Exception e) { };
                         continue;
 
                 }
