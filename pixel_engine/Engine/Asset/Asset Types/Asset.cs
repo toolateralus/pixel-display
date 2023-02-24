@@ -8,11 +8,15 @@ using System.Xml.Linq;
 namespace pixel_renderer.FileIO
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public abstract class Asset 
+    public class Asset 
     {
         [JsonProperty] public string Name;
         [JsonProperty] public string UUID;
         [JsonProperty] public Metadata Metadata;
+        public Asset() : this("New Asset", false)
+        {
+         
+        }
 
         public virtual void Sync()
         {

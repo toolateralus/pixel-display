@@ -6,7 +6,7 @@ namespace pixel_renderer
     /// An attribute for serializing fields to the Inspector.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-    internal class FieldAttribute : Attribute
+    public class FieldAttribute : Attribute
     {
         public FieldAttribute() 
         {

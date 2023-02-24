@@ -62,7 +62,7 @@ namespace pixel_renderer
         {
             CreateInputEvents();
             parent.TryGetComponent(out rb);
-            parent.TryGetComponent(out sprite);
+            if(parent.TryGetComponent(out sprite));
             curve = Curve.Circlular(1, 16, radius: sprite.size.x /2, looping: true);
 
             Task task = new(async delegate

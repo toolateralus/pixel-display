@@ -409,6 +409,34 @@ namespace pixel_editor
                     editComponentActions[i]?.Invoke();
                 else Runtime.Log("Edit pressed failed.");
         }
+
+        internal static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties, out IEnumerable<MethodInfo> methods)
+        {
+            fields = component.GetType().GetRuntimeFields();
+            properties = component.GetType().GetRuntimeProperties();
+            methods = component.GetType().GetRuntimeMethods();
+        }
+
+        public static IEnumerable<FieldInfo> GetSerializedFields(Component component) =>
+           from FieldInfo field in component.GetType().GetRuntimeFields()
+           from CustomAttributeData data in field.CustomAttributes
+           where data.AttributeType == typeof(FieldAttribute)
+           select field;
+
+        public static IEnumerable<MethodInfo> GetSerializedMethods(Component component) =>
+           from MethodInfo method in component.GetType().GetRuntimeMethods()
+           from CustomAttributeData data in method.CustomAttributes
+           where data.AttributeType == typeof(MethodAttribute)
+           select method;
+
+        //public static IEnumerable<PropertyInfo> GetSerializedProperties(this Component component) =>
+        //   from PropertyInfo field in component.GetType().GetRuntimeProperties()
+        //   from CustomAttributeData data in field.CustomAttributes
+        //   where data.AttributeType == typeof(null)
+        //   select field;
+
+
+
         #endregion
     }
 }

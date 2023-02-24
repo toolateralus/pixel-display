@@ -12,11 +12,12 @@ namespace pixel_renderer
     public class Texture : Asset
     {
         [JsonConstructor]
-        public Texture(Metadata imgData, Metadata maskData, string Name = "Texture Asset") : base(Name, true)
+        public Texture(Metadata imgData, Vec2Int scale, string Name = "Texture Asset") : base(Name, true)
         {
             this.imgData = imgData;
-            this.maskData = maskData;
             this.Name = Name;
+            this.scale = scale; 
+            SetImage(imgData, scale);
         }
 
         public void SetImage(Metadata imgData, Vec2Int scale)
@@ -35,31 +36,16 @@ namespace pixel_renderer
             }
         }
 
-        public Texture(Vec2Int scale, Metadata? imgData = null)
+        public Texture(Vec2Int scale, Metadata imgData)
         {
             SetImage(imgData, scale);
         }
 
-        public Bitmap? Image { get; set; }
-
-        [Field] public Bitmap? Mask;
-
+        [Field] [JsonProperty] public Vec2Int scale = new(1, 1);
         [JsonProperty] internal Metadata imgData;
-        [JsonProperty] internal Metadata maskData;
-
-        [Field][JsonProperty] public Vec2Int scale = new(1, 1);
-        
+        public Bitmap? Image { get; set; }
         public bool HasImage => Image != null;
         internal bool HasImageMetadata => imgData != null;
-
-        public bool HasMask => Mask != null;
-        internal bool HasMaskMetadata => imgData != null;
-
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
-        
-
-
-        
-
     }
 }
