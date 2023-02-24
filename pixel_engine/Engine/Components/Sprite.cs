@@ -18,14 +18,17 @@ using Color = System.Drawing.Color;
 namespace pixel_renderer
 {
     public enum SpriteType { SolidColor, Image, Custom};
+    public enum TextureFiltering { Point, Bilinear};
     public class Sprite : Component
     {
         [JsonProperty] public Vec2 size = Vec2.one * 16;
         [JsonProperty] public Vec2 viewportScale = Vec2.one;
         [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
-        [JsonProperty] private Vec2Int colorDataSize = new(1,1);
+        private Vec2Int colorDataSize = new(1,1);
+        public Vec2Int ColorDataSize => colorDataSize;
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] public Texture texture;
+        [JsonProperty] public TextureFiltering textureFiltering = 0;
         [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
         [JsonProperty] public bool IsReadOnly = false;
         
