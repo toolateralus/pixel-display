@@ -35,7 +35,6 @@ namespace pixel_renderer
         [Field][JsonProperty] public TextureFiltering textureFiltering = 0;
         [Field][JsonProperty] public bool lit = false;
         [Field][JsonProperty] public Color color = Color.White;
-
         public Sprite()
         {
 
@@ -45,14 +44,11 @@ namespace pixel_renderer
             size = new(x, y);
 
         }
-
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
-
         private Color[,]? cached_colors = null;
         private Color[,]? lightmap; 
         private Color[,] _colors = new Color[1,1];
-
         private Color[,] LitColorData
         {
             get 
@@ -151,7 +147,6 @@ namespace pixel_renderer
             colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
             dirty = false;
         }
-
         public void Draw(Vec2 size, Color[,] color)
         {
             this.size = size;
@@ -196,8 +191,6 @@ namespace pixel_renderer
             Draw(size, cached_colors);
             if (nullifyCache) cached_colors = null;
         }
-        
-        
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
         public Vec2[] GetVertices()
