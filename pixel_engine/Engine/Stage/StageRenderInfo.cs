@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 
 namespace pixel_renderer
@@ -25,7 +26,6 @@ namespace pixel_renderer
             
             int spriteCt = sprites.Count();
             int spritePosCt = Count; 
-            
             if (spriteCt != spritePosCt)
             {
                 for (int i = Count; i < spriteCt; ++i)

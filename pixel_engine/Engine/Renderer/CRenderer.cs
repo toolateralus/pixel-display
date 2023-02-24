@@ -27,8 +27,6 @@ namespace pixel_renderer
                 if (frame.Length != stride * Resolution.y)
                     frame = new byte[stride * (int)Resolution.y];
 
-                //TODO: find a way to use this without causing an invalid cast exception
-                //IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>();
 
                 List<Component> componentsFound = new();
                 lock(stage.nodes)
@@ -47,17 +45,11 @@ namespace pixel_renderer
                         uiComponents.Add(uiComp);
 
 
-                // TODO : Fix invalid cast exception from Component to UIComponent, likely a JSON problem
                 foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                     if (uiComponent.Enabled && uiComponent is Camera camera)
                         RenderCamera(camera, renderInfo, Resolution);
-            // TODO: restore the original synchronous rendering, just seeing if this would be faster.
-            //Task DrawTask = new(delegate
-            //{
-            //});
-            //DrawTask.RunSynchronously();
+         
         }
-
 
         public override void Render(Image output)
         {

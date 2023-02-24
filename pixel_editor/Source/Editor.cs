@@ -428,14 +428,18 @@ namespace pixel_editor
             e.Handled = true;
             if (sender is not Button button) return;
             foreach (var item in addNodeFunctions)
+            {
                 if (button.Name.ToInt() is int i && addNodeActions.Count > i)
                     addNodeActions[i]?.Invoke();
+                return; 
+            }
         }
         public static Dictionary<string, Func<Node>> addNodeFunctions = new()
         {
             {"Static Body", Rigidbody.StaticBody },
             {"Rigid Body", Rigidbody.Standard },
             {"Animator", Animator.Standard},
+            {"Light", Light.Standard},
             {"Floor", Floor.Standard},
         };
         #endregion

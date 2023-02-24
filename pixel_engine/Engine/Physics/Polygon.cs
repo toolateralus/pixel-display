@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -8,6 +12,9 @@ namespace pixel_renderer
         public Vec2 centroid = Vec2.zero;
         public Vec2[] uv = Array.Empty<Vec2>();
         public Vec2[] vertices = Array.Empty<Vec2>();
+
+        public static float LightRadius { get; private set; }
+
         /// <summary>
         /// Expects vertices to be structed clockwise
         /// </summary>
@@ -81,7 +88,8 @@ namespace pixel_renderer
 
             return new(new Vec2[] { top, right, left});
         }
+
     }
-    
+
 }
 

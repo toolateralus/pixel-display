@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace pixel_renderer
@@ -19,7 +21,7 @@ namespace pixel_renderer
             _uuid = nodeUUID;
             this.Position = position;
             this.scale = scale;
-            this.parentNode = parentNode;
+            this.parent = parentNode;
             this.children = children;
             this.tag = tag;
             this.Components = Components;
@@ -57,6 +59,8 @@ namespace pixel_renderer
         private bool _enabled = true;
         private string _uuid = "";
 
+        internal protected int hiearchyLevel = 0; 
+
         Rigidbody? rb;
         public void Move(Vec2 destination)
         {
@@ -66,14 +70,14 @@ namespace pixel_renderer
 
         public Vec2 Position
         {
-            get => parentNode == null ? localPos : localPos + parentNode.Position;
-            set => localPos = parentNode == null ? value : value - parentNode.Position;
+            get => parent == null ? localPos : localPos + parent.Position;
+            set => localPos = parent == null ? value : value - parent.Position;
         }
         [JsonProperty] public Vec2 scale = new();
 
-        [JsonProperty]
-        public Node? parentNode;
-        [JsonProperty]  public Dictionary<Vec2, Node> children = new();
+        [JsonProperty] public Node? parent;
+       
+        [JsonProperty] public Dictionary<Vec2, Node> children = new();
 
         public List<Component> ComponentsList
         {
@@ -88,11 +92,18 @@ namespace pixel_renderer
         }
 
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
-        
-        public void Child(Node child)
+
+        public async void Child(Node child)
         {
+
+            if (ContainsCycle(child))
+            {
+                Runtime.Log("A cyclic resource inclusion was detected.");
+                return;
+            }
+
             if (!Runtime.Current.GetStage().nodes.Contains(child))
-                Runtime.Current.GetStage().AddNode(child);
+                    Runtime.Current.GetStage().AddNode(child);
 
             var distance = Vec2.Distance(child.Position, Position);
             var direction = child.Position - Position;
@@ -102,21 +113,70 @@ namespace pixel_renderer
             if (children.ContainsKey(direction * distance))
                 return;
 
-            _ = child.parentNode?.TryRemoveChild(child);
+            _ = child.parent?.TryRemoveChild(child);
 
             child.localPos = child.Position - Position;
 
             children.Add(direction * distance, child);
 
-            child.parentNode = this;
+            child.parent = this;
+
         }
+        public bool ContainsCycle(Node newNode)
+        {
+            // Check for cycles in child nodes
+
+            var visited = new HashSet<Node>();
+            var stack = new Stack<Node>();
+            stack.Push(newNode);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                visited.Add(current);
+                foreach (var child in current.children.Values)
+                {
+                    if (child == newNode)
+                    {
+                        // A cycle is detected
+                        return true;
+                    }
+                    if (!visited.Contains(child))
+                    {
+                        stack.Push(child);
+                    }
+                }
+            }
+
+            // Check for cycles in parent nodes
+            visited.Clear();
+            stack.Clear();
+            stack.Push(this);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                visited.Add(current);
+                if (current == newNode)
+                {
+                    // A cycle is detected
+                    return true;
+                }
+                if (current.parent != null && !visited.Contains(current.parent))
+                {
+                    stack.Push(current.parent);
+                }
+            }
+
+            return false;
+        }
+
+       
         public bool TryRemoveChild(Node child)
         {
             foreach (var kvp in children)
                 if (kvp.Value == child)
                 {
                     children.Remove(kvp.Key);
-                    child.parentNode = null;
+                    child.parent = null;
                     return true;
                 }
             return false; 
