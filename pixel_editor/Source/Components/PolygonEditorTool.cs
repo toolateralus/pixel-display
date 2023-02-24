@@ -10,7 +10,10 @@ namespace pixel_editor
 {
     internal class PolygonEditorTool : Tool
     {
+        List<Vec2> highlightedVertices = new List<Vec2>();
         Collider? selectedCollider;
+        const float minHighlightDistance = 2;
+        float vertSize = 2;
         public override void Awake() { }
         public override void OnDrawShapes()
         {
@@ -18,25 +21,44 @@ namespace pixel_editor
                 return;
             selectedCollider.DrawCollider();
             selectedCollider.DrawNormals();
-            foreach (Vec2 vert in selectedCollider.Polygon.vertices)
+            for(int i = 0; i < highlightedVertices.Count; i++)
             {
-                ShapeDrawer.DrawCircle(vert, 2, System.Drawing.Color.GreenYellow);
+                Vec2 vert = highlightedVertices[i];
+                ShapeDrawer.DrawCircle(vert, vertSize, System.Drawing.Color.GreenYellow);
             }
         }
 
         public override void Update(float delta)
         {
-            if (Input.GetInputValue(InputEventType.KeyDown, "LeftCtrl") &&
-                Input.GetInputValue(InputEventType.KeyDown, "LeftShift") &&
-                Runtime.Current.GetStage() is Stage stage &&
-                stage.GetNodesAtGlobalPosition(CMouse.GlobalPosition).FirstOrDefault() is Node node)
+            highlightedVertices.Clear();
+            selectedCollider = GetSelectedCollider();
+            if (selectedCollider == null)
+                return;
+            Vec2[] vertices = selectedCollider.Polygon.vertices;
+            Vec2 mPos = CMouse.GlobalPosition;
+            Vec2 closestVert = vertices.OrderBy((v) => v.SqrDistanceFrom(mPos)).First();
+            if (closestVert.SqrDistanceFrom(mPos) < minHighlightDistance * minHighlightDistance)
             {
-                selectedCollider = node.GetComponent<Collider>();
+                highlightedVertices.Add(closestVert);
+                vertSize = 4;
             }
             else
             {
-                selectedCollider = null;
+                foreach (Vec2 vert in vertices)
+                    highlightedVertices.Add(vert);
+                vertSize = 2;
             }
+        }
+
+        Collider? GetSelectedCollider()
+        {
+            if (Runtime.Current.GetStage() is not Stage stage ||
+                !Input.GetInputValue(InputEventType.KeyDown, "LeftCtrl") ||
+                !Input.GetInputValue(InputEventType.KeyDown, "LeftShift"))
+                return null;
+            if (Editor.Current.Selected is not Node node)
+                node = stage.GetNodesAtGlobalPosition(CMouse.GlobalPosition).FirstOrDefault();
+            return node?.GetComponent<Collider>();
         }
     }
 }

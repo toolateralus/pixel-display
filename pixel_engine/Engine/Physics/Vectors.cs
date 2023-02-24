@@ -85,6 +85,14 @@
             var _y = b.y - a.y;
             return _x * _x + _y * _y;
         }
+        public float SqrDistanceFrom(Vec2 v)
+        {
+            return DistanceSquared(this, v);
+        }
+        public  float DistanceFrom(Vec2 v)
+        {
+            return Distance(this, v);
+        }
         public static float Distance(Vec2 a, Vec2 b)
         {
             var distanceSquared = DistanceSquared(a, b);
