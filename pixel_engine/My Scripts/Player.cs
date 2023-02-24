@@ -197,12 +197,13 @@ namespace pixel_renderer
 
         public override void OnDrawShapes()
         {
-            var mesh = parent.GetComponent<Collider>().Polygon;
-            foreach (var child in parent?.children)
+            if(parent.GetComponent<Collider>()?.Polygon is not Polygon poly)
+                return;
+            foreach (var child in parent.children)
             {
                 if (!child.Value.TryGetComponent(out Collider col)) return;
                 var centroid = col.Polygon.centroid;
-                ShapeDrawer.DrawLine(mesh.centroid, centroid, Color.LightCyan);
+                ShapeDrawer.DrawLine(poly.centroid, centroid, Color.LightCyan);
             }
         }
 

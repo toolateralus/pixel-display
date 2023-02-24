@@ -101,9 +101,11 @@ namespace pixel_editor
                 Inspector.SetControlColors(nameDisplay, Brushes.DarkSlateGray, Brushes.White);
                 Inspector.SetControlColors(inputBox, Brushes.DarkSlateGray, Brushes.White);
 
+                inputBox.Name = $"txtbox{i}";
                 inputBox.IsReadOnly = false;
                 inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
                 inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
+                inputBox.KeyDown += InputBox_KeyDown;
 
                 viewer.Children.Add(nameDisplay);
                 viewer.Children.Add(inputBox);
@@ -114,15 +116,16 @@ namespace pixel_editor
 
                 i++;
             }
-
-            var saveBtn = Inspector.GetButton("Save", new(0, 0, 0, 0));
-            viewer.Children.Add(saveBtn);
-            saveBtn.Click += SaveBtn_Click;
-            saveBtn.FontSize = 2; 
-            Inspector.SetRowAndColumn(saveBtn, 1, 2, 0, 18);
-
-         
         }
+
+        private void InputBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (sender is not TextBox box)
+                return;
+            if (e.Key == Key.Return)
+                Keyboard.ClearFocus();
+        }
+
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             e.Handled = true; 
@@ -132,6 +135,7 @@ namespace pixel_editor
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
+            ExecuteEditEvent(box.Name.ToInt());
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
         }
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
