@@ -107,6 +107,10 @@ namespace pixel_renderer
                 if (IsTerminating)
                     return;
                 CMouse.Update();
+                if (Application.Current is null)
+                    return;
+                Application.Current.Dispatcher.Invoke(() => { Input.Refresh(); });
+                CMouse.MouseWheelDelta = 0;
                 if (IsRunning)
                 {
                     StagingHost.Update(stage);
@@ -114,7 +118,6 @@ namespace pixel_renderer
 
                     if (Application.Current is null)
                         return;
-
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         CMouse.MouseWheelDelta = 0;

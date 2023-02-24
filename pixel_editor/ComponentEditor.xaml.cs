@@ -57,6 +57,11 @@ namespace pixel_editor
         #endregion
 
         public Component component;
+        public ViewerData data;
+        public Grid mainGrid;
+        public List<Action<string, int>> editEvents = new();
+        public List<TextBox> inputFields = new();
+
         public ComponentEditor (Editor mainWnd, Component component)
         {
             InitializeComponent();
@@ -67,25 +72,15 @@ namespace pixel_editor
             CompositionTarget.Rendering += Update;
             RegisterAction(delegate { Keyboard.ClearFocus(); }, Key.Escape);
         }
-
         private void Update(object? sender, EventArgs e)
         {
 
 
         }
-
-        public ViewerData data;
-        public Grid mainGrid;
-        public List<Action<string, int>> editEvents = new();
-        public List<TextBox> inputFields = new();
-
-       
         public void AddTextBoxes(Grid viewer)
         {
             var fields = data.Fields;
             int i = 0;
-
-          
 
             foreach (var x in fields)
             {
@@ -134,19 +129,16 @@ namespace pixel_editor
             for(int i = 0; i < data.Fields.Count; ++i)
                 ExecuteEditEvent(i);
         }
-
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
         }
-
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
         }
-
         private bool SetVariable(string o, int i)
         {
             Inspector.GetComponentRuntimeInfo(component, out var fields, out _);
