@@ -88,9 +88,7 @@ namespace pixel_editor
                 
                 if (x.Value != null)
                 {
-                    if (x.Value is Vec2 vec)
-                        valStr = vec.AsString();
-                    else valStr = x.Value.ToString();
+                     valStr = x.Value.ToString();
                 }
                 else valStr = "null";
 

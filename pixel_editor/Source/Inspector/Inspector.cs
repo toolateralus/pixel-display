@@ -44,12 +44,7 @@ namespace pixel_editor
             {
                 string valString = "";
                 var value = field.GetValue(component);
-
-                if (field.FieldType == typeof(Vec2))
-                    valString = ((Vec2)value).AsString();
-
-
-                else valString = value?.ToString();
+                valString = value.ToString();
                 output.Add($" \n{field.Name} {valString}");
             }
             string output_string = string.Empty;

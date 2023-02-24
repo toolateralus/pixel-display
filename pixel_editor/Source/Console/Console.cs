@@ -54,7 +54,7 @@ namespace pixel_editor
             {
                 Vec2 vector = (Vec2)e[0];
                 Vec2Int newRes = (Vec2Int)vector;
-                Console.Print(vector.AsString());
+                Console.Print(vector.ToString());
                 Runtime.Current.renderHost.GetRenderer().Resolution = newRes;
             },
             description = "sets the resolution to the specified Vec2"
@@ -65,7 +65,7 @@ namespace pixel_editor
             syntax = "resolution.Get();",
             action = (e) =>
             {
-                Console.Print(((Vec2)Runtime.Current.renderHost.GetRenderer().Resolution).AsString());
+                Console.Print(((Vec2)Runtime.Current.renderHost.GetRenderer().Resolution).ToString());
             },
             description = "gets the resolution and prints it to the console"
         };
@@ -632,7 +632,7 @@ namespace pixel_editor
             Print(
                 $"Node Found! " +
                 $"\n Name : {node.Name} " +
-                $"\n Position : {node.Position.AsString()} " +
+                $"\n Position : {node.Position} " +
                 $"\n UUID : {node.UUID} " +
                 $"\n Tag: {node.tag} " +
                 $"\n Component Count : {node.ComponentsList.Count}");
