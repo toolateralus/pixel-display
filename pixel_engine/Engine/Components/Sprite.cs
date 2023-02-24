@@ -149,7 +149,7 @@ namespace pixel_renderer
             
             int vertexCount = vertices.Length;
             
-            Color[,] colors = new Color[_colors.GetLength(0), _colors.GetLength(1)]; 
+            Color[,] colors = new Color[_colors.GetLength(0) - 1, _colors.GetLength(1) - 1]; 
             
             int minY = (int)bounds.min.y;
             int maxY = (int)bounds.max.y;
@@ -166,7 +166,10 @@ namespace pixel_renderer
                         float distance = Vec2.Distance(new Vec2(x, y), lightPosition);
                         float lightAmount = 1f - Math.Clamp(distance / lightRadius, 0,1);
                         int _x = x - minX;
-                        int _y = y - minY; 
+                        int _y = y - minY;
+
+                        if (_colors.GetLength(0) < _x || _colors.GetLength(1) < _y)
+                            return; 
 
                         Color existingColor = _colors[_x, _y];
                         Color blendedColor = ExtensionMethods.Lerp(existingColor, lightColor, lightAmount);
