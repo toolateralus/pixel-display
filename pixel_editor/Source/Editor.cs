@@ -3,6 +3,7 @@ using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -378,7 +379,28 @@ namespace pixel_editor
         #endregion
         #region Add Node Menu
         bool consoleOpen = true;
-        public ComponentEditor? componentEditor;
+        internal Dictionary<string, ComponentEditor?> ComponentEditors = new();
+        public void RegisterComponentEditor(string name, ComponentEditor editor)
+        {
+            if (ComponentEditors.ContainsKey(name))
+            {
+                editor.Close();
+                ComponentEditors[name].Focus();
+                ComponentEditors[name].Refresh(ComponentEditors[name].component);
+                return; 
+            }
+            ComponentEditors.Add(name, editor);
+            ComponentEditors[name].Show();
+        }
+
+        public Action<string, ComponentEditor> OnEditorClosed = OnComponentEditorClosed;
+        private static void OnComponentEditorClosed(string name, ComponentEditor obj)
+        {
+            if (Current.ComponentEditors.ContainsKey(name))
+                Current.ComponentEditors.Remove(name);
+        }
+           
+
         bool addNodeContextMenuOpen = false;
         Grid addNodeContextMenu;
         List<Action> addNodeActions = new();

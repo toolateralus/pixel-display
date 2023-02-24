@@ -11,6 +11,9 @@ namespace pixel_renderer
         private Animation? animation;
         private Sprite? sprite;
         
+        [Field]
+        public string[] frameNames; 
+
         public override void Awake()
         {
             test_flame_anim_setup();

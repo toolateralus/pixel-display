@@ -65,9 +65,7 @@ namespace pixel_renderer
                     lightmap = new Color[X, Y];
 
                 if (parent.TryGetComponent<Collider>(out var col))
-                {
                     lightmap = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
-                }
                 else
                 {
                     Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
@@ -103,17 +101,17 @@ namespace pixel_renderer
         {
             if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
                  texture = new(meta, (Vec2Int)size, meta.Name);
-            Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null}");
+            Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
         [Method]
         public void CycleSpriteType()
         {
-            if ((int)Type++ > sizeof(SpriteType) - 1)
+            if ((int)Type + 1 > sizeof(SpriteType) - 2)
             {
                 Type = 0;
                 return;
             }
-            Type = (SpriteType)((int)Type++);
+            Type = (SpriteType)((int)Type+ 1);
 
         }
         public override void Awake()

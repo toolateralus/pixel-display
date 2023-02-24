@@ -10,6 +10,7 @@ using System.Windows.Media.Effects;
 using System.Linq;
 using System.Windows.Media;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 
 namespace pixel_editor
 {
@@ -103,7 +104,6 @@ namespace pixel_editor
 
         private Dictionary<Type, List<Component>> components = new();
         List<Action> addComponentActions = new();
-        ComponentEditor? lastKnownComponentEditor;
         Dictionary<string, Func<Component>> addComponentFunctions;
         Grid addComponentGrid;
         bool addComponentMenuOpen = false;
@@ -157,10 +157,9 @@ namespace pixel_editor
             SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
             SetRowAndColumn(removeButton, 2, 2, 6, index * 2);
             SetRowAndColumn(box, 2, 4, 0, index * 2);
-            editComponentActions.Add(delegate
+            editComponentActions.Add(async delegate
             {
-                lastKnownComponentEditor = new ComponentEditor(Editor.Current, component);
-                lastKnownComponentEditor.Show();
+               var comp = new ComponentEditor(Editor.Current, component);
             });
             index++;
             return index;
@@ -173,7 +172,7 @@ namespace pixel_editor
         }
         private void AddComponent(KeyValuePair<string, object> item)
         {
-            if (item.Value is Func<Editor> funct)
+            if (item.Value is Func<Component> funct)
             {
                 Runtime.Log($"Component {nameof(funct.Method.ReturnType)} added!");
                 funct.Invoke();

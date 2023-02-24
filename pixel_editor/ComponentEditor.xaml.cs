@@ -9,6 +9,7 @@ using pixel_renderer;
 using Component = pixel_renderer.Component;
 using System.Windows.Input;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace pixel_editor
 {
@@ -16,7 +17,6 @@ namespace pixel_editor
     {
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(ComponentEditor), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
-
         private static object OnCoerceScaleValue(DependencyObject o, object value)
         {
             return o is ComponentEditor mainWindow ? mainWindow.OnCoerceScaleValue((double)value) : value;
@@ -53,7 +53,7 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-
+        string EditorKey => component.Name + component.GetType().Name;
         public Component component;
         public EditorData data;
         public Grid mainGrid;
@@ -64,12 +64,25 @@ namespace pixel_editor
         {
             InitializeComponent();
             this.component = component;
-            mainWnd.componentEditor = this;
-            data = new(component);
-            AddTextBoxes(MainGrid);
+            mainWnd.RegisterComponentEditor(EditorKey, this);
+            Closed += ComponentEditor_Closed;
             CompositionTarget.Rendering += Update;
             RegisterAction(delegate { Keyboard.ClearFocus(); }, Key.Escape);
+            Refresh(component);
         }
+        public void Refresh(Component component)
+        {
+            MainGrid.Children.Clear();
+            inputFields.Clear();
+            editEvents.Clear();
+            data = new(component);
+            AddTextBoxes(MainGrid);
+        }
+        private void ComponentEditor_Closed(object? sender, EventArgs e)
+        {
+            Editor.Current.OnEditorClosed?.Invoke(EditorKey, this);
+        }
+
         private void Update(object? sender, EventArgs e)
         {
 
@@ -77,30 +90,73 @@ namespace pixel_editor
         }
         public void AddTextBoxes(Grid viewer)
         {
-            var fields = data.Fields;
             int i = 0;
-            foreach (var field in fields)
-                {
-                        string? valStr;
-                    if (field != null)
-                        valStr = field.GetValue(component)?.ToString();
-                    else valStr = "null";
-                    string name = field.Name;
-                    AddToEditor(viewer, i, valStr, name);
-                    i++;
-                }
+            i = SerializeFields(viewer, i);
+            i = SerializeMethods(viewer, i);
+        }
+        private int SerializeMethods(Grid viewer, int i)
+        {
             foreach (var method in data.Methods)
+            {
+                AddToEditor(viewer, i, "Method", method.Name);
+                var button = Inspector.GetButton("Call", new(0, 0, 0, 0));
+                viewer.Children.Add(button);
+                Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
+                Inspector.SetRowAndColumn(button, 1, 2, 10, i++);
+                button.FontSize = 3;
+                button.Click += delegate { method.Invoke(component, null); };
+            }
+
+            return i;
+        }
+        private int SerializeFields(Grid viewer, int i)
+        {
+            var fields = data.Fields;
+            foreach (var field in fields)
+            {
+                string name = field.Name;
+                if (field.FieldType.BaseType == typeof(Component))
                 {
-                    AddToEditor(viewer, i, "Method", method.Name);
-                    var button = Inspector.GetButton("Call", new(0, 0, 0, 0));
+                    AddToEditor(viewer, i, "open editor for more options.", name);
+                    var button = Inspector.GetButton("Open Editor", new(0, 0, 0, 0));
                     viewer.Children.Add(button);
                     Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
-                    Inspector.SetRowAndColumn(button, 1, 2, 10, i++);
-                    button.FontSize = 3; 
-                    button.Click += delegate { method.Invoke(component, null); };
+                    Inspector.SetRowAndColumn(button, 1, 3, 12, i++);
+                    button.FontSize = 3;
+                    button.Click += delegate 
+                    {
+                        ComponentEditor editor = new(Editor.Current, (Component)field.GetValue(component));
+                        editor.Show();
+                    };
+                    i++; 
+                    return i; 
                 }
-        }
+                if (field.FieldType == typeof(string[]))
+                {
+                    object obj = field.GetValue(component);
+                    if (obj is null)
+                        continue; 
+                    string[] strings = (string[])obj;
+                    var grid = Inspector.GetGrid(8, 10, 12, 16);
+                    foreach (var str in strings)
+                    {
+                        var txtBox = Inspector.GetTextBox(str);
+                        txtBox.FontSize = 4; 
+                    }
+                    viewer.Children.Add(grid);
+                    Inspector.SetRowAndColumn(grid, 0, 0, 16, 16);
+                }
 
+                string? valStr;
+                if (field != null)
+                    valStr = field.GetValue(component)?.ToString();
+                else valStr = "null";
+                AddToEditor(viewer, i, valStr, name);
+                i++;
+            }
+
+            return i;
+        }
         private void AddToEditor(Grid viewer, int index, string? valStr, string name)
         {
             var nameDisplay = Inspector.GetTextBox(name);
@@ -118,7 +174,6 @@ namespace pixel_editor
             Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, index);
             Inspector.SetRowAndColumn(inputBox, 1, 8, 8, index);
         }
-
         private void InputBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (sender is not TextBox box)
@@ -170,7 +225,6 @@ namespace pixel_editor
         }
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
     }
-
     public record EditorData
     {
         public List<FieldInfo> Fields = new();
@@ -187,6 +241,4 @@ namespace pixel_editor
         }
     }
    ;
-
-      
 }
