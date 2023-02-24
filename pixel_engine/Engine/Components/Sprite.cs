@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using pixel_renderer.Assets;
+using pixel_renderer.FileIO;
 using Bitmap = System.Drawing.Bitmap;
 using Color = System.Drawing.Color;
 
@@ -27,14 +29,12 @@ namespace pixel_renderer
         private Vec2Int colorDataSize = new(1,1);
         public Vec2Int ColorDataSize => colorDataSize;
         [JsonProperty] public float camDistance = 1;
-        [JsonProperty] public Texture texture;
-        [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
+        [Field][JsonProperty] public Texture texture;
+        [JsonProperty] [Field]public SpriteType Type = SpriteType.SolidColor;
         [JsonProperty] public bool IsReadOnly = false;
-        
         [Field][JsonProperty] public TextureFiltering textureFiltering = 0;
         [Field][JsonProperty] public bool lit = false;
         [Field][JsonProperty] public Color color = Color.White;
-
         public Sprite()
         {
 
@@ -44,14 +44,11 @@ namespace pixel_renderer
             size = new(x, y);
 
         }
-
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
-
         private Color[,]? cached_colors = null;
         private Color[,]? lightmap; 
         private Color[,] _colors = new Color[1,1];
-
         private Color[,] LitColorData
         {
             get 
@@ -98,7 +95,27 @@ namespace pixel_renderer
                 }
             }
         }
+        [JsonProperty]
+        [Field]
+        public string textureName = "Table";
+        [Method]
+        public void TrySetTextureFromString()
+        {
+            if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
+                 texture = new(meta, (Vec2Int)size, meta.Name);
+            Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null}");
+        }
+        [Method]
+        public void CycleSpriteType()
+        {
+            if ((int)Type++ > sizeof(SpriteType) - 1)
+            {
+                Type = 0;
+                return;
+            }
+            Type = (SpriteType)((int)Type++);
 
+        }
         public override void Awake()
         {
             texture = new((Vec2Int)size, Player.PlayerSprite);
@@ -111,6 +128,7 @@ namespace pixel_renderer
                 Refresh();
            
         }
+        [Method]
         private void Refresh()
         {
             switch (Type)
@@ -129,7 +147,6 @@ namespace pixel_renderer
             colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
             dirty = false;
         }
-
         public void Draw(Vec2 size, Color[,] color)
         {
             this.size = size;
@@ -174,8 +191,6 @@ namespace pixel_renderer
             Draw(size, cached_colors);
             if (nullifyCache) cached_colors = null;
         }
-        
-        
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
         public Vec2[] GetVertices()
@@ -266,8 +281,8 @@ namespace pixel_renderer
                     {
                         float distance = Vec2.Distance(new Vec2(x, y), lightPosition);
                         float lightAmount = 1f - Math.Clamp(distance / lightRadius, 0,1);
-                        int _x = x - minX;
                         int _y = y - minY;
+                        int _x = x - minX;
 
                         Color existingColor = _colors[_x, _y];
                         Color blendedColor = existingColor.Lerp(lightColor, lightAmount);

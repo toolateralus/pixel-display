@@ -8,12 +8,10 @@ using static pixel_renderer.Input;
 using pixel_renderer;
 using Component = pixel_renderer.Component;
 using System.Windows.Input;
+using System.Reflection;
 
 namespace pixel_editor
 {
-    /// <summary>
-    /// Interaction logic for StageWnd.xaml
-    /// </summary>
     public partial class ComponentEditor : Window
     {
         #region Window Scaling
@@ -57,7 +55,7 @@ namespace pixel_editor
         #endregion
 
         public Component component;
-        public ViewerData data;
+        public EditorData data;
         public Grid mainGrid;
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
@@ -81,40 +79,44 @@ namespace pixel_editor
         {
             var fields = data.Fields;
             int i = 0;
-
-            foreach (var x in fields)
-            {
-                string valStr;
-                
-                if (x.Value != null)
+            foreach (var field in fields)
                 {
-                     valStr = x.Value.ToString();
+                        string? valStr;
+                    if (field != null)
+                        valStr = field.GetValue(component)?.ToString();
+                    else valStr = "null";
+                    string name = field.Name;
+                    AddToEditor(viewer, i, valStr, name);
+                    i++;
                 }
-                else valStr = "null";
+            foreach (var method in data.Methods)
+                {
+                    AddToEditor(viewer, i, "Method", method.Name);
+                    var button = Inspector.GetButton("Call", new(0, 0, 0, 0));
+                    viewer.Children.Add(button);
+                    Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
+                    Inspector.SetRowAndColumn(button, 1, 2, 10, i++);
+                    button.FontSize = 3; 
+                    button.Click += delegate { method.Invoke(component, null); };
+                }
+        }
 
-                string name = x.Key;
-                var nameDisplay = Inspector.GetTextBox(name);
-                var inputBox = Inspector.GetTextBox(valStr);
-
-                Inspector.SetControlColors(nameDisplay, Brushes.DarkSlateGray, Brushes.White);
-                Inspector.SetControlColors(inputBox, Brushes.DarkSlateGray, Brushes.White);
-
-                inputBox.Name = $"txtbox{i}";
-                inputBox.IsReadOnly = false;
-                inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
-                inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
-                inputBox.KeyDown += InputBox_KeyDown;
-
-                viewer.Children.Add(nameDisplay);
-                viewer.Children.Add(inputBox);
-                inputFields.Add(inputBox);
-                editEvents.Add((o, e) => SetVariable(o, e));
-
-                Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, i);
-                Inspector.SetRowAndColumn(inputBox, 1, 8, 8, i);
-
-                i++;
-            }
+        private void AddToEditor(Grid viewer, int index, string? valStr, string name)
+        {
+            var nameDisplay = Inspector.GetTextBox(name);
+            var inputBox = Inspector.GetTextBox(valStr);
+            Inspector.SetControlColors(nameDisplay, Brushes.DarkSlateGray, Brushes.White);
+            Inspector.SetControlColors(inputBox, Brushes.DarkSlateGray, Brushes.White);
+            inputBox.IsReadOnly = false;
+            inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
+            inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
+            inputBox.KeyDown += InputBox_KeyDown;
+            viewer.Children.Add(nameDisplay);
+            viewer.Children.Add(inputBox);
+            inputFields.Add(inputBox);
+            editEvents.Add((o, e) => SetVariable(o, e));
+            Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, index);
+            Inspector.SetRowAndColumn(inputBox, 1, 8, 8, index);
         }
 
         private void InputBox_KeyDown(object sender, KeyEventArgs e)
@@ -124,18 +126,12 @@ namespace pixel_editor
             if (e.Key == Key.Return)
                 Keyboard.ClearFocus();
         }
-
-        private void SaveBtn_Click(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true; 
-            for(int i = 0; i < data.Fields.Count; ++i)
-                ExecuteEditEvent(i);
-        }
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
-            ExecuteEditEvent(box.Name.ToInt());
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
+            for (int i = 0; i < data.Fields.Count; ++i)
+                ExecuteEditEvent(i);
         }
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
@@ -165,32 +161,32 @@ namespace pixel_editor
         private void ExecuteEditEvent(int index)
         {
             if (inputFields.Count > index)
-                if (data.Fields.ElementAt(index) is KeyValuePair<string, object> kvp)
+                if (data.Fields.ElementAt(index) is var field)
                 {
-                    string field = inputFields.ElementAt(index).Text;
                     Action<string, int> action = editEvents[index];
-                    string name = kvp.Key;
+                    string name = field.Name;
                     action.Invoke(name, index);
                 }
         }
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
     }
 
-    public record ViewerData
+    public record EditorData
     {
-        public ViewerData(Component component)
+        public List<FieldInfo> Fields = new();
+        public List<MethodInfo> Methods = new();
+        public EditorData(Component component)
         {
-            init_fields(component);
+            init_data(component);
 
-            void init_fields(Component component)
+            void init_data(Component component)
             {
-                var fields = component.GetSerializedFields();
-                foreach (var field in fields)
-                    Fields.Add(field.Name, field.GetValue(component));
+                Fields = Inspector.GetSerializedFields(component).ToList();
+                Methods = Inspector.GetSerializedMethods(component).ToList();
             }
         }
-        public Dictionary<string, object> Fields { get; private set; } = new();
     }
+   ;
 
       
 }

@@ -24,22 +24,26 @@ namespace pixel_renderer.Assets
                         return;
                 }
 
+            ImportBitmaps();
+            ImportAssets();
+            AssetLibrary.Sync();
+        }
+
+        private static void ImportAssets()
+        {
+            foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.AssetsFileExtension))
+            {
+                var asset = IO.ReadJson<Asset>(x);
+                bool result = AssetLibrary.Register(x, asset);
+                if (!result)
+                    Runtime.Log($"Importer tried to register an asset that already been registered. Asset {asset.Name} \n {asset.GetType()} at path {x.fullPath}");
+            }
+        }
+
+        private static void ImportBitmaps()
+        {
             foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.BitmapFileExtension))
                 AssetLibrary.Register(x, null);
-
-
-            
-            if (!Runtime.IsRunning)
-                if (showMessage)
-                {
-                    var syncResult = MessageBox
-                        .Show("Import complete! Do you want to sync?",
-                        "Asset Importer",
-                        MessageBoxButton.YesNo);
-
-                    if (syncResult == MessageBoxResult.Yes) 
-                        AssetLibrary.Sync();
-                }
         }
 
         private static List<Metadata> Import(string directory, string ext)
