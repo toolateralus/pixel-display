@@ -34,17 +34,16 @@ namespace pixel_renderer
 
         private Color[,]? lightmap; 
         private Color[,]? cached_colors = null;
-        internal Color[,] LitColorData
+
+
+        private Color[,] LitColorData
         {
             get 
             {
-                if (!lit)
-                    throw new InvalidOperationException("Sprite is not set to lit: the LitColorData should not be accessed.");
-
                 var light = GetFirstLight();
 
                 if (light is null)
-                    throw new NullReferenceException("No lights were found in a stage with a lit sprite.");
+                    return _colors ?? throw new NullReferenceException(nameof(_colors));
 
                 int X = _colors.GetLength(0);
                 int Y = _colors.GetLength(1);
@@ -67,7 +66,13 @@ namespace pixel_renderer
         }
         internal Color[,] ColorData
         {
-            get => _colors ?? throw new NullReferenceException(nameof(_colors));
+            get
+            {
+                if (lit)
+                    return LitColorData;
+                return _colors ?? throw new NullReferenceException(nameof(_colors));
+            }
+
             set
             {
                 if (!IsReadOnly)
@@ -114,6 +119,7 @@ namespace pixel_renderer
         {
             if (dirty)
                 Refresh();
+           
         }
         
         public void Draw(Vec2 size, Color[,] color)
