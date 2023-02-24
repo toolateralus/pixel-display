@@ -40,7 +40,11 @@ namespace pixel_renderer
                 spriteSizeVectors[i] = sprite.size;
                 spriteVPOffsetVectors[i] = sprite.viewportOffset;
                 spriteVPScaleVectors[i] = sprite.viewportScale;
-                spriteColorData[i] = sprite.ColorData;
+
+                if (sprite.lit)
+                    spriteColorData[i] = sprite.LitColorData;
+                else spriteColorData[i] = sprite.ColorData;
+                
                 spriteCamDistances[i] = sprite.camDistance;
             }
             void addMemberOnTop()
