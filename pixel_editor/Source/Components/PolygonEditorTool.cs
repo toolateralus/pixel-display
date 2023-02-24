@@ -10,9 +10,10 @@ namespace pixel_editor
 {
     internal class PolygonEditorTool : Tool
     {
-        List<Vec2> highlightedVertices = new List<Vec2>();
+        List<Vec2> highlightedVertices = new();
         Collider? selectedCollider;
         const float minHighlightDistance = 2;
+        int selectedVert = -1;
         float vertSize = 2;
         public override void Awake() { }
         public override void OnDrawShapes()
@@ -35,27 +36,38 @@ namespace pixel_editor
             if (selectedCollider == null)
                 return;
             Vec2[] vertices = selectedCollider.Polygon.vertices;
-            if (vertices.Count() == 0)
+            if (vertices.Length == 0)
                 return;
             Vec2 mPos = CMouse.GlobalPosition;
             Vec2 cPos = selectedCollider.parent.Position;
-            int closest = 0;
-            for(int i = 1; i < vertices.Count(); i++)
-                if (vertices[i].SqrDistanceFrom(mPos) <
-                    vertices[closest].SqrDistanceFrom(mPos))
-                    closest = i;
-            if (vertices[closest].SqrDistanceFrom(mPos) < minHighlightDistance * minHighlightDistance)
+            if (selectedVert == -1)
             {
-                vertices[closest] = mPos;
-                selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
-                highlightedVertices.Add(vertices[closest]);
-                vertSize = 4;
+                int closestVert = 0;
+                for(int i = 1; i < vertices.Length; i++)
+                    if (vertices[i].SqrDistanceFrom(mPos) <
+                        vertices[closestVert].SqrDistanceFrom(mPos))
+                        closestVert = i;
+                if (vertices[closestVert].SqrDistanceFrom(mPos) < minHighlightDistance * minHighlightDistance)
+                {
+                    selectedVert = closestVert;
+                    vertices[selectedVert] = mPos;
+                    selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
+                    highlightedVertices.Add(vertices[selectedVert]);
+                    vertSize = 4;
+                }
+                else
+                {
+                    foreach (Vec2 vert in vertices)
+                        highlightedVertices.Add(vert);
+                    vertSize = 2;
+                }
             }
             else
             {
-                foreach (Vec2 vert in vertices)
-                    highlightedVertices.Add(vert);
-                vertSize = 2;
+                vertices[selectedVert] = mPos;
+                selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
+                highlightedVertices.Add(vertices[selectedVert]);
+                vertSize = 4;
             }
         }
 
@@ -64,7 +76,10 @@ namespace pixel_editor
             if (Runtime.Current.GetStage() is not Stage stage ||
                 !Input.GetInputValue(Key.LeftCtrl) ||
                 !Input.GetInputValue(Key.LeftShift))
+            {
+                selectedVert = -1;
                 return null;
+            }
             return Editor.Current.Selected?.GetComponent<Collider>();
         }
     }
