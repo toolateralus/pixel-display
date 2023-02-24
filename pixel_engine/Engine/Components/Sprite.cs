@@ -34,8 +34,6 @@ namespace pixel_renderer
 
         private Color[,]? lightmap; 
         private Color[,]? cached_colors = null;
-
-
         internal Color[,] LitColorData
         {
             get 
@@ -116,7 +114,6 @@ namespace pixel_renderer
         {
             if (dirty)
                 Refresh();
-           
         }
         
         public void Draw(Vec2 size, Color[,] color)
