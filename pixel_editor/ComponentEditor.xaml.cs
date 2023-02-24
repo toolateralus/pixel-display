@@ -107,6 +107,7 @@ namespace pixel_editor
                 viewer.Children.Add(inputBox);
                 inputFields.Add(inputBox);
                 editEvents.Add((o, e) => SetVariable(o, e));
+
                 Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, i);
                 Inspector.SetRowAndColumn(inputBox, 1, 8, 8, i);
 
