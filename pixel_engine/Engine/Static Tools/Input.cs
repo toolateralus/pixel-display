@@ -58,6 +58,7 @@ namespace pixel_renderer
 
         public static void Update()
         {
+            MouseWheelDelta = 0;
             if (!RightPressedLastFrame && Right)
                 RightPressedThisFrame = true;
             else

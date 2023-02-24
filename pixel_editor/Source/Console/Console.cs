@@ -1,21 +1,15 @@
 ﻿using pixel_renderer;
-using pixel_editor;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Windows.Input;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
-using System.Drawing;
-
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Input;
 namespace pixel_editor
 {
-  
-
     public class Console
     {
-
         #region General Commands
         public static Command cmd_help() => new()
         {
@@ -50,7 +44,6 @@ namespace pixel_editor
             description = "Logs a message to the console, Some characters will cause this to fail."
         };
         #endregion
-
         #region Renderer Commands
         public static Command cmd_set_resolution() => new()
         {
@@ -77,7 +70,6 @@ namespace pixel_editor
             description = "gets the resolution and prints it to the console"
         };
         #endregion
-
         #region Node Commands
         public static Command cmd_set_node_field() => new()
         {
@@ -183,7 +175,6 @@ namespace pixel_editor
             },
         };
         #endregion
-
         #region Asset/Project/Stage/IO Commands
         public static Command cmd_set_camera() => new()
         {
@@ -346,15 +337,14 @@ namespace pixel_editor
             args = null,
         };
         #endregion
-
         #region Editor Commands
 
         public static Command cmd_show_colliders() => new()
         {
-           phrase = "showColliders;",
-           syntax = "showColliders();",
-           action = showColliders,
-           description = "highlights all of the colliders bounds in green",
+            phrase = "showColliders;",
+            syntax = "showColliders();",
+            action = showColliders,
+            description = "highlights all of the colliders bounds in green",
         };
         static bool collidersHighlighted = false;
         private static void showColliders(object[]? obj)
@@ -400,7 +390,7 @@ namespace pixel_editor
             syntax = "inspector.Move(Vec2 newPosition)",
             action = moveInspector,
             description = "Sets the inspectors current position",
-            argumentTypes = new string[] { "vec:"},
+            argumentTypes = new string[] { "vec:" },
         };
 
         private static void moveInspector(object[]? obj)
@@ -415,16 +405,18 @@ namespace pixel_editor
         #endregion
 
 
-        public static Console Current 
+        private const string divider = "-- -- --";
+
+        public static Console Current
         {
             get
             {
-                if (_console == null)
+                if (current == null)
                 {
 
                     // init singleton and use it to fill cmd list; 
-                    _console = new();
-                    var type = _console.GetType();
+                    current = new();
+                    var type = current.GetType();
                     var methods = type.GetRuntimeMethods();
                     foreach (var method in methods)
                         if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
@@ -435,27 +427,25 @@ namespace pixel_editor
                         }
                 }
 
-                return _console; 
+                return current;
             }
-            set => _console = value; 
+            set => current = value;
         }
-
-        private const string divider = "\n-- -- --\n";
-        private static Console _console; 
+        private static Console current;
 
         public static void Print(object? o, bool includeDateTime = false)
         {
             var msg = o.ToString();
             var e = new EditorEvent(msg, includeDateTime);
-            Editor.QueueEvent(e); 
+            Editor.QueueEvent(e);
         }
         public static void Error(object? o = null, int? textColorAlterationDuration = null)
         {
             string? msg = o.ToString();
             EditorEvent e = new(msg, true);
-           
-                if (textColorAlterationDuration is not null)
-                    e.action = RedTextAsync( (int)textColorAlterationDuration);
+
+            if (textColorAlterationDuration is not null)
+                e.action = RedTextAsync((int)textColorAlterationDuration);
             Editor.QueueEvent(e);
         }
         internal static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
@@ -485,8 +475,8 @@ namespace pixel_editor
             EditorEvent editorEvent = new EditorEvent("");
             editorEvent.ClearConsole = true;
             Editor.QueueEvent(editorEvent);
-            
-            if(randomColor)
+
+            if (randomColor)
                 Error("Console Cleared", 1);
         }
 
@@ -507,10 +497,10 @@ namespace pixel_editor
             if (hasArg && o[index] is T val)
             {
                 arg = val;
-                return true; 
+                return true;
             }
             arg = (T)Convert.ChangeType(null, typeof(T));
-            return false ; 
+            return false;
         }
 
         static void PrintLoadedStageNames()
@@ -538,8 +528,6 @@ namespace pixel_editor
                 default: break;
             }
         }
-
-
         private static void AddChild(params object[]? e)
         {
             if (!TryGetNodeByNameAtIndex(e, out var node, 0)) return;
@@ -547,8 +535,8 @@ namespace pixel_editor
         }
         public static bool TryGetNodeByNameAtIndex(object[]? e, out Node node, int index)
         {
-            if(!TryGetArgAtIndex(0,out string nodeName, e))
-            { 
+            if (!TryGetArgAtIndex(0, out string nodeName, e))
+            {
                 Command.Error("node.Child(string parentName)", CmdError.ArgumentNotFound);
                 node = null;
                 return false;
@@ -559,22 +547,21 @@ namespace pixel_editor
             if (stage is null)
             {
                 Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
-                node = null; 
+                node = null;
                 return false;
             }
 
             node = stage.FindNode(nodeName);
-            
+
             if (node is null)
             {
                 Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
                 return false;
             }
 
-            return true; 
+            return true;
 
         }
-
         private static void RandomizeBackground(params object[]? args)
         {
             var stage = Runtime.Current.GetStage();
@@ -612,13 +599,14 @@ namespace pixel_editor
                 $"\n Tag: {node.tag} " +
                 $"\n Component Count : {node.ComponentsList.Count}");
         }
-        private static async void AssetExists(object[]? obj) {
+        private static async void AssetExists(object[]? obj)
+        {
 
             var found = AssetLibrary.Fetch<Asset>(out List<Asset> assets);
             if (found)
             {
                 var prompt = PromptAsync($"found {assets.Count} assets. Do you want more information?");
-                await prompt; 
+                await prompt;
                 switch (prompt.Result)
                 {
                     case PromptResult.Yes:
@@ -637,7 +625,7 @@ namespace pixel_editor
                         Print("Asset fetch timed out.");
                         return;
                 }
-              
+
             }
             void PrintAssetsInfo(List<Asset> assets)
             {
@@ -701,5 +689,4 @@ namespace pixel_editor
 
         public List<Command> Active = new();
     }
-
 }

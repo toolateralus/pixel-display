@@ -109,10 +109,12 @@ namespace pixel_renderer
                 CMouse.Update();
                 if (IsRunning)
                 {
-                        StagingHost.Update(stage);
-                        renderHost?.Render();
+                    StagingHost.Update(stage);
+                    renderHost?.Render();
+
                     if (Application.Current is null)
                         return;
+
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         CMouse.MouseWheelDelta = 0;
@@ -131,22 +133,23 @@ namespace pixel_renderer
             {
                 if (IsTerminating)
                     return;
-                Thread.Sleep(16);  // Wait for 16ms to maintain 60fps
+                if (Application.Current == null)
+                    return;
+                
+                Thread.Sleep(Constants.PhysicsIntervalMs);
+                // Wait for 16ms to maintain 60fps
+                CMouse.Update();
+                Application.Current.Dispatcher.Invoke(() => Input.Refresh());
 
                 if (stage is null)
                     continue;
+
                 if (!IsRunning) 
                     continue;
-                //TODO: make frmerate here
-                CMouse.Update();
+
+                //TODO: make framerate here
                 StagingHost.FixedUpdate(stage);
                 Collision.Run();
-                if (Application.Current == null)
-                    return;
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Input.Refresh();
-                });
             }
         }
         /// <summary>
