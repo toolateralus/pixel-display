@@ -15,8 +15,8 @@ namespace pixel_renderer
         protected internal static volatile HashSet<Texture> Textures = new();
         public TexturePool()
         {
-            AssetLibrary.OnTextureRegistered += OnTextureRegister;
-            AssetLibrary.OnTextureQueried += OnTextureQuery;
+            //AssetLibrary.OnTextureRegistered += OnTextureRegister;
+            //AssetLibrary.OnTextureQueried += OnTextureQuery;
         }
 
         public static void OnTextureQuery(string name, Action<Texture?> returnAction)

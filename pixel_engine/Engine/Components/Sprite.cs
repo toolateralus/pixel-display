@@ -268,8 +268,8 @@ namespace pixel_renderer
                         int _y = y - minY;
 
                         Color existingColor = _colors[_x, _y];
-                        Color blendedColor = ExtensionMethods.Lerp(existingColor, lightColor, lightAmount);
-                        colors[x - minX, y - minY] = blendedColor;
+                        Color blendedColor = existingColor.Lerp(lightColor, lightAmount);
+                        colors[_x, _y] = blendedColor;
                     }
             return colors; 
         }
