@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Security.Policy;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -75,6 +77,8 @@ namespace pixel_renderer
         {
             if (dirty)
                 Refresh();
+
+            LightingPerPixel(); 
         }
         public void Randomize()
         {
@@ -90,6 +94,89 @@ namespace pixel_renderer
 
             Draw(size, colorData);
         }
+        public void LightingPerPixel()
+        {
+            var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
+            if (!lights.Any()) 
+                return;
+
+            Light light = lights.First();
+            var lightPosition = light.parent.Position;
+
+
+            for (int x = 0; x < ColorData.GetLength(0); x++)
+            {
+                for (int y = 0; y < ColorData.GetLength(1); y++)
+                {
+                    Vec2 pixelPosition = new Vec2(parent.Position.x, parent.Position.y);
+
+                    float distance = Vec2.Distance(pixelPosition, lightPosition);
+
+                    float brightness = light.brightness / (distance * distance);
+
+                    System.Drawing.Color originalColor = ColorData[x, y];
+
+                    float newR = originalColor.R * brightness;
+                    float newG = originalColor.G * brightness;
+                    float newB = originalColor.B * brightness;
+
+                    newR = Math.Max(0, Math.Min(255, newR));
+                    newG = Math.Max(0, Math.Min(255, newG));
+                    newB = Math.Max(0, Math.Min(255, newB));
+
+                    System.Drawing.Color newColor = System.Drawing.Color.FromArgb(255, (int)newR, (int)newG, (int)newB);
+                    ColorData[x, y] = newColor;
+                }
+            }
+        }
+        void VertexLighting(Polygon poly, Vec2 lightPosition, float lightRadius, Color lightColor, BoundingBox2D bounds)
+        {
+            // Get the vertices of the polygon
+            Vec2[] vertices = poly.vertices;
+            int vertexCount = vertices.Length;
+
+            // Iterate over each horizontal row of the bounding box
+            for (int y = (int)bounds.min.y; y < bounds.max.y; y++)
+            {
+                // Iterate over each column of the bounding box
+                for (int x = (int)bounds.min.x; x < bounds.max.x; x++)
+                {
+                    // Check if the current point is inside the polygon
+                    if (PointInPolygon(new Vec2(x, y), vertices))
+                    {
+                        // Calculate the distance between the current point and the light position
+                        float distance = Vec2.Distance(new Vec2(x, y), lightPosition);
+
+                        // Calculate the amount of light that reaches the current point
+                        float lightAmount = 1f - Math.Clamp(distance / lightRadius, 0,1);
+
+                        // Lerp the light color and the existing color at the current point
+                        Color existingColor = _colors[x - (int)bounds.min.x, y - (int)bounds.min.y];
+                        Color blendedColor = ExtensionMethods.Lerp(existingColor, lightColor, lightAmount);
+
+                        // Set the color at the current point
+                        _colors[x - (int)bounds.min.x, y - (int)bounds.min.y] = blendedColor;
+                    }
+                }
+            }
+        }
+
+        public static bool PointInPolygon(Vec2 point, Vec2[] vertices)
+        {
+            int i, j = vertices.Length - 1;
+            bool c = false;
+            for (i = 0; i < vertices.Length; i++)
+            {
+                if (((vertices[i].y > point.y) != (vertices[j].y > point.y)) &&
+                    (point.x < (vertices[j].x - vertices[i].x) * (point.y - vertices[i].y) / (vertices[j].y - vertices[i].y) + vertices[i].x))
+                {
+                    c = !c;
+                }
+                j = i;
+            }
+            return c;
+        }
+
         public void RestoreCachedColor(bool nullifyCache, bool IsReadOnly = false)
         {
             this.IsReadOnly = IsReadOnly;

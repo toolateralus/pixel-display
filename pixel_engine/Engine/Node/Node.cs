@@ -169,11 +169,7 @@ namespace pixel_renderer
             return false;
         }
 
-        public void AddNode(Node newNode)
-        {
-            
-        }
-
+       
         public bool TryRemoveChild(Node child)
         {
             foreach (var kvp in children)

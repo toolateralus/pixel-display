@@ -172,6 +172,9 @@ namespace pixel_renderer
             var nodes = new List<Node>();
             nodes.Add(Player.Standard());
             Node camera = new("Camera");
+            Node light = new("Light");
+            light.AddComponent<Light>(); 
+
             camera.AddComponent<Camera>().Size = new(256,256);
             nodes.Add(camera);
             Node floorNode = Floor.Standard();
