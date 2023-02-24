@@ -215,15 +215,28 @@
                     continue;
                 Vec2 colorPos = sprite.ViewportToColorPos(spriteViewportPos);
 
-                //float xOffset = colorPos.x - (int)colorPos.x;
-                //float yOffset = colorPos.y - (int)colorPos.y;
-                //Color color1 = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
-                //Color color2 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)((colorPos.y + 1) % sprite.size.x)];
-                //Color color3 = sprite.ColorData[(int)((colorPos.x + 1) % sprite.size.x), (int)colorPos.y];
-                //if (xOffset > yOffset)
-                //    color3 = sprite.ColorData[(int)colorPos.x, (int)((colorPos.y + 1) % sprite.size.x)];
+                Color color = new();
 
-                Color color = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
+                switch (sprite.textureFiltering)
+                {
+                    case TextureFiltering.Point:
+                        color = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
+                        break;
+                    case TextureFiltering.Bilinear:
+                        Vec2Int colorSize = sprite.ColorDataSize;
+                        int left = (int)colorPos.x;
+                        int top = (int)colorPos.y;
+                        int right = (left + 1) % colorSize.x;
+                        int bottom = (top + 1) % colorSize.y;
+                        float xOffset = colorPos.x - left;
+                        float yOffset = colorPos.y - top;
+                        Color topColor = sprite.ColorData[left, top].Lerp(sprite.ColorData[right, top], xOffset);
+                        Color botColor = sprite.ColorData[left, bottom].Lerp(sprite.ColorData[right, bottom], xOffset);
+                        color = topColor.Lerp(botColor, yOffset);
+                        break;
+                    default:
+                        throw new NotImplementedException(nameof(sprite.textureFiltering));
+                }
                 if (color.A == 0)
                     continue;
                 if (color.A == 255)
