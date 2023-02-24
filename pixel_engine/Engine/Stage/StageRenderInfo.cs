@@ -40,10 +40,7 @@ namespace pixel_renderer
                 spriteSizeVectors[i] = sprite.size;
                 spriteVPOffsetVectors[i] = sprite.viewportOffset;
                 spriteVPScaleVectors[i] = sprite.viewportScale;
-
-                if (sprite.lit)
-                    spriteColorData[i] = sprite.LitColorData;
-                else spriteColorData[i] = sprite.ColorData;
+                spriteColorData[i] = sprite.ColorData;
                 
                 spriteCamDistances[i] = sprite.camDistance;
             }
