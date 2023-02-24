@@ -9,6 +9,9 @@ namespace pixel_renderer
     {
         public float brightness = 100f;
         public Vec2 startPos = Vec2.one;
+        public float radius = 24;
+        public Color color = Color.FromArgb(255, 235, 255, 245);
+
         public override void Update()
         {
             parent.Position = startPos;

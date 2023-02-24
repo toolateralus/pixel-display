@@ -78,6 +78,19 @@ namespace pixel_renderer
             if (dirty)
                 Refresh();
 
+            var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
+            if (!lights.Any())
+                return;
+
+            Light light = lights.First();
+            var lightPosition = light.parent.Position;
+
+            if (parent.TryGetComponent<Collider>(out var col))
+            {
+                VertexLighting(col.Polygon, lightPosition, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
+                return; 
+            }
+
             LightingPerPixel(); 
         }
         public void Randomize()
@@ -133,32 +146,35 @@ namespace pixel_renderer
         {
             // Get the vertices of the polygon
             Vec2[] vertices = poly.vertices;
+            
             int vertexCount = vertices.Length;
+            
+            Color[,] colors = new Color[_colors.GetLength(0), _colors.GetLength(1)]; 
+            
+            int minY = (int)bounds.min.y;
+            int maxY = (int)bounds.max.y;
 
-            // Iterate over each horizontal row of the bounding box
-            for (int y = (int)bounds.min.y; y < bounds.max.y; y++)
+            int minX = (int)bounds.min.x;
+            int maxX = (int)bounds.max.x;
+
+            for (int y = minY; y < maxY; y++)
             {
-                // Iterate over each column of the bounding box
-                for (int x = (int)bounds.min.x; x < bounds.max.x; x++)
+                for (int x = minX; x < maxX; x++)
                 {
-                    // Check if the current point is inside the polygon
                     if (PointInPolygon(new Vec2(x, y), vertices))
                     {
-                        // Calculate the distance between the current point and the light position
                         float distance = Vec2.Distance(new Vec2(x, y), lightPosition);
-
-                        // Calculate the amount of light that reaches the current point
                         float lightAmount = 1f - Math.Clamp(distance / lightRadius, 0,1);
+                        int _x = x - minX;
+                        int _y = y - minY; 
 
-                        // Lerp the light color and the existing color at the current point
-                        Color existingColor = _colors[x - (int)bounds.min.x, y - (int)bounds.min.y];
+                        Color existingColor = _colors[_x, _y];
                         Color blendedColor = ExtensionMethods.Lerp(existingColor, lightColor, lightAmount);
-
-                        // Set the color at the current point
-                        _colors[x - (int)bounds.min.x, y - (int)bounds.min.y] = blendedColor;
+                        colors[x - minX, y - minY] = blendedColor;
                     }
                 }
             }
+            Draw(size, colors);
         }
 
         public static bool PointInPolygon(Vec2 point, Vec2[] vertices)

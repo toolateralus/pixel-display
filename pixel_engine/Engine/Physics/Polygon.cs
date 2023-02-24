@@ -13,7 +13,6 @@ namespace pixel_renderer
         public Vec2[] uv = Array.Empty<Vec2>();
         public Vec2[] vertices = Array.Empty<Vec2>();
 
-        public static float LightRadius { get; private set; }
 
         /// <summary>
         /// Expects vertices to be structed clockwise
