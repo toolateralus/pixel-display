@@ -23,19 +23,20 @@ namespace pixel_renderer
         [JsonProperty] public Vec2 size = Vec2.one * 16;
         [JsonProperty] public Vec2 viewportScale = Vec2.one;
         [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
+        [JsonProperty] private Vec2Int colorDataSize = new(1,1);
         [JsonProperty] public float camDistance = 1;
         [JsonProperty] public Texture texture;
         [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
+        [JsonProperty] public bool IsReadOnly = false;
+        
+        [Field][JsonProperty] public bool lit = false;
         [Field][JsonProperty] public Color color = Color.White;
-        [Field] public bool lit = false;
 
         public bool dirty = true;
-        Vec2Int colorDataSize = new(1,1);
+        internal protected bool selected_by_editor;
 
-        private Color[,]? lightmap; 
         private Color[,]? cached_colors = null;
-
-
+        private Color[,]? lightmap; 
         private Color[,] LitColorData
         {
             get 
@@ -82,9 +83,20 @@ namespace pixel_renderer
                 }
             }
         }
+        private Color[,] _colors = new Color[1,1];
 
-        public bool IsReadOnly = false;
+        public override void Awake()
+        {
+            texture = new((Vec2Int)size, Player.PlayerSprite);
+            Refresh();
 
+        }
+        public override void FixedUpdate(float delta)
+        {
+            if (dirty)
+                Refresh();
+           
+        }
         private void Refresh()
         {
             switch (Type)
@@ -106,22 +118,6 @@ namespace pixel_renderer
             dirty = false;
         }
 
-        private Color[,] _colors = new Color[1,1];
-        internal protected bool selected_by_editor;
-
-        public override void Awake()
-        {
-            texture = new((Vec2Int)size, Player.PlayerSprite);
-            Refresh();
-
-        }
-        public override void FixedUpdate(float delta)
-        {
-            if (dirty)
-                Refresh();
-           
-        }
-        
         public void Draw(Vec2 size, Color[,] color)
         {
             this.size = size;
@@ -277,7 +273,6 @@ namespace pixel_renderer
                     }
             return colors; 
         }
-        
         public override void OnDrawShapes()
         {
             if (selected_by_editor)
@@ -291,7 +286,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         /// <summary>
         /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
         /// </summary>
