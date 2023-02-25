@@ -81,10 +81,12 @@ namespace pixel_renderer
             {
                 if (lit)
                     return LitColorData;
-                if (texture.jImage is null)
-                    texture.jImage = new();
+
+                texture.jImage ??= new();
+
                 if (texture.jImage.data is null) 
                     Refresh();
+
                 if (texture.jImage.data is null)
                     throw new NullReferenceException(nameof(texture.jImage.data));
 
