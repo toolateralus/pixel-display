@@ -12,7 +12,7 @@ namespace pixel_editor
     {
         List<Vec2> highlightedVertices = new();
         Collider? selectedCollider;
-        const float minHighlightDistance = 2;
+        const float highlightDistance = 2;
         int selectedVertIndex = -1;
         float vertSize = 2;
         public override void Awake() { }
@@ -47,7 +47,7 @@ namespace pixel_editor
                     if (vertices[i].SqrDistanceFrom(mPos) <
                         vertices[closestVert].SqrDistanceFrom(mPos))
                         closestVert = i;
-                if (vertices[closestVert].SqrDistanceFrom(mPos) < minHighlightDistance * minHighlightDistance)
+                if (vertices[closestVert].SqrDistanceFrom(mPos) < highlightDistance * highlightDistance)
                 {
                     selectedVertIndex = closestVert;
                     vertices[selectedVertIndex] = mPos;
@@ -57,20 +57,21 @@ namespace pixel_editor
                 }
                 else
                 {
+                    vertSize = 2;
                     foreach(Line line in selectedCollider.Polygon.GetLines())
                     {
                         Vec2 mouseOffset = mPos - line.startPoint;
                         float upDot = Vec2.Dot(line.Direction.Normalized(), mouseOffset);
-                        //float leftDot = Vec2.Dot(line.Direction.Normal_LHS.Normalized(), mouseOffset);
-                        highlightedVertices.Add(line.Direction.Normalized() * upDot + line.startPoint);
-                        vertSize = 2;
+                        float leftDot = Vec2.Dot(line.Direction.Normal_LHS.Normalized(), mouseOffset);
+                        if (upDot > 0 && upDot.Squared() < line.Direction.SqrMagnitude()
+                            && leftDot.Squared() < highlightDistance)
+                        {
+                            highlightedVertices.Add(line.Direction.Normalized() * upDot + line.startPoint);
+                            break;
+                        }
                     }
-                    if (highlightedVertices.Count == 0)
-                    {
-                        foreach (Vec2 vert in vertices)
-                            highlightedVertices.Add(vert);
-                        vertSize = 2;
-                    }
+                    foreach (Vec2 vert in vertices)
+                        highlightedVertices.Add(vert);
                 }
             }
             else

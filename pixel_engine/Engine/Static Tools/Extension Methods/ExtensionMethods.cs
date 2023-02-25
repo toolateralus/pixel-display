@@ -13,6 +13,8 @@ namespace pixel_renderer
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
         public static bool WithinRange(this int v, int min, int max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
+        public static double Squared(this double v) => v * v;
+        public static float Squared(this float v) => v * v;
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
         public static float Wrapped(this float v, float max) => (v % max + max) % max;
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
@@ -39,7 +41,7 @@ namespace pixel_renderer
         {
             if (v.Equals(Vec2.zero))
                 return Vec2.zero;
-
+            //return new Vec2(v.x * v.x, v.y * v.y) / v.SqrMagnitude();
             return v / v.Length();
         }
         public static void Increment2D(this ref Vec2 v, float xMax, float xMin = 0)
