@@ -35,7 +35,7 @@ namespace pixel_renderer
         [JsonProperty] public bool IsReadOnly = false;
         [Field] [JsonProperty] public TextureFiltering textureFiltering = 0;
         [Field][JsonProperty] public bool lit = false;
-        [Field][JsonProperty] public Pixel color = Color.White;
+        [Field][JsonProperty] public Pixel color = Pixel.Blue;
         public Sprite()
         {
             texture = new Texture((Vec2Int)size, Pixel.Red);
@@ -47,8 +47,6 @@ namespace pixel_renderer
         }
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
-        
-
         private byte[]? lightmap; 
         private byte[] LitColorData
         {
@@ -83,8 +81,12 @@ namespace pixel_renderer
             {
                 if (lit)
                     return LitColorData;
+
+                texture.jImage ??= new();
+
                 if (texture.jImage.data is null) 
                     Refresh();
+
                 if (texture.jImage.data is null)
                     throw new NullReferenceException(nameof(texture.jImage.data));
 
@@ -176,27 +178,6 @@ namespace pixel_renderer
             this.size = size;
             ColorData = CBit.ByteArrayFromColorArray(CBit.SolidColorSquare(size, color));
         }
-        public void Highlight(Pixel borderColor, Vec2? widthIn = null, bool IsReadOnly = false)
-        {
-            
-            Vec2 width = widthIn ?? Vec2.one;
-            
-            int sizeX = (int)size.x;
-            int sizeY = (int)size.y;
-
-            var colorData = new Pixel[sizeX, sizeY];
-
-            for (int x = 0; x< sizeX; ++x)
-                for (int y = 0; y < sizeY; ++y)
-                {
-                    var pt = new Vec2(x, y);
-                    if (!pt.IsWithinMaxExclusive(width, size - width))
-                        colorData[x, y] = borderColor;
-                }
-            Draw(size, CBit.ByteArrayFromColorArray(colorData));
-            this.IsReadOnly = IsReadOnly;
-        }
-       
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
         public Vec2[] GetVertices()
