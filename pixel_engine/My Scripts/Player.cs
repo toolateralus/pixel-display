@@ -107,12 +107,11 @@ namespace pixel_renderer
 
             if (isGrounded)
             {
-                Jump(moveVector);
-                Move(moveVector);
-            }
-            if (isGrounded)
                 isGrounded = false;
+                Jump(moveVector);
+            }
 
+            Move(moveVector);
             moveVector = Vec2.zero;
         }
 
