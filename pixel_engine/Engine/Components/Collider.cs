@@ -19,7 +19,7 @@ namespace pixel_renderer
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
         [Field] public bool drawCollider = false;
         [Field] public bool drawNormals = false;
-        [Field] public Color colliderColor = Color.LimeGreen;
+        [Field] public Pixel colliderPixel = Color.LimeGreen;
         public Polygon GetUntransformedPolygon() => polygon;
         [JsonProperty]public bool IsTrigger { get; internal set; } = false;
         public override void OnDrawShapes()
@@ -37,7 +37,7 @@ namespace pixel_renderer
             for (int i = 0; i < vertLength; i++)
             {
                 var nextIndex = (i + 1) % vertLength;
-                ShapeDrawer.DrawLine(poly.vertices[i], poly.vertices[nextIndex], colliderColor);
+                ShapeDrawer.DrawLine(poly.vertices[i], poly.vertices[nextIndex], colliderPixel);
             }
         }
 

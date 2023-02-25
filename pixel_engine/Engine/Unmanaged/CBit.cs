@@ -6,8 +6,9 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using Bitmap = System.Drawing.Bitmap;
-using Color = System.Drawing.Color;
+using Pixel = System.Drawing.Color;
 using Image = System.Windows.Controls.Image;
 
 namespace pixel_renderer
@@ -32,8 +33,28 @@ namespace pixel_renderer
             DeleteObject(bmd.Scan0);
 
         }
-       
-        public static Color[,] ColorArrayFromBitmap(Bitmap bmp)
+        public static byte[] ByteArrayFromColorArray(Pixel[,] colorArray)
+        {
+            var width = colorArray.GetLength(0);
+            var height = colorArray.GetLength(1);
+            byte[] pixelData = new byte[width * height * 4];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    Pixel color = colorArray[x, y];
+                    int index = (y * width + x) * 4;
+                    pixelData[index] =     color.r;
+                    pixelData[index + 1] = color.g;
+                    pixelData[index + 2] = color.b;
+                    pixelData[index + 3] = color.a;
+                }
+            }
+            return pixelData; 
+        }
+
+        public static Pixel[,] PixelArrayFromBitmap(Bitmap bmp)
         {
             lock (bmp)
             {
@@ -41,20 +62,20 @@ namespace pixel_renderer
                 int j = bmp.Height;
 
                 if (bmp == null)
-                    return new Color[0, 0];
-                Color[,] _colors = new Color[i,j];
+                    return new Pixel[0, 0];
+                Pixel[,] colors = new Pixel[i,j];
 
                 for (int y = 0; y < bmp.Height; y++)
                 {
                     for (int x = 0; x < bmp.Width; x++)
-                    { 
-                        _colors[x, y] = bmp.GetPixel(x, y);
+                    {
+                        colors[x, y] = bmp.GetPixel(x, y);
                     }
                 }
-                return _colors;
+                return colors;
             }
         }
-        public static Bitmap SolidColorBitmap(Vec2 size, Color color)
+        public static Bitmap SolidColorBitmap(Vec2 size, Pixel color)
         {
             int x = (int)size.x;
             int y = (int)size.y;
@@ -66,9 +87,9 @@ namespace pixel_renderer
                     bitmap.SetPixel(i, j, color);
             return bitmap;
         }
-        public static Color[,] SolidColorSquare(Vec2 size, Color color)
+        public static Pixel[,] SolidColorSquare(Vec2 size, Pixel color)
         {
-            var colorData = new Color[(int)size.x, (int)size.y];
+            var colorData = new Pixel[(int)size.x, (int)size.y];
             for (int x = 0; x < size.x; x++)
                 for (int y = 0; y < size.y; y++)
                     colorData[x, y] = color;

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using pixel_renderer.Engine.Renderer;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -15,7 +17,7 @@ namespace pixel_renderer
         public List<Vec2> spriteVPScaleVectors = new();
         public List<float> spriteCamDistances = new();
         public List<TextureFiltering> spriteFiltering = new();
-        public List<Color[,]> spriteColorData = new();
+        public List<byte[]> spriteColorData = new();
 
         public StageRenderInfo(Stage stage)
         {
@@ -62,7 +64,7 @@ namespace pixel_renderer
                 spriteVPOffsetVectors.Add(Vec2.zero);
                 spriteVPScaleVectors.Add(Vec2.zero);
                 spriteFiltering.Add(0);
-                spriteColorData.Add(new Color[1, 1]);
+                spriteColorData.Add(Array.Empty<byte>());
                 spriteCamDistances.Add(1f);
             }
             void removeFirst()

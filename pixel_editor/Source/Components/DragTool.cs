@@ -27,7 +27,7 @@ namespace pixel_editor
                             if (!x.TryGetComponent<Collider>(out var c)) continue;
                             c.drawCollider = false;
                             c.drawNormals = false;
-                            c.colliderColor = Color.Blue;
+                            c.colliderPixel = Color.Blue;
                         }
                         Editor.Current.ActivelySelected.Clear();
                         break;
@@ -102,7 +102,7 @@ namespace pixel_editor
                                     Editor.Current.ActivelySelected.Add(node);
                                     sprite.drawCollider = true;
                                     sprite.drawNormals = true;
-                                    sprite.colliderColor = Color.Orange;
+                                    sprite.colliderPixel = Color.Orange;
                                 }
                             }
                 }
@@ -120,8 +120,8 @@ namespace pixel_editor
           
               
             if (!InBoxSelect) return;
-            ShapeDrawer.DrawRect(boxStart, boxEnd, Color.Green);
-            ShapeDrawer.DrawCircle(boxEnd, 3, Color.Red);
+            ShapeDrawer.DrawRect(boxStart, boxEnd, Pixel.Green);
+            ShapeDrawer.DrawCircle(boxEnd, 3, Pixel.Red);
 
             var stage = Runtime.Current.GetStage();
             List<Node> nodes = new(stage.nodes);

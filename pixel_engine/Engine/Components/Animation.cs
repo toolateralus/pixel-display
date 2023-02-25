@@ -28,30 +28,9 @@ namespace pixel_renderer
         internal int frameIndex = 0;
 
         [JsonProperty]
-        public Dictionary<(int, int), Color[,]> frames = new();
+        public Dictionary<(int, int), Pixel[,]> frames = new();
 
-        Color[,] lastFrame = new Color[,] {
-                {
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                },
-                {
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                    Color.Red, Color.White, Color.Blue,
-                }
-        };
+        Pixel[,] lastFrame = new Pixel[0,0];
 
         public Animation(Metadata[] frameData, int framePadding = 24) => CreateAnimation(frameData, framePadding);
 
@@ -71,13 +50,13 @@ namespace pixel_renderer
 
                 Bitmap img = new(imgMetadata.Path);
 
-                frames.Add((i, i + padding - 1), CBit.ColorArrayFromBitmap(img));
+                frames.Add((i, i + padding - 1), CBit.PixelArrayFromBitmap(img));
             }
         }
        
 
 
-        public Color[,] GetFrame()
+        public Pixel[,] GetFrame()
         {
             if (frameIndex > frames.Count * padding - 1 && looping)
                 frameIndex = startIndex;

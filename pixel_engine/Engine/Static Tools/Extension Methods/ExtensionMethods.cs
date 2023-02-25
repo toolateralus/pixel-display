@@ -107,7 +107,7 @@ namespace pixel_renderer
             pos.Y /= img.ActualHeight;
             return pos;
         }
-        public static Bitmap ToBitmap(this Color[,] colors)
+        public static Bitmap ToBitmap(this Pixel[,] colors)
         {
             int sizeX = colors.GetLength(0);
             int sizeY = colors.GetLength(1);
@@ -122,13 +122,13 @@ namespace pixel_renderer
         }
         #endregion
 
-        public static Color Lerp(this Color A, Color B, float T)
+        public static Pixel Lerp(this Pixel A, Pixel B, float T)
         {
             T = Math.Max(0, Math.Min(1, T));
-            int r = (int)Math.Round(A.R + (B.R - A.R) * T);
-            int g = (int)Math.Round(A.G + (B.G - A.G) * T);
-            int b = (int)Math.Round(A.B + (B.B - A.B) * T);
-            int a = (int)Math.Round(A.A + (B.A - A.A) * T);
+            int r = (int)Math.Round(A.r + (B.r - A.r) * T);
+            int g = (int)Math.Round(A.g + (B.g - A.g) * T);
+            int b = (int)Math.Round(A.b + (B.b - A.b) * T);
+            int a = (int)Math.Round(A.a + (B.a - A.a) * T);
             return Color.FromArgb(a, r, g, b);
         }
 

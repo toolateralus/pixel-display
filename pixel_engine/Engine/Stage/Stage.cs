@@ -12,8 +12,13 @@ namespace pixel_renderer
     public class Stage : Asset
     {
         [JsonProperty]
-        public Metadata Background;
-
+        public Metadata Background; 
+        [JsonProperty]
+        public Vec2 backgroundSize = new(512, 512);
+        [JsonProperty]
+        public TextureFiltering backgroundFiltering = TextureFiltering.Point; 
+        [JsonProperty]
+        public Vec2 backgroundOffset = new(0, 0);
         private Bitmap init_bckground;
         public Bitmap? InitializedBackground
         {
@@ -187,7 +192,6 @@ namespace pixel_renderer
             }
 
             var stage = new Stage("Default Stage", DefaultBackgroundMetadata, nodes);
-
             return stage;
         }
 

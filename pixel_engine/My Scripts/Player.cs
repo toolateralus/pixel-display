@@ -117,7 +117,7 @@ namespace pixel_renderer
 
         private void DrawCircle()
         {
-            Color[,] colors = new Color[(int)sprite.size.x, (int)sprite.size.y];
+            Pixel[,] colors = new Pixel[(int)sprite.size.x, (int)sprite.size.y];
 
 
             for(int i = 0; i < curve.points.Values.Count; ++i)
@@ -126,10 +126,10 @@ namespace pixel_renderer
                 pos += sprite.size / 2; 
 
                 if(pos.IsWithinMaxExclusive(Vec2.zero, new(sprite.size.x, sprite.size.y)))
-                    colors[(int)pos.x, (int)pos.y] = Color.Red;
+                    colors[(int)pos.x, (int)pos.y] = (Pixel)Color.Red;
                 
             }
-            sprite.Draw(sprite.size, colors);
+            sprite.Draw(sprite.size, CBit.ByteArrayFromColorArray(colors));
         }
 
         void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);
