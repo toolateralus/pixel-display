@@ -42,7 +42,7 @@ namespace pixel_renderer
                 {
                     Runtime.Log(nameof(meta) + " was not found.");
                     // this is a really janky way to return null out of this;
-                    return (T)Convert.ChangeType(null, typeof(T));
+                    return default; 
                 }
                 if (Constants.ReadableExtensions.Contains(meta.extension))
                 {
