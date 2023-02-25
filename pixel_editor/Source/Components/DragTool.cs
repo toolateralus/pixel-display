@@ -117,25 +117,37 @@ namespace pixel_editor
 
         public override void OnDrawShapes()
         {
-            if (!draggingMultiple)
-            {
-                foreach (var node in Editor.Current.ActivelySelected)
-                {
-                    if (!node.TryGetComponent<Collider>(out var col) || col is null) return;
-                    var centroid = col.Polygon.centroid;
-                    Vec2 radiusVec = CMath.Min(Vec2.one * 10, node.Position - CMouse.GlobalPosition);
-                    float radius = radiusVec.y + radiusVec.x;
-                    ShapeDrawer.DrawCircle(centroid, radius, Color.White);
-                }
-            }
+          
               
             if (!InBoxSelect) return;
             ShapeDrawer.DrawRect(boxStart, boxEnd, Color.Green);
             ShapeDrawer.DrawCircle(boxEnd, 3, Color.Red);
 
-           
+            var stage = Runtime.Current.GetStage();
+            List<Node> nodes = new(stage.nodes);
 
+            if (stage is null)
+                return;
+
+            foreach (Node node in nodes)
+                if (node.Position is Vec2 vec)
+                    if (vec.IsWithin(boxStart, boxEnd))
+                    {
+                        if (!node.TryGetComponent<Collider>(out var col) || col is null) 
+                            return;
+
+                        var centroid = col.Polygon.centroid;
+                        Vec2 radiusVec = CMath.Min(Vec2.one * 10, vec - CMouse.GlobalPosition - Vec2.one * 3);
+                        float radius = radiusVec.y + radiusVec.x;
+                        
+                        if (radius < 0)
+                            radius = -radius;
+                        radius *= 0.5f;
+
+                        
+                        ShapeDrawer.DrawCircle(centroid, radius, JRandom.Color(0b1100100));
+                    }
+            }
         }
 
-    }
 }
