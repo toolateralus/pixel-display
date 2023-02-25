@@ -14,11 +14,11 @@ namespace pixel_renderer
         public byte g;
         public byte b;
 
-        public static Pixel White => new(255, 255, 255, 255);
-        public static Pixel Black => new(255, 0, 0, 0);
-        public static Pixel Green => new(255, 0, 255, 0);
-        public static Pixel Red => new(255, 255, 0, 0);
-        public static Pixel Blue => new(255, 0, 0, 255);
+        public readonly static Pixel White = new(255, 255, 255, 255);
+        public readonly static Pixel Black = new(255, 0, 0, 0);
+        public readonly static Pixel Green = new(255, 0, 255, 0);
+        public readonly static Pixel Red = new(255, 255, 0, 0);
+        public readonly static Pixel Blue = new(255, 0, 0, 255);
 
         public Pixel(byte a, byte r, byte g, byte b)
         {

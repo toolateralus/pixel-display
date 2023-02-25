@@ -59,7 +59,7 @@ namespace pixel_renderer
         public Pixel color;
         public Vec2 startPoint;
         public Vec2 endPoint;
-        public Line(Vec2 startPoint, Vec2 endPoint, Pixel? color)
+        public Line(Vec2 startPoint, Vec2 endPoint, Pixel? color = null)
         {
             this.startPoint = startPoint;
             this.endPoint = endPoint;
