@@ -30,7 +30,6 @@ namespace pixel_renderer
                 stage = StageIO.ReadStage(stageMeta);
             }
             else stage = Runtime.InstantiateDefaultStageIntoProject();
-
             Runtime.Current.SetStage(stage);
         }
         public void Save()

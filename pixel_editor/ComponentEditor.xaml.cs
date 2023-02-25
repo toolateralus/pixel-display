@@ -68,31 +68,25 @@ namespace pixel_editor
             Closed += ComponentEditor_Closed;
             CompositionTarget.Rendering += Update;
             RegisterAction(delegate { Keyboard.ClearFocus(); }, Key.Escape);
-            Refresh(component);
+            data = Refresh(component);
         }
-        public void Refresh(Component component)
+        public EditorData Refresh(Component component)
         {
             MainGrid.Children.Clear();
             inputFields.Clear();
             editEvents.Clear();
             data = new(component);
             AddTextBoxes(MainGrid);
+            return data; 
         }
-        private void ComponentEditor_Closed(object? sender, EventArgs e)
-        {
-            Editor.Current.OnEditorClosed?.Invoke(EditorKey, this);
-        }
-
         private void Update(object? sender, EventArgs e)
         {
 
 
         }
-        public void AddTextBoxes(Grid viewer)
+        private void ComponentEditor_Closed(object? sender, EventArgs e)
         {
-            int i = 0;
-            i = SerializeFields(viewer, i);
-            i = SerializeMethods(viewer, i);
+            Editor.Current.OnEditorClosed?.Invoke(EditorKey, this);
         }
         private int SerializeMethods(Grid viewer, int i)
         {
@@ -140,7 +134,12 @@ namespace pixel_editor
 
             return i;
         }
-
+        private void AddTextBoxes(Grid viewer)
+        {
+            int i = 0;
+            i = SerializeFields(viewer, i);
+            i = SerializeMethods(viewer, i);
+        }
         private void AddStringListTextBox(Grid viewer, ref int i, FieldInfo field, string[] strings, ref int strIndex, string str)
         {
             var label = Inspector.GetTextBox(i.ToString());
@@ -158,7 +157,6 @@ namespace pixel_editor
             Inspector.SetRowAndColumn(label, 1, 2, 0, i++);
             strIndex++;
         }
-
         private int AddNestedComponentEditorButton(Grid viewer, ref int i, FieldInfo field, string name)
         {
             AddToEditor(viewer, i, "open editor for more options.", name);
@@ -178,7 +176,6 @@ namespace pixel_editor
             i++;
             return i;
         }
-
         private void TxtBox_KeyDown(object sender, KeyEventArgs e, FieldInfo field, Component component, string[] strings)
         {
             if (sender is TextBox box)
@@ -190,10 +187,10 @@ namespace pixel_editor
                     if (strings.Length > index)
                         strings[index] = txt; 
                     field.SetValue(component, strings);
+                    Keyboard.ClearFocus(); 
                 }
             }
         }
-
         private void AddToEditor(Grid viewer, int index, string? valStr, string name)
         {
             var nameDisplay = Inspector.GetTextBox(name);
@@ -216,7 +213,10 @@ namespace pixel_editor
             if (sender is not TextBox box)
                 return;
             if (e.Key == Key.Return)
+            {
                 Keyboard.ClearFocus();
+                Refresh(component); 
+            }
         }
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
@@ -224,6 +224,7 @@ namespace pixel_editor
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
             for (int i = 0; i < data.Fields.Count; ++i)
                 ExecuteEditEvent(i);
+            Refresh(component);
         }
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
@@ -238,14 +239,12 @@ namespace pixel_editor
                 if (info.Name == o)
                 {
                     CommandParser.TryParse(inputFields[i].Text, out List<object> results);
-
                     foreach(var obj in results)
                         if (obj.GetType() == info.FieldType)
                         {
                             Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType}");
                             info.SetValue(component, obj);
                         }
-
                     return true; 
                 }
             return false;
