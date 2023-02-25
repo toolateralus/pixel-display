@@ -45,10 +45,10 @@ namespace pixel_renderer
                 {
                     Pixel color = colorArray[x, y];
                     int index = (y * width + x) * 4;
-                    pixelData[index] =     color.r;
-                    pixelData[index + 1] = color.g;
-                    pixelData[index + 2] = color.b;
-                    pixelData[index + 3] = color.a;
+                    pixelData[index] =     color.a;
+                    pixelData[index + 1] = color.r;
+                    pixelData[index + 2] = color.g;
+                    pixelData[index + 3] = color.b;
                 }
             }
             return pixelData; 
