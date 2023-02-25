@@ -137,7 +137,7 @@ namespace pixel_editor
                             return;
 
                         var centroid = col.Polygon.centroid;
-                        Vec2 radiusVec = CMath.Min(Vec2.one * 10, vec - CMouse.GlobalPosition - Vec2.one * 3);
+                        Vec2 radiusVec = CMath.Min(Vec2.one * 3, vec - CMouse.GlobalPosition - Vec2.one * 3);
                         float radius = radiusVec.y + radiusVec.x;
                         
                         if (radius < 0)
