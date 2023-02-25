@@ -16,6 +16,7 @@
         public static bool FromEditor; 
         public EngineInstance()
         {
+            Importer.Import(false);
             Project project = Project.Load();
             InitializeComponent();
             Runtime.Initialize(this, project);

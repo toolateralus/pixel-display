@@ -11,7 +11,6 @@ namespace pixel_renderer
             this.imgData = imgData;
             this.Name = Name;
             this.scale = scale; 
-            SetImage(imgData, scale);
         }
 
         public void SetImage(Metadata imgData, Vec2Int scale)
@@ -37,8 +36,17 @@ namespace pixel_renderer
 
         [Field] [JsonProperty] public Vec2Int scale = new(1, 1);
         [JsonProperty] internal Metadata imgData;
-        public Bitmap? Image { get; set; }
-        public bool HasImage => Image != null;
+        Bitmap image;
+        public Bitmap? Image {
+            get 
+            {
+                if (!HasImage && HasImageMetadata)
+                    image = new(imgData.Path);
+                return image;
+            }
+            set => image = value;
+        }
+        public bool HasImage => image != null;
         internal bool HasImageMetadata => imgData != null;
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
     }

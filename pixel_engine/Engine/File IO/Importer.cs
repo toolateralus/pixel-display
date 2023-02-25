@@ -16,17 +16,8 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
-            if (Runtime.IsRunning)
-                if (showMessage)
-                {
-                    var msg = MessageBox.Show("Pixel needs to Import: Press OK to start.", "Asset Importer", MessageBoxButton.OKCancel);
-                    if (msg == MessageBoxResult.Cancel)
-                        return;
-                }
-
             ImportBitmaps();
             ImportAssets();
-            AssetLibrary.Sync();
         }
 
         private static void ImportAssets()

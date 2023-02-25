@@ -83,10 +83,12 @@ namespace pixel_renderer.Assets
         /// 
         public static void Sync()
         {
+            if (Runtime.Initialized)
+            {
+                RefreshStageMetadataWithinLoadedProject();
+                Runtime.Current.LoadedProject?.Save();
+            }
             
-            RefreshStageMetadataWithinLoadedProject();
-            
-            Runtime.Current.LoadedProject?.Save();
 
             foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
             {

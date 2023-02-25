@@ -55,7 +55,6 @@ namespace pixel_renderer
         {
             current = this;
             this.mainWnd = mainWnd;
-            Importer.Import(true);
 
             LoadedProject = project;
 

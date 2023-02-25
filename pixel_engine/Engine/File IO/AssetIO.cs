@@ -124,6 +124,7 @@ namespace pixel_renderer.FileIO
                 IO.ReadJson<Asset>(new(name, dir, extension)) is Asset foundAsset &&
                 foundAsset.UUID == asset.UUID)
                 return fullName;
+
             //removes any numbers at end of name
             string nameWithoutNums = "";
             for (List<char> chars = name.ToList(); chars.Count > 0; chars.RemoveAt(chars.Count - 1))
@@ -149,17 +150,16 @@ namespace pixel_renderer.FileIO
                 {
                     if (!Constants.int_chars.Contains(chars.Last()))
                     {
-                        if (string.Concat(chars) == nameWithoutNums)
-                            duplicateNames.Add(string.Concat(numbers).ToInt());
+                        if (string.Concat(chars) != nameWithoutNums)
+                            break;
+                        duplicateNames.Add(string.Concat(numbers).ToInt());
+                        if (duplicateNames.Count >= 1000)
+                            throw new FileNamingException($"There are too many files already named \"{nameWithoutNums}.{extension}\"");
                         break;
                     }
                     numbers.Insert(0, chars.Last());
                 }
             }
-
-            if (duplicateNames.Count >= 1000)
-                throw new FileNamingException($"There are too many files already named \"{nameWithoutNums}.{extension}\"");
-
             for (int i = 1; i < 1000; i++)
             {
                 if (duplicateNames.Contains(i))
