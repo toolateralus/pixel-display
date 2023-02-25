@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Windows.Media;
 using Newtonsoft.Json;
-using pixel_renderer.Engine.Renderer;
 using pixel_renderer.FileIO;
 namespace pixel_renderer
 {

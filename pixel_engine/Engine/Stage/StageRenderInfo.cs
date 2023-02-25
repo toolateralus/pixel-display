@@ -1,8 +1,4 @@
-﻿using pixel_renderer.Engine.Renderer;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace pixel_renderer
@@ -17,7 +13,7 @@ namespace pixel_renderer
         public List<Vec2> spriteVPScaleVectors = new();
         public List<float> spriteCamDistances = new();
         public List<TextureFiltering> spriteFiltering = new();
-        public List<byte[]> spriteColorData = new();
+        public List<JImage> spriteColorData = new();
 
         public StageRenderInfo(Stage stage)
         {
@@ -26,7 +22,8 @@ namespace pixel_renderer
         public void SetSprite(Sprite sprite, int index)
         {
             sprite.parent.Position = spritePositions[index];
-            sprite.ColorData = spriteColorData[index];
+            JImage jImage = spriteColorData[index];
+            sprite.SetColorData(jImage.Size, jImage.data);
             sprite.size = spriteSizeVectors[index];
             sprite.viewportOffset = spriteVPOffsetVectors[index];
             sprite.viewportScale = spriteVPScaleVectors[index];
@@ -53,7 +50,7 @@ namespace pixel_renderer
                 spriteSizeVectors[i] = sprite.size;
                 spriteVPOffsetVectors[i] = sprite.viewportOffset;
                 spriteVPScaleVectors[i] = sprite.viewportScale;
-                spriteColorData[i] = sprite.ColorData;
+                spriteColorData[i] = sprite.texture.jImage;
                 spriteFiltering[i] = sprite.textureFiltering;
                 spriteCamDistances[i] = sprite.camDistance;
             }
@@ -64,7 +61,7 @@ namespace pixel_renderer
                 spriteVPOffsetVectors.Add(Vec2.zero);
                 spriteVPScaleVectors.Add(Vec2.zero);
                 spriteFiltering.Add(0);
-                spriteColorData.Add(Array.Empty<byte>());
+                spriteColorData.Add(new());
                 spriteCamDistances.Add(1f);
             }
             void removeFirst()

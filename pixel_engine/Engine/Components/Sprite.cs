@@ -13,7 +13,6 @@ using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using pixel_renderer.Assets;
-using pixel_renderer.Engine.Renderer;
 using pixel_renderer.FileIO;
 using Bitmap = System.Drawing.Bitmap;
 using Pixel = System.Drawing.Color;
@@ -175,12 +174,14 @@ namespace pixel_renderer
         public void Draw(Vec2 size, byte[] color)
         {
             this.size = size;
-            ColorData = color;
+            SetColorData((Vec2Int)size, color);
         }
         public void DrawSquare(Vec2 size, Pixel color)
         {
             this.size = size;
-            ColorData = CBit.ByteArrayFromColorArray(CBit.SolidColorSquare(size, color));
+            var cols = CBit.SolidColorSquare(size, color);
+            var bytes = CBit.ByteArrayFromColorArray(cols);
+            SetColorData(new(cols.GetLength(0), cols.GetLength(1)), bytes);  
         }
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();

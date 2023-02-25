@@ -18,7 +18,9 @@ namespace pixel_renderer
             if (Runtime.Current.GetStage() is not Stage stage) return;
             if (baseImageDirty)
             {
-                baseImage = CBit.ByteArrayFromColorArray(PixelArrayFromBitmap(stage.InitializedBackground));
+                var array = PixelArrayFromBitmap(stage.InitializedBackground);
+                var data = CBit.ByteArrayFromColorArray(array);
+                baseImage = new(array.GetLength(0), array.GetLength(1), data); 
                 baseImageDirty = false;
             }
 
