@@ -17,35 +17,48 @@ namespace pixel_editor
         {
             var selected = Editor.Current.LastSelected;
 
-            if (Editor.Current.ActivelySelected.Count > 0 && selected == null)
+            switch (Editor.Current.ActivelySelected.Count)
             {
-                foreach (var x in Editor.Current.ActivelySelected)
-                {
-                    if (!x.TryGetComponent<Collider>(out var c)) continue;
-                    c.drawCollider = false;
-                    c.drawNormals = false;
-                    c.colliderColor = Color.Blue;
-                }
-
-                Editor.Current.ActivelySelected.Clear();
-            }
-            else if (Editor.Current.ActivelySelected.Count > 0)
-            {
-                foreach (var x in Editor.Current.ActivelySelected)
-                    mouseSelectedNodeOffsets.Add(x.Position - CMouse.GlobalPosition);
-
-                draggingMultiple = true;
-            }
-            else
-            {
-                mouseSelectedNodeOffsets.Clear(); 
-                draggingMultiple = false;
+                case > 0 when selected == null:
+                    {
+                        foreach (var x in Editor.Current.ActivelySelected)
+                        {
+                            if (!x.TryGetComponent<Collider>(out var c)) continue;
+                            c.drawCollider = false;
+                            c.drawNormals = false;
+                            c.colliderColor = Color.Blue;
+                        }
+                        Editor.Current.ActivelySelected.Clear();
+                        break;
+                    }
+                case > 0:
+                    if (!Editor.Current.ActivelySelected.Contains(selected))
+                    {
+                        draggingMultiple = false;
+                        return;
+                    }
+                    DragMultipleNodes();
+                    break;
+                default:
+                    mouseSelectedNodeOffsets.Clear();
+                    draggingMultiple = false;
+                    break;
             }
 
             if (selected == null)
                 return;
+
             mouseSelectedNodeOffset = selected.Position - CMouse.GlobalPosition;
         }
+
+        private void DragMultipleNodes()
+        {
+            foreach (var x in Editor.Current.ActivelySelected)
+                mouseSelectedNodeOffsets.Add(x.Position - CMouse.GlobalPosition);
+
+            draggingMultiple = true;
+        }
+
         List<Vec2> mouseSelectedNodeOffsets = new();
         public override void Update(float delta)
         {
@@ -83,9 +96,9 @@ namespace pixel_editor
                         if (node.Position is Vec2 vec)
                             if (vec.IsWithin(boxStart, boxEnd))
                             {
-                                Editor.Current.ActivelySelected.Add(node);
                                 if (node.TryGetComponent(out Collider sprite))
                                 {
+                                    Editor.Current.ActivelySelected.Add(node);
                                     sprite.drawCollider = true;
                                     sprite.drawNormals = true;
                                     sprite.colliderColor = Color.Orange;
