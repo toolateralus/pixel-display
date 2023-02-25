@@ -16,7 +16,7 @@ namespace pixel_editor
         }
         public override async void Update(float delta)
         {
-            if (Editor.Current.Selected is Node _parent)
+            if (Editor.Current.LastSelected is Node _parent)
             {
                 if (CMouse.LeftPressedThisFrame && Input.GetInputValue(Key.RightShift) && !busy)
                 {
@@ -32,7 +32,7 @@ namespace pixel_editor
                             ResetTool();
                             break;
                         }
-                        if (CMouse.Left &&  parent != null && Editor.Current.Selected is Node other && other != parent)
+                        if (CMouse.Left &&  parent != null && Editor.Current.LastSelected is Node other && other != parent)
                         {
                             Child(other, parent);
                             Console.Print($"{parent.Name} had child {other.Name} added to it");

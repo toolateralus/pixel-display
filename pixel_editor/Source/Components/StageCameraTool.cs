@@ -18,7 +18,7 @@ namespace pixel_editor
 
         public override void Update(float delta)
         {
-            selected = Editor.Current.Selected;
+            selected = Editor.Current.LastSelected;
             TryFollowNode();
             TryFocusNode();
             TryZoomCamera();
