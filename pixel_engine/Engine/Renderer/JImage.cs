@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace pixel_renderer.Engine.Renderer
+namespace pixel_renderer
 {
     public class JImage
     {

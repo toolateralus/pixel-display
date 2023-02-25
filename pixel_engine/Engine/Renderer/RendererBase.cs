@@ -15,7 +15,7 @@
     {
         Vec2 zero = Vec2.zero;
         Vec2 one = Vec2.one;
-        private protected byte[] baseImage = Array.Empty<byte>();
+        private protected JImage baseImage = new();
         private protected byte[] frame = Array.Empty<byte>();
         private protected byte[] latestFrame = Array.Empty<byte>();
         private protected int stride = 0;
@@ -193,7 +193,7 @@
             sprite.size = camBoundingBox.max - camBoundingBox.min;
             sprite.viewportScale = sprite.size / baseImageSize;
             sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale.GetDivideSafe();
-            sprite.ColorData = baseImage;
+            sprite.SetColorData(new Vec2Int() baseImage);
             sprite.camDistance = float.Epsilon;
             sprite.textureFiltering = stage.backgroundFiltering;
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);

@@ -92,13 +92,17 @@ namespace pixel_renderer
 
                 return texture.jImage.data;
             }
-            set
+           
+        }
+        public void SetColorData(Vec2Int size, byte[] data)
+        {
+            if (!IsReadOnly)
             {
-                if (!IsReadOnly)
-                {
-                    texture.jImage.data = value ?? throw new ArgumentNullException(nameof(value));
-                    colorDataSize = new(texture.jImage.width, texture.jImage.height);
-                }
+                texture.jImage ??= new();
+                texture.jImage.width = size.x;
+                texture.jImage.height = size.y; 
+                texture.jImage.data = data;
+                colorDataSize = new(texture.jImage.width, texture.jImage.height);
             }
         }
 
