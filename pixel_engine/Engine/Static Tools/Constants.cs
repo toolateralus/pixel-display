@@ -87,13 +87,12 @@ namespace pixel_renderer
         public static string[] ReadableExtensions = 
         { 
             BitmapFileExtension,
-            MetadataFileExtension,
             AssetsFileExtension,
             ProjectFileExtension,
             StageFileExtension,
         };
 
-        public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Pixel";    // Root directory for resources
+        public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
         #endregion
 
         public static List<Type> GetInheritedTypesFromBase<T>()
