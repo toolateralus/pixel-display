@@ -10,30 +10,10 @@ namespace pixel_renderer
 {
     public struct Pixel
     {
-        [JsonProperty]
-        private byte[] data = { 0, 0, 0, 0 };
-        public byte a
-        {
-            get => data[0];
-            set => data[0] = value;
-        }
-
-        public byte r
-        {
-            get => data[1];
-            set => data[1] = value;
-        }
-
-        public byte g
-        {
-            get => data[2];
-            set => data[2] = value;
-        }
-        public byte b
-        {
-            get => data[3];
-            set => data[3] = value;
-        }
+        public byte a;
+        public byte r;
+        public byte g;
+        public byte b;
 
         public readonly static Pixel White = new(255, 255, 255, 255);
         public readonly static Pixel Black = new(255, 0, 0, 0);
