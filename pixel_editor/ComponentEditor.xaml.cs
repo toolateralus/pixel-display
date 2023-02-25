@@ -137,14 +137,23 @@ namespace pixel_editor
                     if (obj is null)
                         continue; 
                     string[] strings = (string[])obj;
-                    var grid = Inspector.GetGrid(8, 10, 12, 16);
+                    int strIndex = 0;
                     foreach (var str in strings)
                     {
+                        var label = Inspector.GetTextBox(i.ToString());
                         var txtBox = Inspector.GetTextBox(str);
-                        txtBox.FontSize = 4; 
+                        txtBox.IsReadOnly = false;
+                        txtBox.Name = $"listBox{strIndex}";
+                        txtBox.KeyDown += (s,e) => TxtBox_KeyDown(s,e, field, component, strings);
+                        txtBox.FontSize = 4;
+                        label.FontSize = 4; 
+                        viewer.Children.Add(txtBox);
+                        viewer.Children.Add(label);
+                        Inspector.SetRowAndColumn(txtBox, 1, 4, 2, i);
+                        Inspector.SetRowAndColumn(label, 1, 2, 0, i++);
+                        strIndex++;
                     }
-                    viewer.Children.Add(grid);
-                    Inspector.SetRowAndColumn(grid, 0, 0, 16, 16);
+                    continue; 
                 }
 
                 string? valStr;
@@ -157,6 +166,22 @@ namespace pixel_editor
 
             return i;
         }
+
+        private void TxtBox_KeyDown(object sender, KeyEventArgs e, FieldInfo field, Component component, string[] strings)
+        {
+            if (sender is TextBox box)
+            {
+                var index = box.Name.ToInt(); 
+                var txt = box.Text;
+                if (e.Key == Key.Enter)
+                {
+                    if (strings.Length > index)
+                        strings[index] = txt; 
+                    field.SetValue(component, strings);
+                }
+            }
+        }
+
         private void AddToEditor(Grid viewer, int index, string? valStr, string name)
         {
             var nameDisplay = Inspector.GetTextBox(name);
