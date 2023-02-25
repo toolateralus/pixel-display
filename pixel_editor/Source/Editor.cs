@@ -339,7 +339,6 @@ namespace pixel_editor
             }
             if (!Input.GetInputValue(Key.S))
                 return; 
-
             AssetLibrary.Sync();
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
