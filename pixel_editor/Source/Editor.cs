@@ -13,23 +13,6 @@ using Brushes = System.Windows.Media.Brushes;
 
 namespace pixel_editor
 {
-    public class EditorEventHandler
-    {
-        protected internal static Editor Editor => Editor.Current;
-        protected internal Action<EditorEvent> InspectorEventRaised;
-        protected internal Queue<EditorEvent> Pending = new();
-        protected internal void ExecuteAll()
-        {
-            EditorEvent e;
-            for (int i = 0; Pending.Count > 0; ++i)
-            {
-                e = Pending.Dequeue();
-                if (e is null)
-                    return;
-                Editor.Current.EditorEvent(e);
-            }
-        }
-    }
     public partial class Editor : Window
     {
         #region Window Scaling
@@ -81,7 +64,7 @@ namespace pixel_editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
-        List<Tool> tools = new List<Tool>();
+        static List<Tool> Tools = new List<Tool>();
         public Editor()
         {
             EngineInstance.FromEditor = true;
@@ -99,12 +82,12 @@ namespace pixel_editor
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
-            tools = Tool.InitializedDerived();
+            Tools = Tool.InitializedDerived();
 
-            foreach (Tool tool in tools)
+            foreach (Tool tool in Tools)
                 tool.init_internal();
 
-            foreach (Tool tool in tools)
+            foreach (Tool tool in Tools)
                 tool.Awake();
 
             Input.RegisterAction(SendCommandKeybind, Key.Return);
@@ -133,7 +116,7 @@ namespace pixel_editor
             inspector.Update(sender, e);
             UpdateMetrics();
             Events.ExecuteAll();
-            foreach (Tool tool in tools)
+            foreach (Tool tool in Tools)
                 tool.Update(1f);
         }
         private void UpdateMetrics()
@@ -142,10 +125,8 @@ namespace pixel_editor
             var framerate = Runtime.Current.renderHost.info.Framerate;
             gcAllocText.Content =
                 $"{memory}";
-
             framerateLabel.Content =
                 $"{framerate}";
-
         }
         protected internal void EditorEvent(EditorEvent e)
         {
@@ -155,9 +136,7 @@ namespace pixel_editor
             consoleOutput.Text += e.message + '\n';
             consoleOutput.ScrollToEnd();
         }
-
         #region Fields/Properties
-        Vec2 mouseSelectedNodeOffset = new Vec2();
         string stageName, projectName;
         internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Current.renderHost;
