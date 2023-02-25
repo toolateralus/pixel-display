@@ -81,7 +81,7 @@ namespace pixel_renderer
 
         public override void Awake()
         {
-            test_flame_anim_setup();
+
         }
         public override void FixedUpdate(float delta)
         {
@@ -91,11 +91,22 @@ namespace pixel_renderer
         }
         public void Next(int increment = 1)
         {
-           sprite.Draw(sprite.size, animation.GetFrame());
+            if (animation is null)
+                return;
+
+            Color[,]? color = animation?.GetFrame();
+            if (color != null)
+                sprite?.Draw(sprite.size, color);
         }
         public void Previous(int increment = 1)
         {
-            sprite.Draw(new (32, 32), animation?.frames[(animation.frameIndex, animation.frameIndex -= increment)]);
+            if (animation is null)
+                return; 
+
+            animation.frameIndex = animation.frameIndex - 2; 
+            Color[,]? color = animation?.GetFrame();
+            if (color != null)
+                sprite?.Draw(sprite.size, color);
         }
         public void Start(float speed = 1, bool looping = true)
         {

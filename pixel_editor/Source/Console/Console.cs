@@ -528,7 +528,7 @@ namespace pixel_editor
             };
         }
 
-        public static bool TryGetArgAtIndex<T>(int index, out T arg, object[] o)
+        public static bool TryGetArgAtIndex<T>(int index, out T? arg, object[] o)
         {
             bool hasArg = o != null && o.Length > index;
 
@@ -537,7 +537,7 @@ namespace pixel_editor
                 arg = val;
                 return true;
             }
-            arg = (T)Convert.ChangeType(null, typeof(T));
+            arg = default;
             return false;
         }
 
@@ -571,7 +571,7 @@ namespace pixel_editor
             if (!TryGetNodeByNameAtIndex(e, out var node, 0)) return;
             node.Child(Player.test_child_node(node));
         }
-        public static bool TryGetNodeByNameAtIndex(object[]? e, out Node node, int index)
+        public static bool TryGetNodeByNameAtIndex(object[]? e, out Node? node, int index)
         {
             if (!TryGetArgAtIndex(0, out string nodeName, e))
             {

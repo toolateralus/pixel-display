@@ -32,9 +32,8 @@ namespace pixel_renderer.Assets
         /// <param name="path"></param>
         /// <exception cref="NotImplementedException"></exception>
         /// 
-        public static bool Fetch<T>(out T result) where T : Asset
+        public static bool Fetch<T>(out T? result) where T : Asset
         {
-            
             result = null;
             foreach(var asset in Current.Values)
                 if (asset.GetType() == typeof(T))
@@ -44,7 +43,7 @@ namespace pixel_renderer.Assets
                 }
             return false;
         }
-        public static Metadata FetchMeta(string name)
+        public static Metadata? FetchMeta(string name)
         {
             foreach (var asset in Current)
                 if (asset.Value is null && asset.Key is not null && name == asset.Key.Name)

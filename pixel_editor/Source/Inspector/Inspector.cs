@@ -157,7 +157,7 @@ namespace pixel_editor
             SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
             SetRowAndColumn(removeButton, 2, 2, 6, index * 2);
             SetRowAndColumn(box, 2, 4, 0, index * 2);
-            editComponentActions.Add(async delegate
+            editComponentActions.Add(delegate
             {
                var comp = new ComponentEditor(Editor.Current, component);
             });

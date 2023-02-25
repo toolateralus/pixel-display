@@ -103,7 +103,35 @@ namespace pixel_renderer
                .Where(type => typeof(T).IsAssignableFrom(type)).ToList();
             return types;
         }
+        public static T?[] NullifyDuplicatesInArray<T>(in T?[] collection)
+        {
+            HashSet<T> comparison = new();
+            foreach (var obj in collection)
+            {
+                if (comparison.Contains(obj))
+                {
+                    collection[Array.IndexOf(collection, obj)] = default; 
+                    continue;
+                }
+                comparison.Add(obj);
+            }
+            return collection; 
+        }
 
+        public static List<T> RemoveDuplicatesFromList<T>(List<T> collection)
+        {
+            HashSet<T> comparison = new();
+            foreach (var obj in collection)
+            {
+                if (comparison.Contains(obj))
+                {
+                    collection.Remove(obj);
+                    continue;
+                }
+                comparison.Add(obj);
+            }
+            return collection; 
+        }
     }
 
 }

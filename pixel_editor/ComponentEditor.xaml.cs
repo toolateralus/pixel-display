@@ -115,45 +115,19 @@ namespace pixel_editor
             foreach (var field in fields)
             {
                 string name = field.Name;
+
                 if (field.FieldType.BaseType == typeof(Component))
-                {
-                    AddToEditor(viewer, i, "open editor for more options.", name);
-                    var button = Inspector.GetButton("Open Editor", new(0, 0, 0, 0));
-                    viewer.Children.Add(button);
-                    Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
-                    Inspector.SetRowAndColumn(button, 1, 3, 12, i++);
-                    button.FontSize = 3;
-                    button.Click += delegate 
-                    {
-                        ComponentEditor editor = new(Editor.Current, (Component)field.GetValue(component));
-                        editor.Show();
-                    };
-                    i++; 
-                    return i; 
-                }
+                    return AddNestedComponentEditorButton(viewer, ref i, field, name);
+
                 if (field.FieldType == typeof(string[]))
                 {
                     object obj = field.GetValue(component);
-                    if (obj is null)
+                    if (obj is not string[] strings)
                         continue; 
-                    string[] strings = (string[])obj;
                     int strIndex = 0;
                     foreach (var str in strings)
-                    {
-                        var label = Inspector.GetTextBox(i.ToString());
-                        var txtBox = Inspector.GetTextBox(str);
-                        txtBox.IsReadOnly = false;
-                        txtBox.Name = $"listBox{strIndex}";
-                        txtBox.KeyDown += (s,e) => TxtBox_KeyDown(s,e, field, component, strings);
-                        txtBox.FontSize = 4;
-                        label.FontSize = 4; 
-                        viewer.Children.Add(txtBox);
-                        viewer.Children.Add(label);
-                        Inspector.SetRowAndColumn(txtBox, 1, 4, 2, i);
-                        Inspector.SetRowAndColumn(label, 1, 2, 0, i++);
-                        strIndex++;
-                    }
-                    continue; 
+                        AddStringListTextBox(viewer, ref i, field, strings, ref strIndex, str);
+                    return i; 
                 }
 
                 string? valStr;
@@ -164,6 +138,44 @@ namespace pixel_editor
                 i++;
             }
 
+            return i;
+        }
+
+        private void AddStringListTextBox(Grid viewer, ref int i, FieldInfo field, string[] strings, ref int strIndex, string str)
+        {
+            var label = Inspector.GetTextBox(i.ToString());
+            var txtBox = Inspector.GetTextBox(str);
+            txtBox.IsReadOnly = false;
+            txtBox.Name = $"listBox{strIndex}";
+            txtBox.KeyDown += (s, e) => TxtBox_KeyDown(s, e, field, component, strings);
+            txtBox.LostKeyboardFocus += Input_LostKeyboardFocus; 
+            txtBox.GotKeyboardFocus += Input_GotKeyboardFocus; 
+            txtBox.FontSize = 4;
+            label.FontSize = 4;
+            viewer.Children.Add(txtBox);
+            viewer.Children.Add(label);
+            Inspector.SetRowAndColumn(txtBox, 1, 4, 2, i);
+            Inspector.SetRowAndColumn(label, 1, 2, 0, i++);
+            strIndex++;
+        }
+
+        private int AddNestedComponentEditorButton(Grid viewer, ref int i, FieldInfo field, string name)
+        {
+            AddToEditor(viewer, i, "open editor for more options.", name);
+            var button = Inspector.GetButton("Open Editor", new(0, 0, 0, 0));
+            viewer.Children.Add(button);
+            Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
+            Inspector.SetRowAndColumn(button, 1, 3, 12, i++);
+            button.FontSize = 3;
+            button.Click += delegate
+            {
+                Component? Component = (Component)field.GetValue(component);
+                if (Component is null)
+                    throw new NullReferenceException("Component could not be found for component editor nesting.");
+                ComponentEditor editor = new(Editor.Current, Component);
+                editor.Show();
+            };
+            i++;
             return i;
         }
 

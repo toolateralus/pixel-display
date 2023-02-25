@@ -223,7 +223,7 @@ namespace pixel_renderer
             }
             return c;
         }
-        public Light GetFirstLight()
+        public Light? GetFirstLight()
         {
             var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
             if (!lights.Any())

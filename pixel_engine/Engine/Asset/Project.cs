@@ -4,6 +4,7 @@ using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Media.Animation;
 
 namespace pixel_renderer
 {
@@ -11,19 +12,12 @@ namespace pixel_renderer
     public class Project
     {
         public List<Stage> stages = new();
-
-        [JsonProperty] [Field]
-        public List<Metadata> stagesMeta = new();
-
-        [JsonProperty] 
-        public string Name 
-        { 
-            get; 
-            private set; 
-        }
-
+      
         [JsonProperty]
-        private readonly int Hash;
+        public List<Metadata> stagesMeta = new();
+        [JsonProperty]
+        public string Name = "DefaultProjectName";
+
         public static void LoadStage(int index)
         {
             List<Metadata> stagesMeta = Runtime.Current.LoadedProject.stagesMeta;
@@ -39,28 +33,10 @@ namespace pixel_renderer
 
             Runtime.Current.SetStage(stage);
         }
-        private int NameHash()
-        {
-            object[] o = new object[] { Name, stages };
-            return o.GetHashCode();
-        }
-        public bool Rename(string newName, int hash)
-        {
-            if (Hash.Equals(hash))
-            {
-                Name = newName;
-                return true;
-            }
-            return false; 
-        }
-
         public void Save()
         {
             ProjectIO.WriteProject(Runtime.Current.LoadedProject, Metadata);
         }
-
-       
-
         private Metadata Metadata
         {
             get
@@ -89,25 +65,23 @@ namespace pixel_renderer
             Project? loadedProject = IO.ReadJson<Project>(meta);
             return loadedProject is null ? project : loadedProject;
         }
-
         internal static string GetPathFromRoot(string filePath)
         {
             var output = filePath.Replace(Constants.WorkingRoot, "");
             return output; 
         }
-
         public static Stage? GetStageByName(string stageName)
         {
             bool gotAsset = AssetLibrary.Fetch(stageName, out Stage stage);
-            
             if (gotAsset) return stage; 
             return null; 
         }
-
         public void AddStage(Stage stage)
         {
             // makes sure the metadata is up-to-date.
             stage.Sync();
+            Constants.RemoveDuplicatesFromList(stagesMeta);
+            Constants.RemoveDuplicatesFromList(stages);
 
             stagesMeta.Add(stage.Metadata);
             stages.Add(stage);
@@ -121,7 +95,6 @@ namespace pixel_renderer
         {
             Name = name;
             stages = new List<Stage>();
-            Hash = NameHash();
         }
         public static Project Default
         {
@@ -132,17 +105,15 @@ namespace pixel_renderer
                 return defaultProj;
             }
         }
-
         public Project()
         {
 
         }
         [JsonConstructor]
-        public Project(List<Metadata>? stage_meta, string name, int hash)
+        public Project(List<Metadata> stage_meta, string name, int hash)
         {
             this.stagesMeta = stage_meta;
             this.stages = new(); 
-            this.Hash = hash;
             Name = name;
         }
     }
