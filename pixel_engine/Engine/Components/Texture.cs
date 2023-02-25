@@ -50,9 +50,15 @@ namespace pixel_renderer
             SetImage(color);
         }
 
-        [Field] [JsonProperty] public Vec2Int scale = new(1, 1);
-        [JsonProperty] internal Metadata imgData;
-        [JsonProperty] public JImage jImage = new(0, 0, Array.Empty<byte>());
+        [Field] 
+        [JsonProperty] public Vec2Int scale = new(1, 1);
+
+        [JsonProperty] 
+        internal Metadata imgData;
+
+        [JsonProperty]
+        public JImage jImage = new(0, 0, Array.Empty<byte>());
+
         Bitmap image;
         public Bitmap? Image {
             get 
