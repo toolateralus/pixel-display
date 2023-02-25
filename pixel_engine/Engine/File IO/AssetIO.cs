@@ -15,36 +15,6 @@ namespace pixel_renderer.FileIO
                 Directory.CreateDirectory(Path);
         }
 
-        public static void WriteMetadata(KeyValuePair<Metadata, Asset> pair)
-        {
-            string fullPath = new(pair.Key.fullPath.ToCharArray());
-            string extension = new(pair.Key.extension.ToCharArray());
-
-            string name = new(pair.Key.Name);
-
-            string thisPath = fullPath;
-            string thisExt = Constants.MetadataFileExtension;
-
-            Metadata meta = new(name, fullPath, extension);
-            Metadata this_meta = new(name, fullPath, extension);
-
-
-            if (thisPath.Contains(meta.extension)
-                && meta.extension != thisExt)
-            {
-                thisPath = thisPath.Replace(meta.extension, "");
-
-                if (thisPath.Contains(thisExt))
-                    thisPath = thisPath.Replace(Constants.MetadataFileExtension, "");
-
-                thisPath += thisExt;
-                this_meta.fullPath = thisPath;
-                this_meta.pathFromProjectRoot = Project.GetPathFromRoot(thisPath);
-                this_meta.extension = thisExt;
-            }
-            IO.WriteJson(meta, this_meta);
-        }
-
         /// <summary>
         /// Checks for the existence of the Assets directory and if it exists, tries to read from the location of the data specified in the metadata object, then registers it to the AssetLibrary..
         /// </summary>
@@ -93,13 +63,13 @@ namespace pixel_renderer.FileIO
         }
         public static void GetDir(Metadata meta, out string name, out string dir)
         {
-            var split = meta.fullPath.Split("\\");
+            var split = meta.Path.Split('\\');
 
             // nullifies C:\\ cuz for some reason it would double up when reconstructing from array
             split[0] = "";
 
             name = split[^1];
-            dir = meta.fullPath.Replace(name, "");
+            dir = meta.Path.Replace(name, "");
         }
 
         public static string DuplicateCheck(string name, string dir)

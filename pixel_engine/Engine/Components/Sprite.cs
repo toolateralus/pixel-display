@@ -181,7 +181,7 @@ namespace pixel_renderer
             this.IsReadOnly = IsReadOnly;
             if (cached_colors == null)
             {
-                Bitmap bmp = new(Player.PlayerSprite.fullPath);
+                Bitmap bmp = new(Player.PlayerSprite.Path);
                 cached_colors = CBit.ColorArrayFromBitmap(bmp);
                 Runtime.Log("Sprite color cache was null upon returning to original color. Instantiating backup.");
             }

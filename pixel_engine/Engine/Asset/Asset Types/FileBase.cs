@@ -10,5 +10,6 @@ namespace pixel_renderer.FileIO
         public string pathFromProjectRoot = "";
         internal string _uuid = "";
         public string UUID => _uuid;
+        public string Path => Constants.WorkingRoot + pathFromProjectRoot;
     }
 }

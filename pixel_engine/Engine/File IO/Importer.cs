@@ -36,7 +36,7 @@ namespace pixel_renderer.Assets
                 var asset = IO.ReadJson<Asset>(x);
                 bool result = AssetLibrary.Register(x, asset);
                 if (!result)
-                    Runtime.Log($"Importer tried to register an asset that already been registered. Asset {asset.Name} \n {asset.GetType()} at path {x.fullPath}");
+                    Runtime.Log($"Importer tried to register an asset that already been registered. Asset {asset.Name} \n {asset.GetType()} at path {x.Path}");
             }
         }
 
@@ -134,7 +134,7 @@ namespace pixel_renderer.Assets
         {
             Metadata metadata = FileDialog.ImportFileDialog();
 
-            var isPathValid = System.IO.Path.IsPathFullyQualified(metadata.fullPath);
+            var isPathValid = System.IO.Path.IsPathFullyQualified(metadata.Path);
             
             if (!isPathValid) 
                 return;

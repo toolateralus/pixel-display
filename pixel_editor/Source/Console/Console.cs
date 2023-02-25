@@ -664,7 +664,7 @@ namespace pixel_editor
                 }
             void PrintAssetsInfo(Metadata meta)
             {
-                string assetInfo = $"Name, {meta.Name} \n Path, {meta.fullPath} Ext {meta.extension}\n";
+                string assetInfo = $"Name, {meta.Name} \n Path, {meta.Path} Ext {meta.extension}\n";
                 Error(assetInfo, 1);
             }
 

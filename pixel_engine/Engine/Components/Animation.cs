@@ -69,7 +69,7 @@ namespace pixel_renderer
                 if (imgMetadata.extension != Constants.BitmapFileExtension)
                     continue;
 
-                Bitmap img = new(imgMetadata.fullPath);
+                Bitmap img = new(imgMetadata.Path);
 
                 frames.Add((i, i + padding - 1), CBit.ColorArrayFromBitmap(img));
             }
