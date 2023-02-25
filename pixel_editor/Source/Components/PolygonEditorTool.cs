@@ -13,7 +13,7 @@ namespace pixel_editor
         List<Vec2> highlightedVertices = new();
         Collider? selectedCollider;
         const float minHighlightDistance = 2;
-        int selectedVert = -1;
+        int selectedVertIndex = -1;
         float vertSize = 2;
         public override void Awake() { }
         public override void OnDrawShapes()
@@ -22,7 +22,7 @@ namespace pixel_editor
                 return;
             selectedCollider.DrawCollider();
             selectedCollider.DrawNormals();
-            for(int i = 0; i < highlightedVertices.Count; i++)
+            for (int i = 0; i < highlightedVertices.Count; i++)
             {
                 Vec2 vert = highlightedVertices[i];
                 ShapeDrawer.DrawCircle(vert, vertSize, System.Drawing.Color.GreenYellow);
@@ -40,7 +40,7 @@ namespace pixel_editor
                 return;
             Vec2 mPos = CMouse.GlobalPosition;
             Vec2 cPos = selectedCollider.parent.Position;
-            if (selectedVert == -1)
+            if (selectedVertIndex == -1)
             {
                 int closestVert = 0;
                 for(int i = 1; i < vertices.Length; i++)
@@ -49,35 +49,46 @@ namespace pixel_editor
                         closestVert = i;
                 if (vertices[closestVert].SqrDistanceFrom(mPos) < minHighlightDistance * minHighlightDistance)
                 {
-                    selectedVert = closestVert;
-                    vertices[selectedVert] = mPos;
+                    selectedVertIndex = closestVert;
+                    vertices[selectedVertIndex] = mPos;
                     selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
-                    highlightedVertices.Add(vertices[selectedVert]);
+                    highlightedVertices.Add(vertices[selectedVertIndex]);
                     vertSize = 4;
                 }
                 else
                 {
-                    foreach (Vec2 vert in vertices)
-                        highlightedVertices.Add(vert);
-                    vertSize = 2;
+                    foreach(Line line in selectedCollider.Polygon.GetLines())
+                    {
+                        Vec2 mouseOffset = mPos - line.startPoint;
+                        float upDot = Vec2.Dot(line.Direction.Normalized(), mouseOffset);
+                        //float leftDot = Vec2.Dot(line.Direction.Normal_LHS.Normalized(), mouseOffset);
+                        highlightedVertices.Add(line.Direction.Normalized() * upDot + line.startPoint);
+                        vertSize = 2;
+                    }
+                    if (highlightedVertices.Count == 0)
+                    {
+                        foreach (Vec2 vert in vertices)
+                            highlightedVertices.Add(vert);
+                        vertSize = 2;
+                    }
                 }
             }
             else
             {
-                vertices[selectedVert] = mPos;
+                vertices[selectedVertIndex] = mPos;
                 selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
-                highlightedVertices.Add(vertices[selectedVert]);
+                highlightedVertices.Add(vertices[selectedVertIndex]);
                 vertSize = 4;
             }
         }
 
         Collider? GetSelectedCollider()
         {
-            if (Runtime.Current.GetStage() is not Stage stage ||
+            if (Runtime.Current.GetStage() is null ||
                 !Input.GetInputValue(Key.LeftCtrl) ||
                 !Input.GetInputValue(Key.LeftShift))
             {
-                selectedVert = -1;
+                selectedVertIndex = -1;
                 return null;
             }
             return Editor.Current.LastSelected?.GetComponent<Collider>();

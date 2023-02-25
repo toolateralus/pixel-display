@@ -100,7 +100,7 @@
         }
         public static float Dot(Vec2 a, Vec2 b)
         {
-            return (a.x * b.x) - (a.y * b.y);
+            return (a.x * b.x) + (a.y * b.y);
         }
         public float Length() => (float)Math.Sqrt(x * x + y * y);
         public Vec2 Rotated(float angle)

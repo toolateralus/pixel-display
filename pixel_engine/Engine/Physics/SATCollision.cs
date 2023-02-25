@@ -31,7 +31,7 @@ namespace pixel_renderer
 
             if (Vec2.Dot(polygonB.centroid - polygonA.centroid, smallest) < 0)
                 smallest *= -1;
-            smallest.x *= -1;
+            smallest *= -1;
             return smallest * overlap;
         }
         private static float GetOverlap(SATProjection p1, SATProjection p2) => MathF.Min(p1.max, p2.max) - MathF.Max(p1.min, p2.min);
