@@ -16,23 +16,17 @@ namespace pixel_renderer
         [Field]
         public string[] frameNames = new string[] 
         { 
-            "Table", 
-            "Table1", 
-            "Table2", 
-            "Table3", 
-            "Table4", 
-            "Table5", 
-            "Table6", 
-            "Table7", 
-            "Table8", 
-            "Table9", 
-            "Table10", 
-            "Table11", 
+            "List Empty", 
+            "Use Buttons To", 
+            "Add Elements That", 
+            "Point to names of", 
+            "Files in the", 
+            "Assets Directory", 
         };
         [Field]
-        private int padding = 24;
+        public int padding = 24;
         [Field]
-        private bool looping;
+        public bool looping;
 
         [Method]
         void InsertFrame()
@@ -50,8 +44,12 @@ namespace pixel_renderer
         void RemoveFrame()
         {
             int max = frameNames.Length - 1;
-            var newArray = new string[max];
             int i = 0;
+            
+            if (max <= 1) 
+                return;
+
+            var newArray = new string[max];
 
             foreach (var str in frameNames)
                 if(i < max)
@@ -106,6 +104,7 @@ namespace pixel_renderer
                 Runtime.Log("Animation was null.");
                 return;
             }
+            animation.frameIndex = animation.startIndex;
             animation.playing = true;
         }
         public void Stop(bool reset = false)

@@ -42,8 +42,12 @@ namespace pixel_renderer.Assets
 
         private static void ImportBitmaps()
         {
-            foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.BitmapFileExtension))
+             foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.BitmapFileExtension))
                 AssetLibrary.Register(x, null);
+
+            foreach (var dir in Directory.GetDirectories(Constants.WorkingRoot + Constants.AssetsDir))
+                foreach (var x in Import(dir, Constants.BitmapFileExtension))
+                    AssetLibrary.Register(x, null);
         }
 
         private static List<Metadata> Import(string directory, string ext)
