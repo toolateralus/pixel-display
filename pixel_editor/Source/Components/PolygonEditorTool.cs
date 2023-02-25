@@ -25,7 +25,7 @@ namespace pixel_editor
             for (int i = 0; i < highlightedVertices.Count; i++)
             {
                 Vec2 vert = highlightedVertices[i];
-                ShapeDrawer.DrawCircle(vert, vertSize, System.Drawing.Color.GreenYellow);
+                ShapeDrawer.DrawCircle(vert, vertSize, Pixel.Green);
             }
         }
 

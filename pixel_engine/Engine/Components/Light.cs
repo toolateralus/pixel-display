@@ -10,7 +10,7 @@ namespace pixel_renderer
         [Field] public float brightness = .5f;
         [Field] public Vec2 startPos = Vec2.one;
         [Field] public float radius = 55;
-        [Field] public Color color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
+        [Field] public Pixel color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
        
         public override void OnDrawShapes()
         {

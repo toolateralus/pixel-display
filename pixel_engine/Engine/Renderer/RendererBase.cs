@@ -6,16 +6,16 @@
     using System.Security.Policy;
     using System.Threading.Tasks;
     using System.Windows.Controls;
+    using System.Windows.Markup;
     using System.Windows.Media;
     using System.Windows.Shapes;
     using Bitmap = System.Drawing.Bitmap;
-    using Color = System.Drawing.Color;
 
     public abstract class  RendererBase 
     {
         Vec2 zero = Vec2.zero;
         Vec2 one = Vec2.one;
-        private protected Color[,] baseImage = new Color[1,1];
+        private protected byte[] baseImage = Array.Empty<byte>();
         private protected byte[] frame = Array.Empty<byte>();
         private protected byte[] latestFrame = Array.Empty<byte>();
         private protected int stride = 0;
@@ -167,9 +167,19 @@
         {
             Node spriteNode = new("SpriteNode", zero, one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
-            Vec2 baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
+
+            var stage = Runtime.Current.GetStage();
+            Vec2 baseImageSize;
+            
+            if (stage != null)
+                baseImageSize = stage.backgroundSize;
+            else baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
+
+
             Vec2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
             BoundingBox2D camBoundingBox = new(topLeft, topLeft);
+
+
             List<Vec2> camCorners = new()
             {
                 cam.Center + cam.bottomRightCornerOffset.WithScale(-1, 1).Rotated(cam.angle),
@@ -185,6 +195,7 @@
             sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale.GetDivideSafe();
             sprite.ColorData = baseImage;
             sprite.camDistance = float.Epsilon;
+            sprite.textureFiltering = stage.backgroundFiltering;
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
         private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vec2 resolution)
@@ -205,12 +216,12 @@
                     continue;
                 Vec2 colorPos = sprite.ViewportToColorPos(spriteViewportPos);
 
-                Color color = new();
+                Pixel color = new();
 
                 switch (sprite.textureFiltering)
                 {
                     case TextureFiltering.Point:
-                        color = sprite.ColorData[(int)colorPos.x, (int)colorPos.y];
+                        color = sprite.texture.jImage.GetPixel((int)colorPos.x, (int)colorPos.y);
                         break;
                     case TextureFiltering.Bilinear:
                         Vec2Int colorSize = sprite.ColorDataSize;
@@ -220,31 +231,32 @@
                         int bottom = (top + 1) % colorSize.y;
                         float xOffset = colorPos.x - left;
                         float yOffset = colorPos.y - top;
-                        Color topColor = sprite.ColorData[left, top].Lerp(sprite.ColorData[right, top], xOffset);
-                        Color botColor = sprite.ColorData[left, bottom].Lerp(sprite.ColorData[right, bottom], xOffset);
-                        color = topColor.Lerp(botColor, yOffset);
+                        Pixel topJPixel = Pixel.Lerp(sprite.texture.jImage.GetPixel(left, top), sprite.texture.jImage.GetPixel(right, top), xOffset);
+                        Pixel botJPixel = Pixel.Lerp(sprite.texture.jImage.GetPixel(left, bottom), sprite.texture.jImage.GetPixel(right, bottom), xOffset);
+                        color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
                         break;
                     default:
                         throw new NotImplementedException(nameof(sprite.textureFiltering));
                 }
-                if (color.A == 0)
+                if (color.a == 0)
                     continue;
-                if (color.A == 255)
+                if (color.a == 255)
                     cam.zBuffer[(int)framePos.x, (int)framePos.y] = sprite.camDistance;
                 WriteColorToFrame(ref color, ref framePos);
             }
         }
-        private void WriteColorToFrame(ref Color color, ref Vec2 framePos)
+     
+        private void WriteColorToFrame(ref Pixel color, ref Vec2 framePos)
         {
             int index = (int)framePos.y * stride + ((int)framePos.x * 3);
 
-            float colorB = (float)color.B / 255 * color.A;
-            float colorG = (float)color.G / 255 * color.A;
-            float colorR = (float)color.R / 255 * color.A;
+            float colorB = (float)color.b / 255 * color.a;
+            float colorG = (float)color.g / 255 * color.a;
+            float colorR = (float)color.r / 255 * color.a;
 
-            float frameB = (float)frame[index + 0] / 255 * (255 - color.A);
-            float frameG = (float)frame[index + 1] / 255 * (255 - color.A);
-            float frameR = (float)frame[index + 2] / 255 * (255 - color.A);
+            float frameB = (float)frame[index + 0] / 255 * (255 - color.a);
+            float frameG = (float)frame[index + 1] / 255 * (255 - color.a);
+            float frameR = (float)frame[index + 2] / 255 * (255 - color.a);
 
             frame[index + 0] = (byte)(colorB + frameB);
             frame[index + 1] = (byte)(colorG + frameG);

@@ -5,7 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
-using Color = System.Drawing.Color;
+using Pixel = System.Drawing.Color;
 
 namespace pixel_renderer
 {
@@ -94,19 +94,19 @@ namespace pixel_renderer
             if (animation is null)
                 return;
 
-            Color[,]? color = animation?.GetFrame();
+            Pixel[,]? color = animation?.GetFrame();
             if (color != null)
-                sprite?.Draw(sprite.size, color);
+                sprite?.Draw(sprite.size, CBit.ByteArrayFromColorArray(color));
         }
         public void Previous(int increment = 1)
         {
             if (animation is null)
                 return; 
 
-            animation.frameIndex = animation.frameIndex - 2; 
-            Color[,]? color = animation?.GetFrame();
+            animation.frameIndex = animation.frameIndex - 2;
+            Pixel[,]? color = animation?.GetFrame();
             if (color != null)
-                sprite?.Draw(sprite.size, color);
+                sprite?.Draw(sprite.size, CBit.ByteArrayFromColorArray(color));
         }
         public void Start(float speed = 1, bool looping = true)
         {

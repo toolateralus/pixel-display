@@ -13,9 +13,10 @@ using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using pixel_renderer.Assets;
+using pixel_renderer.Engine.Renderer;
 using pixel_renderer.FileIO;
 using Bitmap = System.Drawing.Bitmap;
-using Color = System.Drawing.Color;
+using Pixel = System.Drawing.Color;
 
 namespace pixel_renderer
 {
@@ -26,18 +27,18 @@ namespace pixel_renderer
         [JsonProperty] public Vec2 size = Vec2.one * 16;
         [JsonProperty] public Vec2 viewportScale = Vec2.one;
         [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
-        private Vec2Int colorDataSize = new(1,1);
+        private Vec2Int colorDataSize = new(1, 1);
         public Vec2Int ColorDataSize => colorDataSize;
         [JsonProperty] public float camDistance = 1;
         [Field][JsonProperty] public Texture texture;
-        [JsonProperty] [Field]public SpriteType Type = SpriteType.SolidColor;
+        [JsonProperty] [Field] public SpriteType Type = SpriteType.SolidColor;
         [JsonProperty] public bool IsReadOnly = false;
-        [Field][JsonProperty] public TextureFiltering textureFiltering = 0;
+        [Field] [JsonProperty] public TextureFiltering textureFiltering = 0;
         [Field][JsonProperty] public bool lit = false;
-        [Field][JsonProperty] public Color color = Color.White;
+        [Field][JsonProperty] public Pixel color = Color.White;
         public Sprite()
         {
-
+            texture = new Texture((Vec2Int)size, Pixel.Red);
         }
         public Sprite(int x, int y) : this()
         {
@@ -46,53 +47,59 @@ namespace pixel_renderer
         }
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
-        private Color[,]? cached_colors = null;
-        private Color[,]? lightmap; 
-        private Color[,] _colors = new Color[1,1];
-        private Color[,] LitColorData
+        
+
+        private byte[]? lightmap; 
+        private byte[] LitColorData
         {
             get 
             {
                 var light = GetFirstLight();
 
                 if (light is null)
-                    return _colors ?? throw new NullReferenceException(nameof(_colors));
+                    return texture.jImage.data ?? throw new NullReferenceException(nameof(texture.jImage.data));
 
-                int X = _colors.GetLength(0);
-                int Y = _colors.GetLength(1);
+                int X = texture.jImage.data.GetLength(0);
+                int Y = texture.jImage.data.GetLength(1);
 
-                if (lightmap is null || lightmap.Length != _colors.Length)
-                    lightmap = new Color[X, Y];
-
-                if (parent.TryGetComponent<Collider>(out var col))
-                    lightmap = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
-                else
-                {
-                    Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
-                    lightmap = VertexLighting(poly, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(poly.vertices));
-                }
+                if (lightmap is null || lightmap.Length != texture.jImage.data.Length)
+                    lightmap = new byte[X * Y * 4];
+                
+                // TODO: Fix vertex lighting.
+                //if (parent.TryGetComponent<Collider>(out var col))
+                    //lightmap = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
+                //else
+                //{
+                //    Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
+                    //lightmap = VertexLighting(poly, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(poly.vertices));
+                //}
 
                 return lightmap; 
             }
         }
-        internal Color[,] ColorData
+        internal byte[] ColorData
         {
             get
             {
                 if (lit)
                     return LitColorData;
-                return _colors ?? throw new NullReferenceException(nameof(_colors));
-            }
+                if (texture.jImage.data is null) 
+                    Refresh();
+                if (texture.jImage.data is null)
+                    throw new NullReferenceException(nameof(texture.jImage.data));
 
+                return texture.jImage.data;
+            }
             set
             {
                 if (!IsReadOnly)
                 {
-                    _colors = value ?? throw new ArgumentNullException(nameof(value));
-                    colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+                    texture.jImage.data = value ?? throw new ArgumentNullException(nameof(value));
+                    colorDataSize = new(texture.jImage.width, texture.jImage.height);
                 }
             }
         }
+
         [JsonProperty]
         [Field]
         public string textureName = "Table";
@@ -100,7 +107,7 @@ namespace pixel_renderer
         public void TrySetTextureFromString()
         {
             if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
-                 texture = new(meta, (Vec2Int)size, meta.Name);
+                 texture = new(null, meta, (Vec2Int)size, meta.Name);
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
         [Method]
@@ -132,39 +139,52 @@ namespace pixel_renderer
             switch (Type)
             {
                 case SpriteType.SolidColor:
-                    _colors = CBit.SolidColorSquare(size, color);
+                    Pixel[,] colorArray = CBit.SolidColorSquare(size, color);
+                    texture.jImage.data = CBit.ByteArrayFromColorArray(colorArray);
+                    texture.jImage.width = colorArray.GetLength(0);
+                    texture.jImage.height = colorArray.GetLength(1);
                     break;
                 case SpriteType.Image:
                     if (texture is null)
-                        _colors = CBit.SolidColorSquare(size, color);
+                    {
+                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), (Vec2Int)size);
+                        Pixel[,] colorArray1 = CBit.SolidColorSquare(size, color);
+                        texture.jImage.width = colorArray1.GetLength(0);
+                        texture.jImage.height = colorArray1.GetLength(1);
+                        texture.jImage.data = CBit.ByteArrayFromColorArray(colorArray1);
+                    }
                     else
-                        _colors = CBit.ColorArrayFromBitmap(texture.Image);
+                    {
+                        Pixel[,] colorArray1 = CBit.PixelArrayFromBitmap(texture.Image);
+                        texture.jImage.width = colorArray1.GetLength(0);
+                        texture.jImage.height = colorArray1.GetLength(1);
+                        texture.jImage.data = CBit.ByteArrayFromColorArray(colorArray1);
+                    }
                     break;
                 default: throw new NotImplementedException();
             }
-            colorDataSize = new(_colors.GetLength(0), _colors.GetLength(1));
+            colorDataSize = new(texture.jImage.width, texture.jImage.height);
             dirty = false;
         }
-        public void Draw(Vec2 size, Color[,] color)
+        public void Draw(Vec2 size, byte[] color)
         {
             this.size = size;
             ColorData = color;
         }
-        public void DrawSquare(Vec2 size, Color color)
+        public void DrawSquare(Vec2 size, Pixel color)
         {
             this.size = size;
-            ColorData = CBit.SolidColorSquare(size, color);
+            ColorData = CBit.ByteArrayFromColorArray(CBit.SolidColorSquare(size, color));
         }
-        public void Highlight(Color borderColor, Vec2? widthIn = null, bool IsReadOnly = false)
+        public void Highlight(Pixel borderColor, Vec2? widthIn = null, bool IsReadOnly = false)
         {
-            cached_colors = this.ColorData;
             
             Vec2 width = widthIn ?? Vec2.one;
             
             int sizeX = (int)size.x;
             int sizeY = (int)size.y;
 
-            var colorData = new Color[sizeX, sizeY];
+            var colorData = new Pixel[sizeX, sizeY];
 
             for (int x = 0; x< sizeX; ++x)
                 for (int y = 0; y < sizeY; ++y)
@@ -173,22 +193,10 @@ namespace pixel_renderer
                     if (!pt.IsWithinMaxExclusive(width, size - width))
                         colorData[x, y] = borderColor;
                 }
-            Draw(size, colorData);
+            Draw(size, CBit.ByteArrayFromColorArray(colorData));
             this.IsReadOnly = IsReadOnly;
         }
-        public void RestoreCachedColor(bool nullifyCache, bool IsReadOnly = false)
-        {
-            this.IsReadOnly = IsReadOnly;
-            if (cached_colors == null)
-            {
-                Bitmap bmp = new(Player.PlayerSprite.Path);
-                cached_colors = CBit.ColorArrayFromBitmap(bmp);
-                Runtime.Log("Sprite color cache was null upon returning to original color. Instantiating backup.");
-            }
-
-            Draw(size, cached_colors);
-            if (nullifyCache) cached_colors = null;
-        }
+       
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
         internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
         public Vec2[] GetVertices()
@@ -242,29 +250,30 @@ namespace pixel_renderer
 
                     float brightness = light.brightness / (distance * distance);
 
-                    System.Drawing.Color originalColor = ColorData[x, y];
+                    Pixel originalPixel = texture.jImage.GetPixel(x, y);
 
-                    float newR = originalColor.R * brightness;
-                    float newG = originalColor.G * brightness;
-                    float newB = originalColor.B * brightness;
+                    float newR = originalPixel.r * brightness;
+                    float newG = originalPixel.g * brightness;
+                    float newB = originalPixel.b * brightness;
 
                     newR = Math.Max(0, Math.Min(255, newR));
                     newG = Math.Max(0, Math.Min(255, newG));
                     newB = Math.Max(0, Math.Min(255, newB));
 
-                    System.Drawing.Color newColor = System.Drawing.Color.FromArgb(255, (int)newR, (int)newG, (int)newB);
-                    ColorData[x, y] = newColor;
+                    Pixel newPixel = new(originalPixel.a, (byte)newR, (byte)newG, (byte)newB);
+                    
+                    texture.jImage.SetPixel(x, y, newPixel);
                 }
             }
         }
-        Color[,] VertexLighting(Polygon poly, Vec2 lightPosition, float lightRadius, Color lightColor, BoundingBox2D bounds)
+        Pixel[,] VertexLighting(Polygon poly, Vec2 lightPosition, float lightRadius, Pixel lightColor, BoundingBox2D bounds)
         {
             // Get the vertices of the polygon
             Vec2[] vertices = poly.vertices;
             
             int vertexCount = vertices.Length;
             
-            Color[,] colors = new Color[_colors.GetLength(0), _colors.GetLength(1)]; 
+            Pixel[,] colors = new Pixel[texture.jImage.data.GetLength(0), texture.jImage.data.GetLength(1)]; 
             
             int minY = (int)bounds.min.y;
             int maxY = (int)bounds.max.y;
@@ -282,9 +291,9 @@ namespace pixel_renderer
                         int _y = y - minY;
                         int _x = x - minX;
 
-                        Color existingColor = _colors[_x, _y];
-                        Color blendedColor = existingColor.Lerp(lightColor, lightAmount);
-                        colors[_x, _y] = blendedColor;
+                        Pixel existingPixel = texture.jImage.GetPixel(_x, _y);
+                        Pixel blendedPixel = Pixel.Lerp(existingPixel, lightColor, lightAmount);
+                        colors[_x, _y] = blendedPixel;
                     }
             return colors; 
         }
@@ -309,15 +318,13 @@ namespace pixel_renderer
         {
             int x = (int)size.x;
             int y = (int)size.y;
-            cached_colors = this.ColorData;
-            var colorData = new Color[x, y];
+            var colorData = new Pixel[x, y];
 
             for (int j = 0; j < y; j++)
                 for (int i = 0; i < x; i++)
                     colorData[i, j] = JRandom.Color();
 
-
-            Draw(size, colorData);
+            Draw(size, CBit.ByteArrayFromColorArray(colorData));
         }
     }
 }

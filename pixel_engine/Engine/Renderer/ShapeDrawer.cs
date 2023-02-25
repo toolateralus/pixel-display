@@ -27,19 +27,19 @@ namespace pixel_renderer
         /// </summary>
         internal static List<Line> Lines = new();
         internal static List<Circle> Circles = new();
-        public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Color? color = null) =>
-            Lines.Add(new Line(startPoint, endPoint, color ?? Color.White));
-        public static void DrawCircle(Vec2 center, float radius, Color? color = null) =>
-            Circles.Add(new Circle(center, radius, color ?? Color.White));
+        public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Pixel? color = null) =>
+            Lines.Add(new Line(startPoint, endPoint, color ?? Pixel.White));
+        public static void DrawCircle(Vec2 center, float radius, Pixel? color = null) =>
+            Circles.Add(new Circle(center, radius, color ?? Pixel.White));
 
-        public static void DrawRect(Vec2 boxStart, Vec2 boxEnd, Color green)
+        public static void DrawRect(Vec2 boxStart, Vec2 boxEnd, Pixel green)
         {
             // top bottom left right
             Line[] lines = GetSides(boxStart, boxEnd, green);
             Lines.AddRange(lines);
         }
 
-        private static Line[] GetSides(Vec2 boxStart, Vec2 boxEnd, Color green)
+        private static Line[] GetSides(Vec2 boxStart, Vec2 boxEnd, Pixel green)
         {
             return new Line[]
             {
@@ -56,22 +56,22 @@ namespace pixel_renderer
     public class Line
     {
         public Vec2 Direction => endPoint - startPoint;
-        public Color color;
+        public Pixel color;
         public Vec2 startPoint;
         public Vec2 endPoint;
-        public Line(Vec2 startPoint, Vec2 endPoint, Color? color = null)
+        public Line(Vec2 startPoint, Vec2 endPoint, Pixel? color = null)
         {
             this.startPoint = startPoint;
             this.endPoint = endPoint;
-            this.color = color ?? Color.White;
+            this.color = color ?? Pixel.White;
         }
     }
     public class Circle
     {
-        public Color color;
+        public Pixel color;
         public Vec2 center;
         public float radius;
-        public Circle(Vec2 center, float radius, Color color)
+        public Circle(Vec2 center, float radius, Pixel color)
         {
             this.color = color;
             this.center = center;

@@ -65,7 +65,7 @@ namespace pixel_renderer
         public static Vec2 MinResolution = new(4, 4);
 
 
-        public static Color EditorHighlightColor = Color.Orange;
+        public static Pixel EditorHighlightColor = Color.Orange;
         #endregion
         #region IO
         public static char[] unsupported_chars = { '_', '-', '.', '`' };

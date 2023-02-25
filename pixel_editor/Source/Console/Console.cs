@@ -508,13 +508,13 @@ namespace pixel_editor
             };
             return PromptResult.Timeout;
         }
-        public static void Clear(bool randomColor = false)
+        public static void Clear(bool randomPixel = false)
         {
             EditorEvent editorEvent = new EditorEvent("");
             editorEvent.ClearConsole = true;
             Editor.QueueEvent(editorEvent);
 
-            if (randomColor)
+            if (randomPixel)
                 Error("Console Cleared", 1);
         }
 
