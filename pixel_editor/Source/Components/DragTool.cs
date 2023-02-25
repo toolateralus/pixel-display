@@ -1,4 +1,5 @@
 ﻿using pixel_renderer;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Documents;
@@ -116,9 +117,23 @@ namespace pixel_editor
 
         public override void OnDrawShapes()
         {
+            if (!draggingMultiple)
+            {
+                foreach (var node in Editor.Current.ActivelySelected)
+                {
+                    if (!node.TryGetComponent<Collider>(out var col) || col is null) return;
+                    var centroid = col.Polygon.centroid;
+                    Vec2 radiusVec = CMath.Min(Vec2.one * 10, node.Position - CMouse.GlobalPosition);
+                    float radius = radiusVec.y + radiusVec.x;
+                    ShapeDrawer.DrawCircle(centroid, radius, Color.White);
+                }
+            }
+              
             if (!InBoxSelect) return;
             ShapeDrawer.DrawRect(boxStart, boxEnd, Color.Green);
             ShapeDrawer.DrawCircle(boxEnd, 3, Color.Red);
+
+           
 
         }
 

@@ -20,21 +20,24 @@
             }
             return output;
         }
-        internal static double Negate(double v) => -v;
-        internal static Vec2 Negate(Vec2 v) => new()
+        public static double Negate(double v) => -v;
+        public static Vec2 Negate(Vec2 v) => new()
         {
             x = -v.x,
             y = -v.y,
         };
 
-        internal static Vec3 Negate(Vec3 v) => new()
+        public static Vec3 Negate(Vec3 v) => new()
         {
             x = -v.x,
             y = -v.y,
             z = -v.z
         };
-       
-        internal static float Sqrt(float input)
+        public static Vec2 Min(Vec2 v1, Vec2 v2)
+        {
+            return new(MathF.Min(v1.x, v2.x), MathF.Min(v1.y, v2.y));
+        }
+        public static float Sqrt(float input)
         {
             return MathF.Sqrt(input);
         }
