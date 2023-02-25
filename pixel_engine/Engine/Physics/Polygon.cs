@@ -12,7 +12,23 @@ namespace pixel_renderer
         public Vec2 centroid = Vec2.zero;
         public Vec2[] uv = Array.Empty<Vec2>();
         public Vec2[] vertices = Array.Empty<Vec2>();
-
+        /// <summary>
+        /// Each line will point clockwise.
+        /// Will have one line that starts and ends in the same spot if there's only one vertex in the polygon
+        /// </summary>
+        /// <returns></returns>
+        public List<Line> GetLines()
+        {
+            List<Line> lines = new();
+            int vertCount = vertices.Length;
+            for (int i = 0; i < vertCount; i++)
+            {
+                var vert1 = vertices[i];
+                var vert2 = vertices[(i + 1) % vertCount];
+                lines.Add(new(vert1, vert2));
+            }
+            return lines;
+        }
 
         /// <summary>
         /// Expects vertices to be structed clockwise

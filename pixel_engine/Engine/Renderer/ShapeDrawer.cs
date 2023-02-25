@@ -49,17 +49,21 @@ namespace pixel_renderer
               new(boxEnd, boxEnd.WithValue(y: boxStart.y), green),
             };
         }
+
+        public static void DrawLine(Line line) =>
+            Lines.Add(line);
     }
     public class Line
     {
+        public Vec2 Direction => endPoint - startPoint;
         public Pixel color;
         public Vec2 startPoint;
         public Vec2 endPoint;
-        public Line(Vec2 startPoint, Vec2 endPoint, Pixel color)
+        public Line(Vec2 startPoint, Vec2 endPoint, Pixel? color)
         {
             this.startPoint = startPoint;
             this.endPoint = endPoint;
-            this.color = color;
+            this.color = color ?? Pixel.White;
         }
     }
     public class Circle
