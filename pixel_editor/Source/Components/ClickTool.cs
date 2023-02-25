@@ -6,8 +6,13 @@ namespace pixel_editor
     {
         public override void Awake()
         {
-            Editor.Current.image.MouseLeftButtonDown += delegate { TryClickNodeOnScreen(out Editor.Current.Selected); };
+            Editor.Current.image.MouseLeftButtonDown += delegate
+            {
+                TryClickNodeOnScreen(out var x);
+                Editor.Current.LastSelected = x;
+            };
         }
+
         private bool TryClickNodeOnScreen(out Node? result)
         {
             Editor.Current.Inspector?.DeselectNode();

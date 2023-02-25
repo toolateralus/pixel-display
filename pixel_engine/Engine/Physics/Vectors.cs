@@ -117,10 +117,10 @@
         public float SqrMagnitude() => x * x + y * y;
         public readonly static Vec2 one = new(1, 1);
         public readonly static Vec2 zero = new(0, 0);
-        internal static Vec2 up = new(0, -1);
-        internal static Vec2 down = new(0, 1);
-        internal static Vec2 left = new(-1, 0);
-        internal static Vec2 right = new(1, 0);
+        public static Vec2 up = new(0, -1);
+        public static Vec2 down = new(0, 1);
+        public static Vec2 left = new(-1, 0);
+        public static Vec2 right = new(1, 0);
 
         public Vec2(Vec2 original)
         {
@@ -169,25 +169,25 @@
         /// <param name="value"></param>
         /// <param name="min"></param>
         /// <param name="max"></param>
-        internal void Clamp(Vec2 min, Vec2 max)
+        public void Clamp(Vec2 min, Vec2 max)
         {
             x = x.Clamp(min.x, max.x);
             y = y.Clamp(min.y, max.y);
         }
-        internal static void Clamp(ref Vec2 value, Vec2 min, Vec2 max)
+        public static void Clamp(ref Vec2 value, Vec2 min, Vec2 max)
         {
             value.x = value.x.Clamp(min.x, max.x);
             value.y = value.y.Clamp(min.y, max.y);
         }
-        internal Vec2 Clamped(Vec2 min, Vec2 max) => new(x.Clamp(min.x, max.x), y.Clamp(min.y, max.y));
-        
-        internal void Wrap(Vec2 max) { x = x.Wrapped(max.x); y = y.Wrapped(max.y); }
-        internal Vec2 Wrapped(Vec2 max) => new(x.Wrapped(max.x), y.Wrapped(max.y));
-        
-        internal bool IsWithin(Vec2 min, Vec2 max) => x.IsWithin(min.x, max.x) && y.IsWithin(min.y, max.y);
-        internal bool IsWithinMaxExclusive(Vec2 min, Vec2 max) => x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
+        public Vec2 Clamped(Vec2 min, Vec2 max) => new(x.Clamp(min.x, max.x), y.Clamp(min.y, max.y));
 
-        internal void Set(Vec2 size) => this = size; 
+        public void Wrap(Vec2 max) { x = x.Wrapped(max.x); y = y.Wrapped(max.y); }
+        public Vec2 Wrapped(Vec2 max) => new(x.Wrapped(max.x), y.Wrapped(max.y));
+        
+        public bool IsWithin(Vec2 min, Vec2 max) => x.IsWithin(min.x, max.x) && y.IsWithin(min.y, max.y);
+        public bool IsWithinMaxExclusive(Vec2 min, Vec2 max) => x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
+
+        public void Set(Vec2 size) => this = size; 
 
         public override bool Equals(object? obj)
         {

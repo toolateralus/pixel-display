@@ -70,12 +70,12 @@ namespace pixel_editor
         }
         #endregion
         #region Node Function
-        public Node? selectedNode;
+        public Node? lastSelectedNode;
         public void DeselectNode()
         {
-            if (selectedNode != null)
+            if (lastSelectedNode != null)
             {
-                selectedNode = null;
+                lastSelectedNode = null;
                 
                 foreach( var x in activeGrids)
                     x.Visibility = Visibility.Collapsed;
@@ -89,7 +89,7 @@ namespace pixel_editor
         }
         public void SelectNode(Node node)
         {
-            selectedNode = node;
+            lastSelectedNode = node;
             OnObjectSelected?.Invoke(grid);
         }
 
@@ -124,10 +124,10 @@ namespace pixel_editor
 
             grid = NewInspectorGrid();
 
-            if (selectedNode == null)
+            if (lastSelectedNode == null)
                 return;
 
-            components = selectedNode.Components;
+            components = lastSelectedNode.Components;
 
             int index = 0;
 
@@ -204,14 +204,14 @@ namespace pixel_editor
 
             Player AddPlayer()
             {
-                var x= selectedNode.AddComponent<Player>();
+                var x= lastSelectedNode.AddComponent<Player>();
                 Runtime.Log($"Player Added!");
                 return x;
             }
 
             Animator AddAnimator()
             {
-                var x= selectedNode.AddComponent<Animator>();
+                var x= lastSelectedNode.AddComponent<Animator>();
                 Runtime.Log($"Animator Added!");
 
                 return x;
@@ -219,21 +219,21 @@ namespace pixel_editor
 
             Sprite AddSprite()
             {
-                var x = selectedNode.AddComponent<Sprite>();
+                var x = lastSelectedNode.AddComponent<Sprite>();
                 Runtime.Log($"Sprite Added!");
                 return x;
             }
 
             Collider AddCollider()
             {
-                var x = selectedNode.AddComponent<Collider>();
+                var x = lastSelectedNode.AddComponent<Collider>();
                 Runtime.Log($"Collider Added!");
                 return x;
             }
 
             Rigidbody AddRigidbody()
             {
-                var x= selectedNode.AddComponent<Rigidbody>();
+                var x= lastSelectedNode.AddComponent<Rigidbody>();
                 Runtime.Log($"Rigidbody Added!");
                 return x;
             }

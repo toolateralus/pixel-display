@@ -53,7 +53,7 @@
         private void DrawGraphics(Camera cam, Vec2 resolution)
         {
             Vec2 framePos = new Vec2();
-            foreach (Circle circle in ShapeDrawer.circles)
+            foreach (Circle circle in ShapeDrawer.Circles)
             {
                 float sqrtOfHalf = MathF.Sqrt(0.5f);
                 Vec2 radius = circle.center + new Vec2(circle.radius, circle.radius);
@@ -85,7 +85,7 @@
                         WriteColorToFrame(ref circle.color, ref framePos);
                 }
             }
-            foreach(Line line in ShapeDrawer.lines)
+            foreach(Line line in ShapeDrawer.Lines)
             {
                 Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * resolution;
                 Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * resolution;

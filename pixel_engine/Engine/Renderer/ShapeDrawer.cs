@@ -13,8 +13,8 @@ namespace pixel_renderer
         public static event Action? DrawShapeActions;
         public static void Refresh(Stage stage)
         {
-            lines.Clear();
-            circles.Clear();
+            Lines.Clear();
+            Circles.Clear();
             var components = stage.GetAllComponents<Component>();
             lock (components)
                 foreach (Component component in components)
@@ -25,12 +25,30 @@ namespace pixel_renderer
         /// <summary>
         /// start point of each line will always have an x value less than or equal to the end point
         /// </summary>
-        internal static List<Line> lines = new();
-        internal static List<Circle> circles = new();
+        internal static List<Line> Lines = new();
+        internal static List<Circle> Circles = new();
         public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Color? color = null) =>
-            lines.Add(new Line(startPoint, endPoint, color ?? Color.White));
+            Lines.Add(new Line(startPoint, endPoint, color ?? Color.White));
         public static void DrawCircle(Vec2 center, float radius, Color? color = null) =>
-            circles.Add(new Circle(center, radius, color ?? Color.White));
+            Circles.Add(new Circle(center, radius, color ?? Color.White));
+
+        public static void DrawRect(Vec2 boxStart, Vec2 boxEnd, Color green)
+        {
+            // top bottom left right
+            Line[] lines = GetSides(boxStart, boxEnd, green);
+            Lines.AddRange(lines);
+        }
+
+        private static Line[] GetSides(Vec2 boxStart, Vec2 boxEnd, Color green)
+        {
+            return new Line[]
+            {
+              new(boxStart, boxStart.WithValue(x: boxEnd.x), green),
+              new(boxEnd.WithValue(x: boxStart.x), boxEnd, green),
+              new(boxStart, boxStart.WithValue(y: boxEnd.y), green),
+              new(boxEnd, boxEnd.WithValue(y: boxStart.y), green),
+            };
+        }
     }
     public class Line
     {

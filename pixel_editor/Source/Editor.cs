@@ -173,7 +173,8 @@ namespace pixel_editor
                 return current;
             }
         }
-        internal Node? Selected = null;
+        internal Node? LastSelected = null;
+        internal List<Node> ActivelySelected = new();
 
         public Inspector? Inspector => inspector;
         private readonly Inspector inspector;

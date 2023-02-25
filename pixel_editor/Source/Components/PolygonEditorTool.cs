@@ -80,7 +80,7 @@ namespace pixel_editor
                 selectedVert = -1;
                 return null;
             }
-            return Editor.Current.Selected?.GetComponent<Collider>();
+            return Editor.Current.LastSelected?.GetComponent<Collider>();
         }
     }
 }

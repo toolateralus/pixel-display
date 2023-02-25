@@ -1,12 +1,6 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-using System.Net;
-using System.Runtime.CompilerServices;
+﻿using System.Drawing;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
-using Color = System.Drawing.Color;
-
 namespace pixel_renderer
 {
     public class Texture : Asset
