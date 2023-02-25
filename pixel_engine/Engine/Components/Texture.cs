@@ -27,12 +27,12 @@ namespace pixel_renderer
             if (imgData is not null)
             {
                 this.imgData = imgData;
-                Image = new(imgData.fullPath);
+                Image = new(imgData.Path);
             }
             else
             {
                 this.imgData = Player.PlayerSprite;
-                Image = new(imgData.fullPath);
+                Image = new(imgData.Path);
             }
         }
 

@@ -226,9 +226,9 @@ namespace pixel_renderer
         }
         public Bitmap GetBackground()
         {
-            if (File.Exists(Background.fullPath))
-                return new(Background.fullPath);
-            throw new MissingMetadataException($"Metadata :\"{Background.fullPath}\". File not found.");
+            if (File.Exists(Background.Path))
+                return new(Background.Path);
+            throw new MissingMetadataException($"Metadata :\"{Background.Path}\". File not found.");
         }
         public void Update()
         {

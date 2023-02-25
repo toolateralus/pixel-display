@@ -59,8 +59,8 @@ namespace pixel_editor
         public StageWnd(Editor mainWnd)
         {
             InitializeComponent();
-            if (File.Exists(background_meta.fullPath))
-                CBit.Render(new Bitmap(background_meta.fullPath), imgPreview);
+            if (File.Exists(background_meta.Path))
+                CBit.Render(new Bitmap(background_meta.Path), imgPreview);
             mainWnd.Closing += MainWnd_Closing;  
         }
 
@@ -70,11 +70,11 @@ namespace pixel_editor
             e.Handled = true;
             background_meta = FileDialog.ImportFileDialog();
 
-            if (background_meta.fullPath is "" or null)
+            if (background_meta.Path is "" or null)
                 background_meta = Stage.DefaultBackgroundMetadata;
 
-            if (File.Exists(background_meta.fullPath))
-                CBit.Render(new Bitmap(background_meta.fullPath), imgPreview);
+            if (File.Exists(background_meta.Path))
+                CBit.Render(new Bitmap(background_meta.Path), imgPreview);
         }
         private void CreateNewStageButtonPressed(object sender, RoutedEventArgs e)
         {
