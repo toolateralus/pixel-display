@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +8,14 @@ using System.Threading.Tasks;
 
 namespace pixel_renderer
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public class JImage
     {
+        [JsonProperty]
         public int width;
+        [JsonProperty]
         public int height;
+        [JsonProperty]
         public byte[] data;
 
         public Vec2Int Size => new(width, height);
@@ -49,11 +54,6 @@ namespace pixel_renderer
             var b = data[position + 3];
             Pixel col = new(a, r, g, b);
             return col;
-        }
-
-        internal void Set()
-        {
-
         }
 
         public JImage(int width, int height, byte[] data)

@@ -60,17 +60,19 @@ namespace pixel_renderer
                 int Y = texture.jImage.data.GetLength(1);
 
                 if (lightmap is null || lightmap.Length != texture.jImage.data.Length)
-                    lightmap = new byte[X * Y * 4];
-                
-                // TODO: Fix vertex lighting.
-                //if (parent.TryGetComponent<Collider>(out var col))
-                    //lightmap = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
-                //else
-                //{
-                //    Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
-                    //lightmap = VertexLighting(poly, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(poly.vertices));
-                //}
+                    lightmap = new byte[texture.jImage.data.Length];
 
+                if (parent.TryGetComponent<Collider>(out var col))
+                {
+                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
+                    lightmap = CBit.ByteArrayFromColorArray(colors);
+                }
+                else
+                {
+                    Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
+                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
+                    lightmap =  CBit.ByteArrayFromColorArray(colors);
+                }
                 return lightmap; 
             }
         }
