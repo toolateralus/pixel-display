@@ -29,7 +29,7 @@ namespace pixel_renderer
         private Vec2Int colorDataSize = new(1, 1);
         public Vec2Int ColorDataSize => colorDataSize;
         [JsonProperty] public float camDistance = 1;
-        [Field][JsonProperty] public Texture texture;
+        [Field] [JsonProperty] public Texture texture;
         [JsonProperty] [Field] public SpriteType Type = SpriteType.SolidColor;
         [JsonProperty] public bool IsReadOnly = false;
         [Field] [JsonProperty] public TextureFiltering textureFiltering = 0;
@@ -106,7 +106,6 @@ namespace pixel_renderer
                 colorDataSize = new(texture.jImage.width, texture.jImage.height);
             }
         }
-
         [JsonProperty]
         [Field]
         public string textureName = "Table";

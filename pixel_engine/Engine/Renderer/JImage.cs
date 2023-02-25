@@ -55,12 +55,6 @@ namespace pixel_renderer
             Pixel col = new(a, r, g, b);
             return col;
         }
-
-        public JImage(int width, int height, byte[] data)
-        {
-            this.width = width;
-            this.height = height;
-            this.data = data;
-        }
+      
     }
 }

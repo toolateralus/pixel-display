@@ -19,8 +19,7 @@ namespace pixel_renderer
             if (baseImageDirty)
             {
                 var array = PixelArrayFromBitmap(stage.InitializedBackground);
-                var data = CBit.ByteArrayFromColorArray(array);
-                baseImage = new(array.GetLength(0), array.GetLength(1), data); 
+                baseImage = new(array); 
                 baseImageDirty = false;
             }
 

@@ -33,11 +33,11 @@ namespace pixel_renderer
         }
         public void SetImage(Pixel[,] colors)
         {
-            jImage = new(scale.x, scale.y, CBit.ByteArrayFromColorArray(colors));
+            jImage = new(colors);
         }
         public void SetImage(Pixel color)
         {
-            jImage = new(scale.x, scale.y, CBit.ByteArrayFromColorArray(CBit.SolidColorSquare(scale, color)));
+            jImage = new(CBit.SolidColorSquare(scale, color));
         }
         public Texture(Vec2Int scale, Metadata imgData)
         {
@@ -48,17 +48,19 @@ namespace pixel_renderer
             scale = size;
             SetImage(color);
         }
-
+       
         [Field] 
-        [JsonProperty] public Vec2Int scale = new(1, 1);
-
+        [JsonProperty] 
+        public Vec2Int scale = new(1, 1);
+        
         [JsonProperty] 
         internal Metadata imgData;
-
+        
         [JsonProperty]
-        public JImage jImage = new(0, 0, Array.Empty<byte>());
-
+        public JImage jImage = new();
+        
         Bitmap image;
+      
         public Bitmap? Image {
             get 
             {

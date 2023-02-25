@@ -332,7 +332,11 @@ namespace pixel_editor
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
             if (e != null && e.RoutedEvent != null)
+            {
                 e.Handled = true;
+                AssetLibrary.Sync();
+                return; 
+            }
             if (!Input.GetInputValue(Key.S))
                 return; 
 

@@ -62,8 +62,11 @@ namespace pixel_renderer
         {
             CreateInputEvents();
             parent.TryGetComponent(out rb);
-            if(parent.TryGetComponent(out sprite));
-            curve = Curve.Circlular(1, 16, radius: sprite.size.x /2, looping: true);
+            if (parent.TryGetComponent(out sprite))
+            {
+                sprite.Type = SpriteType.Image;
+                curve = Curve.Circlular(1, 16, radius: sprite.size.x /2, looping: true);
+            }
 
             Task task = new(async delegate
             {
@@ -74,7 +77,6 @@ namespace pixel_renderer
             });
 
             task.Start();
-            sprite.Type = SpriteType.Image;
             DrawCircle();
         }
         public override void OnCollision(Collider collider)
