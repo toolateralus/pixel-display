@@ -3,6 +3,8 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Collections.Generic;
+using System.Windows.Shapes;
+using System.Linq;
 
 namespace pixel_renderer.FileIO
 {
@@ -111,45 +113,61 @@ namespace pixel_renderer.FileIO
         }
 
 
-        private static string DuplicateCheck(string name, string dir, Asset asset)
+        private static string DuplicateCheck(string fullName, string dir, Asset asset)
         {
-            foreach (var path in Directory.EnumerateFiles(dir))
+            var fileNameSplit = fullName.Split(".").ToList();
+            var extension = fileNameSplit.Last();
+            fileNameSplit.RemoveAt(fileNameSplit.Count - 1);
+            var name = string.Join('.', fileNameSplit);
+
+            if (File.Exists($"{dir}\\{fullName}") &&
+                IO.ReadJson<Asset>(new(name, dir, extension)) is Asset foundAsset &&
+                foundAsset.UUID == asset.UUID)
+                return fullName;
+            //removes any numbers at end of name
+            string nameWithoutNums = "";
+            for (List<char> chars = name.ToList(); chars.Count > 0; chars.RemoveAt(chars.Count - 1))
             {
-                var splitPath = path.Split("\\");
-                var fileName = splitPath[^1];
-
-                if (fileName == name)
+                if (!Constants.int_chars.Contains(chars.Last()))
                 {
-                    var fileNameSplit = name.Split(".");
-                    var isolated_name = fileNameSplit[0];
-                    var extension = fileNameSplit[1];
-
-                    // this metadata is created to check if there are any existing files in place of this one
-
-                    Metadata meta = new(isolated_name, path, extension);
-                    object obj = IO.ReadJson<object>(meta);
-
-                    // this allows us to overwrite files that have already been
-                    // read and or written this session by comparing their data
-
-                    if (obj is Asset foundAsset && foundAsset == asset)
-                        continue;
-
-                    if (isolated_name == "")
-                        isolated_name = "NamelessAsset";
-
-                    if (filesWritten.ContainsKey(name))
-                    {
-                        isolated_name += filesWritten[name]++;
-                        name = isolated_name + "." + extension;
-                        asset.Name = isolated_name; 
-                    }
-                    else filesWritten.Add(name, 1);
-
-                    Runtime.Log($"Number added to file {name}");
+                    nameWithoutNums = string.Concat(chars);
+                    break;
                 }
             }
-            return name;
+
+            List<int> duplicateNames = new();
+            foreach (var path in Directory.EnumerateFiles(dir))
+            {
+                var splitPath = path.Split("\\").Last().Split('.').ToList();
+                if (splitPath.Last() != extension)
+                    continue;
+                splitPath.RemoveAt(splitPath.Count - 1);
+                var fileName = string.Join('.', splitPath);
+
+                List<char> numbers = new();
+                for (List<char> chars = fileName.ToList(); chars.Count > 0; chars.RemoveAt(chars.Count - 1))
+                {
+                    if (!Constants.int_chars.Contains(chars.Last()))
+                    {
+                        if (string.Concat(chars) == nameWithoutNums)
+                            duplicateNames.Add(string.Concat(numbers).ToInt());
+                        break;
+                    }
+                    numbers.Insert(0, chars.Last());
+                }
+            }
+
+            if (duplicateNames.Count >= 1000)
+                throw new FileNamingException($"There are too many files already named \"{nameWithoutNums}.{extension}\"");
+
+            for (int i = 1; i < 1000; i++)
+            {
+                if (duplicateNames.Contains(i))
+                    continue;
+                Runtime.Log($"Number {i} added to file \"{nameWithoutNums}.{extension}\"");
+                return $"{nameWithoutNums}{i}.{extension}";
+            }
+            throw new Exception("Unknown Exception");
         }
 
         private static void UpdateMetadataPath(Metadata meta, string name)
