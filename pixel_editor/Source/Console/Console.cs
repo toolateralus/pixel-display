@@ -248,9 +248,9 @@ namespace pixel_editor
         public static Command cmd_asset_exists() => new()
         {
             description = "Shows a count of all loaded assets, and an option to see more info.",
+            phrase = "fetch;",
             syntax = "fetch(assetName);",
             argumentTypes = new string[] { "str:" },
-            phrase = "fetch;",
             action = AssetExists,
         };
         public static Command cmd_load_project() => new()
@@ -640,10 +640,9 @@ namespace pixel_editor
         private static async void AssetExists(object[]? obj)
         {
 
-            var found = AssetLibrary.Fetch<Asset>(out List<Asset> assets);
-            if (found)
-            {
-                var prompt = PromptAsync($"found {assets.Count} assets. Do you want more information?");
+            if(!TryGetArgAtIndex<string>(0, out var arg, obj )) return;
+            var assets = AssetLibrary.FetchMeta(arg);
+                var prompt = PromptAsync($"File at {arg} found. Do you want more information?");
                 await prompt;
                 switch (prompt.Result)
                 {
@@ -663,16 +662,9 @@ namespace pixel_editor
                         Print("Asset fetch timed out.");
                         return;
                 }
-
-            }
-            void PrintAssetsInfo(List<Asset> assets)
+            void PrintAssetsInfo(Metadata meta)
             {
-                string assetInfo = "";
-                for (int i = 0; i < assets.Count; i++)
-                {
-                    Asset? asset = assets[i];
-                    assetInfo += $"fetch #{i} :: Name, {asset.Name} UUID, {asset.UUID}\n";
-                }
+                string assetInfo = $"Name, {meta.Name} \n Path, {meta.fullPath} Ext {meta.extension}\n";
                 Error(assetInfo, 1);
             }
 
