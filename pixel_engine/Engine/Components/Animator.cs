@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using Newtonsoft.Json;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using Color = System.Drawing.Color;
@@ -12,8 +13,8 @@ namespace pixel_renderer
     {
         private Animation? animation;
         private Sprite? sprite;
-
         [Field]
+        [JsonProperty]
         public string[] frameNames = new string[] 
         { 
             "List Empty", 
@@ -23,8 +24,12 @@ namespace pixel_renderer
             "Files in the", 
             "Assets Directory", 
         };
+
+        [JsonProperty]
         [Field]
         public int padding = 24;
+        
+        [JsonProperty]
         [Field]
         public bool looping;
 
@@ -39,7 +44,6 @@ namespace pixel_renderer
 
             frameNames = newArray;
         }
-
         [Method]
         void RemoveFrame()
         {
@@ -57,7 +61,6 @@ namespace pixel_renderer
 
             frameNames = newArray;
         }
-
         [Method]
         void RefreshAnimationWithFrameNames()
         {
@@ -70,9 +73,12 @@ namespace pixel_renderer
             if (metas.Count == 0)
                 return;
             Animation anim = new(metas.ToArray(), padding);
-            anim.looping = looping;
+            anim.looping = true;
             animation = anim; 
         }
+        [Method]
+        void Start() => Start(1, true);
+
         public override void Awake()
         {
             test_flame_anim_setup();
@@ -83,7 +89,6 @@ namespace pixel_renderer
                 return;
             Next(animation.padding);
         }
-        
         public void Next(int increment = 1)
         {
            sprite.Draw(sprite.size, animation.GetFrame());
@@ -92,10 +97,6 @@ namespace pixel_renderer
         {
             sprite.Draw(new (32, 32), animation?.frames[(animation.frameIndex, animation.frameIndex -= increment)]);
         }
-
-        [Method]
-        void Start() => Start(1, true);
-
         public void Start(float speed = 1, bool looping = true)
         {
             parent.TryGetComponent(out sprite);
