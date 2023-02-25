@@ -41,7 +41,7 @@ namespace pixel_renderer
             Collider col = node.AddComponent<Collider>();
             Sprite sprite = node.AddComponent<Sprite>();
             col.SetVertices(sprite.GetVertices());
-            sprite.color = JRandom.Color(aMin: 128);
+            //sprite.color = JRandom.Color(aMin: 128);
             col.IsTrigger = false;
             return node;
         }

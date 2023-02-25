@@ -11,7 +11,7 @@ namespace pixel_renderer.Engine.Renderer
         public int width;
         public int height;
         public byte[] data;
-        public JImage(Pixel[,] data)
+        public JImage()
         {
 
         }
