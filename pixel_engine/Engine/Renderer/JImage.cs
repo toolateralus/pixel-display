@@ -18,7 +18,7 @@ namespace pixel_renderer.Engine.Renderer
 
         public void SetPixel(int x, int y, Pixel color)
         {
-            int position = (y * width) + (x * 4);
+            int position = (y * width * 4) + (x * 4);
             if (data.Length < position + 4)
                 throw new InvalidOperationException("image did not contain requested pixel");
 
@@ -29,7 +29,7 @@ namespace pixel_renderer.Engine.Renderer
         }
         public Pixel GetPixel(int x, int y)
         {
-            int position = (y * width) + (x * 4);
+            int position = (y * width * 4) + (x * 4);
             var a = data[position + 0];
             var r = data[position + 1];
             var g = data[position + 2];
