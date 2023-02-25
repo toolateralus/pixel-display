@@ -93,6 +93,7 @@ namespace pixel_editor
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(StartStop, Key.LeftCtrl);
+            Input.RegisterAction((w) => OnSyncBtnPressed(w, null), Key.LeftCtrl);
 
             inspector = new Inspector(inspectorGrid);
             Runtime.Editor = inspector;
@@ -330,7 +331,10 @@ namespace pixel_editor
         }
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
-            e.Handled = true;
+            if (e != null && e.RoutedEvent != null)
+                e.Handled = true;
+            if (!Input.GetInputValue(Key.S))
+                return; 
 
             AssetLibrary.Sync();
         }
