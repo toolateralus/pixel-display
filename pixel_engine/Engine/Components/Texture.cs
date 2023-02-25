@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using pixel_renderer.Engine.Renderer;
@@ -37,16 +38,21 @@ namespace pixel_renderer
         }
         public void SetImage(Pixel color)
         {
-            jImage = new(scale.x, scale.y, CBit.ByteArrayFromColorArray(CBit.SolidColorSquare(scale, (Pixel)color)));
+            jImage = new(scale.x, scale.y, CBit.ByteArrayFromColorArray(CBit.SolidColorSquare(scale, color)));
         }
         public Texture(Vec2Int scale, Metadata imgData)
         {
             SetImage(imgData, scale);
         }
+        public Texture(Vec2Int size, Pixel color)
+        {
+            scale = size;
+            SetImage(color);
+        }
 
         [Field] [JsonProperty] public Vec2Int scale = new(1, 1);
         [JsonProperty] internal Metadata imgData;
-        [JsonProperty] public JImage jImage;
+        [JsonProperty] public JImage jImage = new(0, 0, Array.Empty<byte>());
         Bitmap image;
         public Bitmap? Image {
             get 
