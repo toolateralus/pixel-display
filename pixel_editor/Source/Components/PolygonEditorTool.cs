@@ -47,7 +47,8 @@ namespace pixel_editor
                     if (vertices[i].SqrDistanceFrom(mPos) <
                         vertices[closestVert].SqrDistanceFrom(mPos))
                         closestVert = i;
-                if (vertices[closestVert].SqrDistanceFrom(mPos) < highlightDistance * highlightDistance)
+                if (Input.GetInputValue(Key.Q) &&
+                    vertices[closestVert].SqrDistanceFrom(mPos) < highlightDistance * highlightDistance)
                 {
                     selectedVertIndex = closestVert;
                     vertices[selectedVertIndex] = mPos;
@@ -58,16 +59,30 @@ namespace pixel_editor
                 else
                 {
                     vertSize = 2;
-                    foreach(Line line in selectedCollider.Polygon.GetLines())
+                    int vertcount = vertices.Length;
+                    for (int i = 0; i < vertcount; i++)
                     {
-                        Vec2 mouseOffset = mPos - line.startPoint;
-                        float upDot = Vec2.Dot(line.Direction.Normalized(), mouseOffset);
-                        float leftDot = Vec2.Dot(line.Direction.Normal_LHS.Normalized(), mouseOffset);
-                        if (upDot > 0 && upDot.Squared() < line.Direction.SqrMagnitude()
+                        Vec2 v1 = vertices[i];
+                        Vec2 direction = vertices[(i + 1) % vertcount] - v1;
+                        Vec2 dirNormalized = direction.Normalized();
+                        Vec2 mouseOffset = mPos - v1;
+                        float upDot = Vec2.Dot(dirNormalized, mouseOffset);
+                        float leftDot = Vec2.Dot(dirNormalized.Normal_LHS, mouseOffset);
+                        if (upDot > 0 && upDot.Squared() < direction.SqrMagnitude()
                             && leftDot.Squared() < highlightDistance)
                         {
-                            highlightedVertices.Add(line.Direction.Normalized() * upDot + line.startPoint);
+                            Vec2 newVertex = dirNormalized * upDot + v1;
+                            highlightedVertices.Add(newVertex);
+                            if (Input.GetInputValue(Key.V))
+                            {
+                                List<Vec2> newVertices = vertices.ToList();
+                                newVertices.Insert(i + 1, newVertex);
+                                selectedCollider.Polygon = new Polygon(newVertices.ToArray()).OffsetBy(cPos * -1);
+                                selectedVertIndex = i + 1;
+                                vertSize = 4;
+                            }
                             break;
+
                         }
                     }
                     foreach (Vec2 vert in vertices)
@@ -76,6 +91,13 @@ namespace pixel_editor
             }
             else
             {
+                if (!Input.GetInputValue(Key.V))
+                {
+                    vertSize = 2;
+                    foreach (Vec2 vert in vertices)
+                        highlightedVertices.Add(vert);
+                    return;
+                }
                 vertices[selectedVertIndex] = mPos;
                 selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
                 highlightedVertices.Add(vertices[selectedVertIndex]);
