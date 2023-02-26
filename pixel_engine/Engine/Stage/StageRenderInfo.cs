@@ -22,8 +22,12 @@ namespace pixel_renderer
         public void SetSprite(Sprite sprite, int index)
         {
             sprite.parent.Position = spritePositions[index];
+
             JImage jImage = spriteColorData[index];
-            sprite.SetColorData(jImage.Size, jImage.data);
+            if (jImage != null)
+                sprite.SetColorData(jImage.Size, jImage.data);
+            else Runtime.Log("Sprite image data was null");
+            
             sprite.size = spriteSizeVectors[index];
             sprite.viewportOffset = spriteVPOffsetVectors[index];
             sprite.viewportScale = spriteVPScaleVectors[index];

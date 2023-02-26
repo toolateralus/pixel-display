@@ -96,7 +96,13 @@ namespace pixel_renderer
 
             Pixel[,]? color = animation?.GetFrame();
             if (color != null)
-                sprite?.Draw(sprite.size, CBit.ByteArrayFromColorArray(color));
+            {
+                var colors = CBit.ByteArrayFromColorArray(color);
+                int x = colors.GetLength(0);
+                int y = colors.GetLength(1);
+                var vec = new Vec2Int(x, y);
+                sprite?.Draw(vec, colors);
+            }
         }
         public void Previous(int increment = 1)
         {
@@ -106,7 +112,9 @@ namespace pixel_renderer
             animation.frameIndex = animation.frameIndex - 2;
             Pixel[,]? color = animation?.GetFrame();
             if (color != null)
-                sprite?.Draw(sprite.size, CBit.ByteArrayFromColorArray(color));
+            {
+                sprite?.Draw(new (color.GetLength(0), color.GetLength(1)), CBit.ByteArrayFromColorArray(color));
+            }
         }
         public void Start(float speed = 1, bool looping = true)
         {

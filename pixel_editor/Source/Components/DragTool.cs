@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Documents;
+using System.Xml.Linq;
 
 namespace pixel_editor
 {
@@ -81,6 +82,27 @@ namespace pixel_editor
                 if (CMouse.LeftPressedThisFrame)
                     boxStart = CMouse.GlobalPosition;
                 boxEnd = CMouse.GlobalPosition;
+               
+                var stage = Runtime.Current.GetStage();
+
+                List<Node> nodes = new(stage.nodes);
+
+                if (stage is null)
+                    return;
+
+
+                foreach (Node node in nodes)
+                    if (node.Position is Vec2 vec)
+                        if (vec.IsWithin(boxStart, boxEnd))
+                        {
+                            if (node.TryGetComponent(out Collider sprite))
+                            {
+                                Editor.Current.ActivelySelected.Add(node);
+                                sprite.drawCollider = true;
+                                sprite.drawNormals = true;
+                                sprite.colliderPixel = Color.Orange;
+                            }
+                        }
             }
             else
             {
@@ -128,26 +150,7 @@ namespace pixel_editor
 
             if (stage is null)
                 return;
-
-            foreach (Node node in nodes)
-                if (node.Position is Vec2 vec)
-                    if (vec.IsWithin(boxStart, boxEnd))
-                    {
-                        if (!node.TryGetComponent<Collider>(out var col) || col is null) 
-                            return;
-
-                        var centroid = col.Polygon.centroid;
-                        Vec2 radiusVec = CMath.Min(Vec2.one * 3, vec - CMouse.GlobalPosition - Vec2.one * 3);
-                        float radius = radiusVec.y + radiusVec.x;
-                        
-                        if (radius < 0)
-                            radius = -radius;
-                        radius *= 0.5f;
-
-                        
-                        ShapeDrawer.DrawCircle(centroid, radius, JRandom.Color(0b1100100));
-                    }
-            }
         }
+    }
 
 }

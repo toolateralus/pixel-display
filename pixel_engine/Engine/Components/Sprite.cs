@@ -28,13 +28,20 @@ namespace pixel_renderer
         [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
         private Vec2Int colorDataSize = new(1, 1);
         public Vec2Int ColorDataSize => colorDataSize;
-        [JsonProperty] public float camDistance = 1;
-        [Field] [JsonProperty] public Texture texture;
-        [JsonProperty] [Field] public SpriteType Type = SpriteType.SolidColor;
-        [JsonProperty] public bool IsReadOnly = false;
-        [Field] [JsonProperty] public TextureFiltering textureFiltering = 0;
-        [Field][JsonProperty] public bool lit = false;
-        [Field][JsonProperty] public Pixel color = Pixel.Blue;
+        [JsonProperty] 
+        public float camDistance = 1;
+        [JsonProperty][Field] 
+        public Texture texture;
+        [JsonProperty] 
+        [Field] public SpriteType Type = SpriteType.SolidColor;
+        [JsonProperty] 
+        public bool IsReadOnly = false;
+        [Field][JsonProperty]
+        public TextureFiltering textureFiltering = 0;
+        [Field][JsonProperty] 
+        public bool lit = false;
+        [Field][JsonProperty] 
+        public Pixel color = Pixel.Blue;
         public Sprite()
         {
             texture = new Texture((Vec2Int)size, Pixel.Red);
@@ -162,6 +169,7 @@ namespace pixel_renderer
                     else
                     {
                         Pixel[,] colorArray1 = CBit.PixelArrayFromBitmap(texture.Image);
+                        texture.jImage ??= new(); 
                         texture.jImage.width = colorArray1.GetLength(0);
                         texture.jImage.height = colorArray1.GetLength(1);
                         texture.jImage.data = CBit.ByteArrayFromColorArray(colorArray1);
@@ -172,10 +180,10 @@ namespace pixel_renderer
             colorDataSize = new(texture.jImage.width, texture.jImage.height);
             dirty = false;
         }
-        public void Draw(Vec2 size, byte[] color)
+        public void Draw(Vec2Int size, byte[] color)
         {
             this.size = size;
-            SetColorData((Vec2Int)size, color);
+            texture.SetImage(size, color);
         }
         public void DrawSquare(Vec2 size, Pixel color)
         {
@@ -305,13 +313,12 @@ namespace pixel_renderer
         {
             int x = (int)size.x;
             int y = (int)size.y;
-            var colorData = new Pixel[x, y];
 
-            for (int j = 0; j < y; j++)
-                for (int i = 0; i < x; i++)
-                    colorData[i, j] = JRandom.Color();
+            var colorData = new byte[x * y * 4];
+            for (int j = 0; j < colorData.Length; j++)
+                 colorData[j] = JRandom.Byte();
 
-            Draw(size, CBit.ByteArrayFromColorArray(colorData));
+            Draw(new(x,y), colorData);
         }
     }
 }

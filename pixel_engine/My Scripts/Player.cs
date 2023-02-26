@@ -131,7 +131,7 @@ namespace pixel_renderer
                     colors[(int)pos.x, (int)pos.y] = (Pixel)Color.Red;
                 
             }
-            sprite.Draw(sprite.size, CBit.ByteArrayFromColorArray(colors));
+            sprite.Draw((Vec2Int)sprite.size, CBit.ByteArrayFromColorArray(colors));
         }
 
         void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);

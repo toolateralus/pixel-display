@@ -29,7 +29,15 @@ namespace pixel_renderer
                 this.imgData = Player.PlayerSprite;
                 Image = new(imgData.Path);
             }
-          
+            jImage = new();
+            var colors =  CBit.PixelArrayFromBitmap(Image);
+            SetImage(colors);
+        }
+        public void SetImage(Vec2Int size, byte[] data)
+        {
+            jImage.height = size.y;
+            jImage.width = size.x;
+            jImage.data = data; 
         }
         public void SetImage(Pixel[,] colors)
         {

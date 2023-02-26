@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using pixel_renderer.FileIO;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
+using System.Dynamic;
 
 namespace pixel_renderer.Assets
 {
@@ -20,7 +21,7 @@ namespace pixel_renderer.Assets
         {
             if (Current.ContainsKey(metadata)) 
                 return false;
-         
+
             Current.Add(metadata, asset);
             return true; 
         }
@@ -65,7 +66,9 @@ namespace pixel_renderer.Assets
             output = new List<T>();
             foreach (var obj in Current.Values)
                 if (obj is not null && obj.GetType() == typeof(T))
+                {
                     output.Add((T)obj);
+                }
 
             if(output.Count > 0) return true;
             return false; 
@@ -75,7 +78,7 @@ namespace pixel_renderer.Assets
             Fetch<T>(out List<T> list);
 
             bool r = false;
-            result = null; 
+            result = null;
 
             foreach (var item in list)
                 if (item.Name == name)
@@ -106,7 +109,6 @@ namespace pixel_renderer.Assets
 
             foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
             {
-                // makes sure the metadata is appropriately synced.
                 if (assetPair.Value is null)
                     continue; 
 
