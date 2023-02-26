@@ -409,8 +409,8 @@ namespace pixel_editor
                             return; 
                         }
                         Runtime.Current.GetStage().Background = foundMetadata;
-                        Runtime.Current.GetStage().InitializedBackground = null;
-                        var background = Runtime.Current.GetStage().InitializedBackground;
+                        Runtime.Current.GetStage().InitializedBackground = new(foundMetadata.Path);
+                        Runtime.Current.renderHost.GetRenderer().baseImageDirty = true; 
                         Runtime.Log("Background set.");
                         break;
                     case PromptResult.No:
