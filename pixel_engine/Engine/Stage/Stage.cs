@@ -19,18 +19,29 @@ namespace pixel_renderer
         public TextureFiltering backgroundFiltering = TextureFiltering.Point; 
         [JsonProperty]
         public Vec2 backgroundOffset = new(0, 0);
+
         private Bitmap init_bckground;
-        public Bitmap? InitializedBackground
+        public JImage? InitializedBackground
         {
             get
             {
                 if (init_bckground is null && Background != null)
                     init_bckground = GetBackground();
-                else init_bckground ??= new(256, 256);
-                return init_bckground;
+
+                if (init_bckground != null)
+                {
+                    backgroundJimage = new(CBit.PixelArrayFromBitmap(init_bckground));
+                }
+                else
+                {
+                    init_bckground ??= new(256, 256);
+                    backgroundJimage = new(CBit.PixelArrayFromBitmap(init_bckground));
+                }
+                return backgroundJimage;
             }
-            set => init_bckground = value; 
+            set => backgroundJimage = value; 
         }
+        public JImage backgroundJimage = new(); 
 
         public void AddNode(Node node)
         {

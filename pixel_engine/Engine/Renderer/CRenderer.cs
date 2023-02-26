@@ -18,37 +18,36 @@ namespace pixel_renderer
             if (Runtime.Current.GetStage() is not Stage stage) return;
             if (baseImageDirty)
             {
-                var array = PixelArrayFromBitmap(stage.InitializedBackground);
-                baseImage = new(array); 
+                baseImage = stage.InitializedBackground; 
                 baseImageDirty = false;
             }
 
-                stride = 4 * ((int)Resolution.x * 24 + 31) / 32;
+            stride = 4 * ((int)Resolution.x * 24 + 31) / 32;
 
-                if (frame.Length != stride * Resolution.y)
-                    frame = new byte[stride * (int)Resolution.y];
-
-
-                List<Component> componentsFound = new();
-                lock(stage.nodes)
-                foreach (var node in stage.nodes)
-                {
-                    var result = componentsFound.Concat(node.ComponentsList);
-
-                    if (result != null)
-                        componentsFound = result.ToList();
-                }
-
-                List<UIComponent> uiComponents = new();
-
-                foreach (var comp in componentsFound)
-                    if (comp is UIComponent uiComp)
-                        uiComponents.Add(uiComp);
+            if (frame.Length != stride * Resolution.y)
+                frame = new byte[stride * (int)Resolution.y];
 
 
-                foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
-                    if (uiComponent.Enabled && uiComponent is Camera camera)
-                        RenderCamera(camera, renderInfo, Resolution);
+            List<Component> componentsFound = new();
+            lock(stage.nodes)
+            foreach (var node in stage.nodes)
+            {
+                var result = componentsFound.Concat(node.ComponentsList);
+
+                if (result != null)
+                    componentsFound = result.ToList();
+            }
+
+            List<UIComponent> uiComponents = new();
+
+            foreach (var comp in componentsFound)
+                if (comp is UIComponent uiComp)
+                    uiComponents.Add(uiComp);
+
+
+            foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
+                if (uiComponent.Enabled && uiComponent is Camera camera)
+                    RenderCamera(camera, renderInfo, Resolution);
          
         }
 

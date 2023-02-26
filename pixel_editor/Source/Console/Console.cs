@@ -238,13 +238,6 @@ namespace pixel_editor
             },
             description = "\n {must not be a property or method} Sets Field in camera by name on node of provided name \n syntax : cam(str:<nodeName>, str:<fieldName>, object:value)",
         };
-        public static Command cmd_random_background() => new()
-        {
-            phrase = "stage.Background.Randomize;",
-            syntax = "stage.Background.Randomize();",
-            action = RandomizeBackground,
-            description = "Sets the current stage's background to a random array of colors until reloaded.",
-        };
         public static Command cmd_asset_exists() => new()
         {
             description = "Shows a count of all loaded assets, and an option to see more info.",
@@ -409,7 +402,7 @@ namespace pixel_editor
                             return; 
                         }
                         Runtime.Current.GetStage().Background = foundMetadata;
-                        Runtime.Current.GetStage().InitializedBackground = new(foundMetadata.Path);
+                        Runtime.Current.GetStage().InitializedBackground = new(CBit.PixelArrayFromBitmap(new(foundMetadata.Path)));
                         Runtime.Current.renderHost.GetRenderer().baseImageDirty = true; 
                         Runtime.Log("Background set.");
                         break;
@@ -651,33 +644,7 @@ namespace pixel_editor
             return true;
 
         }
-        private static void RandomizeBackground(params object[]? args)
-        {
-            var stage = Runtime.Current.GetStage();
-
-            var background = stage.InitializedBackground;
-
-            if (background == null)
-            {
-                background = stage.GetBackground();
-                if (background == null)
-                {
-                    Error("Error finding background. Instantiating a new one, though this likely does not fix the problem.", 2);
-                    background = new(pixel_renderer.Constants.ScreenW, pixel_renderer.Constants.ScreenH);
-                }
-            }
-
-            int y, x;
-
-            x = background.Width;
-            y = background.Height;
-
-            for (int i = 0; i < x - 1; ++i)
-                for (int j = 0; j < y - 1; ++j)
-                    background.SetPixel(i, j, JRandom.Color());
-
-            Runtime.Current.renderHost.MarkDirty();
-        }
+       
         private static void PrintNodeInformation(Node node)
         {
             Print(
