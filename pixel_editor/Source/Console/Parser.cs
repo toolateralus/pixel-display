@@ -22,10 +22,7 @@ namespace pixel_editor
         internal static List<char> disallowed_chars = new()
         {
             ';',
-            '\'',
             '\0',
-            '\\',
-            '/',
             '(',
             ')',
             '"',

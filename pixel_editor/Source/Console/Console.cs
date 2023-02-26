@@ -376,6 +376,57 @@ namespace pixel_editor
         };
         #endregion
         #region Editor Commands
+        public static Command cmd_set_stage_background_relative()
+        {
+            var x = new Command(); 
+            x.phrase = "stage.SetBackground;";
+            x.syntax = "stage.SetBackground(string assetNameRelativeToWorkingRoot);";
+            x.action = setBackgroundRelative;
+            x.argumentTypes = new string[] { "str:" };
+            x.description = "Attempts to find asset of provided name and if it's a valid texture, prompts the user to load it as the stages background.";
+                return x;
+        }
+
+        private static async void setBackgroundRelative(object[]? obj)  
+        {
+            string name;
+            if (!TryGetArgAtIndex(0, out name, obj))
+            {
+                Command.Error("stage.SetBackground();", 0);
+                return;
+            }
+            var foundMetadata = AssetLibrary.FetchMetaRelative(name);
+            if (foundMetadata != null && foundMetadata.extension == pixel_renderer.Constants.BitmapFileExtension)
+            {
+                var task = PromptAsync($"Asset {foundMetadata.Name} Found. Do you want to load this background?");
+                await task;
+                switch (task.Result)
+                {
+                    case PromptResult.Yes:
+                        if (Runtime.Current.GetStage() is not Stage stage)
+                        {
+                            Command.Error("stage.SetBackground();", "No stage was loaded");
+                            return; 
+                        }
+                        Runtime.Current.GetStage().Background = foundMetadata;
+                        Runtime.Current.GetStage().InitializedBackground = null;
+                        var background = Runtime.Current.GetStage().InitializedBackground;
+                        Runtime.Log("Background set.");
+                        break;
+                    case PromptResult.No:
+                        Runtime.Log("SetBackground cancelled.");
+                        break;
+                    case PromptResult.Cancel:
+                        Runtime.Log("SetBackground cancelled.");
+                        break;
+                    case PromptResult.Timeout:
+                        Runtime.Log("SetBackground cancelled.");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
 
         public static Command cmd_show_colliders() => new()
         {

@@ -29,6 +29,7 @@ namespace pixel_renderer
                 else init_bckground ??= new(256, 256);
                 return init_bckground;
             }
+            set => init_bckground = value; 
         }
 
         public void AddNode(Node node)
