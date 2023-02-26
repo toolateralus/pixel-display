@@ -43,12 +43,21 @@ namespace pixel_renderer.Assets
                 }
             return false;
         }
+        public static Metadata? FetchMetaRelative(string pathRelativeToRoot)
+        {
+            foreach (var asset in Current)
+                if (asset.Value is null && asset.Key is not null && asset.Key.pathFromProjectRoot == pathRelativeToRoot)
+                    return asset.Key;
+            return default; 
+                    
+        }
+
         public static Metadata? FetchMeta(string name)
         {
             foreach (var asset in Current)
                 if (asset.Value is null && asset.Key is not null && name == asset.Key.Name)
                     return asset.Key;
-            return null; 
+            return default; 
         }
         public static bool Fetch<T>(out List<T> output) where T : Asset
         {
@@ -87,6 +96,11 @@ namespace pixel_renderer.Assets
             {
                 RefreshStageMetadataWithinLoadedProject();
                 Runtime.Current.LoadedProject?.Save();
+                foreach (var x in Runtime.Current.LoadedProject.stages)
+                {
+                    x.Sync(); 
+                    StageIO.WriteStage(x);
+                }
             }
             
 

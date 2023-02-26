@@ -79,11 +79,11 @@ namespace pixel_renderer
         {
             // makes sure the metadata is up-to-date.
             stage.Sync();
-            Constants.RemoveDuplicatesFromList(stagesMeta);
-            Constants.RemoveDuplicatesFromList(stages);
 
             stagesMeta.Add(stage.Metadata);
             stages.Add(stage);
+            Constants.RemoveDuplicatesFromList(stagesMeta);
+            Constants.RemoveDuplicatesFromList(stages);
         }
 
         /// <summary>
