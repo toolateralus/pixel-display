@@ -82,27 +82,6 @@ namespace pixel_editor
                 if (CMouse.LeftPressedThisFrame)
                     boxStart = CMouse.GlobalPosition;
                 boxEnd = CMouse.GlobalPosition;
-               
-                var stage = Runtime.Current.GetStage();
-
-                List<Node> nodes = new(stage.nodes);
-
-                if (stage is null)
-                    return;
-
-
-                foreach (Node node in nodes)
-                    if (node.Position is Vec2 vec)
-                        if (vec.IsWithin(boxStart, boxEnd))
-                        {
-                            if (node.TryGetComponent(out Collider sprite))
-                            {
-                                Editor.Current.ActivelySelected.Add(node);
-                                sprite.drawCollider = true;
-                                sprite.drawNormals = true;
-                                sprite.colliderPixel = Color.Orange;
-                            }
-                        }
             }
             else
             {
