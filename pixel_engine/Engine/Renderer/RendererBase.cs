@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using System.Runtime.CompilerServices;
     using System.Security.Policy;
     using System.Threading.Tasks;
     using System.Windows.Controls;
@@ -28,9 +29,13 @@
         }
         internal protected Vec2 _resolution = Constants.DefaultResolution;
         public bool baseImageDirty = true;
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void RenderCamera(Camera camera, StageRenderInfo renderInfo, Vec2 resolution)
         {
             if (resolution.y == 0 || resolution.x == 0) return;
@@ -50,6 +55,8 @@
 
             Array.Copy(frame, latestFrame, frame.Length);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawGraphics(Camera cam, Vec2 resolution)
         {
             Vec2 framePos = new Vec2();
@@ -133,6 +140,8 @@
                 }
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vec2 resolution)
         {
             Node spriteNode = new("SpriteNode", zero, one);
@@ -163,6 +172,8 @@
                 DrawTransparentSprite(cam, sprite, drawArea, resolution);
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawBaseImage(Camera cam, Vec2 resolution)
         {
             Node spriteNode = new("SpriteNode", zero, one);
@@ -200,6 +211,8 @@
             sprite.textureFiltering = stage.backgroundFiltering;
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vec2 resolution)
         {
             for (Vec2 framePos = drawArea.min;
@@ -247,7 +260,8 @@
                 WriteColorToFrame(ref color, ref framePos);
             }
         }
-     
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void WriteColorToFrame(ref Pixel color, ref Vec2 framePos)
         {
             int index = (int)framePos.y * stride + ((int)framePos.x * 3);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using static pixel_renderer.CBit; 
@@ -9,9 +10,10 @@ namespace pixel_renderer
 {
     public class CRenderer : RendererBase
     {
-      
 
         public override void Dispose() => Array.Clear(frame);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void Draw(StageRenderInfo renderInfo)
         {
 
@@ -50,7 +52,7 @@ namespace pixel_renderer
                     RenderCamera(camera, renderInfo, Resolution);
          
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void Render(Image output)
         {
             if(stride != 0)

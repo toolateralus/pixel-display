@@ -138,6 +138,8 @@ namespace pixel_renderer
                 }
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(string key, InputEventType type = InputEventType.KeyDown)
         {
             if(Application.Current is Application app)
@@ -154,6 +156,8 @@ namespace pixel_renderer
                 });
             else return false; 
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
             return Application.Current.Dispatcher.Invoke(() => {
@@ -167,6 +171,7 @@ namespace pixel_renderer
                 return input_value;
             });
         }
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(ref Key key, InputEventType type = InputEventType.KeyDown)
         {
             return Get(key, type);
