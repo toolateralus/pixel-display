@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO.Compression;
 using System.Linq;
 using System.Security.Policy;
 using System.Threading;
@@ -53,52 +54,47 @@ namespace pixel_renderer
         }
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
-        private byte[]? lightmap; 
-        private byte[] LitColorData
+        private JImage lightmap; 
+        private JImage LitColorData
         {
             get 
             {
                 var light = GetFirstLight();
 
+                var data = texture?.GetImage();
+
                 if (light is null)
-                    return texture.jImage.data ?? throw new NullReferenceException(nameof(texture.jImage.data));
-
-                int X = texture.jImage.data.GetLength(0);
-                int Y = texture.jImage.data.GetLength(1);
-
-                if (lightmap is null || lightmap.Length != texture.jImage.data.Length)
-                    lightmap = new byte[texture.jImage.data.Length];
+                    return data ?? throw new NullReferenceException(nameof(data));
 
                 if (parent.TryGetComponent<Collider>(out var col))
                 {
                     Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
-                    lightmap = CBit.ByteArrayFromColorArray(colors);
+                    lightmap = new(colors);
                 }
                 else
                 {
                     Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
                     Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
-                    lightmap =  CBit.ByteArrayFromColorArray(colors);
+                    lightmap = new(colors);
                 }
                 return lightmap; 
             }
         }
-        internal byte[] ColorData
+        internal JImage ColorData
         {
             get
             {
                 if (lit)
                     return LitColorData;
 
-                texture.jImage ??= new();
-
-                if (texture.jImage.data is null) 
+               
+                if (texture is null || texture.Data is null)
                     Refresh();
 
-                if (texture.jImage.data is null)
-                    throw new NullReferenceException(nameof(texture.jImage.data));
+                if (texture is null || texture.Data is null)
+                    throw new NullReferenceException(nameof(texture.Data));
 
-                return texture.jImage.data;
+                return texture.GetImage();
             }
            
         }
@@ -106,11 +102,8 @@ namespace pixel_renderer
         {
             if (!IsReadOnly)
             {
-                texture.jImage ??= new();
-                texture.jImage.width = size.x;
-                texture.jImage.height = size.y; 
-                texture.jImage.data = data;
-                colorDataSize = new(texture.jImage.width, texture.jImage.height);
+                texture.SetImage(size, data);
+                colorDataSize = new(size.x, size.y);
             }
         }
         [JsonProperty]
@@ -153,31 +146,24 @@ namespace pixel_renderer
             {
                 case SpriteType.SolidColor:
                     Pixel[,] colorArray = CBit.SolidColorSquare(size, color);
-                    texture.jImage.data = CBit.ByteArrayFromColorArray(colorArray);
-                    texture.jImage.width = colorArray.GetLength(0);
-                    texture.jImage.height = colorArray.GetLength(1);
+                    texture.SetImage(colorArray);
                     break;
                 case SpriteType.Image:
                     if (texture is null)
                     {
                         texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), (Vec2Int)size);
                         Pixel[,] colorArray1 = CBit.SolidColorSquare(size, color);
-                        texture.jImage.width = colorArray1.GetLength(0);
-                        texture.jImage.height = colorArray1.GetLength(1);
-                        texture.jImage.data = CBit.ByteArrayFromColorArray(colorArray1);
+                        texture.SetImage(colorArray1);
                     }
                     else
                     {
                         Pixel[,] colorArray1 = CBit.PixelArrayFromBitmap(texture.Image);
-                        texture.jImage ??= new(); 
-                        texture.jImage.width = colorArray1.GetLength(0);
-                        texture.jImage.height = colorArray1.GetLength(1);
-                        texture.jImage.data = CBit.ByteArrayFromColorArray(colorArray1);
+                        texture.SetImage(colorArray1);
                     }
                     break;
                 default: throw new NotImplementedException();
             }
-            colorDataSize = new(texture.jImage.width, texture.jImage.height);
+            colorDataSize = new(texture.Width, texture.Height);
             dirty = false;
         }
         public void Draw(Vec2Int size, byte[] color)
@@ -235,9 +221,9 @@ namespace pixel_renderer
         }
         public void LightingPerPixel(Light light)
         {
-            for (int x = 0; x < ColorData.GetLength(0); x++)
+            for (int x = 0; x < ColorData.width; x++)
             {
-                for (int y = 0; y < ColorData.GetLength(1); y++)
+                for (int y = 0; y < ColorData.height; y++)
                 {
                     Vec2 pixelPosition = new Vec2(parent.Position.x, parent.Position.y);
 
@@ -245,7 +231,7 @@ namespace pixel_renderer
 
                     float brightness = light.brightness / (distance * distance);
 
-                    Pixel originalPixel = texture.jImage.GetPixel(x, y);
+                    Pixel originalPixel = texture.GetPixel(x, y);
 
                     float newR = originalPixel.r * brightness;
                     float newG = originalPixel.g * brightness;
@@ -257,7 +243,7 @@ namespace pixel_renderer
 
                     Pixel newPixel = new(originalPixel.a, (byte)newR, (byte)newG, (byte)newB);
                     
-                    texture.jImage.SetPixel(x, y, newPixel);
+                    texture.SetPixel(x, y, newPixel);
                 }
             }
         }
@@ -268,7 +254,7 @@ namespace pixel_renderer
             
             int vertexCount = vertices.Length;
             
-            Pixel[,] colors = new Pixel[texture.jImage.data.GetLength(0), texture.jImage.data.GetLength(1)]; 
+            Pixel[,] colors = new Pixel[texture.Width, texture.Height]; 
             
             int minY = (int)bounds.min.y;
             int maxY = (int)bounds.max.y;
@@ -286,7 +272,7 @@ namespace pixel_renderer
                         int _y = y - minY;
                         int _x = x - minX;
 
-                        Pixel existingPixel = texture.jImage.GetPixel(_x, _y);
+                        Pixel existingPixel = texture.GetPixel(_x, _y);
                         Pixel blendedPixel = Pixel.Lerp(existingPixel, lightColor, lightAmount);
                         colors[_x, _y] = blendedPixel;
                     }
@@ -305,20 +291,13 @@ namespace pixel_renderer
                 }
             }
         }
-        /// <summary>
-        /// caches the current color data of the sprite and sets every pixel in the color data to the one passed in.
-        /// </summary>
-        /// <param name="borderColor"></param>
-        public void Randomize()
+        public void Draw(JImage? image)
         {
-            int x = (int)size.x;
-            int y = (int)size.y;
-
-            var colorData = new byte[x * y * 4];
-            for (int j = 0; j < colorData.Length; j++)
-                 colorData[j] = JRandom.Byte();
-
-            Draw(new(x,y), colorData);
+            if (image is not null)
+            {
+                Vec2Int size = new(image.width, image.height);
+                Draw(size, image.data);
+            }
         }
     }
 }

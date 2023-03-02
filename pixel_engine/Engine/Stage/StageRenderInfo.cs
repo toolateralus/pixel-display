@@ -54,7 +54,7 @@ namespace pixel_renderer
                 spriteSizeVectors[i] = sprite.size;
                 spriteVPOffsetVectors[i] = sprite.viewportOffset;
                 spriteVPScaleVectors[i] = sprite.viewportScale;
-                spriteColorData[i] = sprite.texture.jImage;
+                spriteColorData[i] = sprite.texture.GetImage();
                 spriteFiltering[i] = sprite.textureFiltering;
                 spriteCamDistances[i] = sprite.camDistance;
             }

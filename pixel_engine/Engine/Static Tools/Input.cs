@@ -162,7 +162,6 @@ namespace pixel_renderer
             return input_value;
             });
         }
-
         public static bool GetInputValue(Key key, InputEventType type = InputEventType.KeyDown)
         {
             return Application.Current.Dispatcher.Invoke(() => {

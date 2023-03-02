@@ -108,6 +108,8 @@ namespace pixel_renderer.FileIO
 
                     Runtime.Log($"Number added to file {name}");
                 }
+
+
             }
             return name;
         }
@@ -120,13 +122,17 @@ namespace pixel_renderer.FileIO
             fileNameSplit.RemoveAt(fileNameSplit.Count - 1);
             var name = string.Join('.', fileNameSplit);
 
-            if (File.Exists($"{dir}\\{fullName}") &&
-                IO.ReadJson<Asset>(new(name, dir, extension)) is Asset foundAsset &&
-                foundAsset.UUID == asset.UUID)
+            string fullPath = $"{dir}\\{fullName}";
+
+            Metadata meta = new(name, fullPath, extension);
+
+            Asset foundAsset = IO.ReadJson<Asset>(meta); 
+
+            if (File.Exists(fullPath) && foundAsset is not null && foundAsset.UUID == asset.UUID)
                 return fullName;
 
-            //removes any numbers at end of name
             string nameWithoutNums = "";
+
             for (List<char> chars = name.ToList(); chars.Count > 0; chars.RemoveAt(chars.Count - 1))
             {
                 if (!Constants.int_chars.Contains(chars.Last()))

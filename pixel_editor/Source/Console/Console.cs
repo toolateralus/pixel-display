@@ -3,6 +3,7 @@ using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -401,8 +402,9 @@ namespace pixel_editor
                             Command.Error("stage.SetBackground();", "No stage was loaded");
                             return; 
                         }
-                        Runtime.Current.GetStage().Background = foundMetadata;
-                        Runtime.Current.GetStage().InitializedBackground = new(CBit.PixelArrayFromBitmap(new(foundMetadata.Path)));
+                        Runtime.Current.GetStage().backgroundMetadata = foundMetadata;
+                        var bmp = new Bitmap(foundMetadata.Path);
+                        Runtime.Current.GetStage()?.SetBackground(bmp);
                         Runtime.Current.renderHost.GetRenderer().baseImageDirty = true; 
                         Runtime.Log("Background set.");
                         break;

@@ -15,6 +15,7 @@ namespace pixel_editor
 {
     public partial class Editor : Window
     {
+        private const string motd = "Session started. Type 'help();' for a list of commands.";
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty =
             DependencyProperty.Register(
@@ -69,9 +70,31 @@ namespace pixel_editor
         {
             EngineInstance.FromEditor = true;
             engine = new();
+
             current = this;
 
+            //wpf
             InitializeComponent();
+
+            GetEvents();
+            GetTools();
+            GetInputs();
+
+            inspector = new Inspector(inspectorGrid);
+            Runtime.Editor = inspector;
+
+            Console.Print(motd, true);
+
+            OnStageSet(Runtime.Current.GetStage());
+            OnProjectSet(Runtime.Current.LoadedProject);
+
+            Runtime.OutputImages.Add(image);
+            Runtime.ToggleRendering();
+
+        }
+
+        private void GetEvents()
+        {
             Closing += OnDisable;
             MouseWheel += OnMouseWheelMoved;
 
@@ -82,35 +105,29 @@ namespace pixel_editor
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
-            Tools = Tool.InitializedDerived();
+            Runtime.OnProjectSet += OnProjectSet;
+            Runtime.OnStageSet += OnStageSet;
+        }
+
+        private void GetInputs()
+        {
+            Input.RegisterAction(SendCommandKeybind, Key.Return);
+            Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
+            Input.RegisterAction(StartStop, Key.LeftCtrl);
+            Input.RegisterAction((w) => OnSyncBtnPressed(w, null), Key.LeftCtrl);
+        }
+
+        private static void GetTools()
+        {
+            Tools = Tool.InitializeToolkit();
 
             foreach (Tool tool in Tools)
                 tool.init_internal();
 
             foreach (Tool tool in Tools)
                 tool.Awake();
-
-            Input.RegisterAction(SendCommandKeybind, Key.Return);
-            Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
-            Input.RegisterAction(StartStop, Key.LeftCtrl);
-            Input.RegisterAction((w) => OnSyncBtnPressed(w, null), Key.LeftCtrl);
-
-            inspector = new Inspector(inspectorGrid);
-            Runtime.Editor = inspector;
-
-
-            Task.Run(() => Console.Print("Session Started. Type 'help();' for a list of commands.", true));
-
-            Runtime.OnProjectSet += OnProjectSet;
-            Runtime.OnStageSet += OnStageSet;
-
-            OnStageSet(Runtime.Current.GetStage());
-            OnProjectSet(Runtime.Current.LoadedProject);
-
-            Runtime.OutputImages.Add(image);
-            Runtime.ToggleRendering();
-
         }
+
         private void Update(object? sender, EventArgs e)
         {
             CMouse.Update();

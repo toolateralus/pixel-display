@@ -12,36 +12,129 @@ namespace pixel_renderer
     public class Stage : Asset
     {
         [JsonProperty]
-        public Metadata Background; 
+        public Metadata backgroundMetadata; 
         [JsonProperty]
         public Vec2 backgroundSize = new(512, 512);
         [JsonProperty]
         public TextureFiltering backgroundFiltering = TextureFiltering.Point; 
         [JsonProperty]
         public Vec2 backgroundOffset = new(0, 0);
+        [JsonProperty]
+        public List<Node> nodes = new();
 
-        private Bitmap init_bckground;
-        public JImage? InitializedBackground
+        private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
+        private StageRenderInfo? stage_render_info = null;
+        public StageRenderInfo StageRenderInfo
         {
             get
             {
-                if (init_bckground is null && Background != null)
-                    init_bckground = GetBackground();
+                var wasNull = stage_render_info is null;
+                var stage = Runtime.Current.GetStage();
+                stage_render_info ??= new(stage);
 
-                if (init_bckground != null)
-                {
-                    backgroundJimage = new(CBit.PixelArrayFromBitmap(init_bckground));
-                }
-                else
-                {
-                    init_bckground ??= new(256, 256);
-                    backgroundJimage = new(CBit.PixelArrayFromBitmap(init_bckground));
-                }
-                return backgroundJimage;
+                if (!wasNull)
+                    stage_render_info.Refresh(stage);
+
+                return stage_render_info;
             }
-            set => backgroundJimage = value; 
+            set { stage_render_info = value; }
         }
-        public JImage backgroundJimage = new(); 
+        public JImage GetBackground()
+        {
+            if (background == null && backgroundMetadata != null)
+                    return background = init_background();
+            return background ?? throw new NullReferenceException(nameof(background));
+        }
+        public JImage background = new(); 
+        public bool NodesBusy { get; private set; }
+        public void Awake()
+        {
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                Node node = nodes[i];
+                node.ParentStage = this;
+                node.Awake();
+            }
+        }
+        public void Update()
+        {
+            NodesBusy = true;
+            lock (nodes)
+            {
+
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    Node node = nodes[i];
+                    node.Update();
+                }
+            }
+            NodesBusy = false;
+
+            for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
+            {
+                (Action<object[]>, object[]) kvp = delayedActionQueue.Dequeue();
+
+                object[] args = kvp.Item2;
+                Action<object[]> action = kvp.Item1;
+
+                action.Invoke(args);
+            }
+        }
+        public void FixedUpdate(float delta)
+        {
+                NodesBusy = true;
+            lock (nodes)
+            {
+
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    Node node = nodes[i];
+                    node.FixedUpdate(delta);
+                }
+
+            }
+                NodesBusy = false;
+        }
+        public override void Sync()
+        {
+            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
+            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
+        }
+
+        public void SetBackground(JImage value)
+        {
+            background = value;
+        }
+        public void SetBackground(Bitmap value)
+        {
+            background = new(value);
+        }
+        public void SetBackground(Pixel[,] value)
+        {
+            background = new(value);
+        }
+
+        private JImage init_background()
+        {
+            if (File.Exists(backgroundMetadata.Path))
+                return background = new(new Bitmap(backgroundMetadata.Path));
+            throw new MissingMetadataException($"Metadata :\"{backgroundMetadata.Path}\". File not found.");
+        }
+        #region Node Utils
+        public List<Node> GetNodesAtGlobalPosition(Vec2 position)
+        {
+            List<Node> outNodes = new List<Node>();
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+                if (node.GetComponent<Sprite>() is not Sprite sprite)
+                    continue;
+                if (!position.IsWithin(node.Position, node.Position + sprite.size))
+                    continue;
+                outNodes.Add(node);
+            }
+            return outNodes;
+        }
 
         public void AddNode(Node node)
         {
@@ -120,11 +213,6 @@ namespace pixel_renderer
                                            select sprite);
             return sprites;
         }
-        public override void Sync()
-        {
-            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
-            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
-        }
         private void RemoveNode(Node? node)
         {
             object[] args = { node };
@@ -141,37 +229,11 @@ namespace pixel_renderer
             }
             else remove_node(args);
         }
-        #region Node Utils
 
-        [JsonProperty]
-        public List<Node> nodes = new();
-        public bool NodesBusy { get; private set; }
-
-        #endregion Node Utils
-
-        #region Misc Utils
-
-        private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
-        private StageRenderInfo? stage_render_info = null;
-        public StageRenderInfo StageRenderInfo
-        {
-            get
-            {
-                var wasNull = stage_render_info is null;
-                var stage = Runtime.Current.GetStage();
-                stage_render_info ??= new(stage);
-
-                if (!wasNull)
-                    stage_render_info.Refresh(stage);
-
-                return stage_render_info;
-            }
-            set { stage_render_info = value; }
-        }
-        #endregion Misc Utils
 
 
 
+        #endregion Node Utils
         #region development defaults
 
         public static Metadata DefaultBackgroundMetadata
@@ -208,70 +270,7 @@ namespace pixel_renderer
         }
 
         #endregion development defaults
-
-        #region Engine Stuff
-
-        public void Awake()
-        {
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                Node node = nodes[i];
-                node.ParentStage = this;
-                node.Awake();
-            }
-        }
-        public Stage Copy()
-        {
-            var output = new Stage(Name, Background, nodes, UUID);
-            return output;
-        }
-        public void FixedUpdate(float delta)
-        {
-                NodesBusy = true;
-            lock (nodes)
-            {
-
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    Node node = nodes[i];
-                    node.FixedUpdate(delta);
-                }
-
-            }
-                NodesBusy = false;
-        }
-        public Bitmap GetBackground()
-        {
-            if (File.Exists(Background.Path))
-                return new(Background.Path);
-            throw new MissingMetadataException($"Metadata :\"{Background.Path}\". File not found.");
-        }
-        public void Update()
-        {
-            NodesBusy = true;
-            lock (nodes)
-            {
-
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    Node node = nodes[i];
-                    node.Update();
-                }
-            }
-            NodesBusy = false;
-
-            for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
-            {
-                (Action<object[]>, object[]) kvp = delayedActionQueue.Dequeue();
-
-                object[] args = kvp.Item2;
-                Action<object[]> action = kvp.Item1;
-
-                action.Invoke(args);
-            }
-        }
-        #endregion Engine Stuff
-
+        #region constructors
         public Stage()
         {
         }
@@ -299,22 +298,11 @@ namespace pixel_renderer
                 }
             }
             Metadata = metadata;
-            Background = background;
+            backgroundMetadata = background;
+            init_background(); 
         }
-        public List<Node> GetNodesAtGlobalPosition(Vec2 position)
-        {
-            List<Node> outNodes = new List<Node>();
-            for(int i = 0; i < nodes.Count; i++)
-            {
-                var node = nodes[i];
-                if (node.GetComponent<Sprite>() is not Sprite sprite)
-                    continue;
-                if (!position.IsWithin(node.Position, node.Position + sprite.size))
-                    continue;
-                outNodes.Add(node);
-            }
-            return outNodes;
-        }
+
+
         /// <summary>
         /// Memberwise copy constructor
         /// </summary>
@@ -327,7 +315,9 @@ namespace pixel_renderer
             this.Name = Name;
             UUID = existingUUID ?? pixel_renderer.UUID.NewUUID();
             this.nodes = nodes;
-            Background = backgroundMeta;
+            backgroundMetadata = backgroundMeta;
+            init_background();
         }
+        #endregion
     }
 }

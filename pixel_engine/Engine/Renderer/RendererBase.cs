@@ -221,7 +221,7 @@
                 switch (sprite.textureFiltering)
                 {
                     case TextureFiltering.Point:
-                        color = sprite.texture.jImage.GetPixel((int)colorPos.x, (int)colorPos.y);
+                        color = sprite.texture.GetPixel((int)colorPos.x, (int)colorPos.y);
                         break;
                     case TextureFiltering.Bilinear:
                         Vec2Int colorSize = sprite.ColorDataSize;
@@ -231,8 +231,8 @@
                         int bottom = (top + 1) % colorSize.y;
                         float xOffset = colorPos.x - left;
                         float yOffset = colorPos.y - top;
-                        Pixel topJPixel = Pixel.Lerp(sprite.texture.jImage.GetPixel(left, top), sprite.texture.jImage.GetPixel(right, top), xOffset);
-                        Pixel botJPixel = Pixel.Lerp(sprite.texture.jImage.GetPixel(left, bottom), sprite.texture.jImage.GetPixel(right, bottom), xOffset);
+                        Pixel topJPixel = Pixel.Lerp(sprite.texture.GetPixel(left, top), sprite.texture.GetPixel(right, top), xOffset);
+                        Pixel botJPixel = Pixel.Lerp(sprite.texture.GetPixel(left, bottom), sprite.texture.GetPixel(right, bottom), xOffset);
                         color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
                         break;
                     default:

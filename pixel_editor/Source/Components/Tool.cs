@@ -23,7 +23,7 @@ namespace pixel_editor
         {
 
         }
-        public static List<Tool> InitializedDerived()
+        public static List<Tool> InitializeToolkit()
         {
             List<Tool> list = new List<Tool>();
             var toolsTypes = pixel_renderer.Constants.GetInheritedTypesFromBase<Tool>();

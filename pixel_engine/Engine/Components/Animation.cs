@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Security.Policy;
 using System.Windows.Media.Animation;
@@ -28,14 +29,15 @@ namespace pixel_renderer
         internal int frameIndex = 0;
 
         [JsonProperty]
-        public Dictionary<(int, int), Pixel[,]> frames = new();
+        public Dictionary<(int, int), JImage> frames = new();
 
-        Pixel[,] lastFrame = new Pixel[0,0];
+        JImage? lastFrame;
 
         public Animation(Metadata[] frameData, int framePadding = 24) => CreateAnimation(frameData, framePadding);
 
         public void CreateAnimation(Metadata[] frameData, int framePadding = 24)
         {
+
             if (frameData is null) 
                 return;
 
@@ -50,13 +52,17 @@ namespace pixel_renderer
 
                 Bitmap img = new(imgMetadata.Path);
 
-                frames.Add((i, i + padding - 1), CBit.PixelArrayFromBitmap(img));
+                var colors = CBit.PixelArrayFromBitmap(img);
+
+                JImage image = new(colors);
+
+                frames.Add((i, i + padding - 1), image);
             }
         }
        
 
 
-        public Pixel[,] GetFrame()
+        public JImage GetFrame(bool shouldIncrement = true)
         {
             if (frameIndex > frames.Count * padding - 1 && looping)
                 frameIndex = startIndex;
@@ -65,7 +71,8 @@ namespace pixel_renderer
                     if (frameIndex.WithinRange(frame.Key.Item1, frame.Key.Item2))
                         lastFrame = frame.Value;
             
-            frameIndex++;
+            if(shouldIncrement)
+                frameIndex++;
 
             return lastFrame;
         }

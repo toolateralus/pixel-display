@@ -1,6 +1,4 @@
 ﻿
-using System;
-using System.Linq;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
@@ -8,8 +6,6 @@ namespace pixel_renderer
     public class StagingHost
     {
         public Node? lastSelected;
-
-        static Runtime runtime => Runtime.Current;
         /// <summary>
         /// this is used for editor clicking.
         /// </summary>
@@ -42,24 +38,21 @@ namespace pixel_renderer
             result = null;
             return false;
         }
-
         private static void SelectNode(Sprite sprite) => sprite.selected_by_editor = true;
-
         public void DeselectNode()
         {
             if (lastSelected is null) return;
             var x = lastSelected.GetComponent<Sprite>();
-            x.selected_by_editor = false;
             lastSelected = null;
+            if (x is not null)
+            x.selected_by_editor = false;
         }
-
         public static void FixedUpdate(Stage stage)
         {
-            var delta = runtime.renderHost.info.FrameTime;
-            runtime.renderHost.info.frameCount++;
+            var delta = Runtime.Current.renderHost.info.FrameTime;
+            Runtime.Current.renderHost.info.frameCount++;
             stage.FixedUpdate(delta);
         }
-
         public static void Update(Stage m_stage)
         {
             m_stage.Update();

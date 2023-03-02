@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +13,11 @@ namespace pixel_renderer
     public class JImage
     {
         [JsonProperty]
-        public int width;
+        public readonly int width;
         [JsonProperty]
-        public int height;
+        public readonly int height;
         [JsonProperty]
-        public byte[] data;
-
+        internal byte[] data;
         public Vec2Int Size => new(width, height);
 
         public JImage()
@@ -26,12 +26,32 @@ namespace pixel_renderer
             height = 0;
             data = Array.Empty<byte>();
         }
-        public JImage(Pixel[,] input)
+        public JImage(Vec2Int size, byte[] data)
         {
-            width = input.GetLength(0); 
-            height = input.GetLength(1); 
-            var data = CBit.ByteArrayFromColorArray(input);
-            this.data =  data;
+            width = size.x;
+            height = size.y;
+            this.data = data;
+        }
+
+        public JImage(Pixel[,] pixels)
+        {
+            width = pixels.GetLength(0);
+            height = pixels.GetLength(1);
+            byte[] byteData = CBit.ByteArrayFromColorArray(pixels);
+            data = byteData;
+        }
+        public JImage(Bitmap bmpInput)
+        {
+            Pixel[,] pixels;
+            lock (bmpInput)
+                pixels = CBit.PixelArrayFromBitmap(bmpInput);
+
+            width = pixels.GetLength(0);
+            height = pixels.GetLength(1);
+
+            byte[] byteData = CBit.ByteArrayFromColorArray(pixels);
+
+            data = byteData;
         }
 
         public void SetPixel(int x, int y, Pixel color)
@@ -45,8 +65,11 @@ namespace pixel_renderer
             data[position + 2] = color.g;
             data[position + 3] = color.b;
         }
-        public Pixel GetPixel(int x, int y)
+        public  Pixel GetPixel(int x, int y)
         {
+            if (width + height == 0)
+                return Pixel.Black; 
+
             int position = (y * width + x) * 4;
             var a = data[position + 0];
             var r = data[position + 1];
@@ -55,6 +78,7 @@ namespace pixel_renderer
             Pixel col = new(a, r, g, b);
             return col;
         }
+
       
     }
 }

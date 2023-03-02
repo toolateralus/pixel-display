@@ -94,27 +94,18 @@ namespace pixel_renderer
             if (animation is null)
                 return;
 
-            Pixel[,]? color = animation?.GetFrame();
-            if (color != null)
-            {
-                var colors = CBit.ByteArrayFromColorArray(color);
-                int x = colors.GetLength(0);
-                int y = colors.GetLength(1);
-                var vec = new Vec2Int(x, y);
-                sprite?.Draw(vec, colors);
-            }
+            var img  = animation?.GetFrame(true);
+            sprite?.Draw(img);
         }
         public void Previous(int increment = 1)
         {
             if (animation is null)
                 return; 
+            animation.frameIndex -= 2;
 
-            animation.frameIndex = animation.frameIndex - 2;
-            Pixel[,]? color = animation?.GetFrame();
-            if (color != null)
-            {
-                sprite?.Draw(new (color.GetLength(0), color.GetLength(1)), CBit.ByteArrayFromColorArray(color));
-            }
+            var img = animation?.GetFrame(true);
+         
+            sprite?.Draw(img);
         }
         public void Start(float speed = 1, bool looping = true)
         {

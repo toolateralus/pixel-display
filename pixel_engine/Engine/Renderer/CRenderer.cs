@@ -18,7 +18,7 @@ namespace pixel_renderer
             if (Runtime.Current.GetStage() is not Stage stage) return;
             if (baseImageDirty)
             {
-                baseImage = stage.InitializedBackground; 
+                baseImage = stage.GetBackground(); 
                 baseImageDirty = false;
             }
 

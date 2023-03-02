@@ -4,13 +4,8 @@ using Key = System.Windows.Input.Key;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
-using System.DirectoryServices;
-using System.Runtime.CompilerServices;
 using System.Drawing;
-using System.Xml.Linq;
 using System.Threading.Tasks;
-using System.Data;
-using System.Windows.Data;
 using pixel_renderer.Assets;
 using System.Linq;
 
@@ -44,8 +39,8 @@ namespace pixel_renderer
         }
         public static Metadata test_animation_data(int index)
         {
-            string x = $"Animation{index}"; 
-            return AssetLibrary.FetchMeta(x);
+            string name = $"Animation{index}"; 
+            return AssetLibrary.FetchMeta(name);
         }
 
         public static Node test_child_node(Node? parent = null)

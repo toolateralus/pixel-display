@@ -15,6 +15,36 @@ namespace pixel_renderer
             this.scale = scale;
             this.jImage = image; 
         }
+        public Texture(Vec2Int scale, Metadata imgData)
+        {
+            SetImage(imgData, scale);
+        }
+        public Texture(Vec2Int size, Pixel color)
+        {
+            scale = size;
+            SetImage(color);
+        }
+        [Field] 
+        [JsonProperty] 
+        public Vec2Int scale = new(1, 1);
+        [JsonProperty] 
+        internal Metadata imgData;
+        [JsonProperty]
+        private JImage jImage = new();
+        Bitmap initializedBitmap;
+        public Bitmap? Image {
+            get 
+            {
+                if (!HasImage && HasImageMetadata)
+                    initializedBitmap = new(imgData.Path);
+                return initializedBitmap;
+            }
+            set => initializedBitmap = value;
+        }
+        public bool HasImage => initializedBitmap != null;
+        internal bool HasImageMetadata => imgData != null;
+        public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
+
         public void SetImage(Metadata imgData, Vec2Int scale)
         {
             this.scale = scale;
@@ -30,14 +60,12 @@ namespace pixel_renderer
                 Image = new(imgData.Path);
             }
             jImage = new();
-            var colors =  CBit.PixelArrayFromBitmap(Image);
+            var colors = CBit.PixelArrayFromBitmap(Image);
             SetImage(colors);
         }
         public void SetImage(Vec2Int size, byte[] data)
         {
-            jImage.height = size.y;
-            jImage.width = size.x;
-            jImage.data = data; 
+            jImage = new(size, data);
         }
         public void SetImage(Pixel[,] colors)
         {
@@ -47,39 +75,28 @@ namespace pixel_renderer
         {
             jImage = new(CBit.SolidColorSquare(scale, color));
         }
-        public Texture(Vec2Int scale, Metadata imgData)
+
+        public Pixel GetPixel(int x, int y) => jImage.GetPixel(x, y);
+        public void SetPixel(int x, int y, Pixel pixel) => jImage?.SetPixel(x, y, pixel);
+
+        public JImage GetImage()
         {
-            SetImage(imgData, scale);
+            return jImage; 
         }
-        public Texture(Vec2Int size, Pixel color)
+
+        public byte[] Data
         {
-            scale = size;
-            SetImage(color);
+            get => jImage.data;
         }
-       
-        [Field] 
-        [JsonProperty] 
-        public Vec2Int scale = new(1, 1);
-        
-        [JsonProperty] 
-        internal Metadata imgData;
-        
-        [JsonProperty]
-        public JImage jImage = new();
-        
-        Bitmap image;
-      
-        public Bitmap? Image {
-            get 
-            {
-                if (!HasImage && HasImageMetadata)
-                    image = new(imgData.Path);
-                return image;
-            }
-            set => image = value;
+
+        internal int Width
+        {
+            get => jImage.width; 
         }
-        public bool HasImage => image != null;
-        internal bool HasImageMetadata => imgData != null;
-        public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
+
+        internal int Height
+        {
+            get => jImage.height; 
+        }
     }
 }
