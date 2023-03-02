@@ -32,7 +32,16 @@ namespace pixel_editor
                 var obj = Activator.CreateInstance(type);
                 if (obj is Tool tool)
                     list.Add(tool);
+              
+
             }
+
+            foreach (Tool tool in list)
+                tool.init_internal();
+
+            foreach (Tool tool in list)
+                tool.Awake();
+
             return list;
         }
     }

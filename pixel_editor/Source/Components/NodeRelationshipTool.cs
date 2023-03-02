@@ -18,7 +18,7 @@ namespace pixel_editor
         {
             if (Editor.Current.LastSelected is Node _parent)
             {
-                if (CMouse.LeftPressedThisFrame && Input.GetInputValue(Key.RightShift) && !busy)
+                if (CMouse.LeftPressedThisFrame && Input.Get(Key.RightShift) && !busy)
                 {
                     parent = _parent;
                     busy = true;
@@ -27,7 +27,7 @@ namespace pixel_editor
                     {
                         shouldDraw = true;
                         await Task.Delay(30);
-                        if (!Input.GetInputValue(Key.RightShift))
+                        if (!Input.Get(Key.RightShift))
                         {
                             ResetTool();
                             break;

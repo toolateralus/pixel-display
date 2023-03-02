@@ -47,7 +47,7 @@ namespace pixel_editor
                     if (vertices[i].SqrDistanceFrom(mPos) <
                         vertices[closestVert].SqrDistanceFrom(mPos))
                         closestVert = i;
-                if (Input.GetInputValue(Key.Q) &&
+                if (Input.Get(Key.Q) &&
                     vertices[closestVert].SqrDistanceFrom(mPos) < highlightDistance * highlightDistance)
                 {
                     selectedVertIndex = closestVert;
@@ -73,7 +73,7 @@ namespace pixel_editor
                         {
                             Vec2 newVertex = dirNormalized * upDot + v1;
                             highlightedVertices.Add(newVertex);
-                            if (Input.GetInputValue(Key.V))
+                            if (Input.Get(Key.V))
                             {
                                 List<Vec2> newVertices = vertices.ToList();
                                 newVertices.Insert(i + 1, newVertex);
@@ -91,7 +91,7 @@ namespace pixel_editor
             }
             else
             {
-                if (!Input.GetInputValue(Key.V))
+                if (!Input.Get(Key.V))
                 {
                     vertSize = 2;
                     foreach (Vec2 vert in vertices)
@@ -108,8 +108,8 @@ namespace pixel_editor
         Collider? GetSelectedCollider()
         {
             if (Runtime.Current.GetStage() is null ||
-                !Input.GetInputValue(Key.LeftCtrl) ||
-                !Input.GetInputValue(Key.LeftShift))
+                !Input.Get(Key.LeftCtrl) ||
+                !Input.Get(Key.LeftShift))
             {
                 selectedVertIndex = -1;
                 return null;

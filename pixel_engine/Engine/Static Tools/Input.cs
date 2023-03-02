@@ -148,7 +148,7 @@ namespace pixel_renderer
                 }
             }
         }
-        public static bool GetInputValue(InputEventType type, string key)
+        public static bool Get(InputEventType type, string key)
         {
             return Application.Current.Dispatcher.Invoke(() => { 
             Key key_ = Enum.Parse<Key>(key);
@@ -162,7 +162,7 @@ namespace pixel_renderer
             return input_value;
             });
         }
-        public static bool GetInputValue(Key key, InputEventType type = InputEventType.KeyDown)
+        public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
             return Application.Current.Dispatcher.Invoke(() => {
                 var input_value = type switch
@@ -177,7 +177,7 @@ namespace pixel_renderer
         }
         public static bool GetInputValueByType(ref Key key, InputEventType type = InputEventType.KeyDown)
         {
-            return GetInputValue(key, type);
+            return Get(key, type);
         }
         public static void RegisterAction(Action<object[]?> action, Key key, InputEventType type = InputEventType.KeyDown)
         {

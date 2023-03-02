@@ -77,7 +77,8 @@ namespace pixel_editor
             InitializeComponent();
 
             GetEvents();
-            GetTools();
+            Tools = Tool.InitializeToolkit();
+
             GetInputs();
 
             inspector = new Inspector(inspectorGrid);
@@ -116,18 +117,6 @@ namespace pixel_editor
             Input.RegisterAction(StartStop, Key.LeftCtrl);
             Input.RegisterAction((w) => OnSyncBtnPressed(w, null), Key.LeftCtrl);
         }
-
-        private static void GetTools()
-        {
-            Tools = Tool.InitializeToolkit();
-
-            foreach (Tool tool in Tools)
-                tool.init_internal();
-
-            foreach (Tool tool in Tools)
-                tool.Awake();
-        }
-
         private void Update(object? sender, EventArgs e)
         {
             CMouse.Update();
@@ -185,7 +174,7 @@ namespace pixel_editor
         #region Input Events
         private void StartStop(object[]? obj)
         {
-            if (Input.GetInputValue(0, "P"))
+            if (Input.Get(0, "P"))
                 Runtime.TogglePhysics();
 
         }
@@ -323,8 +312,6 @@ namespace pixel_editor
         private void OnDisable(object? sender, EventArgs e)
         {
             stageWnd?.Close();
-            Runtime.Current.mainWnd.Close();
-            engine?.Close();
         }
         private void OnPlay(object sender, RoutedEventArgs e)
         {
@@ -354,7 +341,7 @@ namespace pixel_editor
                 AssetLibrary.Sync();
                 return; 
             }
-            if (!Input.GetInputValue(Key.S))
+            if (!Input.Get(Key.S))
                 return; 
             AssetLibrary.Sync();
         }

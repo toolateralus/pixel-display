@@ -84,7 +84,7 @@ namespace pixel_renderer
             if (!takingInput)
                 return;
 
-            var freezeButtonPressed = GetInputValue(Key.LeftShift);
+            var freezeButtonPressed = Get(Key.LeftShift);
 
             if (freezeButtonPressed && !freezeButtonPressedLastFrame)
                 thisPos = parent.Position;

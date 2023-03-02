@@ -87,6 +87,7 @@ namespace pixel_editor
         private void ComponentEditor_Closed(object? sender, EventArgs e)
         {
             Editor.Current.OnEditorClosed?.Invoke(EditorKey, this);
+            Closed -= ComponentEditor_Closed; 
         }
         private int SerializeMethods(Grid viewer, int i)
         {
