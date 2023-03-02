@@ -41,13 +41,13 @@ namespace pixel_renderer
         public static List<Image> OutputImages = new();
         
         private protected Thread renderThread;
-        private BackgroundWorker physicsWorker;
+        private protected static BackgroundWorker physicsWorker;
      
         public static object? Editor = null;
 
         public static bool IsRunning { get; private set; }
         public static bool PhysicsStopping { get; private set; }
-        public static bool PhysicsInitialized { get; private set; }
+        public static bool physicsRunning { get; private set; }
         public static bool Initialized { get; private set; }
         public static bool IsTerminating { get; private set; }
 
@@ -71,14 +71,29 @@ namespace pixel_renderer
 
         public static void TogglePhysics()
         {
-            if (!PhysicsStopping)
+            if (!physicsRunning)
             {
-                PhysicsStopping = true;
+                physicsRunning = true;
+                StartPhysicsWorker();
                 return;
             }
-            PhysicsStopping = false;
-            Current.InitializePhysics();
+            physicsRunning = false;
+            StopPhysicsWorker();
         }
+
+        private static void StopPhysicsWorker()
+        {
+            physicsWorker.DoWork -= OnPhysicsTick;
+            physicsWorker.Dispose();
+        }
+
+        private static void StartPhysicsWorker()
+        {
+            physicsWorker ??= new BackgroundWorker();
+            physicsWorker.DoWork += OnPhysicsTick;
+            physicsWorker.RunWorkerAsync();
+        }
+
         public static void ToggleRendering()
         {
             if (IsRunning)
@@ -88,6 +103,7 @@ namespace pixel_renderer
             }
             IsRunning = true;
         }
+
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -98,40 +114,45 @@ namespace pixel_renderer
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
-        private void OnRenderTick()
+        private static void OnRenderTick()
         {
-            while (renderThread != null && renderThread.IsAlive)
+            while (Current.renderThread != null && Current.renderThread.IsAlive)
             {
-               
                 if (IsTerminating)
                     return;
+
                 CMouse.Update();
+
                 if (Application.Current is null)
                     return;
+
                 Application.Current.Dispatcher.Invoke(() => { Input.Refresh(); });
                 CMouse.MouseWheelDelta = 0;
+
                 if (IsRunning)
                 {
-                    StagingHost.Update(stage);
-                    renderHost?.Render();
+                    StagingHost.Update(Current.stage);
+                    Current.renderHost?.Render();
 
                     if (Application.Current is null)
                         return;
+
+                    var renderer = Current.renderHost?.GetRenderer();
+
+                    if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
+                        continue;
+
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        CMouse.MouseWheelDelta = 0;
-
-                        if (OutputImages.Count == 0 || OutputImages.First() is null) return;
-                        var renderer = renderHost.GetRenderer();
                         CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
                     });
                     Thread.Sleep(1);
                 }
             }
         }
-        private void OnPhysicsTick(object sender, DoWorkEventArgs e)
+        private static void OnPhysicsTick(object sender, DoWorkEventArgs e)
         {
-            while (!PhysicsStopping)
+            while (physicsRunning)
             {
                 if (IsTerminating)
                     return;
@@ -139,36 +160,24 @@ namespace pixel_renderer
                     return;
                 
                 Thread.Sleep(Constants.PhysicsIntervalMs);
-                // Wait for 16ms to maintain 60fps
-                CMouse.Update();
-                Application.Current.Dispatcher.Invoke(() => Input.Refresh());
 
-                if (stage is null)
+                if (!IsRunning)
                     continue;
 
-                if (!IsRunning) 
+                if (Current.stage is null)
                     continue;
 
-                //TODO: make framerate here
-                StagingHost.FixedUpdate(stage);
+                StagingHost.FixedUpdate(Current.stage);
                 Collision.Run();
             }
         }
-        /// <summary>
-        /// this is a method since it has to be initialized externally but the fields are hidden.
-        /// </summary>
-        /// <param name="mainWnd"></param>
-        /// <param name="project"></param>
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             current ??= new(mainWnd, project);
         }
         private void InitializePhysics()
         {
-            PhysicsInitialized = true;
-            physicsWorker ??= new BackgroundWorker();
-            physicsWorker.DoWork += OnPhysicsTick;
-            physicsWorker.RunWorkerAsync();
+         
         }
         public void SetProject(Project project)
         {
