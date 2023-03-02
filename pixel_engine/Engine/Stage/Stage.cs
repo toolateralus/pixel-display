@@ -273,9 +273,10 @@ namespace pixel_renderer
         #region constructors
         public Stage()
         {
+
         }
         [JsonConstructor]
-        internal Stage(List<Node> nodes, Metadata metadata, Metadata background, string name = "Stage Asset") : base(name, true)
+        internal Stage(List<Node> nodes, Metadata metadata, Metadata backgroundMetadata, string name = "Stage Asset") : base(name, true)
         {
             Name = name;
             this.nodes = nodes;
@@ -298,7 +299,7 @@ namespace pixel_renderer
                 }
             }
             Metadata = metadata;
-            backgroundMetadata = background;
+            this.backgroundMetadata = backgroundMetadata;
             init_background(); 
         }
 
@@ -310,12 +311,12 @@ namespace pixel_renderer
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        internal Stage(string Name, Metadata backgroundMeta, List<Node> nodes, string? existingUUID = null) : this()
+        internal Stage(string Name, Metadata backgroundMetadata, List<Node> nodes, string? existingUUID = null) : this()
         {
             this.Name = Name;
             UUID = existingUUID ?? pixel_renderer.UUID.NewUUID();
             this.nodes = nodes;
-            backgroundMetadata = backgroundMeta;
+            this.backgroundMetadata = backgroundMetadata;
             init_background();
         }
         #endregion
