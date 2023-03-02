@@ -5,11 +5,62 @@ namespace pixel_renderer
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
+    using System.Numerics;
     using System.Reflection;
     using System.Runtime.CompilerServices;
 
     public static class ExtensionMethods
     {
+        public static float DistanceSquared(Vector2 a, Vector2 b)
+        {
+            return (b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y);
+        }
+        public static float SqrDistanceFrom(this Vector2 a, Vector2 v)
+        {
+            return DistanceSquared(a, v);
+        }
+        public static float DistanceFrom(this Vector2 v,  Vector2 a)
+        {
+            return v.Distance(a);
+        }
+        public static float Distance(this Vector2 a, Vector2 b)
+        {
+            var distanceSquared = DistanceSquared(a, b);
+            return CMath.Sqrt(distanceSquared);
+        }
+        public static float Dot(this Vector2 a, Vector2 b)
+        {
+            return (a.X * b.X) + (a.Y * b.Y);
+        }
+        public static float Length(this Vector2 v) => MathF.Sqrt(v.X * v.X + v.Y * v.Y);
+        public static Vector2 Rotated(this Vector2 v, float angle)
+        {
+            float cos = MathF.Cos(angle);
+            float sin = MathF.Sin(angle);
+            return new Vector2(cos * v.X - sin * v.Y, sin * v.X + cos * v.Y);
+        }
+        public static void Rotate(this Vector2 v, float angle)
+        {
+            float cos = MathF.Cos(angle);
+            float sin = MathF.Sin(angle);
+            float newX = cos * v.X - sin * v.Y;
+            float newY = sin * v.X + cos * v.Y;
+            v.X = newX;
+            v.Y = newY;
+        }
+        public static float SqrMagnitude(this Vector2 v)
+        {
+            var product = MathF.FusedMultiplyAdd(v.X, v.X, v.Y * v.Y);
+            return product; 
+        }
+        public readonly static Vector2 one = new(1, 1);
+        public readonly static Vector2 zero = new(0, 0);
+        public static Vector2 up = new(0, -1);
+        public static Vector2 down = new(0, 1);
+        public static Vector2 left = new(-1, 0);
+        public static Vector2 right = new(1, 0);
+
+
         private const float Epsilon = float.Epsilon;
         #region Numbers
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
@@ -21,7 +72,20 @@ namespace pixel_renderer
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Squared(this float v) => v * v;
-        
+
+        public static void Clamp(this ref Vector2 v, Vector2 min, Vector2 max)
+        {
+            v.X = v.X.Clamp(min.X, max.X);
+            v.Y = v.Y.Clamp(min.Y, max.Y);
+        }
+
+
+        public static void Wrap(this Vector2 v, Vector2 max) { v.X = v.X.Wrapped(max.X); v.Y = v.Y.Wrapped(max.Y); }
+        public static Vector2 Wrapped(this Vector2 v, Vector2 max) => new(v.X.Wrapped(max.X), v.Y.Wrapped(max.Y));
+        public static bool IsWithin(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithin(min.X, max.X) && v.Y.IsWithin(min.Y, max.Y);
+        public static bool IsWithinMaxExclusive(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithinMaxExclusive(min.X ,max.X) && v.Y.IsWithinMaxExclusive(min.Y, max.Y);
+     
+
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
         public static float Wrapped(this float v, float max)
         {
@@ -34,22 +98,21 @@ namespace pixel_renderer
         public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion
         #region Vectors
-        public static void GetDivideSafeRef(this ref Vec2 v)
-        {
-            v.x = v.x.GetDivideSafe();
-            v.y = v.y.GetDivideSafe();
+        public static void GetDivideSafeRef(this ref Vector2 v)
+        { 
+            v.X = v.X.GetDivideSafe();
+            v.Y = v.Y.GetDivideSafe();
         }
-        public static void GetDivideSafe(this Vec2 v)
+        public static void GetDivideSafe(this Vector2 v)
         {
-            v.x = v.x.GetDivideSafe();
-            v.y = v.y.GetDivideSafe();
+            v.X = v.X.GetDivideSafe();
+            v.Y = v.Y.GetDivideSafe();
         }
-        public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.y); }
-        public static Vec2 WithValue(this Vec2 v, float? x = null, float? y = null) { return new Vec2(x ?? v.x, y ?? v.y); }
-        public static Vec2 WithScale(this Vec2 v, float x = 1, float y = 1) { return new Vec2(v.x * x, v.y * y); }
-        public static double Sum(this Vec2 v) => v.x + v.y;
-        public static double Sum(this Vec3 v) => v.x + v.y + v.z;
-        public static float Distance(this Vec2 v, Vec2 end) => (v - end).Length();
+        public static Vector2 WithValue(this Vector2 v, int? x = null, int? y = null) { return new Vector2(x ?? v.X, y ?? v.Y); }
+        public static Vector2 WithValue(this Vector2 v, float? x = null, float? y = null) { return new Vector2(x ?? v.X, y ?? v.Y); }
+        public static Vector2 WithScale(this Vector2 v, float x = 1, float y = 1) { return new Vector2(v.X * x, v.Y * y); }
+        public static double Sum(this Vector2 v) => v.X + v.Y;
+        public static double Sum(this Vector3 v) => v.X + v.Y + v.Z;
         
         /// <summary>
         ///  TODO: fix possible  'divide by zero'
@@ -57,20 +120,20 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="v"></param>
         /// <returns>A normalized Vector from the length of the current</returns>
-        public static Vec2 Normalized(this Vec2 v)
+        public static Vector2 Normalized(this Vector2 v)
         {
-            if (v.Equals(Vec2.zero))
-                return Vec2.zero;
-            //return new Vec2(v.x * v.x, v.y * v.y) / v.SqrMagnitude();
+            if (v.Equals(Vector2.Zero))
+                return Vector2.Zero;
+            //return new Vec2(v.X * v.X v.Y * v.Y) / v.SqrMagnitude();
             return v / v.Length();
         }
-        public static void Increment2D(this ref Vec2 v, float xMax, float xMin = 0)
+        public static void Increment2D(this ref Vector2 v, float xMax, float xMin = 0)
         {
-            v.x++;
-            if (v.x >= xMax)
+            v.X++;
+            if (v.X >= xMax)
             {
-                v.y++;
-                v.x = xMin;
+                v.Y++;
+                v.X = xMin;
             }
         }
         #endregion
@@ -106,6 +169,11 @@ namespace pixel_renderer
                 if (!Constants.unsupported_chars.Contains(_char)) output += _char;
             }
             return output;
+        }
+
+        public static Vector2 Normal_LHS(this Vector2 v)
+        {
+            return new Vector2(-v.X, v.Y).Normalized();
         }
         #endregion
         #region Arrays

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -17,33 +18,33 @@ namespace pixel_renderer
         public const float MaxDepenetrationForce = 3f;
         public static int TerminalVelocity = 4;
 
-        public static Vec2 TerminalVec2()
+        public static Vector2 TerminalVec2()
         {
-            return new Vec2()
+            return new Vector2()
             {
-                x = TerminalVelocity,
-                y = TerminalVelocity,
+                X = TerminalVelocity,
+                Y = TerminalVelocity,
             };
         }
-        public static Vec3 TerminalVec3()
+        public static Vector3 TerminalVec3()
         {
-            return new Vec3()
+            return new Vector3()
             {
-                x = TerminalVelocity,
-                y = TerminalVelocity,
-                z = TerminalVelocity,
+                X = TerminalVelocity,
+                Y = TerminalVelocity,
+                Z = TerminalVelocity,
             };
         }
-        public static bool WithinTerminalVelocity(Vec2 velocity)
+        public static bool WithinTerminalVelocity(Vector2 velocity)
         {
-            return velocity.x <= TerminalVelocity && velocity.x >= -TerminalVelocity &&
-                velocity.y <= TerminalVelocity && velocity.y >= -TerminalVelocity;
+            return velocity.X <= TerminalVelocity && velocity.X >= -TerminalVelocity &&
+                velocity.Y <= TerminalVelocity && velocity.Y >= -TerminalVelocity;
         }
-        public static bool WithinTerminalVelocity(Vec3 velocity)
+        public static bool WithinTerminalVelocity(Vector3 velocity)
         {
-            return velocity.x <= TerminalVelocity && velocity.x >= -TerminalVelocity &&
-                velocity.y <= TerminalVelocity && velocity.y >= -TerminalVelocity &&
-                 velocity.z <= TerminalVelocity && velocity.z >= -TerminalVelocity;
+            return velocity.X <= TerminalVelocity && velocity.X >= -TerminalVelocity &&
+                velocity.Y <= TerminalVelocity && velocity.Y >= -TerminalVelocity &&
+                 velocity.Z <= TerminalVelocity && velocity.Z >= -TerminalVelocity;
         }
         public static bool WithinTerminalVelocity(Rigidbody rigidbody) => WithinTerminalVelocity(rigidbody.velocity);
         #endregion
@@ -51,18 +52,18 @@ namespace pixel_renderer
 
         public const int FramerateSampleThreshold = 60;
 
-        public static Vec2 PhysicsArea = new Vec2(2048, 2048);
+        public static Vector2 PhysicsArea = new Vector2(2048, 2048);
 
         public const int ScreenH = 256;
         public const int ScreenW = 256;
         public const int PhysicsIntervalMs = 16; 
 
-        public static Vec2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
-        public static Vec2 DefaultResolution => new(ScreenW, ScreenH);
+        public static Vector2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
+        public static Vector2 DefaultResolution => new(ScreenW, ScreenH);
 
 
-        public static Vec2 MaxResolution = new(3840, 3840);
-        public static Vec2 MinResolution = new(4, 4);
+        public static Vector2 MaxResolution = new(3840, 3840);
+        public static Vector2 MinResolution = new(4, 4);
 
 
         public static Pixel EditorHighlightColor = Color.Orange;

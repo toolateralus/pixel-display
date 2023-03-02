@@ -3,6 +3,7 @@ using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -90,7 +91,7 @@ namespace pixel_editor
             OnProjectSet(Runtime.Current.LoadedProject);
 
             Runtime.OutputImages.Add(image);
-            Runtime.ToggleRendering();
+            Runtime.Toggle();
 
         }
 
@@ -114,7 +115,6 @@ namespace pixel_editor
         {
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
-            Input.RegisterAction(StartStop, Key.LeftCtrl);
             Input.RegisterAction((w) => OnSyncBtnPressed(w, null), Key.LeftCtrl);
         }
         private void Update(object? sender, EventArgs e)
@@ -169,16 +169,10 @@ namespace pixel_editor
         public readonly EditorEventHandler Events = new();
         public byte[] Frame => Runtime.Current.renderHost.GetRenderer().Frame;
         public int Stride => Runtime.Current.renderHost.GetRenderer().Stride;
-        public Vec2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
+        public Vector2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         #endregion
         #region Input Events
-         Key P = Key.P; 
-        private void StartStop(object[]? obj)
-        {
-            if (Input.Get(ref P, 0))
-                Runtime.TogglePhysics();
-
-        }
+     
         private void ClearKeyboardFocus(object[]? obj)
         {
             Keyboard.ClearFocus();
@@ -315,7 +309,7 @@ namespace pixel_editor
         private void OnPlay(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            Runtime.TogglePhysics();
+            Runtime.Toggle(); 
             playBtn.Content = Runtime.IsRunning ? "On" : "Off";
             playBtn.Background = Runtime.IsRunning ? Brushes.LightGreen : Brushes.LightPink;
         }

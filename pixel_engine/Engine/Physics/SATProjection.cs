@@ -1,8 +1,10 @@
-﻿namespace pixel_renderer
+﻿using System.Numerics;
+
+namespace pixel_renderer
 {
     public class SATProjection
     {
-        public Vec2 normal;
+        public Vector2 normal;
         public float min;
         public float max;
     }

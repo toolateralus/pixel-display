@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace pixel_renderer
         public readonly int height;
         [JsonProperty]
         internal byte[] data;
-        public Vec2Int Size => new(width, height);
+        public Vector2 Size => new(width, height);
 
         public JImage()
         {
@@ -26,10 +27,10 @@ namespace pixel_renderer
             height = 0;
             data = Array.Empty<byte>();
         }
-        public JImage(Vec2Int size, byte[] data)
+        public JImage(Vector2 size, byte[] data)
         {
-            width = size.x;
-            height = size.y;
+            width = (int)size.X;
+            height = (int)size.Y;
             this.data = data;
         }
 

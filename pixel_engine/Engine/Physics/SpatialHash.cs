@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Numerics;
 
     public class SpatialHash
     {
@@ -64,11 +65,11 @@
             }
             return nodes;
         }
-        private void AddBucket(Vec2 vector, float width, List<int> bucket)
+        private void AddBucket(Vector2 vector, float width, List<int> bucket)
         {
             int cellPosition = (int)
-                (Math.Floor((double)vector.x / cellSize) +
-                 Math.Floor((double)vector.y / cellSize) * width);
+                (Math.Floor((double)vector.X / cellSize) +
+                 Math.Floor((double)vector.Y / cellSize) * width);
 
             if (!bucket.Contains(cellPosition))
                 bucket.Add(cellPosition);
@@ -80,24 +81,24 @@
 
             List<int> bucketsObjIsIn = new();
 
-            Vec2 min = new Vec2(
-                obj.Position.x,
-                obj.Position.y);
+            Vector2 min = new Vector2(
+                obj.Position.X,
+                obj.Position.Y);
 
-            Vec2 max = new Vec2(
-                obj.Position.x + sprite.size.x,
-                obj.Position.y + sprite.size.y);
+            Vector2 max = new Vector2(
+                obj.Position.X + sprite.size.X,
+                obj.Position.Y + sprite.size.Y);
 
             float width = Constants.ScreenH / cellSize;
 
             //TopLeft
             AddBucket(min, width, bucketsObjIsIn);
             //TopRight
-            AddBucket(new Vec2(max.x, min.y), width, bucketsObjIsIn);
+            AddBucket(new Vector2(max.X ,min.Y), width, bucketsObjIsIn);
             //BottomRight
-            AddBucket(new Vec2(max.x, min.y), width, bucketsObjIsIn);
+            AddBucket(new Vector2(max.X ,min.Y), width, bucketsObjIsIn);
             //BottomLeft
-            AddBucket(new Vec2(max.x, min.y), width, bucketsObjIsIn);
+            AddBucket(new Vector2(max.X ,min.Y), width, bucketsObjIsIn);
 
             return bucketsObjIsIn;
 

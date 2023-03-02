@@ -20,10 +20,7 @@
             Project project = Project.Load();
             Runtime.Initialize(this, project);
             if (!FromEditor)
-            {
-                Runtime.ToggleRendering();
-                Runtime.TogglePhysics();
-            } 
+                Runtime.Toggle();
         }
     }
 }

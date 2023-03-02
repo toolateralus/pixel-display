@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -7,10 +8,10 @@ namespace pixel_renderer
     {
         public int Count => spritePositions.Count;
 
-        public List<Vec2> spritePositions= new ();
-        public List<Vec2> spriteSizeVectors = new();
-        public List<Vec2> spriteVPOffsetVectors = new();
-        public List<Vec2> spriteVPScaleVectors = new();
+        public List<Vector2> spritePositions= new ();
+        public List<Vector2> spriteSizeVectors = new();
+        public List<Vector2> spriteVPOffsetVectors = new();
+        public List<Vector2> spriteVPScaleVectors = new();
         public List<float> spriteCamDistances = new();
         public List<TextureFiltering> spriteFiltering = new();
         public List<JImage> spriteColorData = new();
@@ -60,10 +61,10 @@ namespace pixel_renderer
             }
             void addMemberOnTop()
             {
-                spritePositions.Add(Vec2.zero);
-                spriteSizeVectors.Add(Vec2.zero);
-                spriteVPOffsetVectors.Add(Vec2.zero);
-                spriteVPScaleVectors.Add(Vec2.zero);
+                spritePositions.Add(Vector2.Zero);
+                spriteSizeVectors.Add(Vector2.Zero);
+                spriteVPOffsetVectors.Add(Vector2.Zero);
+                spriteVPScaleVectors.Add(Vector2.Zero);
                 spriteFiltering.Add(0);
                 spriteColorData.Add(new());
                 spriteCamDistances.Add(1f);

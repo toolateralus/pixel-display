@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -14,11 +15,11 @@ namespace pixel_renderer
         [JsonProperty]
         public Metadata backgroundMetadata; 
         [JsonProperty]
-        public Vec2 backgroundSize = new(512, 512);
+        public Vector2 backgroundSize = new(512, 512);
         [JsonProperty]
         public TextureFiltering backgroundFiltering = TextureFiltering.Point; 
         [JsonProperty]
-        public Vec2 backgroundOffset = new(0, 0);
+        public Vector2 backgroundOffset = new(0, 0);
         [JsonProperty]
         public List<Node> nodes = new();
 
@@ -121,7 +122,7 @@ namespace pixel_renderer
             throw new MissingMetadataException($"Metadata :\"{backgroundMetadata.Path}\". File not found.");
         }
         #region Node Utils
-        public List<Node> GetNodesAtGlobalPosition(Vec2 position)
+        public List<Node> GetNodesAtGlobalPosition(Vector2 position)
         {
             List<Node> outNodes = new List<Node>();
             for (int i = 0; i < nodes.Count; i++)

@@ -1,4 +1,5 @@
 ﻿
+using System.Numerics;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
@@ -13,7 +14,7 @@ namespace pixel_renderer
         /// <param name="clickPosition"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public bool GetNodeAtPoint(Stage stage, Point clickPosition, out Node? result)
+        public bool GetNodeAtPoint(Stage stage, Vector2 clickPosition, out Node? result)
         {
             foreach (var node in stage.nodes)
             {
@@ -22,7 +23,7 @@ namespace pixel_renderer
                 bool hasSprite = !node.TryGetComponent(out Sprite sprite);
                 if (hasSprite) continue;
 
-                bool isWithin = ((Vec2)clickPosition).IsWithin(node.Position, node.Position + sprite.size);
+                bool isWithin = clickPosition.IsWithin(node.Position, node.Position + sprite.size);
                 if (!isWithin) continue;
 
                 result = node;

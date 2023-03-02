@@ -1,36 +1,37 @@
 ﻿using Newtonsoft.Json;
 using System.Linq;
+using System.Numerics;
 
 namespace pixel_renderer
 {
     public class Camera : UIComponent
     {
-        [Field] [JsonProperty] public Vec2 viewportPosition = Vec2.zero;
-        [Field] [JsonProperty] public Vec2 viewportSize = Vec2.one;
+        [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
+        [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
         [Field] [JsonProperty] public DrawingType DrawMode = DrawingType.Clamped;
         public float[,] zBuffer = new float[0, 0];
 
-        public Vec2 LocalToCamViewport(Vec2 local)
+        public Vector2 LocalToCamViewport(Vector2 local)
         {
             Size.GetDivideSafe();
             return local / Size;
         }
 
-        public Vec2 CamViewportToLocal(Vec2 camViewport) => camViewport * Size;
-        public Vec2 CamToScreenViewport(Vec2 camViewport) => camViewport * viewportSize + viewportPosition;
-        public Vec2 ScreenToCamViewport(Vec2 screenViewport)
+        public Vector2 CamViewportToLocal(Vector2 camViewport) => camViewport * Size;
+        public Vector2 CamToScreenViewport(Vector2 camViewport) => camViewport * viewportSize + viewportPosition;
+        public Vector2 ScreenToCamViewport(Vector2 screenViewport)
         {
             viewportSize.GetDivideSafeRef();
             return (screenViewport - viewportPosition) / viewportSize;
 }
 
-        public Vec2 GlobalToCamViewport(Vec2 global) => LocalToCamViewport(GlobalToLocal(global));
-        public Vec2 ViewportToGlobal(Vec2 camViewport) => LocalToGlobal(CamViewportToLocal(camViewport));
-        public Vec2 GlobalToScreenViewport(Vec2 global) => CamToScreenViewport(GlobalToCamViewport(global));
-        public Vec2 ScreenViewportToLocal(Vec2 screenViewport) => CamViewportToLocal(ScreenToCamViewport(screenViewport));
-        public Vec2 ScreenViewportToGlobal(Vec2 screenViewport) => LocalToGlobal(ScreenViewportToLocal(screenViewport));
+        public Vector2 GlobalToCamViewport(Vector2 global) => LocalToCamViewport(GlobalToLocal(global));
+        public Vector2 ViewportToGlobal(Vector2 camViewport) => LocalToGlobal(CamViewportToLocal(camViewport));
+        public Vector2 GlobalToScreenViewport(Vector2 global) => CamToScreenViewport(GlobalToCamViewport(global));
+        public Vector2 ScreenViewportToLocal(Vector2 screenViewport) => CamViewportToLocal(ScreenToCamViewport(screenViewport));
+        public Vector2 ScreenViewportToGlobal(Vector2 screenViewport) => LocalToGlobal(ScreenViewportToLocal(screenViewport));
 
-        public Vec2 ViewportToSpriteViewport(Sprite sprite, Vec2 viewportPos) =>
+        public Vector2 ViewportToSpriteViewport(Sprite sprite, Vector2 viewportPos) =>
             sprite.GlobalToViewport(ViewportToGlobal(viewportPos));
         public static Camera? First => Runtime.Current.GetStage()?.GetAllComponents<Camera>().First();
     }

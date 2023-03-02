@@ -1,11 +1,13 @@
-﻿namespace pixel_renderer
+﻿using System.Numerics;
+
+namespace pixel_renderer
 {
     public class Floor : Component
     {
         public const float height = 10;
         public const float width = 5500;
-        Vec2 zero = Vec2.zero;
-        private static Vec2 startPosition = new(-(width / 2), 0);
+        Vector2 zero = Vector2.Zero;
+        private static Vector2 startPosition = new(-(width / 2), 0);
         private Polygon poly;
 
         public static Node Standard()

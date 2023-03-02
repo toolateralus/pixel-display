@@ -1,6 +1,7 @@
 ﻿namespace pixel_renderer
 {
     using System;
+    using System.Numerics;
     using System.Security.Cryptography;
     using Random = System.Random;
 
@@ -45,12 +46,12 @@
 
         public static bool Bool() => Int(-32000, 32000) > 0;
 
-        internal static Vec2 Vec2(Vec2 min, Vec2 max)
+        internal static Vector2 Vec2(Vector2 min, Vector2 max)
         {
             return new()
             {
-                x = Int((int)min.x, (int)max.x),
-                y = Int((int)min.y, (int)max.y),
+                X = Int((int)min.X, (int)max.X),
+                Y = Int((int)min.Y, (int)max.Y),
             };
         }
 

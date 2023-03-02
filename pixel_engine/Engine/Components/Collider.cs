@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Documents;
 
 namespace pixel_renderer
@@ -15,7 +16,7 @@ namespace pixel_renderer
             get => polygon.OffsetBy(parent.Position);
             set => polygon = new(value.vertices);
         }
-        [JsonProperty] [Field] public Vec2 scale = new(1,1);
+        [JsonProperty] [Field] public Vector2 scale = new(1,1);
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
         [Field] public bool drawCollider = false;
         [Field] public bool drawNormals = false;
@@ -53,7 +54,7 @@ namespace pixel_renderer
             }
         }
 
-        internal void SetVertices(Vec2[] vertices)
+        internal void SetVertices(Vector2[] vertices)
         {
             polygon = new Polygon(vertices);
         }

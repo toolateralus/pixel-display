@@ -6,267 +6,188 @@
     using System.Runtime.CompilerServices;
     using System.Text.Json.Serialization;
     using System.Windows;
-    public struct Vec3
-    {
-        public float x;
-        public float y;
-        public float z;
-        public float Magnitude() => MathF.Sqrt(x * x + y * y + z * z);
-        public float SqrMagnitude() => x * x + y * y + z * z;
-        public float this[int index]
-        {
-            get =>
-                index switch
-                {
-                    0 => x,
-                    1 => y,
-                    2 => z,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            set
-            {
-                switch (index)
-                {
-                    case 0: x = value; break;
-                    case 1: y = value; break;
-                    case 2: z = value; break;
-                    default: throw new IndexOutOfRangeException();
-                }
-            }
+    //public struct Vector3
+    //{
+    //    public float x;
+    //    public float y;
+    //    public float z;
+    //    public float Magnitude() => MathF.Sqrt(x * x + y * y + z * z);
+    //    public float SqrMagnitude() => x * x + y * y + z * z;
+    //    public float this[int index]
+    //    {
+    //        get =>
+    //            index switch
+    //            {
+    //                0 => x,
+    //                1 => y,
+    //                2 => z,
+    //                _ => throw new IndexOutOfRangeException(),
+    //            };
+    //        set
+    //        {
+    //            switch (index)
+    //            {
+    //                case 0: x = value; break;
+    //                case 1: y = value; break;
+    //                case 2: z = value; break;
+    //                default: throw new IndexOutOfRangeException();
+    //            }
+    //        }
 
-        }
-        public readonly static Vec3 one = new(1, 1, 1);
-        public readonly static Vec3 zero = new(0, 0, 0);
+    //    }
+    //    public readonly static Vector3 one = new(1, 1, 1);
+    //    public readonly static Vector3 zero = new(0, 0, 0);
 
-        public Vec3()
-        {
-            x = 0;
-            y = 0;
-            z = 0;
-        }
-        public Vec3(float x, float y, float z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
+    //    public Vector3()
+    //    {
+    //        x = 0;
+    //        y = 0;
+    //        z = 0;
+    //    }
+    //    public Vector3(float x, float y, float z)
+    //    {
+    //        this.X = x;
+    //        this.Y = y;
+    //        this.z = z;
+    //    }
 
-        public static Vec3 operator +(Vec3 a, Vec3 b) { return new Vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
-        public static Vec3 operator -(Vec3 a, Vec3 b) { return new Vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
-        public static Vec3 operator /(Vec3 a, Vec3 b) { return new Vec3(a.x / b.x, a.y / b.y, a.z / b.z); }
-        public static Vec3 operator *(Vec3 a, Vec3 b) { return new Vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
+    //    public static Vector3 operator +(Vector3 a, Vector3 b) { return new Vector3(a.X + b.X a.Y + b.Y, a.z + b.z); }
+    //    public static Vector3 operator -(Vector3 a, Vector3 b) { return new Vector3(a.X - b.X a.Y - b.Y, a.z - b.z); }
+    //    public static Vector3 operator /(Vector3 a, Vector3 b) { return new Vector3(a.X / b.X a.Y / b.Y, a.z / b.z); }
+    //    public static Vector3 operator *(Vector3 a, Vector3 b) { return new Vector3(a.X * b.X a.Y * b.Y, a.z * b.z); }
 
-        public static implicit operator Vec2(Vec3 v) => new()
-        {
-            x = v.x,
-            y = v.y
-        };
-        public static implicit operator Vec3(Vec2 v) => new()
-        {
-            x = v.x,
-            y = v.y,
-            z = 0
-        };
+    //    public static implicit operator Vector2(Vector3 v) => new()
+    //    {
+    //        x = v.X
+    //        y = v.Y
+    //    };
+    //    public static implicit operator Vector3(Vector2 v) => new()
+    //    {
+    //        x = v.X
+    //        y = v.Y,
+    //        z = 0
+    //    };
 
-    }
-    [JsonObject(MemberSerialization.OptIn)]
-    public struct Vec2
-    {
-        [JsonProperty]
-        public float x;
+    //}
+    //[JsonObject(MemberSerialization.OptIn)]
+    //public struct Vector2
+    //{
+    //    [JsonProperty]
+    //    public float x;
 
-        [JsonProperty]
-        public float y;
-        public Vec2 Normal_RHS => new Vec2(-y, x).Normalized();
-        public Vec2 Normal_LHS => new Vec2(y, -x).Normalized();
-        public static float DistanceSquared(Vec2 a, Vec2 b)
-        {
-            return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
-        }
-        public float SqrDistanceFrom(Vec2 v)
-        {
-            return DistanceSquared(this, v);
-        }
-        public  float DistanceFrom(Vec2 v)
-        {
-            return Distance(this, v);
-        }
-        public static float Distance(Vec2 a, Vec2 b)
-        {
-            var distanceSquared = DistanceSquared(a, b);
-            return CMath.Sqrt(distanceSquared);
-        }
-        public static float Dot(Vec2 a, Vec2 b)
-        {
-            return (a.x * b.x) + (a.y * b.y);
-        }
-        public float Length() => MathF.Sqrt(x * x + y * y);
-        public Vec2 Rotated(float angle)
-        {
-            float cos = MathF.Cos(angle);
-            float sin = MathF.Sin(angle);
-            return new Vec2(cos * x - sin * y, sin * x + cos * y);
-        }
-        public void Rotate(float angle)
-        {
-            float cos = MathF.Cos(angle);
-            float sin = MathF.Sin(angle);
-            float newX = cos * x - sin * y;
-            float newY = sin * x + cos * y;
-            x = newX;
-            y = newY;
-        }
-        public float SqrMagnitude() => MathF.FusedMultiplyAdd(x, x, y * y);
-        public readonly static Vec2 one = new(1, 1);
-        public readonly static Vec2 zero = new(0, 0);
-        public static Vec2 up = new(0, -1);
-        public static Vec2 down = new(0, 1);
-        public static Vec2 left = new(-1, 0);
-        public static Vec2 right = new(1, 0);
+    //    [JsonProperty]
+    //    public float y;
+    //    public Vector2 Normal_RHS => new Vector2(-y, x).Normalized();
+    //    public Vector2 Normal_LHS() => new Vector2(y, -x).Normalized();
 
-        public Vec2(Vec2 original)
-        {
-            x = original.x;
-            y = original.y;
-        }
-        public Vec2(float x, float y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-        public Vec2()
-        {
-            x = new();
-            y = new();
-        }
-        public override string ToString()
-        {
-            return $" ({x},{y})";
-        }
-        public static Vec2 operator +(Vec2 a, Vec2 b) => new(a.x + b.x, a.y + b.y);
-        public static bool operator ==(Vec2 a, Vec2 b) => a.x == b.x && a.y == b.y;
-        public static bool operator !=(Vec2 a, Vec2 b) => a.x != b.x || a.y != b.y;
-        public static Vec2 operator -(Vec2 a, Vec2 b) => new(a.x - b.x, a.y - b.y);
-        public static Vec2 operator /(Vec2 a, float b) => new(a.x / b, a.y / b);
-        public static Vec2 operator *(Vec2 a, float b) => new(a.x * b, a.y * b);
-        public static Vec2 operator *(Vec2 a, Vec2 b) => new()
-        {
-            x = a.x * b.x,
-            y = a.y * b.y,
-        };
-        public static Vec2 operator /(Vec2 a, Vec2 b) => new()
-        {
-            x = a.x / b.x,
-            y = a.y / b.y,
-        };
-        public static implicit operator Point(Vec2 v) => new()
-        {
-            X = v.x,
-            Y = v.y
-        };
-        public static explicit operator Vec2(Point v) => new((float)v.X, (float)v.Y);
-        /// <summary>
-        /// Clamp each value of the vector component-wise;
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        public void Clamp(Vec2 min, Vec2 max)
-        {
-            x = x.Clamp(min.x, max.x);
-            y = y.Clamp(min.y, max.y);
-        }
-        public static void Clamp(ref Vec2 value, Vec2 min, Vec2 max)
-        {
-            value.x = value.x.Clamp(min.x, max.x);
-            value.y = value.y.Clamp(min.y, max.y);
-        }
-        public Vec2 Clamped(Vec2 min, Vec2 max) => new(x.Clamp(min.x, max.x), y.Clamp(min.y, max.y));
+    //    public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.X + b.X a.Y + b.Y);
+    //    public static bool operator ==(Vector2 a, Vector2 b) => a.X == b.X && a.Y == b.Y;
+    //    public static bool operator !=(Vector2 a, Vector2 b) => a.X != b.X || a.Y != b.Y;
+    //    public static Vector2 operator -(Vector2 a, Vector2 b) => new(a.X - b.X a.Y - b.Y);
+    //    public static Vector2 operator /(Vector2 a, float b) => new(a.X / b, a.Y / b);
+    //    public static Vector2 operator *(Vector2 a, float b) => new(a.X * b, a.Y * b);
+    //    public static Vector2 operator *(Vector2 a, Vector2 b) => new()
+    //    {
+    //        x = a.X * b.X
+    //        y = a.Y * b.Y,
+    //    };
+    //    public static Vector2 operator /(Vector2 a, Vector2 b) => new()
+    //    {
+    //        x = a.X / b.X
+    //        y = a.Y / b.Y,
+    //    };
+    //    public static implicit operator Point(Vector2 v) => new()
+    //    {
+    //        X = v.X
+    //        Y = v.Y
+    //    };
+    //    public static explicit operator Vector2(Point v) => new((float)v.X, (float)v.Y);
+    //    /// <summary>
+    //    /// Clamp each value of the vector component-wise;
+    //    /// </summary>
+    //    /// <param name="value"></param>
+    //    /// <param name="min"></param>
+    //    /// <param name="max"></param>
 
-        public void Wrap(Vec2 max) { x = x.Wrapped(max.x); y = y.Wrapped(max.y); }
-        public Vec2 Wrapped(Vec2 max) => new(x.Wrapped(max.x), y.Wrapped(max.y));
-        
-        public bool IsWithin(Vec2 min, Vec2 max) => x.IsWithin(min.x, max.x) && y.IsWithin(min.y, max.y);
-        public bool IsWithinMaxExclusive(Vec2 min, Vec2 max) => x.IsWithinMaxExclusive(min.x, max.x) && y.IsWithinMaxExclusive(min.y, max.y);
 
-        public void Set(Vec2 size) => this = size; 
+    //    public void Set(Vector2 size) => this = size; 
 
-        public override bool Equals(object? obj)
-        {
-            if (obj is not Vec2 vec)
-                return false;
-            return x.Equals(vec.x) && y.Equals(vec.y);
-        }
+    //    public override bool Equals(object? obj)
+    //    {
+    //        if (obj is not Vector2 vec)
+    //            return false;
+    //        return x.Equals(vec.x) && y.Equals(vec.Y);
+    //    }
 
-        public override int GetHashCode()
-        {
-            return x.GetHashCode() ^ y.GetHashCode();
-        }
+    //    public override int GetHashCode()
+    //    {
+    //        return x.GetHashCode() ^ y.GetHashCode();
+    //    }
 
-        public static Vec2 ClampMagnitude(Vec2 vector, float maxLength)
-        {
-            if (vector.SqrMagnitude() > maxLength * maxLength)
-            {
-                return vector.Normalized() * maxLength;
-            }
-            return vector;
-        }
-    }
-    public struct Vec2Int
-    {
-        public int x;
-        public int y;
+    //    public static Vector2 ClampMagnitude(Vector2 vector, float maxLength)
+    //    {
+    //        if (vector.SqrMagnitude() > maxLength * maxLength)
+    //        {
+    //            return vector.Normalized() * maxLength;
+    //        }
+    //        return vector;
+    //    }
+    //}
+    //public struct Vector2
+    //{
+    //    public int x;
+    //    public int y;
 
-        public void Increment2D(int xMax, int xMin = 0)
-        {
-            x++;
-            if (x >= xMax)
-            {
-                y++;
-                x = xMin;
-            }
-        }
-        public Vec2Int(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-        public Vec2Int(Vec2Int v)
-        {
-            this.x = v.x;
-            this.y = v.y;
-        }
-        public Vec2Int(Vec2 v)
-        {
-            this.x = (int)v.x;
-            this.y = (int)v.y;
-        }
-        public int this[int index]
-        {
-            get
-            {
-                return index switch
-                {
-                    0 => x,
-                    1 => y,
-                    _ => 0,
-                };
-            }
-            set
-            {
-                switch (index)
-                {
-                    case 0: x = value; break;
-                    case 1: y = value; break;
-                }
-            }
+    //    public void Increment2D(int xMax, int xMin = 0)
+    //    {
+    //        x++;
+    //        if (x >= xMax)
+    //        {
+    //            y++;
+    //            x = xMin;
+    //        }
+    //    }
+    //    public Vector2(int x, int y)
+    //    {
+    //        this.X = x;
+    //        this.Y = y;
+    //    }
+    //    public Vector2(Vector2 v)
+    //    {
+    //        this.X = v.x;
+    //        this.Y = v.Y;
+    //    }
+    //    public Vector2(Vector2 v)
+    //    {
+    //        this.X = (int)v.x;
+    //        this.Y = (int)v.Y;
+    //    }
+    //    public int this[int index]
+    //    {
+    //        get
+    //        {
+    //            return index switch
+    //            {
+    //                0 => x,
+    //                1 => y,
+    //                _ => 0,
+    //            };
+    //        }
+    //        set
+    //        {
+    //            switch (index)
+    //            {
+    //                case 0: x = value; break;
+    //                case 1: y = value; break;
+    //            }
+    //        }
 
-        }
-        public static implicit operator Vec2(Vec2Int v) => new(v.x, v.y);
-        public static explicit operator Vec2Int(Vec2 v) => new((int)v.x, (int)v.y);
-        public static Vec2Int operator +(Vec2Int v1, Vec2Int v2) => new(v1.x + v2.x, v1.y + v2.y);
-        public static Vec2Int operator -(Vec2Int v1, Vec2Int v2) => new(v1.x - v2.x, v1.y - v2.y);
-    }
+    //    }
+    //    public static implicit operator Vector2(Vector2 v) => new(v.X v.Y);
+    //    public static explicit operator Vector2(Vector2 v) => new((int)v.X (int)v.Y);
+    //    public static Vector2 operator +(Vector2 v1, Vector2 v2) => new(v1.X + v2.X v1.Y + v2.Y);
+    //    public static Vector2 operator -(Vector2 v1, Vector2 v2) => new(v1.X - v2.X v1.Y - v2.Y);
+    //}
 }
 
 

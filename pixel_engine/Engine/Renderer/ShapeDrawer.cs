@@ -5,6 +5,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -27,26 +28,26 @@ namespace pixel_renderer
         /// </summary>
         internal static List<Line> Lines = new();
         internal static List<Circle> Circles = new();
-        public static void DrawLine(Vec2 startPoint, Vec2 endPoint, Pixel? color = null) =>
+        public static void DrawLine(Vector2 startPoint, Vector2 endPoint, Pixel? color = null) =>
             Lines.Add(new Line(startPoint, endPoint, color ?? Pixel.White));
-        public static void DrawCircle(Vec2 center, float radius, Pixel? color = null) =>
+        public static void DrawCircle(Vector2 center, float radius, Pixel? color = null) =>
             Circles.Add(new Circle(center, radius, color ?? Pixel.White));
 
-        public static void DrawRect(Vec2 boxStart, Vec2 boxEnd, Pixel green)
+        public static void DrawRect(Vector2 boxStart, Vector2 boxEnd, Pixel green)
         {
             // top bottom left right
             Line[] lines = GetSides(boxStart, boxEnd, green);
             Lines.AddRange(lines);
         }
 
-        private static Line[] GetSides(Vec2 boxStart, Vec2 boxEnd, Pixel green)
+        private static Line[] GetSides(Vector2 boxStart, Vector2 boxEnd, Pixel green)
         {
             return new Line[]
             {
-              new(boxStart, boxStart.WithValue(x: boxEnd.x), green),
-              new(boxEnd.WithValue(x: boxStart.x), boxEnd, green),
-              new(boxStart, boxStart.WithValue(y: boxEnd.y), green),
-              new(boxEnd, boxEnd.WithValue(y: boxStart.y), green),
+              new(boxStart, boxStart.WithValue(x: boxEnd.X), green),
+              new(boxEnd.WithValue(x: boxStart.X), boxEnd, green),
+              new(boxStart, boxStart.WithValue(y: boxEnd.Y), green),
+              new(boxEnd, boxEnd.WithValue(y: boxStart.Y), green),
             };
         }
 
@@ -55,11 +56,11 @@ namespace pixel_renderer
     }
     public class Line
     {
-        public Vec2 Direction => endPoint - startPoint;
+        public Vector2 Direction => endPoint - startPoint;
         public Pixel color;
-        public Vec2 startPoint;
-        public Vec2 endPoint;
-        public Line(Vec2 startPoint, Vec2 endPoint, Pixel? color = null)
+        public Vector2 startPoint;
+        public Vector2 endPoint;
+        public Line(Vector2 startPoint, Vector2 endPoint, Pixel? color = null)
         {
             this.startPoint = startPoint;
             this.endPoint = endPoint;
@@ -69,9 +70,9 @@ namespace pixel_renderer
     public class Circle
     {
         public Pixel color;
-        public Vec2 center;
+        public Vector2 center;
         public float radius;
-        public Circle(Vec2 center, float radius, Pixel color)
+        public Circle(Vector2 center, float radius, Pixel color)
         {
             this.color = color;
             this.center = center;

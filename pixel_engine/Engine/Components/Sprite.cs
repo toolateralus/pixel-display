@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO.Compression;
 using System.Linq;
+using System.Numerics;
 using System.Security.Policy;
 using System.Threading;
 using System.Windows.Input;
@@ -24,11 +25,11 @@ namespace pixel_renderer
     public enum TextureFiltering {Point, Bilinear};
     public class Sprite : Component
     {
-        [JsonProperty] public Vec2 size = Vec2.one * 16;
-        [JsonProperty] public Vec2 viewportScale = Vec2.one;
-        [JsonProperty] public Vec2 viewportOffset = Vec2.zero;
-        private Vec2Int colorDataSize = new(1, 1);
-        public Vec2Int ColorDataSize => colorDataSize;
+        [JsonProperty] public Vector2 size = Vector2.One * 16;
+        [JsonProperty] public Vector2 viewportScale = Vector2.One;
+        [JsonProperty] public Vector2 viewportOffset = Vector2.Zero;
+        private Vector2 colorDataSize = new(1, 1);
+        public Vector2 ColorDataSize => colorDataSize;
         [JsonProperty] 
         public float camDistance = 1;
         [JsonProperty][Field] 
@@ -45,7 +46,7 @@ namespace pixel_renderer
         public Pixel color = Pixel.Blue;
         public Sprite()
         {
-            texture = new Texture((Vec2Int)size, Pixel.Red);
+            texture = new Texture((Vector2)size, Pixel.Red);
         }
         public Sprite(int x, int y) : this()
         {
@@ -98,12 +99,12 @@ namespace pixel_renderer
             }
            
         }
-        public void SetColorData(Vec2Int size, byte[] data)
+        public void SetColorData(Vector2 size, byte[] data)
         {
             if (!IsReadOnly)
             {
                 texture.SetImage(size, data);
-                colorDataSize = new(size.x, size.y);
+                colorDataSize = new(size.X, size.Y);
             }
         }
         [JsonProperty]
@@ -113,7 +114,7 @@ namespace pixel_renderer
         public void TrySetTextureFromString()
         {
             if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
-                 texture = new(null, meta, (Vec2Int)size, meta.Name);
+                 texture = new(null, meta, size, meta.Name);
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
         [Method]
@@ -129,7 +130,7 @@ namespace pixel_renderer
         }
         public override void Awake()
         {
-            texture = new((Vec2Int)size, Player.PlayerSprite);
+            texture = new(size, Player.PlayerSprite);
             Refresh();
 
         }
@@ -151,7 +152,7 @@ namespace pixel_renderer
                 case SpriteType.Image:
                     if (texture is null)
                     {
-                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), (Vec2Int)size);
+                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), (Vector2)size);
                         Pixel[,] colorArray1 = CBit.SolidColorSquare(size, color);
                         texture.SetImage(colorArray1);
                     }
@@ -166,33 +167,33 @@ namespace pixel_renderer
             colorDataSize = new(texture.Width, texture.Height);
             dirty = false;
         }
-        public void Draw(Vec2Int size, byte[] color)
+        public void Draw(Vector2 size, byte[] color)
         {
             this.size = size;
             texture.SetImage(size, color);
         }
-        public void DrawSquare(Vec2 size, Pixel color)
+        public void DrawSquare(Vector2 size, Pixel color)
         {
             this.size = size;
             var cols = CBit.SolidColorSquare(size, color);
             var bytes = CBit.ByteArrayFromColorArray(cols);
             SetColorData(new(cols.GetLength(0), cols.GetLength(1)), bytes);  
         }
-        public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
-        internal Vec2 GlobalToViewport(Vec2 global)
+        public Vector2 ViewportToColorPos(Vector2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
+        internal Vector2 GlobalToViewport(Vector2 global)
         {
             size.GetDivideSafe();
             return (global - parent.Position) / size;
         }
 
-        public Vec2[] GetVertices()
+        public Vector2[] GetVertices()
         {
-            Vec2 topLeft = Vec2.zero;
-            Vec2 topRight = new(size.x, 0);
-            Vec2 bottomRight = size;
-            Vec2 bottomLeft = new(0, size.y);
+            Vector2 topLeft = Vector2.Zero;
+            Vector2 topRight = new(size.X, 0);
+            Vector2 bottomRight = size;
+            Vector2 bottomLeft = new(0, size.Y);
 
-            var vertices = new Vec2[]
+            var vertices = new Vector2[]
             {
                     topLeft,
                     topRight,
@@ -202,14 +203,14 @@ namespace pixel_renderer
 
             return vertices;
         }
-        public static bool PointInPolygon(Vec2 point, Vec2[] vertices)
+        public static bool PointInPolygon(Vector2 point, Vector2[] vertices)
         {
             int i, j = vertices.Length - 1;
             bool c = false;
             for (i = 0; i < vertices.Length; i++)
             {
-                if (((vertices[i].y > point.y) != (vertices[j].y > point.y)) &&
-                    (point.x < (vertices[j].x - vertices[i].x) * (point.y - vertices[i].y) / (vertices[j].y - vertices[i].y) + vertices[i].x))
+                if (((vertices[i].Y > point.Y) != (vertices[j].Y > point.Y)) &&
+                    (point.X < (vertices[j].X - vertices[i].X) * (point.Y - vertices[i].Y) / (vertices[j].Y - vertices[i].Y) + vertices[i].X))
                 {
                     c = !c;
                 }
@@ -230,9 +231,9 @@ namespace pixel_renderer
             {
                 for (int y = 0; y < ColorData.height; y++)
                 {
-                    Vec2 pixelPosition = new Vec2(parent.Position.x, parent.Position.y);
+                    Vector2 pixelPosition = new Vector2(parent.Position.X, parent.Position.Y);
 
-                    float distance = Vec2.Distance(pixelPosition, light.parent.Position);
+                    float distance = Vector2.Distance(pixelPosition, light.parent.Position);
 
                     float brightness = light.brightness / (distance * distance);
 
@@ -252,27 +253,27 @@ namespace pixel_renderer
                 }
             }
         }
-        Pixel[,] VertexLighting(Polygon poly, Vec2 lightPosition, float lightRadius, Pixel lightColor, BoundingBox2D bounds)
+        Pixel[,] VertexLighting(Polygon poly, Vector2 lightPosition, float lightRadius, Pixel lightColor, BoundingBox2D bounds)
         {
             // Get the vertices of the polygon
-            Vec2[] vertices = poly.vertices;
+            Vector2[] vertices = poly.vertices;
             
             int vertexCount = vertices.Length;
             
             Pixel[,] colors = new Pixel[texture.Width, texture.Height]; 
             
-            int minY = (int)bounds.min.y;
-            int maxY = (int)bounds.max.y;
+            int minY = (int)bounds.min.Y;
+            int maxY = (int)bounds.max.Y;
 
-            int minX = (int)bounds.min.x;
-            int maxX = (int)bounds.max.x;
+            int minX = (int)bounds.min.X;
+            int maxX = (int)bounds.max.X;
 
             for (int y = minY; y < maxY -1; y++)
                 for (int x = minX; x < maxX -1; x++)
 
-                    if (PointInPolygon(new Vec2(x, y), vertices))
+                    if (PointInPolygon(new Vector2(x, y), vertices))
                     {
-                        float distance = Vec2.Distance(new Vec2(x, y), lightPosition);
+                        float distance = Vector2.Distance(new Vector2(x, y), lightPosition);
                         float lightAmount = 1f - Math.Clamp(distance / lightRadius, 0,1);
                         int _y = y - minY;
                         int _x = x - minX;
@@ -300,7 +301,7 @@ namespace pixel_renderer
         {
             if (image is not null)
             {
-                Vec2Int size = new(image.width, image.height);
+                Vector2 size = new(image.width, image.height);
                 Draw(size, image.data);
             }
         }

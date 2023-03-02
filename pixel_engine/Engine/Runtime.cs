@@ -65,29 +65,7 @@ namespace pixel_renderer
             Project.LoadStage(0);
             Current.stage?.Awake();
         }
-        public static void TogglePhysics()
-        {
-            if (!PhysicsRunning)
-            {
-                PhysicsRunning = true;
-                StartPhysicsWorker();
-                return;
-            }
-            PhysicsRunning = false;
-            StopPhysicsWorker();
-        }
-        private static void StopPhysicsWorker()
-        {
-            Current.physicsWorker.DoWork -= OnPhysicsTick;
-            Current.physicsWorker.Dispose();
-        }
-        private static void StartPhysicsWorker()
-        {
-            Current.physicsWorker ??= new BackgroundWorker();
-            Current.physicsWorker.DoWork += OnPhysicsTick;
-            Current.physicsWorker.RunWorkerAsync();
-        }
-        public static void ToggleRendering()
+        public static void Toggle()
         {
             if (IsRunning)
             {
@@ -113,7 +91,7 @@ namespace pixel_renderer
                 if (IsTerminating)
                     return;
 
-                CMouse.Update();
+               CMouse.Update();
 
                 if (Application.Current is null)
                     return;
@@ -123,7 +101,12 @@ namespace pixel_renderer
 
                 if (IsRunning)
                 {
+                    if (Current.stage is null) 
+                        return; 
+
                     StagingHost.Update(Current.stage);
+                    StagingHost.FixedUpdate(Current.stage);
+                    Collision.Run();
                     Current.renderHost?.Render();
 
                     if (Application.Current is null)
@@ -138,38 +121,13 @@ namespace pixel_renderer
                     {
                         CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
                     });
-                    Thread.Sleep(1);
                 }
             }
         }
-        private static void OnPhysicsTick(object sender, DoWorkEventArgs e)
-        {
-            while (PhysicsRunning)
-            {
-                if (IsTerminating)
-                    return;
-                if (Application.Current == null)
-                    return;
-                
-                Thread.Sleep(Constants.PhysicsIntervalMs);
-
-                if (!IsRunning)
-                    continue;
-
-                if (Current.stage is null)
-                    continue;
-
-                StagingHost.FixedUpdate(Current.stage);
-                Collision.Run();
-            }
-        }
+    
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             current ??= new(mainWnd, project);
-        }
-        private void InitializePhysics()
-        {
-         
         }
         public void SetProject(Project project)
         {

@@ -4,6 +4,7 @@ using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -53,8 +54,8 @@ namespace pixel_editor
             argumentTypes = new string[] { "vec:" },
             action = (e) =>
             {
-                Vec2 vector = (Vec2)e[0];
-                Vec2Int newRes = (Vec2Int)vector;
+                Vector2 vector = (Vector2)e[0];
+                Vector2 newRes = vector;
                 Console.Print(vector.ToString());
                 Runtime.Current.renderHost.GetRenderer().Resolution = newRes;
             },
@@ -66,7 +67,7 @@ namespace pixel_editor
             syntax = "resolution.Get();",
             action = (e) =>
             {
-                Console.Print(((Vec2)Runtime.Current.renderHost.GetRenderer().Resolution).ToString());
+                Console.Print(Runtime.Current.renderHost.GetRenderer().Resolution.ToString());
             },
             description = "gets the resolution and prints it to the console"
         };
@@ -185,7 +186,7 @@ namespace pixel_editor
             action = (e) =>
             {
                 if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
-                if (!TryGetArgAtIndex(1, out Vec2 vec, e)) return;
+                if (!TryGetArgAtIndex(1, out Vector2 vec, e)) return;
                 node.Move(vec);
             },
         };
@@ -479,12 +480,12 @@ namespace pixel_editor
 
         private static void moveInspector(object[]? obj)
         {
-            if (!TryGetArgAtIndex(0, out Vec2 vec, obj))
+            if (!TryGetArgAtIndex(0, out Vector2 vec, obj))
             {
                 Command.Error("inspector.Position(Vec2 newPosition)", CmdError.ArgumentNotFound);
                 return;
             }
-            Inspector.OnInspectorMoved.Invoke((int)vec.x, (int)vec.y);
+            Inspector.OnInspectorMoved.Invoke((int)vec.X, (int)vec.Y);
         }
         #endregion
 

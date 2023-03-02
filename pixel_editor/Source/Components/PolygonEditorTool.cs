@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -10,7 +11,7 @@ namespace pixel_editor
 {
     internal class PolygonEditorTool : Tool
     {
-        List<Vec2> highlightedVertices = new();
+        List<Vector2> highlightedVertices = new();
         Collider? selectedCollider;
         const float highlightDistance = 2;
         int selectedVertIndex = -1;
@@ -24,7 +25,7 @@ namespace pixel_editor
             selectedCollider.DrawNormals();
             for (int i = 0; i < highlightedVertices.Count; i++)
             {
-                Vec2 vert = highlightedVertices[i];
+                Vector2 vert = highlightedVertices[i];
                 ShapeDrawer.DrawCircle(vert, vertSize, Pixel.Green);
             }
         }
@@ -35,11 +36,11 @@ namespace pixel_editor
             selectedCollider = GetSelectedCollider();
             if (selectedCollider == null)
                 return;
-            Vec2[] vertices = selectedCollider.Polygon.vertices;
+            Vector2[] vertices = selectedCollider.Polygon.vertices;
             if (vertices.Length == 0)
                 return;
-            Vec2 mPos = CMouse.GlobalPosition;
-            Vec2 cPos = selectedCollider.parent.Position;
+            Vector2 mPos = CMouse.GlobalPosition;
+            Vector2 cPos = selectedCollider.parent.Position;
             if (selectedVertIndex == -1)
             {
                 int closestVert = 0;
@@ -62,20 +63,20 @@ namespace pixel_editor
                     int vertcount = vertices.Length;
                     for (int i = 0; i < vertcount; i++)
                     {
-                        Vec2 v1 = vertices[i];
-                        Vec2 direction = vertices[(i + 1) % vertcount] - v1;
-                        Vec2 dirNormalized = direction.Normalized();
-                        Vec2 mouseOffset = mPos - v1;
-                        float upDot = Vec2.Dot(dirNormalized, mouseOffset);
-                        float leftDot = Vec2.Dot(dirNormalized.Normal_LHS, mouseOffset);
+                        Vector2 v1 = vertices[i];
+                        Vector2 direction = vertices[(i + 1) % vertcount] - v1;
+                        Vector2 dirNormalized = direction.Normalized();
+                        Vector2 mouseOffset = mPos - v1;
+                        float upDot = Vector2.Dot(dirNormalized, mouseOffset);
+                        float leftDot = Vector2.Dot(dirNormalized.Normal_LHS(), mouseOffset);
                         if (upDot > 0 && upDot.Squared() < direction.SqrMagnitude()
                             && leftDot.Squared() < highlightDistance)
                         {
-                            Vec2 newVertex = dirNormalized * upDot + v1;
+                            Vector2 newVertex = dirNormalized * upDot + v1;
                             highlightedVertices.Add(newVertex);
                             if (Input.Get(Key.V))
                             {
-                                List<Vec2> newVertices = vertices.ToList();
+                                List<Vector2> newVertices = vertices.ToList();
                                 newVertices.Insert(i + 1, newVertex);
                                 selectedCollider.Polygon = new Polygon(newVertices.ToArray()).OffsetBy(cPos * -1);
                                 selectedVertIndex = i + 1;
@@ -85,7 +86,7 @@ namespace pixel_editor
 
                         }
                     }
-                    foreach (Vec2 vert in vertices)
+                    foreach (Vector2 vert in vertices)
                         highlightedVertices.Add(vert);
                 }
             }
@@ -94,7 +95,7 @@ namespace pixel_editor
                 if (!Input.Get(Key.V))
                 {
                     vertSize = 2;
-                    foreach (Vec2 vert in vertices)
+                    foreach (Vector2 vert in vertices)
                         highlightedVertices.Add(vert);
                     return;
                 }

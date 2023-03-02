@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
@@ -8,25 +9,25 @@ namespace pixel_renderer
     public class Texture : Asset
     {
         [JsonConstructor]
-        public Texture(JImage image, Metadata imgData, Vec2Int scale, string Name = "Texture Asset") : base(Name, true)
+        public Texture(JImage image, Metadata imgData, Vector2 scale, string Name = "Texture Asset") : base(Name, true)
         {
             this.imgData = imgData;
             this.Name = Name;
             this.scale = scale;
             this.jImage = image; 
         }
-        public Texture(Vec2Int scale, Metadata imgData)
+        public Texture(Vector2 scale, Metadata imgData)
         {
             SetImage(imgData, scale);
         }
-        public Texture(Vec2Int size, Pixel color)
+        public Texture(Vector2 size, Pixel color)
         {
             scale = size;
             SetImage(color);
         }
         [Field] 
         [JsonProperty] 
-        public Vec2Int scale = new(1, 1);
+        public Vector2 scale = new(1, 1);
         [JsonProperty] 
         internal Metadata imgData;
         [JsonProperty]
@@ -45,7 +46,7 @@ namespace pixel_renderer
         internal bool HasImageMetadata => imgData != null;
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
 
-        public void SetImage(Metadata imgData, Vec2Int scale)
+        public void SetImage(Metadata imgData, Vector2 scale)
         {
             this.scale = scale;
 
@@ -63,7 +64,7 @@ namespace pixel_renderer
             var colors = CBit.PixelArrayFromBitmap(Image);
             SetImage(colors);
         }
-        public void SetImage(Vec2Int size, byte[] data)
+        public void SetImage(Vector2 size, byte[] data)
         {
             jImage = new(size, data);
         }

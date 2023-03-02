@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using System.Numerics;
     using System.Runtime.CompilerServices;
     using System.Security.Policy;
     using System.Threading.Tasks;
@@ -14,20 +15,20 @@
 
     public abstract class  RendererBase 
     {
-        Vec2 zero = Vec2.zero;
-        Vec2 one = Vec2.one;
+        Vector2 zero = Vector2.Zero;
+        Vector2 one = Vector2.One;
         private protected JImage baseImage;
         private protected byte[] frame = Array.Empty<byte>();
         private protected byte[] latestFrame = Array.Empty<byte>();
         private protected int stride = 0;
         public byte[] Frame => latestFrame;
         public int Stride => stride;
-        public Vec2 Resolution 
+        public Vector2 Resolution 
         { 
             get => _resolution;
-            set => Runtime.Current.renderHost.newResolution = (Vec2?)value; 
+            set => Runtime.Current.renderHost.newResolution = value; 
         }
-        internal protected Vec2 _resolution = Constants.DefaultResolution;
+        internal protected Vector2 _resolution = Constants.DefaultResolution;
         public bool baseImageDirty = true;
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -36,14 +37,14 @@
         public abstract void Dispose();
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void RenderCamera(Camera camera, StageRenderInfo renderInfo, Vec2 resolution)
+        public void RenderCamera(Camera camera, StageRenderInfo renderInfo, Vector2 resolution)
         {
-            if (resolution.y == 0 || resolution.x == 0) return;
+            if (resolution.Y == 0 || resolution.X == 0) return;
 
             Node camNode = new("CamNode", camera.parent.Position, one);
             Camera cam = camNode.AddComponent(camera.Clone());
-            if (cam.zBuffer.GetLength(0) != resolution.x || cam.zBuffer.GetLength(1) != resolution.y)
-                cam.zBuffer = new float[(int)resolution.x, (int)resolution.y];
+            if (cam.zBuffer.GetLength(0) != resolution.X || cam.zBuffer.GetLength(1) != resolution.Y)
+                cam.zBuffer = new float[(int)resolution.X , (int)resolution.Y];
             Array.Clear(cam.zBuffer);
 
             DrawBaseImage(cam, resolution);
@@ -57,45 +58,45 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawGraphics(Camera cam, Vec2 resolution)
+        private void DrawGraphics(Camera cam, Vector2 resolution)
         {
-            Vec2 framePos = new Vec2();
+            Vector2 framePos = new Vector2();
             foreach (Circle circle in ShapeDrawer.Circles)
             {
                 float sqrtOfHalf = MathF.Sqrt(0.5f);
-                Vec2 radius = circle.center + new Vec2(circle.radius, circle.radius);
-                Vec2 centerPos = cam.GlobalToScreenViewport(circle.center) * resolution;
-                Vec2 pixelRadius = cam.GlobalToScreenViewport(radius) * resolution - centerPos;
-                Vec2 quaterArc = pixelRadius * sqrtOfHalf;
-                int quarterArcAsInt = (int)quaterArc.x;
+                Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
+                Vector2 centerPos = cam.GlobalToScreenViewport(circle.center) * resolution;
+                Vector2 pixelRadius = cam.GlobalToScreenViewport(radius) * resolution - centerPos;
+                Vector2 quaterArc = pixelRadius * sqrtOfHalf;
+                int quarterArcAsInt = (int)quaterArc.X;
                 for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
                 {
-                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.x)) * pixelRadius.y;
-                    framePos.x = centerPos.x + x;
-                    framePos.y = centerPos.y + y;
+                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
+                    framePos.X = centerPos.X + x;
+                    framePos.Y = centerPos.Y + y;
                     if (framePos.IsWithinMaxExclusive(zero, resolution))
                         WriteColorToFrame(ref circle.color, ref framePos);
-                    framePos.y = centerPos.y - y;
+                    framePos.Y = centerPos.Y - y;
                     if (framePos.IsWithinMaxExclusive(zero, resolution))
                         WriteColorToFrame(ref circle.color, ref framePos);
                 }
-                quarterArcAsInt = (int)quaterArc.y;
+                quarterArcAsInt = (int)quaterArc.Y;
                 for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
                 {
-                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.y)) * pixelRadius.x;
-                    framePos.y = centerPos.y + y;
-                    framePos.x = centerPos.x + x;
+                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
+                    framePos.Y = centerPos.Y + y;
+                    framePos.X = centerPos.X + x;
                     if (framePos.IsWithinMaxExclusive(zero, resolution))
                         WriteColorToFrame(ref circle.color, ref framePos);
-                    framePos.x = centerPos.x - x;
+                    framePos.X = centerPos.X - x;
                     if (framePos.IsWithinMaxExclusive(zero, resolution))
                         WriteColorToFrame(ref circle.color, ref framePos);
                 }
             }
             foreach(Line line in ShapeDrawer.Lines)
             {
-                Vec2 startPos = cam.GlobalToScreenViewport(line.startPoint) * resolution;
-                Vec2 endPos = cam.GlobalToScreenViewport(line.endPoint) * resolution;
+                Vector2 startPos = cam.GlobalToScreenViewport(line.startPoint) * resolution;
+                Vector2 endPos = cam.GlobalToScreenViewport(line.endPoint) * resolution;
                 if (startPos == endPos)
                 {
                     if (startPos.IsWithinMaxExclusive(zero, resolution))
@@ -103,21 +104,21 @@
                     continue;
                 }
 
-                float xDiff = startPos.x - endPos.x;
-                float yDiff = startPos.y - endPos.y;
+                float xDiff = startPos.X - endPos.X;
+                float yDiff = startPos.Y - endPos.Y;
 
                 if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
                 {
                     float slope = yDiff / xDiff;
-                    float yIntercept = startPos.y - (slope * startPos.x);
+                    float yIntercept = startPos.Y - (slope * startPos.X);
                 
-                    int endX = (int)MathF.Min(MathF.Max(startPos.x, endPos.x), resolution.x);
+                    int endX = (int)MathF.Min(MathF.Max(startPos.X ,endPos.X), resolution.X);
                 
-                    for (int x = (int)MathF.Max(MathF.Min(startPos.x, endPos.x), 0); x < endX; x++)
+                    for (int x = (int)MathF.Max(MathF.Min(startPos.X ,endPos.X), 0); x < endX; x++)
                     {
-                        framePos.x = x;
-                        framePos.y = slope * x + yIntercept;
-                        if (framePos.y < 0 || framePos.y >= resolution.y)
+                        framePos.X = x;
+                        framePos.Y = slope * x + yIntercept;
+                        if (framePos.Y < 0 || framePos.Y >= resolution.Y)
                             continue;
                         WriteColorToFrame(ref line.color, ref framePos);
                     }
@@ -125,15 +126,15 @@
                 else
                 {
                     float slope = xDiff / yDiff;
-                    float xIntercept = startPos.x - (slope * startPos.y);
+                    float xIntercept = startPos.X - (slope * startPos.Y);
 
-                    int endY = (int)MathF.Min(MathF.Max(startPos.y, endPos.y), resolution.y);
+                    int endY = (int)MathF.Min(MathF.Max(startPos.Y, endPos.Y), resolution.Y);
 
-                    for (int y = (int)MathF.Max(MathF.Min(startPos.y, endPos.y), 0); y < endY; y++)
+                    for (int y = (int)MathF.Max(MathF.Min(startPos.Y, endPos.Y), 0); y < endY; y++)
                     {
-                        framePos.y = y;
-                        framePos.x = slope * y + xIntercept;
-                        if (framePos.x < 0 || framePos.x >= resolution.x)
+                        framePos.Y = y;
+                        framePos.X = slope * y + xIntercept;
+                        if (framePos.X < 0 || framePos.X >= resolution.X)
                             continue;
                         WriteColorToFrame(ref line.color, ref framePos);
                     }
@@ -142,7 +143,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vec2 resolution)
+        private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vector2 resolution)
         {
             Node spriteNode = new("SpriteNode", zero, one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
@@ -151,19 +152,19 @@
             {
                 renderInfo.SetSprite(sprite, i);
 
-                Vec2 spritePos = sprite.parent.Position;
-                Vec2 firstCorner = cam.GlobalToScreenViewport(spritePos) * resolution;
+                Vector2 spritePos = sprite.parent.Position;
+                Vector2 firstCorner = cam.GlobalToScreenViewport(spritePos) * resolution;
                 //Bounding box on screen which fully captures sprite
                 drawArea.min = firstCorner;
                 drawArea.max = firstCorner;
-                List<Vec2> corners = new()
+                List<Vector2> corners = new()
                 {
-                    cam.GlobalToScreenViewport(spritePos + new Vec2(sprite.size.x, 0)) * resolution,
-                    cam.GlobalToScreenViewport(spritePos + new Vec2(0, sprite.size.y)) * resolution,
+                    cam.GlobalToScreenViewport(spritePos + new Vector2(sprite.size.X ,0)) * resolution,
+                    cam.GlobalToScreenViewport(spritePos + new Vector2(0, sprite.size.Y)) * resolution,
                     cam.GlobalToScreenViewport(spritePos + sprite.size) * resolution
                 };
 
-                foreach (Vec2 corner in corners)
+                foreach (Vector2 corner in corners)
                     drawArea.ExpandTo(corner);
 
                 if (!drawArea.min.IsWithinMaxExclusive(zero, resolution) &&
@@ -174,31 +175,31 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawBaseImage(Camera cam, Vec2 resolution)
+        private void DrawBaseImage(Camera cam, Vector2 resolution)
         {
             Node spriteNode = new("SpriteNode", zero, one);
             Sprite sprite = spriteNode.AddComponent<Sprite>();
 
             var stage = Runtime.Current.GetStage();
-            Vec2 baseImageSize;
+            Vector2 baseImageSize;
             
             if (stage != null)
                 baseImageSize = stage.backgroundSize;
             else baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
 
 
-            Vec2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
+            Vector2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
             BoundingBox2D camBoundingBox = new(topLeft, topLeft);
 
 
-            List<Vec2> camCorners = new()
+            List<Vector2> camCorners = new()
             {
                 cam.Center + cam.bottomRightCornerOffset.WithScale(-1, 1).Rotated(cam.angle),
                 cam.Center + cam.bottomRightCornerOffset.WithScale(1, -1).Rotated(cam.angle),
                 cam.Center + cam.bottomRightCornerOffset.Rotated(cam.angle)
             };
 
-            foreach (Vec2 corner in camCorners) camBoundingBox.ExpandTo(corner);
+            foreach (Vector2 corner in camCorners) camBoundingBox.ExpandTo(corner);
 
             sprite.parent.Position = camBoundingBox.min;
             sprite.size = camBoundingBox.max - camBoundingBox.min;
@@ -213,39 +214,39 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vec2 resolution)
+        private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vector2 resolution)
         {
-            for (Vec2 framePos = drawArea.min;
-                framePos.y < drawArea.max.y;
-                framePos.Increment2D(drawArea.max.x, drawArea.min.x))
+            for (Vector2 framePos = drawArea.min;
+                framePos.Y < drawArea.max.Y;
+                framePos.Increment2D(drawArea.max.X ,drawArea.min.X))
             {
                 if (!framePos.IsWithinMaxExclusive(zero, resolution))
                     continue;
-                if (sprite.camDistance <= cam.zBuffer[(int)framePos.x, (int)framePos.y])
+                if (sprite.camDistance <= cam.zBuffer[(int)framePos.X ,(int)framePos.Y])
                     continue;
-                Vec2 camViewport = cam.ScreenToCamViewport(framePos / resolution);
+                Vector2 camViewport = cam.ScreenToCamViewport(framePos / resolution);
                 if (!camViewport.IsWithinMaxExclusive(zero, one))
                     continue;
-                Vec2 spriteViewportPos = cam.ViewportToSpriteViewport(sprite, camViewport);
+                Vector2 spriteViewportPos = cam.ViewportToSpriteViewport(sprite, camViewport);
                 if (!spriteViewportPos.IsWithinMaxExclusive(zero, one))
                     continue;
-                Vec2 colorPos = sprite.ViewportToColorPos(spriteViewportPos);
+                Vector2 colorPos = sprite.ViewportToColorPos(spriteViewportPos);
 
                 Pixel color = new();
 
                 switch (sprite.textureFiltering)
                 {
                     case TextureFiltering.Point:
-                        color = sprite.texture.GetPixel((int)colorPos.x, (int)colorPos.y);
+                        color = sprite.texture.GetPixel((int)colorPos.X ,(int)colorPos.Y);
                         break;
                     case TextureFiltering.Bilinear:
-                        Vec2Int colorSize = sprite.ColorDataSize;
-                        int left = (int)colorPos.x;
-                        int top = (int)colorPos.y;
-                        int right = (left + 1) % colorSize.x;
-                        int bottom = (top + 1) % colorSize.y;
-                        float xOffset = colorPos.x - left;
-                        float yOffset = colorPos.y - top;
+                        Vector2 colorSize = sprite.ColorDataSize;
+                        int left = (int)colorPos.X;
+                        int top = (int)colorPos.Y;
+                        int right = (int)((left + 1) % colorSize.X);
+                        int bottom = (int)((top + 1) % colorSize.Y);
+                        float xOffset = colorPos.X - left;
+                        float yOffset = colorPos.Y - top;
                         Pixel topJPixel = Pixel.Lerp(sprite.texture.GetPixel(left, top), sprite.texture.GetPixel(right, top), xOffset);
                         Pixel botJPixel = Pixel.Lerp(sprite.texture.GetPixel(left, bottom), sprite.texture.GetPixel(right, bottom), xOffset);
                         color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
@@ -256,15 +257,15 @@
                 if (color.a == 0)
                     continue;
                 if (color.a == 255)
-                    cam.zBuffer[(int)framePos.x, (int)framePos.y] = sprite.camDistance;
+                    cam.zBuffer[(int)framePos.X, (int)framePos.Y] = sprite.camDistance;
                 WriteColorToFrame(ref color, ref framePos);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void WriteColorToFrame(ref Pixel color, ref Vec2 framePos)
+        private void WriteColorToFrame(ref Pixel color, ref Vector2 framePos)
         {
-            int index = (int)framePos.y * stride + ((int)framePos.x * 3);
+            int index = (int)framePos.Y * stride + ((int)framePos.X * 3);
 
             float colorB = (float)color.b / 255 * color.a;
             float colorG = (float)color.g / 255 * color.a;

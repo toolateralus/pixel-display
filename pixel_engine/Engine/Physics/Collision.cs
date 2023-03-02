@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
+
 namespace pixel_renderer
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };
@@ -16,11 +18,11 @@ namespace pixel_renderer
             var hasCollider = node.TryGetComponent(out Collider col);
             if (!hasCollider) return;
 
-            if (node.Position.y > Constants.PhysicsArea.y - col.scale.y)
-                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.y - col.scale.y);
-            if (node.Position.x > Constants.PhysicsArea.x - col.scale.x)
-                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.x - col.scale.x);
-            if (node.Position.x < 0)
+            if (node.Position.Y > Constants.PhysicsArea.Y - col.scale.Y)
+                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.Y - col.scale.Y);
+            if (node.Position.X > Constants.PhysicsArea.X - col.scale.X)
+                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.X - col.scale.X);
+            if (node.Position.X < 0)
                 node.Position = node.Position.WithValue(x: 0);
         }
         public static void FinalPhase()
@@ -71,7 +73,7 @@ namespace pixel_renderer
 
             A.parent.Position += minDepth;
 
-            if(minDepth != Vec2.zero)
+            if(minDepth != Vector2.Zero)
                 AttemptCallbacks(aCol, B);
 
         }
@@ -86,15 +88,15 @@ namespace pixel_renderer
 
             //depenetrate
             var minDepth = SATCollision.GetMinimumDepthVector(aCol.Polygon, bCol.Polygon);
-            if (minDepth == Vec2.zero)
+            if (minDepth == Vector2.Zero)
                 return;
             A.parent.Position += minDepth / 2;
             B.parent.Position -= minDepth / 2;
 
             //flatten velocities
-            Vec2 colNormal = minDepth.Normalized();
-            float colSpeedA = Vec2.Dot(A.velocity, colNormal);
-            float colSpeedB = Vec2.Dot(B.velocity, colNormal);
+            Vector2 colNormal = minDepth.Normalized();
+            float colSpeedA = Vector2.Dot(A.velocity, colNormal);
+            float colSpeedB = Vector2.Dot(B.velocity, colNormal);
             float averageSpeed = (colSpeedA + colSpeedB) / 2;
             A.velocity -= colNormal * (averageSpeed - colSpeedA);
             B.velocity -= colNormal * (averageSpeed - colSpeedB);

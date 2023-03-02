@@ -24,10 +24,10 @@ namespace pixel_renderer
                 baseImageDirty = false;
             }
 
-            stride = 4 * ((int)Resolution.x * 24 + 31) / 32;
+            stride = 4 * ((int)Resolution.X * 24 + 31) / 32;
 
-            if (frame.Length != stride * Resolution.y)
-                frame = new byte[stride * (int)Resolution.y];
+            if (frame.Length != stride * Resolution.Y)
+                frame = new byte[stride * (int)Resolution.Y];
 
 
             List<Component> componentsFound = new();

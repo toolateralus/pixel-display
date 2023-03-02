@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Drawing;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -7,16 +8,16 @@ namespace pixel_renderer
     {
         [Field][JsonProperty] public float drawOrder = 0f;
         [Field][JsonProperty] public float angle = 0f;
-        [Field][JsonProperty] public Vec2 bottomRightCornerOffset = new(1, 1);
+        [Field][JsonProperty] public Vector2 bottomRightCornerOffset = new(1, 1);
 
-        public Vec2 Center { get => parent.Position; set => parent.Position = value; }
-        public Vec2 Size
+        public Vector2 Center { get => parent.Position; set => parent.Position = value; }
+        public Vector2 Size
         {
             get => bottomRightCornerOffset * 2;
             set => bottomRightCornerOffset = value * 0.5f;
         }
         
-        public Vec2 GlobalToLocal(Vec2 global) => (global - Center).Rotated(angle) + bottomRightCornerOffset;
-        public Vec2 LocalToGlobal(Vec2 local) => (local - bottomRightCornerOffset).Rotated(-angle) + Center;
+        public Vector2 GlobalToLocal(Vector2 global) => (global - Center).Rotated(angle) + bottomRightCornerOffset;
+        public Vector2 LocalToGlobal(Vector2 local) => (local - bottomRightCornerOffset).Rotated(-angle) + Center;
     }
 }

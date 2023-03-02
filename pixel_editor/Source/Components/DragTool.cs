@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Documents;
 using System.Xml.Linq;
 
@@ -9,7 +10,7 @@ namespace pixel_editor
 {
     public class DragTool : Tool
     {
-        private Vec2 mouseSelectedNodeOffset;
+        private Vector2 mouseSelectedNodeOffset;
 
         public override void Awake()
         {
@@ -61,7 +62,7 @@ namespace pixel_editor
             draggingMultiple = true;
         }
 
-        List<Vec2> mouseSelectedNodeOffsets = new();
+        List<Vector2> mouseSelectedNodeOffsets = new();
         public override void Update(float delta)
         {
             var selected = Editor.Current.LastSelected;
@@ -95,7 +96,7 @@ namespace pixel_editor
                         return;
 
                     foreach (Node node in nodes)
-                        if (node.Position is Vec2 vec)
+                        if (node.Position is Vector2 vec)
                             if (vec.IsWithin(boxStart, boxEnd))
                             {
                                 if (node.TryGetComponent(out Collider sprite))
@@ -112,8 +113,8 @@ namespace pixel_editor
             }
         }
         private bool InBoxSelect = false;
-        Vec2 boxStart;
-        Vec2 boxEnd;
+        Vector2 boxStart;
+        Vector2 boxEnd;
         private bool draggingMultiple;
 
         public override void OnDrawShapes()

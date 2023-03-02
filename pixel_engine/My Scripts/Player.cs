@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using pixel_renderer.Assets;
 using System.Linq;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -20,12 +21,12 @@ namespace pixel_renderer
 
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
-        [Field] public Vec2 moveVector;
+        [Field] public Vector2 moveVector;
 
         
         
         private bool freezeButtonPressedLastFrame = false;
-        private Vec2 thisPos;
+        private Vector2 thisPos;
         private Curve curve;
         [Field] private bool isGrounded;
 
@@ -47,8 +48,8 @@ namespace pixel_renderer
         {
             Node node = new("Player Child");
             if (parent != null)
-                node.Position = parent.Position + Vec2.up * 16;
-            else node.Position = JRandom.Vec2(Vec2.zero, Vec2.one * Constants.ScreenW); 
+                node.Position = parent.Position + Vector2.UnitY * 16;
+            else node.Position = JRandom.Vec2(Vector2.Zero, Vector2.One * Constants.ScreenW); 
             AddCamera(node);
             return node;
         }
@@ -60,7 +61,7 @@ namespace pixel_renderer
             if (parent.TryGetComponent(out sprite))
             {
                 sprite.Type = SpriteType.Image;
-                curve = Curve.Circlular(1, 16, radius: sprite.size.x /2, looping: true);
+                curve = Curve.Circlular(1, 16, radius: sprite.size.X /2, looping: true);
             }
 
             Task task = new(async delegate
@@ -68,7 +69,7 @@ namespace pixel_renderer
                 if (sprite is null) return; 
                 while (sprite.texture is null)
                     await Task.Delay(25);
-                sprite.texture.SetImage(PlayerSprite, (Vec2Int)sprite.size);
+                sprite.texture.SetImage(PlayerSprite, (Vector2)sprite.size);
             });
 
             task.Start();
@@ -98,7 +99,7 @@ namespace pixel_renderer
                     child.Value.localPos += moveVector;
 
                 parent.Position = thisPos;
-                moveVector = Vec2.zero;
+                moveVector = Vector2.Zero;
                 return;
             }
 
@@ -109,30 +110,30 @@ namespace pixel_renderer
             }
 
             Move(moveVector);
-            moveVector = Vec2.zero;
+            moveVector = Vector2.Zero;
         }
 
         private void DrawCircle()
         {
-            Pixel[,] colors = new Pixel[(int)sprite.size.x, (int)sprite.size.y];
+            Pixel[,] colors = new Pixel[(int)sprite.size.X, (int)sprite.size.Y];
 
 
             for(int i = 0; i < curve.points.Values.Count; ++i)
             {
-                Vec2 pos = curve.points.Values.ElementAt(i);
+                Vector2 pos = curve.points.Values.ElementAt(i);
                 pos += sprite.size / 2; 
 
-                if(pos.IsWithinMaxExclusive(Vec2.zero, new(sprite.size.x, sprite.size.y)))
-                    colors[(int)pos.x, (int)pos.y] = (Pixel)Color.Red;
+                if(pos.IsWithinMaxExclusive(Vector2.Zero, new(sprite.size.X, sprite.size.Y)))
+                    colors[(int)pos.X, (int)pos.Y] = (Pixel)Color.Red;
                 
             }
-            sprite.Draw((Vec2Int)sprite.size, CBit.ByteArrayFromColorArray(colors));
+            sprite.Draw((Vector2)sprite.size, CBit.ByteArrayFromColorArray(colors));
         }
 
-        void Up(object[]? e) => moveVector = new Vec2(moveVector.x, -inputMagnitude);
-        void Down(object[]? e) => moveVector = new Vec2(moveVector.x, inputMagnitude);
-        void Left(object[]? e) => moveVector = new Vec2(-inputMagnitude, moveVector.y);
-        void Right(object[]? e) => moveVector = new Vec2(inputMagnitude, moveVector.y);
+        void Up(object[]? e) => moveVector = new Vector2(moveVector.X -inputMagnitude);
+        void Down(object[]? e) => moveVector = new Vector2(moveVector.X, inputMagnitude);
+        void Left(object[]? e) => moveVector = new Vector2(-inputMagnitude, moveVector.Y);
+        void Right(object[]? e) => moveVector = new Vector2(inputMagnitude, moveVector.Y);
 
         private void CreateInputEvents()
         {
@@ -142,21 +143,21 @@ namespace pixel_renderer
             RegisterAction(Left,  Key.A);
             RegisterAction(Right, Key.D);
         }
-        private void Move(Vec2 moveVector)
+        private void Move(Vector2 moveVector)
         {
-            rb.velocity.x += moveVector.x * speed;
+            rb.velocity.X += moveVector.X * speed;
         }
-        private void Jump(Vec2 moveVector)
+        private void Jump(Vector2 moveVector)
         {
             var jumpVel = speed * 2;
-            rb.velocity.y = moveVector.y * jumpVel;
+            rb.velocity.Y = moveVector.Y * jumpVel;
         }
 
         public static Node Standard()
         {
             Node playerNode = new("Player")
             {
-                Position = new Vec2(0, -20)
+                Position = new Vector2(0, -20)
             };
            
 
@@ -187,7 +188,7 @@ namespace pixel_renderer
         public static Sprite AddSprite(Node playerNode)
         {
             var sprite = playerNode.AddComponent<Sprite>();
-            sprite.size = Vec2.one * 36;
+            sprite.size = Vector2.One * 36;
             return sprite;
         }
 

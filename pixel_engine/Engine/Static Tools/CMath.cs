@@ -1,6 +1,7 @@
 ﻿namespace pixel_renderer
 {
     using System;
+    using System.Numerics;
 
     public static class CMath
     {
@@ -21,21 +22,21 @@
             return output;
         }
         public static double Negate(double v) => -v;
-        public static Vec2 Negate(Vec2 v) => new()
+        public static Vector2 Negate(Vector2 v) => new()
         {
-            x = -v.x,
-            y = -v.y,
+            X = -v.X,
+            Y = -v.Y,
         };
 
-        public static Vec3 Negate(Vec3 v) => new()
+        public static Vector3 Negate(Vector3 v) => new()
         {
-            x = -v.x,
-            y = -v.y,
-            z = -v.z
+            X = -v.X,
+            Y = -v.Y,
+            Z = -v.Z
         };
-        public static Vec2 Min(Vec2 v1, Vec2 v2)
+        public static Vector2 Min(Vector2 v1, Vector2 v2)
         {
-            return new(MathF.Min(v1.x, v2.x), MathF.Min(v1.y, v2.y));
+            return new(MathF.Min(v1.X ,v2.X), MathF.Min(v1.Y, v2.Y));
         }
         public static float Sqrt(float input)
         {

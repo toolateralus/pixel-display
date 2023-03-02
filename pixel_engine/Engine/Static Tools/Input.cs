@@ -7,6 +7,7 @@ using System.Windows;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -25,12 +26,12 @@ namespace pixel_renderer
      
         public static int MouseWheelDelta { get; set; }
         
-        public static Vec2 LastClickPosition { get; set; }
-        public static Vec2 Position;
-        public static Vec2 LastClickGlobalPosition { get; private set; }
-        public static Vec2 GlobalPosition;
-        public static Vec2 LastPosition { get; set; }
-        public static Vec2 Delta { get { return LastPosition - Position; } }
+        public static Vector2 LastClickPosition { get; set; }
+        public static Vector2 Position;
+        public static Vector2 LastClickGlobalPosition { get; private set; }
+        public static Vector2 GlobalPosition;
+        public static Vector2 LastPosition { get; set; }
+        public static Vector2 Delta { get { return LastPosition - Position; } }
 
         private static CMouse current = null;
 
@@ -70,9 +71,9 @@ namespace pixel_renderer
                 LastClickPosition = Position;
                 
                 var img = Runtime.OutputImages.First();
-                var normalizedPos = (Vec2)img.GetNormalizedPoint(LastClickPosition);
+                var normalizedPos = img.GetNormalizedPoint(new Point(LastClickPosition.X, LastClickPosition.Y));
 
-                LastClickGlobalPosition = Camera.First.ScreenViewportToGlobal(normalizedPos);
+                LastClickGlobalPosition = Camera.First.ScreenViewportToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
                 OnLeftPressedThisFrame?.Invoke();
             }
             else
@@ -113,9 +114,12 @@ namespace pixel_renderer
             LastPosition = Position;
             var img = Runtime.OutputImages.First();
             var point = e.GetPosition(img);
-            var normalizedPos = (Vec2)img.GetNormalizedPoint(point);
+            var pt = img.GetNormalizedPoint(point);
+            var normalizedPos = new Vector2((float)pt.X, (float)pt.Y); 
             GlobalPosition = Camera.First.ScreenViewportToGlobal(normalizedPos);
-            Position = (Vec2)point;
+            Position = new((float)point.X,
+                (float)point.Y);
+              
         }
     }
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }

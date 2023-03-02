@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Drawing;
+using System.Numerics;
 using System.Windows.Documents;
 
 namespace pixel_renderer
@@ -10,7 +11,7 @@ namespace pixel_renderer
         private float _drag = 0.0f;
         [Field] [JsonProperty] public float drag = .6f;
         [Field] [JsonProperty] public bool usingGravity = true;
-        [Field] [JsonProperty] public Vec2 velocity = new();
+        [Field] [JsonProperty] public Vector2 velocity = new();
         [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
         
         const double dragCoefficient = 1;
@@ -22,8 +23,8 @@ namespace pixel_renderer
         private protected void ApplyDrag()
         {
             _drag = (float)GetDrag().Clamp(-drag, drag);
-            velocity.y *= _drag;
-            velocity.x *= _drag;
+            velocity.Y *= _drag;
+            velocity.X *= _drag;
         }
         private protected double GetDrag()
         {
@@ -53,7 +54,7 @@ namespace pixel_renderer
         public override void FixedUpdate(float delta)
         {
             if (usingGravity) 
-                velocity.y += CMath.Gravity;
+                velocity.Y += CMath.Gravity;
             ApplyDrag();
             ApplyVelocity();
         }

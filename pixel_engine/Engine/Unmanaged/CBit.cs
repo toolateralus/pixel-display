@@ -10,6 +10,7 @@ using System.Windows.Media.Media3D;
 using Bitmap = System.Drawing.Bitmap;
 using Pixel = System.Drawing.Color;
 using Image = System.Windows.Controls.Image;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -75,10 +76,10 @@ namespace pixel_renderer
                 return colors;
             }
         }
-        public static Bitmap SolidColorBitmap(Vec2 size, Pixel color)
+        public static Bitmap SolidColorBitmap(Vector2 size, Pixel color)
         {
-            int x = (int)size.x;
-            int y = (int)size.y;
+            int x = (int)size.X;
+            int y = (int)size.Y;
 
             var bitmap = new Bitmap(x, y);
 
@@ -87,16 +88,16 @@ namespace pixel_renderer
                     bitmap.SetPixel(i, j, color);
             return bitmap;
         }
-        public static Pixel[,] SolidColorSquare(Vec2 size, Pixel color)
+        public static Pixel[,] SolidColorSquare(Vector2 size, Pixel color)
         {
-            var colorData = new Pixel[(int)size.x, (int)size.y];
-            for (int x = 0; x < size.x; x++)
-                for (int y = 0; y < size.y; y++)
+            var colorData = new Pixel[(int)size.X, (int)size.Y];
+            for (int x = 0; x < size.X; x++)
+                for (int y = 0; y < size.Y; y++)
                     colorData[x, y] = color;
             return colorData;
         }
         
-        public static void RenderFromFrame(byte[] frame, int stride, Vec2 resolution, Image output)
+        public static void RenderFromFrame(byte[] frame, int stride, Vector2 resolution, Image output)
         {
 
             if (GetStride(resolution) != stride)
@@ -112,7 +113,7 @@ namespace pixel_renderer
             try
             {
                 output.Source = BitmapSource.Create(
-                (int)resolution.x, (int)resolution.y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+                (int)resolution.X, (int)resolution.Y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
                 frame, stride);
             }
             catch
@@ -122,9 +123,9 @@ namespace pixel_renderer
             
         }
 
-        public static int GetStride(Vec2 resolution)
+        public static int GetStride(Vector2 resolution)
         {
-            return 4 * ((int)resolution.x * 24 + 31) / 32;
+            return 4 * ((int)resolution.X * 24 + 31) / 32;
         }
     }
 }

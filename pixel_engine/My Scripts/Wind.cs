@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Numerics;
+using System.Text.Json.Serialization;
 
 namespace pixel_renderer
 {
@@ -7,15 +8,15 @@ namespace pixel_renderer
 
     public static class Orientation
     {
-        public static Vec2 GetDirection(Direction direction)
+        public static Vector2 GetDirection(Direction direction)
         {
             return direction switch
             {
-                Direction.Left => new Vec2(-1, 0),
-                Direction.Right => new Vec2(1, 0),
-                Direction.Up => new Vec2(0, -1),
-                Direction.Down => new Vec2(0, 1),
-                _ => Vec2.zero,
+                Direction.Left => new Vector2(-1, 0),
+                Direction.Right => new Vector2(1, 0),
+                Direction.Up => new Vector2(0, -1),
+                Direction.Down => new Vector2(0, 1),
+                _ => Vector2.Zero,
             };
         }
     }

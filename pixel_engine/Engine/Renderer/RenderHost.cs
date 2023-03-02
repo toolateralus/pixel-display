@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,14 +22,14 @@ namespace pixel_renderer
         }
         public event Action<long>? OnRenderCompleted; 
         public void SetRenderer(RendererBase renderer) => m_renderer = renderer;
-        public Vec2? newResolution = null;
+        public Vector2 newResolution = default;
         public bool Rendering { get; private set; }
         private void UpdateResolution()
         {
-            if (newResolution != null)
+            if (newResolution != default)
             {
-                m_renderer._resolution = (Vec2)newResolution;
-                newResolution = null;
+                m_renderer._resolution = (Vector2)newResolution;
+                newResolution = default;
             }
         }
         public void Render()

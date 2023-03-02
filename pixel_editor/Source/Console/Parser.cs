@@ -4,6 +4,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Text;
 using System.Windows.Documents;
@@ -194,17 +195,17 @@ namespace pixel_editor
            
         }
         
-        private static Vec2 Vec2(string? arg0)
+        private static Vector2 Vec2(string? arg0)
         {
             string[] values = arg0.Split(',');
             
             if(values.Length < 2 )
-            return pixel_renderer.Vec2.zero; 
+            return Vector2.Zero; 
 
             var x = RemoveUnwantedChars(values[0]).ToFloat();
             var y = RemoveUnwantedChars(values[1]).ToFloat();
 
-            return new Vec2(x,y);
+            return new Vector2(x,y);
         }
         private static string String(string arg0)
         {

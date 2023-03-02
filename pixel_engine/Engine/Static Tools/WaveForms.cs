@@ -1,6 +1,7 @@
 ﻿namespace pixel_renderer
 {
     using System;
+    using System.Numerics;
     using pixel_renderer;
     /// <summary>
     /// must be refactored to not be static or to not use instanced data.
@@ -10,13 +11,13 @@
         public static int vertices = 1024;
         public static float amplitude = 1;
         public static float frequency = .5f;
-        public static Vec2 xLimits = new Vec2(0, 15);
+        public static Vector2 xLimits = new Vector2(0, 15);
         public static float movementSpeed = .5f;
         public static float radians = 2 * CMath.PI;
         /// <summary>
         /// Samples a random vertex point on a Sine Wave operating within pre-defined parameters.
         /// </summary>
-        public static Vec2 Next => GetPointOnSine();
+        public static Vector2 Next => GetPointOnSine();
         /// <summary>
         /// Manually define parameters for a sample from a sine wave.
         /// </summary>
@@ -27,24 +28,24 @@
         /// <param name="x">out X of the returned vector</param>
         /// <param name="y">out Y of the returned vector</param>
         /// <returns>A Vertex position on the specified wave.</returns>
-        public static Vec2 GetPointOnSine(float startPosition = 0, float endPosition = 1, float Tau = CMath.PI * 2, int vertexIndex = 0)
+        public static Vector2 GetPointOnSine(float startPosition = 0, float endPosition = 1, float Tau = CMath.PI * 2, int vertexIndex = 0)
         {
             float progress = (float)vertexIndex / (vertices - 1);
             int x = (int)CMath.Lerp(startPosition, endPosition, progress);
             int y = (int)(amplitude * Math.Sin(Tau * frequency * x + Runtime.Current.renderHost.info.frameCount * movementSpeed));
-            return new Vec2(x, y);
+            return new Vector2(x, y);
         }
         /// <summary>
         /// Sample a sine wave under the current defined parameters of the static class Sine.
         /// </summary>
         /// <returns>A Vertex position at a random point on a sine wave</returns>
-        public static Vec2 GetPointOnSine()
+        public static Vector2 GetPointOnSine()
         {
             int vertexIndex = JRandom.Int(0, vertices);
             float progress = (float)vertexIndex / (vertices - 1);
             int x = (int)CMath.Lerp(0, 1, progress);
             int y = (int)(amplitude * Math.Sin(CMath.Tau * frequency * x + Runtime.Current.renderHost.info.frameCount * movementSpeed));
-            return new Vec2(x, y);
+            return new Vector2(x, y);
         }
     }
 
