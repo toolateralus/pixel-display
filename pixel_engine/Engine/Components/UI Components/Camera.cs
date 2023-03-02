@@ -10,10 +10,20 @@ namespace pixel_renderer
         [Field] [JsonProperty] public DrawingType DrawMode = DrawingType.Clamped;
         public float[,] zBuffer = new float[0, 0];
 
-        public Vec2 LocalToCamViewport(Vec2 local) => local / Size.GetDivideSafe();
+        public Vec2 LocalToCamViewport(Vec2 local)
+        {
+            Size.GetDivideSafe();
+            return local / Size;
+        }
+
         public Vec2 CamViewportToLocal(Vec2 camViewport) => camViewport * Size;
         public Vec2 CamToScreenViewport(Vec2 camViewport) => camViewport * viewportSize + viewportPosition;
-        public Vec2 ScreenToCamViewport(Vec2 screenViewport) => (screenViewport - viewportPosition) / viewportSize.GetDivideSafe();
+        public Vec2 ScreenToCamViewport(Vec2 screenViewport)
+        {
+            viewportSize.GetDivideSafeRef();
+            return (screenViewport - viewportPosition) / viewportSize;
+}
+
         public Vec2 GlobalToCamViewport(Vec2 global) => LocalToCamViewport(GlobalToLocal(global));
         public Vec2 ViewportToGlobal(Vec2 camViewport) => LocalToGlobal(CamViewportToLocal(camViewport));
         public Vec2 GlobalToScreenViewport(Vec2 global) => CamToScreenViewport(GlobalToCamViewport(global));

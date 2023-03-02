@@ -19,15 +19,10 @@ namespace pixel_renderer
         {
             info = new(this);
         }
-
         public event Action<long>? OnRenderCompleted; 
-
-        public void SetRenderer(RendererBase renderer) => m_renderer= renderer;
-
+        public void SetRenderer(RendererBase renderer) => m_renderer = renderer;
         public Vec2? newResolution = null;
-
         public bool Rendering { get; private set; }
-
         private void UpdateResolution()
         {
             if (newResolution != null)
@@ -36,11 +31,13 @@ namespace pixel_renderer
                 newResolution = null;
             }
         }
-
         public void Render()
         {
-            if (m_renderer is null) throw new NullReferenceException("RenderHost does not have a renderer loaded.");
+            if (m_renderer is null) 
+                throw new NullReferenceException("RenderHost does not have a renderer loaded.");
+
             Cycle();
+
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
         }
         /// <summary>

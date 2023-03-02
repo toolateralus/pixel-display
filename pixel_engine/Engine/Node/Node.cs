@@ -235,7 +235,7 @@ namespace pixel_renderer
             Components[type].Add(component);
             component.parent = this;
 
-            if(Runtime.physicsRunning)
+            if(Runtime.PhysicsRunning)
                 component.Awake();
 
             return component;

@@ -6,27 +6,47 @@ namespace pixel_renderer
     using System.Drawing;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
 
     public static class ExtensionMethods
     {
+        private const float Epsilon = float.Epsilon;
         #region Numbers
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
         public static bool WithinRange(this int v, int min, int max) { return v <= max && v >= min; }
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Squared(this double v) => v * v;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Squared(this float v) => v * v;
+        
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
-        public static float Wrapped(this float v, float max) => (v % max + max) % max;
+        public static float Wrapped(this float v, float max)
+        {
+            float result = v - max * (float)Math.Floor(v / max);
+            return result < 0 ? result + max : result;
+        }
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
         public static bool IsWithinMaxExclusive(this float v, float min, float max) => v >= min && v < max;
-        public static float GetDivideSafe(this float v) => v == 0 ? float.Epsilon : v;
+        public static float GetDivideSafe(this float v) => v == 0 ? Epsilon : v;
         public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion
         #region Vectors
-        public static Vec2 GetDivideSafe(this Vec2 v) => new(v.x.GetDivideSafe(), v.y.GetDivideSafe());
+        public static void GetDivideSafeRef(this ref Vec2 v)
+        {
+            v.x = v.x.GetDivideSafe();
+            v.y = v.y.GetDivideSafe();
+        }
+        public static void GetDivideSafe(this Vec2 v)
+        {
+            v.x = v.x.GetDivideSafe();
+            v.y = v.y.GetDivideSafe();
+        }
         public static Vec2 WithValue(this Vec2 v, int? x = null, int? y = null) { return new Vec2(x ?? v.x, y ?? v.y); }
         public static Vec2 WithValue(this Vec2 v, float? x = null, float? y = null) { return new Vec2(x ?? v.x, y ?? v.y); }
-        public static Vec2 WithScale(this Vec2 v, int x = 1, int y = 1) { return new Vec2(v.x * x, v.y * y); }
+        public static Vec2 WithScale(this Vec2 v, float x = 1, float y = 1) { return new Vec2(v.x * x, v.y * y); }
         public static double Sum(this Vec2 v) => v.x + v.y;
         public static double Sum(this Vec3 v) => v.x + v.y + v.z;
         public static float Distance(this Vec2 v, Vec2 end) => (v - end).Length();

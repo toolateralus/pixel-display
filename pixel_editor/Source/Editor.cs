@@ -172,9 +172,10 @@ namespace pixel_editor
         public Vec2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         #endregion
         #region Input Events
+         Key P = Key.P; 
         private void StartStop(object[]? obj)
         {
-            if (Input.Get(0, "P"))
+            if (Input.Get(ref P, 0))
                 Runtime.TogglePhysics();
 
         }
@@ -307,8 +308,6 @@ namespace pixel_editor
             Current.Events.Pending.Enqueue(e);
         }
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
-
-
         private void OnDisable(object? sender, EventArgs e)
         {
             stageWnd?.Close();
@@ -384,7 +383,7 @@ namespace pixel_editor
             ComponentEditors[name].Show();
         }
 
-        public Action<string, ComponentEditor> OnEditorClosed = OnComponentEditorClosed;
+        public readonly Action<string, ComponentEditor> OnEditorClosed = OnComponentEditorClosed;
         private static void OnComponentEditorClosed(string name, ComponentEditor obj)
         {
             if (Current.ComponentEditors.ContainsKey(name))

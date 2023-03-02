@@ -82,9 +82,6 @@ namespace pixel_renderer
 
         public static void Refresh(MouseButtonEventArgs e)
         {
-
-
-
             e.Handled = true;
             switch (e.ChangedButton)
             {
@@ -104,8 +101,6 @@ namespace pixel_renderer
                     XButton2 = e.XButton2 is MouseButtonState.Pressed;
                     break;
             }
-
-          
         }
         public static void Refresh(MouseWheelEventArgs e)
         {
@@ -123,17 +118,12 @@ namespace pixel_renderer
             Position = (Vec2)point;
         }
     }
-
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
-
-
         private static readonly List<InputAction> InputActions = new(250);
-       
         internal static void Refresh()
         {
-
             lock (InputActions)
             {
                 InputAction[] actions = new InputAction[InputActions.Count];
@@ -141,26 +131,28 @@ namespace pixel_renderer
                 foreach (var action in actions)
                 {
                     var type = action.EventType;
-                    bool input_value = GetInputValueByType(ref action.Key, type);
+                    bool input_value = Get(ref action.Key, type);
                     if (input_value)
                         if (action.ExecuteAsynchronously) Task.Run(() => action.InvokeAsync());
                         else action.Invoke();
                 }
             }
         }
-        public static bool Get(InputEventType type, string key)
+        public static bool Get(string key, InputEventType type = InputEventType.KeyDown)
         {
-            return Application.Current.Dispatcher.Invoke(() => { 
-            Key key_ = Enum.Parse<Key>(key);
-            var input_value = type switch
-            {
-                InputEventType.KeyDown => Keyboard.IsKeyDown(key_),
-                InputEventType.KeyUp => Keyboard.IsKeyUp(key_),
-                InputEventType.KeyToggle => Keyboard.IsKeyToggled(key_),
-                _ => false,
-            };
-            return input_value;
-            });
+            if(Application.Current is Application app)
+                return app.Dispatcher.Invoke(() => { 
+                    Key key_ = Enum.Parse<Key>(key);
+                    var input_value = type switch
+                    {
+                        InputEventType.KeyDown => Keyboard.IsKeyDown(key_),
+                        InputEventType.KeyUp => Keyboard.IsKeyUp(key_),
+                        InputEventType.KeyToggle => Keyboard.IsKeyToggled(key_),
+                        _ => false,
+                    };
+                    return input_value;
+                });
+            else return false; 
         }
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
@@ -175,7 +167,7 @@ namespace pixel_renderer
                 return input_value;
             });
         }
-        public static bool GetInputValueByType(ref Key key, InputEventType type = InputEventType.KeyDown)
+        public static bool Get(ref Key key, InputEventType type = InputEventType.KeyDown)
         {
             return Get(key, type);
         }
@@ -184,14 +176,12 @@ namespace pixel_renderer
              InputActions.Add(new(action, key, type: type));
         }
     }
-
     public class InputAction
     {
         internal Key Key;
         internal InputEventType EventType = InputEventType.KeyDown; 
         internal readonly bool ExecuteAsynchronously = false;
         private ValueTuple<Action<object[]?>, object[]?> Action_Args = new();
-
         public InputAction(Action<object[]?> expression, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
         {
             ExecuteAsynchronously = async;

@@ -8,7 +8,7 @@
     /// <summary>
     /// Main Entry-Point for App.
     /// </summary>
-    public partial class EngineInstance : Window
+    public class EngineInstance 
     {
         /// <summary>
         /// use this flag to prevent the engine from running on its own.
@@ -18,13 +18,11 @@
         {
             Importer.Import(false);
             Project project = Project.Load();
-            InitializeComponent();
             Runtime.Initialize(this, project);
             if (!FromEditor)
             {
                 Runtime.ToggleRendering();
                 Runtime.TogglePhysics();
-                Runtime.OutputImages.Add(renderImage);
             } 
         }
     }

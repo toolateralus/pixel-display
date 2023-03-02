@@ -179,7 +179,12 @@ namespace pixel_renderer
             SetColorData(new(cols.GetLength(0), cols.GetLength(1)), bytes);  
         }
         public Vec2 ViewportToColorPos(Vec2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vec2.one) * colorDataSize;
-        internal Vec2 GlobalToViewport(Vec2 global) => (global - parent.Position) / size.GetDivideSafe();
+        internal Vec2 GlobalToViewport(Vec2 global)
+        {
+            size.GetDivideSafe();
+            return (global - parent.Position) / size;
+        }
+
         public Vec2[] GetVertices()
         {
             Vec2 topLeft = Vec2.zero;

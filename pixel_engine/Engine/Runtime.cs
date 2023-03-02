@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -40,60 +41,52 @@ namespace pixel_renderer
         public static event Action<Stage> OnStageSet = new(delegate { });
         public static List<Image> OutputImages = new();
         
-        private protected Thread renderThread;
-        private protected static BackgroundWorker physicsWorker;
+        private protected volatile Thread renderThread;
+        private protected volatile BackgroundWorker physicsWorker;
      
         public static object? Editor = null;
 
         public static bool IsRunning { get; private set; }
         public static bool PhysicsStopping { get; private set; }
-        public static bool physicsRunning { get; private set; }
+        public static bool PhysicsRunning { get; private set; }
         public static bool Initialized { get; private set; }
         public static bool IsTerminating { get; private set; }
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
+            GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             current = this;
             this.mainWnd = mainWnd;
-
             LoadedProject = project;
-
             renderHost = new();
             renderThread = new(OnRenderTick);
-            renderThread.Start();
-
-            mainWnd.Closing += (e, o) => Dispose();
-            
+            Task.Run(() => renderThread.Start());
             Initialized = true;
             Project.LoadStage(0);
             Current.stage?.Awake();
         }
-
         public static void TogglePhysics()
         {
-            if (!physicsRunning)
+            if (!PhysicsRunning)
             {
-                physicsRunning = true;
+                PhysicsRunning = true;
                 StartPhysicsWorker();
                 return;
             }
-            physicsRunning = false;
+            PhysicsRunning = false;
             StopPhysicsWorker();
         }
-
         private static void StopPhysicsWorker()
         {
-            physicsWorker.DoWork -= OnPhysicsTick;
-            physicsWorker.Dispose();
+            Current.physicsWorker.DoWork -= OnPhysicsTick;
+            Current.physicsWorker.Dispose();
         }
-
         private static void StartPhysicsWorker()
         {
-            physicsWorker ??= new BackgroundWorker();
-            physicsWorker.DoWork += OnPhysicsTick;
-            physicsWorker.RunWorkerAsync();
+            Current.physicsWorker ??= new BackgroundWorker();
+            Current.physicsWorker.DoWork += OnPhysicsTick;
+            Current.physicsWorker.RunWorkerAsync();
         }
-
         public static void ToggleRendering()
         {
             if (IsRunning)
@@ -103,7 +96,6 @@ namespace pixel_renderer
             }
             IsRunning = true;
         }
-
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -152,7 +144,7 @@ namespace pixel_renderer
         }
         private static void OnPhysicsTick(object sender, DoWorkEventArgs e)
         {
-            while (physicsRunning)
+            while (PhysicsRunning)
             {
                 if (IsTerminating)
                     return;

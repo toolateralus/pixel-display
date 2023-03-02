@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-
 namespace pixel_renderer
 {
     public class EditorEvent

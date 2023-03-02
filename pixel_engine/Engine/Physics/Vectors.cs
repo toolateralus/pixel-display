@@ -81,9 +81,7 @@
         public Vec2 Normal_LHS => new Vec2(y, -x).Normalized();
         public static float DistanceSquared(Vec2 a, Vec2 b)
         {
-            var _x = b.x - a.x;
-            var _y = b.y - a.y;
-            return _x * _x + _y * _y;
+            return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
         }
         public float SqrDistanceFrom(Vec2 v)
         {
@@ -102,19 +100,23 @@
         {
             return (a.x * b.x) + (a.y * b.y);
         }
-        public float Length() => (float)Math.Sqrt(x * x + y * y);
+        public float Length() => MathF.Sqrt(x * x + y * y);
         public Vec2 Rotated(float angle)
         {
-            float xResult = (MathF.Cos(angle) * x) - (MathF.Sin(angle) * y);
-            float yResult = (MathF.Sin(angle) * x) + (MathF.Cos(angle) * y);
-            return new Vec2(xResult, yResult);
+            float cos = MathF.Cos(angle);
+            float sin = MathF.Sin(angle);
+            return new Vec2(cos * x - sin * y, sin * x + cos * y);
         }
         public void Rotate(float angle)
         {
-            x = (MathF.Cos(angle) * x) - (MathF.Sin(angle) * y);
-            y = (MathF.Sin(angle) * x) + (MathF.Cos(angle) * y);
+            float cos = MathF.Cos(angle);
+            float sin = MathF.Sin(angle);
+            float newX = cos * x - sin * y;
+            float newY = sin * x + cos * y;
+            x = newX;
+            y = newY;
         }
-        public float SqrMagnitude() => x * x + y * y;
+        public float SqrMagnitude() => MathF.FusedMultiplyAdd(x, x, y * y);
         public readonly static Vec2 one = new(1, 1);
         public readonly static Vec2 zero = new(0, 0);
         public static Vec2 up = new(0, -1);
