@@ -182,7 +182,7 @@ namespace pixel_renderer
         public Vector2 ViewportToColorPos(Vector2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
         internal Vector2 GlobalToViewport(Vector2 global)
         {
-            size.GetDivideSafe();
+            size.MakeDivideSafe();
             return (global - parent.Position) / size;
         }
 

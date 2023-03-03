@@ -145,23 +145,22 @@
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vector2 resolution)
         {
-            Node spriteNode = new("SpriteNode", zero, one);
-            Sprite sprite = spriteNode.AddComponent<Sprite>();
+            SpriteInfo spriteInfo;
             BoundingBox2D drawArea = new();
-            for (int i = 0; i < renderInfo.Count; ++i)
+            for (int i = 0; i < renderInfo.spriteInfos.Count; ++i)
             {
-                renderInfo.SetSprite(sprite, i);
+                spriteInfo = renderInfo.spriteInfos[i];
 
-                Vector2 spritePos = sprite.parent.Position;
+                Vector2 spritePos = spriteInfo.pos;
                 Vector2 firstCorner = cam.GlobalToScreenViewport(spritePos) * resolution;
                 //Bounding box on screen which fully captures sprite
                 drawArea.min = firstCorner;
                 drawArea.max = firstCorner;
                 List<Vector2> corners = new()
                 {
-                    cam.GlobalToScreenViewport(spritePos + new Vector2(sprite.size.X ,0)) * resolution,
-                    cam.GlobalToScreenViewport(spritePos + new Vector2(0, sprite.size.Y)) * resolution,
-                    cam.GlobalToScreenViewport(spritePos + sprite.size) * resolution
+                    cam.GlobalToScreenViewport(spritePos + new Vector2(spriteInfo.size.X ,0)) * resolution,
+                    cam.GlobalToScreenViewport(spritePos + new Vector2(0, spriteInfo.size.Y)) * resolution,
+                    cam.GlobalToScreenViewport(spritePos + spriteInfo.size) * resolution
                 };
 
                 foreach (Vector2 corner in corners)
@@ -170,15 +169,14 @@
                 if (!drawArea.min.IsWithinMaxExclusive(zero, resolution) &&
                     !drawArea.max.IsWithinMaxExclusive(zero, resolution)) continue;
 
-                DrawTransparentSprite(cam, sprite, drawArea, resolution);
+                DrawTransparentSprite(cam, spriteInfo, drawArea, resolution);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawBaseImage(Camera cam, Vector2 resolution)
         {
-            Node spriteNode = new("SpriteNode", zero, one);
-            Sprite sprite = spriteNode.AddComponent<Sprite>();
+            SpriteInfo sprite = new();
 
             var stage = Runtime.Current.GetStage();
             Vector2 baseImageSize;
@@ -187,10 +185,8 @@
                 baseImageSize = stage.backgroundSize;
             else baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
 
-
             Vector2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
             BoundingBox2D camBoundingBox = new(topLeft, topLeft);
-
 
             List<Vector2> camCorners = new()
             {
@@ -201,21 +197,21 @@
 
             foreach (Vector2 corner in camCorners) camBoundingBox.ExpandTo(corner);
 
-            sprite.parent.Position = camBoundingBox.min;
+            sprite.pos = camBoundingBox.min;
             sprite.size = camBoundingBox.max - camBoundingBox.min;
             sprite.viewportScale = sprite.size / baseImageSize;
 
-            sprite.viewportScale.GetDivideSafeRef();
+            sprite.viewportScale.MakeDivideSafe();
             sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;
-            sprite.textureFiltering = stage.backgroundFiltering;
+            sprite.filtering = stage.backgroundFiltering;
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
         const float fZero = 0;
         const float fOne = 1;
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vector2 resolution)
+        private void DrawTransparentSprite(Camera cam, SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution)
         {
             Vector2 framePos = drawArea.min;
 
@@ -274,25 +270,25 @@
 
                 Pixel color = new Pixel();
 
-                switch (sprite.textureFiltering)
+                switch (sprite.filtering)
                 {
                     case TextureFiltering.Point:
-                        color = sprite.texture.GetPixel((int)colorPos.X, (int)colorPos.Y);
+                        color = sprite.image.GetPixel((int)colorPos.X, (int)colorPos.Y);
                         break;
                     case TextureFiltering.Bilinear:
-                        Vector2 colorSize = sprite.ColorDataSize;
+                        Vector2 colorSize = sprite.colorDataSize;
                         int left = (int)colorPos.X;
                         int top = (int)colorPos.Y;
                         int right = (int)((left + 1) % colorSize.X);
                         int bottom = (int)((top + 1) % colorSize.Y);
                         float xOffset = colorPos.X - left;
                         float yOffset = colorPos.Y - top;
-                        Pixel topJPixel = Pixel.Lerp(sprite.texture.GetPixel(left, top), sprite.texture.GetPixel(right, top), xOffset);
-                        Pixel botJPixel = Pixel.Lerp(sprite.texture.GetPixel(left, bottom), sprite.texture.GetPixel(right, bottom), xOffset);
+                        Pixel topJPixel = Pixel.Lerp(sprite.image.GetPixel(left, top), sprite.image.GetPixel(right, top), xOffset);
+                        Pixel botJPixel = Pixel.Lerp(sprite.image.GetPixel(left, bottom), sprite.image.GetPixel(right, bottom), xOffset);
                         color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
                         break;
                     default:
-                        throw new NotImplementedException(nameof(sprite.textureFiltering));
+                        throw new NotImplementedException(nameof(sprite.filtering));
                 }
 
                 if (color.a == 0)

@@ -1,85 +1,83 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Security.Policy;
+using System.Windows.Media.TextFormatting;
 
 namespace pixel_renderer
 {
     public class StageRenderInfo
     {
-        public int Count => spritePositions.Count;
-
-        public List<Vector2> spritePositions= new ();
-        public List<Vector2> spriteSizeVectors = new();
-        public List<Vector2> spriteVPOffsetVectors = new();
-        public List<Vector2> spriteVPScaleVectors = new();
-        public List<float> spriteCamDistances = new();
-        public List<TextureFiltering> spriteFiltering = new();
-        public List<JImage> spriteColorData = new();
+        public List<SpriteInfo> spriteInfos = new List<SpriteInfo>();
 
         public StageRenderInfo(Stage stage)
         {
            Refresh(stage);
-        }
-        public void SetSprite(Sprite sprite, int index)
-        {
-            sprite.parent.Position = spritePositions[index];
-
-            JImage jImage = spriteColorData[index];
-            if (jImage != null)
-                sprite.SetColorData(jImage.Size, jImage.data);
-            else Runtime.Log("Sprite image data was null");
-            
-            sprite.size = spriteSizeVectors[index];
-            sprite.viewportOffset = spriteVPOffsetVectors[index];
-            sprite.viewportScale = spriteVPScaleVectors[index];
-            sprite.textureFiltering = spriteFiltering[index];
-            sprite.camDistance = spriteCamDistances[index];
         }
         public void Refresh(Stage stage)
         {
             var sprites = stage.GetSprites();
             
             int spriteCt = sprites.Count();
-            int spritePosCt = Count; 
-            if (spriteCt != spritePosCt)
+            int infoCount = spriteInfos.Count; 
+            if (spriteCt != infoCount)
             {
-                for (int i = Count; i < spriteCt; ++i)
-                    addMemberOnTop();
-                for (int i = Count; i > spriteCt; --i)
-                    removeFirst();
+                for (int i = infoCount; i < spriteCt; ++i)
+                    spriteInfos.Add(new());
+                for (int i = infoCount; i > spriteCt; --i)
+                    spriteInfos.RemoveAt(0);
             }
             for (int i = 0; i < sprites.Count(); ++i)
             {
                 Sprite sprite = sprites.ElementAt(i);
-                spritePositions[i] = sprite.parent.Position;
-                spriteSizeVectors[i] = sprite.size;
-                spriteVPOffsetVectors[i] = sprite.viewportOffset;
-                spriteVPScaleVectors[i] = sprite.viewportScale;
-                spriteColorData[i] = sprite.texture.GetImage();
-                spriteFiltering[i] = sprite.textureFiltering;
-                spriteCamDistances[i] = sprite.camDistance;
+                spriteInfos[i].Set(sprite);
             }
-            void addMemberOnTop()
-            {
-                spritePositions.Add(Vector2.Zero);
-                spriteSizeVectors.Add(Vector2.Zero);
-                spriteVPOffsetVectors.Add(Vector2.Zero);
-                spriteVPScaleVectors.Add(Vector2.Zero);
-                spriteFiltering.Add(0);
-                spriteColorData.Add(new());
-                spriteCamDistances.Add(1f);
-            }
-            void removeFirst()
-            {
-                spritePositions.RemoveAt(0);
-                spriteSizeVectors.RemoveAt(0);
-                spriteVPOffsetVectors.RemoveAt(0);
-                spriteVPScaleVectors.RemoveAt(0);
-                spriteFiltering.RemoveAt(0);
-                spriteColorData.RemoveAt(0);
-                spriteCamDistances.RemoveAt(0);
+        }
+    }
+    public class SpriteInfo
+    {
+        public Vector2 pos = new();
+        public Vector2 size = new();
+        public Vector2 viewportOffset = new();
+        public Vector2 viewportScale = new();
+        public float camDistance = new();
+        public TextureFiltering filtering = new();
+        public JImage image = new();
+        public Vector2 colorDataSize;
 
-            }
+        public void Set(Sprite sprite)
+        {
+            pos = sprite.parent.Position;
+            size = sprite.size;
+            viewportOffset = sprite.viewportOffset;
+            viewportScale = sprite.viewportScale;
+            image = sprite.texture.GetImage();
+            filtering = sprite.textureFiltering;
+            camDistance = sprite.camDistance;
+            colorDataSize = image.Size;
+            size.MakeDivideSafe();
+        }
+        public Vector2 ViewportToColorPos(Vector2 spriteViewport) => 
+            ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
+        internal Vector2 GlobalToViewport(Vector2 global) =>
+            (global - pos) / size;
+        public void SetColorData(Vector2 size, byte[] data)
+        {
+            image = new(size, data);
+            colorDataSize = new(size.X, size.Y);
+        }
+        public SpriteInfo() { }
+        public SpriteInfo(Sprite sprite)
+        {
+            pos = sprite.parent.Position;
+            size = sprite.size;
+            viewportOffset = sprite.viewportOffset;
+            viewportScale = sprite.viewportScale;
+            image = sprite.texture.GetImage();
+            filtering = sprite.textureFiltering;
+            camDistance = sprite.camDistance;
+            colorDataSize = image.Size;
+            size.MakeDivideSafe();
         }
     }
 }

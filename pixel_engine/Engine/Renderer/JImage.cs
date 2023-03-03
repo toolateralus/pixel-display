@@ -19,7 +19,16 @@ namespace pixel_renderer
         public readonly int height;
         [JsonProperty]
         internal byte[] data;
-        public Vector2 Size => new(width, height);
+        Vector2 size = new();
+        public Vector2 Size
+        {
+            get
+            {
+                if (size.X != width|| size.Y != height)
+                    size = new(width, height);
+                return size;
+            }
+        }
 
         public JImage()
         {
