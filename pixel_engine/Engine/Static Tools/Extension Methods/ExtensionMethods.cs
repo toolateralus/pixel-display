@@ -174,7 +174,9 @@ namespace pixel_renderer
 
         public static Vector2 Normal_LHS(this Vector2 v)
         {
-            return new Vector2(v.Y, -v.X).Normalized();
+            v.X = v.Y;
+            v.Y = -v.X;
+            return v.Normalized();
         }
         #endregion
         #region Arrays
