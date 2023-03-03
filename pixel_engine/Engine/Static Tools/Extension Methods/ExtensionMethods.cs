@@ -89,8 +89,15 @@ namespace pixel_renderer
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
         public static float Wrapped(this float v, float max)
         {
-            float result = v - max * (float)Math.Floor(v / max);
-            return result < 0 ? result + max : result;
+            float result = v - max * MathF.Floor(v / max);
+
+            if (result >= max)
+                return result - max;
+
+            if (result < 0)
+                return result + max;
+
+            return result;
         }
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
         public static bool IsWithinMaxExclusive(this float v, float min, float max) => v >= min && v < max;

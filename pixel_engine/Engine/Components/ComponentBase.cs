@@ -12,17 +12,22 @@ namespace pixel_renderer
     public class Component
     {
         [JsonProperty]
-        public Node parent;
+        public Node node;
         [JsonProperty]
-        public bool Enabled = true;
+        public bool IsActive = true;
         [JsonProperty]
         internal Vector2 Position
         {
             get
             {
-                return parent.Position;
+                return node?.Position ?? default;
             }
-            set => parent.Position = value; 
+            set
+            {
+                if (node is null)
+                    return; 
+                node.Position = value;
+            }
         }
 
 
@@ -48,7 +53,7 @@ namespace pixel_renderer
         /// <typeparam name="T"></typeparam>
         /// <param name="index"></param>
         /// <returns>A component of specified type and parent</returns>
-        public T GetComponent<T>(int index = 0) where T : Component => parent.GetComponent<T>(index);
+        public T GetComponent<T>(int index = 0) where T : Component => node.GetComponent<T>(index);
         /// <summary>
         /// initializes UUID and other readonly info, should NEVER be called by the user.
         /// </summary>

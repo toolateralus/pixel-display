@@ -93,7 +93,11 @@ namespace pixel_renderer
             if (normal == Vector2.Zero)
                 return;
 
-            B.parent.Position -= normal * depth;
+            B.node.Position -= normal * depth;
+
+            var dot = Vector2.Dot(B.velocity, normal);
+
+            B.velocity -= normal * dot; 
 
             AttemptCallbacks(A, bCol);
         }
@@ -112,15 +116,18 @@ namespace pixel_renderer
                 return;
 
             float depenetration = depth / 2f;
+
             A.Position += normal * depenetration;
             B.Position -= normal * depenetration;
 
             float colSpeedA = Vector2.Dot(A.velocity, normal);
             float colSpeedB = Vector2.Dot(B.velocity, normal);
+
             float averageSpeed = (colSpeedA + colSpeedB) / 2f;
 
             Vector2 impulseA = normal * (averageSpeed - colSpeedA);
             Vector2 impulseB = normal * (averageSpeed - colSpeedB);
+
             A.ApplyImpulse(impulseA);
             B.ApplyImpulse(impulseB);
         }
@@ -158,12 +165,12 @@ namespace pixel_renderer
         {
             if (A.IsTrigger || B.IsTrigger)
             {
-                A.parent.OnTrigger(B);
-                B.parent.OnTrigger(A);
+                A.node.OnTrigger(B);
+                B.node.OnTrigger(A);
                 return;
             }
-            A.parent.OnCollision(B);
-            B.parent.OnCollision(A);
+            A.node.OnCollision(B);
+            B.node.OnCollision(A);
         }
         public static void Run()
         {

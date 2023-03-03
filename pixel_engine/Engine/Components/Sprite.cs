@@ -67,15 +67,15 @@ namespace pixel_renderer
                 if (light is null)
                     return data ?? throw new NullReferenceException(nameof(data));
 
-                if (parent.TryGetComponent<Collider>(out var col))
+                if (node.TryGetComponent<Collider>(out var col))
                 {
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, col.BoundingBox);
+                    Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
                 else
                 {
-                    Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, col.BoundingBox);
+                    Polygon poly = new Polygon(GetVertices()).OffsetBy(node.Position);
+                    Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
                 return lightmap; 
@@ -183,7 +183,7 @@ namespace pixel_renderer
         internal Vector2 GlobalToViewport(Vector2 global)
         {
             size.MakeDivideSafe();
-            return (global - parent.Position) / size;
+            return (global - node.Position) / size;
         }
 
         public Vector2[] GetVertices()
@@ -231,9 +231,9 @@ namespace pixel_renderer
             {
                 for (int y = 0; y < ColorData.height; y++)
                 {
-                    Vector2 pixelPosition = new Vector2(parent.Position.X, parent.Position.Y);
+                    Vector2 pixelPosition = new Vector2(node.Position.X, node.Position.Y);
 
-                    float distance = Vector2.Distance(pixelPosition, light.parent.Position);
+                    float distance = Vector2.Distance(pixelPosition, light.node.Position);
 
                     float brightness = light.brightness / (distance * distance);
 
@@ -293,7 +293,7 @@ namespace pixel_renderer
                 for (int i = 0; i < vertLength; i++)
                 {
                     var nextIndex = (i + 1) % vertLength;
-                    ShapeDrawer.DrawLine(mesh.vertices[i] + parent.Position, mesh.vertices[nextIndex] + parent.Position, Constants.EditorHighlightColor);
+                    ShapeDrawer.DrawLine(mesh.vertices[i] + node.Position, mesh.vertices[nextIndex] + node.Position, Constants.EditorHighlightColor);
                 }
             }
         }
@@ -304,6 +304,11 @@ namespace pixel_renderer
                 Vector2 size = new(image.width, image.height);
                 Draw(size, image.data);
             }
+        }
+
+        internal void Draw(Vector2 size, Pixel[,] colors)
+        {
+            texture.SetImage(colors);
         }
     }
 }

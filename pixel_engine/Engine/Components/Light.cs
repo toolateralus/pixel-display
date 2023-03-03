@@ -17,7 +17,7 @@ namespace pixel_renderer
         {
             float sliceAngle = 360f / 6; // divide circle into 6 equal slices
             float radius = 5f; // radius of the circle
-            var center = parent.Position + Vector2.One * radius / 2;
+            var center = node.Position + Vector2.One * radius / 2;
 
             for (int i = 0; i < 6; i++)
             {

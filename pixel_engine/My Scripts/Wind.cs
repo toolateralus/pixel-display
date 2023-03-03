@@ -25,7 +25,7 @@ namespace pixel_renderer
     {
         [JsonInclude] public Direction direction = Direction.Up;
         private Rigidbody rb;
-        public override void Awake() => rb = parent.GetComponent<Rigidbody>();
+        public override void Awake() => rb = node.GetComponent<Rigidbody>();
         public override void FixedUpdate(float delta)
         {
             if (rb is null) return;

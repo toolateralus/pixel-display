@@ -40,7 +40,7 @@ namespace pixel_editor
             if (vertices.Length == 0)
                 return;
             Vector2 mPos = CMouse.GlobalPosition;
-            Vector2 cPos = selectedCollider.parent.Position;
+            Vector2 cPos = selectedCollider.node.Position;
             if (selectedVertIndex == -1)
             {
                 int closestVert = 0;

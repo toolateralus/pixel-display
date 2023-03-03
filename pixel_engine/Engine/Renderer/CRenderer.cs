@@ -48,7 +48,7 @@ namespace pixel_renderer
 
 
             foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
-                if (uiComponent.Enabled && uiComponent is Camera camera)
+                if (uiComponent.IsActive && uiComponent is Camera camera)
                     RenderCamera(camera, renderInfo, Resolution);
          
         }

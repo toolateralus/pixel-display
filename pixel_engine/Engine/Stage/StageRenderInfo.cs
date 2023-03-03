@@ -47,7 +47,7 @@ namespace pixel_renderer
 
         public void Set(Sprite sprite)
         {
-            pos = sprite.parent.Position;
+            pos = sprite.node.Position;
             size = sprite.size;
             viewportOffset = sprite.viewportOffset;
             viewportScale = sprite.viewportScale;
@@ -69,7 +69,7 @@ namespace pixel_renderer
         public SpriteInfo() { }
         public SpriteInfo(Sprite sprite)
         {
-            pos = sprite.parent.Position;
+            pos = sprite.node.Position;
             size = sprite.size;
             viewportOffset = sprite.viewportOffset;
             viewportScale = sprite.viewportScale;

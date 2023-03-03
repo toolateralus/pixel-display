@@ -41,7 +41,7 @@
         {
             if (resolution.Y == 0 || resolution.X == 0) return;
 
-            Node camNode = new("CamNode", camera.parent.Position, one);
+            Node camNode = new("CamNode", camera.node.Position, one);
             Camera cam = camNode.AddComponent(camera.Clone());
             if (cam.zBuffer.GetLength(0) != resolution.X || cam.zBuffer.GetLength(1) != resolution.Y)
                 cam.zBuffer = new float[(int)resolution.X , (int)resolution.Y];

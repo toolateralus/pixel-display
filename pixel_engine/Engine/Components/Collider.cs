@@ -13,7 +13,7 @@ namespace pixel_renderer
         [JsonProperty] Polygon polygon = new();
         public Polygon Polygon
         {
-            get => polygon.OffsetBy(parent.Position);
+            get => polygon.OffsetBy(node.Position);
             set => polygon = new(value.vertices);
         }
         [JsonProperty] [Field] public Vector2 scale = new(1,1);

@@ -77,8 +77,6 @@ namespace pixel_renderer
         }
         public  Pixel GetPixel(int x, int y)
         {
-            if (width + height == 0)
-                return Pixel.Black; 
 
             int position = (y * width + x) * 4;
             var a = data[position + 0];

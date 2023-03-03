@@ -32,7 +32,7 @@ namespace pixel_editor
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any())
                 return;
-            cams.First().parent.Position = selected.Position;
+            cams.First().node.Position = selected.Position;
             if (!Input.Get(Key.Escape))
                 return;
             followNode = false;
@@ -46,7 +46,7 @@ namespace pixel_editor
             if (!cams.Any()) return;
             if (!Input.Get(Key.F))
                 return;
-            cams.First().parent.Position = selected.Position;
+            cams.First().node.Position = selected.Position;
             if (!Input.Get(Key.LeftShift))
                 return;
             followNode = true;
@@ -72,7 +72,7 @@ namespace pixel_editor
             if (CMouse.Right)
             {
                 followNode = false;
-                cams.First().parent.Position += CMouse.Delta * Constants.MouseSensitivity;
+                cams.First().node.Position += CMouse.Delta * Constants.MouseSensitivity;
             }
 
         }

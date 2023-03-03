@@ -109,7 +109,7 @@ namespace pixel_renderer
         }
         public void Start(float speed = 1, bool looping = true)
         {
-            parent.TryGetComponent(out sprite);
+            node.TryGetComponent(out sprite);
             if (animation is null)
             {
                 Runtime.Log("Animation was null.");
@@ -120,7 +120,7 @@ namespace pixel_renderer
         }
         public void Stop(bool reset = false)
         {
-            parent.TryGetComponent(out sprite);
+            node.TryGetComponent(out sprite);
             if (animation is null)
             {
                 Runtime.Log("Animation was null.");

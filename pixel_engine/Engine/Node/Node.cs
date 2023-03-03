@@ -233,7 +233,7 @@ namespace pixel_renderer
                 Components.Add(type, new());
 
             Components[type].Add(component);
-            component.parent = this;
+            component.node = this;
 
             if(Runtime.IsRunning)
                 component.Awake();

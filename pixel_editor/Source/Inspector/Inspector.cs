@@ -38,7 +38,7 @@ namespace pixel_editor
 
             List<string> output = new()
             {
-                $"{component.parent.Name} \n {component.Name} \n"
+                $"{component.node.Name} \n {component.Name} \n"
             };
 
             foreach (var field in fields)
@@ -111,7 +111,7 @@ namespace pixel_editor
         public static List<Action> editComponentActions = new();
         private static void RemoveComponent(Component obj)
         {
-            obj.parent.RemoveComponent(obj);
+            obj.node.RemoveComponent(obj);
         }
 
         private void Refresh(Grid grid)

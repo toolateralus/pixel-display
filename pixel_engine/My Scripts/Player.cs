@@ -22,8 +22,6 @@ namespace pixel_renderer
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vector2 moveVector;
-
-        
         
         private bool freezeButtonPressedLastFrame = false;
         private Vector2 thisPos;
@@ -57,8 +55,8 @@ namespace pixel_renderer
         public override void Awake()
         {
             CreateInputEvents();
-            parent.TryGetComponent(out rb);
-            if (parent.TryGetComponent(out sprite))
+            node.TryGetComponent(out rb);
+            if (node.TryGetComponent(out sprite))
             {
                 sprite.Type = SpriteType.Image;
                 curve = Curve.Circlular(1, 16, radius: sprite.size.X /2, looping: true);
@@ -88,26 +86,23 @@ namespace pixel_renderer
             var freezeButtonPressed = Get(Key.LeftShift);
 
             if (freezeButtonPressed && !freezeButtonPressedLastFrame)
-                thisPos = parent.Position;
+                thisPos = node.Position;
 
 
             freezeButtonPressedLastFrame = freezeButtonPressed;
 
             if (freezeButtonPressed)
             {
-                foreach (var child in parent.children)
+                foreach (var child in node.children)
                     child.Value.localPos += moveVector;
 
-                parent.Position = thisPos;
+                node.Position = thisPos;
                 moveVector = Vector2.Zero;
                 return;
             }
 
             if (isGrounded)
-            {
                 isGrounded = false;
-                Jump(moveVector);
-            }
 
             Move(moveVector);
             moveVector = Vector2.Zero;
@@ -127,13 +122,22 @@ namespace pixel_renderer
                     colors[(int)pos.X, (int)pos.Y] = (Pixel)Color.Red;
                 
             }
-            sprite.Draw((Vector2)sprite.size, CBit.ByteArrayFromColorArray(colors));
+            sprite.Draw(sprite.size, colors);
         }
 
         void Up(object[]? e) => moveVector = new Vector2(moveVector.X -inputMagnitude);
         void Down(object[]? e) => moveVector = new Vector2(moveVector.X, inputMagnitude);
-        void Left(object[]? e) => moveVector = new Vector2(-inputMagnitude, moveVector.Y);
-        void Right(object[]? e) => moveVector = new Vector2(inputMagnitude, moveVector.Y);
+        void Left(object[]? e)
+        {
+            sprite.viewportScale.X = -1; 
+            moveVector = new Vector2(-inputMagnitude, moveVector.Y);
+        }
+
+        void Right(object[]? e)
+        {
+            sprite.viewportScale.X = 1;
+            moveVector = new Vector2(inputMagnitude, moveVector.Y);
+        }
 
         private void CreateInputEvents()
         {
@@ -145,12 +149,7 @@ namespace pixel_renderer
         }
         private void Move(Vector2 moveVector)
         {
-            rb.velocity.X += moveVector.X * speed;
-        }
-        private void Jump(Vector2 moveVector)
-        {
-            var jumpVel = speed * 2;
-            rb.velocity.Y = moveVector.Y * jumpVel;
+            rb.ApplyImpulse(moveVector.WithValue(y:0) * speed);
         }
 
         public static Node Standard()
@@ -194,9 +193,9 @@ namespace pixel_renderer
 
         public override void OnDrawShapes()
         {
-            if(parent.GetComponent<Collider>()?.Polygon is not Polygon poly)
+            if(node.GetComponent<Collider>()?.Polygon is not Polygon poly)
                 return;
-            foreach (var child in parent.children)
+            foreach (var child in node.children)
             {
                 if (!child.Value.TryGetComponent(out Collider col)) return;
                 var centroid = col.Polygon.centroid;

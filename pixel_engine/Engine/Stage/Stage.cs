@@ -296,7 +296,7 @@ namespace pixel_renderer
                         Runtime.Log("JSON_ERROR: Null Component Removed From Node.");
                         node.RemoveComponent(component);
                     }
-                    component.parent ??= node;
+                    component.node ??= node;
                 }
             }
             Metadata = metadata;
