@@ -22,7 +22,7 @@ namespace pixel_renderer
         public EngineInstance mainWnd;
         public RenderHost renderHost;
         public StagingHost stagingHost = new();
-        public Project LoadedProject;
+        public Project project;
 
         public static Runtime Current
         {
@@ -35,29 +35,27 @@ namespace pixel_renderer
         }
         private protected volatile static Runtime? current;
         private protected volatile Stage? stage;
+        private protected volatile Thread renderThread; 
 
         public static event Action<EditorEvent>? InspectorEventRaised;
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
+        
         public static List<Image> OutputImages = new();
         
-        private protected volatile Thread renderThread;
-        private protected volatile BackgroundWorker physicsWorker;
      
-        public static object? Editor = null;
+        public object? Inspector = null;
 
-        public static bool IsRunning { get; private set; }
-        public static bool PhysicsStopping { get; private set; }
-        public static bool PhysicsRunning { get; private set; }
         public static bool Initialized { get; private set; }
-        public static bool IsTerminating { get; private set; }
+        public static bool IsRunning { get; private set; }
+        public static bool IsDiposing { get; private set; }
 
         private Runtime(EngineInstance mainWnd, Project project)
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             current = this;
             this.mainWnd = mainWnd;
-            LoadedProject = project;
+            this.project = project;
             renderHost = new();
             renderThread = new(OnRenderTick);
             Task.Run(() => renderThread.Start());
@@ -88,7 +86,7 @@ namespace pixel_renderer
         {
             while (Current.renderThread != null && Current.renderThread.IsAlive)
             {
-                if (IsTerminating)
+                if (IsDiposing)
                     return;
 
                CMouse.Update();
@@ -124,14 +122,13 @@ namespace pixel_renderer
                 }
             }
         }
-    
         public static void Initialize(EngineInstance mainWnd, Project project)
         {
             current ??= new(mainWnd, project);
         }
         public void SetProject(Project project)
         {
-            LoadedProject = project;
+            this.project = project;
             OnProjectSet?.Invoke(project);
         }
         internal protected static Stage InstantiateDefaultStageIntoProject()
@@ -139,7 +136,7 @@ namespace pixel_renderer
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
                 " A Default will be instantiated and added to the project at the requested index.");
             Stage stage = Stage.Standard();
-            Current.LoadedProject.AddStage(stage);
+            Current.project.AddStage(stage);
             return stage; 
         }
         public Stage? GetStage()
@@ -151,12 +148,15 @@ namespace pixel_renderer
             this.stage = stage;
             OnStageSet?.Invoke(stage);
         }
-        private void Dispose()
+        public void Dispose()
         {
-            IsTerminating = true;
-            PhysicsStopping = true;
+            IsDiposing = true;
+            IsRunning = false;
             Task.Run(()=> renderThread?.Join());
             renderThread = null;
+            current = null;
+            stage = null;
+            project = null;
         }
     }
 }

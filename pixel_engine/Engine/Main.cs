@@ -2,6 +2,7 @@
 {
     using pixel_renderer.Assets;
     using System;
+    using System.Threading.Channels;
     using System.Threading.Tasks;
     using System.Windows;
 
@@ -21,6 +22,11 @@
             Runtime.Initialize(this, project);
             if (!FromEditor)
                 Runtime.Toggle();
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

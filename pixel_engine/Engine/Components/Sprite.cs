@@ -22,7 +22,7 @@ using Pixel = System.Drawing.Color;
 namespace pixel_renderer
 {
     public enum SpriteType { SolidColor, Image, Custom};
-    public enum TextureFiltering {Point, Bilinear};
+    public enum TextureFiltering { Point, Bilinear }
     public class Sprite : Component
     {
         [JsonProperty] public Vector2 size = Vector2.One * 16;

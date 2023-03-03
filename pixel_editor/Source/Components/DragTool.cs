@@ -112,9 +112,9 @@ namespace pixel_editor
                 InBoxSelect = false;
             }
         }
-        private bool InBoxSelect = false;
         Vector2 boxStart;
         Vector2 boxEnd;
+        public bool InBoxSelect { get; private set; } = false;
         private bool draggingMultiple;
 
         public override void OnDrawShapes()

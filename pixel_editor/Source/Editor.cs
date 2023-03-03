@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -69,32 +70,46 @@ namespace pixel_editor
         static List<Tool> Tools = new List<Tool>();
         public Editor()
         {
-            EngineInstance.FromEditor = true;
-            engine = new();
-
-            current = this;
-
-            //wpf
-            InitializeComponent();
-
-            GetEvents();
-            Tools = Tool.InitializeToolkit();
-
-            GetInputs();
-
+            InitializeEditor();
             inspector = new Inspector(inspectorGrid);
-            Runtime.Editor = inspector;
-
-            Console.Print(motd, true);
-
-            OnStageSet(Runtime.Current.GetStage());
-            OnProjectSet(Runtime.Current.LoadedProject);
-
-            Runtime.OutputImages.Add(image);
-            Runtime.Toggle();
-
+            Runtime.Current.Inspector = inspector;
         }
 
+        private void InitializeEditor()
+        {
+            EngineInstance.FromEditor = true;
+            engine = new();
+            current = this;
+            //wpf
+            InitializeComponent();
+            GetEvents();
+            Tools = Tool.InitializeToolkit();
+            GetInputs();
+            Console.Print(motd, true);
+            OnStageSet(Runtime.Current.GetStage());
+            OnProjectSet(Runtime.Current.project);
+            Runtime.OutputImages.Add(image);
+            Runtime.Toggle();
+        }
+
+        public static void DestroySelected()
+        {
+            if (Current.LastSelected != null || Current.ActivelySelected.Count > 0)
+            {
+                Current.LastSelected?.Destroy();
+
+                foreach (var selected in Current.ActivelySelected)
+                {
+                    if (selected is not null)
+                    {
+                        Console.Print($"Node : {selected.Name} destroyed.", true);
+                        selected.Destroy();
+                    }
+                    
+                }
+            }
+            return;
+        }
         private void GetEvents()
         {
             Closing += OnDisable;
@@ -113,10 +128,26 @@ namespace pixel_editor
 
         private void GetInputs()
         {
+            Input.RegisterAction((w) => ResetEditor(), Key.F5); 
+            Input.RegisterAction((w) => Console.cmd_clear_console().Invoke(), Key.F10);
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction((w) => OnSyncBtnPressed(w, null), Key.LeftCtrl);
+            Input.RegisterAction((w) => DestroySelected(), Key.Delete);
         }
+
+        public void Dispose()
+        {
+            CompositionTarget.Rendering -= Update; 
+            Runtime.Current.Dispose();
+            Tools.Clear();
+        }
+        private void ResetEditor()
+        {
+            Dispose();
+            current = new Editor(); 
+        }
+
         private void Update(object? sender, EventArgs e)
         {
             CMouse.Update();

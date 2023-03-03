@@ -164,7 +164,7 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
-            return Application.Current.Dispatcher.Invoke(() => {
+             return Application.Current.Dispatcher.Invoke(() => {
                 var input_value = type switch
                 {
                     InputEventType.KeyDown => Keyboard.IsKeyDown(key),

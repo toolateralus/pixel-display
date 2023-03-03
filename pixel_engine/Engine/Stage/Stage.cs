@@ -214,7 +214,7 @@ namespace pixel_renderer
                                            select sprite);
             return sprites;
         }
-        private void RemoveNode(Node? node)
+        internal void RemoveNode(Node? node)
         {
             object[] args = { node };
             void remove_node(object[] o)

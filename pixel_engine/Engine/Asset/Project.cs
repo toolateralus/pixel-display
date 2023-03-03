@@ -20,7 +20,7 @@ namespace pixel_renderer
 
         public static void LoadStage(int index)
         {
-            List<Metadata> stagesMeta = Runtime.Current.LoadedProject.stagesMeta;
+            List<Metadata> stagesMeta = Runtime.Current.project.stagesMeta;
 
             Stage stage;
 
@@ -34,7 +34,7 @@ namespace pixel_renderer
         }
         public void Save()
         {
-            ProjectIO.WriteProject(Runtime.Current.LoadedProject, Metadata);
+            ProjectIO.WriteProject(Runtime.Current.project, Metadata);
         }
         private Metadata Metadata
         {

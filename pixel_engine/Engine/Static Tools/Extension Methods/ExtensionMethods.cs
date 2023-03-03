@@ -72,20 +72,15 @@ namespace pixel_renderer
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Squared(this float v) => v * v;
-
         public static void Clamp(this ref Vector2 v, Vector2 min, Vector2 max)
         {
             v.X = v.X.Clamp(min.X, max.X);
             v.Y = v.Y.Clamp(min.Y, max.Y);
         }
-
-
         public static void Wrap(this Vector2 v, Vector2 max) { v.X = v.X.Wrapped(max.X); v.Y = v.Y.Wrapped(max.Y); }
         public static Vector2 Wrapped(this Vector2 v, Vector2 max) => new(v.X.Wrapped(max.X), v.Y.Wrapped(max.Y));
         public static bool IsWithin(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithin(min.X, max.X) && v.Y.IsWithin(min.Y, max.Y);
         public static bool IsWithinMaxExclusive(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithinMaxExclusive(min.X ,max.X) && v.Y.IsWithinMaxExclusive(min.Y, max.Y);
-     
-
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
         public static float Wrapped(this float v, float max)
         {
@@ -124,7 +119,6 @@ namespace pixel_renderer
         {
             if (v.Equals(Vector2.Zero))
                 return Vector2.Zero;
-            //return new Vec2(v.X * v.X v.Y * v.Y) / v.SqrMagnitude();
             return v / v.Length();
         }
         public static void Increment2D(this ref Vector2 v, float xMax, float xMin = 0)
@@ -173,7 +167,7 @@ namespace pixel_renderer
 
         public static Vector2 Normal_LHS(this Vector2 v)
         {
-            return new Vector2(-v.X, v.Y).Normalized();
+            return new Vector2(v.Y, -v.X).Normalized();
         }
         #endregion
         #region Arrays

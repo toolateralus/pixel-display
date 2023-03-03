@@ -190,6 +190,28 @@ namespace pixel_editor
                 node.Move(vec);
             },
         };
+        public static Command cmd_destroy_node() => new()
+        {
+            phrase = "node.Destroy;",
+            syntax = "node.Destroy(null || string nodeName);",
+            description = "Attempts to destroy the selected node or node by name. This command can either take no arguments or a string for a node name.",
+            argumentTypes = new string[] {"str:"},
+            action = (e) =>
+            {
+                if (!TryGetNodeByNameAtIndex(e, out Node node, 0))
+                {
+                    if (Editor.Current.LastSelected != null || Editor.Current.ActivelySelected.Count > 0)
+                    {
+                        Editor.Current.LastSelected?.Destroy();
+
+                        foreach (var selected in Editor.Current.ActivelySelected)
+                            selected?.Destroy();
+                    }
+                    return;
+                }
+                node?.Destroy();
+            },
+        };
         public static Command cmd_remove_component() => new()
         {
             phrase = "node.RemoveComponent;",
@@ -305,7 +327,7 @@ namespace pixel_editor
                 if (o.Length > 1 && o[1] is bool)
                     loadAsynchronously = (bool)o[1];
 
-                Project project = Runtime.Current.LoadedProject;
+                Project project = Runtime.Current.project;
 
                 if (project is null) return;
 
@@ -381,7 +403,6 @@ namespace pixel_editor
             x.description = "Attempts to find asset of provided name and if it's a valid texture, prompts the user to load it as the stages background.";
                 return x;
         }
-
         private static async void setBackgroundRelative(object[]? obj)  
         {
             string name;
@@ -423,7 +444,6 @@ namespace pixel_editor
                 }
             }
         }
-
         public static Command cmd_show_colliders() => new()
         {
             phrase = "showColliders;",
@@ -477,7 +497,6 @@ namespace pixel_editor
             description = "Sets the inspectors current position",
             argumentTypes = new string[] { "vec:" },
         };
-
         private static void moveInspector(object[]? obj)
         {
             if (!TryGetArgAtIndex(0, out Vector2 vec, obj))
@@ -488,8 +507,6 @@ namespace pixel_editor
             Inspector.OnInspectorMoved.Invoke((int)vec.X, (int)vec.Y);
         }
         #endregion
-
-
         private const string divider = "-- -- --";
 
         public static Console Current
@@ -564,7 +581,6 @@ namespace pixel_editor
             if (randomPixel)
                 Error("Console Cleared", 1);
         }
-
         public static Action<object[]?> RedTextAsync(int delay)
         {
             return async (o) =>
@@ -574,7 +590,6 @@ namespace pixel_editor
                 Editor.Current.BlackText().Invoke(o);
             };
         }
-
         public static bool TryGetArgAtIndex<T>(int index, out T? arg, object[] o)
         {
             bool hasArg = o != null && o.Length > index;
@@ -587,15 +602,14 @@ namespace pixel_editor
             arg = default;
             return false;
         }
-
         static void PrintLoadedStageNames()
         {
-            foreach (var stage in Runtime.Current.LoadedProject.stages)
+            foreach (var stage in Runtime.Current.project.stages)
                 Console.Print(stage.Name);
         }
         static void PrintLoadedStageMetaFileNames()
         {
-            foreach (var stage in Runtime.Current.LoadedProject.stagesMeta)
+            foreach (var stage in Runtime.Current.project.stagesMeta)
                 Console.Print(stage?.Name ?? "null");
         }
         static void ListStages(string s)
@@ -622,32 +636,25 @@ namespace pixel_editor
         {
             if (!TryGetArgAtIndex(0, out string nodeName, e))
             {
-                Command.Error("node.Child(string parentName)", CmdError.ArgumentNotFound);
+                Command.Error("GetNodeAtIndex", CmdError.ArgumentNotFound);
                 node = null;
                 return false;
             }
-
             Stage? stage = Runtime.Current.GetStage();
-
             if (stage is null)
             {
-                Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
+                Command.Error("GetNodeAtIndex", CmdError.NullReference);
                 node = null;
                 return false;
             }
-
             node = stage.FindNode(nodeName);
-
             if (node is null)
             {
-                Command.Error($"node.Child(string {nodeName})", CmdError.NullReference);
+                Command.Error("GetNodeAtIndex", CmdError.NullReference);
                 return false;
             }
-
             return true;
-
         }
-       
         private static void PrintNodeInformation(Node node)
         {
             Print(

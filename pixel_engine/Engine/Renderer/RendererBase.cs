@@ -212,32 +212,72 @@
             sprite.textureFiltering = stage.backgroundFiltering;
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
-
+        const float fZero = 0;
+        const float fOne = 1;
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawTransparentSprite(Camera cam, Sprite sprite, BoundingBox2D drawArea, Vector2 resolution)
         {
-            for (Vector2 framePos = drawArea.min;
-                framePos.Y < drawArea.max.Y;
-                framePos.Increment2D(drawArea.max.X ,drawArea.min.X))
+            Vector2 framePos = drawArea.min;
+
+            while (framePos.Y < drawArea.max.Y)
             {
-                if (!framePos.IsWithinMaxExclusive(zero, resolution))
+                float x = framePos.X;
+                float y = framePos.Y;
+
+                if (!IsWithinMaxExclusive(x, y, fZero, resolution.X))
+                {
+                    framePos.X++;
+                    if (framePos.X >= drawArea.max.X)
+                    {
+                        framePos.X = drawArea.min.X;
+                        framePos.Y++;
+                    }
                     continue;
-                if (sprite.camDistance <= cam.zBuffer[(int)framePos.X ,(int)framePos.Y])
+                }
+
+                if (sprite.camDistance <= cam.zBuffer[(int)x, (int)y])
+                {
+                    framePos.X++;
+                    if (framePos.X >= drawArea.max.X)
+                    {
+                        framePos.X = drawArea.min.X;
+                        framePos.Y++;
+                    }
                     continue;
-                Vector2 camViewport = cam.ScreenToCamViewport(framePos / resolution);
-                if (!camViewport.IsWithinMaxExclusive(zero, one))
+                }
+
+                Vector2 camViewport = cam.ScreenToCamViewport(new Vector2(x, y) / resolution);
+                if (!IsWithinMaxExclusive(camViewport.X, camViewport.Y, fZero, fOne))
+                {
+                    framePos.X++;
+                    if (framePos.X >= drawArea.max.X)
+                    {
+                        framePos.X = drawArea.min.X;
+                        framePos.Y++;
+                    }
                     continue;
+                }
+
                 Vector2 spriteViewportPos = cam.ViewportToSpriteViewport(sprite, camViewport);
-                if (!spriteViewportPos.IsWithinMaxExclusive(zero, one))
+                if (!IsWithinMaxExclusive(spriteViewportPos.X, spriteViewportPos.Y, fZero, fOne))
+                {
+                    framePos.X++;
+                    if (framePos.X >= drawArea.max.X)
+                    {
+                        framePos.X = drawArea.min.X;
+                        framePos.Y++;
+                    }
                     continue;
+                }
+
                 Vector2 colorPos = sprite.ViewportToColorPos(spriteViewportPos);
 
-                Pixel color = new();
+                Pixel color = new Pixel();
 
                 switch (sprite.textureFiltering)
                 {
                     case TextureFiltering.Point:
-                        color = sprite.texture.GetPixel((int)colorPos.X ,(int)colorPos.Y);
+                        color = sprite.texture.GetPixel((int)colorPos.X, (int)colorPos.Y);
                         break;
                     case TextureFiltering.Bilinear:
                         Vector2 colorSize = sprite.ColorDataSize;
@@ -254,11 +294,36 @@
                     default:
                         throw new NotImplementedException(nameof(sprite.textureFiltering));
                 }
+
                 if (color.a == 0)
+                {
+                    framePos.X++;
+                    if (framePos.X >= drawArea.max.X)
+                    {
+                        framePos.X = drawArea.min.X;
+                        framePos.Y++;
+                    }
                     continue;
+                }
+
                 if (color.a == 255)
-                    cam.zBuffer[(int)framePos.X, (int)framePos.Y] = sprite.camDistance;
+                {
+                    cam.zBuffer[(int)x, (int)y] = sprite.camDistance;
+                }
+
                 WriteColorToFrame(ref color, ref framePos);
+
+                framePos.X++;
+                if (framePos.X >= drawArea.max.X)
+                {
+                    framePos.X = drawArea.min.X;
+                    framePos.Y++;
+                }
+            
+            }
+            bool IsWithinMaxExclusive(float x, float y, float min, float max)
+            {
+                return x >= min && x < max && y >= min && y < max;
             }
         }
 

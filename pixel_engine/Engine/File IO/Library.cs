@@ -98,8 +98,8 @@ namespace pixel_renderer.Assets
             if (Runtime.Initialized)
             {
                 RefreshStageMetadataWithinLoadedProject();
-                Runtime.Current.LoadedProject?.Save();
-                foreach (var x in Runtime.Current.LoadedProject.stages)
+                Runtime.Current.project?.Save();
+                foreach (var x in Runtime.Current.project.stages)
                 {
                     x.Sync(); 
                     StageIO.WriteStage(x);
@@ -120,17 +120,17 @@ namespace pixel_renderer.Assets
         }
         private static void RefreshStageMetadataWithinLoadedProject()
         {
-            if (Runtime.Current.LoadedProject == null)
+            if (Runtime.Current.project == null)
                 return;
 
-            var stages = Runtime.Current.LoadedProject.stages;
+            var stages = Runtime.Current.project.stages;
             
             if (stages is null) 
                 return; 
 
             foreach (var stage in stages)
             {
-                var stages_meta = Runtime.Current.LoadedProject.stagesMeta;
+                var stages_meta = Runtime.Current.project.stagesMeta;
 
                 if (!stages_meta.Contains(stage.Metadata))
                     stages_meta.Add(stage.Metadata);

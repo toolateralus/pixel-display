@@ -102,7 +102,7 @@ namespace pixel_editor
             if (msgResult == MessageBoxResult.Yes)
             {
                 Runtime.Current.SetStage(stage);
-                Runtime.Current.LoadedProject.AddStage(stage);
+                Runtime.Current.project.AddStage(stage);
             }
             Close(); 
         }

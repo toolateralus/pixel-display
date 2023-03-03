@@ -36,8 +36,9 @@ namespace pixel_renderer
         /// <param name="vertices"></param>
         public Polygon(Vector2[] vertices)
         {
-            this.vertices = vertices;
             int vertCount = vertices.Length;
+            CheckWindingOrder(vertices);
+            this.vertices = vertices;
 
             //calc normals and centroid
             normals = new Vector2[vertCount];
@@ -46,7 +47,7 @@ namespace pixel_renderer
             {
                 var vert1 = vertices[i];
                 var vert2 = vertices[(i + 1) % vertCount];
-                normals[i] = (vert2 - vert1).Normalized();
+                normals[i] = (vert2 - vert1).Normal_LHS();
                 centroid += vert1;
             }
             centroid /= vertCount;
@@ -61,6 +62,19 @@ namespace pixel_renderer
             {
                 uv[i] = (vertices[i] - uvBox.min) / bbSize;
             }
+        }
+
+        private static void CheckWindingOrder(Vector2[] vertices)
+        {
+            float area = 0;
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                int j = (i + 1) % vertices.Length;
+                area += vertices[i].X * vertices[j].Y - vertices[j].X * vertices[i].Y;
+            }
+
+            if (area < 0)
+                Array.Reverse(vertices);
         }
 
         public static BoundingBox2D GetBoundingBox(Vector2[] vertices)

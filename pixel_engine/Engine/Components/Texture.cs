@@ -68,6 +68,10 @@ namespace pixel_renderer
         {
             jImage = new(size, data);
         }
+        public void SetImage(JImage image)
+        {
+            jImage = image;
+        }
         public void SetImage(Pixel[,] colors)
         {
             jImage = new(colors);
@@ -83,6 +87,68 @@ namespace pixel_renderer
         public JImage GetImage()
         {
             return jImage; 
+        }
+
+        public static JImage ApplyGaussianFilter(JImage texture, float radius, int kernelSize)
+        {
+            int halfKernelSize = kernelSize / 2;
+            float[,] kernel = new float[kernelSize, kernelSize];
+            float kernelSum = 0;
+
+            // Populate the kernel with Gaussian values
+            for (int x = -halfKernelSize; x <= halfKernelSize; x++)
+            {
+                for (int y = -halfKernelSize; y <= halfKernelSize; y++)
+                {
+                    float gaussianValue = (float)(1.0 / (2.0 * Math.PI * radius * radius) * Math.Exp(-(x * x + y * y) / (2 * radius * radius)));
+                    kernel[x + halfKernelSize, y + halfKernelSize] = gaussianValue;
+                    kernelSum += gaussianValue;
+                }
+            }
+
+            // Normalize the kernel so that all values sum up to 1
+            for (int x = 0; x < kernelSize; x++)
+            {
+                for (int y = 0; y < kernelSize; y++)
+                {
+                    kernel[x, y] /= kernelSum;
+                }
+            }
+
+            // Apply the filter to each pixel in the texture
+            for (int x = 0; x < texture.width; x++)
+            {
+                for (int y = 0; y < texture.height; y++)
+                {
+                    Pixel color = texture.GetPixel(x, y);
+                    float red = 0, green = 0, blue = 0, alpha = color.a;
+
+                    // Apply the kernel to the pixel and its neighboring pixels
+                    for (int i = -halfKernelSize; i <= halfKernelSize; i++)
+                    {
+                        for (int j = -halfKernelSize; j <= halfKernelSize; j++)
+                        {
+                            int neighborX = x + i;
+                            int neighborY = y + j;
+
+                            if (neighborX >= 0 && neighborX < texture.width && neighborY >= 0 && neighborY < texture.height)
+                            {
+                                Pixel neighborColor = texture.GetPixel(neighborX, neighborY);
+                                float neighborWeight = kernel[i + halfKernelSize, j + halfKernelSize];
+
+                                red += neighborColor.r * neighborWeight;
+                                green += neighborColor.g * neighborWeight;
+                                blue += neighborColor.b * neighborWeight;
+                            }
+                        }
+                    }
+
+                    // Set the filtered color for the current pixel
+                    Pixel filteredColor = new Pixel((byte)red, (byte)green, (byte)blue, (byte)alpha);
+                    texture.SetPixel(x, y, filteredColor);
+                }
+            }
+            return texture;
         }
 
         public byte[] Data
