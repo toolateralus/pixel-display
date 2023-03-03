@@ -77,19 +77,27 @@ namespace pixel_editor
 
         private void InitializeEditor()
         {
-            EngineInstance.FromEditor = true;
-            engine = new();
             current = this;
-            //wpf
+
+            //wpf init
             InitializeComponent();
+            
+            Importer.Import(false);
+            Project project = Project.Load();
+            Runtime.Initialize( project);
+            
             GetEvents();
             Tools = Tool.InitializeToolkit();
+            
             GetInputs();
             Console.Print(motd, true);
+            
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.project);
+
             Runtime.OutputImages.Add(image);
-            Runtime.Toggle();
+
+         
         }
 
         public static void DestroySelected()
@@ -125,6 +133,23 @@ namespace pixel_editor
             Runtime.OnProjectSet += OnProjectSet;
             Runtime.OnStageSet += OnStageSet;
         }
+        private void UnsubscribeEvents()
+        {
+            Closing -= OnDisable;
+
+            MouseWheel -= OnMouseWheelMoved;
+
+            image.MouseDown -= Image_MouseBtnChanged;
+            image.MouseUp -= Image_MouseBtnChanged;
+            image.MouseMove -= Image_MouseMove;
+
+            Runtime.InspectorEventRaised -= QueueEvent;
+            CompositionTarget.Rendering -= Update;
+
+            Runtime.OnProjectSet -= OnProjectSet;
+            Runtime.OnStageSet -= OnStageSet;
+        }
+
 
         private void GetInputs()
         {
@@ -138,14 +163,22 @@ namespace pixel_editor
 
         public void Dispose()
         {
-            CompositionTarget.Rendering -= Update; 
+            UnsubscribeEvents();
             Runtime.Current.Dispose();
             Tools.Clear();
         }
         private void ResetEditor()
         {
+            if(Runtime.IsRunning)
+                Runtime.Toggle(); 
+            Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             Dispose();
-            current = new Editor(); 
+
+            current.Close();
+            current = new();  
+            current.Show();
+
+            Application.Current.ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
 
         private void Update(object? sender, EventArgs e)
@@ -159,12 +192,20 @@ namespace pixel_editor
         }
         private void UpdateMetrics()
         {
-            var memory = Runtime.Current.renderHost.info.GetTotalMemory();
-            var framerate = Runtime.Current.renderHost.info.Framerate;
-            gcAllocText.Content =
-                $"{memory}";
-            framerateLabel.Content =
-                $"{framerate}";
+            RenderHost renderHost = Runtime.Current.renderHost;
+            RenderInfo info = renderHost.info;
+
+            if (info.frameCount % 60 == 0)
+            {
+                var memory = info.GetTotalMemory();
+                
+                var framerate = info.Framerate;
+                var min = info.lowestFrameRate;
+                var max = info.highestFrameRate;
+                var avg = info.averageFrameRate;
+                framerateLabel.Content =
+                    $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
+            }
         }
         protected internal void EditorEvent(EditorEvent e)
         {
@@ -176,7 +217,6 @@ namespace pixel_editor
         }
         #region Fields/Properties
         string stageName, projectName;
-        internal EngineInstance? engine;
         internal static RenderHost? Host => Runtime.Current.renderHost;
 
         private static Editor current;

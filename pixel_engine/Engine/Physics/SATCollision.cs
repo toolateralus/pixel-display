@@ -6,10 +6,11 @@ namespace pixel_renderer
 {
     public class SATCollision
     {
-        public static Vector2 GetMinimumDepthVector(Polygon polygonA, Polygon polygonB)
+        public static (Vector2 normal, float depth) GetCollisionData(Polygon polygonA, Polygon polygonB)
         {
             if (polygonA.vertices.Length == 0 || polygonB.vertices.Length == 0)
-                return Vector2.Zero;
+                return (Vector2.Zero, 0f);
+
             float overlap = float.MaxValue;
             Vector2 smallest = Vector2.Zero;
 
@@ -22,18 +23,23 @@ namespace pixel_renderer
                 SATProjection p2 = Project(polygonB, normal);
 
                 if (!Overlap(p1, p2))
-                    return Vector2.Zero;
+                    return (Vector2.Zero, 0f);
+
                 float o = GetOverlap(p1, p2);
-                if (o >= overlap)
-                    continue;
-                overlap = o;
-                smallest = normal;
+                if (o < overlap)
+                {
+                    overlap = o;
+                    smallest = normal;
+                }
             }
+
+            if (smallest == Vector2.Zero)
+                return (Vector2.Zero, 0f);
 
             if (Vector2.Dot(polygonB.centroid - polygonA.centroid, smallest) < 0)
                 smallest *= -1;
-            smallest *= -1;
-            return smallest * overlap;
+
+            return (smallest, -overlap);
         }
         private static float GetOverlap(SATProjection p1, SATProjection p2) => MathF.Min(p1.max, p2.max) - MathF.Max(p1.min, p2.min);
         private static SATProjection Project(Polygon polygon, Vector2 axis)

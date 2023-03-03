@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Image = System.Windows.Controls.Image; 
+using Image = System.Windows.Controls.Image;
 
 namespace pixel_renderer
 {
@@ -14,8 +14,6 @@ namespace pixel_renderer
         private RendererBase m_renderer = new CRenderer();
         public RenderInfo info;  
         public RendererBase GetRenderer() => m_renderer;
-
-     
         public RenderHost()
         {
             info = new(this);
@@ -28,7 +26,7 @@ namespace pixel_renderer
         {
             if (newResolution != default)
             {
-                m_renderer._resolution = (Vector2)newResolution;
+                m_renderer._resolution = newResolution;
                 newResolution = default;
             }
         }
@@ -36,9 +34,7 @@ namespace pixel_renderer
         {
             if (m_renderer is null) 
                 throw new NullReferenceException("RenderHost does not have a renderer loaded.");
-
             Cycle();
-
             OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
         }
         /// <summary>
@@ -48,7 +44,9 @@ namespace pixel_renderer
         private protected void Cycle()
         {
             m_renderer.Dispose();
+            
             UpdateResolution();
+            
             if (Runtime.Current.GetStage() is Stage stage)
             {
                 ShapeDrawer.Refresh(stage);
@@ -59,53 +57,6 @@ namespace pixel_renderer
         public void MarkDirty()
         {
             m_renderer.MarkDirty();
-        }
-    }
-    public class RenderInfo 
-    {
-        string cachedGCValue = "";
-        const int framesUntilGC_Check = 120;
-        private int framesSinceGC_Check = 0;
-        public int framesUntilCheck = 50;
-        public int frameCount;
-
-        internal long lastFrameTime = 0;
-        internal long thisFrameTime = 0;
-
-        public RenderInfo(RenderHost renderer)
-        {
-            renderer.OnRenderCompleted += Update; 
-        }
-
-        public long FrameTime => thisFrameTime - lastFrameTime;
-        public double Framerate => (double)Math.Floor((double)1 / ((double)FrameTime / (double)10_000_000));
-
-        public void Update(long value)
-        {
-            lastFrameTime = thisFrameTime;
-            thisFrameTime = value;
-        }
-       
-        public string GetTotalMemory()
-        {
-            if (framesSinceGC_Check < framesUntilGC_Check)
-            {
-                framesSinceGC_Check++;
-                return cachedGCValue;
-            }
-            framesSinceGC_Check = 0;
-            UpdateGCInfo();
-            return cachedGCValue;
-        }
-        private void UpdateGCInfo()
-        {
-            var bytes = GC.GetTotalMemory(true) + 1f;
-            float megaBytes = BytesToMegaBytes(bytes);
-            cachedGCValue = $"gc alloc : {megaBytes} MB";
-        }
-        private static float BytesToMegaBytes(float bytes)
-        {
-            return bytes / 1_048_576;
         }
     }
 }

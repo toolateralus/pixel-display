@@ -52,7 +52,7 @@ namespace pixel_renderer
 
         public const int FramerateSampleThreshold = 60;
 
-        public static Vector2 PhysicsArea = new Vector2(2048, 2048);
+        public static Vector2 PhysicsArea = new Vector2(10000, 10000);
 
         public const int ScreenH = 256;
         public const int ScreenW = 256;

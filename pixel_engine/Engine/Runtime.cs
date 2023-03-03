@@ -19,11 +19,9 @@ namespace pixel_renderer
 {
     public class Runtime
     {
-        public EngineInstance mainWnd;
         public RenderHost renderHost;
         public StagingHost stagingHost = new();
         public Project project;
-
         public static Runtime Current
         {
             get
@@ -36,25 +34,18 @@ namespace pixel_renderer
         private protected volatile static Runtime? current;
         private protected volatile Stage? stage;
         private protected volatile Thread renderThread; 
-
         public static event Action<EditorEvent>? InspectorEventRaised;
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
-        
         public static List<Image> OutputImages = new();
-        
-     
         public object? Inspector = null;
-
         public static bool Initialized { get; private set; }
         public static bool IsRunning { get; private set; }
         public static bool IsDiposing { get; private set; }
-
-        private Runtime(EngineInstance mainWnd, Project project)
+        private Runtime(Project project)
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             current = this;
-            this.mainWnd = mainWnd;
             this.project = project;
             renderHost = new();
             renderThread = new(OnRenderTick);
@@ -122,9 +113,9 @@ namespace pixel_renderer
                 }
             }
         }
-        public static void Initialize(EngineInstance mainWnd, Project project)
+        public static void Initialize(Project project)
         {
-            current ??= new(mainWnd, project);
+            current ??= new(project);
         }
         public void SetProject(Project project)
         {

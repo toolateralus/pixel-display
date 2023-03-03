@@ -1,8 +1,10 @@
-﻿using System;
+﻿using pixel_renderer;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Numerics;
 
 namespace pixel_renderer
@@ -25,82 +27,133 @@ namespace pixel_renderer
             if (node.Position.X < 0)
                 node.Position = node.Position.WithValue(x: 0);
         }
+
+        static Vector2 position = new Vector2(0, 0);
+        static Vector2 size = new Vector2(Constants.PhysicsArea.X, Constants.PhysicsArea.Y);
+
         public static void FinalPhase()
         {
             if (Runtime.Current.GetStage() is not Stage stage)
                 return;
 
-            var nodes = new List<Node>(stage.nodes);
-            var cols = new List<Collider>(); ;
+            var quadTree = new QuadTree(new BoundingBox2D(-Constants.PhysicsArea.X, -Constants.PhysicsArea.Y, Constants.PhysicsArea.X, Constants.PhysicsArea.Y));
 
-            for (int i = 0; i < nodes.Count; i++)
-                if (nodes[i].TryGetComponent(out Collider col))
-                    cols.Add(col);
-
-            for (int i = 1; i < cols.Count; i++)
+            foreach (var node in stage.nodes)
             {
-                var A = cols.ElementAt(i);
+                var hasCollider = node.TryGetComponent(out Collider col);
+                if (hasCollider)
+                    quadTree.Insert(node);
+            }
+
+          
+            BoundingBox2D range = new BoundingBox2D(position, size);
+
+            // Create a list to store the nodes found within the range
+            List<Node> foundNodes = new List<Node>();
+
+            // Query the quadtree with the range
+            quadTree.Query(range, foundNodes);
+
+            for (int i = 1; i < foundNodes.Count; i++)
+            {
+                var A = foundNodes[i];
                 for (int j = 0; j < i; ++j)
                 {
-                    var B = cols.ElementAt(j);
+                    var B = foundNodes[j];
 
                     if (A is null || B is null)
-                            continue;
+                        continue;
                     if (B == A)
                         continue;
-                    bool a_has_rb = A.parent.TryGetComponent<Rigidbody>(out var rbA);
-                    bool b_has_rb = B.parent.TryGetComponent<Rigidbody>(out var rbB);
+
+                    bool a_has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
+                    bool b_has_rb = B.TryGetComponent<Rigidbody>(out var rbB);
 
                     if (a_has_rb && b_has_rb)
                         Collide(rbB, rbA);
                     if (a_has_rb && !b_has_rb)
-                        Collide(rbA, B);
+                        Collide(B.GetComponent<Collider>(), rbA);
                     if (!a_has_rb && b_has_rb)
-                        Collide(rbB, A);
+                        Collide(A.GetComponent<Collider>(), rbB);
 
                 }
             }
+
         }
-        private static void Collide(Rigidbody A, Collider B)
+        private static void Collide(Collider A, Rigidbody B)
         {
             if (A is null || B is null)
-                return; 
+                return;
 
-            var aCol = A.GetComponent<Collider>();
-            if (aCol.IsTrigger || B.IsTrigger) return;
+            var bCol = B.GetComponent<Collider>();
+            if (A.IsTrigger || bCol.IsTrigger) return;
 
-            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Polygon, B.Polygon);
+            (Vector2 normal, float depth) = SATCollision.GetCollisionData(A.Polygon, bCol.Polygon);
 
-            A.parent.Position += minDepth;
+            if (normal == Vector2.Zero)
+                return;
 
-            if(minDepth != Vector2.Zero)
-                AttemptCallbacks(aCol, B);
+            B.parent.Position -= normal * depth;
 
+            AttemptCallbacks(A, bCol);
         }
         private static void Collide(Rigidbody A, Rigidbody B)
         {
-            if (A is null || B is null)
-                return; 
-
-            var aCol = A.GetComponent<Collider>();
-            var bCol = B.GetComponent<Collider>();
-            if (aCol.IsTrigger || bCol.IsTrigger) return;
-
-            //depenetrate
-            var minDepth = SATCollision.GetMinimumDepthVector(aCol.Polygon, bCol.Polygon);
-            if (minDepth == Vector2.Zero)
+            if (A == null || B == null)
                 return;
-            A.parent.Position += minDepth / 2;
-            B.parent.Position -= minDepth / 2;
 
-            //flatten velocities
-            Vector2 colNormal = minDepth.Normalized();
-            float colSpeedA = Vector2.Dot(A.velocity, colNormal);
-            float colSpeedB = Vector2.Dot(B.velocity, colNormal);
-            float averageSpeed = (colSpeedA + colSpeedB) / 2;
-            A.velocity -= colNormal * (averageSpeed - colSpeedA);
-            B.velocity -= colNormal * (averageSpeed - colSpeedB);
+            Collider aCol = A.GetComponent<Collider>();
+            Collider bCol = B.GetComponent<Collider>();
+            if (aCol.IsTrigger || bCol.IsTrigger)
+                return;
+
+            (Vector2 normal, float depth) = SATCollision.GetCollisionData(aCol.Polygon, bCol.Polygon);
+            if (normal == Vector2.Zero)
+                return;
+
+            float depenetration = depth / 2f;
+            A.Position += normal * depenetration;
+            B.Position -= normal * depenetration;
+
+            float colSpeedA = Vector2.Dot(A.velocity, normal);
+            float colSpeedB = Vector2.Dot(B.velocity, normal);
+            float averageSpeed = (colSpeedA + colSpeedB) / 2f;
+
+            Vector2 impulseA = normal * (averageSpeed - colSpeedA);
+            Vector2 impulseB = normal * (averageSpeed - colSpeedB);
+            A.ApplyImpulse(impulseA);
+            B.ApplyImpulse(impulseB);
         }
+        static void ComputeImpulse(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
+        {
+            Vector2 rv = b.velocity - a.velocity;
+
+            float velAlongNormal = Vector2.Dot(rv, normal);
+
+            if (velAlongNormal > 0) return;
+
+            float e = MathF.Min(a.restitution, b.restitution);
+            float j = -(1 + e) * velAlongNormal / (a.invMass + b.invMass);
+
+            Vector2 impulse = j * normal;
+            a.ApplyImpulse(-impulse);
+            b.ApplyImpulse(impulse);
+
+            PositionalCorrection(a, b, normal, depth);
+        }
+
+        static void PositionalCorrection(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
+        {
+            const float k_slop = 0.01f;
+            const float percent = 0.2f;
+
+            float correction = MathF.Max(depth - k_slop, 0.0f) / (a.invMass + b.invMass) * percent;
+            Vector2 correctionVector = normal * correction;
+
+            a.Position -= a.invMass * correctionVector;
+            b.Position += b.invMass * correctionVector;
+        }
+
         private static void AttemptCallbacks(Collider A, Collider B)
         {
             if (A.IsTrigger || B.IsTrigger)
@@ -118,4 +171,110 @@ namespace pixel_renderer
         }
     }
 
+}
+public class QuadTree
+{
+    private readonly int capacity;
+    private readonly BoundingBox2D boundary;
+    private readonly List<Node> nodes;
+    private readonly QuadTree[] children;
+
+    public QuadTree(BoundingBox2D boundary, int capacity = 4)
+    {
+        this.capacity = capacity;
+        this.boundary = boundary;
+        nodes = new List<Node>();
+        children = new QuadTree[4];
+    }
+
+    public void Clear()
+    {
+        nodes.Clear();
+        for (int i = 0; i < children.Length; i++)
+        {
+            children[i]?.Clear();
+            children[i] = null;
+        }
+    }
+
+    private void Split()
+    {
+        var subWidth = (int)boundary.Width / 2;
+        var subHeight = (int)boundary.Height / 2;
+        var x = (int)boundary.X;
+        var y = (int)boundary.Y;
+
+        children[0] = new QuadTree(new BoundingBox2D(x + subWidth, y, subWidth, subHeight), capacity);
+        children[1] = new QuadTree(new BoundingBox2D(x, y, subWidth, subHeight), capacity);
+        children[2] = new QuadTree(new BoundingBox2D(x, y + subHeight, subWidth, subHeight), capacity);
+        children[3] = new QuadTree(new BoundingBox2D(x + subWidth, y + subHeight, subWidth, subHeight), capacity);
+    }
+
+    private int GetChildIndex(BoundingBox2D bounds)
+    {
+        int index = -1;
+        Vector2 midpoint = (bounds.max + bounds.min) / 2;
+        bool topQuadrant = (bounds.min.Y < midpoint.Y && bounds.max.Y < midpoint.Y);
+        bool bottomQuadrant = (bounds.min.Y > midpoint.Y);
+
+        if (bounds.min.X < midpoint.X && bounds.max.X < midpoint.X)
+        {
+            if (topQuadrant)
+                index = 1;
+            else if (bottomQuadrant)
+                index = 2;
+        }
+        else if (bounds.min.X > midpoint.X)
+        {
+            if (topQuadrant)
+                index = 0;
+            else if (bottomQuadrant)
+                index = 3;
+        }
+        return index;
+    }
+
+    public void Insert(Node node)
+    {
+        if (!boundary.Contains(node.Position))
+            return;
+
+        if (nodes.Count < capacity)
+        {
+            nodes.Add(node);
+            return;
+        }
+
+        if (children[0] == null)
+            Split();
+
+        int index = GetChildIndex(node.GetComponent<Collider>().BoundingBox);
+        if (index != -1)
+            children[index].Insert(node);
+        else
+            nodes.Add(node);
+    }
+    public void Query(BoundingBox2D range, List<Node> found)
+    {
+        if (!boundary.Intersects(range))
+            return;
+
+        foreach (var node in nodes)
+        {
+            if (range.Intersects(node.GetComponent<Collider>().BoundingBox))
+                found.Add(node);
+        }
+
+        if (children[0] == null)
+            return;
+
+        int index = GetChildIndex(range);
+        if (index != -1)
+            children[index].Query(range, found);
+        else
+        {
+            for (int i = 0; i < children.Length; i++)
+                children[i].Query(range, found);
+        }
+    }
 }

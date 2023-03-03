@@ -23,6 +23,17 @@ namespace pixel_renderer
         [Field] public Pixel colliderPixel = Color.LimeGreen;
         public Polygon GetUntransformedPolygon() => polygon;
         [JsonProperty]public bool IsTrigger { get; internal set; } = false;
+        private BoundingBox2D? boundingBox;
+        public BoundingBox2D BoundingBox
+        {
+            get
+            {
+                if (boundingBox == null && polygon?.vertices != null)
+                    boundingBox = Polygon.GetBoundingBox(polygon.vertices);
+                return boundingBox ?? default;
+            }
+        }
+
         public override void OnDrawShapes()
         {
             if(drawCollider)
@@ -57,6 +68,7 @@ namespace pixel_renderer
         internal void SetVertices(Vector2[] vertices)
         {
             polygon = new Polygon(vertices);
+            boundingBox = null; 
         }
     }
 }

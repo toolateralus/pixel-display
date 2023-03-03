@@ -24,11 +24,41 @@ namespace pixel_renderer
             max.X = Math.Max(point.X + 1, max.X);
             max.Y = Math.Max(point.Y + 1, max.Y);
         }
+
+  
+
     }
 
     public struct BoundingBox2D
     {
         public Vector2 min, max;
+        public float X
+        {
+            get { return min.X; }
+            set { min.X = value; }
+        }
+
+        public float Y
+        {
+            get { return min.Y; }
+            set { min.Y = value; }
+        }
+       
+        public float Width
+        {
+            get { return max.X - min.X; }
+            set { max.X = min.X + value; }
+        }
+
+        public float Height
+        {
+            get { return max.Y - min.Y; }
+            set { max.Y = min.Y + value; }
+        }
+        public bool Contains(Vector2 point)
+        {
+            return (point.X >= min.X && point.X <= max.X && point.Y >= min.Y && point.Y <= max.Y);
+        }
         public BoundingBox2D(float min_x, float min_y, float max_x, float max_y)
         {
             this.min = new Vector2(min_x, min_y);
@@ -50,6 +80,12 @@ namespace pixel_renderer
             min.Y = Math.Min(point.Y, min.Y);
             max.X = Math.Max(point.X + 1, max.X);
             max.Y = Math.Max(point.Y + 1, max.Y);
+        }
+
+        public bool Intersects(BoundingBox2D other)
+        {
+            return (max.X >= other.min.X) && (min.X <= other.max.X) &&
+                   (max.Y >= other.min.Y) && (min.Y <= other.max.Y);
         }
     }
 }

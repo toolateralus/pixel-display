@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Controls;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -15,6 +16,16 @@ namespace pixel_renderer
         [JsonProperty]
         public bool Enabled = true;
         [JsonProperty]
+        internal Vector2 Position
+        {
+            get
+            {
+                return parent.Position;
+            }
+            set => parent.Position = value; 
+        }
+
+
         public string Name { get; set; } = "";
         [JsonProperty]
         private string _uuid = "";

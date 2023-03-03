@@ -2,35 +2,43 @@
 using System;
 using System.Drawing;
 using System.Numerics;
+using System.Windows;
 using System.Windows.Documents;
 
 namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
-        private float _drag = 0.0f;
-        [Field] [JsonProperty] public float drag = .6f;
-        [Field] [JsonProperty] public bool usingGravity = true;
-        [Field] [JsonProperty] public Vector2 velocity = new();
-        [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All; 
-        
+
+
+        [Field][JsonProperty] public float mass = 1f;
+        [Field][JsonProperty] public float invMass;
+        [Field][JsonProperty] public float gravityFactor;
+        [Field][JsonProperty] public Vector2 velocity = Vector2.Zero;
+        [Field][JsonProperty] public Vector2 acceleration = Vector2.Zero;
+        [Field][JsonProperty] public float restitution = 0.5f;
+        [Field][JsonProperty] public float drag = .1f;
+        [Field][JsonProperty] public bool usingGravity = true;
+        [Field][JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All;
         const double dragCoefficient = 1;
-        
-        private protected void ApplyVelocity()
+
+        public override void FixedUpdate(float deltaTime)
         {
-            parent.Position += velocity;
+            velocity += CMath.Gravity; 
+
+            velocity += acceleration;
+
+            Position += velocity; 
+
+            velocity *= 1f / (1f + 0.01f * (drag * MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()))));
         }
-        private protected void ApplyDrag()
+        public override void Awake()
         {
-            _drag = (float)GetDrag().Clamp(-drag, drag);
-            velocity.Y *= _drag;
-            velocity.X *= _drag;
+            invMass = 1f / mass;
         }
-        private protected double GetDrag()
+        public void ApplyImpulse(Vector2 impulse)
         {
-            double velocity = this.velocity.Length();
-            double drag = velocity * velocity * dragCoefficient;
-            return drag;
+            velocity += impulse * invMass;
         }
         public static Node Standard()
         {
@@ -46,19 +54,6 @@ namespace pixel_renderer
             col.IsTrigger = false;
             return node;
         }
-
-        public override void Awake()
-        {
-
-        }
-        public override void FixedUpdate(float delta)
-        {
-            if (usingGravity) 
-                velocity.Y += CMath.Gravity;
-            ApplyDrag();
-            ApplyVelocity();
-        }
-
         public static Node StaticBody()
         {
             Node node = Rigidbody.Standard();

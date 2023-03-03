@@ -69,13 +69,13 @@ namespace pixel_renderer
 
                 if (parent.TryGetComponent<Collider>(out var col))
                 {
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
+                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
                 else
                 {
                     Polygon poly = new Polygon(GetVertices()).OffsetBy(parent.Position);
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, Polygon.GetBoundingBox(col.Polygon.vertices));
+                    Pixel[,] colors = VertexLighting(col.Polygon, light.parent.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
                 return lightmap; 
