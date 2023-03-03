@@ -37,9 +37,8 @@ namespace pixel_renderer
     }
     public class SpriteInfo
     {
-        public Vector2 pos = new();
-        public float rotation; 
-        public Vector2 size = new();
+        public Vector2 scale;
+        public Matrix3x2 Transform;
         public Vector2 viewportOffset = new();
         public Vector2 viewportScale = new();
         public float camDistance = new();
@@ -49,21 +48,21 @@ namespace pixel_renderer
 
         public void Set(Sprite sprite)
         {
-            rotation = sprite.rotation; 
-            pos = sprite.node.Position;
-            size = sprite.size;
             viewportOffset = sprite.viewportOffset;
-            viewportScale = sprite.viewportScale;
-            image = sprite.texture.GetImage();
-            filtering = sprite.textureFiltering;
+            viewportScale = sprite.viewportScale.GetDivideSafe();
             camDistance = sprite.camDistance;
+            
+            image = sprite.texture.GetImage();
             colorDataSize = image.Size;
-            size.MakeDivideSafe();
+            filtering = sprite.textureFiltering;
+            
+            Transform = sprite.Transform;
+            scale = sprite.Scale;
         }
         public Vector2 ViewportToColorPos(Vector2 spriteViewport) => 
             ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
         internal Vector2 GlobalToViewport(Vector2 global) =>
-            (global - pos) / size;
+            (global - Transform.Translation) / scale;
         public void SetColorData(Vector2 size, byte[] data)
         {
             image = new(size, data);

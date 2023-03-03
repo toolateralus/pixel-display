@@ -29,8 +29,8 @@ namespace pixel_renderer
             if (frame.Length != stride * Resolution.Y)
                 frame = new byte[stride * (int)Resolution.Y];
 
-
             List<Component> componentsFound = new();
+
             lock(stage.nodes)
             foreach (var node in stage.nodes)
             {

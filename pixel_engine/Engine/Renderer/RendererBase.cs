@@ -151,16 +151,16 @@
             {
                 spriteInfo = renderInfo.spriteInfos[i];
 
-                Vector2 spritePos = spriteInfo.pos;
+                Vector2 spritePos = spriteInfo.Transform.Translation;
                 Vector2 firstCorner = cam.GlobalToScreenViewport(spritePos) * resolution;
                 //Bounding box on screen which fully captures sprite
                 drawArea.min = firstCorner;
                 drawArea.max = firstCorner;
                 List<Vector2> corners = new()
                 {
-                    cam.GlobalToScreenViewport(spritePos + new Vector2(spriteInfo.size.X ,0)) * resolution,
-                    cam.GlobalToScreenViewport(spritePos + new Vector2(0, spriteInfo.size.Y)) * resolution,
-                    cam.GlobalToScreenViewport(spritePos + spriteInfo.size) * resolution
+                    cam.GlobalToScreenViewport(spritePos + new Vector2(spriteInfo.scale.X ,0)) * resolution,
+                    cam.GlobalToScreenViewport(spritePos + new Vector2(0, spriteInfo.scale.Y)) * resolution,
+                    cam.GlobalToScreenViewport(spritePos + spriteInfo.scale) * resolution
                 };
 
                 foreach (Vector2 corner in corners)
@@ -197,15 +197,16 @@
 
             foreach (Vector2 corner in camCorners) camBoundingBox.ExpandTo(corner);
 
-            sprite.pos = camBoundingBox.min;
-            sprite.size = camBoundingBox.max - camBoundingBox.min;
-            sprite.viewportScale = sprite.size / baseImageSize;
+            sprite.Transform.Translation = camBoundingBox.min;
+            sprite.scale = camBoundingBox.max - camBoundingBox.min;
+            sprite.viewportScale = sprite.scale / baseImageSize;
 
             sprite.viewportScale.MakeDivideSafe();
             sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;
             sprite.filtering = stage.backgroundFiltering;
+
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
         const float fZero = 0;
@@ -214,6 +215,9 @@
         private void DrawTransparentSprite(Camera cam, SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution)
         {
             Vector2 framePos = drawArea.min;
+
+            // Get the sprite's transform matrix
+            Matrix3x2 transform = sprite.Transform;
 
             while (framePos.Y < drawArea.max.Y)
             {
@@ -243,6 +247,7 @@
                 }
 
                 Vector2 camViewport = cam.ScreenToCamViewport(new Vector2(x, y) / resolution);
+
                 if (!IsWithinMaxExclusive(camViewport.X, camViewport.Y, fZero, fOne))
                 {
                     framePos.X++;
@@ -255,6 +260,11 @@
                 }
 
                 Vector2 spriteViewportPos = cam.ViewportToSpriteViewport(sprite, camViewport);
+
+                // Transform the sprite viewport position using the transform matrix
+                spriteViewportPos = Vector2.Transform(spriteViewportPos, transform);
+
+
                 if (!IsWithinMaxExclusive(spriteViewportPos.X, spriteViewportPos.Y, fZero, fOne))
                 {
                     framePos.X++;
@@ -266,7 +276,7 @@
                     continue;
                 }
 
-                Vector2 colorPos = sprite.ViewportToColorPos(spriteViewportPos);
+                var colorPos  = spriteViewportPos.Wrapped(Vector2.One) * sprite.colorDataSize;
 
                 Pixel color = new Pixel();
 
@@ -277,12 +287,15 @@
                         break;
                     case TextureFiltering.Bilinear:
                         Vector2 colorSize = sprite.colorDataSize;
+                        
                         int left = (int)colorPos.X;
                         int top = (int)colorPos.Y;
                         int right = (int)((left + 1) % colorSize.X);
                         int bottom = (int)((top + 1) % colorSize.Y);
+
                         float xOffset = colorPos.X - left;
                         float yOffset = colorPos.Y - top;
+
                         Pixel topJPixel = Pixel.Lerp(sprite.image.GetPixel(left, top), sprite.image.GetPixel(right, top), xOffset);
                         Pixel botJPixel = Pixel.Lerp(sprite.image.GetPixel(left, bottom), sprite.image.GetPixel(right, bottom), xOffset);
                         color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
@@ -317,10 +330,10 @@
                 }
             
             }
-            bool IsWithinMaxExclusive(float x, float y, float min, float max)
-            {
-                return x >= min && x < max && y >= min && y < max;
-            }
+        }
+        bool IsWithinMaxExclusive(float x, float y, float min, float max)
+        {
+            return x >= min && x < max && y >= min && y < max;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]

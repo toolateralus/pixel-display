@@ -99,6 +99,8 @@ namespace pixel_renderer
             }
            
         }
+
+
         public void SetColorData(Vector2 size, byte[] data)
         {
             if (!IsReadOnly)

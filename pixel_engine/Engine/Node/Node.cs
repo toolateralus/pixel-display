@@ -30,7 +30,11 @@ namespace pixel_renderer
         }
         #endregion
         #region Other Constructors
-        public Node() => _uuid = pixel_renderer.UUID.NewUUID();
+        public Node()
+        {
+            _uuid = pixel_renderer.UUID.NewUUID();
+        }
+
         public Node(string name) : this() => Name = name;
         public Node Clone() { return (Node)Clone(); }
         public Node(string name, Vector2 pos, Vector2 scale) : this(name)
@@ -72,18 +76,13 @@ namespace pixel_renderer
             Position = destination;
         }
         [JsonProperty] public Vector2 localPos = new();
-
-        public Vector2 Position
-        {
-            get => parent == null ? localPos : localPos + parent.Position;
-            set => localPos = parent == null ? value : value - parent.Position;
-        }
+        
         [JsonProperty] public Vector2 scale = new();
 
         [JsonProperty] public Node? parent;
        
         [JsonProperty] public Dictionary<Vector2, Node> children = new();
-
+        [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
         public List<Component> ComponentsList
         {
             get
@@ -96,9 +95,66 @@ namespace pixel_renderer
             }
         }
 
-        [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
+        [Field]
+        public Matrix3x2 Transform = Matrix3x2.Identity;
+        public Vector2 Position
+        {
+            get => Transform.Translation;
+            set
+            {
+                Transform.Translation = value;
+                UpdateTransform(this); 
+            }
+        }
+        public float Rotation
+        {
+            get => MathF.Atan2(Transform.M21, Transform.M11);
+            set
+            {
+                var cos = MathF.Cos(value);
+                var sin = MathF.Sin(value);
+                Transform.M11 = cos;
+                Transform.M12 = sin;
+                Transform.M21 = -sin;
+                Transform.M22 = cos;
+                UpdateTransform(this);
+            }
+        }
+        public Vector2 Scale
+        {
+            get
+            {
+                var sx = MathF.Sqrt(Transform.M11 * Transform.M11 + Transform.M12 * Transform.M12);
+                var sy = MathF.Sqrt(Transform.M21 * Transform.M21 + Transform.M22 * Transform.M22);
+                return new Vector2(sx, sy);
+            }
+            set
+            {
+                Transform.M11 = value.X;
+                Transform.M22 = value.Y;
+                UpdateTransform(this);
+            }
+        }
+     
+        static void UpdateTransform(Node node)
+        {
+            var parentMatrix = Matrix3x2.Identity; 
+            if (node.parent != null)
+            {
+                parentMatrix = node.parent.Transform; 
+                UpdateTransform(node.parent); 
+            }
 
-        public async void Child(Node child)
+            var rotationMatrix = Matrix3x2.CreateRotation(node.rotation);
+            var scaleMatrix = Matrix3x2.CreateScale(node.scale);
+            var translationMatrix = Matrix3x2.CreateTranslation(node.Position);
+            
+            var transformMatrix = parentMatrix * rotationMatrix * scaleMatrix * translationMatrix;
+
+            node.Transform = transformMatrix;
+        }
+
+        public void Child(Node child)
         {
 
             if (ContainsCycle(child))

@@ -11,6 +11,10 @@ namespace pixel_renderer
     [JsonObject(MemberSerialization.OptIn)]
     public class Component
     {
+
+        public Vector2 Scale { get => node.Scale; set => node.Scale = value; }
+        public float Rotation { get => node.Rotation; set => node.Rotation = value; }
+
         [JsonProperty]
         public Node node;
         [JsonProperty]
@@ -29,7 +33,7 @@ namespace pixel_renderer
                 node.Position = value;
             }
         }
-        public float rotation => node.rotation; 
+        public ref Matrix3x2 Transform { get => ref node.Transform; }
         public string Name { get; set; } = "";
         [JsonProperty]
         private string _uuid = "";
