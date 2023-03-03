@@ -125,8 +125,13 @@ namespace pixel_renderer
         {
             if (v.Equals(Vector2.Zero))
                 return Vector2.Zero;
-            //return new Vec2(v.X * v.X v.Y * v.Y) / v.SqrMagnitude();
             return v / v.Length();
+        }
+        public static void Normalize(this ref Vector2 v)
+        {
+            if (v.Equals(Vector2.Zero))
+                v = Vector2.Zero;
+            v =  v / v.Length();
         }
         public static void Increment2D(this ref Vector2 v, float xMax, float xMin = 0)
         {
@@ -174,9 +179,11 @@ namespace pixel_renderer
 
         public static Vector2 Normal_LHS(this Vector2 v)
         {
+            float x = v.X;
             v.X = v.Y;
-            v.Y = -v.X;
-            return v.Normalized();
+            v.Y = -x;
+            v.Normalize();
+            return v; 
         }
         #endregion
         #region Arrays
