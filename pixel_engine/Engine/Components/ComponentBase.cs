@@ -29,8 +29,7 @@ namespace pixel_renderer
                 node.Position = value;
             }
         }
-
-
+        public float rotation => node.rotation; 
         public string Name { get; set; } = "";
         [JsonProperty]
         private string _uuid = "";

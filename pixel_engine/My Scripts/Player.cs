@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using pixel_renderer.Assets;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace pixel_renderer
 {
@@ -22,11 +23,12 @@ namespace pixel_renderer
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
         [Field] public Vector2 moveVector;
-        
-        private bool freezeButtonPressedLastFrame = false;
-        private Vector2 thisPos;
-        private Curve curve;
         [Field] private bool isGrounded;
+        
+        private Vector2 thisPos;
+        private bool freezeButtonPressedLastFrame = false;
+        
+        private Curve curve;
 
         public static Metadata? PlayerSprite
         {
@@ -41,7 +43,6 @@ namespace pixel_renderer
             string name = $"Animation{index}"; 
             return AssetLibrary.FetchMeta(name);
         }
-
         public static Node test_child_node(Node? parent = null)
         {
             Node node = new("Player Child");
@@ -51,7 +52,6 @@ namespace pixel_renderer
             AddCamera(node);
             return node;
         }
-
         public override void Awake()
         {
             CreateInputEvents();
@@ -107,11 +107,9 @@ namespace pixel_renderer
             Move(moveVector);
             moveVector = Vector2.Zero;
         }
-
         private void DrawCircle()
         {
             Pixel[,] colors = new Pixel[(int)sprite.size.X, (int)sprite.size.Y];
-
 
             for(int i = 0; i < curve.points.Values.Count; ++i)
             {
@@ -122,9 +120,8 @@ namespace pixel_renderer
                     colors[(int)pos.X, (int)pos.Y] = (Pixel)Color.Red;
                 
             }
-            sprite.Draw(sprite.size, colors);
+            sprite?.Draw(sprite.size, colors);
         }
-
         void Up(object[]? e) => moveVector = new Vector2(moveVector.X -inputMagnitude);
         void Down(object[]? e) => moveVector = new Vector2(moveVector.X, inputMagnitude);
         void Left(object[]? e)
@@ -132,13 +129,11 @@ namespace pixel_renderer
             sprite.viewportScale.X = -1; 
             moveVector = new Vector2(-inputMagnitude, moveVector.Y);
         }
-
         void Right(object[]? e)
         {
             sprite.viewportScale.X = 1;
             moveVector = new Vector2(inputMagnitude, moveVector.Y);
         }
-
         private void CreateInputEvents()
         {
             RegisterAction(Up,  Key.W);
@@ -151,7 +146,6 @@ namespace pixel_renderer
         {
             rb.ApplyImpulse(moveVector.WithValue(y:0) * speed);
         }
-
         public static Node Standard()
         {
             Node playerNode = new("Player")
@@ -169,7 +163,6 @@ namespace pixel_renderer
 
             return playerNode;
         }
-
         public static Camera AddCamera(Node node, int height = 256, int width = 256, DrawingType type = DrawingType.Wrapped)
         {
             var cam = node.AddComponent<Camera>();
@@ -190,7 +183,6 @@ namespace pixel_renderer
             sprite.size = Vector2.One * 36;
             return sprite;
         }
-
         public override void OnDrawShapes()
         {
             if(node.GetComponent<Collider>()?.Polygon is not Polygon poly)
@@ -202,7 +194,88 @@ namespace pixel_renderer
                 ShapeDrawer.DrawLine(poly.centroid, centroid, Color.LightCyan);
             }
         }
-
     }
 
+    public class ProjectileSource : Component
+    {
+        [Field]
+        public Key fireKey = Key.F,
+                   reloadKey = Key.R;
+        [Field]
+        public int ammoCt = 300, 
+                   magazineSize = 16,
+                   currentMag = 16;
+
+        const int initAmmoCt = 300;
+
+        [Field]
+        public Projectile projectile = new(); 
+
+        [Field]
+        public Vector2 aimDirection = new(1, 1);
+
+        [Field]
+        public float aimDistance = 30f;
+        private bool fired;
+
+        public override void Awake()
+        {
+            ammoCt = initAmmoCt; 
+          
+        }
+
+        public override void FixedUpdate(float delta)
+        {
+            if (fired)
+            {
+                if (Get(fireKey, InputEventType.KeyUp))
+                    fired = false;
+                return; 
+            }
+
+            if (Get(fireKey))
+                fired = true;
+
+            if (Get(reloadKey))
+                Reload();
+
+        }
+
+        private void Reload()
+        {
+            ammoCt -= magazineSize;
+            currentMag = magazineSize; 
+        }
+
+        public override void OnDrawShapes()
+        {
+            ShapeDrawer.DrawLine(Position, aimDirection * aimDistance, Color.Red);
+        }
+    }
+
+    public class Projectile : Component
+    {
+        public float hitRadius; 
+
+        public override void Awake()
+        {
+
+        }
+
+        public override void FixedUpdate(float delta)
+        {
+        }
+
+        public override void OnCollision(Collider collider)
+        {
+        }
+
+        public override void OnDrawShapes()
+        {
+        }
+
+        public override void OnTrigger(Collider other)
+        {
+        }
+    }
 }

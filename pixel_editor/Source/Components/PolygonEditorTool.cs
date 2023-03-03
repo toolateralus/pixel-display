@@ -48,7 +48,7 @@ namespace pixel_editor
                     if (vertices[i].SqrDistanceFrom(mPos) <
                         vertices[closestVert].SqrDistanceFrom(mPos))
                         closestVert = i;
-                if (Input.Get(Key.Q) &&
+                if (Input.Get(Key.V) &&
                     vertices[closestVert].SqrDistanceFrom(mPos) < highlightDistance * highlightDistance)
                 {
                     selectedVertIndex = closestVert;

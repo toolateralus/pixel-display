@@ -41,6 +41,9 @@ namespace pixel_renderer
 
         #endregion
 
+
+
+
         [JsonProperty]
         public Stage ParentStage { get; set; }
 
@@ -60,6 +63,8 @@ namespace pixel_renderer
         private string _uuid = "";
 
         internal protected int hiearchyLevel = 0; 
+
+        public float rotation = 0;  
 
         Rigidbody? rb;
         public void Move(Vector2 destination)

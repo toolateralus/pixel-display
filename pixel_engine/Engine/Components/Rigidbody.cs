@@ -16,7 +16,7 @@ namespace pixel_renderer
         [Field][JsonProperty] public float gravityFactor;
         [Field][JsonProperty] public Vector2 velocity = Vector2.Zero;
         [Field][JsonProperty] public Vector2 acceleration = Vector2.Zero;
-        [Field][JsonProperty] public float restitution = 0.5f;
+        [Field][JsonProperty] public float restitution = 2f;
         [Field][JsonProperty] public float drag = .1f;
         [Field][JsonProperty] public bool usingGravity = true;
         [Field][JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All;

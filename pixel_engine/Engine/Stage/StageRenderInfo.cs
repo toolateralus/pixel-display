@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Numerics;
 using System.Security.Policy;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
 
 namespace pixel_renderer
@@ -37,6 +38,7 @@ namespace pixel_renderer
     public class SpriteInfo
     {
         public Vector2 pos = new();
+        public float rotation; 
         public Vector2 size = new();
         public Vector2 viewportOffset = new();
         public Vector2 viewportScale = new();
@@ -47,6 +49,7 @@ namespace pixel_renderer
 
         public void Set(Sprite sprite)
         {
+            rotation = sprite.rotation; 
             pos = sprite.node.Position;
             size = sprite.size;
             viewportOffset = sprite.viewportOffset;
@@ -67,17 +70,6 @@ namespace pixel_renderer
             colorDataSize = new(size.X, size.Y);
         }
         public SpriteInfo() { }
-        public SpriteInfo(Sprite sprite)
-        {
-            pos = sprite.node.Position;
-            size = sprite.size;
-            viewportOffset = sprite.viewportOffset;
-            viewportScale = sprite.viewportScale;
-            image = sprite.texture.GetImage();
-            filtering = sprite.textureFiltering;
-            camDistance = sprite.camDistance;
-            colorDataSize = image.Size;
-            size.MakeDivideSafe();
-        }
+      
     }
 }

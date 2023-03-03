@@ -161,6 +161,12 @@ namespace pixel_renderer
             else return false; 
         }
 
+        /// <summary>
+        /// Gets the value of a specified key and type of event.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {

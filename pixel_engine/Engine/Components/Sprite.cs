@@ -138,7 +138,6 @@ namespace pixel_renderer
         {
             if (dirty)
                 Refresh();
-           
         }
         [Method]
         private void Refresh()
