@@ -16,9 +16,7 @@
         {
             float output = 1f;
             for (int i = 0; i < power; i++)
-            {
                 output *= value;
-            }
             return output;
         }
         public static double Negate(double v) => -v;
