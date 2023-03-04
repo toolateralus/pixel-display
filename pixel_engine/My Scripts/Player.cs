@@ -16,8 +16,8 @@ namespace pixel_renderer
 
     public class Text : UIComponent
     {
-        public Dictionary<char, (JImage image, Vector2 scale)> font = new(); 
-
+        public Dictionary<char, (JImage image, Vector2 scale)> font = new();
+        public Dictionary<Sprite, char> nodes = new(); 
         /// <summary>
         /// the bounding box of the text element
         /// </summary>
@@ -34,7 +34,11 @@ namespace pixel_renderer
                 {
                     Bitmap bmp = new(meta.Path);
                     JImage image = new(bmp);
+                    
                     Node node = Rigidbody.Standard("Font Test Node.");
+
+
+                    node.Transform = Matrix3x2.CreateScale(35);
                     if (!node.TryGetComponent(out Sprite sprite)) 
                         continue;
 
@@ -42,16 +46,21 @@ namespace pixel_renderer
 
                     var scale = sprite.texture.scale; 
 
+
                     font.Add(alphabet[i], (image, scale));
+                    nodes.Add(sprite, alphabet[i]);
                 }
-
             }
-
         }
-          
-
-
+        public override void Update()
+        {
+            foreach (var node in nodes.Keys)
+                node.Position = Position + Vector2.One * 15; 
         }
+
+
+
+    }
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
@@ -106,6 +115,10 @@ namespace pixel_renderer
                 while (sprite.texture is null)
                     await Task.Delay(25);
                 sprite.texture.SetImage(PlayerSprite, sprite.Scale);
+                await Task.Delay(2500);
+
+                node.AddComponent<Text>(); 
+
             });
 
             task.Start();
