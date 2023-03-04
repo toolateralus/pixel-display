@@ -13,32 +13,44 @@ using pixel_renderer;
 namespace pixel_renderer
 {
 
-    public class Text : Component
+    public class Text : UIComponent
     {
-        public List<JImage> font;
+        public Dictionary<char, (JImage image, Vector2 scale)> font = new(); 
 
+        /// <summary>
+        /// the bounding box of the text element
+        /// </summary>
         public BoundingBox2D bounds;
-        public Vector2 orignalSize;
+
+        const string alphabet = "abcdefghijklmnopqrstuvwxyz"; 
 
         public override void Awake()
         {
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < 3; ++i)
             {
-                var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Dog walking\\dog_walking_{i}.bmp");
-
+                var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
                 if (meta != null)
                 {
                     Bitmap bmp = new(meta.Path);
                     JImage image = new(bmp);
+                    Node node = Rigidbody.Standard("Font Test Node.");
+                    if (!node.TryGetComponent(out Sprite sprite)) 
+                        continue;
 
+                    sprite.texture.SetImage(image);
+
+                    var scale = sprite.texture.scale; 
+
+                    font.Add(alphabet[i], (image, scale));
                 }
+
             }
+
         }
           
 
 
         }
-    }
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
@@ -87,7 +99,6 @@ namespace pixel_renderer
                 sprite.Type = SpriteType.Image;
                 curve = Curve.Circlular(1, 16, radius: sprite.Scale.X /2, looping: true);
             }
-
             Task task = new(async delegate
             {
                 if (sprite is null) return; 
@@ -148,7 +159,7 @@ namespace pixel_renderer
                     colors[(int)pos.X, (int)pos.Y] = (Pixel)Color.Red;
                 
             }
-            sprite?.Draw(size, colors);
+            sprite?.SetImage(colors);
         }
         private void Move(Vector2 moveVector)
         {
@@ -202,3 +213,4 @@ namespace pixel_renderer
             }
         }
     }
+}

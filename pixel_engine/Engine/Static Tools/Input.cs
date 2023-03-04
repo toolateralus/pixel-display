@@ -14,11 +14,17 @@ namespace pixel_renderer
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
+        
         static Vector2 moveVector;
+        
         static float inputMagnitude;
+        
         private static bool moveVectorInitialized;
+        
         public static Vector2 MoveVector { get => moveVector; }
+        
         public static float InputMagnitude { get => inputMagnitude; set => inputMagnitude = value; }
+        
         static void Up() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Down() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Left()
@@ -30,6 +36,7 @@ namespace pixel_renderer
             moveVector = new Vector2(inputMagnitude, moveVector.Y);
 
         }
+
         static void InitializePlayerMoveVector()
         {
             if (moveVectorInitialized)
@@ -60,6 +67,7 @@ namespace pixel_renderer
                 }
             }
         }
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(string key, InputEventType type = InputEventType.KeyDown)
         {

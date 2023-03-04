@@ -86,6 +86,7 @@ namespace pixel_renderer
                     return;
 
                 Application.Current.Dispatcher.Invoke(() => { Input.Refresh(); });
+
                 CMouse.MouseWheelDelta = 0;
 
                 if (IsRunning)

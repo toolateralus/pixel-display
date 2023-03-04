@@ -102,9 +102,11 @@ namespace pixel_renderer
                 return list ?? new();
             }
         }
-
         [Field]
+        [JsonProperty]
         public Matrix3x2 Transform = Matrix3x2.Identity;
+
+        [JsonProperty]
         public Vector2 Position
         {
             get => Transform.Translation;
@@ -114,6 +116,7 @@ namespace pixel_renderer
                 //UpdateTransform(this); 
             }
         }
+        [JsonProperty]
         public float Rotation
         {
             get => MathF.Atan2(Transform.M21, Transform.M11);
@@ -128,6 +131,7 @@ namespace pixel_renderer
                 //UpdateTransform(this);
             }
         }
+        [JsonProperty]
         public Vector2 Scale
         {
             get

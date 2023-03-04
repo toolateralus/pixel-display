@@ -95,7 +95,7 @@ namespace pixel_renderer
                 return;
 
             var img  = animation?.GetFrame(true);
-            sprite?.Draw(img);
+            sprite?.SetImage(img);
         }
         public void Previous(int increment = 1)
         {
@@ -105,7 +105,7 @@ namespace pixel_renderer
 
             var img = animation?.GetFrame(true);
          
-            sprite?.Draw(img);
+            sprite?.SetImage(img);
         }
         public void Start(float speed = 1, bool looping = true)
         {
