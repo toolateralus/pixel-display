@@ -9,6 +9,7 @@ using pixel_renderer.Assets;
 using System.Linq;
 using System.Numerics;
 using pixel_renderer;
+using pixel_renderer.ShapeDrawing;
 
 namespace pixel_renderer
 {
@@ -172,12 +173,13 @@ namespace pixel_renderer
                 Position = new Vector2(0, -20)
             };
            
-
             playerNode.AddComponent<Rigidbody>();
             playerNode.AddComponent<Player>().takingInput = true;
 
             Sprite sprite = AddSprite(playerNode);
+
             playerNode.AddComponent<ProjectileSource>(); 
+            
             AddCollider(playerNode, sprite);
 
             return playerNode;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Numerics;
 
-namespace pixel_renderer
+namespace pixel_renderer.ShapeDrawing
 {
     public static class ShapeDrawer
     {

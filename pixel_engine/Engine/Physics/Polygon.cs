@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
+using System.Security.Policy;
+using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
@@ -116,6 +119,16 @@ namespace pixel_renderer
             Vector2 left = new(width, height); 
 
             return new(new Vector2[] { top, right, left});
+        }
+        public static Polygon Circle(float radius, int subdivisions)
+        {
+            var curve = Curve.Circlular(1, subdivisions, radius, false);
+            List<Vector2> verts = new();
+
+            for (int i = 0; i < subdivisions; i++)
+                verts.Add(curve.Next());
+
+            return new(verts.ToArray());
         }
 
     }

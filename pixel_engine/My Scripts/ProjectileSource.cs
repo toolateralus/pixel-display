@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Numerics;
 using static pixel_renderer.Input;
 using pixel_renderer.Assets;
+using pixel_renderer.ShapeDrawing;
 
 namespace pixel_renderer
 {

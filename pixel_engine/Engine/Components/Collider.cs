@@ -1,13 +1,47 @@
 ﻿
 
 using Newtonsoft.Json;
+using pixel_renderer.ShapeDrawing;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Windows.Documents;
+using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
+    public interface IPrimitiveGeometry
+    {
+        public static Polygon DefiningGeometry { get; }
+    }
+    public class Box : IPrimitiveGeometry
+    {
+        public static Vector2 DefaultSize;
+        private static readonly Polygon DefaultPolygon = Polygon.Rectangle(DefaultSize.X, DefaultSize.Y);
+
+        public Polygon Polygon = DefaultPolygon;
+        public Polygon DefiningGeometry => Polygon;
+    }
+    public class Triangle : IPrimitiveGeometry
+    {
+        public static Vector2 DefaultSize;
+        private static readonly Polygon DefaultPolygon = Polygon.Triangle(DefaultSize.X, DefaultSize.Y);
+
+        public Polygon Polygon = DefaultPolygon;
+        public Polygon DefiningGeometry => Polygon;
+    }
+    public class Circle : IPrimitiveGeometry
+    {
+        public static Vector2 DefaultSize;
+        private static readonly Polygon DefaultPolygon = Polygon.Circle(DefaultSize.X, 8);
+
+        public Polygon Polygon = DefaultPolygon;
+        public Polygon DefiningGeometry => Polygon;
+    }
+
+
+
     public class Collider : Component
     {
         [JsonProperty] Polygon polygon = new();
