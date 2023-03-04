@@ -49,7 +49,7 @@ namespace pixel_renderer
 
             foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                 if (uiComponent.IsActive && uiComponent is Camera camera)
-                    RenderCamera(camera, renderInfo, Resolution);
+                    camera.RenderCamera(camera, renderInfo, Resolution, ref frame, ref latestFrame, baseImage, this);
          
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
