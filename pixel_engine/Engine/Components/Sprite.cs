@@ -25,11 +25,9 @@ namespace pixel_renderer
     public enum TextureFiltering { Point, Bilinear }
     public class Sprite : Component
     {
-        [JsonProperty]
-        public Vector2 viewportScale = Vector2.One;
-        [JsonProperty] 
-        public Vector2 viewportOffset = Vector2.Zero;
-        private Vector2 colorDataSize = new(1, 1);
+        [JsonProperty] public Vector2 viewportScale = Vector2.One;
+        [JsonProperty] public Vector2 viewportOffset = Vector2.Zero;
+        [JsonProperty] private Vector2 colorDataSize = new(1, 1);
         public Vector2 ColorDataSize => colorDataSize;
         [JsonProperty] 
         public float camDistance = 1;
