@@ -104,7 +104,7 @@ namespace pixel_renderer
         }
 
         [Field]
-        public Matrix3x2 Transform = Matrix3x2.Identity;
+        [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
         public Vector2 Position
         {
             get => Transform.Translation;
