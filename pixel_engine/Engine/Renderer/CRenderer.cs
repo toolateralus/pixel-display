@@ -48,21 +48,18 @@ namespace pixel_renderer
                 if (comp is UIComponent uiComp)
                     uiComponents.Add(uiComp);
 
-
-
             foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
-                if (uiComponent.IsActive && uiComponent is Camera camera)
-                    camera.Draw(ref Resolution, ref frame);
+                if (uiComponent.IsActive)
+                    uiComponent.Draw(this);
 
             if (latestFrame.Length != frame.Length)
                 latestFrame = new byte[frame.Length];
 
             Array.Copy(frame, latestFrame, frame.Length);
 
-
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public override void Render(Image output)
+        public override void Render(System.Windows.Controls.Image output)
         {
             if(stride != 0)
                 RenderFromFrame(frame, stride, Resolution, output);

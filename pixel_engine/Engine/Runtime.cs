@@ -46,7 +46,7 @@ namespace pixel_renderer
         public static event Action<EditorEvent>? InspectorEventRaised;
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
-        public static List<Image> OutputImages = new();
+        public static List<System.Windows.Controls.Image> OutputImages = new();
         public object? Inspector = null;
         public static bool Initialized { get; private set; }
         public static bool IsRunning { get; private set; }

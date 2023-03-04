@@ -184,11 +184,6 @@ namespace pixel_renderer
         }
 
 
-        public Vector2 ViewportToColorPos(Vector2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
-        internal Vector2 GlobalToViewport(Vector2 global)
-        {
-            return (global - Position) / Scale;
-        }
         
         public void LightingPerPixel(Light light)
         {
@@ -288,6 +283,11 @@ namespace pixel_renderer
                 j = i;
             }
             return c;
+        }
+        
+        internal Vector2 GlobalToViewport(Vector2 global)
+        {
+            return (global - Position) / Scale;
         }
 
         public override void OnDrawShapes()

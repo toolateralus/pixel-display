@@ -24,7 +24,7 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="source"></param>
         /// <param name="destination"></param>
-        public static unsafe void Render(Bitmap source, Image destination)
+        public static unsafe void Render(Bitmap source, System.Windows.Controls.Image destination)
         {
             BitmapData bmd = source.LockBits(source.Rect(), ImageLockMode.ReadOnly, source.PixelFormat);
             destination.Source = BitmapSource.Create(
@@ -99,7 +99,7 @@ namespace pixel_renderer
             return colorData;
         }
         
-        public static void RenderFromFrame(byte[] frame, int stride, Vector2 resolution, Image output)
+        public static void RenderFromFrame(byte[] frame, int stride, Vector2 resolution, System.Windows.Controls.Image output)
         {
 
             if (GetStride(resolution) != stride)

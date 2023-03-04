@@ -4,6 +4,7 @@ using System.Numerics;
 
 namespace pixel_renderer
 {
+   
     public abstract class UIComponent : Component
     {
         [Field][JsonProperty] public float drawOrder = 0f;
@@ -18,12 +19,14 @@ namespace pixel_renderer
             }
         }
 
-        public abstract void Draw(ref Vector2 resolution, ref byte[] frame); 
+        public abstract void Draw(RendererBase renderer); 
+
         internal Vector2 GlobalToLocal(Vector2 global)
         {
             Matrix3x2.Invert(Transform, out var inverted);
             return Vector2.Transform(global, inverted);
         }
+        
         public Vector2 LocalToGlobal(Vector2 local) => Vector2.Transform(local, Transform);
         public Vector2[] GetCorners()
         {

@@ -20,36 +20,7 @@ namespace pixel_renderer
         /// Will have one line that starts and ends in the same spot if there's only one vertex in the polygon
         /// </summary>
         /// <returns></returns>
-        public List<Line> GetLines()
-        {
-            List<Line> lines = new();
-            int vertCount = vertices.Length;
-            for (int i = 0; i < vertCount; i++)
-            {
-                var vert1 = vertices[i];
-                var vert2 = vertices[(i + 1) % vertCount];
-                lines.Add(new(vert1, vert2));
-            }
-            return lines;
-        }
-
-        /// <summary>
-        /// Expects vertices to be structed clockwise
-        /// </summary>
-        /// <param name="vertices"></param>
-        public Polygon(Vector2[] vertices)
-        {
-            int vertCount = vertices.Length;
-            CheckWindingOrder(vertices);
-            this.vertices = vertices;
-
-            //calc normals and centroid
-            RecalculateNormals();
-
-            //calc uvs (simple)
-            RecalculateUVs();
-        }
-
+        
         private void RecalculateUVs()
         {
             int vertCount = vertices.Length;
@@ -63,7 +34,6 @@ namespace pixel_renderer
                 uv[i] = (vertices[i] - uvBox.min) / bbSize;
             }
         }
-
         private void RecalculateNormals()
         {
             int vertCount = vertices.Length;
@@ -91,7 +61,18 @@ namespace pixel_renderer
             if (area < 0)
                 Array.Reverse(vertices);
         }
-
+        public List<Line> GetLines()
+        {
+            List<Line> lines = new();
+            int vertCount = vertices.Length;
+            for (int i = 0; i < vertCount; i++)
+            {
+                var vert1 = vertices[i];
+                var vert2 = vertices[(i + 1) % vertCount];
+                lines.Add(new(vert1, vert2));
+            }
+            return lines;
+        }
         public static BoundingBox2D GetBoundingBox(Vector2[] vertices)
         {
             BoundingBox2D uvBox = new(vertices[0], vertices[0]);
@@ -100,7 +81,23 @@ namespace pixel_renderer
             return uvBox;
         }
 
+        /// <summary>
+        /// Expects vertices to be structed clockwise
+        /// </summary>
+        /// <param name="vertices"></param>
         public Polygon() { }
+        public Polygon(Vector2[] vertices)
+        {
+            int vertCount = vertices.Length;
+            CheckWindingOrder(vertices);
+            this.vertices = vertices;
+
+            //calc normals and centroid
+            RecalculateNormals();
+
+            //calc uvs (simple)
+            RecalculateUVs();
+        }
         public Polygon(Polygon polygon)
         {
             vertices = new Vector2[polygon.vertices.Length];
@@ -111,6 +108,7 @@ namespace pixel_renderer
             Array.Copy(polygon.normals, normals, normals.Length);
             Array.Copy(polygon.uv, uv, uv.Length);
         }
+
         public static Polygon Rectangle(float width, float height)
         {
             return new(new Vector2[] { new(0, 0), new(width, 0), new(width, height), new(0, height) });
@@ -123,15 +121,7 @@ namespace pixel_renderer
 
             return new(new Vector2[] { top, right, left});
         }
-        public Polygon Transformed(Matrix3x2 matrix)
-        {
-            Polygon polygon = new(this);
-            int vertCount = polygon.vertices.Length;
-            for (int i = 0; i < vertCount; i++)
-                polygon.vertices[i].Transform(matrix);
-            RecalculateNormals();
-            return polygon;
-        }
+
         public void MoveVertex(int index, Vector2 moveTo)
         {
             vertices[index] = moveTo;
@@ -154,6 +144,7 @@ namespace pixel_renderer
             RecalculateNormals();
             RecalculateUVs();
         }
+
         public static Polygon Circle(float radius, int subdivisions)
         {
             var curve = Curve.Circlular(1, subdivisions, radius, false);
@@ -164,7 +155,15 @@ namespace pixel_renderer
 
             return new(verts.ToArray());
         }
-
+        public Polygon Transformed(Matrix3x2 matrix)
+        {
+            Polygon polygon = new(this);
+            int vertCount = polygon.vertices.Length;
+            for (int i = 0; i < vertCount; i++)
+                polygon.vertices[i].Transform(matrix);
+            RecalculateNormals();
+            return polygon;
+        }
     }
 
 }

@@ -7,31 +7,45 @@ using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
 using System.Linq;
 using System;
+using System.Security.Policy;
 
 namespace pixel_renderer
 {
-    public class UISprite : UIComponent
+    public class Image : UIComponent
     {
-        [JsonProperty] public Vector2 viewportScale = Vector2.One;
-        [JsonProperty] public Vector2 viewportOffset = Vector2.Zero;
-        [JsonProperty] private Vector2 colorDataSize = new(1, 1);
+        [JsonProperty] 
+        public Vector2 viewportScale = Vector2.One;
+
+        [JsonProperty] 
+        public Vector2 viewportOffset = Vector2.Zero;
+
+        [JsonProperty] 
+        private Vector2 colorDataSize = new(1, 1);
+
         public Vector2 ColorDataSize => colorDataSize;
+      
         [JsonProperty]
         public float camDistance = 1;
+
         [JsonProperty]
         [Field]
         public Texture texture;
+
         [JsonProperty]
         [Field]
         public SpriteType Type = SpriteType.SolidColor;
+
         [JsonProperty]
         public bool IsReadOnly = false;
+
         [Field]
         [JsonProperty]
         public TextureFiltering textureFiltering = 0;
+
         [Field]
         [JsonProperty]
         public bool lit = false;
+
         [Field]
         [JsonProperty]
         public Pixel color = Pixel.Blue;
@@ -39,6 +53,8 @@ namespace pixel_renderer
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
         private JImage lightmap;
+        private TextureFiltering filtering;
+
         private JImage LitColorData
         {
             get
@@ -131,11 +147,11 @@ namespace pixel_renderer
                 Refresh();
         }
 
-        public UISprite()
+        public Image()
         {
             texture = new Texture(Vector2.One, Pixel.Red);
         }
-        public UISprite(int x, int y) : this()
+        public Image(int x, int y) : this()
         {
             Scale = new(x, y);
         }
@@ -274,11 +290,98 @@ namespace pixel_renderer
             }
         }
 
-        public override void Draw(ref Vector2 resolution, ref byte[] frame)
+        public Vector2 ScreenViewportToLocal(Vector2 screenViewport)
         {
-            Runtime.GetRenderingData(out var host, out var info, out var renderer, out var baseImg);
-            Position = Vector2.Zero; 
+            viewportScale.MakeDivideSafe();
+            return (screenViewport - viewportOffset) / viewportScale;
+        }
+        public Vector2 LocalToViewport(Vector2 local) => (local + viewportOffset) * viewportScale;
+        public Vector2 LocalToColorPosition(Vector2 local) => ViewportToColorPosition(LocalToViewport(local));
+        public Vector2 ViewportToColorPosition(Vector2 viewport)
+        {
+            viewport.X += 0.5f;
+            viewport.Y += 0.5f;
+            return viewport.Wrapped(Vector2.One) * colorDataSize;
+        }
 
+        public override void Draw(RendererBase renderer) 
+        {
+            var image = new JImage();
+            var drawArea = new BoundingBox2D(); 
+
+            drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
+            drawArea.max = Vector2.Min(renderer.Resolution, drawArea.max);
+
+            Vector2 framePos = drawArea.min;
+
+            while (framePos.Y < drawArea.max.Y)
+            {
+
+                Vector2 screenViewport = framePos / renderer.Resolution;
+
+                var spriteLocal = ScreenViewportToLocal(screenViewport);
+
+                if (!RendererBase.IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, -1, 1))
+                {
+                    framePos.X++;
+                    if (framePos.X >= drawArea.max.X)
+                    {
+                        framePos.X = drawArea.min.X;
+                        framePos.Y++;
+                    }
+                    continue;
+                }
+
+                var colorPos = LocalToColorPosition(spriteLocal);
+
+                Pixel color = new Pixel();
+
+                switch (filtering)
+                {
+                    case TextureFiltering.Point:
+                        color = image.GetPixel((int)colorPos.X, (int)colorPos.Y);
+                        break;
+                    case TextureFiltering.Bilinear:
+                        Vector2 colorSize = colorDataSize;
+
+                        int left = (int)colorPos.X;
+                        int top = (int)colorPos.Y;
+                        int right = (int)((left + 1) % colorSize.X);
+                        int bottom = (int)((top + 1) % colorSize.Y);
+
+                        float xOffset = colorPos.X - left;
+                        float yOffset = colorPos.Y - top;
+
+                        Pixel topJPixel = Pixel.Lerp(image.GetPixel(left, top), image.GetPixel(right, top), xOffset);
+                        Pixel botJPixel = Pixel.Lerp(image.GetPixel(left, bottom), image.GetPixel(right, bottom), xOffset);
+                        color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
+                        break;
+                    default:
+                        throw new NotImplementedException("Filtering not implemented");
+                }
+
+                if (color.a == 0)
+                {
+                    framePos.X++;
+                    if (framePos.X >= drawArea.max.X)
+                    {
+                        framePos.X = drawArea.min.X;
+                        framePos.Y++;
+                    }
+                    continue;
+                }
+
+                renderer.WriteColorToFrame(ref color, ref framePos);
+
+                framePos.X++;
+
+                if (framePos.X >= drawArea.max.X)
+                {
+                    framePos.X = drawArea.min.X;
+                    framePos.Y++;
+                }
+
+            }
 
         }
     }
@@ -327,9 +430,10 @@ namespace pixel_renderer
                 node.Position = Position + Vector2.One * 15; 
         }
 
-        public override void Draw(ref Vector2 resolution, ref byte[] frame)
+        public override void Draw(RendererBase renderer)
         {
-            throw new NotImplementedException();
+
+
         }
     }
 }

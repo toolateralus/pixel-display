@@ -13,7 +13,9 @@ namespace pixel_renderer
     {
         [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
         [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
+       
         public float[,] zBuffer = new float[0, 0];
+
         public Vector2 LocalToScreenViewport(Vector2 local) => local * viewportSize + viewportPosition;
         public Vector2 ScreenViewportToLocal(Vector2 screenViewport)
         {
@@ -21,25 +23,19 @@ namespace pixel_renderer
             return (screenViewport - viewportPosition) / viewportSize;
         }
 
-       
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public override void Draw(ref Vector2 resolution, ref byte[] frame)
+        public override void Draw(RendererBase renderer)
         {
-            Runtime.GetRenderingData(out var renderHost, out var renderInfo, out var renderer, out var baseImage);
-           
+            if (renderer.Resolution.Y == 0 || renderer.Resolution.X == 0) return;
 
-            if (resolution.Y == 0 || resolution.X == 0) return;
+            if (zBuffer.GetLength(0) != renderer.Resolution.X || zBuffer.GetLength(1) != renderer.Resolution.Y)
+                zBuffer = new float[(int)renderer.Resolution.X, (int)renderer.Resolution.Y];
 
-            if (zBuffer.GetLength(0) != resolution.X || zBuffer.GetLength(1) != resolution.Y)
-                zBuffer = new float[(int)resolution.X, (int)resolution.Y];
             Array.Clear(zBuffer);
 
-            DrawBaseImage(resolution, baseImage, renderer);
-            DrawSprites(renderInfo,  resolution, renderer);
-            DrawGraphics(resolution, renderer);
-
-           
+            DrawBaseImage(renderer.Resolution, renderer.baseImage, renderer);
+            DrawSprites(Runtime.Current.GetStage().StageRenderInfo,  renderer.Resolution, renderer);
+            DrawGraphics(renderer.Resolution, renderer);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawGraphics(Vector2 resolution, RendererBase renderer)
