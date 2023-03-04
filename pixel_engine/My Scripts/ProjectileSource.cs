@@ -62,11 +62,13 @@ namespace pixel_renderer
             
             if (proj.TryGetComponent<Sprite>(out var sprite))
             {
+                if (sprite.texture.Name == "ball") 
+                    return; 
 
                 var meta = AssetLibrary.FetchMetaRelative("\\Assets\\other\\ball.bmp");
+
                 if (meta != null)
                 {
-                    Runtime.Log("Texture set");
                     sprite.texture.SetImage(meta.Path);
                     sprite.Transform = Matrix3x2.CreateScale(25);
                     sprite.dirty = true;

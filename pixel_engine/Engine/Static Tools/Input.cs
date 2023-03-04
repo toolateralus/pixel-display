@@ -181,8 +181,7 @@ namespace pixel_renderer
                         InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
                         _ => false,
                     };
-                    return input_value;
-                });
+                return input_value;});
             }
             catch(Exception e)
             {
