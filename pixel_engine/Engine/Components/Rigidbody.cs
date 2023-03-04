@@ -52,7 +52,7 @@ namespace pixel_renderer
             Collider col = node.AddComponent<Collider>();
             Sprite sprite = node.AddComponent<Sprite>();
 
-            col.SetVertices(sprite.GetCorners());
+            col.SetPolygonFromWorldSpace(new(sprite.GetCorners()));
 
             sprite.color = JRandom.Color(aMin: 186);
 
@@ -69,7 +69,7 @@ namespace pixel_renderer
             Collider col = node.AddComponent<Collider>();
             Sprite sprite = node.AddComponent<Sprite>();
             node.Scale = Vector2.One * 16;
-            col.SetVertices(sprite.GetCorners());
+            col.SetPolygonFromWorldSpace(new(sprite.GetCorners()));
             //sprite.color = JRandom.Color(aMin: 128);
             col.IsTrigger = false;
             return node;

@@ -14,12 +14,8 @@ namespace pixel_renderer
 
     public class Collider : Component
     {
-        [JsonProperty] Polygon untransformedPolygon = new Box().DefiningGeometry;
-        public Polygon Polygon
-        {
-            get => untransformedPolygon.Transform(Transform);
-            set => untransformedPolygon = new(value.vertices);
-        }
+        [JsonProperty] public Polygon untransformedPolygon = new Box().DefiningGeometry;
+        public Polygon Polygon => untransformedPolygon.Transformed(Transform);
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
         
         [Field] public bool drawCollider = false;
@@ -38,8 +34,6 @@ namespace pixel_renderer
                 return boundingBox ?? default;
             }
         }
-
-        public Polygon GetUntransformedPolygon() => untransformedPolygon;
         public override void OnDrawShapes()
         {
             if(drawCollider)
@@ -50,6 +44,7 @@ namespace pixel_renderer
         public void DrawCollider()
         {
             var poly = Polygon;
+            BoundingBox2D box = new(poly.vertices);
             int vertLength = poly.vertices.Length;
             for (int i = 0; i < vertLength; i++)
             {
@@ -68,10 +63,9 @@ namespace pixel_renderer
                 ShapeDrawer.DrawLine(midpoint, midpoint + (poly.normals[i] * 10), Color.Blue);
             }
         }
-        internal void SetVertices(Vector2[] vertices)
+        public void SetPolygonFromWorldSpace(Polygon worldspacePolygon)
         {
-            untransformedPolygon = new Polygon(vertices);
-            boundingBox = null; 
+            untransformedPolygon = worldspacePolygon.Transformed(Transform.Inverted());
         }
     }
 }

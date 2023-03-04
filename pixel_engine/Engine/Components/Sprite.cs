@@ -76,7 +76,7 @@ namespace pixel_renderer
                 }
                 else
                 {
-                    Polygon poly = new Polygon(GetCorners()).OffsetBy(node.Position);
+                    Polygon poly = new Polygon(GetCorners()).Transformed(Transform);
                     Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }

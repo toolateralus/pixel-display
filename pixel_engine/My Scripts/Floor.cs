@@ -16,7 +16,7 @@ namespace pixel_renderer
             node.Position = startPosition;
             Collider col = node.AddComponent<Collider>();
             floor.poly = Polygon.Rectangle(width, height);
-            col.Polygon = floor.poly;
+            col.untransformedPolygon = floor.poly;
             col.drawCollider = true;
             col.drawNormals = true;
             return node;
