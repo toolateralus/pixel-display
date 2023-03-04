@@ -17,7 +17,7 @@ namespace pixel_renderer
         [JsonProperty] Polygon polygon = new Box().DefiningGeometry;
         public Polygon Polygon
         {
-            get => polygon.OffsetBy(node.Position);
+            get => polygon.Transform(Transform);
             set => polygon = new(value.vertices);
         }
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
