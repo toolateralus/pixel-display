@@ -216,10 +216,11 @@
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawTransparentSprite(Camera cam, SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution)
         {
-            Vector2 framePos = drawArea.min;
-
+          
             drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
             drawArea.max = Vector2.Min(resolution, drawArea.max);
+
+            Vector2 framePos = drawArea.min;
 
             // Get the sprite's transform matrix
             Matrix3x2 transform = sprite.Transform;
@@ -235,7 +236,7 @@
                     if (framePos.X >= drawArea.max.X)
                     {
                         framePos.X = drawArea.min.X;
-                        framePos.Y++;
+                        framePos.Y++; 
                     }
                     continue;
                 }

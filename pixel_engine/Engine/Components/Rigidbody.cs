@@ -51,7 +51,7 @@ namespace pixel_renderer
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();
             Sprite sprite = node.AddComponent<Sprite>();
-            col.SetVertices(sprite.GetVertices());
+            col.SetVertices(sprite.GetCorners());
             //sprite.color = JRandom.Color(aMin: 128);
             col.IsTrigger = false;
             return node;

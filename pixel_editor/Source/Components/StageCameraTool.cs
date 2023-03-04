@@ -13,7 +13,9 @@ namespace pixel_editor
         private const Key FollowNodeKey = Key.LeftCtrl;
         private const Key StopFollowingNodeKey = Key.Escape;
         public Camera camera;
-        public Node? selected; 
+        public Node? selected;
+        private static bool followNode;
+
         public static StageCameraState State { get; private set;}
         
         public override void Awake()
@@ -24,29 +26,35 @@ namespace pixel_editor
         public override void Update(float delta)
         {
             selected = Editor.Current.LastSelected;
-            TryFollowNode();
+            TryFollowNode(selected);
             TryFocusNode();
             TryZoomCamera();
             TryMoveCamera();
         }
 
-        private void TryFollowNode()
+        public static void TryFollowNode(Node node)
         {
-            if (selected is null || State == StageCameraState.Idle)
+            if (node is null || !followNode)
                 return;
+            
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            
             if (!cams.Any())
                 return;
-            cams.First().node.Position = selected.Position;
+
+            cams.First().node.Position = node.Position;
+            
             if (!Input.Get(StopFollowingNodeKey))
                 return;
-            State = 0;
+
+            followNode = true;
         }
 
         private void TryFocusNode()
         {
             if (selected == null)
                 return;
+
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any()) return;
 
@@ -58,7 +66,8 @@ namespace pixel_editor
 
             if (!Input.Get(FollowNodeKey))
                 return;
-            State = 0; 
+
+            followNode = false; 
         }
         public static void TryFocusNode(Node node)
         {
@@ -80,7 +89,7 @@ namespace pixel_editor
             if (!Input.Get(FollowNodeKey))
                 return;
 
-            State = 0; 
+            followNode = false; 
         }
 
         private void TryZoomCamera()

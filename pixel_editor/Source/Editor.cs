@@ -218,6 +218,7 @@ namespace pixel_editor
                     Current.LastSelected = node;
                     Inspector.DeselectNode(); 
                     Inspector.SelectNode(node);
+                    StageCameraTool.TryFollowNode(node); 
                 }
                 return; 
             }

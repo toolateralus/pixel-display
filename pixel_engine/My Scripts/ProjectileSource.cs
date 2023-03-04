@@ -58,16 +58,19 @@ namespace pixel_renderer
         private void Fire()
         {
             var proj = Node.Instantiate(this.projectile);
-            proj.Position = Vector2.Zero;
-
-
-            if (!proj.TryGetComponent(out Rigidbody rb))
+            proj.Position = new(5,5);
+            if (proj.TryGetComponent<Sprite>(out var sprite))
             {
-                proj?.Destroy();
+
+
+            }
+            if (proj.TryGetComponent(out Rigidbody rb))
+            {
+                rb?.ApplyImpulse(aimDirection / 10);
                 return;
             }
-            rb?.ApplyImpulse(aimDirection * power);
-            
+            else proj?.Destroy();
+
             if (proj.TryGetComponent(out Projectile projectile))
             {
                 projectile.sender = node;
