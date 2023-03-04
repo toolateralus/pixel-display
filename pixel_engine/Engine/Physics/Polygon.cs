@@ -5,7 +5,6 @@ using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Policy;
-using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
