@@ -153,12 +153,12 @@ namespace pixel_editor
 
         private void GetInputs()
         {
-            Input.RegisterAction((w) => ResetEditor(), Key.F5); 
-            Input.RegisterAction((w) => Console.cmd_clear_console().Invoke(), Key.F10);
+            Input.RegisterAction(ResetEditor, Key.F5); 
+            Input.RegisterAction(Console.cmd_clear_console().Invoke, Key.F10);
             Input.RegisterAction(SendCommandKeybind, Key.Return);
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
-            Input.RegisterAction((w) => OnSyncBtnPressed(w, null), Key.LeftCtrl);
-            Input.RegisterAction((w) => DestroySelected(), Key.Delete);
+            Input.RegisterAction(() => OnSyncBtnPressed(null, null), Key.LeftCtrl);
+            Input.RegisterAction(DestroySelected, Key.Delete);
         }
 
         public void Dispose()
@@ -258,11 +258,11 @@ namespace pixel_editor
         #endregion
         #region Input Events
      
-        private void ClearKeyboardFocus(object[]? obj)
+        private void ClearKeyboardFocus()
         {
             Keyboard.ClearFocus();
         }
-        void SendCommandKeybind(object[]? o)
+        void SendCommandKeybind()
         {
             if (!editorMessages.IsKeyboardFocusWithin)
                 return;

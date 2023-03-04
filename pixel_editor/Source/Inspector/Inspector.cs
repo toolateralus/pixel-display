@@ -24,7 +24,7 @@ namespace pixel_editor
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
             OnInspectorMoved += Inspector_OnInspectorMoved;
-            RegisterAction((e) => DeselectNode(), System.Windows.Input.Key.Escape);
+            RegisterAction(DeselectNode, System.Windows.Input.Key.Escape);
         }
         public void Update(object? sender, EventArgs e)
         {

@@ -54,7 +54,7 @@ namespace pixel_renderer
         }
         public override void Awake()
         {
-            CreateInputEvents();
+            InitializePlayerMoveVector();
             node.TryGetComponent(out rb);
             if (node.TryGetComponent(out sprite))
             {
@@ -124,26 +124,8 @@ namespace pixel_renderer
             }
             sprite?.Draw(size, colors);
         }
-        void Up(object[]? e) => moveVector = new Vector2(moveVector.X -inputMagnitude);
-        void Down(object[]? e) => moveVector = new Vector2(moveVector.X, inputMagnitude);
-        void Left(object[]? e)
-        {
-            sprite.viewportScale.X = -1; 
-            moveVector = new Vector2(-inputMagnitude, moveVector.Y);
-        }
-        void Right(object[]? e)
-        {
-            sprite.viewportScale.X = 1;
-            moveVector = new Vector2(inputMagnitude, moveVector.Y);
-        }
-        private void CreateInputEvents()
-        {
-            RegisterAction(Up,  Key.W);
-            RegisterAction(Down,Key.S);
 
-            RegisterAction(Left,  Key.A);
-            RegisterAction(Right, Key.D);
-        }
+      
         private void Move(Vector2 moveVector)
         {
             rb.ApplyImpulse(moveVector.WithValue(y:0) * speed);
