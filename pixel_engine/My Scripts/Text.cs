@@ -304,13 +304,12 @@ namespace pixel_renderer
             return viewport.Wrapped(Vector2.One) * colorDataSize;
         }
 
-        Texture texture; 
+
+
 
         public override void Draw(RendererBase renderer) 
         {
-            
-
-
+            var image = texture.GetImage();
             var drawArea = new BoundingBox2D(GetCorners()); 
             drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
             drawArea.max = Vector2.Min(renderer.Resolution, drawArea.max);
