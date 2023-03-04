@@ -27,9 +27,7 @@ namespace pixel_renderer
         
         private Vector2 thisPos;
         private bool freezeButtonPressedLastFrame = false;
-        
         private Curve curve;
-
         public static Metadata? PlayerSprite
         {
             get
@@ -38,6 +36,7 @@ namespace pixel_renderer
             }
        
         }
+
         public static Metadata test_animation_data(int index)
         {
             string name = $"Animation{index}"; 
@@ -52,9 +51,9 @@ namespace pixel_renderer
             AddCamera(node);
             return node;
         }
+
         public override void Awake()
         {
-            CreateInputEvents();
             node.TryGetComponent(out rb);
             if (node.TryGetComponent(out sprite))
             {
@@ -123,26 +122,6 @@ namespace pixel_renderer
                 
             }
             sprite?.Draw(size, colors);
-        }
-        void Up(object[]? e) => moveVector = new Vector2(moveVector.X -inputMagnitude);
-        void Down(object[]? e) => moveVector = new Vector2(moveVector.X, inputMagnitude);
-        void Left(object[]? e)
-        {
-            sprite.viewportScale.X = -1; 
-            moveVector = new Vector2(-inputMagnitude, moveVector.Y);
-        }
-        void Right(object[]? e)
-        {
-            sprite.viewportScale.X = 1;
-            moveVector = new Vector2(inputMagnitude, moveVector.Y);
-        }
-        private void CreateInputEvents()
-        {
-            RegisterAction(Up,  Key.W);
-            RegisterAction(Down,Key.S);
-
-            RegisterAction(Left,  Key.A);
-            RegisterAction(Right, Key.D);
         }
         private void Move(Vector2 moveVector)
         {

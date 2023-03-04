@@ -4,130 +4,53 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Xml;
 using System.Windows;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 using System.Numerics;
+using System.Security.Policy;
 
 namespace pixel_renderer
 {
-    public class CMouse
-    {
-        public static bool Left;
-        public static bool LeftPressedLastFrame;
-        public static bool LeftPressedThisFrame;
-        public static Action? OnLeftPressedThisFrame;
-        public static bool RightPressedThisFrame;
-        public static bool RightPressedLastFrame { get; set; }
-        public static bool Middle;
-        public static bool Right;
-        public static bool XButton1;
-        public static bool XButton2;
-     
-        public static int MouseWheelDelta { get; set; }
-        
-        public static Vector2 LastClickPosition { get; set; }
-        public static Vector2 Position;
-        public static Vector2 LastClickGlobalPosition { get; private set; }
-        public static Vector2 GlobalPosition;
-        public static Vector2 LastPosition { get; set; }
-        public static Vector2 Delta { get { return LastPosition - Position; } }
-
-        private static CMouse current = null;
-
-        public static CMouse Current
-        {
-            get
-            {
-                current ??= new();
-                return current;
-            }
-        }
-
-
-        public CMouse(MouseButtonEventArgs? e = null)
-        {
-            if (current != this)
-                current = null;
-
-            current = this;
-
-            if(e is not null)
-                Refresh(e);
-
-        }
-
-        public static void Update()
-        {
-            if (!RightPressedLastFrame && Right)
-                RightPressedThisFrame = true;
-            else
-                RightPressedThisFrame = false;
-            RightPressedLastFrame = Right;
-
-            if (!LeftPressedLastFrame && Left)
-            {
-                LeftPressedThisFrame = true;
-                LastClickPosition = Position;
-                
-                var img = Runtime.OutputImages.First();
-                var normalizedPos = img.GetNormalizedPoint(new Point(LastClickPosition.X, LastClickPosition.Y));
-
-                LastClickGlobalPosition = Camera.First.ScreenViewportToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
-                OnLeftPressedThisFrame?.Invoke();
-            }
-            else
-                LeftPressedThisFrame = false;
-            LeftPressedLastFrame = Left;
-        }
-
-        public static void Refresh(MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-            switch (e.ChangedButton)
-            {
-                case MouseButton.Left:
-                    Left = e.LeftButton is MouseButtonState.Pressed;
-                    break;
-                case MouseButton.Middle:
-                    Middle = e.MiddleButton is MouseButtonState.Pressed;
-                    break;
-                case MouseButton.Right:
-                    Right = e.RightButton is MouseButtonState.Pressed;
-                    break;
-                case MouseButton.XButton1:
-                    XButton1 = e.XButton1 is MouseButtonState.Pressed;
-                    break;
-                case MouseButton.XButton2:
-                    XButton2 = e.XButton2 is MouseButtonState.Pressed;
-                    break;
-            }
-        }
-        public static void Refresh(MouseWheelEventArgs e)
-        {
-            e.Handled = true;
-            MouseWheelDelta = e.Delta;
-        }
-        public static void Refresh(MouseEventArgs e)
-        {
-            e.Handled = true; 
-            LastPosition = Position;
-            var img = Runtime.OutputImages.First();
-            var point = e.GetPosition(img);
-            var pt = img.GetNormalizedPoint(point);
-            var normalizedPos = new Vector2((float)pt.X, (float)pt.Y); 
-            GlobalPosition = Camera.First.ScreenViewportToGlobal(normalizedPos);
-            Position = new((float)point.X,
-                (float)point.Y);
-              
-        }
-    }
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
+
+        static Vector2 moveVector;
+        static float inputMagnitude;
+        private static bool moveVectorInitialized;
+
+        public static Vector2 MoveVector { get => moveVector; }
+        public static float InputMagnitude { get => inputMagnitude; set => inputMagnitude = value; }
+
+
+        static void Up() => moveVector = new Vector2(moveVector.X, inputMagnitude);
+        static void Down() => moveVector = new Vector2(moveVector.X, inputMagnitude);
+        static void Left()
+        {
+            moveVector = new Vector2(-inputMagnitude, moveVector.Y);
+        }
+        static void Right()
+        {
+            moveVector = new Vector2(inputMagnitude, moveVector.Y);
+
+        }
+        static void InitializePlayerMoveVector()
+        {
+            if (moveVectorInitialized)
+                return;
+            
+            moveVectorInitialized = true;
+            
+            RegisterAction(Up, Key.W);
+            RegisterAction(Down, Key.S);
+            RegisterAction(Left, Key.A);
+            RegisterAction(Right, Key.D);
+        }
+
         private static readonly List<InputAction> InputActions = new(250);
         internal static void Refresh()
         {
+            InitializePlayerMoveVector(); 
             lock (InputActions)
             {
                 InputAction[] actions = new InputAction[InputActions.Count];
@@ -181,8 +104,7 @@ namespace pixel_renderer
                         InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
                         _ => false,
                     };
-                    return input_value;
-                });
+                return input_value;});
             }
             catch(Exception e)
             {
@@ -195,7 +117,7 @@ namespace pixel_renderer
         {
             return Get(key, type);
         }
-        public static void RegisterAction(Action<object[]?> action, Key key, InputEventType type = InputEventType.KeyDown)
+        public static void RegisterAction(Action action, Key key, InputEventType type = InputEventType.KeyDown)
         {
              InputActions.Add(new(action, key, type: type));
         }
@@ -205,21 +127,20 @@ namespace pixel_renderer
         internal Key Key;
         internal InputEventType EventType = InputEventType.KeyDown; 
         internal readonly bool ExecuteAsynchronously = false;
-        private ValueTuple<Action<object[]?>, object[]?> Action_Args = new();
-        public InputAction(Action<object[]?> expression, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
+        internal Action action;
+
+        public InputAction(Action expression, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
         {
             ExecuteAsynchronously = async;
-            Action_Args.Item1 = expression;
-            Action_Args.Item2 = args;
             Key = key;
             EventType = type;
         }
-        internal void Invoke() => Action_Args.Item1?.Invoke(Action_Args.Item2);
+        internal void Invoke() => action?.Invoke();
         internal async Task InvokeAsync(float? delay = null)
         {
             if (delay is not null)
                 await Task.Delay((int)delay);
-             await Task.Run(() => Action_Args.Item1?.Invoke(Action_Args.Item2));
+            await Task.Run(() => action?.Invoke());
         }
     }
 }

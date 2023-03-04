@@ -62,7 +62,7 @@ namespace pixel_renderer
             byte[] byteData = CBit.ByteFromPixel(pixels);
 
             data = byteData;
-            bmpInput.Dispose();
+            //bmpInput.Dispose();
         }
 
         public void SetPixel(int x, int y, Pixel color)

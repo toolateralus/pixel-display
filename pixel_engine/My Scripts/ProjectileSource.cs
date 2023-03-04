@@ -31,17 +31,14 @@ namespace pixel_renderer
         public float aimDistance = 30f;
         private bool fired;
         private float power = 1f;
-
         public override void Awake()
         {
             ammoCt = initAmmoCt;
             projectile = Rigidbody.Standard("Projectile Original");
             projectile.AddComponent<Projectile>();
         }
-
         public override void FixedUpdate(float delta)
         {
-
             bool fireDown = Get(ref fireKey);
             bool fireUp = Get(ref fireKey, InputEventType.KeyUp);
 
@@ -52,21 +49,20 @@ namespace pixel_renderer
 
             if (Get(ref reloadKey))
                 Reload();
-
-
         }
-
         private void Fire()
         {
             var proj = Node.Instantiate(this.projectile, Position);
             
             if (proj.TryGetComponent<Sprite>(out var sprite))
             {
+                if (sprite.texture.Name == "ball") 
+                    return; 
 
                 var meta = AssetLibrary.FetchMetaRelative("\\Assets\\other\\ball.bmp");
+
                 if (meta != null)
                 {
-                    Runtime.Log("Texture set");
                     sprite.texture.SetImage(meta.Path);
                     sprite.Transform = Matrix3x2.CreateScale(25);
                     sprite.dirty = true;
@@ -90,16 +86,14 @@ namespace pixel_renderer
                 projectile.hitRadius = 16; 
             }   
         }
-
         private void Reload()
         {
             ammoCt -= magazineSize;
             currentMag = magazineSize; 
         }
-
         public override void OnDrawShapes()
         {
-            ShapeDrawer.DrawLine(Position, aimDirection * aimDistance, Color.Red);
+            ShapeDrawer.DrawLine(Position, Position + aimDirection * aimDistance, Color.Red);
         }
     }
 }
