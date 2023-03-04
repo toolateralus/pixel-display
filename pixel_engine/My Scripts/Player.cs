@@ -1,5 +1,4 @@
 ﻿using static pixel_renderer.Input;
-using System;
 using Key = System.Windows.Input.Key;
 using System.Collections.Generic;
 using Newtonsoft.Json;
@@ -9,21 +8,33 @@ using System.Threading.Tasks;
 using pixel_renderer.Assets;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
+using pixel_renderer;
 
 namespace pixel_renderer
 {
 
     public class Text : Component
     {
-        public JImage[] font;
-        public Texture[] fontTextures;
+        public List<JImage> font;
 
-        public float scale;
-        public BoundingBox2D rect; 
+        public BoundingBox2D bounds;
+        public Vector2 orignalSize;
+
         public override void Awake()
         {
+            for (int i = 0; i < 6; ++i)
+            {
+                var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Dog walking\\dog_walking_{i}.bmp");
 
+                if (meta != null)
+                {
+                    Bitmap bmp = new(meta.Path);
+                    JImage image = new(bmp);
+
+                }
+            }
+        }
+          
 
 
         }
@@ -59,8 +70,10 @@ namespace pixel_renderer
         public static Node test_child_node(Node? parent = null)
         {
             Node node = new("Player Child");
+            
             if (parent != null)
                 node.Position = parent.Position + Vector2.UnitY * 16;
+
             else node.Position = JRandom.Vec2(Vector2.Zero, Vector2.One * Constants.ScreenW); 
             AddCamera(node);
             return node;
@@ -189,4 +202,3 @@ namespace pixel_renderer
             }
         }
     }
-}

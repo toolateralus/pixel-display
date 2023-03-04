@@ -1,10 +1,8 @@
-﻿using static pixel_renderer.Input;
+﻿using System;
 using Key = System.Windows.Input.Key;
 using System.Drawing;
 using System.Numerics;
-using System;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
+using static pixel_renderer.Input;
 using pixel_renderer.Assets;
 
 namespace pixel_renderer
