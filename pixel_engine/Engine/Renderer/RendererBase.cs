@@ -234,7 +234,7 @@
                 Vector2 global = cam.LocalToGlobal(camLocal);
                 Vector2 spriteLocal = sprite.GlobalToLocal(global);
 
-                if (!IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, fZero, fOne))
+                if (!IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, -1, 1))
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)

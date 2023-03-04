@@ -61,7 +61,13 @@ namespace pixel_renderer
         }
         public Vector2 LocalToViewport(Vector2 local) => (local + viewportOffset) * viewportScale;
         public Vector2 LocalToColorPosition(Vector2 local) => ViewportToColorPosition(LocalToViewport(local));
-        public Vector2 ViewportToColorPosition(Vector2 viewport) =>  viewport.Wrapped(Vector2.One) * colorDataSize;
+        public Vector2 ViewportToColorPosition(Vector2 viewport)
+        {
+            viewport.X += 0.5f;
+            viewport.Y += 0.5f;
+            return viewport.Wrapped(Vector2.One) * colorDataSize;
+        }
+
         internal Vector2 GlobalToLocal(Vector2 global)
         {
             Matrix3x2.Invert(Transform, out var inverted);
