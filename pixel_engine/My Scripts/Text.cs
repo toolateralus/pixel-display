@@ -137,7 +137,7 @@ namespace pixel_renderer
 
         public override void Awake()
         {
-            texture = new(Vector2.One, Player.PlayerSprite);
+            texture = new(Vector2.One * 16, Player.PlayerSprite);
             Refresh();
 
         }
@@ -304,11 +304,14 @@ namespace pixel_renderer
             return viewport.Wrapped(Vector2.One) * colorDataSize;
         }
 
+        Texture texture; 
+
         public override void Draw(RendererBase renderer) 
         {
-            var image = new JImage();
-            var drawArea = new BoundingBox2D(); 
+            
 
+
+            var drawArea = new BoundingBox2D(GetCorners()); 
             drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
             drawArea.max = Vector2.Min(renderer.Resolution, drawArea.max);
 
@@ -384,8 +387,15 @@ namespace pixel_renderer
             }
 
         }
-    }
 
+        public static Node Standard()
+        {
+            Node node = new("UI Element");
+            node.AddComponent<Image>();
+            return node; 
+        }
+    }
+   
     public class Text : UIComponent
     {
         public Dictionary<char, (JImage image, Vector2 scale)> font = new();

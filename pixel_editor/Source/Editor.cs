@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
+using Image = pixel_renderer.Image;
 
 namespace pixel_editor
 {
@@ -532,6 +533,7 @@ namespace pixel_editor
             {"Animator", Animator.Standard},
             {"Light", Light.Standard},
             {"Floor", Floor.Standard},
+            {"UI Image", Image.Standard},
         };
         #endregion
     }
