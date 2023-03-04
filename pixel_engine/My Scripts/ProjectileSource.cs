@@ -1,10 +1,8 @@
-﻿using static pixel_renderer.Input;
+﻿using System;
 using Key = System.Windows.Input.Key;
 using System.Drawing;
 using System.Numerics;
-using System;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
+using static pixel_renderer.Input;
 using pixel_renderer.Assets;
 
 namespace pixel_renderer
@@ -28,9 +26,10 @@ namespace pixel_renderer
         public Vector2 aimDirection = new(1, -3);
 
         [Field]
-        public float aimDistance = 30f;
         private bool fired;
-        private float power = 1f;
+        public float aimDistance = 30f;
+        
+
         public override void Awake()
         {
             ammoCt = initAmmoCt;
@@ -50,6 +49,7 @@ namespace pixel_renderer
             if (Get(ref reloadKey))
                 Reload();
         }
+        
         private void Fire()
         {
             var proj = Node.Instantiate(this.projectile, Position);
@@ -86,11 +86,13 @@ namespace pixel_renderer
                 projectile.hitRadius = 16; 
             }   
         }
+
         private void Reload()
         {
             ammoCt -= magazineSize;
             currentMag = magazineSize; 
         }
+
         public override void OnDrawShapes()
         {
             ShapeDrawer.DrawLine(Position, Position + aimDirection * aimDistance, Color.Red);

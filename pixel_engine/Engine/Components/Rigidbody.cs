@@ -42,25 +42,28 @@ namespace pixel_renderer
         {
             velocity += impulse * invMass;
         }
-        public static Node Standard(string v = "Rigidbody Node ")
+        public static Node Standard(string v = "rigidbody node")
         {
             Node node = Node.New;
-            string tag = $"{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}";
-            node.Name = $"{v} {tag}";
+
+            node.Name = $"{v}";
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();
             Sprite sprite = node.AddComponent<Sprite>();
+
             col.SetVertices(sprite.GetCorners());
-            //sprite.color = JRandom.Color(aMin: 128);
+
+            sprite.color = JRandom.Color(aMin: 186);
+
             col.IsTrigger = false;
+
             return node;
         }
         public static Node Standard()
         {
             Node node = Node.New;
-            string tag = $"{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}";
-            node.Name = $"Rigidbody Node {tag}";
+            node.Name = "rigidbody node";
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
             Collider col = node.AddComponent<Collider>();

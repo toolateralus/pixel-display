@@ -14,15 +14,11 @@ namespace pixel_renderer
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
-
         static Vector2 moveVector;
         static float inputMagnitude;
         private static bool moveVectorInitialized;
-
         public static Vector2 MoveVector { get => moveVector; }
         public static float InputMagnitude { get => inputMagnitude; set => inputMagnitude = value; }
-
-
         static void Up() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Down() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Left()
@@ -46,7 +42,6 @@ namespace pixel_renderer
             RegisterAction(Left, Key.A);
             RegisterAction(Right, Key.D);
         }
-
         private static readonly List<InputAction> InputActions = new(250);
         internal static void Refresh()
         {
@@ -65,7 +60,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(string key, InputEventType type = InputEventType.KeyDown)
         {
@@ -83,7 +77,6 @@ namespace pixel_renderer
                 });
             else return false; 
         }
-
         /// <summary>
         /// Gets the value of a specified key and type of event.
         /// </summary>
@@ -120,27 +113,6 @@ namespace pixel_renderer
         public static void RegisterAction(Action action, Key key, InputEventType type = InputEventType.KeyDown)
         {
              InputActions.Add(new(action, key, type: type));
-        }
-    }
-    public class InputAction
-    {
-        internal Key Key;
-        internal InputEventType EventType = InputEventType.KeyDown; 
-        internal readonly bool ExecuteAsynchronously = false;
-        internal Action action;
-
-        public InputAction(Action expression, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
-        {
-            ExecuteAsynchronously = async;
-            Key = key;
-            EventType = type;
-        }
-        internal void Invoke() => action?.Invoke();
-        internal async Task InvokeAsync(float? delay = null)
-        {
-            if (delay is not null)
-                await Task.Delay((int)delay);
-            await Task.Run(() => action?.Invoke());
         }
     }
 }
