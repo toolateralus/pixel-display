@@ -1,16 +1,25 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Numerics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
 namespace pixel_renderer
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Linq;
-    using System.Numerics;
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-
     public static class ExtensionMethods
     {
+        public readonly static Vector2 one = new(1, 1);
+        public readonly static Vector2 zero = new(0, 0);
+        
+        private const float Epsilon = float.Epsilon;
+
+        public static Vector2 up = new(0, -1);
+        public static Vector2 down = new(0, 1);
+        public static Vector2 left = new(-1, 0);
+        public static Vector2 right = new(1, 0);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float DistanceSquared(Vector2 a, Vector2 b)
         {
@@ -55,21 +64,14 @@ namespace pixel_renderer
             float newY = sin * v.X + cos * v.Y;
             v.X = newX;
             v.Y = newY;
-        }[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float SqrMagnitude(this Vector2 v)
         {
             var product = MathF.FusedMultiplyAdd(v.X, v.X, v.Y * v.Y);
             return product; 
         }
-        public readonly static Vector2 one = new(1, 1);
-        public readonly static Vector2 zero = new(0, 0);
-        public static Vector2 up = new(0, -1);
-        public static Vector2 down = new(0, 1);
-        public static Vector2 left = new(-1, 0);
-        public static Vector2 right = new(1, 0);
 
-
-        private const float Epsilon = float.Epsilon;
         #region Numbers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
@@ -191,6 +193,7 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="input"></param>
         /// <returns>an integer of value based on the order and frequency of numbers in the input string.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ToInt(this string input)
         {
             string intResult = "";
@@ -201,6 +204,7 @@ namespace pixel_renderer
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ToFloat(this string input) => float.Parse(input);
         /// <summary>
         /// Since the assets system handles the file 
@@ -209,6 +213,7 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="input"></param>
         /// <returns>A formatted version of the string that will not cause file-saving errors</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToFileNameFormat(this string input)
         {
             var output = "";
@@ -219,6 +224,7 @@ namespace pixel_renderer
             return output;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Normal_LHS(this Vector2 v)
         {
             float x = v.X;
@@ -265,26 +271,6 @@ namespace pixel_renderer
 
             return bitmap;
         }
-        #endregion
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pixel Lerp(this Pixel A, Pixel B, float T)
-        {
-            T = Math.Max(0, Math.Min(1, T));
-            int r = (int)Math.Round(A.r + (B.r - A.r) * T);
-            int g = (int)Math.Round(A.g + (B.g - A.g) * T);
-            int b = (int)Math.Round(A.b + (B.b - A.b) * T);
-            int a = (int)Math.Round(A.a + (B.a - A.a) * T);
-            return Color.FromArgb(a, r, g, b);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
-            from FieldInfo field in component.GetType().GetRuntimeFields()
-            from CustomAttributeData data in field.CustomAttributes
-            where data.AttributeType == typeof(FieldAttribute)
-            select field;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static System.Windows.Media.PixelFormat ToMediaFormat(this System.Drawing.Imaging.PixelFormat sourceFormat)
         {
@@ -303,5 +289,22 @@ namespace pixel_renderer
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rectangle Rect(this Bitmap bmp) => new Rectangle(0, 0, bmp.Width, bmp.Height);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Pixel Lerp(this Pixel A, Pixel B, float T)
+        {
+            T = Math.Max(0, Math.Min(1, T));
+            int r = (int)Math.Round(A.r + (B.r - A.r) * T);
+            int g = (int)Math.Round(A.g + (B.g - A.g) * T);
+            int b = (int)Math.Round(A.b + (B.b - A.b) * T);
+            int a = (int)Math.Round(A.a + (B.a - A.a) * T);
+            return Color.FromArgb(a, r, g, b);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
+            from FieldInfo field in component.GetType().GetRuntimeFields()
+            from CustomAttributeData data in field.CustomAttributes
+            where data.AttributeType == typeof(FieldAttribute)
+            select field;
+        #endregion
     }
 }
