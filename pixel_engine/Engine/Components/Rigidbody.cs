@@ -44,19 +44,8 @@ namespace pixel_renderer
         }
         public static Node Standard(string v = "rigidbody node")
         {
-            Node node = Node.New;
-
-            node.Name = $"{v}";
-
-            Rigidbody rb = node.AddComponent<Rigidbody>();
-            Collider col = node.AddComponent<Collider>();
-            Sprite sprite = node.AddComponent<Sprite>();
-
-            col.SetPolygonFromWorldSpace(new(sprite.GetCorners()));
-
-            sprite.color = JRandom.Color(aMin: 186);
-
-            col.IsTrigger = false;
+            Node node = Standard();
+            node.Name = v;
 
             return node;
         }
@@ -70,7 +59,7 @@ namespace pixel_renderer
             Sprite sprite = node.AddComponent<Sprite>();
             node.Scale = Vector2.One * 16;
             col.SetPolygonFromWorldSpace(new(sprite.GetCorners()));
-            //sprite.color = JRandom.Color(aMin: 128);
+            sprite.color = JRandom.Color(aMin: 128);
             col.IsTrigger = false;
             return node;
         }
