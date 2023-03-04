@@ -11,34 +11,42 @@ namespace pixel_renderer
 
     public static class ExtensionMethods
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float DistanceSquared(Vector2 a, Vector2 b)
         {
             return (b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float SqrDistanceFrom(this Vector2 a, Vector2 v)
         {
             return DistanceSquared(a, v);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float DistanceFrom(this Vector2 v,  Vector2 a)
         {
             return v.Distance(a);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Distance(this Vector2 a, Vector2 b)
         {
             var distanceSquared = DistanceSquared(a, b);
             return CMath.Sqrt(distanceSquared);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Dot(this Vector2 a, Vector2 b)
         {
             return (a.X * b.X) + (a.Y * b.Y);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Length(this Vector2 v) => MathF.Sqrt(v.X * v.X + v.Y * v.Y);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Rotated(this Vector2 v, float angle)
         {
             float cos = MathF.Cos(angle);
             float sin = MathF.Sin(angle);
             return new Vector2(cos * v.X - sin * v.Y, sin * v.X + cos * v.Y);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Rotate(this Vector2 v, float angle)
         {
             float cos = MathF.Cos(angle);
@@ -47,7 +55,7 @@ namespace pixel_renderer
             float newY = sin * v.X + cos * v.Y;
             v.X = newX;
             v.Y = newY;
-        }
+        }[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float SqrMagnitude(this Vector2 v)
         {
             var product = MathF.FusedMultiplyAdd(v.X, v.X, v.Y * v.Y);
@@ -63,8 +71,13 @@ namespace pixel_renderer
 
         private const float Epsilon = float.Epsilon;
         #region Numbers
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool WithinRange(this int v, int min, int max) { return v <= max && v >= min; }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Clamp(this double v, double min, double max) => Math.Min(max, Math.Max(v, min));
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,20 +86,28 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Squared(this float v) => v * v;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Clamp(this ref Vector2 v, Vector2 min, Vector2 max)
         {
             v.X = v.X.Clamp(min.X, max.X);
             v.Y = v.Y.Clamp(min.Y, max.Y);
         }
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Wrap(this Vector2 v, Vector2 max) { v.X = v.X.Wrapped(max.X); v.Y = v.Y.Wrapped(max.Y); }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Wrapped(this Vector2 v, Vector2 max) => new(v.X.Wrapped(max.X), v.Y.Wrapped(max.Y));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWithin(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithin(min.X, max.X) && v.Y.IsWithin(min.Y, max.Y);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWithinMaxExclusive(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithinMaxExclusive(min.X ,max.X) && v.Y.IsWithinMaxExclusive(min.Y, max.Y);
      
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Wrapped(this float v, float max)
         {
             float result = v - max * MathF.Floor(v / max);
@@ -99,27 +120,38 @@ namespace pixel_renderer
 
             return result;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWithinMaxExclusive(this float v, float min, float max) => v >= min && v < max;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetDivideSafe(this float v) => v == 0 ? Epsilon : v;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion
         #region Vectors
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MakeDivideSafe(this ref Vector2 v)
         { 
             v.X = v.X.GetDivideSafe();
             v.Y = v.Y.GetDivideSafe();
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 GetDivideSafe(this Vector2 v)
         {
             v.X = v.X.GetDivideSafe();
             v.Y = v.Y.GetDivideSafe();
             return v;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 WithValue(this Vector2 v, int? x = null, int? y = null) { return new Vector2(x ?? v.X, y ?? v.Y); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 WithValue(this Vector2 v, float? x = null, float? y = null) { return new Vector2(x ?? v.X, y ?? v.Y); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 WithScale(this Vector2 v, float x = 1, float y = 1) { return new Vector2(v.X * x, v.Y * y); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Sum(this Vector2 v) => v.X + v.Y;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Sum(this Vector3 v) => v.X + v.Y + v.Z;
         
         /// <summary>
@@ -128,18 +160,21 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="v"></param>
         /// <returns>A normalized Vector from the length of the current</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Normalized(this Vector2 v)
         {
             if (v.Equals(Vector2.Zero))
                 return Vector2.Zero;
             return v / v.Length();
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Normalize(this ref Vector2 v)
         {
             if (v.Equals(Vector2.Zero))
                 v = Vector2.Zero;
             v =  v / v.Length();
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Increment2D(this ref Vector2 v, float xMax, float xMin = 0)
         {
             v.X++;
@@ -199,6 +234,7 @@ namespace pixel_renderer
         /// </summary>
         /// <param name="colors"></param>
         /// <returns> A one dimensional array containing all the elements of the two-dimensional array passed in.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T[] Flatten<T>(this T[,] array)
         {
             List<T> result = new(array.GetLength(0) + array.GetLength(1));
@@ -208,12 +244,14 @@ namespace pixel_renderer
         }
         #endregion
         #region Image
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static System.Windows.Point GetNormalizedPoint(this System.Windows.Controls.Image img, System.Windows.Point pos)
         {
             pos.X /= img.ActualWidth;
             pos.Y /= img.ActualHeight;
             return pos;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Bitmap ToBitmap(this Pixel[,] colors)
         {
             int sizeX = colors.GetLength(0);
@@ -229,6 +267,7 @@ namespace pixel_renderer
         }
         #endregion
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pixel Lerp(this Pixel A, Pixel B, float T)
         {
             T = Math.Max(0, Math.Min(1, T));
@@ -239,12 +278,14 @@ namespace pixel_renderer
             return Color.FromArgb(a, r, g, b);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>
             from FieldInfo field in component.GetType().GetRuntimeFields()
             from CustomAttributeData data in field.CustomAttributes
             where data.AttributeType == typeof(FieldAttribute)
             select field;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static System.Windows.Media.PixelFormat ToMediaFormat(this System.Drawing.Imaging.PixelFormat sourceFormat)
         {
             switch (sourceFormat)
@@ -260,6 +301,7 @@ namespace pixel_renderer
             }
             throw new NotImplementedException($"No Media.PixelFormat implemented Imaging.PixelFormat: {sourceFormat.ToString()}");
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rectangle Rect(this Bitmap bmp) => new Rectangle(0, 0, bmp.Width, bmp.Height);
     }
 }

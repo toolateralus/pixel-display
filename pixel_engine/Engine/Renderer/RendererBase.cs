@@ -1,17 +1,9 @@
 ﻿namespace pixel_renderer
 {
+    using pixel_renderer.ShapeDrawing;
     using System;
-    using System.Collections.Generic;
-    using System.Net;
     using System.Numerics;
     using System.Runtime.CompilerServices;
-    using System.Security.Policy;
-    using System.Threading.Tasks;
-    using System.Windows.Controls;
-    using System.Windows.Markup;
-    using System.Windows.Media;
-    using System.Windows.Shapes;
-    using Bitmap = System.Drawing.Bitmap;
 
     public abstract class  RendererBase 
     {
@@ -30,12 +22,13 @@
         }
         internal protected Vector2 _resolution = Constants.DefaultResolution;
         public bool baseImageDirty = true;
+        const float fZero = 0;
+        const float fOne = 1;
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void RenderCamera(Camera cam, StageRenderInfo renderInfo, Vector2 resolution)
         {
@@ -54,12 +47,11 @@
 
             Array.Copy(frame, latestFrame, frame.Length);
         }
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawGraphics(Camera cam, Vector2 resolution)
         {
             Vector2 framePos = new Vector2();
-            foreach (Circle circle in ShapeDrawer.Circles)
+            foreach (pixel_renderer.ShapeDrawing.Circle circle in ShapeDrawer.Circles)
             {
                 float sqrtOfHalf = MathF.Sqrt(0.5f);
                 Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
@@ -139,7 +131,6 @@
                 }
             }
         }
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vector2 resolution)
         {
@@ -160,7 +151,6 @@
                 DrawTransparentSprite(cam, sprite, drawArea, resolution);
             }
         }
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawBaseImage(Camera cam, Vector2 resolution)
         {
@@ -191,8 +181,6 @@
 
             DrawTransparentSprite(cam, sprite, new BoundingBox2D(zero, resolution), resolution);
         }
-        const float fZero = 0;
-        const float fOne = 1;
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawTransparentSprite(Camera cam, SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution)
         {
@@ -300,11 +288,11 @@
             
             }
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool IsWithinMaxExclusive(float x, float y, float min, float max)
         {
             return x >= min && x < max && y >= min && y < max;
         }
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void WriteColorToFrame(ref Pixel color, ref Vector2 framePos)
         {

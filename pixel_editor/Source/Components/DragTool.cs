@@ -1,4 +1,5 @@
 ﻿using pixel_renderer;
+using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

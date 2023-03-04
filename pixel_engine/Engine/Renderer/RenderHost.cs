@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pixel_renderer.ShapeDrawing;
+using System;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;

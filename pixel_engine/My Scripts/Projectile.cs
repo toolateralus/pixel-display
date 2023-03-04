@@ -1,4 +1,6 @@
-﻿namespace pixel_renderer
+﻿using pixel_renderer.ShapeDrawing;
+
+namespace pixel_renderer
 {
     public class Projectile : Component
     {
