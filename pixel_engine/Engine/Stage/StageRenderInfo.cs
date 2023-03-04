@@ -61,8 +61,12 @@ namespace pixel_renderer
         }
         public Vector2 ViewportToColorPos(Vector2 spriteViewport) => 
             ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
-        internal Vector2 GlobalToViewport(Vector2 global) =>
-            (global - Transform.Translation) / scale;
+        internal Vector2 GlobalToViewport(Vector2 global)
+        {
+            Matrix3x2.Invert(Transform, out var inverted);
+            return Vector2.Transform(global, inverted);
+        }
+
         public void SetColorData(Vector2 size, byte[] data)
         {
             image = new(size, data);

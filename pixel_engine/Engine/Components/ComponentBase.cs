@@ -11,7 +11,6 @@ namespace pixel_renderer
     [JsonObject(MemberSerialization.OptIn)]
     public class Component
     {
-
         public Vector2 Scale { get => node.Scale; set => node.Scale = value; }
         public float Rotation { get => node.Rotation; set => node.Rotation = value; }
 

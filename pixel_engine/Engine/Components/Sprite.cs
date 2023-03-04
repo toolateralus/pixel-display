@@ -25,7 +25,6 @@ namespace pixel_renderer
     public enum TextureFiltering { Point, Bilinear }
     public class Sprite : Component
     {
-        [JsonProperty] public Vector2 size = Vector2.One * 16;
         [JsonProperty] public Vector2 viewportScale = Vector2.One;
         [JsonProperty] public Vector2 viewportOffset = Vector2.Zero;
         private Vector2 colorDataSize = new(1, 1);
@@ -46,11 +45,11 @@ namespace pixel_renderer
         public Pixel color = Pixel.Blue;
         public Sprite()
         {
-            texture = new Texture((Vector2)size, Pixel.Red);
+            texture = new Texture(Vector2.One, Pixel.Red);
         }
         public Sprite(int x, int y) : this()
         {
-            size = new(x, y);
+            Scale = new(x, y);
 
         }
         internal protected bool dirty = true;
@@ -74,7 +73,7 @@ namespace pixel_renderer
                 }
                 else
                 {
-                    Polygon poly = new Polygon(GetVertices()).OffsetBy(node.Position);
+                    Polygon poly = new Polygon(GetCorners()).OffsetBy(node.Position);
                     Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
@@ -115,8 +114,9 @@ namespace pixel_renderer
         [Method]
         public void TrySetTextureFromString()
         {
+            throw new NotImplementedException();
             if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
-                 texture = new(null, meta, size, meta.Name);
+                 //TODO: reimplement: texture = new(null, meta, size, meta.Name);
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
         [Method]
@@ -132,7 +132,7 @@ namespace pixel_renderer
         }
         public override void Awake()
         {
-            texture = new(size, Player.PlayerSprite);
+            texture = new(Vector2.One, Player.PlayerSprite);
             Refresh();
 
         }
@@ -147,14 +147,14 @@ namespace pixel_renderer
             switch (Type)
             {
                 case SpriteType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(size, color);
+                    Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
                     texture.SetImage(colorArray);
                     break;
                 case SpriteType.Image:
                     if (texture is null)
                     {
-                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), (Vector2)size);
-                        Pixel[,] colorArray1 = CBit.SolidColorSquare(size, color);
+                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), Vector2.One);
+                        Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
                         texture.SetImage(colorArray1);
                     }
                     else
@@ -170,12 +170,10 @@ namespace pixel_renderer
         }
         public void Draw(Vector2 size, byte[] color)
         {
-            this.size = size;
             texture.SetImage(size, color);
         }
         public void DrawSquare(Vector2 size, Pixel color)
         {
-            this.size = size;
             var cols = CBit.SolidColorSquare(size, color);
             var bytes = CBit.ByteArrayFromColorArray(cols);
             SetColorData(new(cols.GetLength(0), cols.GetLength(1)), bytes);  
@@ -183,16 +181,15 @@ namespace pixel_renderer
         public Vector2 ViewportToColorPos(Vector2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
         internal Vector2 GlobalToViewport(Vector2 global)
         {
-            size.MakeDivideSafe();
-            return (global - node.Position) / size;
+            return (global - Position) / Scale;
         }
 
-        public Vector2[] GetVertices()
+        public Vector2[] GetCorners()
         {
-            Vector2 topLeft = Vector2.Zero;
-            Vector2 topRight = new(size.X, 0);
-            Vector2 bottomRight = size;
-            Vector2 bottomLeft = new(0, size.Y);
+            Vector2 topLeft = Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform);
+            Vector2 topRight = Vector2.Transform(new Vector2(0.5f, -0.5f), Transform);
+            Vector2 bottomRight = Vector2.Transform(new Vector2(0.5f, 0.5f), Transform);
+            Vector2 bottomLeft = Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform);
 
             var vertices = new Vector2[]
             {
@@ -289,7 +286,7 @@ namespace pixel_renderer
         {
             if (selected_by_editor)
             {
-                Polygon mesh = new(GetVertices());
+                Polygon mesh = new(GetCorners());
                 int vertLength = mesh.vertices.Length;
                 for (int i = 0; i < vertLength; i++)
                 {

@@ -86,6 +86,12 @@ namespace pixel_renderer
             return (max.X >= other.min.X) && (min.X <= other.max.X) &&
                    (max.Y >= other.min.Y) && (min.Y <= other.max.Y);
         }
+
+        internal void ExpandToAll(Vector2[] vector2s)
+        {
+            foreach(Vector2 v in vector2s)
+                ExpandTo(v);
+        }
     }
 }
 

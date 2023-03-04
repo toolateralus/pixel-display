@@ -59,7 +59,7 @@ namespace pixel_renderer
             if (node.TryGetComponent(out sprite))
             {
                 sprite.Type = SpriteType.Image;
-                curve = Curve.Circlular(1, 16, radius: sprite.size.X /2, looping: true);
+                curve = Curve.Circlular(1, 16, radius: sprite.Scale.X /2, looping: true);
             }
 
             Task task = new(async delegate
@@ -67,7 +67,7 @@ namespace pixel_renderer
                 if (sprite is null) return; 
                 while (sprite.texture is null)
                     await Task.Delay(25);
-                sprite.texture.SetImage(PlayerSprite, (Vector2)sprite.size);
+                sprite.texture.SetImage(PlayerSprite, sprite.Scale);
             });
 
             task.Start();
@@ -110,18 +110,19 @@ namespace pixel_renderer
         }
         private void DrawCircle()
         {
-            Pixel[,] colors = new Pixel[(int)sprite.size.X, (int)sprite.size.Y];
+            var size = sprite.texture.scale;
+            Pixel[,] colors = new Pixel[(int)size.X, (int)size.Y];
 
             for(int i = 0; i < curve.points.Values.Count; ++i)
             {
                 Vector2 pos = curve.points.Values.ElementAt(i);
-                pos += sprite.size / 2; 
+                pos += size / 2; 
 
-                if(pos.IsWithinMaxExclusive(Vector2.Zero, new(sprite.size.X, sprite.size.Y)))
+                if(pos.IsWithinMaxExclusive(Vector2.Zero, size))
                     colors[(int)pos.X, (int)pos.Y] = (Pixel)Color.Red;
                 
             }
-            sprite?.Draw(sprite.size, colors);
+            sprite?.Draw(size, colors);
         }
         void Up(object[]? e) => moveVector = new Vector2(moveVector.X -inputMagnitude);
         void Down(object[]? e) => moveVector = new Vector2(moveVector.X, inputMagnitude);
@@ -174,14 +175,14 @@ namespace pixel_renderer
         public static Collider AddCollider(Node playerNode, Sprite sprite)
         {
             var col = playerNode.AddComponent<Collider>();
-            col.SetVertices(sprite.GetVertices());
+            col.SetVertices(sprite.GetCorners());
             col.IsTrigger = false;
             return col;
         }
         public static Sprite AddSprite(Node playerNode)
         {
             var sprite = playerNode.AddComponent<Sprite>();
-            sprite.size = Vector2.One * 36;
+            sprite.Scale = Vector2.One * 36;
             return sprite;
         }
         public override void OnDrawShapes()
