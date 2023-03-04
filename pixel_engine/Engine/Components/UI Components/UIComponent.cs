@@ -32,10 +32,10 @@ namespace pixel_renderer
         {
             return new Vector2[]
             {
-                    Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform), // Top Left
-                    Vector2.Transform(new Vector2(0.5f, -0.5f), Transform), // Top Right
-                    Vector2.Transform(new Vector2(0.5f, 0.5f), Transform), // Bottom Right
-                    Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform), // Bottom Left
+                Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform), // Top Left
+                Vector2.Transform(new Vector2(0.5f, -0.5f), Transform), // Top Right
+                Vector2.Transform(new Vector2(0.5f, 0.5f), Transform), // Bottom Right
+                Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform), // Bottom Left
             };
         }
     }
