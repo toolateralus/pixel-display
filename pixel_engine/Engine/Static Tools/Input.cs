@@ -36,7 +36,8 @@ namespace pixel_renderer
         }
         static void InitializePlayerMoveVector()
         {
-            if (moveVectorInitialized) return;
+            if (moveVectorInitialized)
+                return;
             
             moveVectorInitialized = true;
             
