@@ -11,52 +11,23 @@ using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
-    public interface IPrimitiveGeometry
-    {
-        public static Polygon DefiningGeometry { get; }
-    }
-    public class Box : IPrimitiveGeometry
-    {
-        public static Vector2 DefaultSize;
-        private static readonly Polygon DefaultPolygon = Polygon.Rectangle(DefaultSize.X, DefaultSize.Y);
-
-        public Polygon Polygon = DefaultPolygon;
-        public Polygon DefiningGeometry => Polygon;
-    }
-    public class Triangle : IPrimitiveGeometry
-    {
-        public static Vector2 DefaultSize;
-        private static readonly Polygon DefaultPolygon = Polygon.Triangle(DefaultSize.X, DefaultSize.Y);
-
-        public Polygon Polygon = DefaultPolygon;
-        public Polygon DefiningGeometry => Polygon;
-    }
-    public class Circle : IPrimitiveGeometry
-    {
-        public static Vector2 DefaultSize;
-        private static readonly Polygon DefaultPolygon = Polygon.Circle(DefaultSize.X, 8);
-
-        public Polygon Polygon = DefaultPolygon;
-        public Polygon DefiningGeometry => Polygon;
-    }
-
-
 
     public class Collider : Component
     {
-        [JsonProperty] Polygon polygon = new();
+        [JsonProperty] Polygon polygon = new Box().DefiningGeometry;
         public Polygon Polygon
         {
             get => polygon.OffsetBy(node.Position);
             set => polygon = new(value.vertices);
         }
-        [JsonProperty] [Field] public Vector2 scale = new(1,1);
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
+        
         [Field] public bool drawCollider = false;
         [Field] public bool drawNormals = false;
         [Field] public Pixel colliderPixel = Color.LimeGreen;
-        public Polygon GetUntransformedPolygon() => polygon;
-        [JsonProperty]public bool IsTrigger { get; internal set; } = false;
+        
+        [JsonProperty] public bool IsTrigger { get; internal set; } = false;
+        
         private BoundingBox2D? boundingBox;
         public BoundingBox2D BoundingBox
         {
@@ -68,6 +39,7 @@ namespace pixel_renderer
             }
         }
 
+        public Polygon GetUntransformedPolygon() => polygon;
         public override void OnDrawShapes()
         {
             if(drawCollider)
@@ -75,7 +47,6 @@ namespace pixel_renderer
             if(drawNormals)
                 DrawNormals();
         }
-
         public void DrawCollider()
         {
             var poly = Polygon;
@@ -86,7 +57,6 @@ namespace pixel_renderer
                 ShapeDrawer.DrawLine(poly.vertices[i], poly.vertices[nextIndex], colliderPixel);
             }
         }
-
         public void DrawNormals()
         {
             var poly = Polygon;
@@ -98,7 +68,6 @@ namespace pixel_renderer
                 ShapeDrawer.DrawLine(midpoint, midpoint + (poly.normals[i] * 10), Color.Blue);
             }
         }
-
         internal void SetVertices(Vector2[] vertices)
         {
             polygon = new Polygon(vertices);

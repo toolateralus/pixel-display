@@ -20,10 +20,10 @@ namespace pixel_renderer
             var hasCollider = node.TryGetComponent(out Collider col);
             if (!hasCollider) return;
 
-            if (node.Position.Y > Constants.PhysicsArea.Y - col.scale.Y)
-                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.Y - col.scale.Y);
-            if (node.Position.X > Constants.PhysicsArea.X - col.scale.X)
-                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.X - col.scale.X);
+            if (node.Position.Y > Constants.PhysicsArea.Y - col.Scale.Y)
+                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.Y - col.Scale.Y);
+            if (node.Position.X > Constants.PhysicsArea.X - col.Scale.X)
+                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.X - col.Scale.X);
             if (node.Position.X < 0)
                 node.Position = node.Position.WithValue(x: 0);
         }
@@ -40,17 +40,13 @@ namespace pixel_renderer
 
             foreach (var node in stage.nodes)
             {
-                var hasCollider = node.TryGetComponent(out Collider col);
+                var hasCollider = node.HasComponent<Collider>();
                 if (hasCollider)
                     quadTree.Insert(node);
             }
-
-          
             BoundingBox2D range = new BoundingBox2D(position, size);
-
             // Create a list to store the nodes found within the range
             List<Node> foundNodes = new List<Node>();
-
             // Query the quadtree with the range
             quadTree.Query(range, foundNodes);
 
@@ -86,6 +82,7 @@ namespace pixel_renderer
                 return;
 
             var bCol = B.GetComponent<Collider>();
+
             if (A.IsTrigger || bCol.IsTrigger) return;
 
             (Vector2 normal, float depth) = SATCollision.GetCollisionData(A.Polygon, bCol.Polygon);
@@ -120,16 +117,10 @@ namespace pixel_renderer
             A.Position += normal * depenetration;
             B.Position -= normal * depenetration;
 
-            float colSpeedA = Vector2.Dot(A.velocity, normal);
-            float colSpeedB = Vector2.Dot(B.velocity, normal);
+            ComputeImpulse(A, B, normal, depth);
+            
+            AttemptCallbacks(aCol, bCol);
 
-            float averageSpeed = (colSpeedA + colSpeedB) / 2f;
-
-            Vector2 impulseA = normal * (averageSpeed - colSpeedA);
-            Vector2 impulseB = normal * (averageSpeed - colSpeedB);
-
-            A.ApplyImpulse(impulseA);
-            B.ApplyImpulse(impulseB);
         }
         static void ComputeImpulse(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {

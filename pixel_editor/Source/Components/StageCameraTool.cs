@@ -10,8 +10,12 @@ namespace pixel_editor
 
     public class StageCameraTool : Tool
     {
-        private const Key FollowNodeKey = Key.LeftCtrl;
         private const Key StopFollowingNodeKey = Key.Escape;
+        /// <summary>
+        /// when held during a FocusNodeKey press, will follow.
+        /// </summary>
+        private const Key FollowModifier = Key.LeftCtrl;
+        private const Key FocusNodeKey = Key.F;
         public Camera camera;
         public Node? selected;
         private static bool followNode;
@@ -57,15 +61,17 @@ namespace pixel_editor
 
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
 
+            lock(cams)
             if (!cams.Any()) return;
 
-            bool selectNode = Input.Get(Key.LeftShift) && Input.Get(Key.Space);
+            bool selectNode = Input.Get(FocusNodeKey);
+
             if (!selectNode)
                 return;
 
             cams.First().node.Position = selected.Position;
 
-            if (!Input.Get(FollowNodeKey))
+            if (!Input.Get(FollowModifier))
                 return;
 
             followNode = false; 
@@ -87,7 +93,7 @@ namespace pixel_editor
 
             cams.First().node.Position = node.Position;
 
-            if (!Input.Get(FollowNodeKey))
+            if (!Input.Get(FollowModifier))
                 return;
 
             followNode = false; 

@@ -14,13 +14,13 @@ namespace pixel_renderer
     {
         #region Json Constructor
         [JsonConstructor]
-        public Node(bool Enabled, Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vector2 position, Vector2 scale, Node? parentNode, Dictionary<Vector2, Node> children, string nodeUUID)
+        public Node(bool Enabled, Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vector2 position, Vector2 Scale, Node? parentNode, Dictionary<Vector2, Node> children, string nodeUUID)
         {
             this.ParentStage = parentStage;
             Name = name;
             _uuid = nodeUUID;
             this.Position = position;
-            this.scale = scale;
+            this.Scale = Scale;
             this.parent = parentNode;
             this.children = children;
             this.tag = tag;
@@ -37,10 +37,10 @@ namespace pixel_renderer
 
         public Node(string name) : this() => Name = name;
         private protected Node Clone() { return (Node)MemberwiseClone(); }
-        public Node(string name, Vector2 pos, Vector2 scale) : this(name)
+        public Node(string name, Vector2 pos, Vector2 Scale) : this(name)
         {
             Position = pos;
-            this.scale = scale;
+            this.Scale = Scale;
         }
 
         #endregion
@@ -76,7 +76,6 @@ namespace pixel_renderer
 
         internal protected int hiearchyLevel = 0; 
 
-        public float rotation = 0;  
 
         Rigidbody? rb;
         public void Move(Vector2 destination)
@@ -85,8 +84,6 @@ namespace pixel_renderer
         }
         [JsonProperty] public Vector2 localPos = new();
         
-        [JsonProperty] public Vector2 scale = new();
-
         [JsonProperty] public Node? parent;
        
         [JsonProperty] public Dictionary<Vector2, Node> children = new();
@@ -110,7 +107,7 @@ namespace pixel_renderer
             set
             {
                 Transform.Translation = value;
-                //UpdateTransform(this); 
+                UpdateTransform(this); 
             }
         }
         [JsonProperty]
@@ -125,7 +122,7 @@ namespace pixel_renderer
                 Transform.M12 = sin;
                 Transform.M21 = -sin;
                 Transform.M22 = cos;
-                //UpdateTransform(this);
+                UpdateTransform(this);
             }
         }
         [JsonProperty]
@@ -141,7 +138,7 @@ namespace pixel_renderer
             {
                 Transform.M11 = value.X;
                 Transform.M22 = value.Y;
-                //UpdateTransform(this);
+                UpdateTransform(this);
             }
         }
      
@@ -154,8 +151,8 @@ namespace pixel_renderer
                 //UpdateTransform(node.parent); 
             }
 
-            var rotationMatrix = Matrix3x2.CreateRotation(node.rotation);
-            var scaleMatrix = Matrix3x2.CreateScale(node.scale);
+            var rotationMatrix = Matrix3x2.CreateRotation(node.Rotation);
+            var scaleMatrix = Matrix3x2.CreateScale(node.Scale);
             var translationMatrix = Matrix3x2.CreateTranslation(node.Position);
             
             var transformMatrix = parentMatrix * rotationMatrix * scaleMatrix * translationMatrix;
