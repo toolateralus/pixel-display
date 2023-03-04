@@ -24,7 +24,7 @@ namespace pixel_renderer
         {
             get
             {
-                if (size.X != width|| size.Y != height)
+                if (size.X != width || size.Y != height)
                     size = new(width, height);
                 return size;
             }
@@ -47,21 +47,22 @@ namespace pixel_renderer
         {
             width = pixels.GetLength(0);
             height = pixels.GetLength(1);
-            byte[] byteData = CBit.ByteArrayFromColorArray(pixels);
+            byte[] byteData = CBit.ByteFromPixel(pixels);
             data = byteData;
         }
         public JImage(Bitmap bmpInput)
         {
             Pixel[,] pixels;
             lock (bmpInput)
-                pixels = CBit.PixelArrayFromBitmap(bmpInput);
+                pixels = CBit.PixelFromBitmap(bmpInput);
 
             width = pixels.GetLength(0);
             height = pixels.GetLength(1);
 
-            byte[] byteData = CBit.ByteArrayFromColorArray(pixels);
+            byte[] byteData = CBit.ByteFromPixel(pixels);
 
             data = byteData;
+            bmpInput.Dispose();
         }
 
         public void SetPixel(int x, int y, Pixel color)
@@ -75,7 +76,7 @@ namespace pixel_renderer
             data[position + 2] = color.g;
             data[position + 3] = color.b;
         }
-        public  Pixel GetPixel(int x, int y)
+        public Pixel GetPixel(int x, int y)
         {
             if (data.Length == 0)
                 return Pixel.Black;
@@ -89,6 +90,6 @@ namespace pixel_renderer
             return col;
         }
 
-      
+
     }
 }

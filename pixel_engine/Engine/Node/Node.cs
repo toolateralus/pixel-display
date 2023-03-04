@@ -384,10 +384,19 @@ namespace pixel_renderer
 
             if (stage is null)
                 throw new EngineInstanceException("Stage was not initialized during a clone or instantiate call.");
+            clone.UUID = pixel_renderer.UUID.NewUUID();
+
+            stage.AddNode(clone);
 
             if (clone.ParentStage is null || clone.parentStage != stage)
-                clone.ParentStage = stage;
-         
+
+            clone.Awake();
+            return clone; 
+        }
+        internal static Node Instantiate(Node projectile, Vector2 position)
+        {
+            var clone = Instantiate(projectile);
+            clone.Position = position;
             return clone; 
         }
 

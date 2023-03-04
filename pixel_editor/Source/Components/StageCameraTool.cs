@@ -55,7 +55,8 @@ namespace pixel_editor
             if (selected == null)
                 return;
 
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
+
             if (!cams.Any()) return;
 
             bool selectNode = Input.Get(Key.LeftShift) && Input.Get(Key.Space);
@@ -97,14 +98,14 @@ namespace pixel_editor
             if (CMouse.MouseWheelDelta == 0)
                 return;
 
-            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
             if (!enumerable.Any()) return;
             enumerable.First().Size *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
         }
 
         private void TryMoveCamera()
         {
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
+            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
 
             if (!cams.Any())
                 return;

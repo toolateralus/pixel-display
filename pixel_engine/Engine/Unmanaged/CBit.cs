@@ -34,7 +34,7 @@ namespace pixel_renderer
             DeleteObject(bmd.Scan0);
 
         }
-        public static byte[] ByteArrayFromColorArray(Pixel[,] colorArray)
+        public static byte[] ByteFromPixel(Pixel[,] colorArray)
         {
             var width = colorArray.GetLength(0);
             var height = colorArray.GetLength(1);
@@ -55,7 +55,7 @@ namespace pixel_renderer
             return pixelData; 
         }
 
-        public static Pixel[,] PixelArrayFromBitmap(Bitmap bmp)
+        public static Pixel[,] PixelFromBitmap(Bitmap bmp, bool dispose = false)
         {
             lock (bmp)
             {
@@ -73,6 +73,8 @@ namespace pixel_renderer
                         colors[x, y] = bmp.GetPixel(x, y);
                     }
                 }
+                if(dispose)
+                    bmp.Dispose();
                 return colors;
             }
         }

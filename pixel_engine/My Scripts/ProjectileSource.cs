@@ -5,6 +5,7 @@ using System.Numerics;
 using System;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using pixel_renderer.Assets;
 
 namespace pixel_renderer
 {
@@ -24,7 +25,7 @@ namespace pixel_renderer
         public Node projectile = new(); 
 
         [Field]
-        public Vector2 aimDirection = new(1, 1);
+        public Vector2 aimDirection = new(1, -3);
 
         [Field]
         public float aimDistance = 30f;
@@ -57,35 +58,37 @@ namespace pixel_renderer
 
         private void Fire()
         {
-            var proj = Node.Instantiate(this.projectile);
-            proj.Position = new(5,5);
+            var proj = Node.Instantiate(this.projectile, Position);
+            
             if (proj.TryGetComponent<Sprite>(out var sprite))
             {
 
+                var meta = AssetLibrary.FetchMetaRelative("\\Assets\\other\\ball.bmp");
+                if (meta != null)
+                {
+                    Runtime.Log("Texture set");
+                    sprite.texture.SetImage(meta.Path);
+                    sprite.Transform = Matrix3x2.CreateScale(25);
+                    sprite.dirty = true;
+                }
 
             }
             if (proj.TryGetComponent(out Rigidbody rb))
             {
-                rb?.ApplyImpulse(aimDirection / 10);
+                rb?.ApplyImpulse(new Vector2(5, 0) * 15);
                 return;
             }
-            else proj?.Destroy();
+            else
+            {
+                proj?.Destroy();
+                Runtime.Log("Projectile discarded");
+            }
 
             if (proj.TryGetComponent(out Projectile projectile))
             {
                 projectile.sender = node;
                 projectile.hitRadius = 16; 
-            }
-
-            Task followNodeTask = new(async delegate 
-            {
-                FocusNodeEvent e = new(proj);
-                Runtime.RaiseInspectorEvent(e);
-                await Task.Delay(1000 * 5);
-                proj?.Destroy();
-            });
-
-            followNodeTask.Start(); 
+            }   
         }
 
         private void Reload()

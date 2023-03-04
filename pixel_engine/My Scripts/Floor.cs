@@ -6,8 +6,7 @@ namespace pixel_renderer
     {
         public const float height = 2500;
         public const float width = 5500;
-        Vector2 zero = Vector2.Zero;
-        private static Vector2 startPosition = new(-(width / 2), height);
+        private static Vector2 startPosition = new(-(width / 2), height / 2);
         private Polygon poly;
 
         public static Node Standard()

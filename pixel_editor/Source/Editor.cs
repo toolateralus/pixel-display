@@ -223,6 +223,9 @@ namespace pixel_editor
                 return; 
             }
 
+            if (consoleOutput.LineCount == Constants.ConsoleMaxLines)
+                Console.Clear(); 
+
             consoleOutput.Text += e.message + '\n';
             consoleOutput.ScrollToEnd();
         }

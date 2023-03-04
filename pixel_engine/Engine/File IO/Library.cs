@@ -37,7 +37,7 @@ namespace pixel_renderer.Assets
         {
             result = null;
             foreach(var asset in Current.Values)
-                if (asset.GetType() == typeof(T))
+                if (asset != null && asset.GetType() == typeof(T))
                 {
                     result = asset as T;
                     return true;

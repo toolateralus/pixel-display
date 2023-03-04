@@ -52,7 +52,7 @@ namespace pixel_renderer
 
                 Bitmap img = new(imgMetadata.Path);
 
-                var colors = CBit.PixelArrayFromBitmap(img);
+                var colors = CBit.PixelFromBitmap(img);
 
                 JImage image = new(colors);
 

@@ -23,7 +23,7 @@ namespace pixel_editor
                 return;
             selectedCollider.DrawCollider();
             selectedCollider.DrawNormals();
-            for (int i = 0; i < highlightedVertices.Count; i++)
+            for (int i = 0; i < highlightedVertices.Count - 1; i++)
             {
                 Vector2 vert = highlightedVertices[i];
                 ShapeDrawer.DrawCircle(vert, vertSize, Pixel.Green);
