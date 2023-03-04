@@ -61,7 +61,7 @@ namespace pixel_renderer
                 Image = new(imgData.Path);
             }
             jImage = new();
-            var colors = CBit.PixelArrayFromBitmap(Image);
+            var colors = CBit.PixelFromBitmap(Image);
             SetImage(colors);
         }
         public void SetImage(Vector2 size, byte[] data)
@@ -71,6 +71,10 @@ namespace pixel_renderer
         public void SetImage(JImage image)
         {
             jImage = image;
+        }
+        public void SetImage(string path)
+        {
+            jImage = new(new Bitmap(path));
         }
         public void SetImage(Pixel[,] colors)
         {

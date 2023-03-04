@@ -24,4 +24,12 @@ namespace pixel_renderer
             }
         }
     }
+    public class FocusNodeEvent : EditorEvent
+    {
+        public FocusNodeEvent(Node focused, string message = "$nolog", bool includeDateTime = false, bool clearConsole = false) : base(message, includeDateTime, clearConsole)
+        {
+            action = (e) => { };
+            args = new object[] { focused };
+        }
+    }
 }

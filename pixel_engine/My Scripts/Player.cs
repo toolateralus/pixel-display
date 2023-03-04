@@ -17,8 +17,8 @@ namespace pixel_renderer
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
-        [Field][JsonProperty] public float speed = 3;
-        [Field][JsonProperty] public float inputMagnitude = 1f;
+        [Field][JsonProperty] public float speed = 0.1f;
+        [Field][JsonProperty] public float inputMagnitude = 0.5f;
 
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
@@ -79,11 +79,19 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
-            
+
             if (!takingInput)
                 return;
 
-            var freezeButtonPressed = Get(Key.LeftShift);
+            if (isGrounded)
+                isGrounded = false;
+
+            Move(moveVector * 0.01f);
+            moveVector = Vector2.Zero;
+        }
+        public void FreezePlayer()
+        {
+            bool freezeButtonPressed = Get(Key.LeftShift);
 
             if (freezeButtonPressed && !freezeButtonPressedLastFrame)
                 thisPos = node.Position;
@@ -98,14 +106,7 @@ namespace pixel_renderer
 
                 node.Position = thisPos;
                 moveVector = Vector2.Zero;
-                return;
             }
-
-            if (isGrounded)
-                isGrounded = false;
-
-            Move(moveVector);
-            moveVector = Vector2.Zero;
         }
         private void DrawCircle()
         {
@@ -159,7 +160,7 @@ namespace pixel_renderer
             playerNode.AddComponent<Player>().takingInput = true;
 
             Sprite sprite = AddSprite(playerNode);
-
+            playerNode.AddComponent<ProjectileSource>(); 
             AddCollider(playerNode, sprite);
 
             return playerNode;
@@ -193,89 +194,6 @@ namespace pixel_renderer
                 var centroid = col.Polygon.centroid;
                 ShapeDrawer.DrawLine(poly.centroid, centroid, Color.LightCyan);
             }
-        }
-    }
-
-    public class ProjectileSource : Component
-    {
-        [Field]
-        public Key fireKey = Key.F,
-                   reloadKey = Key.R;
-        [Field]
-        public int ammoCt = 300, 
-                   magazineSize = 16,
-                   currentMag = 16;
-
-        const int initAmmoCt = 300;
-
-        [Field]
-        public Projectile projectile = new(); 
-
-        [Field]
-        public Vector2 aimDirection = new(1, 1);
-
-        [Field]
-        public float aimDistance = 30f;
-        private bool fired;
-
-        public override void Awake()
-        {
-            ammoCt = initAmmoCt; 
-          
-        }
-
-        public override void FixedUpdate(float delta)
-        {
-            if (fired)
-            {
-                if (Get(fireKey, InputEventType.KeyUp))
-                    fired = false;
-                return; 
-            }
-
-            if (Get(fireKey))
-                fired = true;
-
-            if (Get(reloadKey))
-                Reload();
-
-        }
-
-        private void Reload()
-        {
-            ammoCt -= magazineSize;
-            currentMag = magazineSize; 
-        }
-
-        public override void OnDrawShapes()
-        {
-            ShapeDrawer.DrawLine(Position, aimDirection * aimDistance, Color.Red);
-        }
-    }
-
-    public class Projectile : Component
-    {
-        public float hitRadius; 
-
-        public override void Awake()
-        {
-
-        }
-
-        public override void FixedUpdate(float delta)
-        {
-        }
-
-        public override void OnCollision(Collider collider)
-        {
-        }
-
-        public override void OnDrawShapes()
-        {
-        }
-
-        public override void OnTrigger(Collider other)
-        {
         }
     }
 }

@@ -36,7 +36,7 @@ namespace pixel_renderer
         }
 
         public Node(string name) : this() => Name = name;
-        public Node Clone() { return (Node)Clone(); }
+        private protected Node Clone() { return (Node)MemberwiseClone(); }
         public Node(string name, Vector2 pos, Vector2 scale) : this(name)
         {
             Position = pos;
@@ -46,10 +46,18 @@ namespace pixel_renderer
         #endregion
 
 
-
-
         [JsonProperty]
-        public Stage ParentStage { get; set; }
+        public Stage parentStage;
+        public Stage ParentStage 
+        {
+            get
+            { 
+                parentStage ??= Runtime.Current.GetStage();
+                return parentStage ?? throw new NullStageException();
+            } 
+            set => parentStage = value; 
+        }
+
 
         [JsonProperty]
         public bool Enabled { get { return _enabled; } set => _enabled = value; }
@@ -266,7 +274,7 @@ namespace pixel_renderer
         }
         
         public void SetActive(bool value) => _enabled = value;
-        public void Destroy() => ParentStage.nodes.Remove(this);
+        public void Destroy() => ParentStage?.nodes.Remove(this);
         public void OnTrigger(Collider otherBody)
         {
             lock (Components)
@@ -366,6 +374,30 @@ namespace pixel_renderer
                 return false;
             }
             return true;
+        }
+
+        internal static Node Instantiate(Node projectile)
+        {
+            
+            var clone = projectile.Clone();
+            var stage = Runtime.Current.GetStage();
+
+            if (stage is null)
+                throw new EngineInstanceException("Stage was not initialized during a clone or instantiate call.");
+            clone.UUID = pixel_renderer.UUID.NewUUID();
+
+            stage.AddNode(clone);
+
+            if (clone.ParentStage is null || clone.parentStage != stage)
+
+            clone.Awake();
+            return clone; 
+        }
+        internal static Node Instantiate(Node projectile, Vector2 position)
+        {
+            var clone = Instantiate(projectile);
+            clone.Position = position;
+            return clone; 
         }
 
         public static Node New => new("New Node", Vector2.Zero, Vector2.One);

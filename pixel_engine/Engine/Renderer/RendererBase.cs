@@ -211,7 +211,7 @@
                     if (framePos.X >= drawArea.max.X)
                     {
                         framePos.X = drawArea.min.X;
-                        framePos.Y++;
+                        framePos.Y++; 
                     }
                     continue;
                 }
@@ -242,7 +242,7 @@
                     continue;
                 }
 
-                var colorPos  = spriteViewportPos.Wrapped(Vector2.One) * sprite.colorDataSize;
+                var colorPos = spriteViewportPos.Wrapped(Vector2.One) * sprite.colorDataSize;
 
                 Pixel color = new Pixel();
 

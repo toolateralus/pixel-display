@@ -159,7 +159,7 @@ namespace pixel_renderer
                     }
                     else
                     {
-                        Pixel[,] colorArray1 = CBit.PixelArrayFromBitmap(texture.Image);
+                        Pixel[,] colorArray1 = CBit.PixelFromBitmap(texture.Image);
                         texture.SetImage(colorArray1);
                     }
                     break;
@@ -175,7 +175,7 @@ namespace pixel_renderer
         public void DrawSquare(Vector2 size, Pixel color)
         {
             var cols = CBit.SolidColorSquare(size, color);
-            var bytes = CBit.ByteArrayFromColorArray(cols);
+            var bytes = CBit.ByteFromPixel(cols);
             SetColorData(new(cols.GetLength(0), cols.GetLength(1)), bytes);  
         }
         public Vector2 ViewportToColorPos(Vector2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
