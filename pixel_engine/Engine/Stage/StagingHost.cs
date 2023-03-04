@@ -20,11 +20,13 @@ namespace pixel_renderer
             {
                 if (node == lastSelected) continue;
 
-                bool hasSprite = !node.TryGetComponent(out Sprite sprite);
-                if (hasSprite) continue;
+                if (node.GetComponent<Sprite>() is not Sprite sprite)
+                    continue;
 
-                bool isWithin = clickPosition.IsWithin(node.Position, node.Position + sprite.size);
-                if (!isWithin) continue;
+                BoundingBox2D box = new();
+                box.ExpandToAll(sprite.GetCorners());
+                if (!clickPosition.IsWithin(box.min, box.max))
+                    continue;
 
                 result = node;
 

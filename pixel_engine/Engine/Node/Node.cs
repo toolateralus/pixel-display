@@ -103,7 +103,7 @@ namespace pixel_renderer
             set
             {
                 Transform.Translation = value;
-                UpdateTransform(this); 
+                //UpdateTransform(this); 
             }
         }
         public float Rotation
@@ -117,7 +117,7 @@ namespace pixel_renderer
                 Transform.M12 = sin;
                 Transform.M21 = -sin;
                 Transform.M22 = cos;
-                UpdateTransform(this);
+                //UpdateTransform(this);
             }
         }
         public Vector2 Scale
@@ -132,7 +132,7 @@ namespace pixel_renderer
             {
                 Transform.M11 = value.X;
                 Transform.M22 = value.Y;
-                UpdateTransform(this);
+                //UpdateTransform(this);
             }
         }
      
@@ -142,7 +142,7 @@ namespace pixel_renderer
             if (node.parent != null)
             {
                 parentMatrix = node.parent.Transform; 
-                UpdateTransform(node.parent); 
+                //UpdateTransform(node.parent); 
             }
 
             var rotationMatrix = Matrix3x2.CreateRotation(node.rotation);

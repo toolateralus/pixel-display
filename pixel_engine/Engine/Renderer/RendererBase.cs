@@ -196,9 +196,11 @@
             };
 
             foreach (Vector2 corner in camCorners) camBoundingBox.ExpandTo(corner);
-
+            var scale = camBoundingBox.max - camBoundingBox.min;
             sprite.Transform.Translation = camBoundingBox.min;
-            sprite.scale = camBoundingBox.max - camBoundingBox.min;
+            sprite.scale = scale;
+            sprite.Transform.M11 = scale.X;
+            sprite.Transform.M22 = scale.Y;
             sprite.viewportScale = sprite.scale / baseImageSize;
 
             sprite.viewportScale.MakeDivideSafe();
@@ -216,6 +218,9 @@
         {
             Vector2 framePos = drawArea.min;
 
+            drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
+            drawArea.max = Vector2.Min(resolution, drawArea.max);
+
             // Get the sprite's transform matrix
             Matrix3x2 transform = sprite.Transform;
 
@@ -223,17 +228,6 @@
             {
                 float x = framePos.X;
                 float y = framePos.Y;
-
-                if (!IsWithinMaxExclusive(x, y, fZero, resolution.X))
-                {
-                    framePos.X++;
-                    if (framePos.X >= drawArea.max.X)
-                    {
-                        framePos.X = drawArea.min.X;
-                        framePos.Y++;
-                    }
-                    continue;
-                }
 
                 if (sprite.camDistance <= cam.zBuffer[(int)x, (int)y])
                 {
@@ -246,7 +240,7 @@
                     continue;
                 }
 
-                Vector2 camViewport = cam.ScreenToCamViewport(new Vector2(x, y) / resolution);
+                Vector2 camViewport = cam.ScreenToCamViewport(framePos / resolution);
 
                 if (!IsWithinMaxExclusive(camViewport.X, camViewport.Y, fZero, fOne))
                 {
@@ -260,10 +254,6 @@
                 }
 
                 Vector2 spriteViewportPos = cam.ViewportToSpriteViewport(sprite, camViewport);
-
-                // Transform the sprite viewport position using the transform matrix
-                spriteViewportPos = Vector2.Transform(spriteViewportPos, transform);
-
 
                 if (!IsWithinMaxExclusive(spriteViewportPos.X, spriteViewportPos.Y, fZero, fOne))
                 {

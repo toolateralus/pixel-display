@@ -81,13 +81,13 @@
 
             List<int> bucketsObjIsIn = new();
 
-            Vector2 min = new Vector2(
-                obj.Position.X,
-                obj.Position.Y);
+            BoundingBox2D box = new();
 
-            Vector2 max = new Vector2(
-                obj.Position.X + sprite.size.X,
-                obj.Position.Y + sprite.size.Y);
+            box.ExpandToAll(sprite.GetCorners());
+
+            Vector2 min = box.min;
+
+            Vector2 max = box.max;
 
             float width = Constants.ScreenH / cellSize;
 
