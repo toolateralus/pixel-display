@@ -130,8 +130,7 @@ namespace pixel_renderer
                 var node = nodes[i];
                 if (node.GetComponent<Sprite>() is not Sprite sprite)
                     continue;
-                BoundingBox2D box = new();
-                box.ExpandToAll(sprite.GetCorners());
+                BoundingBox2D box = new(sprite.GetCorners());
                 if (!position.IsWithin(box.min, box.max))
                     continue;
                 outNodes.Add(node);

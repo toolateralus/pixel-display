@@ -74,6 +74,13 @@ namespace pixel_renderer
             this.min = existing.min;
             this.max = existing.max;
         }
+        public BoundingBox2D(Vector2[] expandToAll)
+        {
+            this.min = expandToAll[0];
+            this.max = expandToAll[0];
+            for(int i = 1; i < expandToAll.Length; i++)
+                ExpandTo(expandToAll[i]);
+        }
         public void ExpandTo(Vector2 point)
         {
             min.X = Math.Min(point.X, min.X);
@@ -85,12 +92,6 @@ namespace pixel_renderer
         {
             return (max.X >= other.min.X) && (min.X <= other.max.X) &&
                    (max.Y >= other.min.Y) && (min.Y <= other.max.Y);
-        }
-
-        internal void ExpandToAll(Vector2[] vector2s)
-        {
-            foreach(Vector2 v in vector2s)
-                ExpandTo(v);
         }
     }
 }

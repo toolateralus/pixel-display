@@ -59,9 +59,9 @@ namespace pixel_renderer
             Transform = sprite.Transform;
             scale = sprite.Scale;
         }
-        public Vector2 ViewportToColorPos(Vector2 spriteViewport) => 
+        public Vector2 LocalToColorPosition(Vector2 spriteViewport) => 
             ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
-        internal Vector2 GlobalToViewport(Vector2 global)
+        internal Vector2 GlobalToLocal(Vector2 global)
         {
             Matrix3x2.Invert(Transform, out var inverted);
             return Vector2.Transform(global, inverted);
@@ -71,6 +71,23 @@ namespace pixel_renderer
         {
             image = new(size, data);
             colorDataSize = new(size.X, size.Y);
+        }
+        public Vector2[] GetCorners()
+        {
+            Vector2 topLeft = Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform);
+            Vector2 topRight = Vector2.Transform(new Vector2(0.5f, -0.5f), Transform);
+            Vector2 bottomRight = Vector2.Transform(new Vector2(0.5f, 0.5f), Transform);
+            Vector2 bottomLeft = Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform);
+
+            var vertices = new Vector2[]
+            {
+                    topLeft,
+                    topRight,
+                    bottomRight,
+                    bottomLeft,
+            };
+
+            return vertices;
         }
         public SpriteInfo() { }
       
