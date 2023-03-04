@@ -130,10 +130,10 @@ namespace pixel_renderer
 
             if (velAlongNormal > 0) return;
 
-            float e = MathF.Min(a.restitution, b.restitution);
-            float j = -(1 + e) * velAlongNormal / (a.invMass + b.invMass);
+            float minRestitution = MathF.Min(a.restitution, b.restitution);
+            float force = -(1 + minRestitution) * velAlongNormal / (a.invMass + b.invMass);
 
-            Vector2 impulse = j * normal;
+            Vector2 impulse = force * normal;
             a.ApplyImpulse(-impulse);
             b.ApplyImpulse(impulse);
 
