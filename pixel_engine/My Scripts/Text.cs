@@ -57,6 +57,10 @@ namespace pixel_renderer
 
         private TextureFiltering filtering = TextureFiltering.Point;
 
+        [Field]
+        [JsonProperty]
+        private string textureName = "Assets\\other\\ball.bmp";
+
         private JImage LitColorData
         {
             get
@@ -175,7 +179,15 @@ namespace pixel_renderer
         }
        
 
+        
+        [Method]
+        public void TrySetTextureFromString()
+        {
+            if (AssetLibrary.FetchMetaRelative(textureName) is Metadata meta)
+                texture.SetImage(meta.Path);
 
+            Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
+        }
         public override void OnDrawShapes()
         {
             if (selected_by_editor)

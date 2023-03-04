@@ -149,5 +149,10 @@ namespace pixel_renderer.Assets
 
             return library;
         }
+
+        internal static Metadata FetchMeta(object textureName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

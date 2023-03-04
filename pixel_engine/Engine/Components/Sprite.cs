@@ -105,10 +105,8 @@ namespace pixel_renderer
         public void TrySetTextureFromString()
         {
             if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
-            {
-                texture = new();
+                texture.SetImage(meta.Path);
 
-            }
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
         [Method]
