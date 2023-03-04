@@ -12,11 +12,10 @@ namespace pixel_editor
 {
     internal class PolygonEditorTool : Tool
     {
-        List<Vector2> highlightedVertices = new();
         Collider? selectedCollider;
-        const float highlightDistance = 2;
-        int selectedVertIndex = -1;
-        float vertSize = 2;
+        const float highlightDistance = 4;
+        int grabbedVertexIndex = -1;
+        Vector2? newVertexTarget;
         public override void Awake() { }
         public override void OnDrawShapes()
         {
@@ -24,87 +23,73 @@ namespace pixel_editor
                 return;
             selectedCollider.DrawCollider();
             selectedCollider.DrawNormals();
-            for (int i = 0; i < highlightedVertices.Count - 1; i++)
+            Polygon poly = selectedCollider.Polygon;
+            for (int i = 0; i < poly.vertices.Length; i++)
             {
-                Vector2 vert = highlightedVertices[i];
-                ShapeDrawer.DrawCircle(vert, vertSize, Pixel.Green);
+                Vector2 vert = poly.vertices[i];
+                if (i == grabbedVertexIndex)
+                    ShapeDrawer.DrawCircle(vert, highlightDistance, Pixel.Green);
+                else
+                    ShapeDrawer.DrawCircle(vert, highlightDistance / 2, Pixel.Green);
             }
+            if (newVertexTarget != null)
+                ShapeDrawer.DrawCircle((Vector2)newVertexTarget, highlightDistance / 2, Pixel.Green);
         }
 
         public override void Update(float delta)
         {
-            highlightedVertices.Clear();
+            // not editing
+            // targeting (new vertex, existing, none)
+            // grabbing vertex
             selectedCollider = GetSelectedCollider();
             if (selectedCollider == null)
                 return;
-            Vector2[] vertices = selectedCollider.Polygon.vertices;
-            if (vertices.Length == 0)
+            var localPoly = selectedCollider.GetUntransformedPolygon();
+            Vector2 mPosLocal = CMouse.GlobalPosition.Transformed(selectedCollider.Transform.Inverted());
+            if (grabbedVertexIndex != -1 && Input.Get(Key.V))
+            {
+                localPoly.MoveVertex(grabbedVertexIndex, mPosLocal);
                 return;
-            Vector2 mPos = CMouse.GlobalPosition;
-            Vector2 cPos = selectedCollider.node.Position;
-            if (selectedVertIndex == -1)
-            {
-                int closestVert = 0;
-                for(int i = 1; i < vertices.Length; i++)
-                    if (vertices[i].SqrDistanceFrom(mPos) <
-                        vertices[closestVert].SqrDistanceFrom(mPos))
-                        closestVert = i;
-                if (Input.Get(Key.V) &&
-                    vertices[closestVert].SqrDistanceFrom(mPos) < highlightDistance * highlightDistance)
-                {
-                    selectedVertIndex = closestVert;
-                    vertices[selectedVertIndex] = mPos;
-                    selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
-                    highlightedVertices.Add(vertices[selectedVertIndex]);
-                    vertSize = 4;
-                }
-                else
-                {
-                    vertSize = 2;
-                    int vertcount = vertices.Length;
-                    for (int i = 0; i < vertcount; i++)
-                    {
-                        Vector2 v1 = vertices[i];
-                        Vector2 direction = vertices[(i + 1) % vertcount] - v1;
-                        Vector2 dirNormalized = direction.Normalized();
-                        Vector2 mouseOffset = mPos - v1;
-                        float upDot = Vector2.Dot(dirNormalized, mouseOffset);
-                        float leftDot = Vector2.Dot(dirNormalized.Normal_LHS(), mouseOffset);
-                        if (upDot > 0 && upDot.Squared() < direction.SqrMagnitude()
-                            && leftDot.Squared() < highlightDistance)
-                        {
-                            Vector2 newVertex = dirNormalized * upDot + v1;
-                            highlightedVertices.Add(newVertex);
-                            if (Input.Get(Key.V))
-                            {
-                                List<Vector2> newVertices = vertices.ToList();
-                                newVertices.Insert(i + 1, newVertex);
-                                selectedCollider.Polygon = new Polygon(newVertices.ToArray()).OffsetBy(cPos * -1);
-                                selectedVertIndex = i + 1;
-                                vertSize = 4;
-                            }
-                            break;
-
-                        }
-                    }
-                    foreach (Vector2 vert in vertices)
-                        highlightedVertices.Add(vert);
-                }
             }
-            else
-            {
-                if (!Input.Get(Key.V))
+            int closestVertIndex = 0;
+            float closestSqrDistance = localPoly.vertices[0].SqrDistanceFrom(mPosLocal);
+            for (int i = 1; i < localPoly.vertices.Length; i++)
+                if (localPoly.vertices[i].SqrDistanceFrom(mPosLocal) < closestSqrDistance)
                 {
-                    vertSize = 2;
-                    foreach (Vector2 vert in vertices)
-                        highlightedVertices.Add(vert);
+                    closestSqrDistance = localPoly.vertices[i].SqrDistanceFrom(mPosLocal);
+                    closestVertIndex = i;
+                }
+            if (closestSqrDistance < highlightDistance.Squared())
+            {
+                grabbedVertexIndex = closestVertIndex;
+                if(Input.Get(Key.V))
+                    localPoly.MoveVertex(grabbedVertexIndex, mPosLocal);
+                return;
+            }
+            int vertcount = localPoly.vertices.Length;
+            for (int i = 0; i < vertcount; i++)
+            {
+                Vector2 v1 = localPoly.vertices[i];
+                Vector2 direction = localPoly.vertices[(i + 1) % vertcount] - v1;
+                Vector2 dirNormalized = direction.Normalized();
+                Vector2 mouseOffset = mPosLocal - v1;
+                float dot = Vector2.Dot(dirNormalized, mouseOffset);
+                if (dot > 0 && dot.Squared() < direction.SqrMagnitude() &&
+                    mPosLocal.SqrDistanceFrom(direction * dot + v1) < highlightDistance.Squared())
+                {
+                    Vector2 newVertex = dirNormalized * dot + v1;
+                    if (Input.Get(Key.V))
+                    {
+                        localPoly.InsertVertex(i + 1, newVertex);
+                        grabbedVertexIndex = i + 1;
+                        return;
+                    }
+                    newVertexTarget = newVertex;
                     return;
                 }
-                vertices[selectedVertIndex] = mPos;
-                selectedCollider.Polygon = new Polygon(vertices).OffsetBy(cPos * -1);
-                highlightedVertices.Add(vertices[selectedVertIndex]);
-                vertSize = 4;
             }
+            grabbedVertexIndex = -1;
+            newVertexTarget = null;
         }
 
         Collider? GetSelectedCollider()
@@ -113,7 +98,7 @@ namespace pixel_editor
                 !Input.Get(Key.LeftCtrl) ||
                 !Input.Get(Key.LeftShift))
             {
-                selectedVertIndex = -1;
+                grabbedVertexIndex = -1;
                 return null;
             }
             return Editor.Current.LastSelected?.GetComponent<Collider>();

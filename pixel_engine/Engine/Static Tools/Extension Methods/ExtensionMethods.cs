@@ -133,6 +133,12 @@ namespace pixel_renderer
         #endregion
         #region Vectors
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 Transformed(this Vector2 v, Matrix3x2 matrix) =>
+            Vector2.Transform(v, matrix);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(this ref Vector2 v, Matrix3x2 matrix) =>
+            v = Vector2.Transform(v, matrix);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MakeDivideSafe(this ref Vector2 v)
         { 
             v.X = v.X.GetDivideSafe();
@@ -185,6 +191,19 @@ namespace pixel_renderer
                 v.Y++;
                 v.X = xMin;
             }
+        }
+        #endregion
+        #region Matrices
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x2 Inverted(this Matrix3x2 matrix)
+        {
+            Matrix3x2.Invert(matrix, out matrix);
+            return matrix;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Invert(this ref Matrix3x2 matrix)
+        {
+            Matrix3x2.Invert(matrix, out matrix);
         }
         #endregion
         #region Strings

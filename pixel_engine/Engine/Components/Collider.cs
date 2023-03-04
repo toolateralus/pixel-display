@@ -14,11 +14,11 @@ namespace pixel_renderer
 
     public class Collider : Component
     {
-        [JsonProperty] Polygon polygon = new Box().DefiningGeometry;
+        [JsonProperty] Polygon untransformedPolygon = new Box().DefiningGeometry;
         public Polygon Polygon
         {
-            get => polygon.OffsetBy(node.Position);
-            set => polygon = new(value.vertices);
+            get => untransformedPolygon.Transform(Transform);
+            set => untransformedPolygon = new(value.vertices);
         }
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
         
@@ -33,13 +33,13 @@ namespace pixel_renderer
         {
             get
             {
-                if (boundingBox == null && polygon?.vertices != null)
-                    boundingBox = Polygon.GetBoundingBox(polygon.vertices);
+                if (boundingBox == null && Polygon.vertices != null)
+                    boundingBox = Polygon.GetBoundingBox(Polygon.vertices);
                 return boundingBox ?? default;
             }
         }
 
-        public Polygon GetUntransformedPolygon() => polygon;
+        public Polygon GetUntransformedPolygon() => untransformedPolygon;
         public override void OnDrawShapes()
         {
             if(drawCollider)
@@ -70,7 +70,7 @@ namespace pixel_renderer
         }
         internal void SetVertices(Vector2[] vertices)
         {
-            polygon = new Polygon(vertices);
+            untransformedPolygon = new Polygon(vertices);
             boundingBox = null; 
         }
     }

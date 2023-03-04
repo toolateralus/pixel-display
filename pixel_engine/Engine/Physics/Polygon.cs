@@ -44,6 +44,29 @@ namespace pixel_renderer
             this.vertices = vertices;
 
             //calc normals and centroid
+            RecalculateNormals();
+
+            //calc uvs (simple)
+            RecalculateUVs();
+        }
+
+        private void RecalculateUVs()
+        {
+            int vertCount = vertices.Length;
+            uv = new Vector2[vertCount];
+            BoundingBox2D uvBox = GetBoundingBox(vertices);
+            Vector2 bbSize = uvBox.max - uvBox.min - Vector2.One;
+            if (bbSize.X == 0 || bbSize.Y == 0)
+                return;
+            for (int i = 0; i < vertCount; i++)
+            {
+                uv[i] = (vertices[i] - uvBox.min) / bbSize;
+            }
+        }
+
+        private void RecalculateNormals()
+        {
+            int vertCount = vertices.Length;
             normals = new Vector2[vertCount];
             centroid = Vector2.Zero;
             for (int i = 0; i < vertCount; i++)
@@ -54,17 +77,6 @@ namespace pixel_renderer
                 centroid += vert1;
             }
             centroid /= vertCount;
-
-            //calc uvs (simple)
-            uv = new Vector2[vertCount];
-            BoundingBox2D uvBox = GetBoundingBox(vertices);
-            Vector2 bbSize = uvBox.max - uvBox.min - Vector2.One;
-            if (bbSize.X == 0 || bbSize.Y == 0)
-                return;
-            for (int i = 0; i < vertCount; i++)
-            {
-                uv[i] = (vertices[i] - uvBox.min) / bbSize;
-            }
         }
 
         private static void CheckWindingOrder(Vector2[] vertices)
@@ -119,6 +131,37 @@ namespace pixel_renderer
             Vector2 left = new(width, height); 
 
             return new(new Vector2[] { top, right, left});
+        }
+        public Polygon Transform(Matrix3x2 matrix)
+        {
+            Polygon polygon = new(this);
+            int vertCount = polygon.vertices.Length;
+            for (int i = 0; i < vertCount; i++)
+                polygon.vertices[i] = Vector2.Transform(polygon.vertices[i], matrix);
+            polygon.centroid = Vector2.Transform(polygon.centroid, matrix);
+            return polygon;
+        }
+        public void MoveVertex(int index, Vector2 moveTo)
+        {
+            vertices[index] = moveTo;
+            RecalculateNormals();
+            RecalculateUVs();
+        }
+        public void InsertVertex(int index, Vector2 vertex)
+        {
+            List<Vector2> verts = vertices.ToList();
+            verts.Insert(index, vertex);
+            vertices = verts.ToArray();
+            RecalculateNormals();
+            RecalculateUVs();
+        }
+        public void RemoveVertexAt(int index)
+        {
+            List<Vector2> verts = vertices.ToList();
+            verts.RemoveAt(index);
+            vertices = verts.ToArray();
+            RecalculateNormals();
+            RecalculateUVs();
         }
         public static Polygon Circle(float radius, int subdivisions)
         {
