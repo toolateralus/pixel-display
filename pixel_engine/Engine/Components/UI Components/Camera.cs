@@ -19,7 +19,7 @@ namespace pixel_renderer
         public Vector2 ScreenViewportToGlobal(Vector2 screenViewport) => LocalToGlobal(ScreenViewportToLocal(screenViewport));
         public Vector2 LocalToSpriteViewport(Sprite sprite, Vector2 local) =>
             sprite.GlobalToViewport(LocalToGlobal(local));
-        public Vector2 LocalToSpriteViewport(SpriteInfo sprite, Vector2 local) =>
+        public Vector2 LocalToSpriteLocal(SpriteInfo sprite, Vector2 local) =>
             sprite.GlobalToLocal(LocalToGlobal(local));
         public static Camera? First => Runtime.Current.GetStage()?.GetAllComponents<Camera>().First();
     }
