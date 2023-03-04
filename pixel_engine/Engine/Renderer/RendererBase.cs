@@ -276,7 +276,7 @@
                     continue;
                 }
 
-                var colorPos  = spriteViewportPos.Wrapped(Vector2.One) * sprite.colorDataSize;
+                var colorPos = spriteViewportPos.Wrapped(Vector2.One) * sprite.colorDataSize;
 
                 Pixel color = new Pixel();
 

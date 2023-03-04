@@ -170,16 +170,25 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
-             return Application.Current.Dispatcher.Invoke(() => {
-                var input_value = type switch
+            try
+            {
+                return Application.Current.Dispatcher.Invoke(() =>
                 {
-                    InputEventType.KeyDown => Keyboard.IsKeyDown(key),
-                    InputEventType.KeyUp => Keyboard.IsKeyUp(key),
-                    InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
-                    _ => false,
-                };
-                return input_value;
-            });
+                    var input_value = type switch
+                    {
+                        InputEventType.KeyDown => Keyboard.IsKeyDown(key),
+                        InputEventType.KeyUp => Keyboard.IsKeyUp(key),
+                        InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
+                        _ => false,
+                    };
+                    return input_value;
+                });
+            }
+            catch(Exception e)
+            {
+                Runtime.Log(e.Message);
+                return false; 
+            }
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(ref Key key, InputEventType type = InputEventType.KeyDown)

@@ -1,4 +1,6 @@
 ﻿using pixel_renderer;
+using System;
+using System.Windows.Input;
 
 namespace pixel_editor
 {
@@ -6,14 +8,16 @@ namespace pixel_editor
     {
         public override void Awake()
         {
-            Editor.Current.image.MouseLeftButtonDown += delegate
-            {
-                TryClickNodeOnScreen(out var x);
-                Editor.Current.LastSelected = x;
-            };
+            Editor.Current.image.MouseLeftButtonDown += Click;
         }
 
-        private bool TryClickNodeOnScreen(out Node? result)
+        private void Click(object sender, MouseEventArgs args)
+        {
+            TryClickNodeOnScreen(out var x);
+            Editor.Current.LastSelected = x;
+        }
+
+        internal static bool TryClickNodeOnScreen(out Node? result)
         {
             Editor.Current.Inspector?.DeselectNode();
             result = null;

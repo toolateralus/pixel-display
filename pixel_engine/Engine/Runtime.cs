@@ -106,10 +106,11 @@ namespace pixel_renderer
                     if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
                         continue;
 
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
-                    });
+                    Task.Run(()=>
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
+                    }));
                 }
             }
         }

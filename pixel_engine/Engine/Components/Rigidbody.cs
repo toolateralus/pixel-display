@@ -42,6 +42,20 @@ namespace pixel_renderer
         {
             velocity += impulse * invMass;
         }
+        public static Node Standard(string v = "Rigidbody Node ")
+        {
+            Node node = Node.New;
+            string tag = $"{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}{JRandom.Hexadecimal()}";
+            node.Name = $"{v} {tag}";
+
+            Rigidbody rb = node.AddComponent<Rigidbody>();
+            Collider col = node.AddComponent<Collider>();
+            Sprite sprite = node.AddComponent<Sprite>();
+            col.SetVertices(sprite.GetVertices());
+            //sprite.color = JRandom.Color(aMin: 128);
+            col.IsTrigger = false;
+            return node;
+        }
         public static Node Standard()
         {
             Node node = Node.New;
@@ -56,6 +70,7 @@ namespace pixel_renderer
             col.IsTrigger = false;
             return node;
         }
+
         public static Node StaticBody()
         {
             Node node = Rigidbody.Standard();

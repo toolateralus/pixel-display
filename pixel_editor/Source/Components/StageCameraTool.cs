@@ -6,14 +6,19 @@ using System.Windows.Input;
 
 namespace pixel_editor
 {
+    public enum StageCameraState : byte { Following, Idle, Inactive};
+
     public class StageCameraTool : Tool
     {
+        private const Key FollowNodeKey = Key.LeftCtrl;
+        private const Key StopFollowingNodeKey = Key.Escape;
         public Camera camera;
         public Node? selected; 
-        private bool followNode = false;
+        public static StageCameraState State { get; private set;}
         
         public override void Awake()
         {
+
         }
 
         public override void Update(float delta)
@@ -27,15 +32,15 @@ namespace pixel_editor
 
         private void TryFollowNode()
         {
-            if (selected is null || !followNode)
+            if (selected is null || State == StageCameraState.Idle)
                 return;
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any())
                 return;
             cams.First().node.Position = selected.Position;
-            if (!Input.Get(Key.Escape))
+            if (!Input.Get(StopFollowingNodeKey))
                 return;
-            followNode = false;
+            State = 0;
         }
 
         private void TryFocusNode()
@@ -44,12 +49,38 @@ namespace pixel_editor
                 return;
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             if (!cams.Any()) return;
-            if (!Input.Get(Key.F))
+
+            bool selectNode = Input.Get(Key.LeftShift) && Input.Get(Key.Space);
+            if (!selectNode)
                 return;
+
             cams.First().node.Position = selected.Position;
-            if (!Input.Get(Key.LeftShift))
+
+            if (!Input.Get(FollowNodeKey))
                 return;
-            followNode = true;
+            State = 0; 
+        }
+        public static void TryFocusNode(Node node)
+        {
+            if (node == null)
+                return;
+            
+            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
+
+            if (!cams.Any()) 
+                return;
+
+            bool selectNode = Input.Get(Key.LeftShift) && Input.Get(Key.Space);
+
+            if (!selectNode)
+                return;
+
+            cams.First().node.Position = node.Position;
+
+            if (!Input.Get(FollowNodeKey))
+                return;
+
+            State = 0; 
         }
 
         private void TryZoomCamera()
@@ -71,7 +102,7 @@ namespace pixel_editor
 
             if (CMouse.Right)
             {
-                followNode = false;
+                State = StageCameraState.Idle; 
                 cams.First().node.Position += CMouse.Delta * Constants.MouseSensitivity;
             }
 

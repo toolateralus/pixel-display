@@ -20,12 +20,14 @@ namespace pixel_editor
         {
             var selected = Editor.Current.LastSelected;
 
+            lock(Editor.Current.ActivelySelected)
             switch (Editor.Current.ActivelySelected.Count)
             {
                 case > 0 when selected == null:
                     {
-                        foreach (var x in Editor.Current.ActivelySelected)
+                        for (int i = 0; i < Editor.Current.ActivelySelected.Count; i++)
                         {
+                            Node? x = Editor.Current.ActivelySelected[i];
                             if (!x.TryGetComponent<Collider>(out var c)) continue;
                             c.drawCollider = false;
                             c.drawNormals = false;

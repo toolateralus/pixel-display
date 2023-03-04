@@ -210,7 +210,17 @@ namespace pixel_editor
         protected internal void EditorEvent(EditorEvent e)
         {
             e.action?.Invoke(e.args);
-            if (e.message is "" || e.message.Contains("$nolog")) return;
+            if (e.message is "" || e.message.Contains("$nolog"))
+            {
+                if (e is FocusNodeEvent nodeEvent && nodeEvent.args.First() is Node node)
+                {
+                    Current.ActivelySelected.Add(node);
+                    Current.LastSelected = node;
+                    Inspector.DeselectNode(); 
+                    Inspector.SelectNode(node);
+                }
+                return; 
+            }
 
             consoleOutput.Text += e.message + '\n';
             consoleOutput.ScrollToEnd();
