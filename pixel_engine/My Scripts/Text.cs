@@ -274,6 +274,14 @@ namespace pixel_renderer
                 }
             }
         }
+
+        public override void Draw(ref Vector2 resolution, ref byte[] frame)
+        {
+            Runtime.GetRenderingData(out var host, out var info, out var renderer, out var baseImg);
+            Position = Vector2.Zero; 
+
+
+        }
     }
 
     public class Text : UIComponent
@@ -320,7 +328,9 @@ namespace pixel_renderer
                 node.Position = Position + Vector2.One * 15; 
         }
 
-
-
+        public override void Draw(ref Vector2 resolution, ref byte[] frame)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

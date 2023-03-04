@@ -13,9 +13,11 @@ namespace pixel_renderer
 
         public override void Dispose() => Array.Clear(frame);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Draw(StageRenderInfo renderInfo)
         {
+
+            var Resolution = this.Resolution;
 
             if (Runtime.Current.GetStage() is not Stage stage) return;
             if (baseImageDirty)
@@ -47,12 +49,19 @@ namespace pixel_renderer
                     uiComponents.Add(uiComp);
 
 
+
             foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                 if (uiComponent.IsActive && uiComponent is Camera camera)
-                    camera.RenderCamera(camera, renderInfo, Resolution, ref frame, ref latestFrame, baseImage, this);
-         
+                    camera.Draw(ref Resolution, ref frame);
+
+            if (latestFrame.Length != frame.Length)
+                latestFrame = new byte[frame.Length];
+
+            Array.Copy(frame, latestFrame, frame.Length);
+
+
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Render(Image output)
         {
             if(stride != 0)

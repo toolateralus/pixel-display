@@ -31,6 +31,15 @@ namespace pixel_renderer
                 return current;
             }
         }
+
+        public static void GetRenderingData(out RenderHost host, out StageRenderInfo info, out RendererBase renderer, out JImage baseImage)
+        {
+            host = Runtime.Current.renderHost;
+            info = Current.stage.StageRenderInfo; 
+            renderer = Runtime.Current.renderHost.GetRenderer();
+            baseImage = renderer.baseImage;
+        }
+
         private protected volatile static Runtime? current;
         private protected volatile Stage? stage;
         private protected volatile Thread renderThread; 

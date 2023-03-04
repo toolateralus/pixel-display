@@ -9,7 +9,7 @@
     {
         Vector2 zero = Vector2.Zero;
         Vector2 one = Vector2.One;
-        private protected JImage baseImage;
+        internal protected JImage baseImage;
         private protected byte[] frame = Array.Empty<byte>();
         private protected byte[] latestFrame = Array.Empty<byte>();
         private protected int stride = 0;
@@ -25,6 +25,7 @@
         const float fZero = 0;
         const float fOne = 1;
 
+      
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);

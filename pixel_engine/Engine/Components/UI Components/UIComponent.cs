@@ -18,7 +18,7 @@ namespace pixel_renderer
             }
         }
 
-
+        public abstract void Draw(ref Vector2 resolution, ref byte[] frame); 
         internal Vector2 GlobalToLocal(Vector2 global)
         {
             Matrix3x2.Invert(Transform, out var inverted);

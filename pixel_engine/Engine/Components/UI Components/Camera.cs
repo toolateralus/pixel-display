@@ -21,34 +21,36 @@ namespace pixel_renderer
             return (screenViewport - viewportPosition) / viewportSize;
         }
 
+       
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void RenderCamera(Camera cam, StageRenderInfo renderInfo, Vector2 resolution, ref byte[] frame, ref byte[] latestFrame, JImage baseImage, RendererBase renderer)
+        public override void Draw(ref Vector2 resolution, ref byte[] frame)
         {
+            Runtime.GetRenderingData(out var renderHost, out var renderInfo, out var renderer, out var baseImage);
+           
+
             if (resolution.Y == 0 || resolution.X == 0) return;
 
-            if (cam.zBuffer.GetLength(0) != resolution.X || cam.zBuffer.GetLength(1) != resolution.Y)
-                cam.zBuffer = new float[(int)resolution.X, (int)resolution.Y];
-            Array.Clear(cam.zBuffer);
+            if (zBuffer.GetLength(0) != resolution.X || zBuffer.GetLength(1) != resolution.Y)
+                zBuffer = new float[(int)resolution.X, (int)resolution.Y];
+            Array.Clear(zBuffer);
 
-            DrawBaseImage(cam, resolution, baseImage, renderer);
-            DrawSprites(renderInfo, cam, resolution, renderer);
-            DrawGraphics(cam, resolution, renderer);
+            DrawBaseImage(resolution, baseImage, renderer);
+            DrawSprites(renderInfo,  resolution, renderer);
+            DrawGraphics(resolution, renderer);
 
-            if (latestFrame.Length != frame.Length)
-                latestFrame = new byte[frame.Length];
-
-            Array.Copy(frame, latestFrame, frame.Length);
+           
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawGraphics(Camera cam, Vector2 resolution, RendererBase renderer)
+        private void DrawGraphics(Vector2 resolution, RendererBase renderer)
         {
             Vector2 framePos = new Vector2();
             foreach (pixel_renderer.ShapeDrawing.Circle circle in ShapeDrawer.Circles)
             {
                 float sqrtOfHalf = MathF.Sqrt(0.5f);
                 Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
-                Vector2 centerPos = cam.GlobalToScreenViewport(circle.center) * resolution;
-                Vector2 pixelRadius = cam.GlobalToScreenViewport(radius) * resolution - centerPos;
+                Vector2 centerPos = GlobalToScreenViewport(circle.center) * resolution;
+                Vector2 pixelRadius = GlobalToScreenViewport(radius) * resolution - centerPos;
                 Vector2 quaterArc = pixelRadius * sqrtOfHalf;
                 int quarterArcAsInt = (int)quaterArc.X;
                 for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
@@ -77,8 +79,8 @@ namespace pixel_renderer
             }
             foreach (Line line in ShapeDrawer.Lines)
             {
-                Vector2 startPos = cam.GlobalToScreenViewport(line.startPoint) * resolution;
-                Vector2 endPos = cam.GlobalToScreenViewport(line.endPoint) * resolution;
+                Vector2 startPos = GlobalToScreenViewport(line.startPoint) * resolution;
+                Vector2 endPos = GlobalToScreenViewport(line.endPoint) * resolution;
                 if (startPos == endPos)
                 {
                     if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
@@ -124,7 +126,7 @@ namespace pixel_renderer
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vector2 resolution, RendererBase renderer)
+        private void DrawSprites(StageRenderInfo renderInfo, Vector2 resolution, RendererBase renderer)
         {
             SpriteInfo sprite;
             BoundingBox2D drawArea = new();
@@ -132,19 +134,19 @@ namespace pixel_renderer
             {
                 sprite = renderInfo.spriteInfos[i];
                 drawArea = new(sprite.GetCorners());
-                drawArea.min = cam.GlobalToLocal(drawArea.min);
-                drawArea.max = cam.GlobalToLocal(drawArea.max);
+                drawArea.min = GlobalToLocal(drawArea.min);
+                drawArea.max = GlobalToLocal(drawArea.max);
                 if (drawArea.min.X >= 1 || drawArea.max.X < 0 ||
                     drawArea.min.Y >= 1 || drawArea.max.Y < 0)
                     continue;
-                drawArea.min = cam.LocalToScreenViewport(drawArea.min) * resolution;
-                drawArea.max = cam.LocalToScreenViewport(drawArea.max) * resolution;
+                drawArea.min = LocalToScreenViewport(drawArea.min) * resolution;
+                drawArea.max = LocalToScreenViewport(drawArea.max) * resolution;
 
-                DrawTransparentSprite(cam, sprite, drawArea, resolution, renderer);
+                DrawTransparentSprite(sprite, drawArea, resolution, renderer);
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawBaseImage(Camera cam, Vector2 resolution, JImage baseImage, RendererBase renderer)
+        private void DrawBaseImage(Vector2 resolution, JImage baseImage, RendererBase renderer)
         {
             SpriteInfo sprite = new();
 
@@ -155,26 +157,26 @@ namespace pixel_renderer
                 baseImageSize = stage.backgroundSize;
             else baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
 
-            BoundingBox2D camBoundingBox = new(cam.GetCorners());
+            BoundingBox2D camBoundingBox = new(GetCorners());
 
             var scale = camBoundingBox.max - camBoundingBox.min;
-            sprite.Transform.Translation = cam.Center;
+            sprite.Transform.Translation = Center;
             sprite.scale = scale;
             sprite.Transform.M11 = scale.X;
             sprite.Transform.M22 = scale.Y;
             sprite.viewportScale = sprite.scale / baseImageSize;
 
             sprite.viewportScale.MakeDivideSafe();
-            sprite.viewportOffset = cam.Center.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
+            sprite.viewportOffset = Center.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
 
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;
             sprite.filtering = stage.backgroundFiltering;
 
-            DrawTransparentSprite(cam, sprite, new BoundingBox2D(Vector2.Zero, resolution), resolution, renderer);
+            DrawTransparentSprite(sprite, new BoundingBox2D(Vector2.Zero, resolution), resolution, renderer);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawTransparentSprite(Camera cam, SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution, RendererBase renderer)
+        private void DrawTransparentSprite(SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution, RendererBase renderer)
         {
             drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
             drawArea.max = Vector2.Min(resolution, drawArea.max);
@@ -186,7 +188,7 @@ namespace pixel_renderer
                 float x = framePos.X;
                 float y = framePos.Y;
 
-                if (sprite.camDistance <= cam.zBuffer[(int)x, (int)y])
+                if (sprite.camDistance <= zBuffer[(int)x, (int)y])
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)
@@ -198,7 +200,7 @@ namespace pixel_renderer
                 }
 
                 Vector2 screenViewport = framePos / resolution;
-                Vector2 camLocal = cam.ScreenViewportToLocal(screenViewport);
+                Vector2 camLocal = ScreenViewportToLocal(screenViewport);
 
                 if (!RendererBase.IsWithinMaxExclusive(camLocal.X, camLocal.Y, 0, 1))
                 {
@@ -211,7 +213,7 @@ namespace pixel_renderer
                     continue;
                 }
 
-                Vector2 global = cam.LocalToGlobal(camLocal);
+                Vector2 global = LocalToGlobal(camLocal);
                 Vector2 spriteLocal = sprite.GlobalToLocal(global);
 
                 if (!RendererBase.IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, -1, 1))
@@ -266,7 +268,7 @@ namespace pixel_renderer
 
                 if (color.a == 255)
                 {
-                    cam.zBuffer[(int)x, (int)y] = sprite.camDistance;
+                    zBuffer[(int)x, (int)y] = sprite.camDistance;
                 }
 
                 renderer.WriteColorToFrame(ref color, ref framePos);
