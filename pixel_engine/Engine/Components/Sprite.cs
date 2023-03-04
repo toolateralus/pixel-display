@@ -104,9 +104,11 @@ namespace pixel_renderer
         [Method]
         public void TrySetTextureFromString()
         {
-            throw new NotImplementedException();
             if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
-                 //TODO: reimplement: texture = new(null, meta, size, meta.Name);
+            {
+                texture = new();
+
+            }
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
         [Method]

@@ -2,29 +2,20 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Xml;
 using System.Windows;
 using System.Runtime.CompilerServices;
-using System.Windows.Media;
 using System.Numerics;
-using System.Security.Policy;
 
 namespace pixel_renderer
 {
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
-        
         static Vector2 moveVector;
-        
         static float inputMagnitude;
-        
         private static bool moveVectorInitialized;
-        
         public static Vector2 MoveVector { get => moveVector; }
-        
         public static float InputMagnitude { get => inputMagnitude; set => inputMagnitude = value; }
-        
         static void Up() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Down() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Left()

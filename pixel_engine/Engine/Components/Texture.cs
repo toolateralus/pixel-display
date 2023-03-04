@@ -25,6 +25,14 @@ namespace pixel_renderer
             scale = size;
             SetImage(color);
         }
+        public Texture(string filePath)
+        {
+            SetImage(filePath);
+        }
+        public Texture(Bitmap source)
+        {
+            jImage = new(source);
+        }
         [Field] 
         [JsonProperty] 
         public Vector2 scale = new(1, 1);
