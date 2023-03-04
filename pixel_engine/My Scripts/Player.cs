@@ -14,6 +14,20 @@ using System.Runtime.CompilerServices;
 namespace pixel_renderer
 {
 
+    public class Text : Component
+    {
+        public JImage[] font;
+        public Texture[] fontTextures;
+
+        public float scale;
+        public BoundingBox2D rect; 
+        public override void Awake()
+        {
+
+
+
+        }
+    }
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
