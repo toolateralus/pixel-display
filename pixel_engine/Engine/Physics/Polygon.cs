@@ -111,15 +111,6 @@ namespace pixel_renderer
             Array.Copy(polygon.normals, normals, normals.Length);
             Array.Copy(polygon.uv, uv, uv.Length);
         }
-        public Polygon OffsetBy(Vector2 offset)
-        {
-            Polygon polygon = new(this);
-            int vertCount = polygon.vertices.Length;
-            for (int i = 0; i < vertCount; i++)
-                polygon.vertices[i] += offset;
-            polygon.centroid += offset;
-            return polygon;
-        }
         public static Polygon Rectangle(float width, float height)
         {
             return new(new Vector2[] { new(0, 0), new(width, 0), new(width, height), new(0, height) });
@@ -132,13 +123,13 @@ namespace pixel_renderer
 
             return new(new Vector2[] { top, right, left});
         }
-        public Polygon Transform(Matrix3x2 matrix)
+        public Polygon Transformed(Matrix3x2 matrix)
         {
             Polygon polygon = new(this);
             int vertCount = polygon.vertices.Length;
             for (int i = 0; i < vertCount; i++)
-                polygon.vertices[i] = Vector2.Transform(polygon.vertices[i], matrix);
-            polygon.centroid = Vector2.Transform(polygon.centroid, matrix);
+                polygon.vertices[i].Transform(matrix);
+            RecalculateNormals();
             return polygon;
         }
         public void MoveVertex(int index, Vector2 moveTo)
