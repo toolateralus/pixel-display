@@ -176,7 +176,7 @@
             BoundingBox2D camBoundingBox = new(cam.GetCorners());
 
             var scale = camBoundingBox.max - camBoundingBox.min;
-            sprite.Transform.Translation = camBoundingBox.min;
+            sprite.Transform.Translation = cam.Center;
             sprite.scale = scale;
             sprite.Transform.M11 = scale.X;
             sprite.Transform.M22 = scale.Y;
@@ -184,6 +184,7 @@
 
             sprite.viewportScale.MakeDivideSafe();
             sprite.viewportOffset = cam.Center.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
+
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;
             sprite.filtering = stage.backgroundFiltering;
@@ -216,9 +217,10 @@
                     continue;
                 }
 
-                Vector2 camViewport = cam.ScreenViewportToLocal(framePos / resolution);
+                Vector2 screenViewport = framePos / resolution;
+                Vector2 camLocal = cam.ScreenViewportToLocal(screenViewport);
 
-                if (!IsWithinMaxExclusive(camViewport.X, camViewport.Y, fZero, fOne))
+                if (!IsWithinMaxExclusive(camLocal.X, camLocal.Y, fZero, fOne))
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)
@@ -229,9 +231,10 @@
                     continue;
                 }
 
-                Vector2 spriteViewportPos = cam.LocalToSpriteViewport(sprite, camViewport);
+                Vector2 global = cam.LocalToGlobal(camLocal);
+                Vector2 spriteLocal = sprite.GlobalToLocal(global);
 
-                if (!IsWithinMaxExclusive(spriteViewportPos.X, spriteViewportPos.Y, fZero, fOne))
+                if (!IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, fZero, fOne))
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)
@@ -242,7 +245,7 @@
                     continue;
                 }
 
-                var colorPos = spriteViewportPos.Wrapped(Vector2.One) * sprite.colorDataSize;
+                var colorPos = sprite.LocalToColorPosition(spriteLocal);
 
                 Pixel color = new Pixel();
 

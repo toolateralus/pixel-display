@@ -59,8 +59,9 @@ namespace pixel_renderer
             Transform = sprite.Transform;
             scale = sprite.Scale;
         }
-        public Vector2 LocalToColorPosition(Vector2 spriteViewport) => 
-            ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
+        public Vector2 LocalToViewport(Vector2 local) => (local + viewportOffset) * viewportScale;
+        public Vector2 LocalToColorPosition(Vector2 local) => ViewportToColorPosition(LocalToViewport(local));
+        public Vector2 ViewportToColorPosition(Vector2 viewport) =>  viewport.Wrapped(Vector2.One) * colorDataSize;
         internal Vector2 GlobalToLocal(Vector2 global)
         {
             Matrix3x2.Invert(Transform, out var inverted);
