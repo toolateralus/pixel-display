@@ -7,17 +7,33 @@ namespace pixel_renderer
     public abstract class UIComponent : Component
     {
         [Field][JsonProperty] public float drawOrder = 0f;
-        [Field][JsonProperty] public float angle = 0f;
-        [Field][JsonProperty] public Vector2 bottomRightCornerOffset = new(1, 1);
-
-        public Vector2 Center { get => node.Position; set => node.Position = value; }
+        public Vector2 Center { get => Transform.Translation; set => Transform.Translation = value; }
         public Vector2 Size
         {
-            get => bottomRightCornerOffset * 2;
-            set => bottomRightCornerOffset = value * 0.5f;
+            get => new(Transform.M11, Transform.M22);
+            set
+            {
+                Transform.M11 = value.X;
+                Transform.M22 = value.Y;
+            }
         }
-        
-        public Vector2 GlobalToLocal(Vector2 global) => (global - Center).Rotated(angle) + bottomRightCornerOffset;
-        public Vector2 LocalToGlobal(Vector2 local) => (local - bottomRightCornerOffset).Rotated(-angle) + Center;
+
+
+        internal Vector2 GlobalToLocal(Vector2 global)
+        {
+            Matrix3x2.Invert(Transform, out var inverted);
+            return Vector2.Transform(global, inverted);
+        }
+        public Vector2 LocalToGlobal(Vector2 local) => Vector2.Transform(local, Transform);
+        public Vector2[] GetCorners()
+        {
+            return new Vector2[]
+            {
+                    Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform), // Top Left
+                    Vector2.Transform(new Vector2(0.5f, -0.5f), Transform), // Top Right
+                    Vector2.Transform(new Vector2(0.5f, 0.5f), Transform), // Bottom Right
+                    Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform), // Bottom Left
+            };
+        }
     }
 }

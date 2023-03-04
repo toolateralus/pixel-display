@@ -81,9 +81,7 @@
 
             List<int> bucketsObjIsIn = new();
 
-            BoundingBox2D box = new();
-
-            box.ExpandToAll(sprite.GetCorners());
+            BoundingBox2D box = new(sprite.GetCorners());
 
             Vector2 min = box.min;
 

@@ -37,12 +37,10 @@
         public abstract void Dispose();
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void RenderCamera(Camera camera, StageRenderInfo renderInfo, Vector2 resolution)
+        public void RenderCamera(Camera cam, StageRenderInfo renderInfo, Vector2 resolution)
         {
             if (resolution.Y == 0 || resolution.X == 0) return;
 
-            Node camNode = new("CamNode", camera.node.Position, one);
-            Camera cam = camNode.AddComponent(camera.Clone());
             if (cam.zBuffer.GetLength(0) != resolution.X || cam.zBuffer.GetLength(1) != resolution.Y)
                 cam.zBuffer = new float[(int)resolution.X , (int)resolution.Y];
             Array.Clear(cam.zBuffer);
@@ -145,31 +143,21 @@
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawSprites(StageRenderInfo renderInfo, Camera cam, Vector2 resolution)
         {
-            SpriteInfo spriteInfo;
+            SpriteInfo sprite;
             BoundingBox2D drawArea = new();
             for (int i = 0; i < renderInfo.spriteInfos.Count; ++i)
             {
-                spriteInfo = renderInfo.spriteInfos[i];
+                sprite = renderInfo.spriteInfos[i];
+                drawArea = new(sprite.GetCorners());
+                drawArea.min = cam.GlobalToLocal(drawArea.min);
+                drawArea.max = cam.GlobalToLocal(drawArea.max);
+                if (drawArea.min.X >= 1 || drawArea.max.X < 0 ||
+                    drawArea.min.Y >= 1 || drawArea.max.Y < 0)
+                    continue;
+                drawArea.min = cam.LocalToScreenViewport(drawArea.min) * resolution;
+                drawArea.max = cam.LocalToScreenViewport(drawArea.max) * resolution;
 
-                Vector2 spritePos = spriteInfo.Transform.Translation;
-                Vector2 firstCorner = cam.GlobalToScreenViewport(spritePos) * resolution;
-                //Bounding box on screen which fully captures sprite
-                drawArea.min = firstCorner;
-                drawArea.max = firstCorner;
-                List<Vector2> corners = new()
-                {
-                    cam.GlobalToScreenViewport(spritePos + new Vector2(spriteInfo.scale.X ,0)) * resolution,
-                    cam.GlobalToScreenViewport(spritePos + new Vector2(0, spriteInfo.scale.Y)) * resolution,
-                    cam.GlobalToScreenViewport(spritePos + spriteInfo.scale) * resolution
-                };
-
-                foreach (Vector2 corner in corners)
-                    drawArea.ExpandTo(corner);
-
-                if (!drawArea.min.IsWithinMaxExclusive(zero, resolution) &&
-                    !drawArea.max.IsWithinMaxExclusive(zero, resolution)) continue;
-
-                DrawTransparentSprite(cam, spriteInfo, drawArea, resolution);
+                DrawTransparentSprite(cam, sprite, drawArea, resolution);
             }
         }
 
@@ -185,17 +173,8 @@
                 baseImageSize = stage.backgroundSize;
             else baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
 
-            Vector2 topLeft = cam.Center - cam.bottomRightCornerOffset.Rotated(cam.angle);
-            BoundingBox2D camBoundingBox = new(topLeft, topLeft);
+            BoundingBox2D camBoundingBox = new(cam.GetCorners());
 
-            List<Vector2> camCorners = new()
-            {
-                cam.Center + cam.bottomRightCornerOffset.WithScale(-1, 1).Rotated(cam.angle),
-                cam.Center + cam.bottomRightCornerOffset.WithScale(1, -1).Rotated(cam.angle),
-                cam.Center + cam.bottomRightCornerOffset.Rotated(cam.angle)
-            };
-
-            foreach (Vector2 corner in camCorners) camBoundingBox.ExpandTo(corner);
             var scale = camBoundingBox.max - camBoundingBox.min;
             sprite.Transform.Translation = camBoundingBox.min;
             sprite.scale = scale;
@@ -204,7 +183,7 @@
             sprite.viewportScale = sprite.scale / baseImageSize;
 
             sprite.viewportScale.MakeDivideSafe();
-            sprite.viewportOffset = (cam.Center - cam.bottomRightCornerOffset).Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
+            sprite.viewportOffset = cam.Center.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;
             sprite.filtering = stage.backgroundFiltering;
@@ -216,13 +195,10 @@
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawTransparentSprite(Camera cam, SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution)
         {
-            Vector2 framePos = drawArea.min;
-
             drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
             drawArea.max = Vector2.Min(resolution, drawArea.max);
 
-            // Get the sprite's transform matrix
-            Matrix3x2 transform = sprite.Transform;
+            Vector2 framePos = drawArea.min;
 
             while (framePos.Y < drawArea.max.Y)
             {
@@ -240,7 +216,7 @@
                     continue;
                 }
 
-                Vector2 camViewport = cam.ScreenToCamViewport(framePos / resolution);
+                Vector2 camViewport = cam.ScreenViewportToLocal(framePos / resolution);
 
                 if (!IsWithinMaxExclusive(camViewport.X, camViewport.Y, fZero, fOne))
                 {
@@ -253,7 +229,7 @@
                     continue;
                 }
 
-                Vector2 spriteViewportPos = cam.ViewportToSpriteViewport(sprite, camViewport);
+                Vector2 spriteViewportPos = cam.LocalToSpriteViewport(sprite, camViewport);
 
                 if (!IsWithinMaxExclusive(spriteViewportPos.X, spriteViewportPos.Y, fZero, fOne))
                 {

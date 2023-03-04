@@ -167,7 +167,6 @@ namespace pixel_renderer
         public static Camera AddCamera(Node node, int height = 256, int width = 256, DrawingType type = DrawingType.Wrapped)
         {
             var cam = node.AddComponent<Camera>();
-            cam.DrawMode = type;
             cam.Size = new(width, height);
             return cam;
         }
