@@ -8,6 +8,9 @@ namespace pixel_renderer
 {
     public class Texture : Asset
     {
+
+
+
         [JsonConstructor]
         public Texture(JImage image, Metadata imgData, Vector2 scale, string Name = "Texture Asset") : base(Name, true)
         {

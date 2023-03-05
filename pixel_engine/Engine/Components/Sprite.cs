@@ -26,41 +26,13 @@ namespace pixel_renderer
     public enum TextureFiltering { Point, Bilinear }
     public class Sprite : Component
     {
-        [JsonProperty] public Vector2 viewportScale = Vector2.One;
-        [JsonProperty] public Vector2 viewportOffset = Vector2.Zero;
-        [JsonProperty] private Vector2 colorDataSize = new(1, 1);
-        public Vector2 ColorDataSize => colorDataSize;
-        [JsonProperty] 
-        public float camDistance = 1;
-        [JsonProperty]
-        [Field] 
-        public Texture texture;
-        [JsonProperty] 
-        [Field]
-        public SpriteType Type = SpriteType.SolidColor;
-        [JsonProperty] 
-        public bool IsReadOnly = false;
-        [Field]
-        [JsonProperty]
-        public TextureFiltering textureFiltering = 0;
-        [Field]
-        [JsonProperty] 
-        public bool lit = false;
-        [Field]
-        [JsonProperty] 
-        public Pixel color = Pixel.Blue;
-        [JsonProperty]
-        [Field]
-        public string textureName = "Table";
-
-      
-
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
-        private JImage lightmap; 
+
+        private JImage lightmap;
         private JImage LitColorData
         {
-            get 
+            get
             {
                 var light = GetFirstLight();
 
@@ -80,7 +52,7 @@ namespace pixel_renderer
                     Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
-                return lightmap; 
+                return lightmap;
             }
         }
         internal JImage ColorData
@@ -89,7 +61,7 @@ namespace pixel_renderer
             {
                 if (lit)
                     return LitColorData;
-               
+
                 if (texture is null || texture.Data is null)
                     Refresh();
 
@@ -98,7 +70,29 @@ namespace pixel_renderer
 
                 return texture.GetImage();
             }
-           
+
+        }
+        [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
+        [Field][JsonProperty] public Vector2 viewportScale = new(1, 1);
+        [Field][JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
+        [Field][JsonProperty] public float camDistance = 1;
+        [Field][JsonProperty] public Texture texture;
+        [Field][JsonProperty] public SpriteType Type = SpriteType.SolidColor;
+        [Field][JsonProperty] public TextureFiltering textureFiltering = 0;
+        [Field][JsonProperty] public bool lit = false;
+        [Field][JsonProperty] public Pixel color = Pixel.Blue;
+        [Field][JsonProperty] public float drawOrder = 0f;
+        [Field][JsonProperty] public bool IsReadOnly = false;
+        [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
+        [Field][JsonProperty] public string textureName = "Table";
+        
+        public Sprite()
+        {
+            texture = new Texture(Vector2.One, Pixel.Red);
+        }
+        public Sprite(int x, int y) : this()
+        {
+            Scale = new(x, y);
         }
 
         [Method]
@@ -159,32 +153,21 @@ namespace pixel_renderer
             if (dirty)
                 Refresh();
         }
-        
-        public Sprite()
+        public override void OnDrawShapes()
         {
-            texture = new Texture(Vector2.One, Pixel.Red);
-        }
-        public Sprite(int x, int y) : this()
-        {
-            Scale = new(x, y);
-        }
-
-        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
-        public void SetImage(Vector2 size, byte[] color)
-        {
-            texture.SetImage(size, color);
-        }
-        public void SetImage(JImage? image)
-        {
-            if (image is not null)
+            if (selected_by_editor)
             {
-                Vector2 size = new(image.width, image.height);
-                SetImage(size, image.data);
+                Polygon mesh = new(GetCorners());
+                int vertLength = mesh.vertices.Length;
+                for (int i = 0; i < vertLength; i++)
+                {
+                    var nextIndex = (i + 1) % vertLength;
+                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Constants.EditorHighlightColor);
+                }
             }
         }
 
-
-        
+        #region lighting
         public void LightingPerPixel(Light light)
         {
             for (int x = 0; x < ColorData.width; x++)
@@ -251,7 +234,23 @@ namespace pixel_renderer
                 return null; 
             return lights.First();
         }
-        
+
+        #endregion lighting
+
+        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
+        public void SetImage(Vector2 size, byte[] color)
+        {
+            texture.SetImage(size, color);
+        }
+        public void SetImage(JImage? image)
+        {
+            if (image is not null)
+            {
+                Vector2 size = new(image.width, image.height);
+                SetImage(size, image.data);
+            }
+        }
+
         public Vector2[] GetCorners()
         {
             Vector2 topLeft = Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform);
@@ -283,25 +282,6 @@ namespace pixel_renderer
                 j = i;
             }
             return c;
-        }
-        
-        internal Vector2 GlobalToViewport(Vector2 global)
-        {
-            return (global - Position) / Scale;
-        }
-
-        public override void OnDrawShapes()
-        {
-            if (selected_by_editor)
-            {
-                Polygon mesh = new(GetCorners());
-                int vertLength = mesh.vertices.Length;
-                for (int i = 0; i < vertLength; i++)
-                {
-                    var nextIndex = (i + 1) % vertLength;
-                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Constants.EditorHighlightColor);
-                }
-            }
         }
     }
 }

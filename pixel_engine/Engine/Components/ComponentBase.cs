@@ -76,6 +76,10 @@ namespace pixel_renderer
         public virtual void OnDrawShapes()
         {
         }
+        internal Vector2 GlobalToViewport(Vector2 global)
+        {
+            return (global - Position) / Scale;
+        }
     }
 
 }

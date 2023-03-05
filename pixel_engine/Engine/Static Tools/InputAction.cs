@@ -10,8 +10,9 @@ namespace pixel_renderer
         internal InputEventType EventType = InputEventType.KeyDown; 
         internal readonly bool ExecuteAsynchronously = false;
         internal Action action;
-        public InputAction(Action expression, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
+        public InputAction(Action action, Key key, object[]? args = null, bool async = false, InputEventType type = InputEventType.KeyDown)
         {
+            this.action = action;
             ExecuteAsynchronously = async;
             Key = key;
             EventType = type;

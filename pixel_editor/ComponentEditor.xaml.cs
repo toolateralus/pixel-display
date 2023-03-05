@@ -55,7 +55,7 @@ namespace pixel_editor
         #endregion
         string EditorKey => component.Name + component.GetType().Name;
         public Component component;
-        public EditorData data;
+        public ComponentEditorData data;
         public Grid mainGrid;
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
@@ -65,12 +65,18 @@ namespace pixel_editor
             InitializeComponent();
             this.component = component;
             mainWnd.RegisterComponentEditor(EditorKey, this);
+            GetEvents();
+            data = Refresh(component);
+        }
+
+        private void GetEvents()
+        {
             Closed += ComponentEditor_Closed;
             CompositionTarget.Rendering += Update;
             RegisterAction(delegate { Keyboard.ClearFocus(); }, Key.Escape);
-            data = Refresh(component);
         }
-        public EditorData Refresh(Component component)
+
+        public ComponentEditorData Refresh(Component component)
         {
             MainGrid.Children.Clear();
             inputFields.Clear();
@@ -79,16 +85,7 @@ namespace pixel_editor
             AddTextBoxes(MainGrid);
             return data; 
         }
-        private void Update(object? sender, EventArgs e)
-        {
-
-
-        }
-        private void ComponentEditor_Closed(object? sender, EventArgs e)
-        {
-            Editor.Current.OnEditorClosed?.Invoke(EditorKey, this);
-            Closed -= ComponentEditor_Closed; 
-        }
+        
         private int SerializeMethods(Grid viewer, int i)
         {
             foreach (var method in data.Methods)
@@ -135,6 +132,8 @@ namespace pixel_editor
 
             return i;
         }
+
+        #region "Add" Button/TextBox/Grid methods
         private void AddTextBoxes(Grid viewer)
         {
             int i = 0;
@@ -177,21 +176,6 @@ namespace pixel_editor
             i++;
             return i;
         }
-        private void TxtBox_KeyDown(object sender, KeyEventArgs e, FieldInfo field, Component component, string[] strings)
-        {
-            if (sender is TextBox box)
-            {
-                var index = box.Name.ToInt(); 
-                var txt = box.Text;
-                if (e.Key == Key.Enter)
-                {
-                    if (strings.Length > index)
-                        strings[index] = txt; 
-                    field.SetValue(component, strings);
-                    Keyboard.ClearFocus(); 
-                }
-            }
-        }
         private void AddToEditor(Grid viewer, int index, string? valStr, string name)
         {
             var nameDisplay = Inspector.GetTextBox(name);
@@ -209,6 +193,24 @@ namespace pixel_editor
             Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, index);
             Inspector.SetRowAndColumn(inputBox, 1, 8, 8, index);
         }
+        #endregion
+        #region WPF Events
+
+        private void TxtBox_KeyDown(object sender, KeyEventArgs e, FieldInfo field, Component component, string[] strings)
+        {
+            if (sender is TextBox box)
+            {
+                var index = box.Name.ToInt(); 
+                var txt = box.Text;
+                if (e.Key == Key.Return)
+                {
+                    if (strings.Length > index)
+                        strings[index] = txt; 
+                    field.SetValue(component, strings);
+                    Keyboard.ClearFocus(); 
+                }
+            }
+        }
         private void InputBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (sender is not TextBox box)
@@ -223,8 +225,10 @@ namespace pixel_editor
         {
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
+            
             for (int i = 0; i < data.Fields.Count; ++i)
                 ExecuteEditEvent(i);
+
             Refresh(component);
         }
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -232,6 +236,18 @@ namespace pixel_editor
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
         }
+        private void Update(object? sender, EventArgs e)
+        {
+
+
+        }
+        private void ComponentEditor_Closed(object? sender, EventArgs e)
+        {
+            Editor.Current.OnEditorClosed?.Invoke(EditorKey, this);
+            Closed -= ComponentEditor_Closed; 
+        }
+
+        #endregion
         private bool SetVariable(string o, int i)
         {
             Inspector.GetComponentRuntimeInfo(component, out var fields, out _);
@@ -262,20 +278,49 @@ namespace pixel_editor
         }
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
     }
-    public record EditorData
+    public record ComponentEditorData
     {
-        public List<FieldInfo> Fields = new();
-        public List<MethodInfo> Methods = new();
-        public EditorData(Component component)
-        {
-            init_data(component);
+        public readonly IReadOnlyCollection<FieldInfo> Fields;
+        public readonly IReadOnlyCollection<MethodInfo> Methods;
+        public readonly IReadOnlyCollection<object> Values;
+        public readonly WeakReference<Component> Component; 
 
-            void init_data(Component component)
+        public ComponentEditorData(Component component)
+        {
+            this.Component = new(component);
+            Fields = Inspector.GetSerializedFields(component).ToList();
+            Methods = Inspector.GetSerializedMethods(component).ToList();
+            var values = new object[Fields.Count];
+            for (int i = 0; i < Fields.Count; i++)
             {
-                Fields = Inspector.GetSerializedFields(component).ToList();
-                Methods = Inspector.GetSerializedMethods(component).ToList();
+                FieldInfo? field = Fields.ElementAt(i);
+                values[i] = GetValueAtIndex(i);
             }
+            this.Values = values;
         }
+     
+        public IReadOnlyCollection<object> GetAllValues(out int count)
+        {
+            count = Values.Count;
+            return Values; 
+        }
+        
+        public object? GetValueAtIndex(int index) => Fields.ElementAt(index)?.GetValue(Component);
+        public void SetValueAtIndex(int index, object value) => Fields.ElementAt(index).SetValue(Component, value);
+
+        public bool IsReferenceAlive(out Component component)
+        {
+            if (!this.Component.TryGetTarget(out component))
+                return false;
+            return true;
+        }
+        public bool HasValueChanged(int index, object value, out object newValue)
+        {
+            newValue = GetValueAtIndex(index);
+            if (newValue == value)
+                return true;
+            return false; 
+        }
+
     }
-   ;
 }

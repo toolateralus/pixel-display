@@ -35,6 +35,34 @@ namespace pixel_renderer
         [Field][JsonProperty] public bool IsReadOnly = false;
         [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
 
+        [Method]
+        internal protected void Refresh()
+        {
+            switch (Type)
+            {
+                case SpriteType.SolidColor:
+                    Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
+                    texture.SetImage(colorArray);
+                    break;
+                case SpriteType.Image:
+                    if (texture is null)
+                    {
+                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), Vector2.One);
+                        Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
+                        texture.SetImage(colorArray1);
+                    }
+                    else
+                    {
+                        Pixel[,] colorArray1 = CBit.PixelFromBitmap(texture.Image);
+                        texture.SetImage(colorArray1);
+                    }
+                    break;
+                default: throw new NotImplementedException();
+            }
+            colorDataSize = new(texture.Width, texture.Height);
+            dirty = false;
+        }
+        
         public abstract void Draw(RendererBase renderer); 
         /// <summary>
         /// this is the default method for drawing.
@@ -121,32 +149,12 @@ namespace pixel_renderer
         /// re-draws the image *this is always called when marked dirty*
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
-        [Method]
-        internal protected void Refresh()
+        /// <summary>
+        /// for any unmanaged resources that need to be disposed of, this is usually unneccesary.
+        /// </summary>
+        public virtual void Dispose()
         {
-            switch (Type)
-            {
-                case SpriteType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
-                    texture.SetImage(colorArray);
-                    break;
-                case SpriteType.Image:
-                    if (texture is null)
-                    {
-                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), Vector2.One);
-                        Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
-                        texture.SetImage(colorArray1);
-                    }
-                    else
-                    {
-                        Pixel[,] colorArray1 = CBit.PixelFromBitmap(texture.Image);
-                        texture.SetImage(colorArray1);
-                    }
-                    break;
-                default: throw new NotImplementedException();
-            }
-            colorDataSize = new(texture.Width, texture.Height);
-            dirty = false;
+            throw new NotImplementedException(); 
         }
         #region Coordinate Functions
         public BoundingBox2D GetSafeDrawArea(RendererBase renderer)
@@ -206,13 +214,5 @@ namespace pixel_renderer
             return viewport.Wrapped(Vector2.One) * colorDataSize;
         }
         #endregion
-        /// <summary>
-        /// for any unmanaged resources that need to be disposed of, this is usually unneccesary.
-        /// </summary>
-        public virtual void Dispose()
-        {
-            throw new NotImplementedException(); 
-        }
-
     }
 }
