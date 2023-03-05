@@ -13,49 +13,12 @@ namespace pixel_renderer
 {
     public class Image : UIComponent
     {
-        [JsonProperty] 
-        public Vector2 viewportScale = new(1,1);
-
-        [JsonProperty] 
-        public Vector2 viewportOffset = new(0.0f, 0.0f);
-
-        [JsonProperty] 
-        private Vector2 colorDataSize = new(1, 1);
-
-        public Vector2 ColorDataSize => colorDataSize;
-      
-        [JsonProperty]
-        public float camDistance = 1;
-
-        [JsonProperty]
-        [Field]
-        public Texture texture;
-
-        [JsonProperty]
-        [Field]
-        public SpriteType Type = SpriteType.SolidColor;
-
-        [JsonProperty]
-        public bool IsReadOnly = false;
-
-        [Field]
-        [JsonProperty]
-        public TextureFiltering textureFiltering = 0;
-
-        [Field]
-        [JsonProperty]
-        public bool lit = false;
-
-        [Field]
-        [JsonProperty]
-        public Pixel color = Pixel.Blue;
-
+        
         internal protected bool dirty = true;
         internal protected bool selected_by_editor;
         
         private JImage lightmap;
 
-        private TextureFiltering filtering = TextureFiltering.Point;
 
         [Field]
         [JsonProperty]
@@ -101,6 +64,28 @@ namespace pixel_renderer
 
                 return texture.GetImage();
             }
+
+        }
+
+
+        public override void OnDrawShapes()
+        {
+            if (selected_by_editor)
+            {
+                Polygon mesh = new(GetCorners());
+                int vertLength = mesh.vertices.Length;
+                for (int i = 0; i < vertLength; i++)
+                {
+                    var nextIndex = (i + 1) % vertLength;
+                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Constants.EditorHighlightColor);
+                }
+            }
+        }
+
+        public override void Draw(RendererBase renderer)
+        {
+            var image = texture.GetImage();
+            DrawImage(renderer, image);
 
         }
 
@@ -178,109 +163,15 @@ namespace pixel_renderer
             }
         }
        
-
-        
         [Method]
         public void TrySetTextureFromString()
         {
             if (AssetLibrary.FetchMetaRelative(textureName) is Metadata meta)
                 texture.SetImage(meta.Path);
-
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
-        public override void OnDrawShapes()
-        {
-            if (selected_by_editor)
-            {
-                Polygon mesh = new(GetCorners());
-                int vertLength = mesh.vertices.Length;
-                for (int i = 0; i < vertLength; i++)
-                {
-                    var nextIndex = (i + 1) % vertLength;
-                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Constants.EditorHighlightColor);
-                }
-            }
-        }
-        public override void Draw(RendererBase renderer) 
-        {
-            var image = texture.GetImage();
-            var drawArea = new BoundingBox2D(GetCorners()); 
-            drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
-            drawArea.max = Vector2.Min(renderer.Resolution, drawArea.max);
 
-            Vector2 framePos = drawArea.min;
-
-            while (framePos.Y < drawArea.max.Y)
-            {
-
-                Vector2 screenViewport = framePos / renderer.Resolution;
-
-                var spriteLocal = ScreenViewportToLocal(screenViewport);
-
-                if (!RendererBase.IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, -1, 1))
-                {
-                    framePos.X++;
-                    if (framePos.X >= drawArea.max.X)
-                    {
-                        framePos.X = drawArea.min.X;
-                        framePos.Y++;
-                    }
-                    continue;
-                }
-
-                var colorPos = LocalToColorPosition(spriteLocal);
-
-                Pixel color = new Pixel();
-
-                switch (filtering)
-                {
-                    case TextureFiltering.Point:
-                        color = image.GetPixel((int)colorPos.X, (int)colorPos.Y);
-                        break;
-                    case TextureFiltering.Bilinear:
-                        Vector2 colorSize = colorDataSize;
-
-                        int left = (int)colorPos.X;
-                        int top = (int)colorPos.Y;
-                        int right = (int)((left + 1) % colorSize.X);
-                        int bottom = (int)((top + 1) % colorSize.Y);
-
-                        float xOffset = colorPos.X - left;
-                        float yOffset = colorPos.Y - top;
-
-                        Pixel topJPixel = Pixel.Lerp(image.GetPixel(left, top), image.GetPixel(right, top), xOffset);
-                        Pixel botJPixel = Pixel.Lerp(image.GetPixel(left, bottom), image.GetPixel(right, bottom), xOffset);
-                        color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
-                        break;
-                    default:
-                        throw new NotImplementedException("Filtering not implemented");
-                }
-
-                if (color.a == 0)
-                {
-                    framePos.X++;
-                    if (framePos.X >= drawArea.max.X)
-                    {
-                        framePos.X = drawArea.min.X;
-                        framePos.Y++;
-                    }
-                    continue;
-                }
-
-                renderer.WriteColorToFrame(ref color, ref framePos);
-
-                framePos.X++;
-
-                if (framePos.X >= drawArea.max.X)
-                {
-                    framePos.X = drawArea.min.X;
-                    framePos.Y++;
-                }
-
-            }
-
-        }
-
+       
         public static Node Standard()
         {
             Node node = new("UI Element");
@@ -292,10 +183,13 @@ namespace pixel_renderer
             return node; 
         }
 
-        public Vector2 ViewportToColorPos(Vector2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
-        internal Vector2 GlobalToViewport(Vector2 global)
+        #region Lighting
+        public Light? GetFirstLight()
         {
-            return (global - Position) / Scale;
+            var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
+            if (!lights.Any())
+                return null;
+            return lights.First();
         }
         public void LightingPerPixel(Light light)
         {
@@ -356,61 +250,11 @@ namespace pixel_renderer
                     }
             return colors;
         }
-        public Light? GetFirstLight()
-        {
-            var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
-            if (!lights.Any())
-                return null;
-            return lights.First();
-        }
-        public Vector2[] GetCorners()
-        {
-            Vector2 topLeft = Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform);
-            Vector2 topRight = Vector2.Transform(new Vector2(0.5f, -0.5f), Transform);
-            Vector2 bottomRight = Vector2.Transform(new Vector2(0.5f, 0.5f), Transform);
-            Vector2 bottomLeft = Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform);
+        #endregion
 
-            var vertices = new Vector2[]
-            {
-                topLeft,
-                topRight,
-                bottomRight,
-                bottomLeft,
-            };
-
-            return vertices;
-        }
-        public static bool PointInPolygon(Vector2 point, Vector2[] vertices)
-        {
-            int i, j = vertices.Length - 1;
-            bool c = false;
-            for (i = 0; i < vertices.Length; i++)
-            {
-                if (((vertices[i].Y > point.Y) != (vertices[j].Y > point.Y)) &&
-                    (point.X < (vertices[j].X - vertices[i].X) * (point.Y - vertices[i].Y) / (vertices[j].Y - vertices[i].Y) + vertices[i].X))
-                {
-                    c = !c;
-                }
-                j = i;
-            }
-            return c;
-        }
-        public Vector2 ScreenViewportToLocal(Vector2 screenViewport)
-        {
-            viewportScale.MakeDivideSafe();
-            return (screenViewport - viewportOffset) / viewportScale;
-        }
-        public Vector2 LocalToViewport(Vector2 local) => (local + viewportOffset) * viewportScale;
-        public Vector2 LocalToColorPosition(Vector2 local) => ViewportToColorPosition(LocalToViewport(local));
-        public Vector2 ViewportToColorPosition(Vector2 viewport)
-        {
-            viewport.X += 0.5f;
-            viewport.Y += 0.5f;
-            return viewport.Wrapped(Vector2.One) * colorDataSize;
-        }
-
+       
     }
-   
+
     public class Text : UIComponent
     {
         public Dictionary<char, (JImage image, Vector2 scale)> font = new();
