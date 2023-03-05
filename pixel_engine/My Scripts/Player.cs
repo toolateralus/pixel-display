@@ -70,7 +70,6 @@ namespace pixel_renderer
                 node.AddComponent<Text>(); 
 
             });
-
             task.Start();
             DrawCircle();
         }
