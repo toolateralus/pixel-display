@@ -17,7 +17,7 @@ namespace pixel_renderer
         public Vector2 viewportScale = new(1,1);
 
         [JsonProperty] 
-        public Vector2 viewportOffset = new(0.5f, 0.5f);
+        public Vector2 viewportOffset = new(0.0f, 0.0f);
 
         [JsonProperty] 
         private Vector2 colorDataSize = new(1, 1);
@@ -284,7 +284,11 @@ namespace pixel_renderer
         public static Node Standard()
         {
             Node node = new("UI Element");
-            node.AddComponent<Image>();
+            var img = node.AddComponent<Image>();
+            img.Size = new(250, 250);
+            img.TrySetTextureFromString();
+            img.Type = SpriteType.Image; 
+            img.Refresh();
             return node; 
         }
 
