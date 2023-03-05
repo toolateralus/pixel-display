@@ -9,6 +9,7 @@ using System.Linq;
 using System.Numerics;
 using pixel_renderer;
 using pixel_renderer.ShapeDrawing;
+using System;
 
 namespace pixel_renderer
 {
@@ -72,7 +73,27 @@ namespace pixel_renderer
             });
             task.Start();
             DrawCircle();
+            sprite.IsReadOnly = true;
+
+
+            RegisterAction(Rotate, Key.B);
+
         }
+
+        private void Rotate()
+        {
+            if (Input.Get(Key.E))
+            {
+                Rotation += 0.01f;
+                return;
+            }
+            if (Input.Get(Key.Q))
+            {
+                Rotation -= 0.01f;
+                return; 
+            }
+        }
+
         public override void OnCollision(Collider collider)
         {
             isGrounded = true; 
