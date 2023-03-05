@@ -16,6 +16,7 @@ namespace pixel_renderer
         private static bool moveVectorInitialized;
         public static Vector2 MoveVector { get => moveVector; }
         public static float InputMagnitude { get => inputMagnitude; set => inputMagnitude = value; }
+        
         static void Up() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Down() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Left()
@@ -76,6 +77,7 @@ namespace pixel_renderer
                 });
             else return false; 
         }
+        
         /// <summary>
         /// Gets the value of a specified key and type of event.
         /// </summary>
@@ -104,6 +106,7 @@ namespace pixel_renderer
                 return false; 
             }
         }
+        
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(ref Key key, InputEventType type = InputEventType.KeyDown)
         {

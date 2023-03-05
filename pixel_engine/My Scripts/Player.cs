@@ -20,7 +20,6 @@ namespace pixel_renderer
 
         [Field] Sprite sprite = new();
         [Field] Rigidbody rb = new();
-        [Field] public Vector2 moveVector;
         [Field] private bool isGrounded;
         
         private Vector2 thisPos;
@@ -88,8 +87,7 @@ namespace pixel_renderer
             if (isGrounded)
                 isGrounded = false;
 
-            Move(moveVector * 0.01f);
-            moveVector = Vector2.Zero;
+            Move(MoveVector * 0.01f);
         }
         public void FreezePlayer()
         {
@@ -104,10 +102,9 @@ namespace pixel_renderer
             if (freezeButtonPressed)
             {
                 foreach (var child in node.children)
-                    child.Value.localPos += moveVector;
+                    child.Value.localPos += MoveVector;
 
                 node.Position = thisPos;
-                moveVector = Vector2.Zero;
             }
         }
         private void DrawCircle()

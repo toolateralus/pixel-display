@@ -22,17 +22,16 @@ namespace pixel_renderer
         }
         public Vector2 Center { get => Transform.Translation; set => Transform.Translation = value; }
 
-        [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
+        [Field][JsonProperty] public Texture texture;
+        [Field][JsonProperty] public bool lit = false;
+        [Field][JsonProperty] public float drawOrder = 0f;
+        [Field][JsonProperty] public bool IsReadOnly = false;
+        [Field][JsonProperty] public Pixel color = Pixel.Blue;
+               [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
         [Field][JsonProperty] public Vector2 viewportScale = new(1, 1);
         [Field][JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
         [Field][JsonProperty] public float camDistance = 1;
-        [Field][JsonProperty] public Texture texture;
         [Field][JsonProperty] public SpriteType Type = SpriteType.SolidColor;
-        [Field][JsonProperty] public TextureFiltering textureFiltering = 0;
-        [Field][JsonProperty] public bool lit = false;
-        [Field][JsonProperty] public Pixel color = Pixel.Blue;
-        [Field][JsonProperty] public float drawOrder = 0f;
-        [Field][JsonProperty] public bool IsReadOnly = false;
         [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
 
         [Method]
@@ -62,7 +61,6 @@ namespace pixel_renderer
             colorDataSize = new(texture.Width, texture.Height);
             dirty = false;
         }
-        
         public abstract void Draw(RendererBase renderer); 
         /// <summary>
         /// this is the default method for drawing.

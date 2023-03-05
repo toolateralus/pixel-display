@@ -10,6 +10,9 @@ using Component = pixel_renderer.Component;
 using System.Windows.Input;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Reflection.Metadata.Ecma335;
+using Newtonsoft.Json.Linq;
+using System.Net.NetworkInformation;
 
 namespace pixel_editor
 {
@@ -288,14 +291,18 @@ namespace pixel_editor
         public ComponentEditorData(Component component)
         {
             this.Component = new(component);
+            
             Fields = Inspector.GetSerializedFields(component).ToList();
             Methods = Inspector.GetSerializedMethods(component).ToList();
+
             var values = new object[Fields.Count];
+
             for (int i = 0; i < Fields.Count; i++)
             {
                 FieldInfo? field = Fields.ElementAt(i);
                 values[i] = GetValueAtIndex(i);
             }
+
             this.Values = values;
         }
      
@@ -304,9 +311,42 @@ namespace pixel_editor
             count = Values.Count;
             return Values; 
         }
-        
-        public object? GetValueAtIndex(int index) => Fields.ElementAt(index)?.GetValue(Component);
-        public void SetValueAtIndex(int index, object value) => Fields.ElementAt(index).SetValue(Component, value);
+
+        public object? GetValueAtIndex(int index)
+        {
+            if (IsReferenceAlive(out var component))
+                return Fields.ElementAt(index)?.GetValue(component);
+            return false;
+        }
+
+        public void UpdateChangedValues(object[] data)
+        {
+            if (data.Length != Values.Count)
+                throw new InvalidOperationException("Component Update Invalidated! input array was the wrong size.");
+
+            for (int i = 0; i < Values.Count; ++i)
+            {
+                object localVal = Values.ElementAt(i);
+                object newVal = data.ElementAt(i);
+
+                if (localVal == newVal)
+                    continue;
+
+                Runtime.Log(localVal + "is being replaced with" + newVal);
+
+            }
+          
+        }
+
+        public bool SetValueAtIndex(int index, object value)
+        {
+            if (IsReferenceAlive(out var component))
+            {
+                Fields.ElementAt(index).SetValue(component, value);
+                return true;
+            }
+            return false; 
+        }
 
         public bool IsReferenceAlive(out Component component)
         {
