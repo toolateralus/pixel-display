@@ -14,7 +14,7 @@ namespace pixel_renderer
     public class Image : UIComponent
     {
         
-        internal protected bool dirty = true;
+       
         internal protected bool selected_by_editor;
         
         private JImage lightmap;
@@ -99,33 +99,6 @@ namespace pixel_renderer
             }
             Type = (SpriteType)((int)Type + 1);
 
-        }
-        [Method]
-        private void Refresh()
-        {
-            switch (Type)
-            {
-                case SpriteType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
-                    texture.SetImage(colorArray);
-                    break;
-                case SpriteType.Image:
-                    if (texture is null)
-                    {
-                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), Vector2.One);
-                        Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
-                        texture.SetImage(colorArray1);
-                    }
-                    else
-                    {
-                        Pixel[,] colorArray1 = CBit.PixelFromBitmap(texture.Image);
-                        texture.SetImage(colorArray1);
-                    }
-                    break;
-                default: throw new NotImplementedException();
-            }
-            colorDataSize = new(texture.Width, texture.Height);
-            dirty = false;
         }
 
         public override void Awake()
