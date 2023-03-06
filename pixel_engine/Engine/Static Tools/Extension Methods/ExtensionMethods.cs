@@ -136,6 +136,8 @@ namespace pixel_renderer
         public static Vector2 Transformed(this Vector2 v, Matrix3x2 matrix) =>
             Vector2.Transform(v, matrix);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 ToVector2(this System.Windows.Point v) => new((float)v.X, (float)v.Y);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Transform(this ref Vector2 v, Matrix3x2 matrix) =>
             v = Vector2.Transform(v, matrix);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

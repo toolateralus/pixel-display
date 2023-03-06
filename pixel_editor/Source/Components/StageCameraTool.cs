@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Windows.Input;
+using System.Numerics;
 
 namespace pixel_editor
 {
@@ -20,10 +21,12 @@ namespace pixel_editor
         public Camera camera;
         public Node? selected;
         private static bool followNode;
+        private bool draggingCam;
+        private Vector2 mouseGlobalPos;
 
         public override void Awake()
         {
-
+            CMouse.OnMouseMove += TryMoveCamera;
         }
 
         public override void Update(float delta)
@@ -32,7 +35,6 @@ namespace pixel_editor
             TryFollowNode(selected);
             TryFocusNode();
             TryZoomCamera();
-            TryMoveCamera();
         }
 
         public static void TryFollowNode(Node node)
@@ -115,13 +117,18 @@ namespace pixel_editor
             if (!cams.Any())
                 return;
 
-            if (CMouse.Right)
+            if (!CMouse.Right)
             {
-                float camSize = cams.First().camDistance;
-                var scrollSpeed = Math.Clamp(camSize / 2, 0.001f, 20);
-                cams.First().node.Position += CMouse.Delta * Constants.MouseSensitivity * scrollSpeed;
+                draggingCam = false;
+                return;
             }
-
+            if (!draggingCam)
+            {
+                draggingCam = true;
+                mouseGlobalPos = CMouse.GlobalPosition;
+            }
+            var offset = CMouse.GlobalPosition - mouseGlobalPos;
+            cams.First().node.Position -= offset;
         }
 
       

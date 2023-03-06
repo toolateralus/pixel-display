@@ -24,11 +24,15 @@ namespace pixel_renderer
         public static Vector2 LastClickPosition { get; set; }
         public static Vector2 Position;
         public static Vector2 LastClickGlobalPosition { get; private set; }
+        public static Vector2 ScreenPosition { get; private set; }
+        public static Vector2 CameraPosition { get; private set; }
+
         public static Vector2 GlobalPosition;
         public static Vector2 LastPosition { get; set; }
         public static Vector2 Delta { get { return LastPosition - Position; } }
 
         private static CMouse current = null;
+        public static Action? OnMouseMove;
 
         public static CMouse Current
         {
@@ -109,12 +113,14 @@ namespace pixel_renderer
             LastPosition = Position;
             var img = Runtime.OutputImages.First();
             var point = e.GetPosition(img);
+            Position = new((float)point.X, (float)point.Y);
             var pt = img.GetNormalizedPoint(point);
-            var normalizedPos = new Vector2((float)pt.X, (float)pt.Y); 
-            GlobalPosition = Camera.First.ScreenViewportToGlobal(normalizedPos);
-            Position = new((float)point.X,
-                (float)point.Y);
-              
+            if (Camera.First is not Camera firstCam)
+                return;
+            ScreenPosition = pt.ToVector2();
+            CameraPosition = firstCam.ScreenViewportToLocal(ScreenPosition);
+            GlobalPosition = firstCam.ScreenViewportToGlobal(ScreenPosition);
+            OnMouseMove?.Invoke();
         }
     }
 }
