@@ -11,16 +11,18 @@ namespace pixel_renderer
 {
     public class Camera : UIComponent
     {
+        public readonly Vector2 half = Vector2.One * 0.5f;
         [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
         [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
        
         public float[,] zBuffer = new float[0, 0];
 
-        public Vector2 LocalToScreenViewport(Vector2 local) => local * viewportSize + viewportPosition;
+        public Vector2 LocalToScreenViewport(Vector2 local) =>
+            ((local * viewportSize + viewportPosition) / 2) + half;
         public Vector2 ScreenViewportToLocal(Vector2 screenViewport)
         {
             viewportSize.MakeDivideSafe();
-            return (screenViewport - viewportPosition) / viewportSize;
+            return (((screenViewport - half) * 2) - viewportPosition) / viewportSize;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -132,8 +134,8 @@ namespace pixel_renderer
                 drawArea = new(sprite.GetCorners());
                 drawArea.min = GlobalToLocal(drawArea.min);
                 drawArea.max = GlobalToLocal(drawArea.max);
-                if (drawArea.min.X >= 1 || drawArea.max.X < 0 ||
-                    drawArea.min.Y >= 1 || drawArea.max.Y < 0)
+                if (drawArea.min.X >= 1 || drawArea.max.X <= -1 ||
+                    drawArea.min.Y >= 1 || drawArea.max.Y <= -1)
                     continue;
                 drawArea.min = LocalToScreenViewport(drawArea.min) * resolution;
                 drawArea.max = LocalToScreenViewport(drawArea.max) * resolution;
@@ -198,7 +200,7 @@ namespace pixel_renderer
                 Vector2 screenViewport = framePos / resolution;
                 Vector2 camLocal = ScreenViewportToLocal(screenViewport);
 
-                if (!RendererBase.IsWithinMaxExclusive(camLocal.X, camLocal.Y, 0, 1))
+                if (!RendererBase.IsWithinMaxExclusive(camLocal.X, camLocal.Y, -1, 1))
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)
