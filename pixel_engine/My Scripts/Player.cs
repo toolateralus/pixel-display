@@ -18,14 +18,14 @@ namespace pixel_renderer
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] public float speed = 0.1f;
         [Field][JsonProperty] public float inputMagnitude = 0.5f;
-
-        [Field] Sprite sprite = new();
-        [Field] Rigidbody rb = new();
         [Field] private bool isGrounded;
+        Sprite sprite = new();
+        Rigidbody rb = new();
         
         private Vector2 thisPos;
         private bool freezeButtonPressedLastFrame = false;
-        private Curve curve;
+        private Curve curve = null; 
+
         public static Metadata? PlayerSprite
         {
             get
@@ -34,7 +34,6 @@ namespace pixel_renderer
             }
        
         }
-
         public static Metadata test_animation_data(int index)
         {
             string name = $"Animation{index}"; 
@@ -62,10 +61,14 @@ namespace pixel_renderer
             }
             Task task = new(async delegate
             {
-                if (sprite is null) return; 
+                if (sprite is null) 
+                    return; 
+
                 while (sprite.texture is null)
                     await Task.Delay(25);
+
                 sprite.texture.SetImage(PlayerSprite, sprite.Scale);
+
                 await Task.Delay(2500);
 
                 node.AddComponent<Text>(); 
@@ -73,27 +76,9 @@ namespace pixel_renderer
             });
             task.Start();
             DrawCircle();
-            sprite.IsReadOnly = true;
 
-
-            RegisterAction(Rotate, Key.B);
 
         }
-
-        private void Rotate()
-        {
-            if (Input.Get(Key.E))
-            {
-                Rotation += 0.01f;
-                return;
-            }
-            if (Input.Get(Key.Q))
-            {
-                Rotation -= 0.01f;
-                return; 
-            }
-        }
-
         public override void OnCollision(Collider collider)
         {
             isGrounded = true; 
@@ -108,6 +93,11 @@ namespace pixel_renderer
                 isGrounded = false;
 
             Move(MoveVector * 0.01f);
+        }
+        
+        private void Move(Vector2 moveVector)
+        {
+            rb.ApplyImpulse(moveVector.WithValue(y:0) * speed);
         }
         public void FreezePlayer()
         {
@@ -143,10 +133,7 @@ namespace pixel_renderer
             }
             sprite?.SetImage(colors);
         }
-        private void Move(Vector2 moveVector)
-        {
-            rb.ApplyImpulse(moveVector.WithValue(y:0) * speed);
-        }
+
         public static Node Standard()
         {
             Node playerNode = new("Player")
@@ -171,7 +158,6 @@ namespace pixel_renderer
             cam.Size = new(width, height);
             return cam;
         }
-     
         public static Sprite AddSprite(Node playerNode)
         {
             var sprite = playerNode.AddComponent<Sprite>();

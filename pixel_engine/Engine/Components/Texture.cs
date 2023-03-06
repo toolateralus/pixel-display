@@ -8,9 +8,7 @@ namespace pixel_renderer
 {
     public class Texture : Asset
     {
-
-
-
+        #region Constructors / Overrides
         [JsonConstructor]
         public Texture(JImage image, Metadata imgData, Vector2 scale, string Name = "Texture Asset") : base(Name, true)
         {
@@ -21,6 +19,7 @@ namespace pixel_renderer
         }
         public Texture(Vector2 scale, Metadata imgData)
         {
+            this.scale = scale; 
             SetImage(imgData, scale);
         }
         public Texture(Vector2 size, Pixel color)
@@ -36,27 +35,6 @@ namespace pixel_renderer
         {
             jImage = new(source);
         }
-        [Field] 
-        [JsonProperty] 
-        public Vector2 scale = new(1, 1);
-        [JsonProperty] 
-        internal Metadata imgData;
-        [JsonProperty]
-        private JImage jImage = new();
-        Bitmap initializedBitmap;
-        public Bitmap? Image {
-            get 
-            {
-                if (!HasImage && HasImageMetadata)
-                    initializedBitmap = new(imgData.Path);
-                return initializedBitmap;
-            }
-            set => initializedBitmap = value;
-        }
-        public bool HasImage => initializedBitmap != null;
-        internal bool HasImageMetadata => imgData != null;
-        public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
-
         public void SetImage(Metadata imgData, Vector2 scale)
         {
             this.scale = scale;
@@ -95,15 +73,24 @@ namespace pixel_renderer
         {
             jImage = new(CBit.SolidColorSquare(scale, color));
         }
+        #endregion
 
+        [Field] 
+        [JsonProperty] 
+        public Vector2 scale = new(1, 1);
+        [JsonProperty] 
+        internal Metadata imgData;
+        [JsonProperty]
+        private JImage jImage = new();
+        public bool HasImage => initializedBitmap != null;
+        internal bool HasImageMetadata => imgData != null;
+        
         public Pixel GetPixel(int x, int y) => jImage.GetPixel(x, y);
         public void SetPixel(int x, int y, Pixel pixel) => jImage?.SetPixel(x, y, pixel);
-
         public JImage GetImage()
         {
             return jImage; 
         }
-
         public static JImage ApplyGaussianFilter(JImage texture, float radius, int kernelSize)
         {
             int halfKernelSize = kernelSize / 2;
@@ -121,18 +108,12 @@ namespace pixel_renderer
                 }
             }
 
-            // Normalize the kernel so that all values sum up to 1
             for (int x = 0; x < kernelSize; x++)
-            {
                 for (int y = 0; y < kernelSize; y++)
-                {
                     kernel[x, y] /= kernelSum;
-                }
-            }
 
             // Apply the filter to each pixel in the texture
             for (int x = 0; x < texture.width; x++)
-            {
                 for (int y = 0; y < texture.height; y++)
                 {
                     Pixel color = texture.GetPixel(x, y);
@@ -158,24 +139,30 @@ namespace pixel_renderer
                         }
                     }
 
-                    // Set the filtered color for the current pixel
-                    Pixel filteredColor = new Pixel((byte)red, (byte)green, (byte)blue, (byte)alpha);
+                    Pixel filteredColor = new((byte)red, (byte)green, (byte)blue, (byte)alpha);
                     texture.SetPixel(x, y, filteredColor);
-                }
             }
             return texture;
         }
-
+        public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
+        public Bitmap? Image {
+            get 
+            {
+                if (!HasImage && HasImageMetadata)
+                    initializedBitmap = new(imgData.Path);
+                return initializedBitmap;
+            }
+            set => initializedBitmap = value;
+        }
+        private Bitmap initializedBitmap;
         public byte[] Data
         {
             get => jImage.data;
         }
-
         internal int Width
         {
             get => jImage.width; 
         }
-
         internal int Height
         {
             get => jImage.height; 
