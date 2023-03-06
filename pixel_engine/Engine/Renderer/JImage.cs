@@ -42,7 +42,6 @@ namespace pixel_renderer
             height = (int)size.Y;
             this.data = data;
         }
-
         public JImage(Pixel[,] pixels)
         {
             width = pixels.GetLength(0);
@@ -63,6 +62,12 @@ namespace pixel_renderer
 
             data = byteData;
             //bmpInput.Dispose();
+        }
+        public JImage(BoundingBox2D bounds, byte[] bytes)
+        {
+            height = (int)bounds.Height;
+            width = (int)bounds.Width;
+            data = bytes; 
         }
 
         public void SetPixel(int x, int y, Pixel color)
@@ -89,12 +94,54 @@ namespace pixel_renderer
             Pixel col = new(a, r, g, b);
             return col;
         }
-
-        internal static void Concat(IEnumerable<JImage> images, BoundingBox2D bounds, Curve posCurve, Curve sizeCurve)
+        internal static JImage Concat(IReadOnlyCollection<JImage> images, Curve posCurve)
         {
-            
 
+            byte[] drawSurface = GetDrawSurface(images, posCurve, out var bounds);
 
+            posCurve.Reset();
+
+            foreach (var image in images)
+            {
+                var position = posCurve.Next();
+                for (int x = 0; x < image.width; x += 4)
+                    for (int y = 0; y < image.height; y += 4)
+                    {
+                        var indices = new Vector2(x, y);
+
+                        var pxPos = position + indices;
+
+                        int mapPos = (int)((pxPos.Y * (bounds.Width - 1) * 4) + (pxPos.X * 4));
+                        int imgPos = (x * (image.width - 1) * 4) + (x * 4);
+
+                        drawSurface[mapPos + 0] = image.data[imgPos + 0];
+                        drawSurface[mapPos + 1] = image.data[imgPos + 1];
+                        drawSurface[mapPos + 2] = image.data[imgPos + 2];
+                        drawSurface[mapPos + 3] = image.data[imgPos + 3];
+                    }
+            }
+
+            Vector2 size = new Vector2(bounds.Width - 1, bounds.Height - 1);
+            return new(size, drawSurface); 
+        }
+        private static byte[] GetDrawSurface(IReadOnlyCollection<JImage> images, Curve posCurve, out BoundingBox2D bounds)
+        {
+            bounds = new(0, 0, 1, 1);
+
+            foreach (var image in images)
+            {
+                Vector2 position = posCurve.Next();
+                Vector2 bR = position + image.Size;
+
+                bounds.ExpandTo(position);
+                bounds.ExpandTo(bR);
+            }
+
+            int width  = (int)(bounds.Width - 1);
+            int height = (int)bounds.Height - 1;
+
+            byte[] drawSurface = new byte[width * height * 4];
+            return drawSurface;
         }
     }
 }

@@ -16,6 +16,11 @@ namespace pixel_renderer
         private int index;
         private int startIndex;
         public bool looping;
+
+        public void Reset()
+        {
+            index = startIndex; 
+        }
         public static Curve Circlular(float speed, int length, float radius = 1f, bool looping = true)
         {
             Curve curve = new()
