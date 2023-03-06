@@ -85,8 +85,8 @@ namespace pixel_renderer
         {
             min.X = Math.Min(point.X, min.X);
             min.Y = Math.Min(point.Y, min.Y);
-            max.X = Math.Max(point.X + 1, max.X);
-            max.Y = Math.Max(point.Y + 1, max.Y);
+            max.X = Math.Max(point.X, max.X);
+            max.Y = Math.Max(point.Y, max.Y);
         }
         public bool Intersects(BoundingBox2D other)
         {

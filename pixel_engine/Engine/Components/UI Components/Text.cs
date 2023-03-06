@@ -17,13 +17,14 @@ namespace pixel_renderer
 
 
         public BoundingBox2D bounds = new(new(0,0), new(15,5));
-        public Curve posCurve = Curve.Linear(new Vector2(), new Vector2(), 15);
-
+        public Curve posCurve;
+        private JImage init_font;
         const string alphabet = "abcdefghijklmnopqrstuvwxyz"; 
 
         public override void Awake()
         {
-            lock(font)
+            posCurve = Curve.Linear(new Vector2(), new Vector2(), speed: 1, vertices: 3);
+            lock (font)
             for (int i = 0; i < 3; ++i)
             {
                 var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
@@ -34,7 +35,7 @@ namespace pixel_renderer
                     font.Add(alphabet[i], image);
                 }
             }
-            JImage.Concat(font.Values, bounds, posCurve, posCurve);
+            init_font = JImage.Concat(font.Values, posCurve);
         }
         public override void Update()
         {
