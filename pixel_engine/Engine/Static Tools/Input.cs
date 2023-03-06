@@ -81,7 +81,7 @@ namespace pixel_renderer
                 });
             else return false; 
         }
-        
+
         /// <summary>
         /// Gets the value of a specified key and type of event.
         /// </summary>
@@ -91,27 +91,29 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
-            bool input_value = false; 
-            Application.Current.Dispatcher.Invoke(delegate
+            bool input_value = false;
+            if (Application.Current != null)
             {
-                try
+                Application.Current.Dispatcher.Invoke(delegate
                 {
-                    input_value = type switch
+                    try
                     {
-                        InputEventType.KeyDown => Keyboard.IsKeyDown(key),
-                        InputEventType.KeyUp => Keyboard.IsKeyUp(key),
-                        InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
-                        _ => false,
-                    };
-                }
-                catch(Exception e)
-                {
-                    Runtime.Log(e.Message);
-                }
-            });
+                        input_value = type switch
+                        {
+                            InputEventType.KeyDown => Keyboard.IsKeyDown(key),
+                            InputEventType.KeyUp => Keyboard.IsKeyUp(key),
+                            InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
+                            _ => false,
+                        };
+                    }
+                    catch (Exception e)
+                    {
+                        Runtime.Log(e.Message);
+                    }
+                });
+            }
             return input_value;
         }
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(ref Key key, InputEventType type = InputEventType.KeyDown)
         {

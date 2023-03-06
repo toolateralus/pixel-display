@@ -116,6 +116,12 @@ namespace pixel_editor
         }
         public override void OnDrawShapes()
         {
+            if (!InBoxSelect) return;
+            ShapeDrawer.DrawRect(boxStart, boxEnd, Constants.DragBoxColor);
+            ShapeDrawer.DrawCircle(boxEnd, Constants.DragCursorRadius, Constants.DragCursorColor);
+
+
+
 
         }
     }

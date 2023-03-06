@@ -19,6 +19,7 @@ namespace pixel_renderer
 
         public override void Awake()
         {
+            lock(font)
             for (int i = 0; i < 3; ++i)
             {
                 var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
