@@ -14,8 +14,18 @@ namespace pixel_renderer
 
     public class Collider : Component
     {
-        [JsonProperty] public Polygon untransformedPolygon = new Box().DefiningGeometry;
-        public Polygon Polygon => untransformedPolygon.Transformed(Transform);
+        
+        [JsonProperty] public Polygon untransformedPolygon;
+        public Polygon Polygon
+        {
+            get
+            {
+                if (untransformedPolygon is null)
+                    untransformedPolygon = new Box().DefiningGeometry; 
+                return untransformedPolygon.Transformed(Transform);
+            }
+        }
+
         [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
         
         [Field] public bool drawCollider = false;
