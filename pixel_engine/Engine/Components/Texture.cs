@@ -82,11 +82,10 @@ namespace pixel_renderer
         internal Metadata imgData;
         [JsonProperty]
         private JImage jImage = new();
-        public bool HasImage => initializedBitmap != null;
-        internal bool HasImageMetadata => imgData != null;
         
         public Pixel GetPixel(int x, int y) => jImage.GetPixel(x, y);
         public void SetPixel(int x, int y, Pixel pixel) => jImage?.SetPixel(x, y, pixel);
+
         public JImage GetImage()
         {
             return jImage; 
@@ -144,6 +143,7 @@ namespace pixel_renderer
             }
             return texture;
         }
+        
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
         public Bitmap? Image {
             get 
@@ -155,6 +155,10 @@ namespace pixel_renderer
             set => initializedBitmap = value;
         }
         private Bitmap initializedBitmap;
+        
+        public bool HasImage => initializedBitmap != null;
+        internal bool HasImageMetadata => imgData != null;
+        
         public byte[] Data
         {
             get => jImage.data;
