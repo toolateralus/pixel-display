@@ -56,7 +56,7 @@ namespace pixel_renderer
                 foreach (var action in actions)
                 {
                     var type = action.EventType;
-                    bool input_value = Get(ref action.Key, type);
+                    bool input_value = Get(action.Key, type);
                     if (input_value)
                         if (action.ExecuteAsynchronously) Task.Run(() => action.InvokeAsync());
                         else action.Invoke();
@@ -92,9 +92,7 @@ namespace pixel_renderer
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
             bool input_value = false;
-            if (Application.Current != null)
-            {
-                Application.Current.Dispatcher.Invoke(delegate
+            Application.Current?.Dispatcher.Invoke(delegate
                 {
                     try
                     {
@@ -111,14 +109,9 @@ namespace pixel_renderer
                         Runtime.Log(e.Message);
                     }
                 });
-            }
             return input_value;
         }
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public static bool Get(ref Key key, InputEventType type = InputEventType.KeyDown)
-        {
-            return Get(key, type);
-        }
+      
         public static void RegisterAction(Action action, Key key, InputEventType type = InputEventType.KeyDown)
         {
              InputActions.Add(new(action, key, type: type));
