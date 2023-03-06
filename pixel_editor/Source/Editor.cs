@@ -186,8 +186,11 @@ namespace pixel_editor
         {
             CMouse.Update();
             inspector.Update(sender, e);
+            
             UpdateMetrics();
+            
             Events.ExecuteAll();
+
             foreach (Tool tool in Tools)
                 tool.Update(1f);
         }
@@ -198,8 +201,6 @@ namespace pixel_editor
 
             if (info.frameCount % 60 == 0)
             {
-                var memory = info.GetTotalMemory();
-                
                 var framerate = info.Framerate;
                 var min = info.lowestFrameRate;
                 var max = info.highestFrameRate;
@@ -381,10 +382,14 @@ namespace pixel_editor
         /// For users to pass an event to the inspector to be executed as soon as possible
         /// </summary>
         /// <param name="e"></param>
-        public static void QueueEvent(EditorEvent e)
+        public async static void QueueEvent(EditorEvent e)
         {
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
+
+            while (Current.Events.Pending.Count > Constants.EditorEventQueueMaxLength)
+                await Task.Delay(15);
+
             Current.Events.Pending.Enqueue(e);
         }
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;

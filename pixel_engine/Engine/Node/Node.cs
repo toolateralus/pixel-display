@@ -295,15 +295,31 @@ namespace pixel_renderer
         public void Destroy() => ParentStage?.nodes.Remove(this);
         public void OnTrigger(Collider otherBody)
         {
-            lock (Components)
-                for (int i = 0; i < ComponentsList.Count; i++)
-                  ComponentsList[i].OnTrigger(otherBody);
+            if (!awake)
+                return;
+
+            for (int i = 0; i < Components.Count; i++)
+            {
+                var pair = Components.ElementAt(i);
+                var key = pair.Key;
+
+                for (int j = 0; j < Components[key].Count; ++j)
+                    Components[key].ElementAt(j)?.OnTrigger(otherBody);
+            }
         }
         public void OnCollision(Collider otherBody)
         {
-            lock (Components)
-                for (int i = 0; i < ComponentsList.Count; i++)
-                  ComponentsList[i].OnCollision(otherBody);
+            if (!awake)
+                return;
+
+            for (int i = 0; i < Components.Count; i++)
+            {
+                var pair = Components.ElementAt(i);
+                var key = pair.Key;
+
+                for (int j = 0; j < Components[key].Count; ++j)
+                    Components[key].ElementAt(j)?.OnCollision(otherBody);
+            }
         }
 
         public T AddComponent<T>(T component) where T : Component
@@ -341,7 +357,7 @@ namespace pixel_renderer
         public void RemoveComponent(Component component)
         {
             var type = component.GetType();
-            if (ComponentsList.Contains(component))
+            if (Components[type].Contains(component))
             {
                 var compList = Components[type];
                 var toRemove = new Component();

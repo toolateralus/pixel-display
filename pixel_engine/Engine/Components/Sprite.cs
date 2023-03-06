@@ -26,7 +26,7 @@ namespace pixel_renderer
     public enum TextureFiltering { Point, Bilinear }
     public class Sprite : Component
     {
-        internal protected bool dirty = true;
+        internal protected bool IsDirty = true;
         internal protected bool selected_by_editor;
 
         private JImage lightmap;
@@ -139,7 +139,7 @@ namespace pixel_renderer
                 default: throw new NotImplementedException();
             }
             colorDataSize = new(texture.Width, texture.Height);
-            dirty = false;
+            IsDirty = false;
         }
 
         public override void Awake()
@@ -150,7 +150,7 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
-            if (dirty)
+            if (IsDirty)
                 Refresh();
         }
         public override void OnDrawShapes()

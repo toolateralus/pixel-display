@@ -112,13 +112,8 @@ namespace pixel_renderer
             if (normal == Vector2.Zero)
                 return;
 
-            float depenetration = depth / 2f;
-
-            A.Position += normal * depenetration;
-            B.Position -= normal * depenetration;
 
             ComputeImpulse(A, B, normal, depth);
-            
             AttemptCallbacks(aCol, bCol);
 
         }

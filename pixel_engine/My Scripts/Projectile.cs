@@ -1,11 +1,39 @@
-﻿using pixel_renderer.ShapeDrawing;
-
+﻿using pixel_renderer.FileIO;
+using pixel_renderer.ShapeDrawing;
+using System;
+using System.Drawing;
+using System.Numerics;
+using System.Threading;
+using static pixel_renderer.Assets.AssetLibrary; 
 namespace pixel_renderer
 {
     public class Projectile : Component
     {
         public float hitRadius;
-        public Node? sender; 
+        public Node? sender;
+        const string defaultImagePath = "\\Assets\\other\\ball.bmp";
+        internal static Node Standard(Node sender)
+        {
+            Node node = Node.New;
+            
+            var proj = node.AddComponent<Projectile>();
+            proj.hitRadius = 125;
+            proj.sender = sender;
+            node.AddComponent<Rigidbody>();
+
+            Metadata meta = FetchMetaRelative(defaultImagePath);
+            var sprite = node.AddComponent<Sprite>();
+            sprite.Type = SpriteType.Image;
+            sprite.texture = new(meta.Path);
+            sprite.IsDirty = true;
+            node.Transform = Matrix3x2.CreateScale(35);
+
+            var col = node.AddComponent<Collider>();
+            col.untransformedPolygon = new Circle().DefiningGeometry; 
+
+
+            return node; 
+        }
 
         public override void Awake()
         {
@@ -13,6 +41,8 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
+            if (sender != null)
+                Position = sender.Position + Vector2.One * 2; 
         }
         public override void OnCollision(Collider collider)
         {

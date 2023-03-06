@@ -53,41 +53,13 @@ namespace pixel_renderer
         
         private void Fire()
         {
-            fired = true; 
+            fired = true;
 
-            var proj = Node.Instantiate(this.projectile, Position);
+            var proj = Projectile.Standard(this.node);
+
+            Runtime.Current.GetStage()?.AddNode(proj);
             
-            if (proj.TryGetComponent<Sprite>(out var sprite))
-            {
-                if (sprite.texture.Name == "ball") 
-                    return; 
-
-                var meta = AssetLibrary.FetchMetaRelative("\\Assets\\other\\ball.bmp");
-
-                if (meta != null)
-                {
-                    sprite.texture.SetImage(meta.Path);
-                    sprite.Transform = Matrix3x2.CreateScale(25);
-                    sprite.dirty = true;
-                }
-
-            }
-            if (proj.TryGetComponent(out Rigidbody rb))
-            {
-                rb?.ApplyImpulse(new Vector2(5, 0) * 15);
-                return;
-            }
-            else
-            {
-                proj?.Destroy();
-                Runtime.Log("Projectile discarded");
-            }
-
-            if (proj.TryGetComponent(out Projectile projectile))
-            {
-                projectile.sender = node;
-                projectile.hitRadius = 16; 
-            }   
+       
         }
 
         private void Reload()
