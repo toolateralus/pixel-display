@@ -26,7 +26,7 @@ namespace pixel_editor
 
         public override void Awake()
         {
-            CMouse.OnMouseMove += TryMoveCamera;
+            CMouse.OnMouseMove += UpdateCamPosition;
         }
 
         public override void Update(float delta)
@@ -108,9 +108,10 @@ namespace pixel_editor
             IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
             if (!enumerable.Any()) return;
             enumerable.First().Size *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
+            UpdateCamPosition();
         }
 
-        private void TryMoveCamera()
+        private void UpdateCamPosition()
         {
             IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
 
