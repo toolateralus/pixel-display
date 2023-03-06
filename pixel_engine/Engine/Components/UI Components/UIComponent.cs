@@ -77,12 +77,10 @@ namespace pixel_renderer
 
             while (framePos.Y < drawArea.max.Y)
             {
-
                 Vector2 screenViewport = framePos / renderer.Resolution;
-
-                var spriteLocal = ScreenViewportToLocal(screenViewport);
-
-                if (!RendererBase.IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, -1, 1))
+                var localPos = ScreenViewportToLocal(screenViewport);
+                
+                if (!RendererBase.IsWithinMaxExclusive(localPos.X, localPos.Y, -1, 1))
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)
@@ -93,34 +91,10 @@ namespace pixel_renderer
                     continue;
                 }
 
-                var colorPos = LocalToColorPosition(spriteLocal);
-
-                Pixel color = new Pixel();
-
-                switch (filtering)
-                {
-                    case TextureFiltering.Point:
-                        color = image.GetPixel((int)colorPos.X, (int)colorPos.Y);
-                        break;
-                    case TextureFiltering.Bilinear:
-                        Vector2 colorSize = colorDataSize;
-
-                        int left = (int)colorPos.X;
-                        int top = (int)colorPos.Y;
-                        int right = (int)((left + 1) % colorSize.X);
-                        int bottom = (int)((top + 1) % colorSize.Y);
-
-                        float xOffset = colorPos.X - left;
-                        float yOffset = colorPos.Y - top;
-
-                        Pixel topJPixel = Pixel.Lerp(image.GetPixel(left, top), image.GetPixel(right, top), xOffset);
-                        Pixel botJPixel = Pixel.Lerp(image.GetPixel(left, bottom), image.GetPixel(right, bottom), xOffset);
-                        color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
-                        break;
-                    default:
-                        throw new NotImplementedException("Filtering not implemented");
-                }
-
+                var colorPos = LocalToColorPosition(localPos);
+                
+                Pixel color = FilterPixel(image, colorPos);
+                
                 if (color.a == 0)
                 {
                     framePos.X++;
@@ -131,19 +105,66 @@ namespace pixel_renderer
                     }
                     continue;
                 }
-
+                
                 renderer.WriteColorToFrame(ref color, ref framePos);
-
+                
                 framePos.X++;
-
+                
                 if (framePos.X >= drawArea.max.X)
                 {
                     framePos.X = drawArea.min.X;
                     framePos.Y++;
                 }
-
             }
         }
+
+        private Pixel FilterPixel(JImage image, Vector2 colorPos)
+        {
+            Pixel color;
+            switch (filtering)
+            {
+                case TextureFiltering.Point:
+                    color = image.GetPixel((int)colorPos.X, (int)colorPos.Y);
+                    break;
+
+                case TextureFiltering.Bilinear:
+
+                    Vector2 colorSize = colorDataSize;
+
+                    int left = (int)colorPos.X;
+                    int top = (int)colorPos.Y;
+                    int right = (int)((left + 1) % colorSize.X);
+                    int bottom = (int)((top + 1) % colorSize.Y);
+
+                    float xOffset = colorPos.X - left;
+                    float yOffset = colorPos.Y - top;
+
+                    Pixel tl, tr, bl, br;
+
+                    GetAdjacentPixels(image, left, top, right, bottom, out tl, out tr, out bl, out br);
+
+                    Pixel topPx = Pixel.Lerp(tl, tr, xOffset);
+                    Pixel bottomPx = Pixel.Lerp(bl, br, xOffset);
+
+                    color = Pixel.Lerp(topPx, bottomPx, yOffset);
+
+                    break;
+
+                default:
+                    throw new NotImplementedException("Filtering not implemented");
+            }
+
+            return color;
+        }
+
+        private static void GetAdjacentPixels(JImage image, int left, int top, int right, int bottom, out Pixel tl, out Pixel tr, out Pixel bl, out Pixel br)
+        {
+            tl = image.GetPixel(left, top);
+            tr = image.GetPixel(right, top);
+            bl = image.GetPixel(left, bottom);
+            br = image.GetPixel(right, bottom);
+        }
+
         /// <summary>
         /// re-draws the image *this is always called when marked dirty*
         /// </summary>
