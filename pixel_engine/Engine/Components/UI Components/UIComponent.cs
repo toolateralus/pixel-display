@@ -41,19 +41,20 @@ namespace pixel_renderer
             {
                 case SpriteType.SolidColor:
                     Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
-                    texture.SetImage(colorArray);
+                    if (texture is null) texture = new(colorArray);
+                    else texture.SetImage(colorArray);
                     break;
                 case SpriteType.Image:
                     if (texture is null)
                     {
-                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), Vector2.One);
                         Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
-                        texture.SetImage(colorArray1);
+                        if (texture is null) texture = new(colorArray1);
+                        else texture.SetImage(colorArray1);
                     }
                     else
                     {
-                        Pixel[,] colorArray1 = CBit.PixelFromBitmap(texture.Image);
-                        texture.SetImage(colorArray1);
+                        if (texture is null) texture = new(texture.Image);
+                        else texture.SetImage(texture.Image);
                     }
                     break;
                 default: throw new NotImplementedException();

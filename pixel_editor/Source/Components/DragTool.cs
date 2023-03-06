@@ -12,6 +12,11 @@ namespace pixel_editor
     public class DragTool : Tool
     {
         private Vector2 mouseSelectedNodeOffset;
+        List<Vector2> mouseSelectedNodeOffsets = new();
+        Vector2 boxStart = default;
+        Vector2 boxEnd = default;
+        public bool InBoxSelect { get; private set; } = false;
+        private bool draggingMultiple;
 
         public override void Awake()
         {
@@ -56,7 +61,6 @@ namespace pixel_editor
 
             mouseSelectedNodeOffset = selected.Position - CMouse.GlobalPosition;
         }
-
         private void DragMultipleNodes()
         {
             foreach (var x in Editor.Current.ActivelySelected)
@@ -65,7 +69,6 @@ namespace pixel_editor
             draggingMultiple = true;
         }
 
-        List<Vector2> mouseSelectedNodeOffsets = new();
         public override void Update(float delta)
         {
             var selected = Editor.Current.LastSelected;
@@ -74,11 +77,9 @@ namespace pixel_editor
                 selected.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset;
                 int i = 0; 
 
-
                 if (draggingMultiple && mouseSelectedNodeOffsets.Count - 1 > i)
                     foreach (var x in Editor.Current.ActivelySelected )
                         x.Position = CMouse.GlobalPosition + mouseSelectedNodeOffsets[i++];
-
             }
             else if (CMouse.Left)
             {
@@ -101,7 +102,6 @@ namespace pixel_editor
                     foreach (Node node in nodes)
                         if (node.Position is Vector2 vec)
                             if (vec.IsWithin(boxStart, boxEnd))
-                            {
                                 if (node.TryGetComponent(out Collider sprite))
                                 {
                                     Editor.Current.ActivelySelected.Add(node);
@@ -109,30 +109,14 @@ namespace pixel_editor
                                     sprite.drawNormals = true;
                                     sprite.colliderPixel = Color.Orange;
                                 }
-                            }
                 }
 
                 InBoxSelect = false;
             }
         }
-        Vector2 boxStart;
-        Vector2 boxEnd;
-        public bool InBoxSelect { get; private set; } = false;
-        private bool draggingMultiple;
-
         public override void OnDrawShapes()
         {
-          
-              
-            if (!InBoxSelect) return;
-            ShapeDrawer.DrawRect(boxStart, boxEnd, Pixel.Green);
-            ShapeDrawer.DrawCircle(boxEnd, 3, Pixel.Red);
 
-            var stage = Runtime.Current.GetStage();
-            List<Node> nodes = new(stage.nodes);
-
-            if (stage is null)
-                return;
         }
     }
 

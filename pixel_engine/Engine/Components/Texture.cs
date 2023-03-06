@@ -10,22 +10,12 @@ namespace pixel_renderer
     {
         #region Constructors / Overrides
         [JsonConstructor]
-        public Texture(JImage image, Metadata imgData, Vector2 scale, string Name = "Texture Asset") : base(Name, true)
+        internal protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name = "Texture Asset") : base(Name, true)
         {
             this.imgData = imgData;
             this.Name = Name;
             this.scale = scale;
             this.jImage = image; 
-        }
-        public Texture(Vector2 scale, Metadata imgData)
-        {
-            this.scale = scale; 
-            SetImage(imgData, scale);
-        }
-        public Texture(Vector2 size, Pixel color)
-        {
-            scale = size;
-            SetImage(color);
         }
         public Texture(string filePath)
         {
@@ -33,7 +23,42 @@ namespace pixel_renderer
         }
         public Texture(Bitmap source)
         {
+            SetImage(source);
+        }
+        public Texture(Vector2 size, Pixel color)
+        {
+            scale = size;
+            SetImage(color);
+        }
+        public Texture(Pixel[,] colors)
+        {
+            SetImage(colors);
+        }
+        public Texture(Vector2 scale, Metadata imgData)
+        {
+            this.scale = scale; 
+            SetImage(imgData, scale);
+        }
+
+        public void SetImage(string path)
+        {
+            jImage = new(new Bitmap(path));
+        }
+        public void SetImage(Pixel color)
+        {
+            jImage = new(CBit.SolidColorSquare(scale, color));
+        }
+        public void SetImage(Bitmap source)
+        {
             jImage = new(source);
+        }
+        public void SetImage(JImage image)
+        {
+            jImage = image;
+        }
+        public void SetImage(Pixel[,] colors)
+        {
+            jImage = new(colors);
         }
         public void SetImage(Metadata imgData, Vector2 scale)
         {
@@ -56,22 +81,6 @@ namespace pixel_renderer
         public void SetImage(Vector2 size, byte[] data)
         {
             jImage = new(size, data);
-        }
-        public void SetImage(JImage image)
-        {
-            jImage = image;
-        }
-        public void SetImage(string path)
-        {
-            jImage = new(new Bitmap(path));
-        }
-        public void SetImage(Pixel[,] colors)
-        {
-            jImage = new(colors);
-        }
-        public void SetImage(Pixel color)
-        {
-            jImage = new(CBit.SolidColorSquare(scale, color));
         }
         #endregion
 

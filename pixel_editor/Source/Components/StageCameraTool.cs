@@ -16,12 +16,11 @@ namespace pixel_editor
         /// </summary>
         private const Key FollowModifier = Key.LeftCtrl;
         private const Key FocusNodeKey = Key.F;
+
         public Camera camera;
         public Node? selected;
         private static bool followNode;
 
-        public static StageCameraState State { get; private set;}
-        
         public override void Awake()
         {
 
@@ -118,8 +117,9 @@ namespace pixel_editor
 
             if (CMouse.Right)
             {
-                State = StageCameraState.Idle; 
-                cams.First().node.Position += CMouse.Delta * Constants.MouseSensitivity;
+                float camSize = cams.First().camDistance;
+                var scrollSpeed = Math.Clamp(camSize / 2, 0.001f, 20);
+                cams.First().node.Position += CMouse.Delta * Constants.MouseSensitivity * scrollSpeed;
             }
 
         }

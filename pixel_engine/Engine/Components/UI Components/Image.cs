@@ -1,24 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using pixel_renderer.Assets;
+﻿using pixel_renderer.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
 using System.Linq;
 using System;
-using System.Security.Policy;
 
 namespace pixel_renderer
 {
     public class Image : UIComponent
     {
         
-       
         internal protected bool selected_by_editor;
-        
         private JImage lightmap;
-
 
         [Field]
         [JsonProperty]
@@ -48,7 +42,6 @@ namespace pixel_renderer
                 return lightmap;
             }
         }
-        
         internal JImage ColorData
         {
             get
@@ -67,7 +60,17 @@ namespace pixel_renderer
 
         }
 
+        public override void Awake()
+        {
+            texture = new(Vector2.One, Player.PlayerSprite);
+            Refresh();
 
+        }
+        public override void FixedUpdate(float delta)
+        {
+            if (dirty)
+                Refresh();
+        }
         public override void OnDrawShapes()
         {
             if (selected_by_editor)
@@ -81,36 +84,11 @@ namespace pixel_renderer
                 }
             }
         }
-
         public override void Draw(RendererBase renderer)
         {
             var image = texture.GetImage();
             DrawImage(renderer, image);
 
-        }
-
-        [Method]
-        public void CycleSpriteType()
-        {
-            if ((int)Type + 1 > sizeof(SpriteType) - 2)
-            {
-                Type = 0;
-                return;
-            }
-            Type = (SpriteType)((int)Type + 1);
-
-        }
-
-        public override void Awake()
-        {
-            texture = new(Vector2.One, Player.PlayerSprite);
-            Refresh();
-
-        }
-        public override void FixedUpdate(float delta)
-        {
-            if (dirty)
-                Refresh();
         }
 
         public Image()
@@ -137,13 +115,23 @@ namespace pixel_renderer
         }
        
         [Method]
+        public void CycleSpriteType()
+        {
+            if ((int)Type + 1 > sizeof(SpriteType) - 2)
+            {
+                Type = 0;
+                return;
+            }
+            Type = (SpriteType)((int)Type + 1);
+
+        }
+        [Method]
         public void TrySetTextureFromString()
         {
             if (AssetLibrary.FetchMetaRelative(textureName) is Metadata meta)
                 texture.SetImage(meta.Path);
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
-
        
         public static Node Standard()
         {
@@ -224,58 +212,6 @@ namespace pixel_renderer
             return colors;
         }
         #endregion
-
        
-    }
-
-    public class Text : UIComponent
-    {
-        public Dictionary<char, (JImage image, Vector2 scale)> font = new();
-        public Dictionary<Sprite, char> nodes = new(); 
-        /// <summary>
-        /// the bounding box of the text element
-        /// </summary>
-
-        public BoundingBox2D bounds;
-        const string alphabet = "abcdefghijklmnopqrstuvwxyz"; 
-
-        public override void Awake()
-        {
-            for (int i = 0; i < 3; ++i)
-            {
-                var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
-                if (meta != null)
-                {
-                    Bitmap bmp = new(meta.Path);
-                    JImage image = new(bmp);
-                    
-                    Node node = Rigidbody.Standard("Font Test Node.");
-
-
-                    node.Transform = Matrix3x2.CreateScale(35);
-                    if (!node.TryGetComponent(out Sprite sprite)) 
-                        continue;
-
-                    sprite.texture.SetImage(image);
-
-                    var scale = sprite.texture.scale; 
-
-
-                    font.Add(alphabet[i], (image, scale));
-                    nodes.Add(sprite, alphabet[i]);
-                }
-            }
-        }
-        public override void Update()
-        {
-            foreach (var node in nodes.Keys)
-                node.Position = Position + Vector2.One * 15; 
-        }
-
-        public override void Draw(RendererBase renderer)
-        {
-
-
-        }
     }
 }
