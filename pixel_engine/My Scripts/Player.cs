@@ -152,7 +152,7 @@ namespace pixel_renderer
 
             return playerNode;
         }
-        public static Camera AddCamera(Node node, int height = 256, int width = 256, DrawingType type = DrawingType.Wrapped)
+        public static Camera AddCamera(Node node, int height = 256, int width = 256)
         {
             var cam = node.AddComponent<Camera>();
             cam.Size = new(width, height);

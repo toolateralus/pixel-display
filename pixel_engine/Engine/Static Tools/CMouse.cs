@@ -72,7 +72,7 @@ namespace pixel_renderer
                 var img = Runtime.OutputImages.First();
                 var normalizedPos = img.GetNormalizedPoint(new Point(LastClickPosition.X, LastClickPosition.Y));
 
-                LastClickGlobalPosition = Camera.First.ScreenViewportToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
+                LastClickGlobalPosition = Camera.First.ScreenToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
                 OnLeftPressedThisFrame?.Invoke();
             }
             else
@@ -118,8 +118,8 @@ namespace pixel_renderer
             if (Camera.First is not Camera firstCam)
                 return;
             ScreenPosition = pt.ToVector2();
-            CameraPosition = firstCam.ScreenViewportToLocal(ScreenPosition);
-            GlobalPosition = firstCam.ScreenViewportToGlobal(ScreenPosition);
+            CameraPosition = firstCam.ScreenToLocal(ScreenPosition);
+            GlobalPosition = firstCam.ScreenToGlobal(ScreenPosition);
             OnMouseMove?.Invoke();
         }
     }

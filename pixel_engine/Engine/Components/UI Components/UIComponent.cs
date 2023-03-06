@@ -28,11 +28,12 @@ namespace pixel_renderer
         [Field][JsonProperty] public bool IsReadOnly = false;
         [Field][JsonProperty] public Pixel color = Pixel.Blue;
                [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
-        [Field][JsonProperty] public Vector2 viewportScale = new(1, 1);
-        [Field][JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
         [Field][JsonProperty] public float camDistance = 1;
         [Field][JsonProperty] public SpriteType Type = SpriteType.SolidColor;
         [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
+        [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
+        [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
+        public readonly Vector2 half = Vector2.One * 0.5f;
 
         [Method]
         internal protected void Refresh()
@@ -78,7 +79,7 @@ namespace pixel_renderer
             while (framePos.Y < drawArea.max.Y)
             {
                 Vector2 screenViewport = framePos / renderer.Resolution;
-                var localPos = ScreenViewportToLocal(screenViewport);
+                var localPos = ScreenToLocal(screenViewport);
                 
                 if (!RendererBase.IsWithinMaxExclusive(localPos.X, localPos.Y, -1, 1))
                 {
@@ -194,11 +195,7 @@ namespace pixel_renderer
                 Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform), // Bottom Left
             };
         }
-        internal Vector2 GlobalToLocal(Vector2 global)
-        {
-            Matrix3x2.Invert(Transform, out var inverted);
-            return Vector2.Transform(global, inverted);
-        }
+
         public static bool PointInPolygon(Vector2 point, Vector2[] vertices)
         {
             int i, j = vertices.Length - 1;
@@ -214,25 +211,19 @@ namespace pixel_renderer
             }
             return c;
         }
-        public Vector2 LocalToGlobal(Vector2 local) => Vector2.Transform(local, Transform);
-        public Vector2 ViewportToColorPos(Vector2 spriteViewport) => ((spriteViewport + viewportOffset) * viewportScale).Wrapped(Vector2.One) * colorDataSize;
-        internal Vector2 GlobalToViewport(Vector2 global)
-        {
-            return (global - Position) / Scale;
-        }
-        public Vector2 ScreenViewportToLocal(Vector2 screenViewport)
-        {
-            viewportScale.MakeDivideSafe();
-            return (screenViewport - viewportOffset) / viewportScale;
-        }
-        public Vector2 LocalToViewport(Vector2 local) => (local + viewportOffset) * viewportScale;
-        public Vector2 LocalToColorPosition(Vector2 local) => ViewportToColorPosition(LocalToViewport(local));
-        public Vector2 ViewportToColorPosition(Vector2 viewport)
+        public Vector2 LocalToColorPosition(Vector2 local) => ScreenToColorPos(LocalToScreen(local));
+        public Vector2 ScreenToColorPos(Vector2 viewport)
         {
             viewport.X += 0.5f;
             viewport.Y += 0.5f;
             return viewport.Wrapped(Vector2.One) * colorDataSize;
         }
+        public Vector2 GlobalToScreen(Vector2 globalPos) => LocalToScreen(GlobalToLocal(globalPos));
+        public Vector2 ScreenToGlobal(Vector2 normalizedScreenPos) => LocalToGlobal(ScreenToLocal(normalizedScreenPos));
+        public Vector2 LocalToScreen(Vector2 local) => 
+            ((local * viewportSize + viewportPosition) / 2) + half;
+        public Vector2 ScreenToLocal(Vector2 screenViewport) =>
+            (((screenViewport - half) * 2) - viewportPosition) / viewportSize.GetDivideSafe();
         #endregion
     }
 }
