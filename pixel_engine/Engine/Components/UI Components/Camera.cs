@@ -11,19 +11,7 @@ namespace pixel_renderer
 {
     public class Camera : UIComponent
     {
-        public readonly Vector2 half = Vector2.One * 0.5f;
-        [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
-        [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
-       
         public float[,] zBuffer = new float[0, 0];
-
-        public Vector2 LocalToScreenViewport(Vector2 local) =>
-            ((local * viewportSize + viewportPosition) / 2) + half;
-        public Vector2 ScreenViewportToLocal(Vector2 screenViewport)
-        {
-            viewportSize.MakeDivideSafe();
-            return (((screenViewport - half) * 2) - viewportPosition) / viewportSize;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Draw(RendererBase renderer)
@@ -47,8 +35,8 @@ namespace pixel_renderer
             {
                 float sqrtOfHalf = MathF.Sqrt(0.5f);
                 Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
-                Vector2 centerPos = GlobalToScreenViewport(circle.center) * resolution;
-                Vector2 pixelRadius = GlobalToScreenViewport(radius) * resolution - centerPos;
+                Vector2 centerPos = GlobalToScreen(circle.center) * resolution;
+                Vector2 pixelRadius = GlobalToScreen(radius) * resolution - centerPos;
                 Vector2 quaterArc = pixelRadius * sqrtOfHalf;
                 int quarterArcAsInt = (int)quaterArc.X;
                 for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
@@ -77,8 +65,8 @@ namespace pixel_renderer
             }
             foreach (Line line in ShapeDrawer.Lines)
             {
-                Vector2 startPos = GlobalToScreenViewport(line.startPoint) * resolution;
-                Vector2 endPos = GlobalToScreenViewport(line.endPoint) * resolution;
+                Vector2 startPos = GlobalToScreen(line.startPoint) * resolution;
+                Vector2 endPos = GlobalToScreen(line.endPoint) * resolution;
                 if (startPos == endPos)
                 {
                     if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
@@ -137,8 +125,8 @@ namespace pixel_renderer
                 if (drawArea.min.X >= 1 || drawArea.max.X <= -1 ||
                     drawArea.min.Y >= 1 || drawArea.max.Y <= -1)
                     continue;
-                drawArea.min = LocalToScreenViewport(drawArea.min) * resolution;
-                drawArea.max = LocalToScreenViewport(drawArea.max) * resolution;
+                drawArea.min = LocalToScreen(drawArea.min) * resolution;
+                drawArea.max = LocalToScreen(drawArea.max) * resolution;
 
                 DrawTransparentSprite(sprite, drawArea, resolution, renderer);
             }
@@ -198,7 +186,7 @@ namespace pixel_renderer
                 }
 
                 Vector2 screenViewport = framePos / resolution;
-                Vector2 camLocal = ScreenViewportToLocal(screenViewport);
+                Vector2 camLocal = ScreenToLocal(screenViewport);
 
                 if (!RendererBase.IsWithinMaxExclusive(camLocal.X, camLocal.Y, -1, 1))
                 {
@@ -280,15 +268,6 @@ namespace pixel_renderer
 
             }
         }
-
-
-        public Vector2 GlobalToScreenViewport(Vector2 global) => LocalToScreenViewport(GlobalToLocal(global));
-        public Vector2 ScreenViewportToGlobal(Vector2 screenViewport) => LocalToGlobal(ScreenViewportToLocal(screenViewport));
-        public Vector2 LocalToSpriteViewport(Sprite sprite, Vector2 local) =>
-            sprite.GlobalToViewport(LocalToGlobal(local));
-        public Vector2 LocalToSpriteLocal(SpriteInfo sprite, Vector2 local) =>
-            sprite.GlobalToLocal(LocalToGlobal(local));
         public static Camera? First => Runtime.Current.GetStage()?.GetAllComponents<Camera>().First();
     }
-    public enum DrawingType { Wrapped, Clamped, None }
 }
