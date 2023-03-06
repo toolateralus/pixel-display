@@ -88,7 +88,10 @@ namespace pixel_renderer
             for (int i = 0; i < vertices; ++i)
             {
                 float t = (vertices - i) / vertices;
+
                 output[i] = Vector2.Lerp(start, end, t);
+
+
             }
 
             Curve curve = new();
