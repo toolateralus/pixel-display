@@ -61,7 +61,7 @@ namespace pixel_renderer
             Task.Run(() => renderThread.Start());
             Initialized = true;
             Project.LoadStage(0);
-            Current.stage?.Awake();
+            
         }
         public static void Toggle()
         {
@@ -71,6 +71,9 @@ namespace pixel_renderer
                 return;
             }
             IsRunning = true;
+
+            if(!Current.stage.awake)
+                Current.stage?.Awake();
         }
         /// <summary>
         /// Prints a message in the editor console.
@@ -104,8 +107,11 @@ namespace pixel_renderer
                         return; 
 
                     StagingHost.Update(Current.stage);
+                    
                     StagingHost.FixedUpdate(Current.stage);
+                    
                     Collision.Run();
+
                     Current.renderHost?.Render();
 
                     if (Application.Current is null)

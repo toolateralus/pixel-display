@@ -288,7 +288,16 @@ namespace pixel_renderer
             sprite.GlobalToViewport(LocalToGlobal(local));
         public Vector2 LocalToSpriteLocal(SpriteInfo sprite, Vector2 local) =>
             sprite.GlobalToLocal(LocalToGlobal(local));
-        public static Camera? First => Runtime.Current.GetStage()?.GetAllComponents<Camera>().First();
+        public static Camera? First
+        {
+            get
+            {
+                var cams = Runtime.Current.GetStage()?.GetAllComponents<Camera>();
+                if (cams.Any())
+                    return cams.First();
+                else return null;
+            }
+        }
     }
     public enum DrawingType { Wrapped, Clamped, None }
 }

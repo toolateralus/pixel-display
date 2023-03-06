@@ -73,8 +73,6 @@ namespace pixel_renderer
 
             return outVec;
         }
-
-
         internal static Curve Linear(Vector2 start = default, Vector2 end = default, float speed = 1, int vertices = 16)
         {
             if(start == default)

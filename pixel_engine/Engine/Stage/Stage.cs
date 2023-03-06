@@ -46,7 +46,9 @@ namespace pixel_renderer
                     return background = init_background();
             return background ?? throw new NullReferenceException(nameof(background));
         }
-        public JImage background = new(); 
+        public JImage background = new();
+        internal bool awake;
+
         public bool NodesBusy { get; private set; }
         public void Awake()
         {
@@ -56,19 +58,20 @@ namespace pixel_renderer
                 node.ParentStage = this;
                 node.Awake();
             }
+            awake = true; 
         }
         public void Update()
         {
+            if (!awake)
+                return; 
+
             NodesBusy = true;
             lock (nodes)
-            {
-
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     Node node = nodes[i];
                     node.Update();
                 }
-            }
             NodesBusy = false;
 
             for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
@@ -83,18 +86,16 @@ namespace pixel_renderer
         }
         public void FixedUpdate(float delta)
         {
-                NodesBusy = true;
-            lock (nodes)
-            {
+            if (!awake) return;
 
+            NodesBusy = true;
+            lock (nodes)
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     Node node = nodes[i];
                     node.FixedUpdate(delta);
                 }
-
-            }
-                NodesBusy = false;
+            NodesBusy = false;
         }
         public override void Sync()
         {

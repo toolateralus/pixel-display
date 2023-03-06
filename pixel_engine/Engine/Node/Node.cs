@@ -1,11 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace pixel_renderer
 {
@@ -101,6 +98,8 @@ namespace pixel_renderer
         }
         [Field]
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
+        private bool awake;
+
         public Vector2 Position
         {
             get => Transform.Translation;
@@ -118,10 +117,12 @@ namespace pixel_renderer
             {
                 var cos = MathF.Cos(value);
                 var sin = MathF.Sin(value);
+                
                 Transform.M11 = cos;
                 Transform.M12 = sin;
                 Transform.M21 = -sin;
                 Transform.M22 = cos;
+
                 UpdateTransform(this);
             }
         }
@@ -138,6 +139,7 @@ namespace pixel_renderer
             {
                 Transform.M11 = value.X;
                 Transform.M22 = value.Y;
+
                 UpdateTransform(this);
             }
         }
@@ -145,10 +147,11 @@ namespace pixel_renderer
         static void UpdateTransform(Node node)
         {
             var parentMatrix = Matrix3x2.Identity; 
+
             if (node.parent != null)
             {
                 parentMatrix = node.parent.Transform; 
-                //UpdateTransform(node.parent); 
+                UpdateTransform(node.parent); 
             }
 
             var rotationMatrix = Matrix3x2.CreateRotation(node.Rotation);
@@ -235,8 +238,6 @@ namespace pixel_renderer
 
             return false;
         }
-
-       
         public bool TryRemoveChild(Node child)
         {
             foreach (var kvp in children)
@@ -250,22 +251,41 @@ namespace pixel_renderer
         }
         public void Awake()
         {
-            foreach(var Components in Components.Values)
-                foreach(var component in Components)
-                    component.init_component_internal();
+            for (int i = 0; i < Components.Count; i++)
+            {
+                var pair = Components.ElementAt(i);
+                var key = pair.Key;
+
+                for (int j = 0; j < Components[key].Count; ++j)
+                        Components[key].ElementAt(j).init_component_internal();
+                awake = true; 
+            }
         }
         public void FixedUpdate(float delta)
         {
-            lock (Components)
-                for (int i = 0; i < ComponentsList.Count; i++)
-                      ComponentsList[i].FixedUpdate(delta);
+            if (!awake) 
+                return;
+            for (int i = 0; i < Components.Count; i++)
+            {
+                var pair = Components.ElementAt(i);
+                var key = pair.Key;
+
+                for (int j = 0; j < Components[key].Count; ++j)
+                    Components[key].ElementAt(j)?.FixedUpdate(delta);
+            }
         }
         public void Update()
         {
-            lock (Components)
+            if (!awake) 
+                return; 
+
+            for (int i = 0; i < Components.Count; i++)
             {
-                for (int i = 0; i < ComponentsList.Count; i++)
-                    ComponentsList[i].Update();
+                var pair = Components.ElementAt(i);
+                var key = pair.Key; 
+
+                for (int j = 0; j < Components[key].Count; ++j)
+                    Components[key].ElementAt(j)?.Update();
             }
            
 

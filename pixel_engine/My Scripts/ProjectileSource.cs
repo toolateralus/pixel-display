@@ -53,6 +53,8 @@ namespace pixel_renderer
         
         private void Fire()
         {
+            fired = true; 
+
             var proj = Node.Instantiate(this.projectile, Position);
             
             if (proj.TryGetComponent<Sprite>(out var sprite))
