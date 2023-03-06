@@ -272,7 +272,7 @@ namespace pixel_renderer
         {
             get
             {
-                var cams = Runtime.Current.GetStage()?.GetAllComponents<Camera>();
+                var cams = Runtime.Current.GetStage()?.GetAllComponents<Camera>().AsParallel();
                 if (cams.Any())
                     return cams.First();
                 else return null;
