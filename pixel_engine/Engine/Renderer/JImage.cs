@@ -90,6 +90,11 @@ namespace pixel_renderer
             return col;
         }
 
+        internal static void Concat(IEnumerable<JImage> images, BoundingBox2D bounds, Curve posCurve, Curve sizeCurve)
+        {
+            
 
+
+        }
     }
 }

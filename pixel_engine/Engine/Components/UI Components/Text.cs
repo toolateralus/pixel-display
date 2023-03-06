@@ -6,6 +6,7 @@ using System.Security.Policy;
 
 namespace pixel_renderer
 {
+    public enum InterpolationType { Linear, Exponential, ExponentialSqrd}
 
     public class Text : UIComponent
     {
@@ -14,7 +15,10 @@ namespace pixel_renderer
         /// the bounding box of the text element
         /// </summary>
 
-        public BoundingBox2D bounds;
+
+        public BoundingBox2D bounds = new(new(0,0), new(15,5));
+        public Curve posCurve = Curve.Linear(new Vector2(), new Vector2(), 15);
+
         const string alphabet = "abcdefghijklmnopqrstuvwxyz"; 
 
         public override void Awake()
@@ -30,6 +34,7 @@ namespace pixel_renderer
                     font.Add(alphabet[i], image);
                 }
             }
+            JImage.Concat(font.Values, bounds, posCurve, posCurve);
         }
         public override void Update()
         {
@@ -38,8 +43,7 @@ namespace pixel_renderer
         }
         public override void Draw(RendererBase renderer)
         {
-            foreach (var x in font)
-                DrawImage(renderer, x.Value);
+          
         }
     }
 }

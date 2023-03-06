@@ -39,15 +39,15 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
-            bool fireDown = Get(ref fireKey);
-            bool fireUp = Get(ref fireKey, InputEventType.KeyUp);
+            bool fireDown = Get(fireKey);
+            bool fireUp = Get(fireKey, InputEventType.KeyUp);
 
             if (!fired && fireDown)
                 Fire();
             else if (fireUp)
                 fired = false;
 
-            if (Get(ref reloadKey))
+            if (Get(reloadKey))
                 Reload();
         }
         

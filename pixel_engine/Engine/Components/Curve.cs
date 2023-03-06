@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices;
 using System.Numerics;
 using System.Security.Cryptography;
+using System.Windows.Media.Animation;
 
 namespace pixel_renderer
 {
@@ -65,6 +67,49 @@ namespace pixel_renderer
             curve.index++;
 
             return outVec;
+        }
+
+
+        internal static Curve Linear(Vector2 start = default, Vector2 end = default, float speed = 1, int vertices = 16)
+        {
+            if(start == default)
+                start = Vector2.Zero;
+            
+            if (end == default)
+                end = Vector2.One;
+
+            Vector2[] output = new Vector2[vertices]; 
+
+            for (int i = 0; i < vertices; ++i)
+            {
+                float t = (vertices - i) / vertices;
+                output[i] = Vector2.Lerp(start, end, t);
+            }
+
+            Curve curve = new();
+            curve.CreateCurve(output, (int)(speed / vertices));
+            return curve; 
+
+        }
+        public static Curve LinearExponential(Vector2 start = default, Vector2 end = default, float speed = 1, int vertices = 16, float pow = 1.1f)
+        {
+            if (start == default)
+                start = Vector2.Zero;
+
+            if (end == default)
+                end = Vector2.One;
+
+            Vector2[] output = new Vector2[vertices];
+
+            for (int i = 0; i < vertices; ++i)
+            {
+                float t = (vertices - i) / vertices;
+                output[i] = Vector2.Lerp(start, end, MathF.Pow(t, pow));
+            }
+
+            Curve curve = new();
+            curve.CreateCurve(output, (int)(speed / vertices));
+            return curve;
         }
     }
 }
