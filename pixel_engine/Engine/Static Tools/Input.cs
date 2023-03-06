@@ -16,7 +16,11 @@ namespace pixel_renderer
         private static bool moveVectorInitialized;
         public static Vector2 MoveVector { get => moveVector; }
         public static float InputMagnitude { get => inputMagnitude; set => inputMagnitude = value; }
-        
+        public static void AddInputResultToQueue(bool val, Key key)
+        {
+
+        }
+
         static void Up() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Down() => moveVector = new Vector2(moveVector.X, inputMagnitude);
         static void Left()
@@ -87,26 +91,27 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
-            try
+            bool input_value = false; 
+            Application.Current.Dispatcher.Invoke(delegate
             {
-                return Application.Current.Dispatcher.Invoke(() =>
+                try
                 {
-                    var input_value = type switch
+                    input_value = type switch
                     {
                         InputEventType.KeyDown => Keyboard.IsKeyDown(key),
                         InputEventType.KeyUp => Keyboard.IsKeyUp(key),
                         InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
                         _ => false,
                     };
-                return input_value;});
-            }
-            catch(Exception e)
-            {
-                Runtime.Log(e.Message);
-                return false; 
-            }
+                }
+                catch(Exception e)
+                {
+                    Runtime.Log(e.Message);
+                }
+            });
+            return input_value;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(ref Key key, InputEventType type = InputEventType.KeyDown)
         {
