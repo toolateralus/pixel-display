@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json;
-using pixel_renderer.FileIO;
 using System;
-using System.Drawing;
 using System.Numerics;
-using System.Reflection.Metadata;
 
 namespace pixel_renderer
 {
@@ -11,16 +8,6 @@ namespace pixel_renderer
     {
         internal protected bool dirty = true;
         public Vector2 ColorDataSize => colorDataSize;
-        public Vector2 Size
-        {
-            get => new(Transform.M11, Transform.M22);
-            set
-            {
-                Transform.M11 = value.X;
-                Transform.M22 = value.Y;
-            }
-        }
-        public Vector2 Center { get => Transform.Translation; set => Transform.Translation = value; }
 
         [Field][JsonProperty] public Texture texture;
         [Field][JsonProperty] public bool lit = false;

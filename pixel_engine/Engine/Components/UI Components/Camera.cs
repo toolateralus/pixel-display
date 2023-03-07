@@ -146,14 +146,14 @@ namespace pixel_renderer
             BoundingBox2D camBoundingBox = new(GetCorners());
 
             var scale = camBoundingBox.max - camBoundingBox.min;
-            sprite.Transform.Translation = Center;
+            sprite.Transform.Translation = Position;
             sprite.scale = scale;
             sprite.Transform.M11 = scale.X;
             sprite.Transform.M22 = scale.Y;
             sprite.viewportScale = sprite.scale / baseImageSize;
 
             sprite.viewportScale.MakeDivideSafe();
-            sprite.viewportOffset = Center.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
+            sprite.viewportOffset = Position.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
 
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;

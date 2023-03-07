@@ -10,7 +10,6 @@ namespace pixel_renderer
 {
     public class CRenderer : RendererBase
     {
-
         public override void Dispose() => Array.Clear(frame);
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
