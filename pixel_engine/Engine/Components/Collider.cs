@@ -44,6 +44,7 @@ namespace pixel_renderer
                 return boundingBox ?? default;
             }
         }
+
         public override void OnDrawShapes()
         {
             if(drawCollider)

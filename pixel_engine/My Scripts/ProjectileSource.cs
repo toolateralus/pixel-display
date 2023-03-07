@@ -54,12 +54,9 @@ namespace pixel_renderer
         private void Fire()
         {
             fired = true;
-
-            var proj = Projectile.Standard(this.node);
-
+            var proj = Projectile.Standard(this.node, out var rb);
+            rb.ApplyImpulse(new Vector2(0.1f, 0));
             Runtime.Current.GetStage()?.AddNode(proj);
-            
-       
         }
 
         private void Reload()

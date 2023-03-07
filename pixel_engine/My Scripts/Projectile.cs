@@ -12,14 +12,13 @@ namespace pixel_renderer
         public float hitRadius;
         public Node? sender;
         const string defaultImagePath = "\\Assets\\other\\ball.bmp";
-        internal static Node Standard(Node sender)
+        internal static Node Standard(Node sender, out Rigidbody rb)
         {
             Node node = Node.New;
             
             var proj = node.AddComponent<Projectile>();
             proj.hitRadius = 125;
             proj.sender = sender;
-            node.AddComponent<Rigidbody>();
 
             Metadata meta = FetchMetaRelative(defaultImagePath);
             var sprite = node.AddComponent<Sprite>();
@@ -29,9 +28,10 @@ namespace pixel_renderer
             node.Transform = Matrix3x2.CreateScale(35);
 
             var col = node.AddComponent<Collider>();
-            col.untransformedPolygon = new Circle().DefiningGeometry; 
-
-
+            col.untransformedPolygon = new Circle().DefiningGeometry;
+            col.Scale = new(25, 25);
+            rb = node.AddComponent<Rigidbody>();
+            node.Position = sender.Position; 
             return node; 
         }
 
