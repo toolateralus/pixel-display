@@ -155,7 +155,7 @@ namespace pixel_renderer
         public static Camera AddCamera(Node node, int height = 256, int width = 256)
         {
             var cam = node.AddComponent<Camera>();
-            cam.Size = new(width, height);
+            cam.Scale = new(width, height);
             return cam;
         }
         public static Sprite AddSprite(Node playerNode)
