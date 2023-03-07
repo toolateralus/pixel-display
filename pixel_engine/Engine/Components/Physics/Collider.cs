@@ -1,39 +1,32 @@
-﻿
-
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using pixel_renderer.ShapeDrawing;
-using System;
-using System.Diagnostics;
 using System.Drawing;
-using System.Numerics;
-using System.Windows.Documents;
-using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
 
     public class Collider : Component
     {
-        
+
         [JsonProperty] public Polygon untransformedPolygon;
         public Polygon Polygon
         {
             get
             {
                 if (untransformedPolygon is null)
-                    untransformedPolygon = new Box().DefiningGeometry; 
+                    untransformedPolygon = new Box().DefiningGeometry;
                 return untransformedPolygon.Transformed(Transform);
             }
         }
 
-        [JsonProperty] [Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
-        
+        [JsonProperty][Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
+
         [Field] public bool drawCollider = false;
         [Field] public bool drawNormals = false;
         [Field] public Pixel colliderPixel = Color.LimeGreen;
-        
+
         [JsonProperty] public bool IsTrigger { get; internal set; } = false;
-        
+
         private BoundingBox2D? boundingBox;
         public BoundingBox2D BoundingBox
         {
@@ -47,9 +40,9 @@ namespace pixel_renderer
 
         public override void OnDrawShapes()
         {
-            if(drawCollider)
+            if (drawCollider)
                 DrawCollider();
-            if(drawNormals)
+            if (drawNormals)
                 DrawNormals();
         }
         public void DrawCollider()
@@ -71,7 +64,7 @@ namespace pixel_renderer
             {
                 var nextIndex = (i + 1) % vertLength;
                 var midpoint = (poly.vertices[i] + poly.vertices[nextIndex]) / 2;
-                ShapeDrawer.DrawLine(midpoint, midpoint + (poly.normals[i] * 10), Color.Blue);
+                ShapeDrawer.DrawLine(midpoint, midpoint + poly.normals[i] * 10, Color.Blue);
             }
         }
         public void SetPolygonFromWorldSpace(Polygon worldspacePolygon)

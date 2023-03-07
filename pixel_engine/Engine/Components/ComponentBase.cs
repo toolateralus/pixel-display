@@ -6,6 +6,7 @@ using System.Windows.Media.TextFormatting;
 using System.Windows.Controls;
 using System.Numerics;
 using System.Dynamic;
+using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_renderer
 {
