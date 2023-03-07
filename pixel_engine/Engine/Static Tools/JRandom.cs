@@ -56,19 +56,16 @@
             };
         }
 
-        internal static char Hex()
+        internal static char Char()
         {
             int v = Int(0, 16);
             if (v >= 10)
                 v += 7;
             return Convert.ToChar(v + Convert.ToByte('0'));
         }
-        internal static string Hex(int length)
+        internal static string Hex()
         {
-            StringBuilder sb = new();
-            for (int i = 0; i < length; i++)
-                sb.Append(Hex());
-            return sb.ToString();
+            return RandomNumberGenerator.GetInt32(int.MinValue, int.MaxValue).ToString("X");
         }
     }
 

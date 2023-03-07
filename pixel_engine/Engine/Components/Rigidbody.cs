@@ -54,11 +54,11 @@ namespace pixel_renderer
             return node;
         }
         public static Node Standard() =>
-            Standard("Rigidbody " + JRandom.Hex(4));
+            Standard("Rigidbody " + JRandom.Hex());
 
         public static Node StaticBody()
         {
-            Node node = Standard("Static Body " + JRandom.Hex(4));
+            Node node = Standard("Static Body " + JRandom.Hex());
             Rigidbody rb = node.GetComponent<Rigidbody>();
             node.RemoveComponent(rb);
             return node; 
