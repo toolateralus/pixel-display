@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace pixel_renderer.Engine.Primitives
+namespace pixel_renderer
 {
     public class Circle : IPrimitiveGeometry
     {

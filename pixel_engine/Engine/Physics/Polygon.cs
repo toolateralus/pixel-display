@@ -1,12 +1,8 @@
-﻿using pixel_renderer.Engine.Primitives;
-using pixel_renderer.ShapeDrawing;
+﻿using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Numerics;
-using System.Security.Cryptography;
-using System.Security.Policy;
 
 namespace pixel_renderer
 {

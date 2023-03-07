@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Windows.Media.Animation;
 
-namespace pixel_renderer.Engine.Primitives
+namespace pixel_renderer
 {
 
     public class Curve

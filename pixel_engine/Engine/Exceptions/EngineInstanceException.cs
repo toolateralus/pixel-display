@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace pixel_renderer.Engine.Exceptions
+namespace pixel_renderer
 {
     [Serializable]
     internal class EngineInstanceException : Exception

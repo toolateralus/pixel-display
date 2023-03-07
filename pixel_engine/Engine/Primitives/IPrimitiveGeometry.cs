@@ -1,4 +1,4 @@
-﻿namespace pixel_renderer.Engine.Primitives
+﻿namespace pixel_renderer
 {
     public interface IPrimitiveGeometry
     {

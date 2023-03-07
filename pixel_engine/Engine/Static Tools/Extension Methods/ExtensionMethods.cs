@@ -5,7 +5,6 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using pixel_renderer.Engine.Attributes;
 
 namespace pixel_renderer
 {

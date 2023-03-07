@@ -11,7 +11,6 @@ using System.Linq;
 using System.Windows.Media;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
-using pixel_renderer.Engine.Attributes;
 
 namespace pixel_editor
 {

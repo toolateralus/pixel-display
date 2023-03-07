@@ -1,7 +1,5 @@
 ﻿using System;
 
-namespace pixel_renderer.Engine.Attributes
-{
     /// <summary>
     /// An attribute for serializing fields to the Inspector.
     /// </summary>
@@ -13,4 +11,3 @@ namespace pixel_renderer.Engine.Attributes
 
         }
     }
-}

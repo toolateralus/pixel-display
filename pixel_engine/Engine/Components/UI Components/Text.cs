@@ -3,7 +3,6 @@ using System.Drawing;
 using pixel_renderer.Assets;
 using System.Numerics;
 using System.Security.Policy;
-using pixel_renderer.Engine.Primitives;
 
 namespace pixel_renderer
 {
