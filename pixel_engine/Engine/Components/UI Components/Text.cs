@@ -23,7 +23,7 @@ namespace pixel_renderer
 
         public override void Awake()
         {
-            posCurve = Curve.Linear(new Vector2(), new Vector2(), speed: 1, vertices: 3);
+            posCurve = Curve.Circlular(1, 16, 6, true);
             lock (font)
             for (int i = 0; i < 3; ++i)
             {

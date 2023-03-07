@@ -18,7 +18,7 @@ namespace pixel_renderer
         {
             float sliceAngle = 360f / 6; // divide circle into 6 equal slices
             float radius = 5f; // radius of the circle
-            var center = node.Position + Vector2.One * radius / 2;
+            var center = node.Position;
 
             for (int i = 0; i < 6; i++)
             {
@@ -29,7 +29,7 @@ namespace pixel_renderer
                 Vector2 endPt = startPt + new Vector2(MathF.Cos(endAngle * CMath.PI / 180) * radius, (float)(Math.Sin(endAngle *  CMath.PI / 180) * radius));
 
                 ShapeDrawer.DrawLine(startPt, endPt, Color.Yellow);
-                ShapeDrawer.DrawLine(endPt, endPt + center);
+                ShapeDrawer.DrawLine(endPt, endPt + center, Color.Magenta);
             }
         }
         public static Node Standard()

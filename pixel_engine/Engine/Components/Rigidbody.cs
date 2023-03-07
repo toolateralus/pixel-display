@@ -16,22 +16,16 @@ namespace pixel_renderer
         [Field][JsonProperty] public float gravityFactor;
         [Field][JsonProperty] public Vector2 velocity = Vector2.Zero;
         [Field][JsonProperty] public Vector2 acceleration = Vector2.Zero;
-        [Field][JsonProperty] public float restitution = 2f;
-        [Field][JsonProperty] public float drag = .1f;
+        [Field][JsonProperty] public float restitution = 0.5f;
+        [Field][JsonProperty] public float drag = 0.1f;
         [Field][JsonProperty] public bool usingGravity = true;
         [Field][JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All;
-        const double dragCoefficient = 1;
 
         public override void FixedUpdate(float deltaTime)
         {
             velocity += CMath.Gravity; 
-
             velocity += acceleration;
-
-            velocity *= 0.99f;
-
             Position += velocity; 
-
             velocity *= 1f / (1f + 0.01f * (drag * MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()))));
         }
         public override void Awake()
@@ -55,18 +49,23 @@ namespace pixel_renderer
             node.Name = "rigidbody node";
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
+            rb.IsActive = true;
+
             Collider col = node.AddComponent<Collider>();
+            col.untransformedPolygon = new Box().DefiningGeometry;
+
             Sprite sprite = node.AddComponent<Sprite>();
-            node.Scale = Vector2.One * 16;
-            col.SetPolygonFromWorldSpace(new(sprite.GetCorners()));
-            sprite.color = JRandom.Color(aMin: 128);
-            col.IsTrigger = false;
+            sprite.color = JRandom.Color(aMin: 200);
+
+
+
+            node.Scale = new Vector2(25, 25);
             return node;
         }
 
         public static Node StaticBody()
         {
-            Node node = Rigidbody.Standard();
+            Node node = Standard();
             Rigidbody rb = node.GetComponent<Rigidbody>();
             node.RemoveComponent(rb);
             return node; 

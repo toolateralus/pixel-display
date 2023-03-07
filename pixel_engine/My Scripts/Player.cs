@@ -56,12 +56,12 @@ namespace pixel_renderer
             if (node.TryGetComponent(out sprite))
             {
                 sprite.Type = SpriteType.Image;
-                curve = Curve.Circlular(1, 16, radius: sprite.Scale.X /2, looping: true);
             }
+
             Task task = new(async delegate
             {
-                if (sprite is null) 
-                    return; 
+                if (sprite is null)
+                    return;
 
                 while (sprite.texture is null)
                     await Task.Delay(25);
@@ -70,13 +70,10 @@ namespace pixel_renderer
 
                 await Task.Delay(2500);
 
-                node.AddComponent<Text>(); 
+                node.AddComponent<Text>();
 
             });
             task.Start();
-            DrawCircle();
-
-
         }
         public override void OnCollision(Collider collider)
         {
@@ -118,7 +115,10 @@ namespace pixel_renderer
         }
         private void DrawCircle()
         {
+            if (sprite is null) return;
+            if (sprite.texture is null) return; 
             var size = sprite.texture.scale;
+
             Pixel[,] colors = new Pixel[(int)size.X, (int)size.Y];
 
             for(int i = 0; i < curve.points.Values.Count; ++i)
@@ -142,12 +142,11 @@ namespace pixel_renderer
            
             playerNode.AddComponent<Rigidbody>();
             playerNode.AddComponent<Player>().takingInput = true;
-            playerNode.AddComponent<ProjectileSource>(); 
 
             AddSprite(playerNode);
             var col = playerNode.AddComponent<Collider>();
-
-            
+            col.untransformedPolygon = new Box().DefiningGeometry;
+            playerNode.Scale = new(25, 25);
 
             return playerNode;
         }

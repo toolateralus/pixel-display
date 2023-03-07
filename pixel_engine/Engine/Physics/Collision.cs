@@ -112,8 +112,8 @@ namespace pixel_renderer
             if (normal == Vector2.Zero)
                 return;
 
-
             ComputeImpulse(A, B, normal, depth);
+
             AttemptCallbacks(aCol, bCol);
 
         }
@@ -129,6 +129,7 @@ namespace pixel_renderer
             float force = -(1 + minRestitution) * velAlongNormal / (a.invMass + b.invMass);
 
             Vector2 impulse = force * normal;
+
             a.ApplyImpulse(-impulse);
             b.ApplyImpulse(impulse);
 
@@ -179,7 +180,6 @@ public class QuadTree
         nodes = new List<Node>();
         children = new QuadTree[4];
     }
-
     public void Clear()
     {
         nodes.Clear();
@@ -189,7 +189,6 @@ public class QuadTree
             children[i] = null;
         }
     }
-
     private void Split()
     {
         var subWidth = (int)boundary.Width / 2;
@@ -202,7 +201,6 @@ public class QuadTree
         children[2] = new QuadTree(new BoundingBox2D(x, y + subHeight, subWidth, subHeight), capacity);
         children[3] = new QuadTree(new BoundingBox2D(x + subWidth, y + subHeight, subWidth, subHeight), capacity);
     }
-
     private int GetChildIndex(BoundingBox2D bounds)
     {
         int index = -1;
@@ -226,7 +224,6 @@ public class QuadTree
         }
         return index;
     }
-
     public void Insert(Node node)
     {
         if (!boundary.Contains(node.Position))
