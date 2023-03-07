@@ -1,5 +1,4 @@
-﻿using pixel_renderer.Engine.Components.Physics;
-using pixel_renderer.FileIO;
+﻿using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
 using System;
 using System.Drawing;

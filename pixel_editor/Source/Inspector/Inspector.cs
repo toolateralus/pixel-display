@@ -6,13 +6,8 @@ using static pixel_renderer.Input;
 using System.Windows;
 using System.Windows.Controls;
 using pixel_renderer;
-using System.Windows.Media.Effects;
 using System.Linq;
 using System.Windows.Media;
-using System.Net.NetworkInformation;
-using System.Threading.Tasks;
-using pixel_renderer.Engine.Components.Animation;
-using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_editor
 {

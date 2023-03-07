@@ -1,12 +1,6 @@
 ﻿using pixel_renderer;
-using pixel_renderer.Engine.Components.Physics;
 using pixel_renderer.ShapeDrawing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace pixel_editor

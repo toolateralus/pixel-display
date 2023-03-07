@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using Newtonsoft.Json;
 using pixel_renderer.Assets;
-using pixel_renderer.Engine.Components.Physics;
 using pixel_renderer.FileIO;
 using Pixel = System.Drawing.Color;
 

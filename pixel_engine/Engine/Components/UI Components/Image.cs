@@ -5,7 +5,6 @@ using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
 using System.Linq;
 using System;
-using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_renderer
 {

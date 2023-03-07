@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_renderer
 {

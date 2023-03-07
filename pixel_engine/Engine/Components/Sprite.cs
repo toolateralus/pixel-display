@@ -15,7 +15,6 @@ using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using pixel_renderer.Assets;
-using pixel_renderer.Engine.Components.Physics;
 using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
 using Bitmap = System.Drawing.Bitmap;

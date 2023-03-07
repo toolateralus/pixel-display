@@ -1,7 +1,5 @@
 ﻿using pixel_renderer;
 using pixel_renderer.Assets;
-using pixel_renderer.Engine.Components.Animation;
-using pixel_renderer.Engine.Components.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;

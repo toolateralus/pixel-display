@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Security.Policy;
-using System.Windows.Media.Animation;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 
 namespace pixel_renderer
+{ 
     public class Animation : Asset
     {
 

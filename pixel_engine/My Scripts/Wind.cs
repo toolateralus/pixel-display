@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Text.Json.Serialization;
-using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_renderer
 {

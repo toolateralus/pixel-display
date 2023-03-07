@@ -9,7 +9,6 @@ using System.Linq;
 using System.Numerics;
 using pixel_renderer.ShapeDrawing;
 using System;
-using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_renderer
 {
