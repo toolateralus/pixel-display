@@ -164,15 +164,18 @@ namespace pixel_renderer
         }
         private static void SimpleRBResolution(Rigidbody A, Rigidbody B, Vector2 normal, float depth)
         {
-            var minDepth = normal * depth;
-            A.Position += minDepth / 2;
-            B.Position -= minDepth / 2;
+            var correction = normal * depth;
 
-            //flatten velocities
-            Vector2 colNormal = minDepth.Normalized();
+            A.Position += correction / 2;
+            B.Position -= correction / 2;
+
+            Vector2 colNormal = normal.Normalized();
+
             float colSpeedA = Vector2.Dot(A.velocity, colNormal);
             float colSpeedB = Vector2.Dot(B.velocity, colNormal);
+
             float averageSpeed = (colSpeedA + colSpeedB) / 2;
+
             A.velocity -= colNormal * (averageSpeed - colSpeedA);
             B.velocity -= colNormal * (averageSpeed - colSpeedB);
         }
