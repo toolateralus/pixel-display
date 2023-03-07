@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using pixel_renderer.Assets;
 using System.Linq;
 using System.Numerics;
-using pixel_renderer;
 using pixel_renderer.ShapeDrawing;
 using System;
 

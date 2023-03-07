@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 
 namespace pixel_renderer
-{
+{ 
     public class Triangle : IPrimitiveGeometry
     {
         public static Vector2 DefaultSize;
