@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 
 namespace pixel_renderer
-{
     public class Animation : Asset
     {
 
@@ -38,7 +37,7 @@ namespace pixel_renderer
         public void CreateAnimation(Metadata[] frameData, int framePadding = 24)
         {
 
-            if (frameData is null) 
+            if (frameData is null)
                 return;
 
             padding = framePadding;
@@ -59,7 +58,7 @@ namespace pixel_renderer
                 frames.Add((i, i + padding - 1), image);
             }
         }
-       
+
 
 
         public JImage GetFrame(bool shouldIncrement = true)
@@ -68,10 +67,10 @@ namespace pixel_renderer
                 frameIndex = startIndex;
 
             foreach (var frame in frames)
-                    if (frameIndex.WithinRange(frame.Key.Item1, frame.Key.Item2))
-                        lastFrame = frame.Value;
-            
-            if(shouldIncrement)
+                if (frameIndex.WithinRange(frame.Key.Item1, frame.Key.Item2))
+                    lastFrame = frame.Value;
+
+            if (shouldIncrement)
                 frameIndex++;
 
             return lastFrame;

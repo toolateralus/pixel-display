@@ -1,10 +1,11 @@
-﻿using pixel_renderer.FileIO;
+﻿using pixel_renderer.Engine.Components.Physics;
+using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
 using System;
 using System.Drawing;
 using System.Numerics;
 using System.Threading;
-using static pixel_renderer.Assets.AssetLibrary; 
+using static pixel_renderer.Assets.AssetLibrary;
 namespace pixel_renderer
 {
     public class Projectile : Component

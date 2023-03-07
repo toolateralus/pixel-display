@@ -9,6 +9,7 @@ using System.Linq;
 using System.Numerics;
 using pixel_renderer.ShapeDrawing;
 using System;
+using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_renderer
 {
@@ -115,8 +116,13 @@ namespace pixel_renderer
         }
         private void DrawCircle()
         {
-            if (sprite is null) return;
-            if (sprite.texture is null) return; 
+
+            if (sprite is null) 
+                return;
+
+            if (sprite.texture is null)
+                return; 
+
             var size = sprite.texture.scale;
 
             Pixel[,] colors = new Pixel[(int)size.X, (int)size.Y];
@@ -130,25 +136,33 @@ namespace pixel_renderer
                     colors[(int)pos.X, (int)pos.Y] = (Pixel)Color.Red;
                 
             }
+
             sprite?.SetImage(colors);
+
         }
 
         public static Node Standard()
         {
+
             Node playerNode = new("Player")
             {
                 Position = new Vector2(0, -20)
             };
            
             playerNode.AddComponent<Rigidbody>();
+            
             playerNode.AddComponent<Player>().takingInput = true;
 
             AddSprite(playerNode);
+            
             var col = playerNode.AddComponent<Collider>();
+
             col.untransformedPolygon = new Box().DefiningGeometry;
+
             playerNode.Scale = new(25, 25);
 
             return playerNode;
+
         }
         public static Camera AddCamera(Node node, int height = 256, int width = 256)
         {

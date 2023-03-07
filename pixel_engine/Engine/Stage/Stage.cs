@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using pixel_renderer.Assets;
+using pixel_renderer.Engine.Components.Physics;
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
@@ -257,7 +258,7 @@ namespace pixel_renderer
             Node light = new("Light");
             light.AddComponent<Light>(); 
 
-            camera.AddComponent<Camera>().Scale = new(256,256);
+            camera.AddComponent<Camera>().Size = new(256,256);
             nodes.Add(camera);
             Node floorNode = Floor.Standard();
             nodes.Add(floorNode);

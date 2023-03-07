@@ -27,6 +27,6 @@
         /// </summary>
         /// <param name="increment"></param>
         public abstract void Previous(int increment = 1);
-     
+
     }
 }

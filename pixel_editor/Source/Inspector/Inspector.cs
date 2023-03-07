@@ -11,6 +11,8 @@ using System.Linq;
 using System.Windows.Media;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
+using pixel_renderer.Engine.Components.Animation;
+using pixel_renderer.Engine.Components.Physics;
 
 namespace pixel_editor
 {

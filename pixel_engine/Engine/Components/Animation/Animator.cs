@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using Newtonsoft.Json;
 using pixel_renderer.Assets;
+using pixel_renderer.Engine.Components.Physics;
 using pixel_renderer.FileIO;
 using Pixel = System.Drawing.Color;
 
@@ -15,20 +16,20 @@ namespace pixel_renderer
         private Sprite? sprite;
         [Field]
         [JsonProperty]
-        public string[] frameNames = new string[] 
-        { 
-            "List Empty", 
-            "Use Buttons To", 
-            "Add Elements That", 
-            "Point to names of", 
-            "Files in the", 
-            "Assets Directory", 
+        public string[] frameNames = new string[]
+        {
+            "List Empty",
+            "Use Buttons To",
+            "Add Elements That",
+            "Point to names of",
+            "Files in the",
+            "Assets Directory",
         };
 
         [JsonProperty]
         [Field]
         public int padding = 24;
-        
+
         [JsonProperty]
         [Field]
         public bool looping;
@@ -37,7 +38,7 @@ namespace pixel_renderer
         void InsertFrame()
         {
             var newArray = new string[frameNames.Length + 1];
-            int i = 0; 
+            int i = 0;
 
             foreach (var str in frameNames)
                 newArray[i++] = str;
@@ -49,15 +50,15 @@ namespace pixel_renderer
         {
             int max = frameNames.Length - 1;
             int i = 0;
-            
-            if (max <= 1) 
+
+            if (max <= 1)
                 return;
 
             var newArray = new string[max];
 
             foreach (var str in frameNames)
-                if(i < max)
-                newArray[i++] = str;
+                if (i < max)
+                    newArray[i++] = str;
 
             frameNames = newArray;
         }
@@ -67,14 +68,14 @@ namespace pixel_renderer
             List<Metadata> metas = new();
             foreach (var name in frameNames)
             {
-                if(AssetLibrary.FetchMeta(name) is Metadata meta)
-                metas.Add(meta);
+                if (AssetLibrary.FetchMeta(name) is Metadata meta)
+                    metas.Add(meta);
             }
             if (metas.Count == 0)
                 return;
             Animation anim = new(metas.ToArray(), padding);
             anim.looping = true;
-            animation = anim; 
+            animation = anim;
         }
         [Method]
         void Start() => Start(1, true);
@@ -85,7 +86,7 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
-            if (animation is null || !animation.playing) 
+            if (animation is null || !animation.playing)
                 return;
             Next(animation.padding);
         }
@@ -94,17 +95,17 @@ namespace pixel_renderer
             if (animation is null)
                 return;
 
-            var img  = animation?.GetFrame(true);
+            var img = animation?.GetFrame(true);
             sprite?.SetImage(img);
         }
         public void Previous(int increment = 1)
         {
             if (animation is null)
-                return; 
+                return;
             animation.frameIndex -= 2;
 
             var img = animation?.GetFrame(true);
-         
+
             sprite?.SetImage(img);
         }
         public void Start(float speed = 1, bool looping = true)
@@ -131,7 +132,7 @@ namespace pixel_renderer
             if (reset)
                 animation.frameIndex = animation.startIndex;
         }
-        
+
         public void SetAnimation(Animation animation) => this.animation = animation;
         public Animation? GetAnimation() => animation;
         public static Node Standard()
@@ -142,7 +143,7 @@ namespace pixel_renderer
             anim.Start();
             return node;
         }
-        
+
         private void test_flame_anim_setup()
         {
             List<Metadata> anim_metas = new()
