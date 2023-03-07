@@ -36,17 +36,10 @@ namespace pixel_renderer
         {
             velocity += impulse * invMass;
         }
-        public static Node Standard(string v = "rigidbody node")
-        {
-            Node node = Standard();
-            node.Name = v;
-
-            return node;
-        }
-        public static Node Standard()
+        public static Node Standard(string name)
         {
             Node node = Node.New;
-            node.Name = "rigidbody node";
+            node.Name = name;
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
             rb.IsActive = true;
@@ -57,11 +50,11 @@ namespace pixel_renderer
             Sprite sprite = node.AddComponent<Sprite>();
             sprite.color = JRandom.Color(aMin: 200);
 
-
-
             node.Scale = new Vector2(25, 25);
             return node;
         }
+        public static Node Standard() =>
+            Standard("Rigidbody " + JRandom.Hex(4));
 
         public static Node StaticBody()
         {

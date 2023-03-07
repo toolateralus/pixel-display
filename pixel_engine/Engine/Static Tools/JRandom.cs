@@ -3,6 +3,7 @@
     using System;
     using System.Numerics;
     using System.Security.Cryptography;
+    using System.Text;
     using Random = System.Random;
 
     public static class JRandom
@@ -55,8 +56,20 @@
             };
         }
 
-        internal static char Hexadecimal() =>
-            Convert.ToChar(Int(0,16) + Convert.ToByte('0'));
+        internal static char Hex()
+        {
+            int v = Int(0, 16);
+            if (v >= 10)
+                v += 7;
+            return Convert.ToChar(v + Convert.ToByte('0'));
+        }
+        internal static string Hex(int length)
+        {
+            StringBuilder sb = new();
+            for (int i = 0; i < length; i++)
+                sb.Append(Hex());
+            return sb.ToString();
+        }
     }
 
 }
