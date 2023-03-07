@@ -112,8 +112,7 @@ namespace pixel_renderer
             if (normal == Vector2.Zero)
                 return;
 
-            ComputeImpulse(A, B, normal, depth);
-
+            SimpleRBResolution(A, B, normal, depth);
             AttemptCallbacks(aCol, bCol);
 
         }
@@ -162,6 +161,20 @@ namespace pixel_renderer
         public static void Run()
         {
             FinalPhase();
+        }
+        private static void SimpleRBResolution(Rigidbody A, Rigidbody B, Vector2 normal, float depth)
+        {
+            var minDepth = normal * depth;
+            A.Position += minDepth / 2;
+            B.Position -= minDepth / 2;
+
+            //flatten velocities
+            Vector2 colNormal = minDepth.Normalized();
+            float colSpeedA = Vector2.Dot(A.velocity, colNormal);
+            float colSpeedB = Vector2.Dot(B.velocity, colNormal);
+            float averageSpeed = (colSpeedA + colSpeedB) / 2;
+            A.velocity -= colNormal * (averageSpeed - colSpeedA);
+            B.velocity -= colNormal * (averageSpeed - colSpeedB);
         }
     }
 
