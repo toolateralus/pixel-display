@@ -58,7 +58,7 @@ namespace pixel_renderer
 
         public static Node StaticBody()
         {
-            Node node = Standard();
+            Node node = Standard("Static Body " + JRandom.Hex(4));
             Rigidbody rb = node.GetComponent<Rigidbody>();
             node.RemoveComponent(rb);
             return node; 
