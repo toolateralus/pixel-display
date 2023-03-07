@@ -1,10 +1,10 @@
 ﻿using System.Numerics;
 
-namespace pixel_renderer
+namespace pixel_renderer.Engine.Primitives
 {
     public class Box : IPrimitiveGeometry
     {
-        public static Vector2 DefaultSize = new(1,1);
+        public static Vector2 DefaultSize = new(1, 1);
         private static readonly Polygon DefaultPolygon = Polygon.Rectangle(DefaultSize.X, DefaultSize.Y);
 
         public Polygon Polygon = DefaultPolygon;

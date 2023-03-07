@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace pixel_renderer
+namespace pixel_renderer.Engine.Attributes
 {
     /// <summary>
     /// An attribute for serializing fields to the Inspector.
@@ -8,7 +8,7 @@ namespace pixel_renderer
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class FieldAttribute : Attribute
     {
-        public FieldAttribute() 
+        public FieldAttribute()
         {
 
         }

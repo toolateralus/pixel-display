@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Windows.Media.Animation;
 
-namespace pixel_renderer
+namespace pixel_renderer.Engine.Primitives
 {
 
     public class Curve
@@ -19,7 +19,7 @@ namespace pixel_renderer
 
         public void Reset()
         {
-            index = startIndex; 
+            index = startIndex;
         }
         public static Curve Circlular(float speed, int length, float radius = 1f, bool looping = true)
         {
@@ -66,7 +66,7 @@ namespace pixel_renderer
             {
                 float i = curve.index;
                 if (i.IsWithin(pt.Key.X, pt.Key.Y))
-                    outVec =  pt.Value;
+                    outVec = pt.Value;
             }
 
             curve.index++;
@@ -75,13 +75,13 @@ namespace pixel_renderer
         }
         internal static Curve Linear(Vector2 start = default, Vector2 end = default, float speed = 1, int vertices = 16)
         {
-            if(start == default)
+            if (start == default)
                 start = Vector2.Zero;
-            
+
             if (end == default)
                 end = Vector2.One;
 
-            Vector2[] output = new Vector2[vertices]; 
+            Vector2[] output = new Vector2[vertices];
 
             for (int i = 0; i < vertices; ++i)
             {
@@ -94,7 +94,7 @@ namespace pixel_renderer
 
             Curve curve = new();
             curve.CreateCurve(output, (int)(speed / vertices));
-            return curve; 
+            return curve;
 
         }
         public static Curve LinearExponential(Vector2 start = default, Vector2 end = default, float speed = 1, int vertices = 16, float pow = 1.1f)
