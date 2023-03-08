@@ -21,7 +21,7 @@ namespace pixel_editor
             action = (o) =>
             {
                 string output = "";
-                foreach (var cmd in Current.Active)
+                foreach (var cmd in Current.LoadedCommands)
                     output += "\n" + cmd.syntax + "\n" + cmd.description + "\n" + divider;
                 Print(output);
             },
@@ -501,8 +501,8 @@ namespace pixel_editor
                         if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
                         {
                             Command? item = (Command)method.Invoke(null, null);
-                            if (item != null && !Current.Active.Contains(item))
-                                Current.Active.Add(item);
+                            if (item != null && !Current.LoadedCommands.Contains(item))
+                                Current.LoadedCommands.Add(item);
                         }
                 }
 
@@ -527,7 +527,7 @@ namespace pixel_editor
                 e.action = RedTextAsync((int)textColorAlterationDuration);
             Editor.QueueEvent(e);
         }
-        internal static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
+        public static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
         {
             Console.Print(question);
             for (int i = 0; i < waitDuration * 100; i++)
@@ -722,6 +722,6 @@ namespace pixel_editor
             }
         }
 
-        public List<Command> Active = new();
+        public List<Command> LoadedCommands = new();
     }
 }

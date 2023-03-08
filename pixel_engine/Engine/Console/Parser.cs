@@ -63,6 +63,7 @@ namespace pixel_editor
                 command.error = e.Message;
             }
         }
+
         public static void TryCallLine(string line, List<Command> commands)
         {
             ParseArguments(line, out string[] args, out _);
@@ -84,10 +85,6 @@ namespace pixel_editor
                     Command.Success(command.syntax);
                     cmds++;
                 }
-
-            if (cmds == 0)
-                Console.Print($"command {line} not found.");
-
         }
         public static void TryParse(string input, out List<object> value)
         {

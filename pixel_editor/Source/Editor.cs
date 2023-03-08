@@ -360,7 +360,7 @@ namespace pixel_editor
                 }
 
                 if (line != "")
-                    Command.Call(line);
+                    CommandParser.TryCallLine(line, Console.Current.LoadedCommands);
             }
         }
         private void OnToggleConsole(object sender, RoutedEventArgs e)

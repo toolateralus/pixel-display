@@ -33,7 +33,6 @@ namespace pixel_editor
         /// use this as a way to pass parameters into a command
         /// </summary>
         public object[]? args;
-        public static void Call(string line) => CommandParser.TryCallLine(line, Console.Current.Active);
         public void Invoke() => action?.Invoke(args);
         public bool Equals(string input)
         {
