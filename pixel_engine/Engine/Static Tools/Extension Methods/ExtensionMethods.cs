@@ -1,5 +1,7 @@
-﻿using System;
+﻿using pixel_editor;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -133,9 +135,27 @@ namespace pixel_renderer
         #region Vectors
         public static Vector2 ToVector(this string input)
         {
-            var x = input.Split(',').First().ToInt();
-            var y = input.Split(',').Last().ToInt();
-            return new Vector2(x, y);
+            var split = input.Split(',');
+            
+            if (!split.Any())
+                return default; 
+
+            string x = split.First();
+            string y = split.Last();
+
+            foreach (var _char in CommandParser.disallowed_chars)
+            {
+                if (x.Contains(_char))
+                    x = x.Replace($"{_char}", "");
+                
+                if (y.Contains(_char))
+                    y = y.Replace($"{_char}", "");
+            }
+
+            float xF = float.Parse(x);
+            float yF = float.Parse(y);
+
+            return new Vector2(xF, yF);
 
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

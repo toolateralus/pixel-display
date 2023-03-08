@@ -14,21 +14,17 @@ namespace pixel_editor
     public partial class Command
     {
         public const char PhraseVariantSeperator = '|';
-
         /// <summary>
         /// This is the keyword used to invoke the command
         /// </summary>
         public string phrase = "";
         public string description = "Please add a description to this command.";
         public string syntax = "Please add syntactical guidelines to this command. e.g. node.Get(str:{{target}});";
-
         public string[]? argumentTypes = null; 
-
         /// <summary>
         /// this is only not null when there has been an error, and will likely contain a string of information about the error.
         /// </summary>
         public object? error = null;
-
         /// <summary>
         /// this is what is invoked when the command is successfully called, and it is invoked under the parameters of this.args as needed.
         /// </summary>
@@ -37,8 +33,7 @@ namespace pixel_editor
         /// use this as a way to pass parameters into a command
         /// </summary>
         public object[]? args;
-
-        internal static void Call(string line) => CommandParser.TryCallLine(line, Console.Current.Active);
+        public static void Call(string line) => CommandParser.TryCallLine(line, Console.Current.Active);
         public void Invoke() => action?.Invoke(args);
         public bool Equals(string input)
         {
@@ -52,7 +47,7 @@ namespace pixel_editor
                     return true;
             return false;
         }
-        internal static void Success(string syntax) => Runtime.Log($"{syntax} call successful");
+        public static void Success(string syntax) => Runtime.Log($"{syntax} call successful");
     }
 }
 

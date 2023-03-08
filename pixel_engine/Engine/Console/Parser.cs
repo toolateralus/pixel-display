@@ -20,7 +20,7 @@ namespace pixel_editor
         private const string ParameterSeperator = ", ";
 
         // for the final cleanup of commands before execution
-        internal static List<char> disallowed_chars = new()
+        public static List<char> disallowed_chars = new()
         {
             ';',
             '\0',
@@ -63,7 +63,7 @@ namespace pixel_editor
                 command.error = e.Message;
             }
         }
-        internal static void TryCallLine(string line, List<Command> commands)
+        public static void TryCallLine(string line, List<Command> commands)
         {
             ParseArguments(line, out string[] args, out _);
             line = ParseLoopParams(line, out string loop_param);
@@ -171,7 +171,7 @@ namespace pixel_editor
             }
             return outArg;
         }
-        internal static string ParseLoopParams(string input, out string repeaterArgs)
+        public static string ParseLoopParams(string input, out string repeaterArgs)
         {
             string withoutArgs = "";
             repeaterArgs = ""; 
@@ -189,7 +189,7 @@ namespace pixel_editor
             else withoutArgs = input;
             return withoutArgs;
         } 
-        internal static void ParseArguments(string input, out string[] arguments, out string commandPhrase)
+        public static void ParseArguments(string input, out string[] arguments, out string commandPhrase)
         {
             var args_str = "";
             arguments = Array.Empty<string>();

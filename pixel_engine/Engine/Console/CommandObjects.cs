@@ -15,13 +15,13 @@ namespace pixel_editor
             " was not called: An invalid cast operation was attempted."
         };
 
-        internal static void Error(string cmdName, string errorInfo)
+        public static void Error(string cmdName, string errorInfo)
         {
             Runtime.Log($"{cmdName} was not called : {errorInfo}");
         }
 
 
-        internal static void Error(string cmdName, CmdError error)
+        public static void Error(string cmdName, CmdError error)
         {
             switch (error)
             {
