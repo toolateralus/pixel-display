@@ -25,8 +25,9 @@ namespace pixel_renderer
 
             var quadTree = new QuadTree(new BoundingBox2D(-Constants.PhysicsArea.X, -Constants.PhysicsArea.Y, Constants.PhysicsArea.X, Constants.PhysicsArea.Y));
 
-            foreach (var node in stage.nodes)
+            for (int i = 0; i < stage.nodes.Count; i++)
             {
+                Node? node = stage.nodes[i];
                 var hasCollider = node.HasComponent<Collider>();
                 if (hasCollider)
                     quadTree.Insert(node);
