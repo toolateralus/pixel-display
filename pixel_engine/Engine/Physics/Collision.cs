@@ -31,7 +31,7 @@ namespace pixel_renderer
                     quadTree.Insert(node);
             }
             
-            BoundingBox2D range = new BoundingBox2D(Constants.PhysicsOrigin, Constants.PhysicsArea);
+            BoundingBox2D range = new(Constants.PhysicsArea / -2, Constants.PhysicsArea / 2);
            
             List<Node> foundNodes = new();
 
