@@ -94,6 +94,7 @@ namespace pixel_renderer
 
             Collider aCol = A.GetComponent<Collider>();
             Collider bCol = B.GetComponent<Collider>();
+
             if (aCol.IsTrigger || bCol.IsTrigger)
                 return;
 
