@@ -3,8 +3,11 @@ using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
+using System.Security.Policy;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Xml.Linq;
 
 namespace pixel_editor
@@ -21,6 +24,31 @@ namespace pixel_editor
         public override void Awake()
         {
             CMouse.OnLeftPressedThisFrame += SetSelectedNodeOffest;
+                Input.RegisterAction(SelectAll, Key.LeftCtrl);
+            
+        }
+        private void SelectAll()
+        {
+            if (Input.Get(Key.A))
+            {
+                if (Runtime.Current.GetStage()?.nodes is List<Node> nodes)
+                {
+                    Editor.Current.LastSelected = nodes.First(); 
+                    Editor.Current.ActivelySelected.Clear();
+                    Editor.Current.ActivelySelected.AddRange(nodes);
+
+                    for (int i = 0; i < nodes.Count; i++)
+                    {
+                        Node node = nodes[i];
+                        if(!node.TryGetComponent(out Collider col)) return;
+                        col.drawCollider = true;
+                        col.drawNormals = true;
+                        col.colliderPixel = Color.Orange;
+                    }
+
+                   
+                }
+            }
         }
         private void SetSelectedNodeOffest()
         {
@@ -116,7 +144,8 @@ namespace pixel_editor
         }
         public override void OnDrawShapes()
         {
-            if (!InBoxSelect) return;
+            if (!InBoxSelect) 
+                return;
             ShapeDrawer.DrawRect(boxStart, boxEnd, Constants.DragBoxColor);
             ShapeDrawer.DrawCircle(boxEnd, Constants.DragCursorRadius, Constants.DragCursorColor);
 

@@ -53,6 +53,7 @@ namespace pixel_renderer
         public const int FramerateSampleThreshold = 60;
 
         public static Vector2 PhysicsArea = new Vector2(10000, 10000);
+        public static Vector2 PhysicsOrigin = new(0, 0); 
 
         public const int ScreenH = 256;
         public const int ScreenW = 256;
@@ -64,10 +65,8 @@ namespace pixel_renderer
         public static Vector2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         public static Vector2 DefaultResolution => new(ScreenW, ScreenH);
 
-
         public static Vector2 MaxResolution = new(3840, 3840);
         public static Vector2 MinResolution = new(4, 4);
-
 
         public static Pixel EditorHighlightColor = Color.Orange;
         #endregion
@@ -120,7 +119,6 @@ namespace pixel_renderer
             }
             return collection; 
         }
-
         public static List<T> RemoveDuplicatesFromList<T>(List<T> collection)
         {
             HashSet<T> comparison = new();

@@ -3,6 +3,7 @@ using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
@@ -161,6 +162,8 @@ namespace pixel_editor
             Input.RegisterAction(() => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(DestroySelected, Key.Delete);
         }
+
+     
 
         public void Dispose()
         {

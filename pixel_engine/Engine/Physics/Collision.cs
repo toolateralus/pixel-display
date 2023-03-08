@@ -15,21 +15,7 @@ namespace pixel_renderer
         public static bool AllowEntries { get; private set; } = true;
        
         public static void SetActive(bool value) => AllowEntries = value;
-        public static void ViewportCollision(Node node)
-        {
-            var hasCollider = node.TryGetComponent(out Collider col);
-            if (!hasCollider) return;
 
-            if (node.Position.Y > Constants.PhysicsArea.Y - col.Scale.Y)
-                node.Position = node.Position.WithValue(y: Constants.PhysicsArea.Y - col.Scale.Y);
-            if (node.Position.X > Constants.PhysicsArea.X - col.Scale.X)
-                node.Position = node.Position.WithValue(x: Constants.PhysicsArea.X - col.Scale.X);
-            if (node.Position.X < 0)
-                node.Position = node.Position.WithValue(x: 0);
-        }
-
-        static Vector2 position = new Vector2(0, 0);
-        static Vector2 size = new Vector2(Constants.PhysicsArea.X, Constants.PhysicsArea.Y);
 
         public static void FinalPhase()
         {
@@ -44,10 +30,11 @@ namespace pixel_renderer
                 if (hasCollider)
                     quadTree.Insert(node);
             }
-            BoundingBox2D range = new BoundingBox2D(position, size);
-            // Create a list to store the nodes found within the range
-            List<Node> foundNodes = new List<Node>();
-            // Query the quadtree with the range
+            
+            BoundingBox2D range = new BoundingBox2D(Constants.PhysicsOrigin, Constants.PhysicsArea);
+           
+            List<Node> foundNodes = new();
+
             quadTree.Query(range, foundNodes);
 
             for (int i = 1; i < foundNodes.Count; i++)
@@ -59,10 +46,12 @@ namespace pixel_renderer
 
                     if (A is null || B is null)
                         continue;
+
                     if (B == A)
                         continue;
 
                     bool a_has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
+
                     bool b_has_rb = B.TryGetComponent<Rigidbody>(out var rbB);
 
                     if (a_has_rb && b_has_rb)
