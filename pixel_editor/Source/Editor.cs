@@ -519,7 +519,7 @@ namespace pixel_editor
                 Runtime.Log("Node added!");
                 Node node = funct.Invoke();
                 node.Position = CMouse.LastClickGlobalPosition;
-                Runtime.Current.GetStage().AddNode(node);
+                Runtime.Current.GetStage()?.AddNode(node);
                 return;
             }
         }

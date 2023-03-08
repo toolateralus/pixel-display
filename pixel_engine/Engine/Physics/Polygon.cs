@@ -8,9 +8,13 @@ namespace pixel_renderer
 {
     public class Polygon
     {
+        [Field]
         public Vector2[] normals = Array.Empty<Vector2>();
+        [Field]
         public Vector2 centroid = Vector2.Zero;
+        [Field]
         public Vector2[] uv = Array.Empty<Vector2>();
+        [Field]
         public Vector2[] vertices = Array.Empty<Vector2>();
 
         /// <summary>
@@ -18,7 +22,7 @@ namespace pixel_renderer
         /// Will have one line that starts and ends in the same spot if there's only one vertex in the polygon
         /// </summary>
         /// <returns></returns>
-        
+        [Method]        
         private void CalculateUV()
         {
             int vertCount = vertices.Length;
@@ -34,6 +38,7 @@ namespace pixel_renderer
                 uv[i] = (vertices[i] - uvBox.min) / bbSize;
             }
         }
+        [Method]
         private void CalculateNormals()
         {
             int vertCount = vertices.Length;
@@ -48,7 +53,6 @@ namespace pixel_renderer
             }
             centroid /= vertCount;
         }
-
         private static void CheckWindingOrder(Vector2[] vertices)
         {
             float area = 0;
@@ -61,6 +65,7 @@ namespace pixel_renderer
             if (area < 0)
                 Array.Reverse(vertices);
         }
+        [Method]
         public List<Line> GetLines()
         {
             List<Line> lines = new();

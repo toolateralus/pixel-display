@@ -17,11 +17,11 @@ namespace pixel_renderer
         {
             if (collider is null)
                 node?.TryGetComponent(out collider);
-
-            i++;
-
+            
             if (i % 60 == 0)
                 Runtime.Log(colliderDistance);
+            
+            i++;
         }
 
         public override void OnCollision(Collider collider)

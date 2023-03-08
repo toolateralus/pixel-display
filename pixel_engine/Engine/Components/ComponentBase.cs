@@ -65,11 +65,6 @@ namespace pixel_renderer
             Awake();
         }
         internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
-        public virtual void OnEditActionClicked(Action action) 
-        {
-            action?.Invoke();
-            Runtime.Log($"{Name} had {nameof(OnEditActionClicked)} called at {DateTime.Now}");
-        }
         public virtual void OnFieldEdited(string field) { }
         public virtual void OnDrawShapes() { }
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
