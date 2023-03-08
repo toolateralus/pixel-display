@@ -19,14 +19,14 @@
         /// Gets the next frame in the animation, or skips frames if  an increment of greater than one is provided
         /// /// </summary>
         /// <param name="increment"></param>
-        public abstract void Next(int increment = 1);
+        public abstract void Next();
 
 
         /// <summary>
         /// Gets the previous frame in the animation, or skips back multiple frames if an increment of greater than one is provided
         /// </summary>
         /// <param name="increment"></param>
-        public abstract void Previous(int increment = 1);
+        public abstract void Previous();
 
     }
 }
