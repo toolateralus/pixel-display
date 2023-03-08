@@ -71,7 +71,6 @@ namespace pixel_renderer
             var product = MathF.FusedMultiplyAdd(v.X, v.X, v.Y * v.Y);
             return product; 
         }
-
         #region Numbers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool WithinRange(this float v, float min, float max) { return v <= max && v >= min; }
@@ -132,7 +131,6 @@ namespace pixel_renderer
         public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion
         #region Vectors
-
         public static Vector2 ToVector(this string input)
         {
             var x = input.Split(',').First().ToInt();
@@ -140,15 +138,12 @@ namespace pixel_renderer
             return new Vector2(x, y);
 
         }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 Transformed(this Vector2 v, Matrix3x2 matrix) =>
-            Vector2.Transform(v, matrix);
+        public static Vector2 Transformed(this Vector2 v, Matrix3x2 matrix) => Vector2.Transform(v, matrix);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 ToVector2(this System.Windows.Point v) => new((float)v.X, (float)v.Y);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(this ref Vector2 v, Matrix3x2 matrix) =>
-            v = Vector2.Transform(v, matrix);
+        public static void Transform(this ref Vector2 v, Matrix3x2 matrix) =>  v = Vector2.Transform(v, matrix);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MakeDivideSafe(this ref Vector2 v)
         { 
