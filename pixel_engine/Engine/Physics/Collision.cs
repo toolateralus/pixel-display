@@ -50,14 +50,15 @@ namespace pixel_renderer
                     if (B == A)
                         continue;
 
-                    bool a_has_rb = A.TryGetComponent<Rigidbody>(out var rbA);
-
-                    bool b_has_rb = B.TryGetComponent<Rigidbody>(out var rbB);
+                    bool a_has_rb = A.TryGetComponent(out Rigidbody rbA);
+                    bool b_has_rb = B.TryGetComponent(out Rigidbody rbB);
 
                     if (a_has_rb && b_has_rb)
                         Collide(rbB, rbA);
+
                     if (a_has_rb && !b_has_rb)
                         Collide(B.GetComponent<Collider>(), rbA);
+
                     if (!a_has_rb && b_has_rb)
                         Collide(A.GetComponent<Collider>(), rbB);
 

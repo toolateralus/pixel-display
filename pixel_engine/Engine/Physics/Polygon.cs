@@ -23,8 +23,10 @@ namespace pixel_renderer
         {
             int vertCount = vertices.Length;
             uv = new Vector2[vertCount];
+
             BoundingBox2D uvBox = GetBoundingBox(vertices);
             Vector2 bbSize = uvBox.max - uvBox.min - Vector2.One;
+
             if (bbSize.X == 0 || bbSize.Y == 0)
                 return;
             for (int i = 0; i < vertCount; i++)

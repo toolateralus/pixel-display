@@ -346,6 +346,7 @@ namespace pixel_renderer
         public void RemoveComponent(Component component)
         {
             var type = component.GetType();
+            if(Components.ContainsKey(type))
             if (Components[type].Contains(component))
             {
                 var compList = Components[type];

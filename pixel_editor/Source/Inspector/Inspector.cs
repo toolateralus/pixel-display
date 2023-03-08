@@ -128,6 +128,8 @@ namespace pixel_editor
 
             int index = 0;
 
+
+
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
                     index = AddComponentToInspector(grid, index, component);
