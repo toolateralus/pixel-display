@@ -13,24 +13,18 @@ namespace pixel_renderer
     {
         private Animation? animation;
         private Sprite? sprite;
-        [Field]
-        [JsonProperty]
+       
+        [Field][JsonProperty]
         public string[] frameNames = new string[]
         {
-            "List Empty",
-            "Use Buttons To",
-            "Add Elements That",
-            "Point to names of",
-            "Files in the",
-            "Assets Directory",
+            "Add/Remove Elements",
+            "With The Buttons Below"
         };
 
-        [JsonProperty]
-        [Field]
+        [JsonProperty][Field]
         public int padding = 24;
 
-        [JsonProperty]
-        [Field]
+        [JsonProperty][Field]
         public bool looping;
 
         [Method]
@@ -44,6 +38,7 @@ namespace pixel_renderer
 
             frameNames = newArray;
         }
+        
         [Method]
         void RemoveFrame()
         {
@@ -61,21 +56,33 @@ namespace pixel_renderer
 
             frameNames = newArray;
         }
+        
         [Method]
         void RefreshAnimationWithFrameNames()
         {
             List<Metadata> metas = new();
-            foreach (var name in frameNames)
+
+            for (int i = 0; i < frameNames.Length; i++)
             {
+                string? name = frameNames[i];
                 if (AssetLibrary.FetchMeta(name) is Metadata meta)
                     metas.Add(meta);
             }
+            
             if (metas.Count == 0)
                 return;
-            Animation anim = new(metas.ToArray(), padding);
-            anim.looping = true;
+
+            Animation anim = new(metas.ToArray(), padding)
+            {
+                looping = true
+            };
+
             animation = anim;
         }
+        /// <summary>
+        /// this wrapper allows params to be passed in when pressed from inspector.
+        /// </summary>
+        
         [Method]
         void Start() => Start(1, true);
 
@@ -87,9 +94,10 @@ namespace pixel_renderer
         {
             if (animation is null || !animation.playing)
                 return;
-            Next(animation.padding);
+            Next();
         }
-        public void Next(int increment = 1)
+
+        public void Next()
         {
             if (animation is null)
                 return;
@@ -97,7 +105,7 @@ namespace pixel_renderer
             var img = animation?.GetFrame(true);
             sprite?.SetImage(img);
         }
-        public void Previous(int increment = 1)
+        public void Previous()
         {
             if (animation is null)
                 return;
@@ -107,6 +115,7 @@ namespace pixel_renderer
 
             sprite?.SetImage(img);
         }
+
         public void Start(float speed = 1, bool looping = true)
         {
             node.TryGetComponent(out sprite);
@@ -134,15 +143,21 @@ namespace pixel_renderer
 
         public void SetAnimation(Animation animation) => this.animation = animation;
         public Animation? GetAnimation() => animation;
+
         public static Node Standard()
         {
             var node = Rigidbody.Standard();
             var anim = node.AddComponent<Animator>();
+            anim.looping = true; 
+            if (node.TryGetComponent(out Sprite sprite))
+            {
+                sprite.IsReadOnly = false; 
+            }
             anim.test_flame_anim_setup();
             anim.Start();
+            node.Scale = new(40, 40);
             return node;
         }
-
         private void test_flame_anim_setup()
         {
             List<Metadata> anim_metas = new()
