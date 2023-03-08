@@ -60,7 +60,7 @@ namespace pixel_renderer
         /// <summary>
         /// amount of time in milliseconds between physics frames (60 fps ~ 16ms)
         /// </summary>
-        public const int PhysicsTimeStep = 16; 
+        public const int PhysicsTimeStep = 160; 
 
         public static Vector2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         public static Vector2 DefaultResolution => new(ScreenW, ScreenH);
@@ -97,7 +97,6 @@ namespace pixel_renderer
 
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
         #endregion
-
         public static List<Type> GetInheritedTypesFromBase<T>()
         {
             var types = AppDomain.CurrentDomain.GetAssemblies()

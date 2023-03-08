@@ -132,6 +132,15 @@ namespace pixel_renderer
         public static void MakeDivideSafe(this float[] v) { for(int i = 0; i < v.Length; i++) v[i] = v[i].GetDivideSafe(); }
         #endregion
         #region Vectors
+
+        public static Vector2 ToVector(this string input)
+        {
+            var x = input.Split(',').First().ToInt();
+            var y = input.Split(',').Last().ToInt();
+            return new Vector2(x, y);
+
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Transformed(this Vector2 v, Matrix3x2 matrix) =>
             Vector2.Transform(v, matrix);

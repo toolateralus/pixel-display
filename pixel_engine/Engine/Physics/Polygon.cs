@@ -12,6 +12,7 @@ namespace pixel_renderer
         public Vector2 centroid = Vector2.Zero;
         public Vector2[] uv = Array.Empty<Vector2>();
         public Vector2[] vertices = Array.Empty<Vector2>();
+
         /// <summary>
         /// Each line will point clockwise.
         /// Will have one line that starts and ends in the same spot if there's only one vertex in the polygon

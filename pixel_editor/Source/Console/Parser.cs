@@ -36,7 +36,6 @@ namespace pixel_editor
             "float:",
             "bool:",
         };
-        
         private static void ExecuteCommand(string[] args, int count, Command command)
         {
             try
@@ -99,34 +98,42 @@ namespace pixel_editor
                     // string
                     case 0:
                         try { value.Add(input); }
-                        catch (Exception e) {  };
+                        catch (Exception) {  };
                         continue;
                         // bool
                     case 1:
-                        try {
-                            value.Add(bool.Parse(input)); }
-                        catch (Exception e) {  };
+                        try
+                        {
+                            value.Add(bool.Parse(input));
+                        }
+                        catch (Exception) 
+                        { 
+                        
+                        };
                         continue;
                         // int
                     case 2:
                         try { value.Add(int.Parse(input)); }
-                        catch (Exception e) {  };
+                        catch (Exception) {  };
                         continue;
                         // float
                     case 3:
                         try { value.Add(float.Parse(input)); }
-                        catch (Exception e) {  };
+                        catch (Exception) {  };
                         continue;
                         // vec2
                     case 4:
-                        try {
-                            value.Add(Vec2(input)); }
-                        catch (Exception e) { };
+                        try
+                        {
+                            Vector2 vec = input.ToVector(); 
+                            value.Add(vec);
+                            
+                        }
+                        catch (Exception) { };
                         continue;
 
                 }
         }
-        
         public static object? ParseParam(string arg, Command command, int index)
         {
             // this string gets treated like a null/void variable.
@@ -187,14 +194,13 @@ namespace pixel_editor
             var args_str = "";
             arguments = Array.Empty<string>();
 
-            commandPhrase = getCmdPhrase(input);
+            commandPhrase = GetCmdPhrase(input);
 
-            if (hasArgs(input))
-                arguments = getParameterArray(input, ref args_str);
+            if (HasArgs(input))
+                arguments = GetParameterArray(input, ref args_str);
 
            
         }
-        
         private static Vector2 Vec2(string? arg0)
         {
             string[] values = arg0.Split(',');
@@ -221,35 +227,33 @@ namespace pixel_editor
                     arg0 = arg0.Replace($"{_char}", "");
             return arg0;
         }
-
-        public static string[] splitArgsIntoParams(string args_str) => args_str.Split(ParameterSeperator);
-        public static string getCmdPhrase(string input)
+        public static string[] SplitArgsIntoParams(string args_str) => args_str.Split(ParameterSeperator);
+        public static string GetCmdPhrase(string input)
         {
             return input.Split(ArgumentsStart)[0] + EndLine;
         }
-        public static string getArguments(string input, string arguments, int argStartIndex, int argEndIndex)
+        public static string GetArguments(string input, string arguments, int argStartIndex, int argEndIndex)
         {
             for (int i = argStartIndex; i < argEndIndex; ++i)
                 arguments += input[i];
             return arguments;
         }
-        public static void getArgumentIndices(string input, out int argStartIndex, out int argEndIndex)
+        public static void GetArgumentIndices(string input, out int argStartIndex, out int argEndIndex)
         {
             argStartIndex = input.IndexOf(ArgumentsStart);
             argEndIndex = input.IndexOf(EndLine);
         }
-        public static string[] getParameterArray(string input, ref string args_str)
+        public static string[] GetParameterArray(string input, ref string args_str)
         {
             string[] arguments;
-            getArgumentIndices(input, out int argStartIndex, out int argEndIndex);
-            args_str = getArguments(input, args_str, argStartIndex, argEndIndex);
-            arguments = splitArgsIntoParams(args_str);
+            GetArgumentIndices(input, out int argStartIndex, out int argEndIndex);
+            args_str = GetArguments(input, args_str, argStartIndex, argEndIndex);
+            arguments = SplitArgsIntoParams(args_str);
             return arguments;
         }
-        public static bool hasArgs(string input)
+        public static bool HasArgs(string input)    
         {
             return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
         }
-
     }
 }
