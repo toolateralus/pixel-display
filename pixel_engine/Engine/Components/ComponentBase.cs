@@ -21,7 +21,7 @@ namespace pixel_renderer
         [JsonProperty]
         public bool IsActive = true;
         [JsonProperty]
-        internal Vector2 Position
+        public Vector2 Position
         {
             get
             {
@@ -73,6 +73,7 @@ namespace pixel_renderer
             action?.Invoke();
             Runtime.Log($"{Name} had {nameof(OnEditActionClicked)} called at {DateTime.Now}");
         }
+        public virtual void OnFieldEdited(string field) { }
         public virtual void OnDrawShapes() { }
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
