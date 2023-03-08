@@ -17,19 +17,14 @@ namespace pixel_renderer
         {
             if (collider is null)
                 node?.TryGetComponent(out collider);
-            
-            if (i % 60 == 0)
-                Runtime.Log(colliderDistance);
-            
-            i++;
         }
 
         public override void OnCollision(Collider collider)
         {
             if (this.collider is null)
                 return;
-            Vector2 thisCol = this.collider.Polygon.centroid;
-            colliderDistance = Vector2.Distance(collider.Polygon.centroid, thisCol);
+            colliderDistance = Vector2.Distance(Position, collider.Position);
+            Runtime.Log(colliderDistance);
         }
 
         public static Node SoftBody()
