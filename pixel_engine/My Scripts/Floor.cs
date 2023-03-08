@@ -4,9 +4,10 @@ namespace pixel_renderer
 {
     public class Floor : Component
     {
-        public const float height = 2500;
+        public const float height = 250;
         public const float width = 5500;
-        private static Vector2 startPosition = new(-(width / 2), 0);
+        private static Vector2 startPosition = new(0, height / 2);
+        private static Vector2 size = new(width, height);
 
         public static Node Standard()
         {
@@ -19,7 +20,7 @@ namespace pixel_renderer
 
             Collider col = node.AddComponent<Collider>();
 
-            col.untransformedPolygon = Polygon.Rectangle(width, 250);
+            col.untransformedPolygon = Polygon.Rectangle(size);
             col.drawCollider = true;
             col.drawNormals = true;
             return node;

@@ -8,7 +8,7 @@ namespace pixel_renderer
     public class Collider : Component
     {
 
-        [JsonProperty] public Polygon untransformedPolygon;
+        [JsonProperty] public Polygon untransformedPolygon = new();
         public Polygon Polygon
         {
             get
@@ -27,14 +27,13 @@ namespace pixel_renderer
 
         [JsonProperty] public bool IsTrigger { get; internal set; } = false;
 
-        private BoundingBox2D? boundingBox;
+        private BoundingBox2D boundingBox = new();
         public BoundingBox2D BoundingBox
         {
             get
             {
-                if (boundingBox == null && Polygon.vertices != null)
-                    boundingBox = Polygon.GetBoundingBox(Polygon.vertices);
-                return boundingBox ?? default;
+                Polygon.GetBoundingBox(ref boundingBox);
+                return boundingBox;
             }
         }
 

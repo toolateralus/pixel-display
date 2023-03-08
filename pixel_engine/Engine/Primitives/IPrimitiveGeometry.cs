@@ -2,6 +2,6 @@
 {
     public interface IPrimitiveGeometry
     {
-        public static Polygon DefiningGeometry { get; }
+        public Polygon DefiningGeometry { get; }
     }
 }
