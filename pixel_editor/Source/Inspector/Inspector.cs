@@ -123,7 +123,16 @@ namespace pixel_editor
                 return;
 
             components = lastSelectedNode.Components;
+
             int index = 0;
+            TransformComponent transform = new()
+            {
+                node = lastSelectedNode,
+                position = lastSelectedNode.Position,
+                scale = lastSelectedNode.Scale,
+                rotation = lastSelectedNode.Rotation
+            };
+            index = AddComponentToInspector(grid, index, transform, false, lastSelectedNode.Name);
 
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
@@ -136,20 +145,22 @@ namespace pixel_editor
             SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
             OnInspectorUpdated?.Invoke(grid);
         }
-        private int AddComponentToInspector(Grid grid, int index, Component component)
+        private int AddComponentToInspector(Grid grid, int index, Component component, bool removable = true, string? name = null)
         {
-            var box = GetTextBox(component.GetType().Name);
-           
-            Button editComponentButton = GetEditComponentButton(index);
-            Button removeButton = GetRemoveComponentButton(index, component);
-           
-            grid.Children.Add(removeButton);
-            grid.Children.Add(editComponentButton);
+            var box = GetTextBox(name ?? component.GetType().Name);
+            SetRowAndColumn(box, 2, 4, 0, index * 2);
             grid.Children.Add(box);
 
+            Button editComponentButton = GetEditComponentButton(index);
             SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
-            SetRowAndColumn(removeButton, 2, 2, 6, index * 2);
-            SetRowAndColumn(box, 2, 4, 0, index * 2);
+            grid.Children.Add(editComponentButton);
+           
+            if (removable)
+            {
+                Button removeButton = GetRemoveComponentButton(index, component);
+                SetRowAndColumn(removeButton, 2, 2, 6, index * 2);
+                grid.Children.Add(removeButton);
+            }
 
             editComponentActions.Add(delegate
             {

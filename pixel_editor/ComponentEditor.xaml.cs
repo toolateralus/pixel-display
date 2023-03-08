@@ -278,6 +278,7 @@ namespace pixel_editor
                     Action<string, int> action = editEvents[index];
                     string name = field.Name;
                     action.Invoke(name, index);
+                    component.OnFieldEdited(name);
                 }
         }
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
