@@ -18,7 +18,7 @@ namespace pixel_renderer
         /// </summary>
         /// <returns></returns>
         
-        private void RecalculateUVs()
+        private void CalculateUV()
         {
             int vertCount = vertices.Length;
             uv = new Vector2[vertCount];
@@ -31,7 +31,7 @@ namespace pixel_renderer
                 uv[i] = (vertices[i] - uvBox.min) / bbSize;
             }
         }
-        private void RecalculateNormals()
+        private void CalculateNormals()
         {
             int vertCount = vertices.Length;
             normals = new Vector2[vertCount];
@@ -90,10 +90,10 @@ namespace pixel_renderer
             this.vertices = vertices;
 
             //calc normals and centroid
-            RecalculateNormals();
+            CalculateNormals();
 
             //calc uvs (simple)
-            RecalculateUVs();
+            CalculateUV();
         }
         public Polygon(Polygon polygon)
         {
@@ -122,24 +122,24 @@ namespace pixel_renderer
         public void MoveVertex(int index, Vector2 moveTo)
         {
             vertices[index] = moveTo;
-            RecalculateNormals();
-            RecalculateUVs();
+            CalculateNormals();
+            CalculateUV();
         }
         public void InsertVertex(int index, Vector2 vertex)
         {
             List<Vector2> verts = vertices.ToList();
             verts.Insert(index, vertex);
             vertices = verts.ToArray();
-            RecalculateNormals();
-            RecalculateUVs();
+            CalculateNormals();
+            CalculateUV();
         }
         public void RemoveVertexAt(int index)
         {
             List<Vector2> verts = vertices.ToList();
             verts.RemoveAt(index);
             vertices = verts.ToArray();
-            RecalculateNormals();
-            RecalculateUVs();
+            CalculateNormals();
+            CalculateUV();
         }
 
         public static Polygon Circle(float radius, int subdivisions)
@@ -158,7 +158,7 @@ namespace pixel_renderer
             int vertCount = polygon.vertices.Length;
             for (int i = 0; i < vertCount; i++)
                 polygon.vertices[i].Transform(matrix);
-            RecalculateNormals();
+            CalculateNormals();
             return polygon;
         }
     }
