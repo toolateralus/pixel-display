@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace pixel_renderer
 {
@@ -47,9 +48,28 @@ namespace pixel_renderer
             return background ?? throw new NullReferenceException(nameof(background));
         }
         public JImage background = new();
-        internal bool awake;
-
+       
         public bool NodesBusy { get; private set; }
+
+        /// <summary>
+        /// Checks whether all of the nodes in the stages have or havent been awoken, and if not, calls awake.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsFullyAwake()
+        {
+            var awokenNodes = 0; 
+            int count = nodes.Count;
+            for (int i = 0; i < count; i++)
+                if (!nodes[i].awake)
+                {
+                    nodes[i].Awake();
+                    awokenNodes++;
+                }
+            if (awokenNodes > 0)
+                return false;
+            return true;
+
+        }
         public void Awake()
         {
             for (int i = 0; i < nodes.Count; i++)
@@ -58,13 +78,9 @@ namespace pixel_renderer
                 node.ParentStage = this;
                 node.Awake();
             }
-            awake = true; 
         }
         public void Update()
         {
-            if (!awake)
-                return; 
-
             NodesBusy = true;
             lock (nodes)
                 for (int i = 0; i < nodes.Count; i++)
@@ -86,8 +102,6 @@ namespace pixel_renderer
         }
         public void FixedUpdate(float delta)
         {
-            if (!awake) return;
-
             NodesBusy = true;
             lock (nodes)
                 for (int i = 0; i < nodes.Count; i++)

@@ -87,7 +87,7 @@ namespace pixel_renderer
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
         [Field]
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
-        private bool awake;
+        internal protected bool awake;
 
         public Vector2 Position
         {
