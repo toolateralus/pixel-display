@@ -1,12 +1,7 @@
 ﻿using pixel_renderer;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
 
 namespace pixel_renderer
 {
@@ -14,10 +9,7 @@ namespace pixel_renderer
     public static partial class Collision
     {
         public static bool AllowEntries { get; private set; } = true;
-       
         public static void SetActive(bool value) => AllowEntries = value;
-
-
         public static void FinalPhase()
         {
             if (Runtime.Current.GetStage() is not Stage stage)
@@ -130,7 +122,6 @@ namespace pixel_renderer
 
             PositionalCorrection(a, b, normal, depth);
         }
-
         static void PositionalCorrection(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {
             const float k_slop = 0.01f;
@@ -142,7 +133,6 @@ namespace pixel_renderer
             a.Position -= a.invMass * correctionVector;
             b.Position += b.invMass * correctionVector;
         }
-
         private static void AttemptCallbacks(Collider A, Collider B)
         {
             if (A.UUID == B.UUID) 
@@ -179,7 +169,6 @@ namespace pixel_renderer
             B.velocity -= colNormal * (averageSpeed - colSpeedB);
         }
     }
-
 }
 public class QuadTree
 {
