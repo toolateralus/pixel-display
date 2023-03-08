@@ -9,10 +9,6 @@ using pixel_renderer;
 using Component = pixel_renderer.Component;
 using System.Windows.Input;
 using System.Reflection;
-using System.Threading.Tasks;
-using System.Reflection.Metadata.Ecma335;
-using Newtonsoft.Json.Linq;
-using System.Net.NetworkInformation;
 
 namespace pixel_editor
 {
@@ -66,6 +62,11 @@ namespace pixel_editor
         public ComponentEditor (Editor mainWnd, Component component)
         {
             InitializeComponent();
+            InitializeComponentEditor(mainWnd, component);
+        }
+
+        private void InitializeComponentEditor(Editor mainWnd, Component component)
+        {
             this.component = component;
             mainWnd.RegisterComponentEditor(EditorKey, this);
             GetEvents();
@@ -285,7 +286,7 @@ namespace pixel_editor
     {
         public readonly IReadOnlyCollection<FieldInfo> Fields;
         public readonly IReadOnlyCollection<MethodInfo> Methods;
-        public readonly IReadOnlyCollection<object> Values;
+        public readonly List<object> Values;
         public readonly WeakReference<Component> Component; 
 
         public ComponentEditorData(Component component)
@@ -303,26 +304,26 @@ namespace pixel_editor
                 values[i] = GetValueAtIndex(i);
             }
 
-            this.Values = values;
+            this.Values = values.ToList();
         }
-     
         public IReadOnlyCollection<object> GetAllValues(out int count)
         {
             count = Values.Count;
             return Values; 
         }
-
         public object? GetValueAtIndex(int index)
         {
             if (IsReferenceAlive(out var component))
                 return Fields.ElementAt(index)?.GetValue(component);
             return false;
         }
-
         public void UpdateChangedValues(object[] data)
         {
             if (data.Length != Values.Count)
-                throw new InvalidOperationException("Component Update Invalidated! input array was the wrong size.");
+            {
+                Runtime.Log("component update invalidated : input array was the wrong size.");
+                return; 
+            }
 
             for (int i = 0; i < Values.Count; ++i)
             {
@@ -332,12 +333,9 @@ namespace pixel_editor
                 if (localVal == newVal)
                     continue;
 
-                Runtime.Log(localVal + "is being replaced with" + newVal);
-
+                Values[i] = newVal; 
             }
-          
         }
-
         public bool SetValueAtIndex(int index, object value)
         {
             if (IsReferenceAlive(out var component))
@@ -347,7 +345,6 @@ namespace pixel_editor
             }
             return false; 
         }
-
         public bool IsReferenceAlive(out Component component)
         {
             if (!this.Component.TryGetTarget(out component))

@@ -118,17 +118,13 @@ namespace pixel_editor
             editComponentActions.Clear();
 
             grid = null;
-
             grid = NewInspectorGrid();
 
             if (lastSelectedNode == null)
                 return;
 
             components = lastSelectedNode.Components;
-
             int index = 0;
-
-
 
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
@@ -138,24 +134,24 @@ namespace pixel_editor
             addComponentButton.FontSize = 2;
             grid.Children.Add(addComponentButton);
             addComponentButton.Click += AddComponentButton_Click;
-            Inspector.SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
-
-
-
+            SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
             OnInspectorUpdated?.Invoke(grid);
         }
-     
         private int AddComponentToInspector(Grid grid, int index, Component component)
         {
             var box = GetTextBox(component.GetType().Name);
+           
             Button editComponentButton = GetEditComponentButton(index);
             Button removeButton = GetRemoveComponentButton(index, component);
+           
             grid.Children.Add(removeButton);
             grid.Children.Add(editComponentButton);
             grid.Children.Add(box);
+
             SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
             SetRowAndColumn(removeButton, 2, 2, 6, index * 2);
             SetRowAndColumn(box, 2, 4, 0, index * 2);
+
             editComponentActions.Add(delegate
             {
                var comp = new ComponentEditor(Editor.Current, component);
@@ -244,20 +240,20 @@ namespace pixel_editor
             if (!addComponentMenuOpen)
             {
                 addComponentMenuOpen = true;
-                addComponentGrid = Inspector.GetGrid();
+                addComponentGrid = GetGrid();
                 MainGrid.Children.Add(addComponentGrid);
-                Inspector.SetRowAndColumn(addComponentGrid, 10, 10, (int)Constants.InspectorPosition.X, (int)Constants.InspectorPosition.Y);
+                SetRowAndColumn(addComponentGrid, 10, 10, (int)Constants.InspectorPosition.X, (int)Constants.InspectorPosition.Y);
 
                 int i = 0;
                 foreach (var item in addComponentFunctions)
                 {
-                    Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
+                    Button button = GetButton(item.Key, new(0, 0, 0, 0));
                     button.Name = $"button{i}";
                     addComponentActions.Add(() => AddComponent(new(item.Key, item.Value)));
                     button.FontSize = 2;
                     button.Click += AddComponentClicked;
                     addComponentGrid.Children.Add(button);
-                    Inspector.SetRowAndColumn(button, 1, 2, 0, i);
+                    SetRowAndColumn(button, 1, 2, 0, i);
                     i++;
 
                 }
@@ -291,7 +287,7 @@ namespace pixel_editor
             {
                 Text = componentName,
                 FontSize = 4f,
-                FontFamily = new System.Windows.Media.FontFamily("MS Gothic"),
+                FontFamily = new FontFamily("MS Gothic"),
                 IsReadOnly = true,
 
                 AcceptsReturn = false,
@@ -315,6 +311,7 @@ namespace pixel_editor
             Margin = margin,
             BorderThickness = new Thickness(0.1,0.1,0.1,0.1),
         };
+        
         private static Button GetRemoveComponentButton(int index, Component component)
         {
             Button editComponentButton = GetButton("Remove", new(0, 0, 0, 0));
@@ -335,7 +332,7 @@ namespace pixel_editor
             editComponentButton.Name = "edit_button_" + index.ToString();
             return editComponentButton;
         }
-        
+
         public static Grid GetGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
         {
             Grid grid = new()
@@ -364,6 +361,7 @@ namespace pixel_editor
 
             return grid;
         }
+
         public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
         {
             grid.SetValue(Grid.RowSpanProperty, height);
