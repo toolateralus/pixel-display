@@ -30,22 +30,7 @@ namespace pixel_renderer
             if (frame.Length != stride * Resolution.Y)
                 frame = new byte[stride * (int)Resolution.Y];
 
-            List<Component> componentsFound = new();
-
-            lock(stage.nodes)
-            foreach (var node in stage.nodes)
-            {
-                var result = componentsFound.Concat(node.ComponentsList);
-
-                if (result != null)
-                    componentsFound = result.ToList();
-            }
-
-            List<UIComponent> uiComponents = new();
-
-            foreach (var comp in componentsFound)
-                if (comp is UIComponent uiComp)
-                    uiComponents.Add(uiComp);
+            IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>().AsParallel();
 
             foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                 if (uiComponent.IsActive)

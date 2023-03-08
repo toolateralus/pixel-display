@@ -85,17 +85,6 @@ namespace pixel_renderer
        
         [JsonProperty] public Dictionary<Vector2, Node> children = new();
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
-        public List<Component> ComponentsList
-        {
-            get
-            {
-                var list = new List<Component>();
-                foreach (var componentType in Components)
-                    foreach (var component in componentType.Value)
-                        list.Add(component);
-                return list ?? new();
-            }
-        }
         [Field]
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
         private bool awake;

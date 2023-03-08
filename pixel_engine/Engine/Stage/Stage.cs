@@ -290,15 +290,21 @@ namespace pixel_renderer
                     Runtime.Log("JSON_ERROR: Null Node Removed From Stage.");
                     RemoveNode(node);
                 }
-
-                foreach (var component in node.ComponentsList)
+                for (int x = 0; x < node.Components.Count; ++x)
                 {
-                    if (component is null)
+                    var type = node.Components.Keys.ElementAt(x);
+                    var compList = node.Components[type];
+                    for(int y = 0; y < compList.Count; ++y)
                     {
-                        Runtime.Log("JSON_ERROR: Null Component Removed From Node.");
-                        node.RemoveComponent(component);
+                        var component = compList[y];
+                        if (component is null)
+                        {
+                            Runtime.Log("JSON_ERROR: Null Component Removed From Node.");
+                            node.RemoveComponent(component);
+                        }
+                        component.node ??= node;
                     }
-                    component.node ??= node;
+
                 }
             }
             Metadata = metadata;

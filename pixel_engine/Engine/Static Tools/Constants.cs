@@ -56,7 +56,10 @@ namespace pixel_renderer
 
         public const int ScreenH = 256;
         public const int ScreenW = 256;
-        public const int PhysicsIntervalMs = 16; 
+        /// <summary>
+        /// amount of time in milliseconds between physics frames (60 fps ~ 16ms)
+        /// </summary>
+        public const int PhysicsTimeStep = 16; 
 
         public static Vector2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
         public static Vector2 DefaultResolution => new(ScreenW, ScreenH);

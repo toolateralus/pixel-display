@@ -25,6 +25,9 @@ namespace pixel_renderer
         {
             velocity += CMath.Gravity;
             velocity += acceleration;
+            
+            velocity *= 0.99f; 
+
             Position += velocity;
             velocity *= 1f / (1f + 0.01f * (drag * MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()))));
         }

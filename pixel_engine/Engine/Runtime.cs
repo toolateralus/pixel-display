@@ -1,19 +1,11 @@
-﻿using pixel_renderer.Assets;
-using pixel_renderer.FileIO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
-using System.Windows.Threading;
-using Timer = System.Timers.Timer;
 
 namespace pixel_renderer
 {
@@ -43,26 +35,65 @@ namespace pixel_renderer
         private protected volatile static Runtime? current;
         private protected volatile Stage? stage;
         private protected volatile Thread renderThread; 
+
         public static event Action<EditorEvent>? InspectorEventRaised;
+
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
+
         public static List<System.Windows.Controls.Image> OutputImages = new();
         public object? Inspector = null;
+
         public static bool Initialized { get; private set; }
         public static bool IsRunning { get; private set; }
         public static bool IsDiposing { get; private set; }
+        public BackgroundWorker physicsWorker; 
+
         private Runtime(Project project)
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             current = this;
             this.project = project;
+
+
             renderHost = new();
-            renderThread = new(OnRenderTick);
+            renderThread = new(OnRenderBegin);
             Task.Run(() => renderThread.Start());
+            
+            physicsWorker = new();
+            physicsWorker.DoWork += OnPhysicsBegin;
+            physicsWorker.RunWorkerAsync(); 
+
             Initialized = true;
             Project.LoadStage(0);
             
         }
+
+        private void OnPhysicsBegin(object? sender, DoWorkEventArgs e)
+        {
+            while (physicsWorker != null)
+            {
+                if (IsDiposing)
+                    return;
+
+                if (IsRunning)
+                {
+                    if (Current.stage is null)
+                        continue;
+
+                    StagingHost.FixedUpdate(Current.stage);
+
+                    Collision.Run();
+
+                    if (Application.Current is null)
+                        return;
+
+                    Thread.Sleep(Constants.PhysicsTimeStep);
+                }
+            }
+
+        }
+
         public static void Toggle()
         {
             if (IsRunning)
@@ -85,7 +116,7 @@ namespace pixel_renderer
            RaiseInspectorEvent(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e) => InspectorEventRaised?.Invoke(e);
-        private static void OnRenderTick()
+        private static void OnRenderBegin()
         {
             while (Current.renderThread != null && Current.renderThread.IsAlive)
             {
@@ -108,10 +139,6 @@ namespace pixel_renderer
 
                     StagingHost.Update(Current.stage);
                     
-                    StagingHost.FixedUpdate(Current.stage);
-                    
-                    Collision.Run();
-
                     Current.renderHost?.Render();
 
                     if (Application.Current is null)
