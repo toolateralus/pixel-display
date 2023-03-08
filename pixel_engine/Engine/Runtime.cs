@@ -103,8 +103,7 @@ namespace pixel_renderer
             }
             IsRunning = true;
 
-            if (Current.stage.IsFullyAwake())
-                Runtime.Log("Nodes recursively awoken");
+            
         }
         /// <summary>
         /// Prints a message in the editor console.

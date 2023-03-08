@@ -81,6 +81,9 @@ namespace pixel_renderer
         }
         public void Update()
         {
+            if (!Runtime.Current.GetStage().IsFullyAwake())
+                Runtime.Log("Nodes recursively awoken");
+
             NodesBusy = true;
             lock (nodes)
                 for (int i = 0; i < nodes.Count; i++)
