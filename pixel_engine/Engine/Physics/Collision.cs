@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace pixel_renderer
 {
@@ -75,6 +76,9 @@ namespace pixel_renderer
 
             if (A.IsTrigger || bCol.IsTrigger) return;
 
+            if (A.UUID == bCol.UUID)
+                return; 
+
             (Vector2 normal, float depth) = SATCollision.GetCollisionData(A.Polygon, bCol.Polygon);
 
             if (normal == Vector2.Zero)
@@ -140,6 +144,9 @@ namespace pixel_renderer
 
         private static void AttemptCallbacks(Collider A, Collider B)
         {
+            if (A.UUID == B.UUID) 
+                return;
+
             if (A.IsTrigger || B.IsTrigger)
             {
                 A.node.OnTrigger(B);
