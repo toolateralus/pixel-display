@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace pixel_renderer
 {
@@ -81,6 +82,7 @@ namespace pixel_renderer
             for(int i = 1; i < expandToAll.Length; i++)
                 ExpandTo(expandToAll[i]);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ExpandTo(Vector2 point)
         {
             min.X = Math.Min(point.X, min.X);

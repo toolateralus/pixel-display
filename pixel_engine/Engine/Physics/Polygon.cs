@@ -72,10 +72,18 @@ namespace pixel_renderer
         }
         public static BoundingBox2D GetBoundingBox(Vector2[] vertices)
         {
-            BoundingBox2D uvBox = new(vertices[0], vertices[0]);
-            foreach (Vector2 v in vertices)
-                uvBox.ExpandTo(v);
-            return uvBox;
+            BoundingBox2D boundingBox = new(vertices[0], vertices[0]);
+            foreach (Vector2 vertex in vertices)
+                boundingBox.ExpandTo(vertex);
+            return boundingBox;
+        }
+        public void GetBoundingBox(ref BoundingBox2D boundingBox)
+        {
+            var vertLength = vertices.Length;
+            boundingBox.min = vertices[0];
+            boundingBox.max = vertices[0];
+            for(int i = 1; i < vertLength; i++)
+                boundingBox.ExpandTo(vertices[i]);
         }
 
         /// <summary>
@@ -106,9 +114,17 @@ namespace pixel_renderer
             Array.Copy(polygon.uv, uv, uv.Length);
         }
 
-        public static Polygon Rectangle(float width, float height)
+        public static Polygon Rectangle(Vector2 size)
         {
-            return new(new Vector2[] { new(0, 0), new(width, 0), new(width, height), new(0, height) });
+            var vertices = new Vector2[]
+            {
+                new Vector2(-0.5f, -0.5f),
+                new Vector2( 0.5f, -0.5f),
+                new Vector2( 0.5f,  0.5f),
+                new Vector2(-0.5f,  0.5f),
+            };
+
+            return new Polygon(vertices).Transformed(Matrix3x2.CreateScale(size));
         }
         public static Polygon Triangle(float width, float height, float topPosScale = 0.5f)
         {
