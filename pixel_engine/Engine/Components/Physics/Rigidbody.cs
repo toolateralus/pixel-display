@@ -45,7 +45,7 @@ namespace pixel_renderer
             rb.IsActive = true;
 
             Collider col = node.AddComponent<Collider>();
-            col.untransformedPolygon = new Box().DefiningGeometry;
+            col.model = new Box().DefiningGeometry;
 
             Sprite sprite = node.AddComponent<Sprite>();
             sprite.color = JRandom.Color(aMin: 200);

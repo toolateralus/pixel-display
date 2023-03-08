@@ -8,14 +8,14 @@ namespace pixel_renderer
     public class Collider : Component
     {
 
-        [JsonProperty] public Polygon untransformedPolygon = new();
+        [JsonProperty] public Polygon model = new();
         public Polygon Polygon
         {
             get
             {
-                if (untransformedPolygon is null)
-                    untransformedPolygon = new Box().DefiningGeometry;
-                return untransformedPolygon.Transformed(Transform);
+                if (model is null)
+                    model = new Box().DefiningGeometry;
+                return model.Transformed(Transform);
             }
         }
 
@@ -68,7 +68,7 @@ namespace pixel_renderer
         }
         public void SetPolygonFromWorldSpace(Polygon worldspacePolygon)
         {
-            untransformedPolygon = worldspacePolygon.Transformed(Transform.Inverted());
+            model = worldspacePolygon.Transformed(Transform.Inverted());
         }
     }
 }

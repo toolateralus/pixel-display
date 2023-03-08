@@ -20,7 +20,7 @@ namespace pixel_renderer
 
             Collider col = node.AddComponent<Collider>();
 
-            col.untransformedPolygon = Polygon.Rectangle(size);
+            col.model = Polygon.Rectangle(size);
             col.drawCollider = true;
             col.drawNormals = true;
             return node;

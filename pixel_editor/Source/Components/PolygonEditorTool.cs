@@ -39,7 +39,7 @@ namespace pixel_editor
             selectedCollider = GetSelectedCollider();
             if (selectedCollider == null)
                 return;
-            var localPoly = selectedCollider.untransformedPolygon;
+            var localPoly = selectedCollider.model;
             Vector2 mPosLocal = CMouse.GlobalPosition.Transformed(selectedCollider.Transform.Inverted());
             if (grabbedVertexIndex != -1 && Input.Get(Key.V))
             {

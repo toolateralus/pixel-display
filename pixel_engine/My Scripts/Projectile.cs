@@ -28,7 +28,7 @@ namespace pixel_renderer
             node.Transform = Matrix3x2.CreateScale(35);
 
             var col = node.AddComponent<Collider>();
-            col.untransformedPolygon = new Circle().DefiningGeometry;
+            col.model = new Circle().DefiningGeometry;
             col.Scale = new(25, 25);
             rb = node.AddComponent<Rigidbody>();
             node.Position = sender.Position; 
