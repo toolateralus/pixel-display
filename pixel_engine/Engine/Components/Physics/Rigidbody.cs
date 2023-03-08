@@ -9,8 +9,6 @@ namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
-
-
         [Field][JsonProperty] public float mass = 1f;
         [Field][JsonProperty] public float invMass;
         [Field][JsonProperty] public float gravityFactor;
@@ -25,11 +23,10 @@ namespace pixel_renderer
         {
             velocity += CMath.Gravity;
             velocity += acceleration;
-            
             velocity *= 0.99f; 
-
             Position += velocity;
-            velocity *= 1f / (1f + 0.01f * (drag * MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()))));
+            float velAccel = MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()));
+            velocity *= 1f / (1f + 0.01f * (drag * velAccel));
         }
         public override void Awake()
         {

@@ -95,22 +95,21 @@ namespace pixel_editor
         
         private List<Control> activeControls = new();
         private List<Grid> activeGrids = new();
+        bool addComponentMenuOpen = false;
 
         private Grid MainGrid;
         private Grid grid;
+        Grid addComponentGrid;
 
+        Dictionary<string, Func<Component>> addComponentFunctions;
+        public static List<Action> editComponentActions = new();
         private Dictionary<Type, List<Component>> components = new();
         List<Action> addComponentActions = new();
-        Dictionary<string, Func<Component>> addComponentFunctions;
-        Grid addComponentGrid;
-        bool addComponentMenuOpen = false;
         
-        public static List<Action> editComponentActions = new();
         private static void RemoveComponent(Component obj)
         {
             obj.node.RemoveComponent(obj);
         }
-
         private void Refresh(Grid grid)
         {
             activeGrids.Clear();
@@ -188,50 +187,15 @@ namespace pixel_editor
         }
         private void RefreshAddComponentFunctions()
         {
-            addComponentFunctions = new()
+             addComponentFunctions = new()
             {
                 {"Player",    AddPlayer},
                 {"Animator",  AddAnimator},
                 {"Sprite",    AddSprite},
                 {"Collider",  AddCollider},
                 {"Rigidbody", AddRigidbody},
+                {"Softbody",  AddSoftbody},
             };
-
-            Player AddPlayer()
-            {
-                var x= lastSelectedNode.AddComponent<Player>();
-                Runtime.Log($"Player Added!");
-                return x;
-            }
-
-            Animator AddAnimator()
-            {
-                var x= lastSelectedNode.AddComponent<Animator>();
-                Runtime.Log($"Animator Added!");
-
-                return x;
-            }
-
-            Sprite AddSprite()
-            {
-                var x = lastSelectedNode.AddComponent<Sprite>();
-                Runtime.Log($"Sprite Added!");
-                return x;
-            }
-
-            Collider AddCollider()
-            {
-                var x = lastSelectedNode.AddComponent<Collider>();
-                Runtime.Log($"Collider Added!");
-                return x;
-            }
-
-            Rigidbody AddRigidbody()
-            {
-                var x= lastSelectedNode.AddComponent<Rigidbody>();
-                Runtime.Log($"Rigidbody Added!");
-                return x;
-            }
         }
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
@@ -311,7 +275,6 @@ namespace pixel_editor
             Margin = margin,
             BorderThickness = new Thickness(0.1,0.1,0.1,0.1),
         };
-        
         private static Button GetRemoveComponentButton(int index, Component component)
         {
             Button editComponentButton = GetButton("Remove", new(0, 0, 0, 0));
@@ -332,7 +295,6 @@ namespace pixel_editor
             editComponentButton.Name = "edit_button_" + index.ToString();
             return editComponentButton;
         }
-
         public static Grid GetGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
         {
             Grid grid = new()
@@ -361,7 +323,6 @@ namespace pixel_editor
 
             return grid;
         }
-
         public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
         {
             grid.SetValue(Grid.RowSpanProperty, height);
@@ -380,6 +341,44 @@ namespace pixel_editor
         {
             control.Foreground = foreground;
             control.Background = background;
+        }
+
+        Sprite AddSprite()
+        {
+            var x = lastSelectedNode.AddComponent<Sprite>();
+            Runtime.Log($"Sprite Added!");
+            return x;
+        }
+        Player AddPlayer()
+        {
+            var x= lastSelectedNode.AddComponent<Player>();
+            Runtime.Log($"Player Added!");
+            return x;
+        }
+        Animator AddAnimator()
+        {
+            var x= lastSelectedNode.AddComponent<Animator>();
+            Runtime.Log($"Animator Added!");
+
+            return x;
+        }
+        Collider AddCollider()
+        {
+            var x = lastSelectedNode.AddComponent<Collider>();
+            Runtime.Log($"Collider Added!");
+            return x;
+        }
+        Softbody AddSoftbody()
+        {
+            var x = lastSelectedNode.AddComponent<Softbody>();
+            Runtime.Log($"Player Added!");
+            return x;
+        }
+        Rigidbody AddRigidbody()
+        {
+            var x= lastSelectedNode.AddComponent<Rigidbody>();
+            Runtime.Log($"Rigidbody Added!");
+            return x;
         }
 
         #endregion

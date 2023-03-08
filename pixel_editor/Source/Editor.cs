@@ -536,8 +536,9 @@ namespace pixel_editor
         }
         public static Dictionary<string, Func<Node>> addNodeFunctions = new()
         {
-            {"Static Body", Rigidbody.StaticBody },
-            {"Rigid Body", Rigidbody.Standard },
+            {"Static Body", Rigidbody.StaticBody},
+            {"Rigid Body", Rigidbody.Standard},
+            {"Soft Body", Softbody.SoftBody},
             {"Animator", Animator.Standard},
             {"Light", Light.Standard},
             {"Floor", Floor.Standard},
