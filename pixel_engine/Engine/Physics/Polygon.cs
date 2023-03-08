@@ -179,11 +179,15 @@ namespace pixel_renderer
         public Polygon Transformed(Matrix3x2 matrix)
         {
             Polygon polygon = new(this);
-            int vertCount = polygon.vertices.Length;
-            for (int i = 0; i < vertCount; i++)
-                polygon.vertices[i].Transform(matrix);
-            CalculateNormals();
+            polygon.Transform(matrix);
             return polygon;
+        }
+        public void Transform(Matrix3x2 matrix)
+        {
+            int vertCount = vertices.Length;
+            for (int i = 0; i < vertCount; i++)
+                vertices[i].Transform(matrix);
+            CalculateNormals();
         }
     }
 
