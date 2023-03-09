@@ -173,13 +173,9 @@ namespace pixel_renderer
         }
         public Vector2[] GetCorners()
         {
-            return new Vector2[]
-            {
-                Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform), // Top Left
-                Vector2.Transform(new Vector2(0.5f, -0.5f), Transform), // Top Right
-                Vector2.Transform(new Vector2(0.5f, 0.5f), Transform), // Bottom Right
-                Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform), // Bottom Left
-            };
+            var viewport = Polygon.UnitSquare();
+            viewport.Transform(Transform);
+            return viewport.vertices;
         }
 
         public static bool PointInPolygon(Vector2 point, Vector2[] vertices)

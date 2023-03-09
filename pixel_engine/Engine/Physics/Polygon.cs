@@ -124,18 +124,17 @@ namespace pixel_renderer
             Array.Copy(polygon.uv, uv, uv.Length);
         }
 
-        public static Polygon Rectangle(Vector2 size)
-        {
-            var vertices = new Vector2[]
+        public static Polygon Rectangle(Vector2 size) =>
+            UnitSquare().Transformed(Matrix3x2.CreateScale(size));
+
+        public static Polygon UnitSquare() =>
+            new(new Vector2[]
             {
                 new Vector2(-0.5f, -0.5f),
                 new Vector2( 0.5f, -0.5f),
                 new Vector2( 0.5f,  0.5f),
                 new Vector2(-0.5f,  0.5f),
-            };
-
-            return new Polygon(vertices).Transformed(Matrix3x2.CreateScale(size));
-        }
+            });
         public static Polygon Triangle(float width, float height, float topPosScale = 0.5f)
         {
             Vector2 top = new(topPosScale * width, 0);
