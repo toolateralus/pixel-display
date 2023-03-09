@@ -34,14 +34,14 @@ namespace pixel_renderer
         /// <returns></returns>
         public static T? ReadJson<T>(Metadata meta, bool closeStreamWhenFinished = true) where T : new()
         {
-            T? obj = new();
+            T? obj = (T)Convert.ChangeType(null, typeof(T));
             try
             {
 
                 if (meta is null)
                 {
                     Runtime.Log(nameof(meta) + " was not found.");
-                    return default;
+                    return obj;
                 }
                 if (Constants.ReadableExtensions.Contains(meta.extension))
                 {

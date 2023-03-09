@@ -54,7 +54,6 @@ namespace pixel_renderer
             current = this;
             this.project = project;
 
-            GetProjectSettings();
 
             renderHost = new();
             renderThread = new(OnRenderBegin);
@@ -66,20 +65,23 @@ namespace pixel_renderer
 
             Initialized = true;
             Project.LoadStage(0);
+            GetProjectSettings();
 
         }
 
         private void GetProjectSettings()
         {
-            Metadata meta = new("projectSettings", Constants.WorkingRoot + Constants.AssetsDir +  "\\projectSettings.asset", ".asset");
+            Metadata meta = new("projectSettings", Constants.WorkingRoot + "\\projectSettings.asset", ".asset");
 
-            var fetchedMeta = AssetLibrary.FetchMetaRelative("\\Assets\\projectSettings.asset");
+            var fetchedAsset = IO.ReadJson<ProjectSettings>(meta);
 
-            if (fetchedMeta is null)
+            if (fetchedAsset is null)
             {
-                projectSettings = new();
-                IO.WriteJson<ProjectSettings>(projectSettings, meta);
+                fetchedAsset = new();
+                IO.WriteJson<ProjectSettings>(fetchedAsset, meta);
             }
+            projectSettings = fetchedAsset;
+            renderHost.GetRenderer()._resolution = projectSettings.CurrentResolution; 
         }
 
         public ProjectSettings projectSettings;

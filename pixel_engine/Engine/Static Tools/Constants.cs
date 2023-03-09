@@ -39,6 +39,8 @@ namespace pixel_renderer
             StageFileExtension,
         };
 
+        public static Vector2 DefaultResolution = new(480, 480);
+
         public static List<Type> GetInheritedTypesFromBase<T>()
         {
             var types = AppDomain.CurrentDomain.GetAssemblies()

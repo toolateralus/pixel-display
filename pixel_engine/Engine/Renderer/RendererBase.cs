@@ -20,7 +20,7 @@
             get => _resolution;
             set => Runtime.Current.renderHost.newResolution = value; 
         }
-        internal protected Vector2 _resolution = Runtime.Current.projectSettings.DefaultResolution;
+        internal protected Vector2 _resolution = Constants.DefaultResolution;
         public bool baseImageDirty = true;
         const float fZero = 0;
         const float fOne = 1;
