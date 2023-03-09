@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Xml;
 
 namespace pixel_renderer
 {
@@ -8,31 +9,32 @@ namespace pixel_renderer
         [Field] Collider? collider = null;
         [Field] float minScale = 0.25f;
         [Field] float maxScale = 2f;
-
-        private Polygon model = default;
         private Vector2 maxDeformationAmount = new(0.001f, 0.001f);
 
         public override void Update()
         {
+            usingGravity = false;
+
             if (collider is null)
                 node?.TryGetComponent(out collider);
-
             if (collider is null) return; 
+
             collider.drawCollider = true;
             collider.drawNormals = true;
-            model = collider.model;
-
+            collider.IsTrigger = true;
         }
-        public override void OnCollision(Collision col)
+
+        
+        public override void OnTrigger(Collision col)
         {
             if (this.collider is null)
                 return;
 
-            Polygon poly = new(model);
+            Polygon poly = new(collider.model);
 
             for (int index = 0; index < poly.vertices.Length; index++)
             {
-                var (within, pos) = WithinDeformationRange(poly.vertices[index], model.vertices[index]);
+                var (within, pos) = WithinDeformationRange(poly.vertices[index], collider.model.vertices[index]);
                 if (within)
                 {
                     float distance = Vector2.Distance(poly.vertices[index], collider.model.centroid);
@@ -40,19 +42,20 @@ namespace pixel_renderer
                     Vector2 deformationAmount = Vector2.Lerp(Vector2.Zero, maxDeformationAmount, distance / (collider.Scale / 2).Length());
                     
                     Vector2 direction = (poly.vertices[index] - collider.Polygon.centroid).Normalized();
-                    
-                    poly.vertices[index] += direction * deformationAmount;
-                    
+
+                    if (JRandom.Bool())
+                        poly.vertices[index] += direction * WaveForms.Next;
+                    else poly.vertices[index] -= direction * WaveForms.Next;
                     continue;
                 }
                 poly.vertices[index] = pos;
             }
             collider.model = poly; 
         }
-
         private (bool within, Vector2 result) WithinDeformationRange(Vector2 vert, Vector2 original)
         {
             float scale = vert.Length() / original.Length();
+
 
             var min = minScale;
             var max = maxScale;

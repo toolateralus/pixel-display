@@ -21,12 +21,14 @@ namespace pixel_renderer
 
         public override void FixedUpdate(float deltaTime)
         {
-            velocity += CMath.Gravity;
+            if (usingGravity)
+                velocity += CMath.Gravity;
+
             velocity += acceleration;
             velocity *= 0.99f; 
             Position += velocity;
-            float velAccel = MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()));
-            velocity *= 1f / (1f + 0.01f * (drag * velAccel));
+            float force = MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()));
+            velocity *= 1f / (1f + 0.01f * (drag * force));
         }
         public override void Awake()
         {
@@ -55,7 +57,6 @@ namespace pixel_renderer
         }
         public static Node Standard() =>
             Standard("Rigidbody " + JRandom.Hex());
-
         public static Node StaticBody()
         {
             Node node = Standard("Static Body " + JRandom.Hex());

@@ -13,7 +13,7 @@ namespace pixel_renderer.FileIO
         [JsonProperty] public string Name;
         [JsonProperty] public string UUID;
         [JsonProperty] public Metadata Metadata;
-        public Asset() : this("New Asset", false)
+        public Asset() : this("New Asset Mode", false)
         {
          
         }
