@@ -78,7 +78,7 @@ namespace pixel_renderer
             if (fetchedAsset is null)
             {
                 fetchedAsset = new();
-                IO.WriteJson<ProjectSettings>(fetchedAsset, meta);
+                IO.WriteJson(fetchedAsset, meta);
             }
             projectSettings = fetchedAsset;
             renderHost.GetRenderer()._resolution = projectSettings.CurrentResolution; 

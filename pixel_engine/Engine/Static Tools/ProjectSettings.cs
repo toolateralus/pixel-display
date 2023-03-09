@@ -24,7 +24,6 @@ namespace pixel_renderer
         public int ScreenH = 256;
         [JsonProperty]
         public int ScreenW = 256;
-
     }
 
 }
