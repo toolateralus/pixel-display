@@ -6,31 +6,17 @@ using System.Numerics;
 
 namespace pixel_renderer
 {
+
     public class Constants
     {
+
         public const int FramerateSampleThreshold = 60;
-
-        public static Vector2 PhysicsArea = new Vector2(10000, 10000);
-
-        public const int ScreenH = 256;
-        public const int ScreenW = 256;
-        /// <summary>
-        /// amount of time in milliseconds between physics frames (60 fps ~ 16ms)
-        /// </summary>
-        public const int PhysicsTimeStep = 16; 
-
-        public static Vector2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
-        public static Vector2 DefaultResolution => new(ScreenW, ScreenH);
-
         public static Vector2 MaxResolution = new(3840, 3840);
         public static Vector2 MinResolution = new(4, 4);
 
-        public static Pixel EditorHighlightColor = Color.Orange;
-
         public static char[] unsupported_chars = { '_', '-', '.', '`' };
         public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-        
-        
+
         public const string ImagesDir = "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
         public const string ProjectsDir = "\\Projects"; // Project files 
         public const string AssetsDir = "\\Assets";   // Asset files (user - created)
@@ -41,6 +27,8 @@ namespace pixel_renderer
         public const string ProjectFileExtension = ".pixel";   // .pixel {Pixel Project}
         public const string MetadataFileExtension = ".meta";  // .meta {File Metadata} 
         public const string StageFileExtension = ".stage";    // .stage {Stage File}
+        
+        public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
 
         public const string BitmapFileExtension = ".bmp"; // .bmp {The only image format currently supported.}
         public static string[] ReadableExtensions = 
@@ -50,8 +38,6 @@ namespace pixel_renderer
             ProjectFileExtension,
             StageFileExtension,
         };
-
-        public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
 
         public static List<Type> GetInheritedTypesFromBase<T>()
         {

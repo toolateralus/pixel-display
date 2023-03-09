@@ -162,7 +162,7 @@ namespace pixel_renderer
                 for (int i = 0; i < vertLength; i++)
                 {
                     var nextIndex = (i + 1) % vertLength;
-                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Constants.EditorHighlightColor);
+                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Runtime.Current.projectSettings.EditorHighlightColor);
                 }
             }
         }

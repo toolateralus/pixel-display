@@ -33,7 +33,9 @@ namespace pixel_renderer
             if (Runtime.Current.GetStage() is not Stage stage)
                 return;
 
-            var quadTree = new QuadTree(new BoundingBox2D(-Constants.PhysicsArea.X, -Constants.PhysicsArea.Y, Constants.PhysicsArea.X, Constants.PhysicsArea.Y));
+            var area = Runtime.Current.projectSettings.PhysicsArea;
+
+            var quadTree = new QuadTree(new BoundingBox2D(-area.X, -area.Y, area.X, area.Y));
 
             for (int i = 0; i < stage.nodes.Count; i++)
             {
@@ -43,7 +45,7 @@ namespace pixel_renderer
                     quadTree.Insert(node);
             }
             
-            BoundingBox2D range = new(Constants.PhysicsArea / -2, Constants.PhysicsArea / 2);
+            BoundingBox2D range = new(area / -2, area / 2);
            
             List<Node> foundNodes = new();
 

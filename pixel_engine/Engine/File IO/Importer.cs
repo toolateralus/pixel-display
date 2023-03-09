@@ -16,19 +16,19 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
-            ImportBitmaps();
-            ImportAssets();
+            ImportAll(Constants.WorkingRoot);
         }
 
         private static void ImportAssets()
         {
-            foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.AssetsFileExtension))
+            foreach (var x in Import(Constants.WorkingRoot, Constants.AssetsFileExtension))
             {
                 var asset = IO.ReadJson<Asset>(x);
                 bool result = AssetLibrary.Register(x, asset);
                 if (!result)
                     Runtime.Log($"Importer tried to register an asset that already been registered. Asset {asset.Name} \n {asset.GetType()} at path {x.Path}");
             }
+
         }
 
         private static void ImportBitmaps()
@@ -51,36 +51,67 @@ namespace pixel_renderer.Assets
 
             if (Constants.ReadableExtensions.Contains(ext))
             {
-                var files = Directory.GetFiles(directory, $"*{ext}");
-                foreach (var item in files)
-                {
-                    var split = item.Split('\\');
-                    var name = split[^1].Replace($"{ext}", "");
-                    Metadata file = new(name, item, ext);
-                    collection.Add(file);
-                }
+                GetFiles(directory, ext, collection);
             }
             return collection;
         }
 
-        private static void ImportTask()
+        private static void GetFiles(string directory, string ext, List<Metadata> collection)
         {
-            foreach (var file in Directory.EnumerateFiles(DirectoryPath))
+            var files = Directory.GetFiles(directory, $"*{ext}");
+            foreach (var item in files)
             {
-
+                var split = item.Split('\\');
+                var name = split[^1].Replace($"{ext}", "");
+                Metadata file = new(name, item, ext);
+                collection.Add(file);
             }
-
-            var subdirectories = Directory.EnumerateDirectories(DirectoryPath); 
-            if (!subdirectories.Any())
-                     return;
-
-            foreach (var dir in subdirectories)
-                foreach (var file in Directory.EnumerateFiles(dir))
-                {
-
-                }
         }
-        
+
+        private static void ImportAll(string dir)
+        {
+            var dirs = Directory.GetDirectories(dir);
+            var files = Directory.GetFiles(dir);
+            
+            foreach (var _dir in dirs)
+            {
+                var subDirs = Directory.GetDirectories(_dir);
+                if (subDirs.Length > 0)
+                    foreach (var __dir in subDirs)
+                    {
+                        var _subDirs = Directory.GetDirectories(__dir);
+                        if (_subDirs.Length > 0)
+                            foreach (var ___dir in _subDirs)
+                            {
+                                var __subDirs = Directory.GetDirectories(___dir);
+                                if (__subDirs.Length > 0)
+                                    foreach (var ____dir in __subDirs)
+                                    {
+                                        ImportAndRegister(____dir);
+                                    }
+                                ImportAndRegister(___dir);
+                            }
+                        ImportAndRegister(__dir);
+                    }
+                ImportAndRegister(_dir);
+            }
+            ImportAndRegister(dir);
+
+        }
+
+        private static void ImportAndRegister(string _dir)
+        {
+            var assets = Import(_dir, ".asset");
+            var images = Import(_dir, ".bmp");
+            foreach (var item in assets)
+            {
+                var asset = IO.ReadJson<Asset>(item);
+                AssetLibrary.Register(item, asset);
+            }
+            foreach (var item in images)
+                AssetLibrary.Register(item, null);
+        }
+
         public static void GetFileNameAndExtensionFromPath(string path, out string name, out string ext)
         {
             var split = path.Split('\\');

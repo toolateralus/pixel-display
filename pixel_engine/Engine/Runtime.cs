@@ -1,4 +1,6 @@
-﻿using System;
+﻿using pixel_renderer.Assets;
+using pixel_renderer.FileIO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -38,31 +40,49 @@ namespace pixel_renderer
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
         public static List<System.Windows.Controls.Image> OutputImages = new();
+        public BackgroundWorker physicsWorker; 
+
         public object? Inspector = null;
         public static bool Initialized { get; private set; }
         public static bool IsRunning { get; private set; }
         public static bool IsDiposing { get; private set; }
-        public BackgroundWorker physicsWorker; 
 
         private Runtime(Project project)
         {
+
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             current = this;
             this.project = project;
 
+            GetProjectSettings();
 
             renderHost = new();
             renderThread = new(OnRenderBegin);
             Task.Run(() => renderThread.Start());
-            
+
             physicsWorker = new();
             physicsWorker.DoWork += OnPhysicsBegin;
-            physicsWorker.RunWorkerAsync(); 
+            physicsWorker.RunWorkerAsync();
 
             Initialized = true;
             Project.LoadStage(0);
-            
+
         }
+
+        private void GetProjectSettings()
+        {
+            Metadata meta = new("projectSettings", Constants.WorkingRoot + Constants.AssetsDir +  "\\projectSettings.asset", ".asset");
+
+            var fetchedMeta = AssetLibrary.FetchMetaRelative("\\Assets\\projectSettings.asset");
+
+            if (fetchedMeta is null)
+            {
+                projectSettings = new();
+                IO.WriteJson<ProjectSettings>(projectSettings, meta);
+            }
+        }
+
+        public ProjectSettings projectSettings;
 
         private void OnPhysicsBegin(object? sender, DoWorkEventArgs e)
         {
@@ -83,7 +103,7 @@ namespace pixel_renderer
                     if (Application.Current is null)
                         return;
 
-                    Thread.Sleep(Constants.PhysicsTimeStep);
+                    Thread.Sleep(projectSettings.PhysicsTimeStep);
                 }
             }
 

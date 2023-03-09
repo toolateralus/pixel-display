@@ -95,10 +95,13 @@ namespace pixel_renderer.Assets
         /// 
         public static void Sync()
         {
+
+
             if (Runtime.Initialized)
             {
                 RefreshStageMetadataWithinLoadedProject();
                 Runtime.Current.project?.Save();
+
                 foreach (var x in Runtime.Current.project.stages)
                 {
                     x.Sync(); 

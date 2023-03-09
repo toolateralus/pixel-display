@@ -45,7 +45,7 @@ namespace pixel_renderer
             if (parent != null)
                 node.Position = parent.Position + Vector2.UnitY * 16;
 
-            else node.Position = JRandom.Vec2(Vector2.Zero, Vector2.One * Constants.ScreenW); 
+            else node.Position = JRandom.Vec2(Vector2.Zero, Vector2.One * Runtime.Current.projectSettings.ScreenW); 
             AddCamera(node);
             return node;
         }
