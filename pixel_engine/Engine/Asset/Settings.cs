@@ -1,4 +1,5 @@
-﻿using pixel_renderer.FileIO;
+﻿using Newtonsoft.Json;
+using pixel_renderer.FileIO;
 using System;
 using System.Drawing;
 using System.Numerics;
@@ -18,7 +19,6 @@ namespace pixel_renderer
 
         public Vector2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
 
-
         public string ImagesDir = "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
         public string ProjectsDir = "\\Projects"; // Project files 
         public string AssetsDir = "\\Assets";   // Asset files (user - created)
@@ -28,17 +28,27 @@ namespace pixel_renderer
     }
     public class EditorSettings : Asset
     {
-
+        [JsonProperty]
         public float DragCursorRadius = 3f;
+        [JsonProperty]
         public Vector2 MouseSensitivity = new(1.0f, 1.0f);
+        [JsonProperty]
         public Vector2 InspectorPosition = new(14, 3);
+        [JsonProperty]
         public float MouseZoomSensitivityFactor = 1.001f;
+        [JsonProperty]
         public int EditorEventQueueMaxLength = 12;
+        [JsonProperty]
         public int ConsoleMaxLines = 100;
+        [JsonProperty]
         public int InspectorHeight = 10;
+        [JsonProperty]
         public int InspectorWidth = 6;
+        [JsonProperty]
         public Pixel DragCursorColor = Pixel.Green;
+        [JsonProperty]
         public Pixel DragBoxColor = Pixel.Red;
+        [JsonProperty]
         public Pixel EditorHighlightColor = Color.Orange;
     }
 }
