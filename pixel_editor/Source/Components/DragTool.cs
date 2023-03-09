@@ -29,6 +29,9 @@ namespace pixel_editor
         }
         private void SelectAll()
         {
+
+            // NOT YET IMPLEMENTED< CAUSES TRAGEDY
+            return;
             if (Input.Get(Key.A))
             {
                 if (Runtime.Current.GetStage()?.nodes is List<Node> nodes)

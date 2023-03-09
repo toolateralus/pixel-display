@@ -106,12 +106,20 @@ namespace pixel_renderer
         [Method]
         public void CycleSpriteType()
         {
-            if ((int)Type + 1 > sizeof(SpriteType) - 2)
+            switch (Type)
             {
-                Type = 0;
-                return;
+                case SpriteType.SolidColor:
+                    Type = SpriteType.Image;
+                    break;
+                case SpriteType.Image:
+                    Type = SpriteType.SolidColor;
+                    break;
+                case SpriteType.Custom:
+                    Type = SpriteType.SolidColor;
+                    break;
+                default:
+                    break;
             }
-            Type = (SpriteType)((int)Type + 1);
 
         }
         [Method]

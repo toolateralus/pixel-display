@@ -17,7 +17,7 @@ namespace pixel_renderer.ShapeDrawing
         {
             Lines.Clear();
             Circles.Clear();
-            var components = stage.GetAllComponents<Component>();
+            var components = stage.GetAllComponents<Component>().AsParallel();
             lock (components)
             {
                 for (int i = 0; i < components.Count(); ++i)
