@@ -9,15 +9,25 @@ namespace pixel_renderer
         [Field] Collider? collider = null;
         [Field] float minScale = 0.25f;
         [Field] float maxScale = 2f;
+
+        Curve curve;
+
         private Vector2 maxDeformationAmount = new(0.001f, 0.001f);
 
         public override void Update()
         {
             usingGravity = false;
 
+            if (curve is null)
+            {
+                curve = Curve.Circlular(1, 16, 3, true);
+            }
+
             if (collider is null)
+            {
                 node?.TryGetComponent(out collider);
-            if (collider is null) return; 
+                return; 
+            }
 
             collider.drawCollider = true;
             collider.drawNormals = true;
@@ -44,8 +54,8 @@ namespace pixel_renderer
                     Vector2 direction = (poly.vertices[index] - collider.Polygon.centroid).Normalized();
 
                     if (JRandom.Bool())
-                        poly.vertices[index] += direction * WaveForms.Next;
-                    else poly.vertices[index] -= direction * WaveForms.Next;
+                        poly.vertices[index] += direction * curve.Next();
+                    else poly.vertices[index] -= direction * curve.Next();
                     continue;
                 }
                 poly.vertices[index] = pos;
