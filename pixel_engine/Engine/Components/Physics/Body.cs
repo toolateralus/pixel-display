@@ -17,7 +17,7 @@ namespace pixel_renderer
         [Field] float maxScale = 2f;
 
         private Polygon model = default;
-        private Vector2 maxDeformationAmount;
+        private Vector2 maxDeformationAmount = new(0.001f, 0.001f);
 
         public override void Update()
         {
@@ -40,6 +40,7 @@ namespace pixel_renderer
             for (int index = 0; index < poly.vertices.Length; index++)
             {
                 var (within, pos) = WithinDeformationRange(poly.vertices[index], model.vertices[index]);
+
                 if (within)
                 {
                     float distance = Vector2.Distance(poly.vertices[index], collider.Polygon.centroid);
