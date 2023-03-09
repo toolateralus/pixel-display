@@ -13,7 +13,7 @@ namespace pixel_renderer
         /// <param name="polygonA"></param>
         /// <param name="polygonB"></param>
         /// <returns>The direction to move A out of B, and the amount it must move.</returns>
-        public static (Vector2 normal, float depth) GetCollisionData(Polygon polygonA, Polygon polygonB)
+        public static (Vector2 normal, float depth) GetCollisionData(Polygon polygonA, Polygon polygonB, Vector2 aRelativeVelocity)
         {
             if (polygonA.vertices.Length == 0 || polygonB.vertices.Length == 0)
                 return (Vector2.Zero, 0f);
@@ -21,10 +21,7 @@ namespace pixel_renderer
             float overlap = float.MaxValue;
             Vector2 smallest = Vector2.Zero;
 
-            List<Vector2> normals = new List<Vector2>(polygonA.normals);
-            normals.AddRange(polygonB.normals);
-
-            foreach (Vector2 normal in normals)
+            foreach (Vector2 normal in polygonA.normals)
             {
                 SATProjection p1 = Project(polygonA, normal);
                 SATProjection p2 = Project(polygonB, normal);
@@ -35,6 +32,30 @@ namespace pixel_renderer
                 float o = GetOverlap(p1, p2);
                 if (o < overlap)
                 {
+                    if (aRelativeVelocity.X > 0 &&
+                        aRelativeVelocity.Y > 0 &&
+                        Vector2.Dot(normal, aRelativeVelocity) < 0)
+                        continue;
+                    overlap = o;
+                    smallest = normal;
+                }
+            }
+
+            foreach (Vector2 normal in polygonB.normals)
+            {
+                SATProjection p1 = Project(polygonA, normal);
+                SATProjection p2 = Project(polygonB, normal);
+
+                if (!Overlap(p1, p2))
+                    return (Vector2.Zero, 0f);
+
+                float o = GetOverlap(p1, p2);
+                if (o < overlap)
+                {
+                    if (aRelativeVelocity.X > 0 &&
+                        aRelativeVelocity.Y > 0 &&
+                        Vector2.Dot(normal, aRelativeVelocity) > 0)
+                        continue;
                     overlap = o;
                     smallest = normal;
                 }
@@ -43,8 +64,8 @@ namespace pixel_renderer
             if (smallest == Vector2.Zero)
                 return (Vector2.Zero, 0f);
 
-            Vector2 AToBOffset = polygonB.centroid - polygonA.centroid;
-            if (Vector2.Dot(AToBOffset, smallest) > 0)
+            Vector2 bToAOffset = polygonA.centroid - polygonB.centroid;
+            if (Vector2.Dot(bToAOffset, smallest) < 0)
                 smallest *= -1;
 
             return (smallest, overlap);

@@ -84,28 +84,21 @@ namespace pixel_renderer
         {
             if (rigidBody is null || staticCollider is null)
                 return;
-
             var rbCollider = rigidBody.GetComponent<Collider>();
-
-            if (rbCollider.IsTrigger || staticCollider.IsTrigger) return;
-
             if (rbCollider.UUID == staticCollider.UUID)
                 return;
-
             Polygon polyA = rbCollider.Polygon;
             Polygon polyB = staticCollider.Polygon;
-            (Vector2 normal, float depth) = SATCollision.GetCollisionData(polyA, polyB);
-
+            (Vector2 normal, float depth) = SATCollision.GetCollisionData(polyA, polyB, rigidBody.velocity);
             if (normal == Vector2.Zero)
                 return;
-
-            rigidBody.Position += normal * depth;
-
-            var dot = Vector2.Dot(rigidBody.velocity, normal);
-
-            rigidBody.velocity -= normal * dot;
+            if (!rbCollider.IsTrigger && !staticCollider.IsTrigger)
+            {
+                rigidBody.Position += normal * depth;
+                var dot = Vector2.Dot(rigidBody.velocity, normal);
+                rigidBody.velocity -= normal * dot;
+            }
             GetCollisionObjects(staticCollider, rbCollider, normal, depth, out var collisionA, out var collisionB);
-
             AttemptCallbacks(collisionA, collisionB);
         }
         private static void Collide(Rigidbody A, Rigidbody B)
@@ -121,7 +114,7 @@ namespace pixel_renderer
 
             Polygon polyA = aCol.Polygon;
             Polygon polyB = bCol.Polygon;
-            (Vector2 normal, float depth) = SATCollision.GetCollisionData(polyA, polyB);
+            (Vector2 normal, float depth) = SATCollision.GetCollisionData(polyA, polyB, A.velocity - B.velocity);
 
             if (normal == Vector2.Zero)
                 return;
@@ -166,23 +159,23 @@ namespace pixel_renderer
             A.collider.node.OnCollision(B);
             B.collider.node.OnCollision(A);
         }
-        private static void ComputeImpulse(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
+        private static void ComputeImpulse(Rigidbody rbA, Rigidbody rbB, Vector2 aToBMoveDir, float depth)
         {
-            Vector2 rv = b.velocity - a.velocity;
+            Vector2 bVelRelToA = rbB.velocity - rbA.velocity;
 
-            float velAlongNormal = Vector2.Dot(rv, normal);
+            float bRelVelAlongNorm = Vector2.Dot(bVelRelToA, aToBMoveDir);
 
-            if (velAlongNormal > 0) return;
+            if (bRelVelAlongNorm > 0) return;
 
-            float minRestitution = MathF.Min(a.restitution, b.restitution);
-            float force = -(1 + minRestitution) * velAlongNormal / (a.invMass + b.invMass);
+            float minRestitution = MathF.Min(rbA.restitution, rbB.restitution);
+            float force = -(1 + minRestitution) * bRelVelAlongNorm / (rbA.invMass + rbB.invMass);
 
-            Vector2 impulse = force * normal;
+            Vector2 impulse = force * aToBMoveDir;
 
-            a.ApplyImpulse(-impulse);
-            b.ApplyImpulse(impulse);
+            rbA.ApplyImpulse(-impulse);
+            rbB.ApplyImpulse(impulse);
 
-            PositionalCorrection(a, b, normal, depth);
+            PositionalCorrection(rbA, rbB, aToBMoveDir, depth);
         }
         private static void PositionalCorrection(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {
