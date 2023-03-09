@@ -44,7 +44,7 @@ namespace pixel_renderer
             if (sender != null)
                 Position = sender.Position + Vector2.One * 2; 
         }
-        public override void OnCollision(Collider collider)
+        public override void OnCollision(Collision collider)
         {
         }
         public override void OnDrawShapes()
@@ -58,7 +58,7 @@ namespace pixel_renderer
               }
         }
 
-        public override void OnTrigger(Collider other)
+        public override void OnTrigger(Collision other)
         {
         }
     }

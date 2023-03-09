@@ -32,7 +32,7 @@ namespace pixel_renderer
             model = collider.model;
 
         }
-        public override void OnCollision(Collider col)
+        public override void OnCollision(Collision col)
         {
             if (this.collider is null)
                 return;

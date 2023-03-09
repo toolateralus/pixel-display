@@ -83,7 +83,7 @@ namespace pixel_renderer
 
                     StagingHost.FixedUpdate(Current.stage);
 
-                    Collision.Run();
+                    Physics.Step();
 
                     if (Application.Current is null)
                         return;

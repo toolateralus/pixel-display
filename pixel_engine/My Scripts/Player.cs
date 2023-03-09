@@ -75,7 +75,7 @@ namespace pixel_renderer
             });
             task.Start();
         }
-        public override void OnCollision(Collider collider)
+        public override void OnCollision(Collision collider)
         {
             isGrounded = true; 
         }

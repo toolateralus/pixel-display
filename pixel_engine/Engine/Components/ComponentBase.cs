@@ -47,8 +47,8 @@ namespace pixel_renderer
         public virtual void Awake() { }
         public virtual void Update() { }
         public virtual void FixedUpdate(float delta) { }
-        public virtual void OnTrigger(Collider other) {  }
-        public virtual void OnCollision(Collider collider) {  }
+        public virtual void OnTrigger(Collision collision) {  }
+        public virtual void OnCollision(Collision collision) {  }
         /// <summary>
         /// Performs a 'Get Component' call on the Parent node object of the component this is called from.
         /// </summary>

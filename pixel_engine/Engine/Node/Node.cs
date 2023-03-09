@@ -282,7 +282,7 @@ namespace pixel_renderer
         
         public void SetActive(bool value) => _enabled = value;
         public void Destroy() => ParentStage?.nodes.Remove(this);
-        public void OnTrigger(Collider otherBody)
+        public void OnTrigger(Collision otherBody)
         {
             if (!awake)
                 return;
@@ -296,7 +296,7 @@ namespace pixel_renderer
                     Components[key].ElementAt(j)?.OnTrigger(otherBody);
             }
         }
-        public void OnCollision(Collider otherBody)
+        public void OnCollision(Collision otherBody)
         {
             if (!awake)
                 return;

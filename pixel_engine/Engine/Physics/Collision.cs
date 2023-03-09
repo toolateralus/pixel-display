@@ -6,15 +6,28 @@ using System.Numerics;
 namespace pixel_renderer
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };
-    public class Collision
+
+    public record Collision
+    {
+        public Collider collider = null;  
+        
+        public Vector2 contact = default;
+        public Vector2 normal = default;
+        public float depth = default; 
+
+        public Collision(Collider collider, Vector2 contact, Vector2 normal, float depth)
+        {
+            this.collider = collider;
+            this.contact = contact;
+            this.normal = normal;
+        }
+    }
+
+    public class Physics
     {
         public static bool AllowEntries { get; private set; } = true;
-        public static void Run()
-        {
-            FinalPhase();
-        }
         public static void SetActive(bool value) => AllowEntries = value;
-        public static void FinalPhase()
+        public static void Step()
         {
             if (Runtime.Current.GetStage() is not Stage stage)
                 return;
@@ -85,9 +98,10 @@ namespace pixel_renderer
 
             var dot = Vector2.Dot(B.velocity, normal);
 
-            B.velocity -= normal * dot; 
+            B.velocity -= normal * dot;
+            GetCollisionObjects(A, bCol, normal, depth, out var collisionA, out var collisionB);
 
-            AttemptCallbacks(A, bCol);
+            AttemptCallbacks(collisionA, collisionB);
         }
         private static void Collide(Rigidbody A, Rigidbody B)
         {
@@ -97,30 +111,55 @@ namespace pixel_renderer
             Collider aCol = A.GetComponent<Collider>();
             Collider bCol = B.GetComponent<Collider>();
 
+
+
             if (aCol.IsTrigger || bCol.IsTrigger)
                 return;
 
             (Vector2 normal, float depth) = SATCollision.GetCollisionData(aCol.Polygon, bCol.Polygon);
             if (normal == Vector2.Zero)
+
                 return;
+
+            Collision collisionA, collisionB;
+            GetCollisionObjects(aCol, bCol, normal, depth, out collisionA, out collisionB);
 
             SimpleRBResolution(A, B, normal, depth);
-            AttemptCallbacks(aCol, bCol);
+            AttemptCallbacks(collisionA, collisionB);
 
         }
-        private static void AttemptCallbacks(Collider A, Collider B)
-        {
-            if (A.UUID == B.UUID) 
-                return;
 
-            if (A.IsTrigger || B.IsTrigger)
+        private static void GetCollisionObjects(Collider aCol, Collider bCol, Vector2 normal, float depth, out Collision collisionA, out Collision collisionB)
+        {
+            var centroidA = aCol.Polygon.centroid;
+            var centroidB = bCol.Polygon.centroid;
+
+            var aDistance = Vector2.Dot(centroidA, normal);
+            var bDistance = Vector2.Dot(centroidB, normal);
+
+            Vector2 aCollisionPoint = centroidA - (normal * aDistance);
+            Vector2 bCollisionPoint = centroidB - (normal * bDistance);
+
+            aCollisionPoint += normal * (depth / 2);
+            bCollisionPoint -= normal * (depth / 2);
+
+            aCollisionPoint.Transform(aCol.Transform);
+            bCollisionPoint.Transform(bCol.Transform);
+
+            collisionA = new(bCol, aCollisionPoint, normal, depth);
+            collisionB = new(aCol, bCollisionPoint, -normal, depth);
+        }
+
+        private static void AttemptCallbacks(Collision A, Collision B)
+        {
+            if (A.collider.IsTrigger || B.collider.IsTrigger)
             {
-                A.node.OnTrigger(B);
-                B.node.OnTrigger(A);
+                A.collider.OnTrigger(B);
+                B.collider.OnTrigger(A);
                 return;
             }
-            A.node.OnCollision(B);
-            B.node.OnCollision(A);
+            A.collider.OnCollision(B);
+            B.collider.OnCollision(A);
         }
         private static void ComputeImpulse(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {
