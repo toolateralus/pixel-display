@@ -24,7 +24,7 @@ namespace pixel_editor
         public override void Awake()
         {
             CMouse.OnLeftPressedThisFrame += SetSelectedNodeOffest;
-                Input.RegisterAction(SelectAll, Key.LeftCtrl);
+            Input.RegisterAction(SelectAll, Key.LeftCtrl);
             
         }
         private void SelectAll()
@@ -45,8 +45,6 @@ namespace pixel_editor
                         col.drawNormals = true;
                         col.colliderPixel = Color.Orange;
                     }
-
-                   
                 }
             }
         }
@@ -102,15 +100,18 @@ namespace pixel_editor
             var selected = Editor.Current.LastSelected;
             if (CMouse.Left && selected != null)
             {
+                // drag individual
                 selected.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset;
                 int i = 0; 
 
+                // drag all
                 if (draggingMultiple && mouseSelectedNodeOffsets.Count - 1 > i)
                     foreach (var x in Editor.Current.ActivelySelected )
                         x.Position = CMouse.GlobalPosition + mouseSelectedNodeOffsets[i++];
             }
             else if (CMouse.Left)
             {
+                // box selection
                 InBoxSelect = true;
                 if (CMouse.LeftPressedThisFrame)
                     boxStart = CMouse.GlobalPosition;
@@ -118,6 +119,7 @@ namespace pixel_editor
             }
             else
             {
+                // highlight box selection
                 if (InBoxSelect)
                 {
                     var stage = Runtime.Current.GetStage();

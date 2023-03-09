@@ -13,10 +13,11 @@ namespace pixel_renderer
     public class Softbody : Rigidbody
     {
         [Field] Collider? collider = null;
+        [Field] float minScale = 0.25f;
+        [Field] float maxScale = 2f;
 
-        [Field] float minDistFromCenter = 0.4f;
-        [Field] float maxDistFromCenter = 1.5f;
-        private Polygon model;
+        private Polygon model = default;
+        private Vector2 maxDeformationAmount;
 
         public override void Update()
         {
@@ -34,49 +35,41 @@ namespace pixel_renderer
             if (this.collider is null)
                 return;
 
-
-            List<Vector2> forces = new();
+            Polygon poly = new(model);
 
             for (int index = 0; index < poly.vertices.Length; index++)
             {
-                Vector2 vert = poly.vertices[index];
-                var (within, distance) = WithinDeformationRange(Vector2.Zero, vert);
-                if (within) DeformVertex(poly, index, distance, velocity);
-                else CorrectVertex(poly, index, vert, distance);
+                var (within, pos) = WithinDeformationRange(poly.vertices[index], model.vertices[index]);
+                if (within)
+                {
+                    float distance = Vector2.Distance(poly.vertices[index], collider.Polygon.centroid);
+
+                    Vector2 deformationAmount = Vector2.Lerp(Vector2.Zero, maxDeformationAmount, distance / (collider.Scale / 2).Length());
+
+                    Vector2 direction = (poly.vertices[index] - collider.Polygon.centroid).Normalized();
+
+                    poly.vertices[index] += direction * deformationAmount;
+
+                    continue;
+                }
+                poly.vertices[index] = pos;
             }
+            collider.model = poly; 
         }
 
-        private void DeformVertex(Polygon poly, int index, float distance, Vector2 velocity)
+        private (bool within, Vector2 result) WithinDeformationRange(Vector2 vert, Vector2 original)
         {
-            int ct = poly.vertices.Length;
-            if (ct < index)
-                return;
-            if (distance > 0)
-                poly.vertices[index] += velocity;
-            else poly.vertices[index] -= velocity;
+            float scale = vert.Length() / original.Length();
+
+            var min = minScale;
+            var max = maxScale;
+
+            if (scale < min)
+                return (false, original * min);
+            if (scale > max)
+                return (false, original * max);
+            return (true, original * scale);
         }
-
-        private (bool within, float distance) WithinDeformationRange(Vector2 pos, Vector2 vert)
-        {
-            float distance = Vector2.Distance(pos, vert);
-            
-            var min = minDistFromCenter;
-            var max = maxDistFromCenter;
-            
-            if (distance < min)
-                return (false, min - distance);
-            
-            if (distance > max)
-                return (false, max - distance);
-
-            return (true, distance);
-        }
-
-        private static void CorrectVertex(Polygon poly, int i, Vector2 vert, float difference)
-        {
-            poly.vertices[i] = new(vert.X - difference, vert.Y - difference);
-        }
-
         public static Node SoftBody()
         {
             Node node = Standard();
