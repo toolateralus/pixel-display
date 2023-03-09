@@ -69,8 +69,10 @@ namespace pixel_renderer
                 sprite.texture.SetImage(PlayerSprite, sprite.Scale);
 
                 await Task.Delay(2500);
+                
+                var node  = Node.New.AddComponent<Text>().node;
 
-                node.AddComponent<Text>();
+                node.Child(node);
 
             });
             task.Start();

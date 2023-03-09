@@ -32,10 +32,9 @@ namespace pixel_renderer
                 RefreshCharacters();
             }
         }
+        const string alphabet = "abcdefghijklmnopqrstuvwxyz";
         [Field]
         private string content = "abc";
-        const string alphabet = "abcdefghijklmnopqrstuvwxyz"; 
-
         public override void Awake()
         {
             RefreshFont();
@@ -82,14 +81,13 @@ namespace pixel_renderer
 
             Scale = new(100, 100);
             viewportPosition = new(0, 0);
-           
 
         }
         public override void Draw(RendererBase renderer)
         {
             if (current is null)
                 return;
-            
+
             DrawImage(renderer, current);
         }
     }
