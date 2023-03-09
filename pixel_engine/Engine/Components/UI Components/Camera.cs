@@ -141,7 +141,7 @@ namespace pixel_renderer
 
             if (stage != null)
                 baseImageSize = stage.backgroundSize;
-            else baseImageSize = new(Constants.ScreenH, Constants.ScreenW);
+            else baseImageSize = new(16, 16);
 
             BoundingBox2D camBoundingBox = new(GetCorners());
 
@@ -151,7 +151,6 @@ namespace pixel_renderer
             sprite.Transform.M11 = scale.X;
             sprite.Transform.M22 = scale.Y;
             sprite.viewportScale = sprite.scale / baseImageSize;
-
             sprite.viewportScale.MakeDivideSafe();
             sprite.viewportOffset = Position.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
 
