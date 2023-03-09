@@ -81,6 +81,15 @@ namespace pixel_renderer
             return writer;
 
         }
+        public static string? WriteJsonToString<T>(T data)
+        {
+            using TextWriter writer = new StringWriter();
+            var jsonSerializer = JsonSerializer.Create();
+            jsonSerializer.Serialize(writer, data);
+            var output = writer.ToString();
+            writer.Close();
+            return output;
+        }
 
         public static void Write<T>(T data, Metadata meta)
         {
