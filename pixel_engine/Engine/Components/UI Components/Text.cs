@@ -17,9 +17,8 @@ namespace pixel_renderer
         /// the bounding box of the text element
         /// </summary>
 
-
         public Vector2 start = new(0, 0);
-        public Vector2 end = new(1, 1);
+        public Vector2 end = new(1000, 0);
 
         public Curve posCurve;
         private JImage current;
@@ -61,29 +60,36 @@ namespace pixel_renderer
         [Method]
         public void RefreshCharacters()
         {
-
-            posCurve = Curve.Linear(start, end, 1, Content.Length);
             var output = new List<JImage>();
-            
+            int width = 0;
+            int height = 0;
+
             for (int i = 0; i < Content.Length; i++)
                 if (font_model.ContainsKey(Content[i]))
                 {
                     var img = font_model.ElementAt(i).Value;
                     output.Add(img);
+
+                    width += img.width;
+                    height += img.height; 
                 }
 
-            current = JImage.Concat(output, posCurve);
-        }
-        public override void Update()
-        {
+            var start = new Vector2(0, 0);
+            var end = new Vector2(width, height);
 
+            posCurve = Curve.Linear(start, end, 1, Content.Length);
+            current = JImage.Concat(output, posCurve);
+
+            Scale = new(100, 100);
+            viewportPosition = new(0, 0);
+           
 
         }
         public override void Draw(RendererBase renderer)
         {
             if (current is null)
-                return; 
-
+                return;
+            
             DrawImage(renderer, current);
         }
     }

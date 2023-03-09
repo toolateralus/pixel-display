@@ -88,12 +88,12 @@ namespace pixel_renderer
             if (isGrounded)
                 isGrounded = false;
 
-            Move(MoveVector * 0.01f);
+            Move(MoveVector);
         }
         
         private void Move(Vector2 moveVector)
         {
-            rb.ApplyImpulse(moveVector.WithValue(y:0) * speed);
+            rb?.ApplyImpulse(moveVector.WithValue(y:0) * speed);
         }
         public void FreezePlayer()
         {

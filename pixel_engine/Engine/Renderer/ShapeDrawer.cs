@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Numerics;
+using System.ComponentModel;
 
 namespace pixel_renderer.ShapeDrawing
 {
@@ -18,9 +19,15 @@ namespace pixel_renderer.ShapeDrawing
             Circles.Clear();
             var components = stage.GetAllComponents<Component>();
             lock (components)
-                foreach (Component component in components)
+            {
+                for (int i = 0; i < components.Count(); ++i)
+                {
+                    var component = components.ElementAt(i);
                     component.OnDrawShapes();
-            DrawShapeActions?.Invoke();
+                    DrawShapeActions?.Invoke();
+                }
+            }
+           
         }
 
         /// <summary>

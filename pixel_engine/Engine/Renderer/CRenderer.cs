@@ -32,7 +32,7 @@ namespace pixel_renderer
 
             IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>().AsParallel();
 
-            foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
+            foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder)) 
                 if (uiComponent.IsActive)
                     uiComponent.Draw(this);
 

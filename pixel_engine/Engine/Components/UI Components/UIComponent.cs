@@ -9,15 +9,15 @@ namespace pixel_renderer
         internal protected bool dirty = true;
         public Vector2 ColorDataSize => colorDataSize;
 
-        [Field][JsonProperty] public Texture texture;
-        [Field][JsonProperty] public bool lit = false;
-        [Field][JsonProperty] public float drawOrder = 0f;
-        [Field][JsonProperty] public bool IsReadOnly = false;
-        [Field][JsonProperty] public Pixel color = Pixel.Blue;
-               [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
-        [Field][JsonProperty] public float camDistance = 1;
-        [Field][JsonProperty] public SpriteType Type = SpriteType.SolidColor;
-        [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
+        [Field] [JsonProperty] public Texture texture;
+        [Field] [JsonProperty] public bool lit = false;
+        [Field] [JsonProperty] public float drawOrder = 0f;
+        [Field] [JsonProperty] public bool IsReadOnly = false;
+        [Field] [JsonProperty] public Pixel color = Pixel.Blue;
+                [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
+        [Field] [JsonProperty] public float camDistance = 1;
+        [Field] [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
+        [Field] [JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
         [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
         [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
         public readonly Vector2 half = Vector2.One * 0.5f;
@@ -50,6 +50,13 @@ namespace pixel_renderer
             colorDataSize = new(texture.Width, texture.Height);
             dirty = false;
         }
+        /// <summary>
+        /// re-draws the image *this is always called when marked dirty*
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        /// <summary>
+        /// for any unmanaged resources that need to be disposed of, this is usually unneccesary.
+        /// </summary>
         public abstract void Draw(RendererBase renderer); 
         /// <summary>
         /// this is the default method for drawing.
@@ -57,15 +64,17 @@ namespace pixel_renderer
         /// <param name="renderer"></param>
         /// <param name="image"></param>
         /// <exception cref="NotImplementedException"></exception>
+        /// 
         public virtual void DrawImage(RendererBase renderer, JImage image)
         {
-            BoundingBox2D drawArea = GetSafeDrawArea(renderer);
+            var drawArea = GetSafeDrawArea(renderer);
 
             Vector2 framePos = drawArea.min;
 
             while (framePos.Y < drawArea.max.Y)
             {
                 Vector2 screenViewport = framePos / renderer.Resolution;
+
                 var localPos = ScreenToLocal(screenViewport);
                 
                 if (!RendererBase.IsWithinMaxExclusive(localPos.X, localPos.Y, -1, 1))
@@ -105,7 +114,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         private Pixel FilterPixel(JImage image, Vector2 colorPos)
         {
             Pixel color;
@@ -144,7 +152,6 @@ namespace pixel_renderer
 
             return color;
         }
-
         private static void GetAdjacentPixels(JImage image, int left, int top, int right, int bottom, out Pixel tl, out Pixel tr, out Pixel bl, out Pixel br)
         {
             tl = image.GetPixel(left, top);
@@ -152,14 +159,6 @@ namespace pixel_renderer
             bl = image.GetPixel(left, bottom);
             br = image.GetPixel(right, bottom);
         }
-
-        /// <summary>
-        /// re-draws the image *this is always called when marked dirty*
-        /// </summary>
-        /// <exception cref="NotImplementedException"></exception>
-        /// <summary>
-        /// for any unmanaged resources that need to be disposed of, this is usually unneccesary.
-        /// </summary>
         public virtual void Dispose()
         {
             throw new NotImplementedException(); 

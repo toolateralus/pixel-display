@@ -112,8 +112,15 @@ namespace pixel_renderer
                     {
                         var pxPos = new Vector2(x, y);
 
-                        int mapPos = (int)((pxPos.Y * bounds.Width + pxPos.X) * 4);
+                        int mapPos = ((int)pxPos.Y * (int)bounds.Width + (int)pxPos.X) * 4;
+
+                        if (3 + mapPos > drawSurface.Length) 
+                            continue;
+
                         int imgPos = ((y - startY) * image.width + (x - startX)) * 4;
+                        
+                        if (3 + imgPos > image.data.Length)
+                            continue;
 
                         drawSurface[mapPos + 0] = image.data[imgPos + 0];
                         drawSurface[mapPos + 1] = image.data[imgPos + 1];
@@ -127,43 +134,16 @@ namespace pixel_renderer
         }
         private static byte[] GetDrawSurface(IReadOnlyCollection<JImage> images, Curve posCurve, out BoundingBox2D bounds)
         {
-            var dsList = new List<byte>();
             bounds = new BoundingBox2D(0, 0, 1, 1);
-
             var pos = Vector2.Zero;
             foreach (var img in images)
             {
                 pos = posCurve.Next();
                 bounds.ExpandTo(pos);
-                bounds.ExpandTo(pos + new Vector2(img.Size.X * img.width, img.Size.Y * img.height));
+                bounds.ExpandTo(pos + img.Size);
             }
-
             posCurve.Reset();
-
-            foreach (var image in images)
-            {
-                var position = posCurve.Next();
-                for (int i = 0; i < image.data.Length; i += 4)
-                {
-                    var x = (i / 4) % image.width;
-                    var y = (i / 4) / image.width;
-
-                    var pxPos = position + new Vector2(x * image.width, y * image.height);
-
-                    int mapPos = (int)((pxPos.Y * (bounds.Width - 1) * 4) + (pxPos.X * 4));
-                    int imgPos = i;
-
-                    dsList.Add(image.data[imgPos + 0]);
-                    dsList.Add(image.data[imgPos + 1]);
-                    dsList.Add(image.data[imgPos + 2]);
-                    dsList.Add(image.data[imgPos + 3]);
-
-                    // Expand the bounds to include the current pixel position
-                    bounds.ExpandTo(pxPos);
-                }
-            }
-
-            byte[] drawSurface = dsList.ToArray();
+            byte[] drawSurface = new byte[(int)bounds.Width * (int)bounds.Height * 4];
             return drawSurface;
         }
     }
