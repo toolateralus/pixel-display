@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 
 namespace pixel_renderer
 {
     public class SATCollision
     {
+        /// <summary>
+        /// Finds the smallest vector that will move A out of B
+        /// </summary>
+        /// <param name="polygonA"></param>
+        /// <param name="polygonB"></param>
+        /// <returns>The direction to move A out of B, and the amount it must move.</returns>
         public static (Vector2 normal, float depth) GetCollisionData(Polygon polygonA, Polygon polygonB)
         {
             if (polygonA.vertices.Length == 0 || polygonB.vertices.Length == 0)
@@ -36,10 +43,11 @@ namespace pixel_renderer
             if (smallest == Vector2.Zero)
                 return (Vector2.Zero, 0f);
 
-            if (Vector2.Dot(polygonB.centroid - polygonA.centroid, smallest) < 0)
+            Vector2 AToBOffset = polygonB.centroid - polygonA.centroid;
+            if (Vector2.Dot(AToBOffset, smallest) > 0)
                 smallest *= -1;
 
-            return (smallest, -overlap);
+            return (smallest, overlap);
         }
         private static float GetOverlap(SATProjection p1, SATProjection p2) => MathF.Min(p1.max, p2.max) - MathF.Max(p1.min, p2.min);
         private static SATProjection Project(Polygon polygon, Vector2 axis)

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
@@ -68,38 +69,40 @@ namespace pixel_renderer
                         Collide(rbB, rbA);
 
                     if (a_has_rb && !b_has_rb)
-                        Collide(B.GetComponent<Collider>(), rbA);
+                        Collide(rbA, B.GetComponent<Collider>());
 
                     if (!a_has_rb && b_has_rb)
-                        Collide(A.GetComponent<Collider>(), rbB);
+                        Collide(rbB, A.GetComponent<Collider>());
 
                 }
             }
 
         }
-        private static void Collide(Collider A, Rigidbody B)
+        private static void Collide(Rigidbody rigidBody, Collider staticCollider)
         {
-            if (A is null || B is null)
+            if (rigidBody is null || staticCollider is null)
                 return;
 
-            var bCol = B.GetComponent<Collider>();
+            var rbCollider = rigidBody.GetComponent<Collider>();
 
-            if (A.IsTrigger || bCol.IsTrigger) return;
+            if (rbCollider.IsTrigger || staticCollider.IsTrigger) return;
 
-            if (A.UUID == bCol.UUID)
-                return; 
+            if (rbCollider.UUID == staticCollider.UUID)
+                return;
 
-            (Vector2 normal, float depth) = SATCollision.GetCollisionData(A.Polygon, bCol.Polygon);
+            Polygon polyA = rbCollider.Polygon;
+            Polygon polyB = staticCollider.Polygon;
+            (Vector2 normal, float depth) = SATCollision.GetCollisionData(polyA, polyB);
 
             if (normal == Vector2.Zero)
                 return;
 
-            B.node.Position -= normal * depth;
+            rigidBody.Position += normal * depth;
 
-            var dot = Vector2.Dot(B.velocity, normal);
+            var dot = Vector2.Dot(rigidBody.velocity, normal);
 
-            B.velocity -= normal * dot;
-            GetCollisionObjects(A, bCol, normal, depth, out var collisionA, out var collisionB);
+            rigidBody.velocity -= normal * dot;
+            GetCollisionObjects(staticCollider, rbCollider, normal, depth, out var collisionA, out var collisionB);
 
             AttemptCallbacks(collisionA, collisionB);
         }
@@ -111,20 +114,20 @@ namespace pixel_renderer
             Collider aCol = A.GetComponent<Collider>();
             Collider bCol = B.GetComponent<Collider>();
 
-
-
             if (aCol.IsTrigger || bCol.IsTrigger)
                 return;
 
-            (Vector2 normal, float depth) = SATCollision.GetCollisionData(aCol.Polygon, bCol.Polygon);
-            if (normal == Vector2.Zero)
+            Polygon polyA = aCol.Polygon;
+            Polygon polyB = bCol.Polygon;
+            (Vector2 normal, float depth) = SATCollision.GetCollisionData(polyA, polyB);
 
+            if (normal == Vector2.Zero)
                 return;
+
+            SimpleRBResolution(A, B, normal, depth);
 
             Collision collisionA, collisionB;
             GetCollisionObjects(aCol, bCol, normal, depth, out collisionA, out collisionB);
-
-            SimpleRBResolution(A, B, normal, depth);
             AttemptCallbacks(collisionA, collisionB);
 
         }
@@ -204,8 +207,8 @@ namespace pixel_renderer
 
             float averageSpeed = (colSpeedA + colSpeedB) / 2;
 
-            A.velocity -= colNormal * (averageSpeed - colSpeedA);
-            B.velocity -= colNormal * (averageSpeed - colSpeedB);
+            A.velocity += colNormal * (averageSpeed - colSpeedA);
+            B.velocity += colNormal * (averageSpeed - colSpeedB);
         }
     }
 }

@@ -2,6 +2,7 @@
 using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
@@ -10,11 +11,11 @@ namespace pixel_renderer
     public class Polygon
     {
         [Field]
-        [JsonIgnore] public Vector2[] normals = Array.Empty<Vector2>();
+        public Vector2[] normals = Array.Empty<Vector2>();
         [Field]
         public Vector2 centroid = Vector2.Zero;
         [Field]
-        [JsonIgnore] public Vector2[] uv = Array.Empty<Vector2>();
+        public Vector2[] uv = Array.Empty<Vector2>();
         [Field]
         public Vector2[] vertices = Array.Empty<Vector2>();
 
@@ -190,7 +191,7 @@ namespace pixel_renderer
                 vertices[i].Transform(matrix);
             CalculateNormals();
         }
-        [JsonIgnore] public string? JsonString => IO.WriteJsonToString(this);
+        public Pixel debuggingColor = JRandom.Color();
     }
 
 }
