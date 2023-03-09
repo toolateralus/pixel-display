@@ -23,7 +23,6 @@ namespace pixel_renderer
                 return current;
             }
         }
-
         public static void GetRenderingData(out RenderHost host, out StageRenderInfo info, out RendererBase renderer, out JImage baseImage)
         {
             host = Runtime.Current.renderHost;
@@ -35,15 +34,11 @@ namespace pixel_renderer
         private protected volatile static Runtime? current;
         private protected volatile Stage? stage;
         private protected volatile Thread renderThread; 
-
         public static event Action<EditorEvent>? InspectorEventRaised;
-
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
-
         public static List<System.Windows.Controls.Image> OutputImages = new();
         public object? Inspector = null;
-
         public static bool Initialized { get; private set; }
         public static bool IsRunning { get; private set; }
         public static bool IsDiposing { get; private set; }
@@ -147,13 +142,8 @@ namespace pixel_renderer
                     if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
                         continue;
 
-                    Task.Run(() => Application.Current.Dispatcher.Invoke(()=>
-                    {
-                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First());
-                    }));
-                           
-                    
-                      
+                    Application.Current.Dispatcher.Invoke(()=> CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
+
                 }
             }
         }

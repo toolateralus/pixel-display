@@ -16,7 +16,7 @@ namespace pixel_renderer
         [JsonProperty]
         public Metadata backgroundMetadata; 
         [JsonProperty]
-        public Vector2 backgroundSize = new(512, 512);
+        public Vector2 backgroundSize = new(64,64);
         [JsonProperty]
         public TextureFiltering backgroundFiltering = TextureFiltering.Point; 
         [JsonProperty]

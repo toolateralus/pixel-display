@@ -157,12 +157,12 @@ namespace pixel_renderer
         {
             if (A.collider.IsTrigger || B.collider.IsTrigger)
             {
-                A.collider.OnTrigger(B);
-                B.collider.OnTrigger(A);
+                A.collider.node.OnTrigger(B);
+                B.collider.node.OnTrigger(A);
                 return;
             }
-            A.collider.OnCollision(B);
-            B.collider.OnCollision(A);
+            A.collider.node.OnCollision(B);
+            B.collider.node.OnCollision(A);
         }
         private static void ComputeImpulse(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {

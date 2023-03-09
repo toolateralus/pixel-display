@@ -69,8 +69,10 @@ namespace pixel_renderer
                 sprite.texture.SetImage(PlayerSprite, sprite.Scale);
 
                 await Task.Delay(2500);
+                
+                var node  = Node.New.AddComponent<Text>().node;
 
-                node.AddComponent<Text>();
+                node.Child(node);
 
             });
             task.Start();
@@ -88,12 +90,12 @@ namespace pixel_renderer
             if (isGrounded)
                 isGrounded = false;
 
-            Move(MoveVector * 0.01f);
+            Move(MoveVector);
         }
         
         private void Move(Vector2 moveVector)
         {
-            rb.ApplyImpulse(moveVector.WithValue(y:0) * speed);
+            rb?.ApplyImpulse(moveVector.WithValue(y:0) * speed);
         }
         public void FreezePlayer()
         {

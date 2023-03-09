@@ -107,7 +107,7 @@ namespace pixel_editor
 
             IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
             if (!enumerable.Any()) return;
-            enumerable.First().Scale *= MathF.Pow(Constants.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
+            enumerable.First().Scale *= MathF.Pow(Editor.Current.settings.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
             UpdateCamPosition();
         }
 
