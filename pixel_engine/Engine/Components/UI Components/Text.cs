@@ -3,6 +3,8 @@ using System.Drawing;
 using pixel_renderer.Assets;
 using System.Numerics;
 using System.Security.Policy;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace pixel_renderer
 {
@@ -10,32 +12,68 @@ namespace pixel_renderer
 
     public class Text : UIComponent
     {
-        public Dictionary<char , JImage> font = new();
+        public Dictionary<char , JImage> font_model = new();
         /// <summary>
         /// the bounding box of the text element
         /// </summary>
 
 
-        public BoundingBox2D bounds = new(new(0,0), new(15,5));
+        public Vector2 start = new(0, 0);
+        public Vector2 end = new(1, 1);
+
         public Curve posCurve;
-        private JImage init_font;
+        private JImage current;
+
+        public string Content
+        {
+            get => content;
+            set
+            {
+                content = value;
+                RefreshCharacters();
+            }
+        }
+
+        private string content = "abc";
         const string alphabet = "abcdefghijklmnopqrstuvwxyz"; 
 
         public override void Awake()
         {
-            posCurve = Curve.Circlular(1, 16, 6, true);
-            lock (font)
-            for (int i = 0; i < 3; ++i)
-            {
-                var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
-                if (meta != null)
+            RefreshFont();
+        }
+        [Method]
+        public void RefreshFont()
+        {
+            font_model.Clear();
+            
+            lock (font_model)
+                for (int i = 0; i < 3; ++i)
                 {
-                    Bitmap bmp = new(meta.Path);
-                    JImage image = new(bmp);
-                    font.Add(alphabet[i], image);
+                    var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
+                    if (meta != null)
+                    {
+                        Bitmap bmp = new(meta.Path);
+                        JImage image = new(bmp);
+                        font_model.Add(alphabet[i], image);
+                    }
                 }
-            }
-            init_font = JImage.Concat(font.Values, posCurve);
+        }
+        [Method]
+        public void RefreshCharacters()
+        {
+
+            posCurve = Curve.Linear(start, end, 1, Content.Length);
+            posCurve = Curve.Normalize(posCurve);
+            var output = new List<JImage>();
+            
+            for (int i = 0; i < Content.Length; i++)
+                if (font_model.ContainsKey(Content[i]))
+                {
+                    var img = font_model.ElementAt(i).Value;
+                    output.Add(img);
+                }
+
+            current = JImage.Concat(output, posCurve);
         }
         public override void Update()
         {
@@ -44,7 +82,8 @@ namespace pixel_renderer
         }
         public override void Draw(RendererBase renderer)
         {
-          
+            if (current is null) return; 
+            DrawImage(renderer, current);
         }
     }
 }

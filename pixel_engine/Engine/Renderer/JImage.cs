@@ -96,51 +96,72 @@ namespace pixel_renderer
         }
         internal static JImage Concat(IReadOnlyCollection<JImage> images, Curve posCurve)
         {
-
             byte[] drawSurface = GetDrawSurface(images, posCurve, out var bounds);
-
-            posCurve.Reset();
-
             foreach (var image in images)
             {
                 var position = posCurve.Next();
-                for (int x = 0; x < image.width; x += 4)
-                    for (int y = 0; y < image.height; y += 4)
+                var startX = Math.Max(0, (int)Math.Floor(position.X));
+                var startY = Math.Max(0, (int)Math.Floor(position.Y));
+                var endX = Math.Min((int)bounds.Width, startX + image.width);
+                var endY = Math.Min((int)bounds.Height, startY + image.height);
+
+                for (int x = startX; x < endX -1 ; x++)
+                {
+                    for (int y = startY; y < endY -1; y++)
                     {
-                        var indices = new Vector2(x, y);
+                        var pxPos = new Vector2(x, y);
 
-                        var pxPos = position + indices;
-
-                        int mapPos = (int)((pxPos.Y * (bounds.Width - 1) * 4) + (pxPos.X * 4));
-                        int imgPos = (x * (image.width - 1) * 4) + (x * 4);
+                        int mapPos = (int)((pxPos.Y * bounds.Width + pxPos.X) * 4);
+                        int imgPos = ((y - startY) * image.width + (x - startX)) * 4;
 
                         drawSurface[mapPos + 0] = image.data[imgPos + 0];
                         drawSurface[mapPos + 1] = image.data[imgPos + 1];
                         drawSurface[mapPos + 2] = image.data[imgPos + 2];
                         drawSurface[mapPos + 3] = image.data[imgPos + 3];
                     }
+                }
             }
 
-            Vector2 size = new Vector2(bounds.Width - 1, bounds.Height - 1);
-            return new(size, drawSurface); 
+            return new JImage(new Vector2(bounds.Width, bounds.Height), drawSurface);
         }
         private static byte[] GetDrawSurface(IReadOnlyCollection<JImage> images, Curve posCurve, out BoundingBox2D bounds)
         {
-            bounds = new(0, 0, 1, 1);
+            var dsList = new List<byte>();
+            bounds = new BoundingBox2D(0, 0, 1, 1);
+
+            var pos = Vector2.Zero;
+            foreach (var img in images)
+            {
+                pos += posCurve.Next() + img.Size; 
+                bounds.ExpandTo(pos);
+            }
+
+            posCurve.Reset();
 
             foreach (var image in images)
             {
-                Vector2 position = posCurve.Next();
-                Vector2 bR = position + image.Size;
+                var position = posCurve.Next();
+                for (int i = 0; i < image.data.Length; i += 4)
+                {
+                    var x = (i / 4) % image.width;
+                    var y = (i / 4) / image.width;
 
-                bounds.ExpandTo(position);
-                bounds.ExpandTo(bR);
+                    var pxPos = position + new Vector2(x, y);
+
+                    int mapPos = (int)((pxPos.Y * (bounds.Width - 1) * 4) + (pxPos.X * 4));
+                    int imgPos = i;
+
+                    dsList.Add(image.data[imgPos + 0]);
+                    dsList.Add(image.data[imgPos + 1]);
+                    dsList.Add(image.data[imgPos + 2]);
+                    dsList.Add(image.data[imgPos + 3]);
+
+                    // Expand the bounds to include the current pixel position
+                    bounds.ExpandTo(pxPos);
+                }
             }
 
-            int width  = (int)(bounds.Width - 1);
-            int height = (int)bounds.Height - 1;
-
-            byte[] drawSurface = new byte[width * height * 4];
+            byte[] drawSurface = dsList.ToArray();
             return drawSurface;
         }
     }
