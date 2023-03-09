@@ -1,4 +1,5 @@
-﻿using pixel_renderer.ShapeDrawing;
+﻿using Newtonsoft.Json;
+using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,11 @@ namespace pixel_renderer
     public class Polygon
     {
         [Field]
-        public Vector2[] normals = Array.Empty<Vector2>();
+        [JsonIgnore] public Vector2[] normals = Array.Empty<Vector2>();
         [Field]
         public Vector2 centroid = Vector2.Zero;
         [Field]
-        public Vector2[] uv = Array.Empty<Vector2>();
+        [JsonIgnore] public Vector2[] uv = Array.Empty<Vector2>();
         [Field]
         public Vector2[] vertices = Array.Empty<Vector2>();
 
@@ -189,6 +190,7 @@ namespace pixel_renderer
                 vertices[i].Transform(matrix);
             CalculateNormals();
         }
+        [JsonIgnore] public string? JsonString => IO.WriteJsonToString(this);
     }
 
 }
