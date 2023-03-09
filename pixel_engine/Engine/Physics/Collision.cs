@@ -6,9 +6,13 @@ using System.Numerics;
 namespace pixel_renderer
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };
-    public static partial class Collision
+    public class Collision
     {
         public static bool AllowEntries { get; private set; } = true;
+        public static void Run()
+        {
+            FinalPhase();
+        }
         public static void SetActive(bool value) => AllowEntries = value;
         public static void FinalPhase()
         {
@@ -104,7 +108,21 @@ namespace pixel_renderer
             AttemptCallbacks(aCol, bCol);
 
         }
-        static void ComputeImpulse(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
+        private static void AttemptCallbacks(Collider A, Collider B)
+        {
+            if (A.UUID == B.UUID) 
+                return;
+
+            if (A.IsTrigger || B.IsTrigger)
+            {
+                A.node.OnTrigger(B);
+                B.node.OnTrigger(A);
+                return;
+            }
+            A.node.OnCollision(B);
+            B.node.OnCollision(A);
+        }
+        private static void ComputeImpulse(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {
             Vector2 rv = b.velocity - a.velocity;
 
@@ -122,7 +140,7 @@ namespace pixel_renderer
 
             PositionalCorrection(a, b, normal, depth);
         }
-        static void PositionalCorrection(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
+        private static void PositionalCorrection(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {
             const float k_slop = 0.01f;
             const float percent = 0.2f;
@@ -132,24 +150,6 @@ namespace pixel_renderer
 
             a.Position -= a.invMass * correctionVector;
             b.Position += b.invMass * correctionVector;
-        }
-        private static void AttemptCallbacks(Collider A, Collider B)
-        {
-            if (A.UUID == B.UUID) 
-                return;
-
-            if (A.IsTrigger || B.IsTrigger)
-            {
-                A.node.OnTrigger(B);
-                B.node.OnTrigger(A);
-                return;
-            }
-            A.node.OnCollision(B);
-            B.node.OnCollision(A);
-        }
-        public static void Run()
-        {
-            FinalPhase();
         }
         private static void SimpleRBResolution(Rigidbody A, Rigidbody B, Vector2 normal, float depth)
         {

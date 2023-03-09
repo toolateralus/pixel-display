@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,17 +42,16 @@ namespace pixel_renderer
             for (int index = 0; index < poly.vertices.Length; index++)
             {
                 var (within, pos) = WithinDeformationRange(poly.vertices[index], model.vertices[index]);
-
                 if (within)
                 {
                     float distance = Vector2.Distance(poly.vertices[index], collider.Polygon.centroid);
-
+                    
                     Vector2 deformationAmount = Vector2.Lerp(Vector2.Zero, maxDeformationAmount, distance / (collider.Scale / 2).Length());
 
                     Vector2 direction = (poly.vertices[index] - collider.Polygon.centroid).Normalized();
-
+                    
                     poly.vertices[index] += direction * deformationAmount;
-
+                    
                     continue;
                 }
                 poly.vertices[index] = pos;
