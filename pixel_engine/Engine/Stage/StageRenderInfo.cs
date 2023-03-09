@@ -43,7 +43,7 @@ namespace pixel_renderer
             }
         }
     }
-    public class ViewpoortInfoObject
+    public abstract class ViewpoortInfoObject
     {
         readonly Vector2 half = new(0.5f, 0.5f);
         public Matrix3x2 Transform;
@@ -66,7 +66,7 @@ namespace pixel_renderer
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
 
-        public virtual void Set(object? refObject) { }
+        public abstract void Set(object? refObject);
     }
     public class SpriteInfo : ViewpoortInfoObject
     {
