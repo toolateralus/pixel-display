@@ -12,7 +12,8 @@ namespace pixel_renderer
     public class Project
     {
         public List<Stage> stages = new();
-      
+        [JsonProperty]
+        public Settings settings = new(); 
         [JsonProperty]
         public List<Metadata> stagesMeta = new();
         [JsonProperty]

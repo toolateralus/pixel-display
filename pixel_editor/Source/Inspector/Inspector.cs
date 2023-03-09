@@ -217,7 +217,7 @@ namespace pixel_editor
                 addComponentMenuOpen = true;
                 addComponentGrid = GetGrid();
                 MainGrid.Children.Add(addComponentGrid);
-                SetRowAndColumn(addComponentGrid, 10, 10, (int)Constants.InspectorPosition.X, (int)Constants.InspectorPosition.Y);
+                SetRowAndColumn(addComponentGrid, 10, 10, (int)Editor.Current.settings.InspectorPosition.X, (int)Editor.Current.settings.InspectorPosition.Y);
 
                 int i = 0;
                 foreach (var item in addComponentFunctions)
@@ -247,7 +247,7 @@ namespace pixel_editor
         }
         private static void RePositionInspectorGrid(Grid grid)
         {
-            SetRowAndColumn(grid, Constants.InspectorWidth , Constants.InspectorHeight, (int)Constants.InspectorPosition.X, (int)Constants.InspectorPosition.Y);
+            SetRowAndColumn(grid, Editor.Current.settings.InspectorWidth , Editor.Current.settings.InspectorHeight, (int)Editor.Current.settings.InspectorPosition.X, (int)Editor.Current.settings.InspectorPosition.Y);
         }
         public static TextBox GetTextBox(string componentName, string style = "default")
         {
@@ -404,8 +404,8 @@ namespace pixel_editor
 
         private void Inspector_OnInspectorMoved(int x = 0, int y = 0)
         {
-            Constants.InspectorPosition.X = x;
-            Constants.InspectorPosition.Y = y;
+            Editor.Current.settings.InspectorPosition.X = x;
+            Editor.Current.settings.InspectorPosition.Y = y;
             Refresh(grid);
         }
         private static void HandleEditPressed(object sender, RoutedEventArgs e)

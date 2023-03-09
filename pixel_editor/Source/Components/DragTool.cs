@@ -148,8 +148,8 @@ namespace pixel_editor
         {
             if (!InBoxSelect) 
                 return;
-            ShapeDrawer.DrawRect(boxStart, boxEnd, Constants.DragBoxColor);
-            ShapeDrawer.DrawCircle(boxEnd, Constants.DragCursorRadius, Constants.DragCursorColor);
+            ShapeDrawer.DrawRect(boxStart, boxEnd, Editor.Current.settings.DragBoxColor);
+            ShapeDrawer.DrawCircle(boxEnd, Editor.Current.settings.DragCursorRadius, Editor.Current.settings.DragCursorColor);
 
 
 

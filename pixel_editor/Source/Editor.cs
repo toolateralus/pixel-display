@@ -1,5 +1,6 @@
 ﻿using pixel_renderer;
 using pixel_renderer.Assets;
+using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,15 +77,32 @@ namespace pixel_editor
             inspector = new Inspector(inspectorGrid);
             Runtime.Current.Inspector = inspector;
         }
-
+        public EditorSettings settings; 
         private void InitializeEditor()
         {
             current = this;
 
+
+
+
             //wpf init
             InitializeComponent();
-            
+
             Importer.Import(false);
+
+            Metadata meta = new("editor settings", pixel_renderer.Constants.WorkingRoot + "\\editorSettings.asset", ".asset");
+            
+            var settings = IO.ReadJson<pixel_renderer.EditorSettings>(meta);
+            
+            if (settings is null)
+            {
+                settings = new pixel_renderer.EditorSettings();
+                IO.WriteJson(settings, meta);
+            }
+
+            Current.settings = settings;
+
+
             Project project = Project.Load();
             Runtime.Initialize( project);
             
@@ -228,7 +246,7 @@ namespace pixel_editor
                 return; 
             }
 
-            if (consoleOutput.LineCount == Constants.ConsoleMaxLines)
+            if (consoleOutput.LineCount == Current.settings.ConsoleMaxLines)
                 Console.Clear(); 
 
             consoleOutput.Text += e.message + '\n';
@@ -390,7 +408,7 @@ namespace pixel_editor
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
 
-            while (Current.Events.Pending.Count > Constants.EditorEventQueueMaxLength)
+            while (Current.Events.Pending.Count > Current.settings.EditorEventQueueMaxLength)
                 await Task.Delay(15);
 
             Current.Events.Pending.Enqueue(e);
