@@ -33,7 +33,7 @@ namespace pixel_renderer
                 RefreshCharacters();
             }
         }
-
+        [Field]
         private string content = "abc";
         const string alphabet = "abcdefghijklmnopqrstuvwxyz"; 
 
@@ -63,7 +63,6 @@ namespace pixel_renderer
         {
 
             posCurve = Curve.Linear(start, end, 1, Content.Length);
-            posCurve = Curve.Normalize(posCurve);
             var output = new List<JImage>();
             
             for (int i = 0; i < Content.Length; i++)
@@ -82,7 +81,9 @@ namespace pixel_renderer
         }
         public override void Draw(RendererBase renderer)
         {
-            if (current is null) return; 
+            if (current is null)
+                return; 
+
             DrawImage(renderer, current);
         }
     }

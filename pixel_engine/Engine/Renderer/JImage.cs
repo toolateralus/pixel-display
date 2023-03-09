@@ -100,6 +100,7 @@ namespace pixel_renderer
             foreach (var image in images)
             {
                 var position = posCurve.Next();
+
                 var startX = Math.Max(0, (int)Math.Floor(position.X));
                 var startY = Math.Max(0, (int)Math.Floor(position.Y));
                 var endX = Math.Min((int)bounds.Width, startX + image.width);
@@ -132,8 +133,9 @@ namespace pixel_renderer
             var pos = Vector2.Zero;
             foreach (var img in images)
             {
-                pos += posCurve.Next() + img.Size; 
+                pos = posCurve.Next();
                 bounds.ExpandTo(pos);
+                bounds.ExpandTo(pos + new Vector2(img.Size.X * img.width, img.Size.Y * img.height));
             }
 
             posCurve.Reset();
@@ -146,7 +148,7 @@ namespace pixel_renderer
                     var x = (i / 4) % image.width;
                     var y = (i / 4) / image.width;
 
-                    var pxPos = position + new Vector2(x, y);
+                    var pxPos = position + new Vector2(x * image.width, y * image.height);
 
                     int mapPos = (int)((pxPos.Y * (bounds.Width - 1) * 4) + (pxPos.X * 4));
                     int imgPos = i;

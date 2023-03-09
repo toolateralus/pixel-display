@@ -8,19 +8,90 @@ using System.Windows.Media.Animation;
 
 namespace pixel_renderer
 {
-
     public class Curve
     {
-        public Dictionary<Vector2, Vector2> points = new();
-
         private int padding;
         private int index;
         private int startIndex;
         public bool looping;
 
+        public float Max
+        {
+            get
+            {
+
+                float max = float.MinValue;
+                for (int i = 0; i < points.Count; i++)
+                {
+                    var kvp = points.ElementAt(i);
+                    var pt = kvp.Value;
+
+                    if (pt.Y > max)
+                        max = pt.Y;
+                }
+
+                return max;
+            }
+        }
+        public float Min
+        {
+            get
+            {
+                float min = float.MaxValue;
+                for (int i = 0; i < points.Count; i++)
+                {
+                    var kvp = points.ElementAt(i);
+                    var pt = kvp.Value;
+
+                    if (pt.Y < min)
+                        min = pt.Y;
+                }
+
+                return min;
+            }
+        }
+
+        public Dictionary<Vector2, Vector2> points = new();
+
+        public Vector2 Next()
+        {
+            return Next(this);
+        }
         public void Reset()
         {
             index = startIndex;
+        }
+        public void SetVertices(Vector2[] vertices, int padding = 1)
+        {
+            if (padding <= 0)
+                padding = 1;
+
+            this.padding = padding;
+
+            for (int i = 0; i < vertices.Length * padding; i += padding)
+            {
+                var point = vertices[i / padding];
+                points.Add(new Vector2(i, i + padding - 1), point);
+            }
+        }
+
+        public static Vector2 Next(Curve curve)
+        {
+            var outVec = new Vector2();
+
+            if (curve.index > curve.points.Count * curve.padding - 1 && curve.looping)
+                curve.index = curve.startIndex;
+
+            foreach (var pt in curve.points)
+            {
+                float i = curve.index;
+                if (i.IsWithin(pt.Key.X, pt.Key.Y))
+                    outVec = pt.Value;
+            }
+
+            curve.index++;
+
+            return outVec;
         }
         public static Curve Circlular(float speed, int length, float radius = 1f, bool looping = true)
         {
@@ -59,41 +130,6 @@ namespace pixel_renderer
             }
             return curve;
         }
-        public void SetVertices(Vector2[] vertices, int padding = 1)
-        {
-            if (padding <= 0)
-                padding = 1;
-
-            this.padding = padding;
-
-            for (int i = 0; i < vertices.Length * padding; i += padding)
-            {
-                var point = vertices[i / padding];
-                points.Add(new Vector2(i, i + padding - 1), point);
-            }
-        }
-        public Vector2 Next()
-        {
-            return Next(this);
-        }
-        public static Vector2 Next(Curve curve)
-        {
-            var outVec = new Vector2();
-
-            if (curve.index > curve.points.Count * curve.padding - 1 && curve.looping)
-                curve.index = curve.startIndex;
-
-            foreach (var pt in curve.points)
-            {
-                float i = curve.index;
-                if (i.IsWithin(pt.Key.X, pt.Key.Y))
-                    outVec = pt.Value;
-            }
-
-            curve.index++;
-
-            return outVec;
-        }
         public static Curve Normalize(Curve curve)
         {
             float max = curve.Max; 
@@ -107,43 +143,7 @@ namespace pixel_renderer
             }
             return normalizedCurve;
         }
-        public float Min
-        {
-            get
-            {
-                float min = float.MaxValue;
-                for (int i = 0; i < points.Count; i++)
-                {
-                    var kvp = points.ElementAt(i);
-                    var pt = kvp.Value;
-
-                    if (pt.Y < min)
-                        min = pt.Y;
-                }
-
-                return min;
-            }
-        }
-        public float Max
-        {
-            get
-            {
-
-                float max = float.MinValue;
-                for (int i = 0; i < points.Count; i++)
-                {
-                    var kvp = points.ElementAt(i);
-                    var pt = kvp.Value;
-
-                    if (pt.Y > max)
-                        max = pt.Y;
-                }
-
-                return max;
-            }
-        }
-
-        internal static Curve Linear(Vector2 start = default, Vector2 end = default, float speed = 1, int vertices = 16)
+        public static Curve Linear(Vector2 start = default, Vector2 end = default, float speed = 1, int vertices = 16)
         {
             if (start == default)
                 start = Vector2.Zero;
