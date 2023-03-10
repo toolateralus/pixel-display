@@ -215,6 +215,7 @@ namespace pixel_editor
             foreach (Tool tool in Tools)
                 tool.Update(1f);
         }
+        SolidColorBrush framerateBrush = new(); 
         private void UpdateMetrics()
         {
             RenderHost renderHost = Runtime.Current.renderHost;
@@ -227,32 +228,31 @@ namespace pixel_editor
                 var max = info.highestFrameRate;
                 var avg = info.averageFrameRate;
 
-                SolidColorBrush brush = new(); 
                 switch (avg) 
                 {
                     case < 10:
-                        brush = Brushes.DarkRed;
+                        framerateBrush = Brushes.DarkRed;
                         break;
                     case < 20:
-                        brush = Brushes.Red;
+                        framerateBrush = Brushes.Red;
                         break;
                     case < 30:
-                        brush = Brushes.DarkOrange;
+                        framerateBrush = Brushes.DarkOrange;
                         break;
                     case < 40:
-                        brush = Brushes.Orange;
+                        framerateBrush = Brushes.Orange;
                         break;
                     case < 50:
-                        brush = Brushes.Yellow;
+                        framerateBrush = Brushes.Yellow;
                         break;
                     case < 60:
-                        brush = Brushes.White;
+                        framerateBrush = Brushes.White;
                         break;
                     case > 60:
-                        brush = Brushes.Green;
+                        framerateBrush = Brushes.Green;
                         break;
                 }
-                framerateLabel.Foreground = brush;
+                framerateLabel.Foreground = framerateBrush;
                 framerateLabel.Content =
                     $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
             }
