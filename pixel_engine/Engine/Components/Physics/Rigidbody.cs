@@ -52,7 +52,7 @@ namespace pixel_renderer
             Sprite sprite = node.AddComponent<Sprite>();
             sprite.color = JRandom.Color(aMin: 200);
 
-            node.Scale = new Vector2(25, 25);
+            node.Scale = Constants.DefaultNodeScale;
             return node;
         }
         public static Node Standard() =>
