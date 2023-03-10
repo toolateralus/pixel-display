@@ -274,7 +274,7 @@ namespace pixel_renderer
             Node light = new("Light");
             light.AddComponent<Light>(); 
 
-            camera.AddComponent<Camera>().Scale = new(256,256);
+            camera.AddComponent<Camera>().Scale = new(15,15);
             nodes.Add(camera);
             Node floorNode = Floor.Standard();
             nodes.Add(floorNode);
