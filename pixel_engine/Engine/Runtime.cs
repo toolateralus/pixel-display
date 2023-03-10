@@ -148,21 +148,24 @@ namespace pixel_renderer
                     return;
 
                 CMouse.Update();
-                Application.Current.Dispatcher.Invoke(() => { Input.Refresh(); });
+                Current.renderHost?.Render();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (Application.Current is null)
+                        return;
+                    Input.Refresh();
+                    var renderer = Current.renderHost?.GetRenderer();
+                    if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
+                        return;
+                    Application.Current.Dispatcher.Invoke(() =>
+                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
+                });
 
                 if (IsRunning)
                 {
                     if (Current.stage is null) 
                         return; 
                     StagingHost.Update(Current.stage);
-                    Current.renderHost?.Render();
-                    if (Application.Current is null)
-                        return;
-                    var renderer = Current.renderHost?.GetRenderer();
-                    if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
-                        continue;
-                    Application.Current.Dispatcher.Invoke(()=> CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
-
                 }
             }
             Runtime.Log("renderer has exited unexpectedly.");
