@@ -20,6 +20,7 @@ namespace pixel_editor
         Vector2 boxEnd = default;
         public bool InBoxSelect { get; private set; } = false;
         private bool draggingMultiple;
+        private int rbDragStrengthPercent = 100;
 
         public override void Awake()
         {
@@ -104,7 +105,19 @@ namespace pixel_editor
             if (CMouse.Left && selected != null)
             {
                 // drag individual
-                selected.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset;
+                if (Input.Get(Key.LeftCtrl) && selected.TryGetComponent(out Rigidbody rb))
+                {
+                    if (CMouse.MouseWheelDelta != 0)
+                    {
+                        rbDragStrengthPercent += CMouse.MouseWheelDelta > 0 ? 1 : -1;
+                        rbDragStrengthPercent = Math.Max(0, Math.Min(100, rbDragStrengthPercent));
+                        Runtime.Log("rbDragStrength: " + rbDragStrengthPercent+ "%");
+                    }
+
+                    rb.velocity = (CMouse.GlobalPosition + mouseSelectedNodeOffset - rb.Position) * rbDragStrengthPercent / 100;
+                }
+                else
+                    selected.Position = CMouse.GlobalPosition + mouseSelectedNodeOffset;
                 int i = 0; 
 
                 // drag all

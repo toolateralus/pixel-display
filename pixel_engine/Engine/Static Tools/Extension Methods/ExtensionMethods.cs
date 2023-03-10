@@ -92,8 +92,8 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Clamp(this ref Vector2 v, Vector2 min, Vector2 max)
         {
-            v.X = v.X.Clamp(min.X, max.X);
-            v.Y = v.Y.Clamp(min.Y, max.Y);
+            v.X = v.X.Clamped(min.X, max.X);
+            v.Y = v.Y.Clamped(min.Y, max.Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -109,7 +109,9 @@ namespace pixel_renderer
      
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Clamp(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
+        public static float Clamped(this float v, float min, float max) => MathF.Min(max, MathF.Max(v, min));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Clamp(this ref float v, float min, float max) => v = MathF.Min(max, MathF.Max(v, min));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Wrapped(this float v, float max)
         {

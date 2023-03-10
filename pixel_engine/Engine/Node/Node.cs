@@ -352,7 +352,7 @@ namespace pixel_renderer
                 if (compList.Count == 0) Components.Remove(type);
             }
         }
-        public bool TryGetComponent<T>(out T? component, int? index = 0) where T : Component
+        public bool TryGetComponent<T>(out T component, int? index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
             {
