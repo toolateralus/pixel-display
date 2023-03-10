@@ -42,7 +42,6 @@ namespace pixel_renderer
             {
                 Resolve(activeForces);
             }
-
             collisionThisFrame = false;
         }
 
@@ -120,7 +119,7 @@ namespace pixel_renderer
                     if (vert - activeForces[y] == origVert)
                         continue;
 
-                    Vector2 antiForce = -(activeForces[y] / (float)solverIterations);
+                    Vector2 antiForce = -(activeForces[y] / solverIterations);
 
                     Vector2 difference = poly.vertices[y] + antiForce - model.vertices[y];
 

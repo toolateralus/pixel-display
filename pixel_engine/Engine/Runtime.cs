@@ -128,6 +128,7 @@ namespace pixel_renderer
 
             
         }
+
         /// <summary>
         /// Prints a message in the editor console.
         /// </summary>
@@ -137,6 +138,7 @@ namespace pixel_renderer
            EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
             InspectorEventRaised?.Invoke(e);
         }
+
         private static void OnRenderBegin()
         {
             while (Current.renderThread != null && Current.renderThread.IsAlive)

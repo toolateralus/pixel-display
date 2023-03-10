@@ -51,6 +51,8 @@ namespace pixel_renderer
 
             Sprite sprite = node.AddComponent<Sprite>();
             sprite.color = JRandom.Color(aMin: 200);
+            sprite.lit = true; 
+
 
             node.Scale = Constants.DefaultNodeScale;
             return node;

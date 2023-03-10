@@ -149,5 +149,10 @@ namespace pixel_renderer
             byte[] drawSurface = new byte[(int)bounds.Width * (int)bounds.Height * 4];
             return drawSurface;
         }
+
+        internal void GetPixel(float x, float y)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
