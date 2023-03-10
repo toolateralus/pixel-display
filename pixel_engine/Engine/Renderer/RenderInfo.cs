@@ -42,6 +42,7 @@ namespace pixel_renderer
                 recent.Clear();
             }
             else recent.Push(Framerate);
+            frameCount++;
         }
         public string GetTotalMemory()
         {
