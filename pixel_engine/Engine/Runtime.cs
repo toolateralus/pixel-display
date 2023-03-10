@@ -95,6 +95,9 @@ namespace pixel_renderer
                 if (IsDiposing)
                     return;
 
+                CMouse.MouseWheelDelta = 0;
+                
+
                 if (IsRunning)
                 {
                     if (Current.stage is null)
@@ -141,32 +144,23 @@ namespace pixel_renderer
                 if (IsDiposing)
                     return;
 
-               CMouse.Update();
-
                 if (Application.Current is null)
                     return;
 
+                CMouse.Update();
                 Application.Current.Dispatcher.Invoke(() => { Input.Refresh(); });
-
-                CMouse.MouseWheelDelta = 0;
 
                 if (IsRunning)
                 {
                     if (Current.stage is null) 
                         return; 
-
                     StagingHost.Update(Current.stage);
-                    
                     Current.renderHost?.Render();
-
                     if (Application.Current is null)
                         return;
-
                     var renderer = Current.renderHost?.GetRenderer();
-
                     if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
                         continue;
-
                     Application.Current.Dispatcher.Invoke(()=> CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
 
                 }
