@@ -1,25 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO.Compression;
 using System.Linq;
 using System.Numerics;
-using System.Security.Cryptography.Xml;
-using System.Security.Policy;
-using System.Threading;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
-using Bitmap = System.Drawing.Bitmap;
-using Pixel = System.Drawing.Color;
 
 namespace pixel_renderer
 {
