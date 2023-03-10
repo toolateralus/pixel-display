@@ -50,5 +50,11 @@ namespace pixel_renderer
         public Pixel DragBoxColor = Pixel.Red;
         [JsonProperty]
         public Pixel EditorHighlightColor = Color.Orange;
+
+        public override void Sync()
+        {
+            Metadata = new("Editor Settings", Constants.WorkingRoot + "editorSettings.asset", Constants.AssetsFileExtension);
+        }
+
     }
 }

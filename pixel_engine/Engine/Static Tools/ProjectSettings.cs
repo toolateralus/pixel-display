@@ -12,7 +12,12 @@ namespace pixel_renderer
         [JsonProperty] public Pixel EditorHighlightColor = Color.Orange;
         [JsonProperty] public string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
         [JsonProperty] public int PhysicsTimeStep = 16;
-        [JsonProperty] public Vector2 CurrentResolution = Runtime.Current.renderHost.GetRenderer().Resolution;
+        [JsonProperty] public Vector2 CurrentResolution = new(256, 256);
+
+        public override void Sync()
+        {
+            Metadata = new("Project Settings", Constants.WorkingRoot + "projectSettings.asset", Constants.AssetsFileExtension);
+        }
     }
 
 }
