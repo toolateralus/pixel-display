@@ -119,7 +119,7 @@ namespace pixel_renderer
 
             if (!(aCol.IsTrigger || bCol.IsTrigger))
             {
-                SimpleRBResolution(A, B, collision.normal, collision.depth);
+                SimpleRBResolution(A, B, collision);
             }
 
             Collision collisionA, collisionB;
@@ -189,14 +189,14 @@ namespace pixel_renderer
             a.Position -= a.invMass * correctionVector;
             b.Position += b.invMass * correctionVector;
         }
-        private static void SimpleRBResolution(Rigidbody A, Rigidbody B, Vector2 normal, float depth)
+        private static void SimpleRBResolution(Rigidbody A, Rigidbody B, Collision collision)
         {
-            var correction = normal * depth;
+            var correction = collision.normal * collision.depth;
 
             A.Position += correction / 2;
             B.Position -= correction / 2;
 
-            Vector2 colNormal = normal.Normalized();
+            Vector2 colNormal = collision.normal;
 
             float colSpeedA = Vector2.Dot(A.velocity, colNormal);
             float colSpeedB = Vector2.Dot(B.velocity, colNormal);
