@@ -226,6 +226,33 @@ namespace pixel_editor
                 var min = info.lowestFrameRate;
                 var max = info.highestFrameRate;
                 var avg = info.averageFrameRate;
+
+                SolidColorBrush brush = new(); 
+                switch (avg) 
+                {
+                    case < 10:
+                        brush = Brushes.DarkRed;
+                        break;
+                    case < 20:
+                        brush = Brushes.Red;
+                        break;
+                    case < 30:
+                        brush = Brushes.DarkOrange;
+                        break;
+                    case < 40:
+                        brush = Brushes.Orange;
+                        break;
+                    case < 50:
+                        brush = Brushes.Yellow;
+                        break;
+                    case < 60:
+                        brush = Brushes.White;
+                        break;
+                    case > 60:
+                        brush = Brushes.Green;
+                        break;
+                }
+                framerateLabel.Foreground = brush;
                 framerateLabel.Content =
                     $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
             }
