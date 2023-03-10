@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Printing;
-using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
@@ -25,16 +21,23 @@ namespace pixel_renderer
             Collision collision = new();
             collision.depth = float.MaxValue;
 
-            List<Vector2> normals = new(polygonA.normals);
-            normals.AddRange(polygonB.normals);
-            ProjectAllNormals(normals, polygonA, polygonB, ref collision);
+            if (aRelativeVelocity == zero)
+            {
+                List<Vector2> normals = new(polygonA.normals);
+                normals.AddRange(polygonB.normals);
+                ProjectAllNormals(normals, polygonA, polygonB, ref collision);
+            }
+            else
+            {
+                ProjectAllNormalsWithVelocity(polygonA.normals, polygonA, polygonB, ref collision, aRelativeVelocity);
+                ProjectAllNormalsWithVelocity(polygonB.normals, polygonA, polygonB, ref collision, -aRelativeVelocity);
+            }
 
             if (collision.normal == zero)
                 return null;
 
-            Vector2 bToAOffset = polygonA.centroid - polygonB.centroid;
-
-            if (Vector2.Dot(bToAOffset, collision.normal) < 0)
+            Vector2 offsetA = polygonA.centroid - polygonB.centroid;
+            if (Vector2.Dot(offsetA, collision.normal) < 0)
                 collision.normal *= -1;
 
             return collision;
@@ -43,7 +46,6 @@ namespace pixel_renderer
         private static SATProjection Project(Polygon polygon, Vector2 axis)
         {
             SATProjection projection = new SATProjection();
-            projection.normal = axis;
             projection.min = Vector2.Dot(polygon.vertices[0], axis);
             projection.max = projection.min;
 
@@ -65,6 +67,34 @@ namespace pixel_renderer
         {
             return (p1.min <= p2.max && p1.max >= p2.min);
         }
+
+        private static void ProjectAllNormalsWithVelocity(Vector2[] normals, Polygon polygonA, Polygon polygonB, ref Collision collision, Vector2 relVelocity)
+        {
+            foreach (Vector2 normal in normals)
+            {
+                SATProjection projA = Project(polygonA, normal);
+                SATProjection projB = Project(polygonB, normal);
+
+                if (!Overlap(projA, projB))
+                {
+                    collision.normal = zero;
+                    return;
+                }
+
+                if (normal.Dot(relVelocity) < 0)
+                    continue;
+
+                float overlap = GetOverlap(projA, projB);
+                if (overlap < collision.depth)
+                {
+                    collision.depth = overlap;
+                    collision.normal = normal;
+                    collision.thisProjection = projA;
+                    collision.otherProjection = projB;
+                }
+            }
+        }
+
         private static void ProjectAllNormals(List<Vector2> normals, Polygon polygonA,  Polygon polygonB, ref Collision collision)
         {
             foreach (Vector2 normal in normals)

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
@@ -118,9 +117,7 @@ namespace pixel_renderer
                 return;
 
             if (!(aCol.IsTrigger || bCol.IsTrigger))
-            {
-                SimpleRBResolution(A, B, collision);
-            }
+                ComputeImpulse(A, B, collision);
 
             Collision collisionA, collisionB;
             GetCollisionObjects(aCol, bCol, collision.normal, collision.depth, out collisionA, out collisionB);
@@ -160,24 +157,6 @@ namespace pixel_renderer
             A.collider.node.OnCollision(B);
             B.collider.node.OnCollision(A);
         }
-        private static void ComputeImpulse(Rigidbody rbA, Rigidbody rbB, Vector2 aToBMoveDir, float depth)
-        {
-            Vector2 bVelRelToA = rbB.velocity - rbA.velocity;
-
-            float bRelVelAlongNorm = Vector2.Dot(bVelRelToA, aToBMoveDir);
-
-            if (bRelVelAlongNorm > 0) return;
-
-            float minRestitution = MathF.Min(rbA.restitution, rbB.restitution);
-            float force = -(1 + minRestitution) * bRelVelAlongNorm / (rbA.invMass + rbB.invMass);
-
-            Vector2 impulse = force * aToBMoveDir;
-
-            rbA.ApplyImpulse(-impulse);
-            rbB.ApplyImpulse(impulse);
-
-            PositionalCorrection(rbA, rbB, aToBMoveDir, depth);
-        }
         private static void PositionalCorrection(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
         {
             const float k_slop = 0.01f;
@@ -189,22 +168,22 @@ namespace pixel_renderer
             a.Position -= a.invMass * correctionVector;
             b.Position += b.invMass * correctionVector;
         }
-        private static void SimpleRBResolution(Rigidbody A, Rigidbody B, Collision collision)
+        private static void ComputeImpulse(Rigidbody rbA, Rigidbody rbB, Collision collision)
         {
-            var correction = collision.normal * collision.depth;
+            Vector2 correction = collision.normal * collision.depth;
+            rbA.Position += correction / 2;
+            rbB.Position -= correction / 2;
 
-            A.Position += correction / 2;
-            B.Position -= correction / 2;
+            Vector2 aRelVelocity = rbA.velocity - rbB.velocity;
 
-            Vector2 colNormal = collision.normal;
+            float aRelInertia = Vector2.Dot(aRelVelocity, collision.normal) * (rbA.mass + rbB.mass);
 
-            float colSpeedA = Vector2.Dot(A.velocity, colNormal);
-            float colSpeedB = Vector2.Dot(B.velocity, colNormal);
+            float minRestitution = MathF.Min(rbA.restitution, rbB.restitution);
+            float totalEnergy = aRelInertia * minRestitution;
 
-            float averageSpeed = (colSpeedA + colSpeedB) / 2;
-
-            A.velocity += colNormal * (averageSpeed - colSpeedA);
-            B.velocity += colNormal * (averageSpeed - colSpeedB);
+            Vector2 impulse = totalEnergy * collision.normal;
+            rbA.ApplyImpulse(-impulse);
+            rbB.ApplyImpulse(impulse);
         }
     }
 }
