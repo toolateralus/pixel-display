@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
 using System.Numerics;
-using System.ComponentModel;
 
 namespace pixel_renderer.ShapeDrawing
 {
@@ -29,9 +24,6 @@ namespace pixel_renderer.ShapeDrawing
             DrawShapeActions?.Invoke();
         }
 
-        /// <summary>
-        /// start point of each line will always have an x value less than or equal to the end point
-        /// </summary>
         internal static List<Line> Lines = new();
         internal static List<Circle> Circles = new();
         public static void DrawLine(Vector2 startPoint, Vector2 endPoint, Pixel? color = null) =>
