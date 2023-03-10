@@ -42,7 +42,7 @@ namespace pixel_renderer
 
             if (data is not null)
             {
-                Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color);
+                Pixel[,] colors = VertexLighting(light);
                 lightmap = new(colors);
             }
             texture?.SetImage(lightmap);
@@ -144,7 +144,7 @@ namespace pixel_renderer
             if (lit)
             {
                 Refresh(); 
-                ApplyLighting();
+                LightingPerPixel();
             }
         }
         public override void OnDrawShapes()
@@ -175,55 +175,50 @@ namespace pixel_renderer
             }
         }
 
-        public void LightingPerPixel(Light light)
+        public void LightingPerPixel()
         {
             int x = 0, y = 0;
 
-            PixelShader((e) => { },  getColor, getPosition, X, Y, OnIterationComplete, new object[] { colorDataSize.X, colorDataSize.Y});
+            Pixel color = Pixel.White;
+            Vector2 position = Vector2.Zero;
+            PixelShader((e) => { color = e; },  getColor, X, Y, OnIterationComplete, new object[] { texture.Width, texture.Height});
 
             int Y() => y++; 
-            int X() => x++; 
-
-            void OnIterationComplete(JImage image) { }
-            Vector2 getPosition() { return new(x, y);  }
-            Pixel getColor() { return Pixel.White; };
-        }
-        Pixel[,] VertexLighting(Polygon poly, Vector2 lightPosition, float lightRadius, Pixel lightColor)
-        {
+            int X() => x++;
+            void OnIterationComplete(JImage image) {
+                texture.SetImage(image);
+            }
             
+            Pixel getColor() { 
+            // color 
+                
+                return color; 
+            };
+        }
+        Pixel[,] VertexLighting(Light light)
+        {
             Pixel[,] colors = new Pixel[texture.Width, texture.Height]; 
             for (int x = 0; x < texture.Width; x++)
                 for (int y = 0; y < texture.Height; y++)
                     {
-                        float distance = Vector2.Distance(Position + new Vector2(x,y), lightPosition);
-                        float lightAmount = 1f - Math.Clamp(distance / lightRadius, 0,1);
+                        float distance = Vector2.Distance(Position + new Vector2(x,y), light.Position);
+                        float lightAmount = 1f - Math.Clamp(distance / light.radius, 0,1);
                         Pixel existingPixel = texture.GetPixel(x, y);
-                        Pixel blendedPixel = Pixel.Lerp(existingPixel, lightColor, lightAmount);
+                        Pixel blendedPixel = Pixel.Lerp(existingPixel, light.color, lightAmount);
                         colors[x, y] = blendedPixel;
                     }
             return colors; 
         }
-        public virtual Pixel[,] PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn, Func<Vector2> position,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton,  params object[] args)
+        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton,  params object[] args)
         {
-            
-            int width = (int)args[0];
-            int height = (int)args[1];
-            Pixel[,] pixels = new Pixel[width, height];
-
-            for (int x = 0; x < width; indexerX.Invoke())
-                for (int y = 0; y < height; indexerY.Invoke())
+            for (int x = 0; x < texture.Width -1; x = indexerX.Invoke())
+                for (int y = 0; y < texture.Height -1; y = indexerY.Invoke())
                 {
-                    Vector2 pos = position.Invoke();
-                    int _x = (int)pos.X; 
-                    int _y = (int)pos.Y; 
-
-                    var col = texture.GetPixel(_x, _y);
+                    var col = texture.GetPixel(x, y);
                     colorOut.Invoke(col);
-                    texture.SetPixel(_x, _y, colorIn.Invoke());
+                    texture.SetPixel(x, y, colorIn.Invoke());
                     onIteraton.Invoke(texture.GetImage());
                 }
-
-            return pixels; 
         }
 
 
