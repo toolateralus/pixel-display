@@ -1,74 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
+using System.Printing;
+using System.Windows.Shapes;
 
 namespace pixel_renderer
 {
     public class SATCollision
     {
+        static Vector2 zero = Vector2.Zero;
         /// <summary>
         /// Finds the smallest vector that will move A out of B
         /// </summary>
         /// <param name="polygonA"></param>
         /// <param name="polygonB"></param>
         /// <returns>The direction to move A out of B, and the amount it must move.</returns>
-        public static (Vector2 normal, float depth) GetCollisionData(Polygon polygonA, Polygon polygonB, Vector2 aRelativeVelocity)
+        public static Collision? GetCollisionData(Polygon polygonA, Polygon polygonB, Vector2 aRelativeVelocity)
         {
             if (polygonA.vertices.Length == 0 || polygonB.vertices.Length == 0)
-                return (Vector2.Zero, 0f);
+                return null;
 
-            float overlap = float.MaxValue;
-            Vector2 smallest = Vector2.Zero;
+            Collision collision = new();
+            collision.depth = float.MaxValue;
 
-            foreach (Vector2 normal in polygonA.normals)
-            {
-                SATProjection p1 = Project(polygonA, normal);
-                SATProjection p2 = Project(polygonB, normal);
+            List<Vector2> normals = new(polygonA.normals);
+            normals.AddRange(polygonB.normals);
+            ProjectAllNormals(normals, polygonA, polygonB, ref collision);
 
-                if (!Overlap(p1, p2))
-                    return (Vector2.Zero, 0f);
-
-                float o = GetOverlap(p1, p2);
-                if (o < overlap)
-                {
-                    if (aRelativeVelocity.X > 0 &&
-                        aRelativeVelocity.Y > 0 &&
-                        Vector2.Dot(normal, aRelativeVelocity) < 0)
-                        continue;
-                    overlap = o;
-                    smallest = normal;
-                }
-            }
-
-            foreach (Vector2 normal in polygonB.normals)
-            {
-                SATProjection p1 = Project(polygonA, normal);
-                SATProjection p2 = Project(polygonB, normal);
-
-                if (!Overlap(p1, p2))
-                    return (Vector2.Zero, 0f);
-
-                float o = GetOverlap(p1, p2);
-                if (o < overlap)
-                {
-                    if (aRelativeVelocity.X > 0 &&
-                        aRelativeVelocity.Y > 0 &&
-                        Vector2.Dot(normal, aRelativeVelocity) > 0)
-                        continue;
-                    overlap = o;
-                    smallest = normal;
-                }
-            }
-
-            if (smallest == Vector2.Zero)
-                return (Vector2.Zero, 0f);
+            if (collision.normal == zero)
+                return null;
 
             Vector2 bToAOffset = polygonA.centroid - polygonB.centroid;
-            if (Vector2.Dot(bToAOffset, smallest) < 0)
-                smallest *= -1;
 
-            return (smallest, overlap);
+            if (Vector2.Dot(bToAOffset, collision.normal) < 0)
+                collision.normal *= -1;
+
+            return collision;
         }
         private static float GetOverlap(SATProjection p1, SATProjection p2) => MathF.Min(p1.max, p2.max) - MathF.Max(p1.min, p2.min);
         private static SATProjection Project(Polygon polygon, Vector2 axis)
@@ -95,6 +64,29 @@ namespace pixel_renderer
         private static bool Overlap(SATProjection p1, SATProjection p2)
         {
             return (p1.min <= p2.max && p1.max >= p2.min);
+        }
+        private static void ProjectAllNormals(List<Vector2> normals, Polygon polygonA,  Polygon polygonB, ref Collision collision)
+        {
+            foreach (Vector2 normal in normals)
+            {
+                SATProjection projA = Project(polygonA, normal);
+                SATProjection projB = Project(polygonB, normal);
+
+                if (!Overlap(projA, projB))
+                {
+                    collision.normal = zero;
+                    return;
+                }
+
+                float overlap = GetOverlap(projA, projB);
+                if (overlap < collision.depth)
+                {
+                    collision.depth = overlap;
+                    collision.normal = normal;
+                    collision.thisProjection = projA;
+                    collision.otherProjection = projB;
+                }
+            }
         }
     }
 
