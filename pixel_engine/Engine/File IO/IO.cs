@@ -32,25 +32,31 @@ namespace pixel_renderer
         /// <param name="meta"></param>
         /// <param name="closeStreamWhenFinished"></param>
         /// <returns></returns>
-        public static T? ReadJson<T>(Metadata meta, bool closeStreamWhenFinished = true) where T : new()
+        public static T? ReadJson<T>(Metadata meta) where T : new()
         {
             T? obj = (T)Convert.ChangeType(null, typeof(T));
+
+            if (!File.Exists(meta.Path))
+                return obj;
+
             try
             {
-
                 if (meta is null)
                 {
-                    Runtime.Log(nameof(meta) + " was not found.");
+                    Runtime.Log("Metadata was not found.");
                     return obj;
+
                 }
                 if (Constants.ReadableExtensions.Contains(meta.extension))
                 {
                     var jsonSerializer = JsonSerializer.Create(Settings);
+                    
                     StreamReader reader = new(meta.Path);
+                    
                     using JsonTextReader jsonReader = new(reader);
+                    
                     obj = jsonSerializer.Deserialize<T>(jsonReader);
-                    if (closeStreamWhenFinished)
-                        reader.Close();
+
                     return obj;
                 }
                 throw new FileNotFoundException($"JSON file was not found at provided path, or had an unsupported file extension \n Path: {meta.Path} \n Extension: {meta.extension}");

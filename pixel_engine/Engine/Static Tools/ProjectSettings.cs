@@ -17,7 +17,7 @@ namespace pixel_renderer
         [JsonProperty]
         public int PhysicsTimeStep = 16;
         [JsonProperty]
-        public Vector2 CurrentResolution => Runtime.Current.renderHost.GetRenderer().Resolution;
+        public Vector2 CurrentResolution = Runtime.Current.renderHost.GetRenderer().Resolution;
         [JsonProperty]
         public Vector2 DefaultResolution => new(ScreenW, ScreenH);
         [JsonProperty]

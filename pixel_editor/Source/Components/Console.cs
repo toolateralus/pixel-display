@@ -51,14 +51,16 @@ namespace pixel_editor
         public static Command cmd_set_resolution() => new()
         {
             phrase = "resolution.Set;",
-            syntax = "resolution.Set(1024,1024);",
+            syntax = "resolution.Set(x,y);",
             argumentTypes = new string[] { "vec:" },
             action = (e) =>
             {
-                Vector2 vector = (Vector2)e[0];
-                Vector2 newRes = vector;
-                Console.Print(vector.ToString());
-                Runtime.Current.renderHost.GetRenderer().Resolution = newRes;
+                if(TryGetArgAtIndex(0, out Vector2 vec, e)) 
+                    return;
+
+                Print(vec.ToString());
+                Runtime.Current.projectSettings.CurrentResolution = vec;
+
             },
             description = "sets the resolution to the specified Vec2"
         };

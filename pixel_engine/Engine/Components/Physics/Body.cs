@@ -1,66 +1,62 @@
 ﻿using System;
 using System.Numerics;
+using System.Windows.Media.Media3D;
 using System.Xml;
 
 namespace pixel_renderer
 {
     public class Softbody : Rigidbody
     {
-        [Field] Collider? collider = null;
-        [Field] float minScale = 0.25f;
-        [Field] float maxScale = 2f;
-
-        Curve curve;
-
-        private Vector2 maxDeformationAmount = new(0.001f, 0.001f);
+        [Field] private float minScale = 0.25f;
+        [Field] private float maxScale = 2f;
+        [Field] private Collider? collider = null;
+                private Curve curve;
+                private Polygon model;
 
         public override void Update()
         {
-            usingGravity = false;
-
             if (curve is null)
             {
-                curve = Curve.Circlular(1, 16, 3, true);
+                curve = Curve.Circlular(1, 6, .001f, true);
             }
 
             if (collider is null)
             {
                 node?.TryGetComponent(out collider);
+                model = collider?.model;
                 return; 
             }
 
             collider.drawCollider = true;
             collider.drawNormals = true;
-            collider.IsTrigger = true;
         }
-
         
         public override void OnTrigger(Collision col)
         {
-            if (this.collider is null)
+            if (this.collider is null || model is null)
                 return;
 
-            Polygon poly = new(collider.model);
+            Polygon poly = new(model.vertices);
 
             for (int index = 0; index < poly.vertices.Length; index++)
             {
-                var (within, pos) = WithinDeformationRange(poly.vertices[index], collider.model.vertices[index]);
+                var (within, pos) = WithinDeformationRange(poly.vertices[index], model.vertices[index]);
                 if (within)
                 {
                     float distance = Vector2.Distance(poly.vertices[index], collider.model.centroid);
                     
-                    Vector2 deformationAmount = Vector2.Lerp(Vector2.Zero, maxDeformationAmount, distance / (collider.Scale / 2).Length());
-                    
                     Vector2 direction = (poly.vertices[index] - collider.Polygon.centroid).Normalized();
 
-                    if (JRandom.Bool())
-                        poly.vertices[index] += direction * curve.Next();
-                    else poly.vertices[index] -= direction * curve.Next();
+                    float vel = (velocity.Length() / 2);
+
+                    poly.vertices[index] += curve.Next() * direction; 
+
                     continue;
                 }
                 poly.vertices[index] = pos;
             }
-            collider.model = poly; 
+            collider.model = poly;
+            collider.model.CalculateNormals(); 
         }
         private (bool within, Vector2 result) WithinDeformationRange(Vector2 vert, Vector2 original)
         {

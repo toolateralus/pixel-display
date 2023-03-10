@@ -80,8 +80,10 @@ namespace pixel_renderer
                 fetchedAsset = new();
                 IO.WriteJson(fetchedAsset, meta);
             }
+
             projectSettings = fetchedAsset;
-            renderHost.GetRenderer()._resolution = projectSettings.CurrentResolution; 
+
+            renderHost.newResolution = projectSettings.CurrentResolution; 
         }
 
         public ProjectSettings projectSettings;
@@ -108,6 +110,7 @@ namespace pixel_renderer
                     Thread.Sleep(projectSettings.PhysicsTimeStep);
                 }
             }
+            Runtime.Log("Physics simulation has ended.");
 
         }
 
@@ -168,6 +171,8 @@ namespace pixel_renderer
 
                 }
             }
+            Runtime.Log("renderer has exited unexpectedly.");
+
         }
         public static void Initialize(Project project)
         {

@@ -41,7 +41,7 @@ namespace pixel_renderer
             }
         }
         [Method]
-        private void CalculateNormals()
+        public void CalculateNormals()
         {
             int vertCount = vertices.Length;
             normals = new Vector2[vertCount];
