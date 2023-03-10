@@ -21,17 +21,9 @@ namespace pixel_renderer
             Collision collision = new();
             collision.depth = float.MaxValue;
 
-            if (aRelativeVelocity == zero)
-            {
-                List<Vector2> normals = new(polygonA.normals);
-                normals.AddRange(polygonB.normals);
-                ProjectAllNormals(normals, polygonA, polygonB, ref collision);
-            }
-            else
-            {
-                ProjectAllNormalsWithVelocity(polygonA.normals, polygonA, polygonB, ref collision, aRelativeVelocity);
-                ProjectAllNormalsWithVelocity(polygonB.normals, polygonA, polygonB, ref collision, -aRelativeVelocity);
-            }
+            List<Vector2> normals = new(polygonA.normals);
+            normals.AddRange(polygonB.normals);
+            ProjectAllNormals(normals, polygonA, polygonB, ref collision);
 
             if (collision.normal == zero)
                 return null;
@@ -66,33 +58,6 @@ namespace pixel_renderer
         private static bool Overlap(SATProjection p1, SATProjection p2)
         {
             return (p1.min <= p2.max && p1.max >= p2.min);
-        }
-
-        private static void ProjectAllNormalsWithVelocity(Vector2[] normals, Polygon polygonA, Polygon polygonB, ref Collision collision, Vector2 relVelocity)
-        {
-            foreach (Vector2 normal in normals)
-            {
-                SATProjection projA = Project(polygonA, normal);
-                SATProjection projB = Project(polygonB, normal);
-
-                if (!Overlap(projA, projB))
-                {
-                    collision.normal = zero;
-                    return;
-                }
-
-                if (normal.Dot(relVelocity) < 0)
-                    continue;
-
-                float overlap = GetOverlap(projA, projB);
-                if (overlap < collision.depth)
-                {
-                    collision.depth = overlap;
-                    collision.normal = normal;
-                    collision.thisProjection = projA;
-                    collision.otherProjection = projB;
-                }
-            }
         }
 
         private static void ProjectAllNormals(List<Vector2> normals, Polygon polygonA,  Polygon polygonB, ref Collision collision)
