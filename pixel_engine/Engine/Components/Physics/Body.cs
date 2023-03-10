@@ -129,12 +129,14 @@ namespace pixel_renderer
                         poly.vertices[y] += antiForce;
                         activeForces[y] += antiForce;
 
+
                         if (activeForces[y] == Vector2.Zero)
                             activeForces.RemoveAt(y);
                     }
                 }
             }
-            collider.model = poly; 
+            collider.model = poly;
+            collider.model.CalculateNormals(); 
         }
 
         private Vector2 Force(Polygon poly, int index)
