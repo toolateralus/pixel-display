@@ -137,7 +137,7 @@ namespace pixel_renderer
         {
             Node node = new("UI Element");
             var img = node.AddComponent<Image>();
-            img.Scale = new(250, 250);
+            img.Scale = Constants.DefaultNodeScale;
             img.TrySetTextureFromString();
             img.Type = SpriteType.Image; 
             img.Refresh();

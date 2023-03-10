@@ -22,10 +22,6 @@
         }
         internal protected Vector2 _resolution = Constants.DefaultResolution;
         public bool baseImageDirty = true;
-        const float fZero = 0;
-        const float fOne = 1;
-
-      
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);

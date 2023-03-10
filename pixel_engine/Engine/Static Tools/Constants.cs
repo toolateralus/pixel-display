@@ -41,6 +41,8 @@ namespace pixel_renderer
 
         public static Vector2 DefaultResolution = new(480, 480);
 
+        public static Vector2 DefaultNodeScale = new(1, 1);
+
         public static List<Type> GetInheritedTypesFromBase<T>()
         {
             var types = AppDomain.CurrentDomain.GetAssemblies()

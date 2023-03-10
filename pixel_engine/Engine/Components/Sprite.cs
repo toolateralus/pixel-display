@@ -133,7 +133,7 @@ namespace pixel_renderer
                     texture.SetImage(colorArray);
                     break;
                 case SpriteType.Image:
-                    if (texture is null)
+                    if (texture is null || texture.Image is null)
                     {
                         texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), Vector2.One);
                         Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);

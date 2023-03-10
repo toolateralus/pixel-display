@@ -19,7 +19,7 @@ namespace pixel_renderer
         {
             info = new(this);
         }
-        public event Action<long>? OnRenderCompleted; 
+        public event Action<double>? OnRenderCompleted; 
         public void SetRenderer(RendererBase renderer) => m_renderer = renderer;
         public Vector2 newResolution = default;
         public bool Rendering { get; private set; }
@@ -36,7 +36,7 @@ namespace pixel_renderer
             if (m_renderer is null) 
                 throw new NullReferenceException("RenderHost does not have a renderer loaded.");
             Cycle();
-            OnRenderCompleted?.Invoke(DateTime.Now.Ticks);
+            OnRenderCompleted?.Invoke(((double)DateTime.Now.Ticks / 10000000.0));
         }
         /// <summary>
         /// performs the rendering loop for one cycle or frame.

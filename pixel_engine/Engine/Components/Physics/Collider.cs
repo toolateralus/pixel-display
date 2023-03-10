@@ -63,7 +63,7 @@ namespace pixel_renderer
             {
                 var nextIndex = (i + 1) % vertLength;
                 var midpoint = (poly.vertices[i] + poly.vertices[nextIndex]) / 2;
-                ShapeDrawer.DrawLine(midpoint, midpoint + poly.normals[i] * 10, Color.Blue);
+                ShapeDrawer.DrawLine(midpoint, midpoint + poly.normals[i] * 1, Color.Blue);
             }
         }
         public void SetPolygonFromWorldSpace(Polygon worldspacePolygon)

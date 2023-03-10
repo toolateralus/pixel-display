@@ -15,10 +15,7 @@ namespace pixel_renderer
 
         public override void Update()
         {
-            if (curve is null)
-            {
-                curve = Curve.Circlular(1, 6, .001f, true);
-            }
+            curve ??= Curve.Circlular(1, 6, .001f, true);
 
             if (collider is null)
             {
@@ -29,11 +26,17 @@ namespace pixel_renderer
 
             collider.drawCollider = true;
             collider.drawNormals = true;
+            collider.IsTrigger = true;
         }
         
         public override void OnTrigger(Collision col)
         {
-            if (this.collider is null || model is null)
+            Deform();
+        }
+
+        private void Deform()
+        {
+            if (collider is null || model is null)
                 return;
 
             Polygon poly = new(model.vertices);
@@ -44,20 +47,19 @@ namespace pixel_renderer
                 if (within)
                 {
                     float distance = Vector2.Distance(poly.vertices[index], collider.model.centroid);
-                    
+
                     Vector2 direction = (poly.vertices[index] - collider.Polygon.centroid).Normalized();
 
-                    float vel = (velocity.Length() / 2);
-
-                    poly.vertices[index] += curve.Next() * direction; 
+                    poly.vertices[index] += direction * distance;
 
                     continue;
                 }
                 poly.vertices[index] = pos;
             }
             collider.model = poly;
-            collider.model.CalculateNormals(); 
+            collider.model.CalculateNormals();
         }
+
         private (bool within, Vector2 result) WithinDeformationRange(Vector2 vert, Vector2 original)
         {
             float scale = vert.Length() / original.Length();

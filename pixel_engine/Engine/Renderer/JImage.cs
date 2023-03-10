@@ -51,6 +51,9 @@ namespace pixel_renderer
         }
         public JImage(Bitmap bmpInput)
         {
+            if (bmpInput is null)
+                return; 
+
             Pixel[,] pixels;
             lock (bmpInput)
                 pixels = CBit.PixelFromBitmap(bmpInput);

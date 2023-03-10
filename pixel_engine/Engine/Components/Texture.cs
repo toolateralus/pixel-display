@@ -75,6 +75,11 @@ namespace pixel_renderer
                 Image = new(imgData.Path);
             }
             jImage = new();
+            
+            // maybe unneccesary
+            if (Image is null)
+                return;
+
             var colors = CBit.PixelFromBitmap(Image);
             SetImage(colors);
         }

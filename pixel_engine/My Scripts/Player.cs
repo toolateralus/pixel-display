@@ -8,6 +8,8 @@ using pixel_renderer.Assets;
 using System.Linq;
 using System.Numerics;
 using pixel_renderer.ShapeDrawing;
+using System.Drawing.Printing;
+using System.Windows.Media.Media3D;
 
 namespace pixel_renderer
 {
@@ -18,9 +20,9 @@ namespace pixel_renderer
         [Field] private bool isGrounded;
         Sprite sprite = new();
         Rigidbody rb = new();
-        
         private bool freezeButtonPressedLastFrame = false;
         private Curve curve = null; 
+        Vector2 moveVector = default;
 
         public static Metadata? PlayerSprite
         {
@@ -61,25 +63,45 @@ namespace pixel_renderer
 
             });
             task.Start();
+            RegisterAction(Up, Key.W);
+            RegisterAction(Down, Key.S);
+            RegisterAction(Left, Key.A);
+            RegisterAction(Right, Key.D);
+
         }
+        void Up() => moveVector = new Vector2(moveVector.X, 1);
+        void Down() => moveVector = new Vector2(moveVector.X, -1);
+        void Left()
+        {
+            moveVector = new Vector2(-1, moveVector.Y);
+        }
+        void Right()
+        {
+            moveVector = new Vector2(1, moveVector.Y);
+
+        }
+
         public override void OnCollision(Collision collider)
         {
             isGrounded = true; 
         }
         public override void FixedUpdate(float delta)
         {
-
             if (!takingInput)
                 return;
 
             if (isGrounded)
                 isGrounded = false;
 
-            Move(MoveVector);
+            Move(moveVector);
+
+            moveVector = Vector2.Zero;
         }
         private void Move(Vector2 moveVector)
         {
-            rb?.ApplyImpulse(moveVector.WithValue(y:0) * speed);
+            if (isGrounded)
+                rb?.ApplyImpulse(moveVector.WithValue(y: speed * moveVector.Y) * speed);
+            else rb?.ApplyImpulse(moveVector * speed);
         }
 
         Vector2 thisPos; 
@@ -96,7 +118,7 @@ namespace pixel_renderer
             if (freezeButtonPressed)
             {
                 foreach (var child in node.children)
-                    child.Value.localPos += MoveVector;
+                    child.Value.localPos += moveVector;
 
                 node.Position = thisPos;
             }
@@ -119,7 +141,7 @@ namespace pixel_renderer
 
             col.model = new Box().DefiningGeometry;
 
-            playerNode.Scale = new(25, 25);
+            playerNode.Scale = Constants.DefaultNodeScale;
 
             return playerNode;
 

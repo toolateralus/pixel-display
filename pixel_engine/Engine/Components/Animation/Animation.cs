@@ -50,11 +50,15 @@ namespace pixel_renderer
 
                 Bitmap img = new(imgMetadata.Path);
 
-                var colors = CBit.PixelFromBitmap(img);
+                if (img is not null)
+                {
+                    var colors = CBit.PixelFromBitmap(img);
+                    JImage image = new(colors);
 
-                JImage image = new(colors);
+                    frames.Add((i, i + padding - 1), image);    
+                }
 
-                frames.Add((i, i + padding - 1), image);
+              
             }
         }
 

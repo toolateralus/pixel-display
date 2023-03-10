@@ -11,44 +11,9 @@ namespace pixel_renderer
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public static class Input
     {
-        static Vector2 moveVector;
-        static float inputMagnitude;
-        private static bool moveVectorInitialized;
-        public static Vector2 MoveVector { get => moveVector; }
-        public static float InputMagnitude { get => inputMagnitude; set => inputMagnitude = value; }
-        public static void AddInputResultToQueue(bool val, Key key)
-        {
-
-        }
-
-        static void Up() => moveVector = new Vector2(moveVector.X, inputMagnitude);
-        static void Down() => moveVector = new Vector2(moveVector.X, inputMagnitude);
-        static void Left()
-        {
-            moveVector = new Vector2(-inputMagnitude, moveVector.Y);
-        }
-        static void Right()
-        {
-            moveVector = new Vector2(inputMagnitude, moveVector.Y);
-
-        }
-
-        static void InitializePlayerMoveVector()
-        {
-            if (moveVectorInitialized)
-                return;
-            
-            moveVectorInitialized = true;
-            
-            RegisterAction(Up, Key.W);
-            RegisterAction(Down, Key.S);
-            RegisterAction(Left, Key.A);
-            RegisterAction(Right, Key.D);
-        }
         private static readonly List<InputAction> InputActions = new(250);
         internal static void Refresh()
         {
-            InitializePlayerMoveVector(); 
             lock (InputActions)
             {
                 InputAction[] actions = new InputAction[InputActions.Count];
@@ -63,7 +28,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(string key, InputEventType type = InputEventType.KeyDown)
         {
@@ -81,13 +45,6 @@ namespace pixel_renderer
                 });
             else return false; 
         }
-
-        /// <summary>
-        /// Gets the value of a specified key and type of event.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
@@ -111,7 +68,6 @@ namespace pixel_renderer
                 });
             return input_value;
         }
-      
         public static void RegisterAction(Action action, Key key, InputEventType type = InputEventType.KeyDown)
         {
              InputActions.Add(new(action, key, type: type));

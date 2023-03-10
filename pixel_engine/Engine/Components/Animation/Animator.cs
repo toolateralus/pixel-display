@@ -155,7 +155,7 @@ namespace pixel_renderer
             }
             anim.test_flame_anim_setup();
             anim.Start();
-            node.Scale = new(40, 40);
+            node.Scale = Constants.DefaultNodeScale;
             return node;
         }
         private void test_flame_anim_setup()

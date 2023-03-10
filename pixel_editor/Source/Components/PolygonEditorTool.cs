@@ -8,7 +8,7 @@ namespace pixel_editor
     internal class PolygonEditorTool : Tool
     {
         Collider? selectedCollider;
-        const float highlightDistance = 4;
+        const float highlightDistance = 0.1f;
         int grabbedVertexIndex = -1;
         Vector2? newVertexTarget;
         public override void Awake() { }

@@ -12,26 +12,27 @@ namespace pixel_renderer
         public int framesUntilCheck = 50;
         public int frameCount;
 
-        internal long lastFrameTime = 0;
-        internal long thisFrameTime = 0;
+        internal double thisFrameTime = 0;
 
         public RenderInfo(RenderHost renderer)
         {
             renderer.OnRenderCompleted += Update; 
         }
-        public long FrameTime => thisFrameTime - lastFrameTime;
+        public double FrameTime;
         const double tenMillion = 10000000.0; 
-        public double Framerate => Math.Floor(1 / (FrameTime / tenMillion));
-        
+        public double Framerate => Math.Floor(1f / FrameTime);
+        internal double  LastFrameTime = 0;
         public double lowestFrameRate;
         public double highestFrameRate;
         public double averageFrameRate;
-
         Stack<double> recent = new();
-        public void Update(long value)
+        public void Update(double value)
         {
-            lastFrameTime = thisFrameTime;
+            LastFrameTime = thisFrameTime;
             thisFrameTime = value;
+
+            if (frameCount > 0)
+                FrameTime = (thisFrameTime - LastFrameTime);
 
             if (recent.Count >= 60)
             {
@@ -42,7 +43,6 @@ namespace pixel_renderer
             }
             else recent.Push(Framerate);
         }
-       
         public string GetTotalMemory()
         {
             if (framesSinceGC_Check < framesUntilGC_Check)
