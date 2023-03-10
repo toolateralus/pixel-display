@@ -21,13 +21,12 @@ namespace pixel_renderer
         public override void FixedUpdate(float deltaTime)
         {
             if (usingGravity)
-                velocity += CMath.Gravity;
+                velocity += CMath.Gravity * deltaTime;
 
             velocity += acceleration;
             velocity *= 0.99f; 
             float force = MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()));
             velocity *= 1f / (1f + 0.01f * (drag * force));
-            velocity *= deltaTime; 
 
             Position += velocity;
         }
