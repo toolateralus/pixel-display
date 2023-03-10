@@ -72,19 +72,20 @@ namespace pixel_renderer
             }
 
         }
-        [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
-        [Field][JsonProperty] public Vector2 viewportScale = new(1, 1);
-        [Field][JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
-        [Field][JsonProperty] public float camDistance = 1;
-        [Field][JsonProperty] public Texture texture;
-        [Field][JsonProperty] public SpriteType Type = SpriteType.SolidColor;
-        [Field][JsonProperty] public TextureFiltering textureFiltering = 0;
-        [Field][JsonProperty] public bool lit = false;
-        [Field][JsonProperty] public Pixel color = Pixel.Blue;
-        [Field][JsonProperty] public float drawOrder = 0f;
-        [Field][JsonProperty] public bool IsReadOnly = false;
-        [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
-        [Field][JsonProperty] public string textureName = "Table";
+
+                [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
+        [Field] [JsonProperty] public Vector2 viewportScale = new(1, 1);
+        [Field] [JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
+        [Field] [JsonProperty] public float camDistance = 1;
+        [Field] [JsonProperty] public Texture texture;
+        [Field] [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
+        [Field] [JsonProperty] public TextureFiltering textureFiltering = 0;
+        [Field] [JsonProperty] public bool lit = false;
+        [Field] [JsonProperty] public Pixel color = Pixel.Blue;
+        [Field] [JsonProperty] public float drawOrder = 0f;
+        [Field] [JsonProperty] public bool IsReadOnly = false;
+        [Field] [JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
+        [Field] [JsonProperty] public string textureName = "Table";
         
         public Sprite()
         {
@@ -175,7 +176,20 @@ namespace pixel_renderer
             }
         }
 
-        #region lighting
+        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
+        public void SetImage(Vector2 size, byte[] color)
+        {
+            texture.SetImage(size, color);
+        }
+        public void SetImage(JImage? image)
+        {
+            if (image is not null)
+            {
+                Vector2 size = new(image.width, image.height);
+                SetImage(size, image.data);
+            }
+        }
+
         public void LightingPerPixel(Light light)
         {
             for (int x = 0; x < ColorData.width; x++)
@@ -243,22 +257,21 @@ namespace pixel_renderer
             return lights.First();
         }
 
-        #endregion lighting
-
-        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
-        public void SetImage(Vector2 size, byte[] color)
+        public static bool PointInPolygon(Vector2 point, Vector2[] vertices)
         {
-            texture.SetImage(size, color);
-        }
-        public void SetImage(JImage? image)
-        {
-            if (image is not null)
+            int i, j = vertices.Length - 1;
+            bool c = false;
+            for (i = 0; i < vertices.Length; i++)
             {
-                Vector2 size = new(image.width, image.height);
-                SetImage(size, image.data);
+                if (((vertices[i].Y > point.Y) != (vertices[j].Y > point.Y)) &&
+                    (point.X < (vertices[j].X - vertices[i].X) * (point.Y - vertices[i].Y) / (vertices[j].Y - vertices[i].Y) + vertices[i].X))
+                {
+                    c = !c;
+                }
+                j = i;
             }
+            return c;
         }
-
         public Vector2[] GetCorners()
         {
             Vector2 topLeft = Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform);
@@ -275,21 +288,6 @@ namespace pixel_renderer
             };
 
             return vertices;
-        }
-        public static bool PointInPolygon(Vector2 point, Vector2[] vertices)
-        {
-            int i, j = vertices.Length - 1;
-            bool c = false;
-            for (i = 0; i < vertices.Length; i++)
-            {
-                if (((vertices[i].Y > point.Y) != (vertices[j].Y > point.Y)) &&
-                    (point.X < (vertices[j].X - vertices[i].X) * (point.Y - vertices[i].Y) / (vertices[j].Y - vertices[i].Y) + vertices[i].X))
-                {
-                    c = !c;
-                }
-                j = i;
-            }
-            return c;
         }
     }
 }

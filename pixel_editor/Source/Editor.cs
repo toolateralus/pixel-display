@@ -252,6 +252,7 @@ namespace pixel_editor
                         framerateBrush = Brushes.Green;
                         break;
                 }
+
                 framerateLabel.Foreground = framerateBrush;
                 framerateLabel.Content =
                     $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
