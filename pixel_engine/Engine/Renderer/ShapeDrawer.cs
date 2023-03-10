@@ -24,10 +24,9 @@ namespace pixel_renderer.ShapeDrawing
                 {
                     var component = components.ElementAt(i);
                     component.OnDrawShapes();
-                    DrawShapeActions?.Invoke();
                 }
             }
-           
+            DrawShapeActions?.Invoke();
         }
 
         /// <summary>
