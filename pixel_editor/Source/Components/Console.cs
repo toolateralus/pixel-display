@@ -13,10 +13,36 @@ namespace pixel_editor
 {
     public class Console
     {
+        private const string divider = "-- -- --";
+        public static Console Current
+        {
+            get
+            {
+                if (current == null)
+                {
+
+                    // init singleton and use it to fill cmd list; 
+                    current = new();
+                    var type = current.GetType();
+                    var methods = type.GetRuntimeMethods();
+                    foreach (var method in methods)
+                        if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
+                        {
+                            Command? item = (Command)method.Invoke(null, null);
+                            if (item != null && !Current.LoadedCommands.Contains(item))
+                                Current.LoadedCommands.Add(item);
+                        }
+                }
+
+                return current;
+            }
+            set => current = value;
+        }
+        private static Console current;
         #region General Commands
         public static Command cmd_help() => new()
         {
-            phrase = "help;|help|Help|/h",
+            phrase = "help;",
             syntax = "help();",
             action = (o) =>
             {
@@ -38,10 +64,10 @@ namespace pixel_editor
             },
             description = "Clears the console's output",
         };
-        public static Command cmd_log() => new()
+        public static Command cmd_echo() => new()
         {
-            phrase = "log;",
-            syntax = "log(message);",
+            phrase = "echo;",
+            syntax = "echo(message);",
             argumentTypes = new string[] { "str:" },
             action = (o) => Console.Print(o[0]),
             description = "Logs a message to the console, Some characters will cause this to fail."
@@ -96,7 +122,6 @@ namespace pixel_editor
             description = "Gets a node and attempts to set the texture filtering on the sprite if available.",
 
         };
-
         private static void SetSpriteFiltering(object[]? obj)
         {
             if (obj is null || obj.Length != 2)
@@ -123,7 +148,6 @@ namespace pixel_editor
             }
             sprite.textureFiltering = textureFiltering;
         }
-
         public static Command cmd_get_node() => new()
         {
             phrase = "node.Get;",
@@ -145,8 +169,6 @@ namespace pixel_editor
             args = null,
             description = "Retrieves the node of name specified",
         };
-
-
         public static Command cmd_list_node() => new()
         {
             phrase = "node.List;",
@@ -171,14 +193,6 @@ namespace pixel_editor
             syntax = "++n();",
             action = (o) => Runtime.Current.GetStage().AddNode(Rigidbody.Standard()),
             description = "Spawns a generic node with a Rigidbody , Sprite, and Collider, and adds it to the current Stage."
-        };
-        public static Command cmd_add_child() => new()
-        {
-            phrase = "node.Child;",
-            syntax = "node.Child(string parentName);",
-            description = "Adds a child node underneath the target parent if found.",
-            argumentTypes = new string[] { "str:" },
-            action = AddChild,
         };
         public static Command cmd_move_node() => new()
         {
@@ -486,34 +500,6 @@ namespace pixel_editor
             Inspector.OnInspectorMoved.Invoke((int)vec.X, (int)vec.Y);
         }
         #endregion
-        private const string divider = "-- -- --";
-
-        public static Console Current
-        {
-            get
-            {
-                if (current == null)
-                {
-
-                    // init singleton and use it to fill cmd list; 
-                    current = new();
-                    var type = current.GetType();
-                    var methods = type.GetRuntimeMethods();
-                    foreach (var method in methods)
-                        if (method.ReturnType == typeof(Command) && method.Name.Contains("cmd_"))
-                        {
-                            Command? item = (Command)method.Invoke(null, null);
-                            if (item != null && !Current.LoadedCommands.Contains(item))
-                                Current.LoadedCommands.Add(item);
-                        }
-                }
-
-                return current;
-            }
-            set => current = value;
-        }
-        private static Console current;
-
         public static void Print(object? o, bool includeDateTime = false)
         {
             var msg = o.ToString();
@@ -605,11 +591,6 @@ namespace pixel_editor
 
                 default: break;
             }
-        }
-        private static void AddChild(params object[]? e)
-        {
-            if (!TryGetNodeByNameAtIndex(e, out var node, 0)) return;
-            node.Child(Player.test_child_node(node));
         }
         public static bool TryGetNodeByNameAtIndex(object[]? e, out Node? node, int index)
         {
@@ -723,7 +704,6 @@ namespace pixel_editor
                 Print($"\"{nName}.{fName}()\" Call succesful.");
             }
         }
-
         public List<Command> LoadedCommands = new();
     }
 }

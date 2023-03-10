@@ -8,7 +8,6 @@ using pixel_renderer.Assets;
 using System.Linq;
 using System.Numerics;
 using pixel_renderer.ShapeDrawing;
-using System;
 
 namespace pixel_renderer
 {
@@ -16,12 +15,10 @@ namespace pixel_renderer
     {
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] public float speed = 0.1f;
-        [Field][JsonProperty] public float inputMagnitude = 0.5f;
         [Field] private bool isGrounded;
         Sprite sprite = new();
         Rigidbody rb = new();
         
-        private Vector2 thisPos;
         private bool freezeButtonPressedLastFrame = false;
         private Curve curve = null; 
 
@@ -38,18 +35,6 @@ namespace pixel_renderer
             string name = $"Animation{index}"; 
             return AssetLibrary.FetchMeta(name);
         }
-        public static Node test_child_node(Node? parent = null)
-        {
-            Node node = new("Player Child");
-            
-            if (parent != null)
-                node.Position = parent.Position + Vector2.UnitY * 16;
-
-            else node.Position = JRandom.Vec2(Vector2.Zero, Vector2.One * Runtime.Current.projectSettings.ScreenW); 
-            AddCamera(node);
-            return node;
-        }
-
         public override void Awake()
         {
             node.TryGetComponent(out rb);
@@ -92,11 +77,12 @@ namespace pixel_renderer
 
             Move(MoveVector);
         }
-        
         private void Move(Vector2 moveVector)
         {
             rb?.ApplyImpulse(moveVector.WithValue(y:0) * speed);
         }
+
+        Vector2 thisPos; 
         public void FreezePlayer()
         {
             bool freezeButtonPressed = Get(Key.LeftShift);
@@ -115,33 +101,6 @@ namespace pixel_renderer
                 node.Position = thisPos;
             }
         }
-        private void DrawCircle()
-        {
-
-            if (sprite is null) 
-                return;
-
-            if (sprite.texture is null)
-                return; 
-
-            var size = sprite.texture.scale;
-
-            Pixel[,] colors = new Pixel[(int)size.X, (int)size.Y];
-
-            for(int i = 0; i < curve.points.Values.Count; ++i)
-            {
-                Vector2 pos = curve.points.Values.ElementAt(i);
-                pos += size / 2; 
-
-                if(pos.IsWithinMaxExclusive(Vector2.Zero, size))
-                    colors[(int)pos.X, (int)pos.Y] = (Pixel)Color.Red;
-                
-            }
-
-            sprite?.SetImage(colors);
-
-        }
-
         public static Node Standard()
         {
 

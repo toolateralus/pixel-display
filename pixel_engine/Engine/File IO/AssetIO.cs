@@ -40,18 +40,6 @@ namespace pixel_renderer.FileIO
             return true;
         }
 
-        internal static void GuaranteeUniqueName(Metadata meta)
-        {
-            GetDir(meta, out string name, out string dir);
-
-            _ = FindOrCreatePath(dir);
-
-            name = DuplicateCheck(name, dir);
-
-            UpdateMetadataPath(meta, name);
-
-        }
-
         internal static void GuaranteeUniqueName(Metadata meta, Asset asset)
         {
             GetDir(meta, out string name, out string dir);
@@ -60,8 +48,7 @@ namespace pixel_renderer.FileIO
 
             name = DuplicateCheck(name, dir, asset);
 
-            UpdateMetadataPath(meta, name);
-
+            asset.Upload();
         }
         public static void GetDir(Metadata meta, out string name, out string dir)
         {
@@ -113,8 +100,6 @@ namespace pixel_renderer.FileIO
             }
             return name;
         }
-
-
         private static string DuplicateCheck(string fullName, string dir, Asset asset)
         {
             var fileNameSplit = fullName.Split(".").ToList();
@@ -122,7 +107,7 @@ namespace pixel_renderer.FileIO
             fileNameSplit.RemoveAt(fileNameSplit.Count - 1);
             var name = string.Join('.', fileNameSplit);
 
-            string fullPath = $"{dir}\\{fullName}";
+            string fullPath = $"{dir}{fullName}";
 
             Metadata meta = new(name, fullPath, extension);
 
@@ -174,14 +159,6 @@ namespace pixel_renderer.FileIO
                 return $"{nameWithoutNums}{i}.{extension}";
             }
             throw new Exception("Unknown Exception");
-        }
-
-        private static void UpdateMetadataPath(Metadata meta, string name)
-        {
-           var path = meta.pathFromProjectRoot.Split("\\");
-           meta.fullPath = Constants.WorkingRoot + path[0] + "\\" + path [1] + "\\" + name;
-           meta.pathFromProjectRoot = Project.GetPathFromRoot(meta.fullPath);
-
         }
     }
 }

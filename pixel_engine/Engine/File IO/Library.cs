@@ -4,12 +4,16 @@ using pixel_renderer.FileIO;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
+using System.Threading.Tasks;
 
 namespace pixel_renderer.Assets
 {
     public class AssetLibrary
     {
         static Dictionary<Metadata, Asset> Current = new();
+
+        public static bool Busy { get; private set; }
+
         internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
         /// <summary>
         /// Registers an asset to the AssetLibrary.
@@ -19,11 +23,35 @@ namespace pixel_renderer.Assets
         /// <returns>false if the asset was already in the library, and true if it was successfully added.</returns>
         public static bool Register(Metadata metadata, Asset asset)
         {
-            if (Current.ContainsKey(metadata)) 
+            if (Busy) 
                 return false;
+
+            if (Current.ContainsKey(metadata))
+            {
+                Current[metadata] = asset;
+                return true; 
+            }
 
             Current.Add(metadata, asset);
             return true; 
+        }
+        public static async Task<bool> RegisterAsync(Metadata metadata, Asset asset, int maxTryCount = 1000)
+        {
+            int tries = 0;
+            while (Busy)
+            {
+                tries++;
+                if (tries > maxTryCount)
+                    return false; 
+                await Task.Delay(10);
+            }
+            if (Current.ContainsKey(metadata))
+            {
+                Current[metadata] = asset;
+                return true; 
+            }
+            Current.Add(metadata, asset);
+            return true;
         }
         public static void Unregister(Metadata metadata) => Current.Remove(metadata);
         /// <summary>
@@ -95,31 +123,32 @@ namespace pixel_renderer.Assets
         /// 
         public static void Sync()
         {
-
-
-            if (Runtime.Initialized)
+            Busy = true; 
+            lock (Current)
             {
-                RefreshStageMetadataWithinLoadedProject();
-                Runtime.Current.project?.Save();
-
-                foreach (var x in Runtime.Current.project.stages)
+                if (Runtime.Initialized)
                 {
-                    x.Sync(); 
-                    StageIO.WriteStage(x);
+                    RefreshStageMetadataWithinLoadedProject();
+                    Runtime.Current.project?.Save();
+
+                    foreach (var x in Runtime.Current.project.stages)
+                    {
+                        x.Sync(); 
+                        StageIO.WriteStage(x);
+                    }
+                }
+                foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
+                {
+                    if (assetPair.Value is null)
+                        continue; 
+
+                    assetPair.Value.Sync();
+
+                    AssetIO.GuaranteeUniqueName(assetPair.Key, assetPair.Value);
+                    AssetIO.WriteAsset(assetPair.Value, assetPair.Key);
                 }
             }
-            
-
-            foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
-            {
-                if (assetPair.Value is null)
-                    continue; 
-
-                assetPair.Value.Sync();
-
-                AssetIO.GuaranteeUniqueName(assetPair.Key, assetPair.Value);
-                AssetIO.WriteAsset(assetPair.Value, assetPair.Key);
-            }
+            Busy = false; 
         }
         private static void RefreshStageMetadataWithinLoadedProject()
         {

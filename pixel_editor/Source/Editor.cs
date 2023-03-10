@@ -408,6 +408,7 @@ namespace pixel_editor
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
 
+            // this causes a buffer to build up when huge amounts of messages are coming in which can be slow and unresponsive but prevents a crash or freeze up
             while (Current.Events.Pending.Count > Current.settings.EditorEventQueueMaxLength)
                 await Task.Delay(15);
 
