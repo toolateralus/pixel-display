@@ -181,8 +181,6 @@ namespace pixel_editor
             Input.RegisterAction(DestroySelected, Key.Delete);
         }
 
-     
-
         public void Dispose()
         {
             UnsubscribeEvents();
