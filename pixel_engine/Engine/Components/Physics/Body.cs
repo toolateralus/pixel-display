@@ -24,8 +24,7 @@ namespace pixel_renderer
                 if (!node.TryGetComponent(out rb))
                     return;
 
-
-            curve ??= Curve.Linear();
+            curve ??= Curve.Circlular(1, 16, 0.001f, true);
 
             if (collider is null)
             {
@@ -59,6 +58,7 @@ namespace pixel_renderer
         private bool collisionThisFrame;
 
         private int solverIterations = 6;
+        private float multiplier = 1.1f;
 
         private void Deform(Collision col)
         {
@@ -103,56 +103,49 @@ namespace pixel_renderer
         {
             if (activeForces.Count == 0)
                 return; 
-
-            // our modded model
+            
             Polygon poly = new(collider.model);
+            
+            for (int x = 0; x < model.vertices.Length; x++)
+            {
+                Vector2 origVert = model.vertices[x];
 
-                for (int x = 0; x < model.vertices.Length; x++)
+                for (int y = 0; y < poly.vertices.Length; y++)
                 {
-                    Vector2 origVert = model.vertices[x];
-                    for (int y = 0; y < poly.vertices.Length; y++)
+                    if (y > activeForces.Count)
+                        return; 
+
+                    Vector2 vert = poly.vertices[y];
+
+                    if (vert - activeForces[y] == origVert)
+                        continue;
+
+                    Vector2 antiForce = -(activeForces[y] / (float)solverIterations);
+
+                    Vector2 difference = poly.vertices[y] + antiForce - model.vertices[y];
+
+                    float dot = Vector2.Dot(antiForce, difference); 
+                    
+                    if (dot > 0)
                     {
-
-                        if (y > activeForces.Count)
-                            return; 
-
-                        Vector2 vert = poly.vertices[y];
-
-                        if (vert - activeForces[y] == origVert)
-                            continue;
-
-                        Vector2 antiForce = -(activeForces[y] / (float)solverIterations);
-                     
-                        Vector2 difference = (poly.vertices[y] + antiForce) - model.vertices[y];
-
-                        float dot = Vector2.Dot(antiForce, difference); 
-                        
-                        if (dot > 0)
-                        {
-                            poly.vertices[y] = model.vertices[y];
-                            continue; 
-                        }
-
-
-
-                        poly.vertices[y] += antiForce;
-                        
-                        activeForces[y] += antiForce;
-                        
-
-                        
-
-                        if (activeForces[y] == Vector2.Zero)
-                            activeForces.RemoveAt(y);
+                        poly.vertices[y] = model.vertices[y];
+                        continue; 
                     }
+
+                    poly.vertices[y] += antiForce;
+
+                    activeForces[y] += antiForce;
                 }
+            }
+
             collider.model = poly;
+
             collider.model.CalculateNormals(); 
         }
 
         private Vector2 Force(Polygon poly, int index)
         {
-            return Vector2.Clamp(curve.Next() * -rb.velocity, min, max);
+            return Vector2.Clamp(multiplier * -rb.velocity, min, max);
         }
 
         private (bool within, Vector2 result) WithinDeformationRange(Vector2 vert, Vector2 original)
