@@ -272,9 +272,14 @@ namespace pixel_renderer
             nodes.Add(Player.Standard());
             Node camera = new("Camera");
 
+            
             Node light = new("Light");
-            var lt = light.AddComponent<Light>(); 
+            var lt = light.AddComponent<Light>();
+            
+            lt.brightness = 0.1F;
+            lt.radius = 10; 
 
+            nodes.Add(light);
             camera.AddComponent<Camera>().Scale = new(15,15);
             nodes.Add(camera);
             Node floorNode = Floor.Standard();

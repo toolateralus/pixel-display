@@ -90,8 +90,10 @@ namespace pixel_renderer
         public void GetBoundingBox(ref BoundingBox2D boundingBox)
         {
             var vertLength = vertices.Length;
+            
             boundingBox.min = vertices[0];
             boundingBox.max = vertices[0];
+
             for(int i = 1; i < vertLength; i++)
                 boundingBox.ExpandTo(vertices[i]);
         }

@@ -159,6 +159,9 @@ namespace pixel_renderer
         }
         
         public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
+
+        
+
         public Bitmap? Image {
             get 
             {

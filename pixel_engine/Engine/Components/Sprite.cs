@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.IO.Compression;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography.Xml;
 using System.Security.Policy;
 using System.Threading;
 using System.Windows.Input;
@@ -30,50 +31,25 @@ namespace pixel_renderer
         internal protected bool selected_by_editor;
 
         private JImage lightmap;
-        private JImage LitColorData
+        private void ApplyLighting()
         {
-            get
+            var light = GetFirstLight();
+            var data = texture?.GetImage();
+            if (light is null)
+                return;
+            if (!node.TryGetComponent<Collider>(out var col))
+                return; 
+
+            if (data is not null)
             {
-                var light = GetFirstLight();
-
-                var data = texture?.GetImage();
-
-                if (light is null)
-                    return data ?? throw new NullReferenceException(nameof(data));
-
-                if (node.TryGetComponent<Collider>(out var col))
-                {
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
-                    lightmap = new(colors);
-                }
-                else
-                {
-                    Polygon poly = new Polygon(GetCorners()).Transformed(Transform);
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
-                    lightmap = new(colors);
-                }
-                return lightmap;
+                Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color);
+                lightmap = new(colors);
             }
+            texture?.SetImage(lightmap);
         }
-        internal JImage ColorData
-        {
-            get
-            {
-                if (lit)
-                    return LitColorData;
+      
 
-                if (texture is null || texture.Data is null)
-                    Refresh();
-
-                if (texture is null || texture.Data is null)
-                    throw new NullReferenceException(nameof(texture.Data));
-
-                return texture.GetImage();
-            }
-
-        }
-
-                [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
+        [JsonProperty] protected Vector2 colorDataSize = new(16, 16);
         [Field] [JsonProperty] public Vector2 viewportScale = new(1, 1);
         [Field] [JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
         [Field] [JsonProperty] public float camDistance = 1;
@@ -100,7 +76,10 @@ namespace pixel_renderer
         public void TrySetTextureFromString()
         {
             if (AssetLibrary.FetchMeta(textureName) is Metadata meta)
+            {
                 texture.SetImage(meta.Path);
+                texture.Image = new(meta.Path);
+            }
 
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
         }
@@ -129,7 +108,7 @@ namespace pixel_renderer
             switch (Type)
             {
                 case SpriteType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
+                    Pixel[,] colorArray = CBit.SolidColorSquare(new(16,16), color);
                     texture.SetImage(colorArray);
                     break;
                 case SpriteType.Image:
@@ -161,6 +140,12 @@ namespace pixel_renderer
         {
             if (IsDirty)
                 Refresh();
+
+            if (lit)
+            {
+                Refresh(); 
+                ApplyLighting();
+            }
         }
         public override void OnDrawShapes()
         {
@@ -192,63 +177,56 @@ namespace pixel_renderer
 
         public void LightingPerPixel(Light light)
         {
-            for (int x = 0; x < ColorData.width; x++)
-            {
-                for (int y = 0; y < ColorData.height; y++)
-                {
-                    Vector2 pixelPosition = new Vector2(node.Position.X, node.Position.Y);
+            int x = 0, y = 0;
 
-                    float distance = Vector2.Distance(pixelPosition, light.node.Position);
+            PixelShader((e) => { },  getColor, getPosition, X, Y, OnIterationComplete, new object[] { colorDataSize.X, colorDataSize.Y});
 
-                    float brightness = light.brightness / (distance * distance);
+            int Y() => y++; 
+            int X() => x++; 
 
-                    Pixel originalPixel = texture.GetPixel(x, y);
-
-                    float newR = originalPixel.r * brightness;
-                    float newG = originalPixel.g * brightness;
-                    float newB = originalPixel.b * brightness;
-
-                    newR = Math.Max(0, Math.Min(255, newR));
-                    newG = Math.Max(0, Math.Min(255, newG));
-                    newB = Math.Max(0, Math.Min(255, newB));
-
-                    Pixel newPixel = new(originalPixel.a, (byte)newR, (byte)newG, (byte)newB);
-                    
-                    texture.SetPixel(x, y, newPixel);
-                }
-            }
+            void OnIterationComplete(JImage image) { }
+            Vector2 getPosition() { return new(x, y);  }
+            Pixel getColor() { return Pixel.White; };
         }
-        Pixel[,] VertexLighting(Polygon poly, Vector2 lightPosition, float lightRadius, Pixel lightColor, BoundingBox2D bounds)
+        Pixel[,] VertexLighting(Polygon poly, Vector2 lightPosition, float lightRadius, Pixel lightColor)
         {
-            // Get the vertices of the polygon
-            Vector2[] vertices = poly.vertices;
-            
-            int vertexCount = vertices.Length;
             
             Pixel[,] colors = new Pixel[texture.Width, texture.Height]; 
-            
-            int minY = (int)bounds.min.Y;
-            int maxY = (int)bounds.max.Y;
-
-            int minX = (int)bounds.min.X;
-            int maxX = (int)bounds.max.X;
-
-            for (int y = minY; y < maxY -1; y++)
-                for (int x = minX; x < maxX -1; x++)
-
-                    if (PointInPolygon(new Vector2(x, y), vertices))
+            for (int x = 0; x < texture.Width; x++)
+                for (int y = 0; y < texture.Height; y++)
                     {
-                        float distance = Vector2.Distance(new Vector2(x, y), lightPosition);
+                        float distance = Vector2.Distance(Position + new Vector2(x,y), lightPosition);
                         float lightAmount = 1f - Math.Clamp(distance / lightRadius, 0,1);
-                        int _y = y - minY;
-                        int _x = x - minX;
-
-                        Pixel existingPixel = texture.GetPixel(_x, _y);
+                        Pixel existingPixel = texture.GetPixel(x, y);
                         Pixel blendedPixel = Pixel.Lerp(existingPixel, lightColor, lightAmount);
-                        colors[_x, _y] = blendedPixel;
+                        colors[x, y] = blendedPixel;
                     }
             return colors; 
         }
+        public virtual Pixel[,] PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn, Func<Vector2> position,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton,  params object[] args)
+        {
+            
+            int width = (int)args[0];
+            int height = (int)args[1];
+            Pixel[,] pixels = new Pixel[width, height];
+
+            for (int x = 0; x < width; indexerX.Invoke())
+                for (int y = 0; y < height; indexerY.Invoke())
+                {
+                    Vector2 pos = position.Invoke();
+                    int _x = (int)pos.X; 
+                    int _y = (int)pos.Y; 
+
+                    var col = texture.GetPixel(_x, _y);
+                    colorOut.Invoke(col);
+                    texture.SetPixel(_x, _y, colorIn.Invoke());
+                    onIteraton.Invoke(texture.GetImage());
+                }
+
+            return pixels; 
+        }
+
+
         public Light? GetFirstLight()
         {
             var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
