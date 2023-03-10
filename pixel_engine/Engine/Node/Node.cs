@@ -135,20 +135,10 @@ namespace pixel_renderer
      
         static void UpdateTransform(Node node)
         {
-            var parentMatrix = Matrix3x2.Identity; 
-
-            if (node.parent != null)
-            {
-                parentMatrix = node.parent.Transform; 
-                UpdateTransform(node.parent); 
-            }
-
             var rotationMatrix = Matrix3x2.CreateRotation(node.Rotation);
             var scaleMatrix = Matrix3x2.CreateScale(node.Scale);
             var translationMatrix = Matrix3x2.CreateTranslation(node.Position);
-            
-            var transformMatrix = parentMatrix * rotationMatrix * scaleMatrix * translationMatrix;
-
+            var transformMatrix = rotationMatrix * scaleMatrix * translationMatrix;
             node.Transform = transformMatrix;
         }
 
