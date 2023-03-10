@@ -36,9 +36,8 @@ namespace pixel_renderer
             if (collision.normal == zero)
                 return null;
 
-            Vector2 bToAOffset = polygonA.centroid - polygonB.centroid;
-
-            if (Vector2.Dot(bToAOffset, collision.normal) < 0)
+            Vector2 offsetA = polygonA.centroid - polygonB.centroid;
+            if (Vector2.Dot(offsetA, collision.normal) < 0)
                 collision.normal *= -1;
 
             return collision;
@@ -47,7 +46,6 @@ namespace pixel_renderer
         private static SATProjection Project(Polygon polygon, Vector2 axis)
         {
             SATProjection projection = new SATProjection();
-            projection.normal = axis;
             projection.min = Vector2.Dot(polygon.vertices[0], axis);
             projection.max = projection.min;
 

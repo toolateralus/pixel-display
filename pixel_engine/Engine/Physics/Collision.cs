@@ -117,9 +117,7 @@ namespace pixel_renderer
                 return;
 
             if (!(aCol.IsTrigger || bCol.IsTrigger))
-            {
                 ComputeImpulse(A, B, collision);
-            }
 
             Collision collisionA, collisionB;
             GetCollisionObjects(aCol, bCol, collision.normal, collision.depth, out collisionA, out collisionB);
