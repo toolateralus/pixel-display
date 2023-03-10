@@ -21,6 +21,22 @@ namespace pixel_renderer
         public readonly static Pixel Red = new(255, 255, 0, 0);
         public readonly static Pixel Blue = new(255, 0, 0, 255);
 
+        public static Pixel operator *(Pixel a, Pixel b)
+        {
+            a.a *= b.a;
+            a.r *= b.r;
+            a.g *= b.g;
+            a.b *= b.b;
+            return a; 
+        }
+        public static Pixel operator *(Pixel A, float B)
+        {
+            A.a = (byte)(A.a * B);
+            A.r = (byte)(A.r * B);
+            A.g = (byte)(A.g * B);
+            A.b = (byte)(A.b * B);
+            return A;
+        }
         public Pixel(byte a, byte r, byte g, byte b)
         {
             this.a = a;

@@ -129,7 +129,7 @@ namespace pixel_renderer
             if (lit)
             {
                 Refresh(); 
-                LightingPerPixel();
+                ApplyLighting();
             }
         }
         public override void OnDrawShapes()
@@ -145,7 +145,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
         public void SetImage(Vector2 size, byte[] color)
         {
@@ -159,7 +158,6 @@ namespace pixel_renderer
                 SetImage(size, image.data);
             }
         }
-
         public void LightingPerPixel()
         {
             int x = 0, y = 0;
@@ -184,13 +182,25 @@ namespace pixel_renderer
             Pixel[,] colors = new Pixel[texture.Width, texture.Height]; 
             for (int x = 0; x < texture.Width; x++)
                 for (int y = 0; y < texture.Height; y++)
+                {
+                    var localPos = new Vector2(x, y) / colorDataSize;
+                    var global = LocalToGlobal(localPos);
+
+                    float distance = Vector2.Distance(global , light.Position);
+
+                    float lightAmount = 0f - Math.Clamp(distance / light.radius, 0,1);
+
+                    Pixel existingPixel = texture.GetPixel(x, y);
+                    Pixel blendedPixel;
+
+                    if (lightAmount > 0)
                     {
-                        float distance = Vector2.Distance(Position + new Vector2(x,y), light.Position);
-                        float lightAmount = 1f - Math.Clamp(distance / light.radius, 0,1);
-                        Pixel existingPixel = texture.GetPixel(x, y);
-                        Pixel blendedPixel = Pixel.Lerp(existingPixel, light.color, lightAmount);
-                        colors[x, y] = blendedPixel;
+                        lightAmount = (float)CMath.Negate((double)lightAmount);
+                        blendedPixel = Pixel.Lerp(existingPixel, Pixel.Black, lightAmount);
                     }
+                    blendedPixel = Pixel.Lerp(existingPixel, light.color, lightAmount);
+                    colors[x, y] = blendedPixel;
+                 }
             return colors; 
         }
         public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton)
