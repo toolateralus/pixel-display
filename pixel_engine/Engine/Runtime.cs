@@ -149,7 +149,7 @@ namespace pixel_renderer
 
                 CMouse.Update();
                 Current.renderHost?.Render();
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current?.Dispatcher.Invoke(() =>
                 {
                     if (Application.Current is null)
                         return;
