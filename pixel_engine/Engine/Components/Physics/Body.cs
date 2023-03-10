@@ -107,9 +107,6 @@ namespace pixel_renderer
             // our modded model
             Polygon poly = new(collider.model);
 
-            for (int j = 0; j < solverIterations; j++)
-            {
-                // original model
                 for (int x = 0; x < model.vertices.Length; x++)
                 {
                     Vector2 origVert = model.vertices[x];
@@ -125,16 +122,30 @@ namespace pixel_renderer
                             continue;
 
                         Vector2 antiForce = -(activeForces[y] / (float)solverIterations);
+                     
+                        Vector2 difference = (poly.vertices[y] + antiForce) - model.vertices[y];
+
+                        float dot = Vector2.Dot(antiForce, difference); 
+                        
+                        if (dot > 0)
+                        {
+                            poly.vertices[y] = model.vertices[y];
+                            continue; 
+                        }
+
+
 
                         poly.vertices[y] += antiForce;
+                        
                         activeForces[y] += antiForce;
+                        
 
+                        
 
                         if (activeForces[y] == Vector2.Zero)
                             activeForces.RemoveAt(y);
                     }
                 }
-            }
             collider.model = poly;
             collider.model.CalculateNormals(); 
         }
