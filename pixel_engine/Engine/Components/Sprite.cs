@@ -165,8 +165,7 @@ namespace pixel_renderer
             int x = 0, y = 0;
 
             Pixel color = Pixel.White;
-            Vector2 position = Vector2.Zero;
-            PixelShader((e) => { color = e; },  getColor, X, Y, OnIterationComplete, new object[] { texture.Width, texture.Height});
+            PixelShader((e) => { color = e; },  getColor, X, Y, OnIterationComplete);
 
             int Y() => y++; 
             int X() => x++;
@@ -194,7 +193,7 @@ namespace pixel_renderer
                     }
             return colors; 
         }
-        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton,  params object[] args)
+        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton)
         {
             for (int x = 0; x < texture.Width -1; x = indexerX.Invoke())
                 for (int y = 0; y < texture.Height -1; y = indexerY.Invoke())
