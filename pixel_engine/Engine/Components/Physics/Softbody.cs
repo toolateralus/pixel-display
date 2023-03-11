@@ -19,8 +19,10 @@ namespace pixel_renderer
                 private Curve curve;
                 private Polygon model;
                 private Rigidbody rb;
+        private Player player;
         public override void FixedUpdate(float delta)
         {
+            if (collider is null) return;
             Resolve();
         }
 
@@ -30,19 +32,15 @@ namespace pixel_renderer
                 if (!node.TryGetComponent(out rb))
                     return;
 
-            curve ??= Curve.Circlular(1, 16, 0.001f, true);
 
             if (collider is null)
             {
                 node.TryGetComponent(out collider);
                 model = collider.model;
-
                 collider.drawCollider = true;
                 collider.drawNormals = true;
-
                 return;
             }
-            model ??= collider.model;
         }
 
         public override void OnCollision(Collision col)
@@ -54,41 +52,6 @@ namespace pixel_renderer
         private int solverIterations = 16;
         [Field]
         private float deformationRadius = 0.01f;
-        private void Deform(Collision col)
-        {
-            if (collider == null || model == null)
-                return;
-
-            Polygon poly = new Polygon(collider.model);
-
-            for (int index = 0; index < model.vertices.Length; index++)
-            {
-                Vector2 vertex = poly.vertices[index];
-                Vector2 modelVertex = model.vertices[index];
-
-                bool withinRange;
-                Vector2 deformationPos;
-
-                (withinRange, deformationPos) = WithinDeformationRange(vertex, modelVertex);
-
-                if (withinRange)
-                {
-                    // Calculate the relative velocity of the model vertex with respect to the collision normal
-                    Vector2 relativeVelocity = modelVertex - col.contact;
-                    Vector2 tangent = Vector2.Dot(relativeVelocity, col.normal) * col.normal;
-                    Vector2 perpendicular = relativeVelocity - tangent;
-
-                    // Calculate the force to be applied based on the perpendicular component of the relative velocity
-                    Vector2 force = perpendicular * Force(poly, index);
-
-                    poly.vertices[index] += force;
-                }
-
-            }
-
-            collider.model = poly;
-            collider.model.CalculateNormals();
-        }
         private void Deform1(Collision col)
         {
             if (collider == null || model == null)
@@ -104,7 +67,7 @@ namespace pixel_renderer
                 bool withinRange;
                 Vector2 deformationPos;
 
-                (withinRange, deformationPos) = WithinDeformationRange(vertex, modelVertex);
+                withinRange = WithinDeformationRange(vertex, modelVertex);
 
                 if (withinRange)
                 {
@@ -137,7 +100,6 @@ namespace pixel_renderer
             collider.model = poly;
             collider.model.CalculateNormals();
         }
-
         private float Force(Polygon collider, int index)
         {
             // Get the nearest edge of the collider to the vertex
@@ -156,9 +118,12 @@ namespace pixel_renderer
             // Return the negative of the relative velocity as the force
             return -force * Vector2.Dot(model.vertices[index] - edge.start, normal);
         }
-
         private void Resolve()
         {
+            if (collider is null || model is null) 
+                return; 
+
+
             Polygon poly = new(collider.model);
 
             for (int i = 0; i < model.vertices.Length; i++)
@@ -174,9 +139,7 @@ namespace pixel_renderer
             collider.model = poly;
             collider.model.CalculateNormals();
         }
-
-
-        private (bool within, Vector2 result) WithinDeformationRange(Vector2 vert, Vector2 original)
+        private bool WithinDeformationRange(Vector2 vert, Vector2 original)
         {
             float scale = vert.Length() / original.Length();
            
@@ -184,10 +147,12 @@ namespace pixel_renderer
             var max = maxColliderScale;
 
             if (scale < min)
-                return (false, original * min);
+                return false;
+
             if (scale > max)
-                return (false, original * max);
-            return (true, original * scale);
+                return false;
+
+            return true; 
         }
         public static Node SoftBody()
         {
@@ -198,7 +163,6 @@ namespace pixel_renderer
                 return node;
 
             var sb = node.AddComponent<Softbody>();
-            sb.collider = col;
             return node; 
         }
     }
