@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,6 +30,7 @@ namespace pixel_renderer
             a.b *= b.b;
             return a; 
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pixel operator *(Pixel A, float B)
         {
             A.a = (byte)(A.a * B);
@@ -37,6 +39,7 @@ namespace pixel_renderer
             A.b = (byte)(A.b * B);
             return A;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pixel(byte a, byte r, byte g, byte b)
         {
             this.a = a;
@@ -44,6 +47,7 @@ namespace pixel_renderer
             this.g = g;
             this.b = b;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pixel Lerp(Pixel A, Pixel B, float T)
         {
             T = Math.Max(0, Math.Min(1, T));

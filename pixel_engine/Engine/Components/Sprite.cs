@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Numerics;
+using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
@@ -34,7 +35,7 @@ namespace pixel_renderer
         }
       
 
-        [JsonProperty] protected Vector2 colorDataSize = new(16, 16);
+        [JsonProperty] protected Vector2 colorDataSize = new(256, 256);
         [Field] [JsonProperty] public Vector2 viewportScale = new(1, 1);
         [Field] [JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
         [Field] [JsonProperty] public float camDistance = 1;
@@ -93,7 +94,7 @@ namespace pixel_renderer
             switch (Type)
             {
                 case SpriteType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(new(16,16), color);
+                    Pixel[,] colorArray = CBit.SolidColorSquare(new(256,256), color);
                     texture.SetImage(colorArray);
                     break;
                 case SpriteType.Image:
@@ -129,7 +130,7 @@ namespace pixel_renderer
             if (lit)
             {
                 Refresh(); 
-                ApplyLighting();
+                LightingPerPixel(GetFirstLight());
             }
         }
         public override void OnDrawShapes()
@@ -158,24 +159,29 @@ namespace pixel_renderer
                 SetImage(size, image.data);
             }
         }
-        public void LightingPerPixel()
+        public void LightingPerPixel(Light light)
         {
             int x = 0, y = 0;
 
             Pixel color = Pixel.White;
             PixelShader((e) => { color = e; },  getColor, X, Y, OnIterationComplete);
 
-            int Y() => y++; 
-            int X() => x++;
             void OnIterationComplete(JImage image) {
                 texture.SetImage(image);
             }
             
-            Pixel getColor() { 
-            // color 
-                
-                return color; 
+            Pixel getColor() {
+                // color 
+                var localPos = new Vector2(x, y) / colorDataSize;
+                var global = LocalToGlobal(localPos);
+                float distance = Vector2.Distance(global, light.Position);
+                float lightAmount = 0f - Math.Clamp(distance / light.radius, 0, 1);
+                Pixel blendedPixel = Pixel.Lerp(color, light.color, lightAmount) * distance;
+                return blendedPixel;
             };
+
+            int X() => x++;
+            int Y() => y++; 
         }
         Pixel[,] VertexLighting(Light light)
         {
@@ -186,9 +192,9 @@ namespace pixel_renderer
                     var localPos = new Vector2(x, y) / colorDataSize;
                     var global = LocalToGlobal(localPos);
 
-                    float distance = Vector2.Distance(global , light.Position);
+                    float distance = Vector2.Distance(global, light.Position);
 
-                    float lightAmount = 0f - Math.Clamp(distance / light.radius, 0,1);
+                    float lightAmount = 0f - Math.Clamp(distance / light.radius, 0, 1);
 
                     Pixel existingPixel = texture.GetPixel(x, y);
                     Pixel blendedPixel;
@@ -200,13 +206,13 @@ namespace pixel_renderer
                     }
                     blendedPixel = Pixel.Lerp(existingPixel, light.color, lightAmount);
                     colors[x, y] = blendedPixel;
-                 }
+                }
             return colors; 
         }
         public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton)
         {
-            for (int x = 0; x < texture.Width -1; x = indexerX.Invoke())
-                for (int y = 0; y < texture.Height -1; y = indexerY.Invoke())
+            for (int x = 0; x < texture.Width; x = indexerX.Invoke())
+                for (int y = 0; y < texture.Height; y = indexerY.Invoke())
                 {
                     var col = texture.GetPixel(x, y);
                     colorOut.Invoke(col);
