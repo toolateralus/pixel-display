@@ -67,10 +67,10 @@ namespace pixel_renderer
 
             });
             task.Start();
-            RegisterAction(Up, Key.W);
-            RegisterAction(Down, Key.S);
-            RegisterAction(Left, Key.A);
-            RegisterAction(Right, Key.D);
+            RegisterAction(Up, Key.Down);
+            RegisterAction(Down, Key.Up);
+            RegisterAction(Left, Key.Left);
+            RegisterAction(Right, Key.Right);
             RegisterAction(LeftArrow, Key.Left);
             RegisterAction(RightArrow, Key.Right);
         }
@@ -85,14 +85,30 @@ namespace pixel_renderer
             targetRay.direction.Rotate(-turnSpeed);
         }
 
-        void Up() => moveVector = new Vector2(moveVector.X, 1 * speed) ;
-        void Down() => moveVector = new Vector2(moveVector.X, -1 * speed);
+        void Up()
+        {
+            if (!Get(Key.LeftShift))
+                return;
+            moveVector = new Vector2(moveVector.X, 1 * speed);
+        }
+
+        void Down()
+        {
+            if (!Get(Key.LeftShift))
+                return;
+            moveVector = new Vector2(moveVector.X, -1 * speed);
+        }
+
         void Left()
         {
+            if (!Get(Key.LeftShift))
+                return;
             moveVector = new Vector2(-1 * speed, moveVector.Y);
         }
         void Right()
         {
+            if (!Get(Key.LeftShift))
+                return;
             moveVector = new Vector2(1 * speed, moveVector.Y);
         }
 

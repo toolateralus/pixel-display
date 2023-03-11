@@ -280,12 +280,14 @@ namespace pixel_renderer
             {
                 kvp.Value.parent = null;
             }
-
             KeyValuePair<Vector2, Node> pair = default; 
-            foreach (var kvp in parent.children)
-                if (kvp.Value == this)
-                    pair = kvp;
-            parent.children.Remove(pair.Key);
+            if (parent?.children != null)
+            {
+                foreach (var kvp in parent.children)
+                    if (kvp.Value == this)
+                        pair = kvp;
+                parent.children.Remove(pair.Key);
+            }
             ParentStage?.nodes.Remove(this);
         }
 
