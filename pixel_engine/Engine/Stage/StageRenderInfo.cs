@@ -135,8 +135,10 @@ namespace pixel_renderer
         private void DrawGraphics(Vector2 resolution, RendererBase renderer)
         {
             Vector2 framePos = new Vector2();
-            foreach (pixel_renderer.ShapeDrawing.Circle circle in ShapeDrawer.Circles)
+            var refColor = new Pixel();
+            foreach ((ShapeDrawing.Circle circle, Pixel color) in ShapeDrawer.Circles)
             {
+                refColor = color;
                 float sqrtOfHalf = MathF.Sqrt(0.5f);
                 Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
                 Vector2 centerPos = GlobalToScreen(circle.center) * resolution;
@@ -149,10 +151,10 @@ namespace pixel_renderer
                     framePos.X = centerPos.X + x;
                     framePos.Y = centerPos.Y + y;
                     if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref circle.color, ref framePos);
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
                     framePos.Y = centerPos.Y - y;
                     if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref circle.color, ref framePos);
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
                 }
                 quarterArcAsInt = (int)quaterArc.Y;
                 for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
@@ -161,20 +163,21 @@ namespace pixel_renderer
                     framePos.Y = centerPos.Y + y;
                     framePos.X = centerPos.X + x;
                     if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref circle.color, ref framePos);
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
                     framePos.X = centerPos.X - x;
                     if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref circle.color, ref framePos);
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
                 }
             }
-            foreach (Line line in ShapeDrawer.Lines)
+            foreach ((Line line, Pixel color) in ShapeDrawer.Lines)
             {
+                refColor = color;
                 Vector2 startPos = GlobalToScreen(line.startPoint) * resolution;
                 Vector2 endPos = GlobalToScreen(line.endPoint) * resolution;
                 if (startPos == endPos)
                 {
                     if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref line.color, ref startPos);
+                        renderer.WriteColorToFrame(ref refColor, ref startPos);
                     continue;
                 }
 
@@ -194,7 +197,7 @@ namespace pixel_renderer
                         framePos.Y = slope * x + yIntercept;
                         if (framePos.Y < 0 || framePos.Y >= resolution.Y)
                             continue;
-                        renderer.WriteColorToFrame(ref line.color, ref framePos);
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
                     }
                 }
                 else
@@ -210,7 +213,7 @@ namespace pixel_renderer
                         framePos.X = slope * y + xIntercept;
                         if (framePos.X < 0 || framePos.X >= resolution.X)
                             continue;
-                        renderer.WriteColorToFrame(ref line.color, ref framePos);
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
                     }
                 }
             }
