@@ -151,6 +151,7 @@ namespace pixel_renderer
             
             playerNode.AddComponent<Player>().takingInput = true;
 
+            var proj = playerNode.AddComponent<ProjectileSource>();
             AddSprite(playerNode);
             
             var col = playerNode.AddComponent<Collider>();

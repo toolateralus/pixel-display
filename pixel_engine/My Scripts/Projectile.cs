@@ -25,7 +25,7 @@ namespace pixel_renderer
             sprite.Type = SpriteType.Image;
             sprite.texture = new(meta.Path);
             sprite.IsDirty = true;
-            node.Transform = Matrix3x2.CreateScale(35);
+            node.Transform = Matrix3x2.CreateScale(1);
 
             var col = node.AddComponent<Collider>();
             col.model = new Circle().DefiningGeometry;
@@ -41,8 +41,7 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
-            if (sender != null)
-                Position = sender.Position + Vector2.One * 2; 
+            
         }
         public override void OnCollision(Collision collider)
         {

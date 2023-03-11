@@ -3,7 +3,6 @@ using Key = System.Windows.Input.Key;
 using System.Drawing;
 using System.Numerics;
 using static pixel_renderer.Input;
-using pixel_renderer.Assets;
 using pixel_renderer.ShapeDrawing;
 
 namespace pixel_renderer
@@ -52,10 +51,9 @@ namespace pixel_renderer
         }
         
         private void Fire()
-        {
+        {   
             fired = true;
             var proj = Projectile.Standard(this.node, out var rb);
-            Runtime.Current.GetStage()?.AddNode(proj);
             rb.ApplyImpulse(new Vector2(1f, 0));
         }
 
@@ -67,7 +65,6 @@ namespace pixel_renderer
 
         public override void OnDrawShapes()
         {
-            ShapeDrawer.DrawLine(Position, Position + aimDirection * aimDistance, Color.Red);
         }
     }
 }

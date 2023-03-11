@@ -29,6 +29,9 @@ namespace pixel_renderer
         #region Other Constructors
         public Node()
         {
+            if (Runtime.IsRunning && Runtime.Current.GetStage() is Stage stage)
+                stage.AddNode(this);
+
             _uuid = pixel_renderer.UUID.NewUUID();
         }
 
@@ -271,7 +274,21 @@ namespace pixel_renderer
         }
         
         public void SetActive(bool value) => _enabled = value;
-        public void Destroy() => ParentStage?.nodes.Remove(this);
+        public void Destroy()
+        {
+            foreach (var kvp in children)
+            {
+                kvp.Value.parent = null;
+            }
+            var nodes = parent.children.Where((e) => e.Value == this);
+
+            foreach (var node in nodes)
+            {
+                node.Value.TryRemoveChild(this);
+            }
+            ParentStage?.nodes.Remove(this);
+        }
+
         public void OnTrigger(Collision otherBody)
         {
             if (!awake)
