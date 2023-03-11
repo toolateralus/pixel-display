@@ -106,7 +106,6 @@ namespace pixel_renderer
                 renderer.WriteColorToFrame(ref color, ref framePos);
                 
                 framePos.X++;
-                
                 if (framePos.X >= drawArea.max.X)
                 {
                     framePos.X = drawArea.min.X;

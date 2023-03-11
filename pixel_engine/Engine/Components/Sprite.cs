@@ -16,7 +16,6 @@ namespace pixel_renderer
         internal protected bool IsDirty = true;
         internal protected bool selected_by_editor;
 
-        private JImage lightmap;
         private void ApplyLighting()
         {
             var light = FirstLight;
@@ -26,12 +25,13 @@ namespace pixel_renderer
             if (!node.TryGetComponent<Collider>(out var col))
                 return; 
 
+            JImage lightmap; 
             if (data is not null)
             {
                 Pixel[,] colors = VertexLighting(light);
                 lightmap = new(colors);
+                texture?.SetImage(lightmap);
             }
-            texture?.SetImage(lightmap);
         }
       
 
@@ -127,10 +127,7 @@ namespace pixel_renderer
                 Refresh();
 
             if (lit)
-            {
-                Refresh();
                 ApplyLighting();
-            }
         }
         public override void OnDrawShapes()
         {

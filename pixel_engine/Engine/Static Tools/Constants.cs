@@ -30,10 +30,15 @@ namespace pixel_renderer
         
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
 
-        public const string BitmapFileExtension = ".bmp"; // .bmp {The only image format currently supported.}
+        public const string BmpExt = ".bmp"; 
+        public const string JpegExt = ".jpg"; 
+        public const string PngExt = ".png";
+
         public static string[] ReadableExtensions = 
         { 
-            BitmapFileExtension,
+            PngExt,
+            JpegExt,
+            BmpExt,
             AssetsFileExtension,
             ProjectFileExtension,
             StageFileExtension,

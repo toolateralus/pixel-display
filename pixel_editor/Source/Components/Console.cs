@@ -405,7 +405,7 @@ namespace pixel_editor
                 return;
             }
             var foundMetadata = AssetLibrary.FetchMetaRelative(name);
-            if (foundMetadata != null && foundMetadata.extension == pixel_renderer.Constants.BitmapFileExtension)
+            if (foundMetadata != null && foundMetadata.extension == pixel_renderer.Constants.PngExt)
             {
                 var task = PromptAsync($"Asset {foundMetadata.Name} Found. Do you want to load this background?");
                 await task;
@@ -630,40 +630,43 @@ namespace pixel_editor
 
             if(!TryGetArgAtIndex<string>(0, out var arg, obj )) return;
             var assets = AssetLibrary.FetchMeta(arg);
-                var prompt = PromptAsync($"File at {arg} found. Do you want more information?");
-                await prompt;
-                switch (prompt.Result)
-                {
-                    case PromptResult.Yes:
-                        PrintAssetsInfo(assets);
-                        return;
-                    case PromptResult.No:
-                        Print("Asset fetch cancelled.");
-                        return;
-                    case PromptResult.Ok:
-                        PrintAssetsInfo(assets);
-                        return;
-                    case PromptResult.Cancel:
-                        Print("Asset fetch cancelled.");
-                        return;
-                    case PromptResult.Timeout:
-                        Print("Asset fetch timed out.");
-                        return;
-                }
+            if (assets is null)
+            {
+                Print($"File {arg} was not found.");
+                return; 
+            }
+            var prompt = PromptAsync($"File at {arg} found. Do you want more information?");
+            await prompt;
+            switch (prompt.Result)
+            {
+                case PromptResult.Yes:
+                    PrintAssetsInfo(assets);
+                    return;
+                case PromptResult.No:
+                    Print("Asset fetch cancelled.");
+                    return;
+                case PromptResult.Ok:
+                    PrintAssetsInfo(assets);
+                    return;
+                case PromptResult.Cancel:
+                    Print("Asset fetch cancelled.");
+                    return;
+                case PromptResult.Timeout:
+                    Print("Asset fetch timed out.");
+                    return;
+            }
             void PrintAssetsInfo(Metadata meta)
             {
-                string assetInfo = $"Name, {meta.Name} \n Path, {meta.Path} Ext {meta.extension}\n";
+                string assetInfo = $"Name, {meta?.Name} \n Path, {meta?.Path} Ext {meta?.extension}\n";
                 Error(assetInfo, 1);
             }
-
-
         }
         private static void ListNodes(params object[]? e)
         {
             string nodesList = "";
             foreach (Node node in Runtime.Current.GetStage().nodes)
                 nodesList += node.Name + " ";
-            Console.Print($"{nodesList}");
+            Print($"{nodesList}");
         }
         private static void SetNodeField(params object[]? e)
         {

@@ -261,7 +261,7 @@ namespace pixel_renderer
             get
             {
                 if (AssetLibrary.FetchMeta("Background") is not Metadata meta)
-                    return new("Background", Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.BitmapFileExtension, Constants.BitmapFileExtension);
+                    return new("Background", Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.PngExt, Constants.PngExt);
                 return meta;
             }
         }
@@ -270,20 +270,24 @@ namespace pixel_renderer
         {
             var nodes = new List<Node>();
             nodes.Add(Player.Standard());
+            
             Node camera = new("Camera");
-
-            
+            Node floorNode = Floor.Standard();
             Node light = new("Light");
+           
             var lt = light.AddComponent<Light>();
+           
+            camera.AddComponent<Camera>().Scale = new(15,15);
             
-            lt.brightness = 0.1F;
+            light.Position = new(100, -100);
+            
+            lt.brightness = 0.1f;
             lt.radius = 10; 
 
             nodes.Add(light);
-            camera.AddComponent<Camera>().Scale = new(15,15);
             nodes.Add(camera);
-            Node floorNode = Floor.Standard();
             nodes.Add(floorNode);
+
             for (int i = 0; i < 5; i++)
             {
                 Node rbNode = Rigidbody.Standard();

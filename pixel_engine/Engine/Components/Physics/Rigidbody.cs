@@ -11,21 +11,21 @@ namespace pixel_renderer
     {
         [Field] [JsonProperty] public float mass = 1f;
         [Field] [JsonProperty] public float invMass;
-        [Field] [JsonProperty] public float gravityFactor;
-        [Field] [JsonProperty] public Vector2 velocity = Vector2.Zero;
-        [Field] [JsonProperty] public Vector2 acceleration = Vector2.Zero;
         [Field] [JsonProperty] public float restitution = 0.5f;
         [Field] [JsonProperty] public float drag = 0f;
         [Field] [JsonProperty] public bool usingGravity = true;
-        [Field] [JsonProperty] public TriggerInteraction TriggerInteraction = TriggerInteraction.All;
+        [Field] [JsonProperty] public Vector2 velocity = Vector2.Zero;
+        [Field] [JsonProperty] public Vector2 acceleration = Vector2.Zero;
+
         public override void FixedUpdate(float deltaTime)
         {
             if (usingGravity)
                 velocity += CMath.Gravity * deltaTime;
 
             velocity += acceleration;
-            velocity *= 0.99f; 
-            float force = MathF.Abs(Vector2.Dot(velocity.Normalized(), acceleration.Normalized()));
+            velocity *= 0.99f;
+            float dot = Vector2.Dot(velocity.Normalized(), acceleration.Normalized());
+            float force = MathF.Abs(dot);
             velocity *= 1f / (1f + 0.01f * (drag * force));
 
             Position += velocity;

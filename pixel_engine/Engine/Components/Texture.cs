@@ -96,10 +96,8 @@ namespace pixel_renderer
         internal Metadata imgData;
         [JsonProperty]
         private JImage jImage = new();
-        
         public Pixel GetPixel(int x, int y) => jImage.GetPixel(x, y);
         public void SetPixel(int x, int y, Pixel pixel) => jImage?.SetPixel(x, y, pixel);
-
         public JImage GetImage()
         {
             return jImage; 

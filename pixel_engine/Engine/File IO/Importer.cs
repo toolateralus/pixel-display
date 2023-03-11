@@ -33,11 +33,11 @@ namespace pixel_renderer.Assets
 
         private static void ImportBitmaps()
         {
-             foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.BitmapFileExtension))
+             foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.PngExt))
                 AssetLibrary.Register(x, null);
 
             foreach (var dir in Directory.GetDirectories(Constants.WorkingRoot + Constants.AssetsDir))
-                foreach (var x in Import(dir, Constants.BitmapFileExtension))
+                foreach (var x in Import(dir, Constants.PngExt))
                     AssetLibrary.Register(x, null);
         }
 
@@ -135,7 +135,7 @@ namespace pixel_renderer.Assets
                 Constants.AssetsFileExtension => typeof(Asset),
                 Constants.ProjectFileExtension => typeof(Project),
                 Constants.MetadataFileExtension => typeof(Metadata),
-                Constants.BitmapFileExtension => typeof(Bitmap),
+                Constants.PngExt => typeof(Bitmap),
                  _ => typeof(object),
             };
         }
@@ -146,7 +146,7 @@ namespace pixel_renderer.Assets
             if (type == typeof(Project))
                 return Constants.ProjectFileExtension;
             if (type == typeof(Bitmap))
-                return Constants.BitmapFileExtension;
+                return Constants.PngExt;
             if (type == typeof(Metadata))
                 return Constants.MetadataFileExtension;
 
