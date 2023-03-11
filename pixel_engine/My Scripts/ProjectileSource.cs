@@ -65,7 +65,6 @@ namespace pixel_renderer
 
         public override void OnDrawShapes()
         {
-            ShapeDrawer.DrawLine(Position, Position + aimDirection * aimDistance, Color.Red);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace pixel_renderer
     {
         public CameraInfo? camInfo;
         public static Camera? First =>
-            Runtime.Current.GetStage()?.GetAllComponents<Camera>().AsParallel().FirstOrDefault();
+            Runtime.Current.GetStage()?.GetAllComponents<Camera>().FirstOrDefault();
         public override void Draw(RendererBase renderer) =>
             camInfo?.Draw(renderer);
     }
