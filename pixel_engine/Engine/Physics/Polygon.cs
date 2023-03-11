@@ -192,6 +192,50 @@ namespace pixel_renderer
                 vertices[i].Transform(matrix);
             CalculateNormals();
         }
+
+        public static Vector2 ClosestPointOnSegment(Vector2 point1, Vector2 point2, Vector2 point)
+        {
+            Vector2 direction = point2 - point1;
+            float lengthSquared = direction.LengthSquared();
+
+            if (lengthSquared == 0)
+                return point1;
+
+            float t = Vector2.Dot(point - point1, direction) / lengthSquared;
+            t = Math.Clamp(t, 0, 1);
+
+            return point1 + direction * t;
+        }
+
+        public (Vector2 start, Vector2 end) GetNearestEdge(Vector2 point)
+        {
+            if (vertices.Length < 2)
+                throw new InvalidOperationException("Polygon must have at least 2 vertices.");
+
+            Vector2 nearestPoint1 = vertices[0];
+            Vector2 nearestPoint2 = vertices[1];
+            float nearestDistance = Vector2.Distance(point, nearestPoint1);
+
+            for (int i = 1; i < vertices.Length; i++)
+            {
+                int j = (i + 1) % vertices.Length;
+
+                Vector2 point1 = vertices[i];
+                Vector2 point2 = vertices[j];
+
+                Vector2 closestPoint = ClosestPointOnSegment(point1, point2, point);
+                float distance = Vector2.Distance(point, closestPoint);
+
+                if (distance < nearestDistance)
+                {
+                    nearestPoint1 = point1;
+                    nearestPoint2 = point2;
+                    nearestDistance = distance;
+                }
+            }
+            return (nearestPoint1, nearestPoint2);
+        }
+
         public Pixel debuggingColor = JRandom.Color();
     }
 
