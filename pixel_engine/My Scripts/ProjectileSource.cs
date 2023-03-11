@@ -27,14 +27,16 @@ namespace pixel_renderer
 
         [Field]
         private bool fired;
-        public float aimDistance = 30f;
-        
+        public float aimDistance = 3f;
+        private Key aimLeftKey = Key.Left;
+        private Key aimRightKey= Key.Right;
 
         public override void Awake()
         {
             ammoCt = initAmmoCt;
             projectile = Rigidbody.Standard("Projectile Original");
             projectile.AddComponent<Projectile>();
+
         }
         public override void FixedUpdate(float delta)
         {
@@ -48,17 +50,30 @@ namespace pixel_renderer
 
             if (Get(reloadKey))
                 Reload();
+
+
+            if (Get(aimLeftKey))
+                aimDirection.Rotate(-1f);
+            if (Get(aimRightKey))
+                aimDirection.Rotate(1f);
+
         }
         
         private void Fire()
-        {   
+        {
+            if (!Get(Key.LeftShift))
+                return;
+
             fired = true;
             var proj = Projectile.Standard(this.node, out var rb);
-            rb.ApplyImpulse(new Vector2(1f, 0));
+            rb.ApplyImpulse(aimDirection * aimDistance);
         }
 
         private void Reload()
         {
+            if (!Get(Key.LeftShift)) 
+                return;
+
             ammoCt -= magazineSize;
             currentMag = magazineSize; 
         }

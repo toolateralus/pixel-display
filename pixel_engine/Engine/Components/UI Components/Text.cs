@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Security.Policy;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Reflection.Metadata.Ecma335;
 
 namespace pixel_renderer
 {
@@ -52,6 +53,10 @@ namespace pixel_renderer
                     {
                         Bitmap bmp = new(meta.Path);
                         JImage image = new(bmp);
+                        
+                        if (font_model.ContainsKey(alphabet[i]))
+                            continue;
+
                         font_model.Add(alphabet[i], image);
                     }
                 }
