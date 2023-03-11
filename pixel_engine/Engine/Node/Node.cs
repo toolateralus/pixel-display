@@ -29,6 +29,9 @@ namespace pixel_renderer
         #region Other Constructors
         public Node()
         {
+            if (Runtime.IsRunning && Runtime.Current.GetStage() is Stage stage)
+                stage.AddNode(this);
+
             _uuid = pixel_renderer.UUID.NewUUID();
         }
 

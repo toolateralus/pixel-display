@@ -32,7 +32,6 @@ namespace pixel_renderer
                 if (!node.TryGetComponent(out rb))
                     return;
 
-
             if (collider is null)
             {
                 node.TryGetComponent(out collider);
