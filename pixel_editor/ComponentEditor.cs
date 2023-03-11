@@ -38,19 +38,13 @@ namespace pixel_editor
 
         private void SetupComponentEditorGrid()
         {
-
             mainGrid = Editor.Current.inspectorGrid;
-            
             myGrid ??= new();
+            
+           if (!mainGrid.Children.Contains(myGrid))
+               mainGrid.Children.Add(myGrid);
 
-            if (mainGrid.Children.Contains(myGrid))
-                mainGrid.Children.Remove(myGrid);
-                
-            myGrid?.Children.Clear();
-
-            mainGrid.Children.Add(myGrid);
-
-            Inspector.SetRowAndColumn(myGrid, 1, 1, 0, 15);
+            Inspector.SetRowAndColumn(myGrid, 1, 3, 0, 15);
         }
         private void GetEvents()
         {
@@ -58,6 +52,7 @@ namespace pixel_editor
             RegisterAction(delegate 
             { 
                 Keyboard.ClearFocus();
+                Dispose();
             },  Key.Escape);
         }
         public void Refresh(Component component)
@@ -71,7 +66,6 @@ namespace pixel_editor
 
             data = new(component);
 
-
             AddTextBoxes(mainGrid);
         }
         private int SerializeMethods(Grid viewer, int i)
@@ -79,10 +73,10 @@ namespace pixel_editor
             foreach (var method in data.Methods)
             {
                 AddToEditor(viewer, i, "Method", method.Name);
-                var button = Inspector.GetButton("Call", new(0, 0, 0, 0));
+                var button = Inspector.GetButton(method.Name + "();", new(0, 0, 0, 0));
                 viewer.Children.Add(button);
-                Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
-                Inspector.SetRowAndColumn(button, 1, 1, 20, (i++)+4);
+                uiElements.Add(button);
+                Inspector.SetRowAndColumn(button, 1, 4, 22, i++ + 1);
                 button.FontSize = 3;
                 button.Click += delegate { method.Invoke(component, null); };
             }
@@ -195,8 +189,8 @@ namespace pixel_editor
             
             inputFields.Add(inputBox);
             editEvents.Add((o, e) => SetVariable(o, e));
-            Inspector.SetRowAndColumn(nameDisplay, 1, 2, 18, index + 4);
-               Inspector.SetRowAndColumn(inputBox, 1, 2, 20, index + 4);
+            Inspector.SetRowAndColumn(nameDisplay, 1, 4, 18, index + 1);
+               Inspector.SetRowAndColumn(inputBox, 1, 4, 22, index + 1);
         }
         #endregion
         #region WPF Events
@@ -282,25 +276,24 @@ namespace pixel_editor
             Disposing = true;
             data = null;
 
-            foreach (var o in uiElements)
+            foreach (var element in uiElements)
             {
-                var hasE = mainGrid.Children.Contains(o);
-                if (hasE)
-                    mainGrid.Children.Remove(o);
+                var hasRefGlobal = mainGrid.Children.Contains(element);
+                if (hasRefGlobal)
+                    mainGrid.Children.Remove(element);
 
-                var hasM = myGrid.Children.Contains(o);
-                if (hasM)
-                    myGrid.Children.Remove(o);
-
+                var hasRefLocal = myGrid.Children.Contains(element);
+                if (hasRefLocal)
+                    myGrid.Children.Remove(element);
             }
 
-            uiElements.Clear();
             if (mainGrid != null)
             {
                 if (mainGrid.Children.Contains(myGrid))
                     mainGrid.Children.Remove(myGrid);
             }
 
+            uiElements?.Clear();
             myGrid?.Children.Clear();
             inputFields?.Clear();
             editEvents?.Clear();
