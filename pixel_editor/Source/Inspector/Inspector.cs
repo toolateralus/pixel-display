@@ -81,6 +81,8 @@ namespace pixel_editor
                 activeControls.Clear();
                 activeGrids.Clear();
 
+                Editor.Current.componentEditor?.Dispose();
+
                 OnObjectDeselected?.Invoke(grid);
             }
             Runtime.Current.stagingHost.DeselectNode();
