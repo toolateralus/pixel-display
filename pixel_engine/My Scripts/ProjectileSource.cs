@@ -51,12 +51,10 @@ namespace pixel_renderer
             if (Get(reloadKey))
                 Reload();
 
-
             if (Get(aimLeftKey))
                 aimDirection.Rotate(-1f);
             if (Get(aimRightKey))
                 aimDirection.Rotate(1f);
-
         }
         
         private void Fire()

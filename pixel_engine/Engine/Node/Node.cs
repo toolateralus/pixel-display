@@ -289,6 +289,9 @@ namespace pixel_renderer
                 parent.children.Remove(pair.Key);
             }
             ParentStage?.nodes.Remove(this);
+            foreach (var component in Components)
+                foreach(var comp in component.Value)
+                    comp.OnDestroy();
         }
 
         public void OnTrigger(Collision otherBody)

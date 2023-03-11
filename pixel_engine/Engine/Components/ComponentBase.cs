@@ -69,6 +69,11 @@ namespace pixel_renderer
         public virtual void OnDrawShapes() { }
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
+
+        public virtual void OnDestroy()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

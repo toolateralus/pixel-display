@@ -25,11 +25,10 @@ namespace pixel_renderer
             sprite.Type = SpriteType.Image;
             sprite.texture = new(meta.Path);
             sprite.IsDirty = true;
-            node.Transform = Matrix3x2.CreateScale(1);
 
             var col = node.AddComponent<Collider>();
             col.model = new Circle().DefiningGeometry;
-            col.Scale = new(25, 25);
+            col.Scale = new(1, 1);
             rb = node.AddComponent<Rigidbody>();
             node.Position = sender.Position; 
             return node; 
