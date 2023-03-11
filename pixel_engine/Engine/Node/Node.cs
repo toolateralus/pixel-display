@@ -280,12 +280,7 @@ namespace pixel_renderer
             {
                 kvp.Value.parent = null;
             }
-            var nodes = parent.children.Where((e) => e.Value == this);
-
-            foreach (var node in nodes)
-            {
-                node.Value.TryRemoveChild(this);
-            }
+            parent.children.Remove(parent.Position - Position);
             ParentStage?.nodes.Remove(this);
         }
 
