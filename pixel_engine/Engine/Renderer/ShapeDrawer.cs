@@ -24,55 +24,51 @@ namespace pixel_renderer.ShapeDrawing
             DrawShapeActions?.Invoke();
         }
 
-        internal static List<Line> Lines = new();
-        internal static List<Circle> Circles = new();
+        internal static List<(Line, Pixel)> Lines = new();
+        internal static List<(Circle, Pixel)> Circles = new();
         public static void DrawLine(Vector2 startPoint, Vector2 endPoint, Pixel? color = null) =>
-            Lines.Add(new Line(startPoint, endPoint, color ?? Pixel.White));
+            Lines.Add((new Line(startPoint, endPoint), color ?? Pixel.White));
         public static void DrawCircle(Vector2 center, float radius, Pixel? color = null) =>
-            Circles.Add(new Circle(center, radius, color ?? Pixel.White));
+            Circles.Add((new Circle(center, radius), color ?? Pixel.White));
 
         public static void DrawRect(Vector2 boxStart, Vector2 boxEnd, Pixel green)
         {
             // top bottom left right
-            Line[] lines = GetSides(boxStart, boxEnd, green);
+            (Line, Pixel)[] lines = GetSides(boxStart, boxEnd, green);
             Lines.AddRange(lines);
         }
 
-        private static Line[] GetSides(Vector2 boxStart, Vector2 boxEnd, Pixel green)
+        private static (Line, Pixel)[] GetSides(Vector2 boxStart, Vector2 boxEnd, Pixel color)
         {
-            return new Line[]
+            return new (Line, Pixel)[]
             {
-              new(boxStart, boxStart.WithValue(x: boxEnd.X), green),
-              new(boxEnd.WithValue(x: boxStart.X), boxEnd, green),
-              new(boxStart, boxStart.WithValue(y: boxEnd.Y), green),
-              new(boxEnd, boxEnd.WithValue(y: boxStart.Y), green),
+              (new(boxStart, boxStart.WithValue(x: boxEnd.X)), color),
+              (new(boxEnd.WithValue(x: boxStart.X), boxEnd), color),
+              (new(boxStart, boxStart.WithValue(y: boxEnd.Y)), color),
+              (new(boxEnd, boxEnd.WithValue(y: boxStart.Y)), color),
             };
         }
 
-        public static void DrawLine(Line line) =>
-            Lines.Add(line);
+        public static void DrawLine(Line line, Pixel? color = null) =>
+            Lines.Add((line, color ?? Pixel.White));
     }
     public class Line
     {
-        public Vector2 Direction => endPoint - startPoint;
-        public Pixel color;
+        public Vector2 EndOffset => endPoint - startPoint;
         public Vector2 startPoint;
         public Vector2 endPoint;
-        public Line(Vector2 startPoint, Vector2 endPoint, Pixel? color = null)
+        public Line(Vector2 startPoint, Vector2 endPoint)
         {
             this.startPoint = startPoint;
             this.endPoint = endPoint;
-            this.color = color ?? Pixel.White;
         }
     }
     public class Circle
     {
-        public Pixel color;
         public Vector2 center;
         public float radius;
-        public Circle(Vector2 center, float radius, Pixel color)
+        public Circle(Vector2 center, float radius)
         {
-            this.color = color;
             this.center = center;
             this.radius = radius;
         }

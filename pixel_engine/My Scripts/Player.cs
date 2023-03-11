@@ -18,6 +18,7 @@ namespace pixel_renderer
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] public float speed = 0.1f;
         [Field] private bool isGrounded;
+        Line targetLine = new(Vector2.Zero, Vector2.One * 10);
         Sprite sprite = new();
         Rigidbody rb = new();
         private bool freezeButtonPressedLastFrame = false;
@@ -160,6 +161,7 @@ namespace pixel_renderer
         }
         public override void OnDrawShapes()
         {
+            ShapeDrawer.DrawLine(targetLine, Pixel.Blue);
             if(node.GetComponent<Collider>()?.Polygon is not Polygon poly)
                 return;
             foreach (var child in node.children)

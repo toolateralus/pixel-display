@@ -23,7 +23,27 @@ namespace pixel_renderer
 
             List<Vector2> normals = new(polygonA.normals);
             normals.AddRange(polygonB.normals);
-            ProjectAllNormals(normals, polygonA, polygonB, ref collision);
+
+            foreach (Vector2 normal in normals)
+            {
+                SATProjection projA = Project(polygonA, normal);
+                SATProjection projB = Project(polygonB, normal);
+
+                if (!Overlap(projA, projB))
+                {
+                    collision.normal = zero;
+                    return null;
+                }
+
+                float overlap = GetOverlap(projA, projB);
+                if (overlap < collision.depth)
+                {
+                    collision.depth = overlap;
+                    collision.normal = normal;
+                    collision.thisProjection = projA;
+                    collision.otherProjection = projB;
+                }
+            }
 
             if (collision.normal == zero)
                 return null;
