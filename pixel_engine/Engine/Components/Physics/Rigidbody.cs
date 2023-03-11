@@ -54,7 +54,7 @@ namespace pixel_renderer
             sprite.lit = true; 
 
 
-            node.Scale = Constants.DefaultNodeScale * 16;
+            node.Scale = Constants.DefaultNodeScale;
             return node;
         }
         public static Node Standard() =>

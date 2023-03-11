@@ -94,7 +94,7 @@ namespace pixel_renderer
             switch (Type)
             {
                 case SpriteType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(new(256,256), color);
+                    Pixel[,] colorArray = CBit.SolidColorSquare(colorDataSize, color);
                     texture.SetImage(colorArray);
                     break;
                 case SpriteType.Image:
@@ -211,7 +211,7 @@ namespace pixel_renderer
         }
         public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton)
         {
-            for (int x = 0; x < texture.Width; x = indexerX.Invoke())
+            for (int x = 0; x < texture.Width * 4; x = indexerX.Invoke())
                 for (int y = 0; y < texture.Height; y = indexerY.Invoke())
                 {
                     var col = texture.GetPixel(x, y);
