@@ -72,7 +72,6 @@ namespace pixel_renderer
 
         public virtual void OnDestroy()
         {
-            throw new NotImplementedException();
         }
     }
 
