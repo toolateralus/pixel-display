@@ -177,7 +177,7 @@ namespace pixel_editor
 
             editComponentActions.Add(delegate
             {
-                Editor.Current.componentEditor = new();
+                Editor.Current.componentEditor ??= new();
                 Editor.Current.componentEditor.Dispose();
                 Editor.Current.componentEditor.Refresh(component);
             });
