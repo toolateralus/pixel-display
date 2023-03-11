@@ -58,7 +58,7 @@ namespace pixel_renderer
             return new Vector2(cos * v.X - sin * v.Y, sin * v.X + cos * v.Y);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Rotate(this Vector2 v, float angle)
+        public static void Rotate(this ref Vector2 v, float angle)
         {
             float cos = MathF.Cos(angle);
             float sin = MathF.Sin(angle);

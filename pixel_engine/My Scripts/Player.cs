@@ -10,6 +10,7 @@ using System.Numerics;
 using pixel_renderer.ShapeDrawing;
 using System.Drawing.Printing;
 using System.Windows.Media.Media3D;
+using System;
 
 namespace pixel_renderer
 {
@@ -18,7 +19,8 @@ namespace pixel_renderer
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] public float speed = 0.01f;
         [Field] private bool isGrounded;
-        Ray targetRay = new();
+        [Field] public float turnSpeed = 0.1f;
+        Ray targetRay = new(new(0,0), new(1,0));
         Line targetLine = new(new Vector2(5,0), new Vector2(5, -5));
         Sprite sprite = new();
         Rigidbody rb = new();
@@ -69,8 +71,20 @@ namespace pixel_renderer
             RegisterAction(Down, Key.S);
             RegisterAction(Left, Key.A);
             RegisterAction(Right, Key.D);
-
+            RegisterAction(LeftArrow, Key.Left);
+            RegisterAction(RightArrow, Key.Right);
         }
+
+        private void RightArrow()
+        {
+            targetRay.direction.Rotate(turnSpeed);
+        }
+
+        private void LeftArrow()
+        {
+            targetRay.direction.Rotate(-turnSpeed);
+        }
+
         void Up() => moveVector = new Vector2(moveVector.X, 1 * speed) ;
         void Down() => moveVector = new Vector2(moveVector.X, -1 * speed);
         void Left()
@@ -105,7 +119,8 @@ namespace pixel_renderer
             else rb?.ApplyImpulse(moveVector * speed);
         }
 
-        Vector2 thisPos; 
+        Vector2 thisPos;
+
         public void FreezePlayer()
         {
             bool freezeButtonPressed = Get(Key.LeftShift);
@@ -161,8 +176,16 @@ namespace pixel_renderer
         }
         public override void OnDrawShapes()
         {
-            ShapeDrawer.DrawLine(targetLine, Pixel.Blue);
-            if(node.GetComponent<Collider>()?.Polygon is not Polygon poly)
+            targetRay.position = Position;
+            ShapeDrawer.DrawLine(new(targetRay.position, targetRay.position + targetRay.direction * 10000), Pixel.Red);
+            if (targetRay.CastToLine(targetLine) is float distance)
+            {
+                ShapeDrawer.DrawCircle(targetRay.position + (targetRay.direction * distance), 0.2f);
+                ShapeDrawer.DrawLine(targetLine, Pixel.Red);
+            }
+            else
+                ShapeDrawer.DrawLine(targetLine, Pixel.Blue);
+            if (node.GetComponent<Collider>()?.Polygon is not Polygon poly)
                 return;
             foreach (var child in node.children)
             {

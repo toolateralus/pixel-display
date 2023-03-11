@@ -5,8 +5,8 @@ namespace pixel_renderer
 {
     internal struct Ray
     {
-        Vector2 position;
-        Vector2 direction;
+        public Vector2 position;
+        public Vector2 direction;
 
         public Ray(Vector2 position, Vector2 direction)
         {
