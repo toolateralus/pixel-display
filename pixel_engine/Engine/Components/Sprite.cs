@@ -31,6 +31,7 @@ namespace pixel_renderer
                 Pixel[,] colors = VertexLighting(light);
                 lightmap = new(colors);
                 texture?.SetImage(lightmap);
+                IsDirty = true;
             }
         }
       

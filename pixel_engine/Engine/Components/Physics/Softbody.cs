@@ -19,7 +19,10 @@ namespace pixel_renderer
                 private Curve curve;
                 private Polygon model;
                 private Rigidbody rb;
-
+        public override void FixedUpdate(float delta)
+        {
+            Resolve();
+        }
 
         public override void Awake()
         {
@@ -45,7 +48,6 @@ namespace pixel_renderer
         public override void OnCollision(Collision col)
         {
             Deform1(col);
-            Resolve();
         }
 
         [Field]
@@ -87,7 +89,6 @@ namespace pixel_renderer
             collider.model = poly;
             collider.model.CalculateNormals();
         }
-
         private void Deform1(Collision col)
         {
             if (collider == null || model == null)
@@ -119,7 +120,6 @@ namespace pixel_renderer
                     // Calculate the normal to the edge
                     var edgeVector = edge.end - edge.start;
                     var normal = new Vector2(-edgeVector.Y, edgeVector.X);
-                    normal = normal.Rotated(90f);
 
                     // Calculate the relative velocity of the model vertex with respect to the collision normal
                     Vector2 relativeVelocity = modelVertex - col.contact;
