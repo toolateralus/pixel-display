@@ -19,7 +19,7 @@ namespace pixel_renderer
         private JImage lightmap;
         private void ApplyLighting()
         {
-            var light = GetFirstLight();
+            var light = FirstLight;
             var data = texture?.GetImage();
             if (light is null)
                 return;
@@ -115,7 +115,6 @@ namespace pixel_renderer
             colorDataSize = new(texture.Width, texture.Height);
             IsDirty = false;
         }
-
         public override void Awake()
         {
             texture = new(Vector2.One, Player.PlayerSprite);
@@ -146,17 +145,14 @@ namespace pixel_renderer
                 }
             }
         }
-        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
-        public void SetImage(Vector2 size, byte[] color)
+        public static Light? FirstLight
         {
-            texture.SetImage(size, color);
-        }
-        public void SetImage(JImage? image)
-        {
-            if (image is not null)
+            get
             {
-                Vector2 size = new(image.width, image.height);
-                SetImage(size, image.data);
+                var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
+                if (!lights.Any())
+                    return null;
+                return lights.First();
             }
         }
         public void LightingPerPixel(Light light)
@@ -222,29 +218,7 @@ namespace pixel_renderer
         }
 
 
-        public Light? GetFirstLight()
-        {
-            var lights = Runtime.Current.GetStage().GetAllComponents<Light>();
-            if (!lights.Any())
-                return null; 
-            return lights.First();
-        }
 
-        public static bool PointInPolygon(Vector2 point, Vector2[] vertices)
-        {
-            int i, j = vertices.Length - 1;
-            bool c = false;
-            for (i = 0; i < vertices.Length; i++)
-            {
-                if (((vertices[i].Y > point.Y) != (vertices[j].Y > point.Y)) &&
-                    (point.X < (vertices[j].X - vertices[i].X) * (point.Y - vertices[i].Y) / (vertices[j].Y - vertices[i].Y) + vertices[i].X))
-                {
-                    c = !c;
-                }
-                j = i;
-            }
-            return c;
-        }
         public Vector2[] GetCorners()
         {
             Vector2 topLeft = Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform);
@@ -261,6 +235,19 @@ namespace pixel_renderer
             };
 
             return vertices;
+        }
+        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
+        public void SetImage(Vector2 size, byte[] color)
+        {
+            texture.SetImage(size, color);
+        }
+        public void SetImage(JImage? image)
+        {
+            if (image is not null)
+            {
+                Vector2 size = new(image.width, image.height);
+                SetImage(size, image.data);
+            }
         }
     }
 }
