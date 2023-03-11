@@ -129,8 +129,8 @@ namespace pixel_renderer
 
             if (lit)
             {
-                Refresh(); 
-                LightingPerPixel(GetFirstLight());
+                Refresh();
+                ApplyLighting();
             }
         }
         public override void OnDrawShapes()
