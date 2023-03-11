@@ -287,6 +287,11 @@ namespace pixel_editor
                 var hasE = mainGrid.Children.Contains(o);
                 if (hasE)
                     mainGrid.Children.Remove(o);
+
+                var hasM = myGrid.Children.Contains(o);
+                if (hasM)
+                    myGrid.Children.Remove(o);
+
             }
 
             uiElements.Clear();
