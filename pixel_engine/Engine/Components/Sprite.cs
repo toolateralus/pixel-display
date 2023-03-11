@@ -122,7 +122,7 @@ namespace pixel_renderer
             Refresh();
 
         }
-        public override void FixedUpdate(float delta)
+        public override void Update()
         {
             if (IsDirty)
                 Refresh();
