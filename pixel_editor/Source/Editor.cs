@@ -498,32 +498,12 @@ namespace pixel_editor
             if (project is not null)
                 Runtime.Current.SetProject(project);
         }
+        internal ComponentEditor componentEditor;
 
         #endregion
         #region Add Node Menu
+
         bool consoleOpen = true;
-        internal Dictionary<string, ComponentEditor?> ComponentEditors = new();
-        public void RegisterComponentEditor(string name, ComponentEditor editor)
-        {
-            if (ComponentEditors.ContainsKey(name))
-            {
-                editor.Close();
-                ComponentEditors[name].Focus();
-                ComponentEditors[name].Refresh(ComponentEditors[name].component);
-                return; 
-            }
-            ComponentEditors.Add(name, editor);
-            ComponentEditors[name].Show();
-        }
-
-        public readonly Action<string, ComponentEditor> OnEditorClosed = OnComponentEditorClosed;
-        private static void OnComponentEditorClosed(string name, ComponentEditor obj)
-        {
-            if (Current.ComponentEditors.ContainsKey(name))
-                Current.ComponentEditors.Remove(name);
-        }
-           
-
         bool addNodeContextMenuOpen = false;
         Grid addNodeContextMenu;
         List<Action> addNodeActions = new();
@@ -536,7 +516,7 @@ namespace pixel_editor
                 addNodeContextMenuOpen = true;
                 addNodeContextMenu = Inspector.GetGrid();
                 inspectorGrid.Children.Add(addNodeContextMenu);
-                Inspector.SetRowAndColumn(addNodeContextMenu, 10, 10, 0, 0);
+                Inspector.SetRowAndColumn(addNodeContextMenu, 15, 15, 15, 15);
 
                 int i = 0;
                 foreach (var item in addNodeFunctions)
@@ -547,7 +527,7 @@ namespace pixel_editor
                     button.FontSize = 2;
                     button.Click += newNodeButtonClicked;
                     addNodeContextMenu.Children.Add(button);
-                    Inspector.SetRowAndColumn(button, 2, 3, 15, i * 2);
+                    Inspector.SetRowAndColumn(button, 2, 3, 4, i * 2 + 4);
                     i++;
 
                 }

@@ -9,85 +9,66 @@ using pixel_renderer;
 using Component = pixel_renderer.Component;
 using System.Windows.Input;
 using System.Reflection;
+using System.Data;
+using System.Windows.Markup;
 
 namespace pixel_editor
 {
-    public partial class ComponentEditor : Window
+    public class ComponentEditor 
     {
-        #region Window Scaling
-        public static readonly DependencyProperty ScaleValueProperty = DependencyProperty.Register("ScaleValue", typeof(double), typeof(ComponentEditor), new UIPropertyMetadata(1.0, new PropertyChangedCallback(OnScaleValueChanged), new CoerceValueCallback(OnCoerceScaleValue)));
-        private static object OnCoerceScaleValue(DependencyObject o, object value)
-        {
-            return o is ComponentEditor mainWindow ? mainWindow.OnCoerceScaleValue((double)value) : value;
-        }
-        private static void OnScaleValueChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
-        {
-            ComponentEditor mainWindow = o as ComponentEditor;
-            mainWindow?.OnScaleValueChanged((double)e.OldValue, (double)e.NewValue);
-        }
-        protected virtual double OnCoerceScaleValue(double value)
-        {
-            if (double.IsNaN(value))
-                return 1.0f;
-
-            value = Math.Max(0.1, value);
-            return value;
-        }
-        protected virtual void OnScaleValueChanged(double oldValue, double newValue) { }
-        private void CalculateScale()
-        {
-            double yScale = ActualHeight / 250f;
-            double xScale = ActualWidth / 200f;
-            double value = Math.Min(xScale, yScale);
-
-            ScaleValue = (double)OnCoerceScaleValue(this, value);
-        }
-        public void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            CalculateScale();
-        }
-        public double ScaleValue
-        {
-            get => (double)GetValue(ScaleValueProperty);
-            set => SetValue(ScaleValueProperty, value);
-        }
-        #endregion
-        string EditorKey => component.Name + component.GetType().Name;
         public Component component;
+        public bool Disposing { get; internal set; }
         public ComponentEditorData data;
         public Grid mainGrid;
+        public Grid myGrid; 
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
 
-        public ComponentEditor (Editor mainWnd, Component component)
+        public ComponentEditor()
         {
-            InitializeComponent();
-            InitializeComponentEditor(mainWnd, component);
-        }
-
-        private void InitializeComponentEditor(Editor mainWnd, Component component)
-        {
-            this.component = component;
-            mainWnd.RegisterComponentEditor(EditorKey, this);
             GetEvents();
-            data = Refresh(component);
+        }
+        List<UIElement> uiElements = new();
+
+        private void SetupComponentEditorGrid()
+        {
+
+            mainGrid = Editor.Current.inspectorGrid;
+            
+            myGrid ??= new();
+
+            if (mainGrid.Children.Contains(myGrid))
+                mainGrid.Children.Remove(myGrid);
+                
+            myGrid?.Children.Clear();
+
+            mainGrid.Children.Add(myGrid);
+
+            Inspector.SetRowAndColumn(myGrid, 1, 1, 0, 15);
         }
 
         private void GetEvents()
         {
-            Closed += ComponentEditor_Closed;
             CompositionTarget.Rendering += Update;
-            RegisterAction(delegate { Keyboard.ClearFocus(); }, Key.Escape);
+            RegisterAction(delegate 
+            { 
+                Keyboard.ClearFocus();
+            },  Key.Escape);
         }
 
-        public ComponentEditorData Refresh(Component component)
+        public void Refresh(Component component)
         {
-            MainGrid.Children.Clear();
-            inputFields.Clear();
-            editEvents.Clear();
+            this.component = component;
+
+            SetupComponentEditorGrid();
+
+            if (component is null)
+                return;
+
             data = new(component);
-            AddTextBoxes(MainGrid);
-            return data; 
+
+
+            AddTextBoxes(mainGrid);
         }
         
         private int SerializeMethods(Grid viewer, int i)
@@ -98,7 +79,7 @@ namespace pixel_editor
                 var button = Inspector.GetButton("Call", new(0, 0, 0, 0));
                 viewer.Children.Add(button);
                 Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
-                Inspector.SetRowAndColumn(button, 1, 2, 10, i++);
+                Inspector.SetRowAndColumn(button, 1, 1, 20, (i++)+4);
                 button.FontSize = 3;
                 button.Click += delegate { method.Invoke(component, null); };
             }
@@ -108,6 +89,9 @@ namespace pixel_editor
         private int SerializeFields(Grid viewer, int i)
         {
             var fields = data.Fields;
+
+            RefreshData();
+
             foreach (var field in fields)
             {
                 string name = field.Name;
@@ -119,11 +103,11 @@ namespace pixel_editor
                 {
                     object obj = field.GetValue(component);
                     if (obj is not string[] strings)
-                        continue; 
+                        continue;
                     int strIndex = 0;
                     foreach (var str in strings)
                         AddStringListTextBox(viewer, ref i, field, strings, ref strIndex, str);
-                    return i; 
+                    return i;
                 }
 
                 string? valStr;
@@ -134,9 +118,15 @@ namespace pixel_editor
                 i++;
             }
 
+
             return i;
         }
 
+        private void RefreshData()
+        {
+            if (component != null && data.Component.TryGetTarget(out var dataComp) && dataComp != component)
+                data = new(component);
+        }
         #region "Add" Button/TextBox/Grid methods
         private void AddTextBoxes(Grid viewer)
         {
@@ -144,6 +134,13 @@ namespace pixel_editor
             i = SerializeFields(viewer, i);
             i = SerializeMethods(viewer, i);
         }
+        
+        int lhs_width = 2;
+        int lhs_height = 1;
+
+        int rhs_width = 2;
+        int rhs_height = 1; 
+        
         private void AddStringListTextBox(Grid viewer, ref int i, FieldInfo field, string[] strings, ref int strIndex, string str)
         {
             var label = Inspector.GetTextBox(i.ToString());
@@ -155,10 +152,14 @@ namespace pixel_editor
             txtBox.GotKeyboardFocus += Input_GotKeyboardFocus; 
             txtBox.FontSize = 4;
             label.FontSize = 4;
+
+            uiElements.Add(txtBox);
+            uiElements.Add(label);
+
             viewer.Children.Add(txtBox);
             viewer.Children.Add(label);
-            Inspector.SetRowAndColumn(txtBox, 1, 4, 2, i);
-            Inspector.SetRowAndColumn(label, 1, 2, 0, i++);
+            Inspector.SetRowAndColumn(txtBox, lhs_height, lhs_width, 2, i);
+            Inspector.SetRowAndColumn(label, rhs_height, rhs_width, 0, i++);
             strIndex++;
         }
         private int AddNestedComponentEditorButton(Grid viewer, ref int i, FieldInfo field, string name)
@@ -166,6 +167,7 @@ namespace pixel_editor
             AddToEditor(viewer, i, "open editor for more options.", name);
             var button = Inspector.GetButton("Open Editor", new(0, 0, 0, 0));
             viewer.Children.Add(button);
+            uiElements.Add(button);
             Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
             Inspector.SetRowAndColumn(button, 1, 3, 12, i++);
             button.FontSize = 3;
@@ -174,8 +176,7 @@ namespace pixel_editor
                 Component? Component = (Component)field.GetValue(component);
                 if (Component is null)
                     throw new NullReferenceException("Component could not be found for component editor nesting.");
-                ComponentEditor editor = new(Editor.Current, Component);
-                editor.Show();
+                Refresh(Component);
             };
             i++;
             return i;
@@ -190,12 +191,17 @@ namespace pixel_editor
             inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
             inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
             inputBox.KeyDown += InputBox_KeyDown;
+
+            uiElements.Add(nameDisplay);
+            uiElements.Add(inputBox);
+
             viewer.Children.Add(nameDisplay);
             viewer.Children.Add(inputBox);
+            
             inputFields.Add(inputBox);
             editEvents.Add((o, e) => SetVariable(o, e));
-            Inspector.SetRowAndColumn(nameDisplay, 1, 8, 0, index);
-            Inspector.SetRowAndColumn(inputBox, 1, 8, 8, index);
+            Inspector.SetRowAndColumn(nameDisplay, 1, 2, 18, index + 4);
+               Inspector.SetRowAndColumn(inputBox, 1, 2, 20, index + 4);
         }
         #endregion
         #region WPF Events
@@ -245,11 +251,6 @@ namespace pixel_editor
 
 
         }
-        private void ComponentEditor_Closed(object? sender, EventArgs e)
-        {
-            Editor.Current.OnEditorClosed?.Invoke(EditorKey, this);
-            Closed -= ComponentEditor_Closed; 
-        }
 
         #endregion
         private bool SetVariable(string o, int i)
@@ -281,7 +282,32 @@ namespace pixel_editor
                     component.OnFieldEdited(name);
                 }
         }
-        private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
+
+        internal void Dispose()
+        {
+            Disposing = true;
+            data = null;
+
+            foreach (var o in uiElements)
+            {
+                var hasE = mainGrid.Children.Contains(o);
+                if (hasE)
+                    mainGrid.Children.Remove(o);
+            }
+
+            uiElements.Clear();
+            if (mainGrid != null)
+            {
+                if (mainGrid.Children.Contains(myGrid))
+                    mainGrid.Children.Remove(myGrid);
+            }
+
+            myGrid?.Children.Clear();
+            inputFields?.Clear();
+            editEvents?.Clear();
+
+            Disposing = false; 
+        }
     }
     public record ComponentEditorData
     {
@@ -292,6 +318,8 @@ namespace pixel_editor
 
         public ComponentEditorData(Component component)
         {
+            
+
             this.Component = new(component);
             
             Fields = Inspector.GetSerializedFields(component).ToList();

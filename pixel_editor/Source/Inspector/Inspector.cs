@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using pixel_renderer;
 using System.Linq;
 using System.Windows.Media;
+using System.DirectoryServices;
 
 namespace pixel_editor
 {
@@ -125,18 +126,13 @@ namespace pixel_editor
             components = lastSelectedNode.Components;
 
             int index = 0;
-            TransformComponent transform = new()
-            {
-                node = lastSelectedNode,
-                position = lastSelectedNode.Position,
-                scale = lastSelectedNode.Scale,
-                rotation = lastSelectedNode.Rotation
-            };
-            index = AddComponentToInspector(grid, index, transform, false, lastSelectedNode.Name);
+
+            index = AddTransform(grid, index);
 
             foreach (var componentType in components.Values)
                 foreach (var component in componentType)
                     index = AddComponentToInspector(grid, index, component);
+
 
             var addComponentButton = Inspector.GetButton("Add Component", new(0, 0, 0, 0));
             addComponentButton.FontSize = 2;
@@ -145,6 +141,22 @@ namespace pixel_editor
             SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
             OnInspectorUpdated?.Invoke(grid);
         }
+
+        private int AddTransform(Grid grid, int index)
+        {
+            TransformComponent transform = new()
+            {
+                node = lastSelectedNode,
+                position = lastSelectedNode.Position,
+                scale = lastSelectedNode.Scale,
+                rotation = lastSelectedNode.Rotation
+            };
+
+
+            index = AddComponentToInspector(grid, index, transform, false, lastSelectedNode.Name);
+            return index;
+        }
+
         private int AddComponentToInspector(Grid grid, int index, Component component, bool removable = true, string? name = null)
         {
             var box = GetTextBox(name ?? component.GetType().Name);
@@ -162,9 +174,12 @@ namespace pixel_editor
                 grid.Children.Add(removeButton);
             }
 
+
             editComponentActions.Add(delegate
             {
-               var comp = new ComponentEditor(Editor.Current, component);
+                Editor.Current.componentEditor = new();
+                Editor.Current.componentEditor.Dispose();
+                Editor.Current.componentEditor.Refresh(component);
             });
             index++;
             return index;
@@ -354,6 +369,54 @@ namespace pixel_editor
             control.Background = background;
         }
 
+       
+
+        #endregion
+        #region Events
+        public static event Action<Grid> OnObjectSelected;
+        public static event Action<Grid> OnObjectDeselected;
+        public static event Action<Grid> OnInspectorUpdated;
+        public static event Action<Grid> OnComponentAdded;
+        public static event Action<Grid> OnComponentRemoved;
+        public static Action<int, int> OnInspectorMoved;
+
+        private void Inspector_OnInspectorMoved(int x = 0, int y = 0)
+        {
+            Editor.Current.settings.InspectorPosition.X = x;
+            Editor.Current.settings.InspectorPosition.Y = y;
+            Refresh(grid);
+        }
+        private static void HandleEditPressed(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+                if (button.Name.ToInt() is int i && editComponentActions.Count > i && editComponentActions.Count > i)
+                    editComponentActions[i]?.Invoke();
+                else Runtime.Log("Edit pressed failed.");
+        }
+        internal static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties, out IEnumerable<MethodInfo> methods)
+        {
+            fields = component.GetType().GetRuntimeFields();
+            properties = component.GetType().GetRuntimeProperties();
+            methods = component.GetType().GetRuntimeMethods();
+        }
+        public static IEnumerable<FieldInfo> GetSerializedFields(Component component) =>
+           from FieldInfo field in component.GetType().GetRuntimeFields()
+           from CustomAttributeData data in field.CustomAttributes
+           where data.AttributeType == typeof(FieldAttribute)
+           select field;
+        public static IEnumerable<MethodInfo> GetSerializedMethods(Component component) =>
+           from MethodInfo method in component.GetType().GetRuntimeMethods()
+           from CustomAttributeData data in method.CustomAttributes
+           where data.AttributeType == typeof(MethodAttribute)
+           select method;
+
+        //public static IEnumerable<PropertyInfo> GetSerializedProperties(this Component component) =>
+        //   from PropertyInfo field in component.GetType().GetRuntimeProperties()
+        //   from CustomAttributeData data in field.CustomAttributes
+        //   where data.AttributeType == typeof(null)
+        //   select field;
+
+
         Sprite AddSprite()
         {
             var x = lastSelectedNode.AddComponent<Sprite>();
@@ -362,13 +425,13 @@ namespace pixel_editor
         }
         Player AddPlayer()
         {
-            var x= lastSelectedNode.AddComponent<Player>();
+            var x = lastSelectedNode.AddComponent<Player>();
             Runtime.Log($"Player Added!");
             return x;
         }
         Animator AddAnimator()
         {
-            var x= lastSelectedNode.AddComponent<Animator>();
+            var x = lastSelectedNode.AddComponent<Animator>();
             Runtime.Log($"Animator Added!");
 
             return x;
@@ -387,62 +450,10 @@ namespace pixel_editor
         }
         Rigidbody AddRigidbody()
         {
-            var x= lastSelectedNode.AddComponent<Rigidbody>();
+            var x = lastSelectedNode.AddComponent<Rigidbody>();
             Runtime.Log($"Rigidbody Added!");
             return x;
         }
-
-        #endregion
-        #region Events
-        public static event Action<Grid> OnObjectSelected;
-        public static event Action<Grid> OnObjectDeselected;
-        public static event Action<Grid> OnInspectorUpdated;
-        public static event Action<Grid> OnComponentAdded;
-        public static event Action<Grid> OnComponentRemoved;
-        public static Action<int, int> OnInspectorMoved;
-
-
-        private void Inspector_OnInspectorMoved(int x = 0, int y = 0)
-        {
-            Editor.Current.settings.InspectorPosition.X = x;
-            Editor.Current.settings.InspectorPosition.Y = y;
-            Refresh(grid);
-        }
-        private static void HandleEditPressed(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button)
-                if (button.Name.ToInt() is int i && editComponentActions.Count > i && editComponentActions.Count > i)
-                    editComponentActions[i]?.Invoke();
-                else Runtime.Log("Edit pressed failed.");
-        }
-
-        internal static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties, out IEnumerable<MethodInfo> methods)
-        {
-            fields = component.GetType().GetRuntimeFields();
-            properties = component.GetType().GetRuntimeProperties();
-            methods = component.GetType().GetRuntimeMethods();
-        }
-
-        public static IEnumerable<FieldInfo> GetSerializedFields(Component component) =>
-           from FieldInfo field in component.GetType().GetRuntimeFields()
-           from CustomAttributeData data in field.CustomAttributes
-           where data.AttributeType == typeof(FieldAttribute)
-           select field;
-
-        public static IEnumerable<MethodInfo> GetSerializedMethods(Component component) =>
-           from MethodInfo method in component.GetType().GetRuntimeMethods()
-           from CustomAttributeData data in method.CustomAttributes
-           where data.AttributeType == typeof(MethodAttribute)
-           select method;
-
-        //public static IEnumerable<PropertyInfo> GetSerializedProperties(this Component component) =>
-        //   from PropertyInfo field in component.GetType().GetRuntimeProperties()
-        //   from CustomAttributeData data in field.CustomAttributes
-        //   where data.AttributeType == typeof(null)
-        //   select field;
-
-
-
         #endregion
     }
 }
