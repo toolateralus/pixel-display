@@ -16,13 +16,13 @@ namespace pixel_renderer
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
-        [Field][JsonProperty] public float speed = 0.1f;
+        [Field][JsonProperty] public float speed = 0.01f;
         [Field] private bool isGrounded;
         Sprite sprite = new();
         Rigidbody rb = new();
         private bool freezeButtonPressedLastFrame = false;
         private Curve curve = null; 
-        Vector2 moveVector = default;
+        public Vector2 moveVector = default;
 
         public static Metadata? PlayerSprite
         {
@@ -69,16 +69,15 @@ namespace pixel_renderer
             RegisterAction(Right, Key.D);
 
         }
-        void Up() => moveVector = new Vector2(moveVector.X, 1);
-        void Down() => moveVector = new Vector2(moveVector.X, -1);
+        void Up() => moveVector = new Vector2(moveVector.X, 1 * speed) ;
+        void Down() => moveVector = new Vector2(moveVector.X, -1 * speed);
         void Left()
         {
-            moveVector = new Vector2(-1, moveVector.Y);
+            moveVector = new Vector2(-1 * speed, moveVector.Y);
         }
         void Right()
         {
-            moveVector = new Vector2(1, moveVector.Y);
-
+            moveVector = new Vector2(1 * speed, moveVector.Y);
         }
 
         public override void OnCollision(Collision collider)
