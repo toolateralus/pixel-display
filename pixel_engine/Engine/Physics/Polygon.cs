@@ -226,7 +226,7 @@ namespace pixel_renderer
                 Vector2 closestPoint = ClosestPointOnSegment(point1, point2, point);
                 float distance = Vector2.Distance(point, closestPoint);
 
-                if (distance < nearestDistance)
+                if (distance < nearestDistance && point1 != point2)
                 {
                     nearestPoint1 = point1;
                     nearestPoint2 = point2;
