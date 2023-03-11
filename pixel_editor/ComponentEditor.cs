@@ -14,8 +14,14 @@ using System.Windows.Markup;
 
 namespace pixel_editor
 {
-    public class ComponentEditor 
+    public class ComponentEditor
     {
+        int lhs_width = 2;
+        int lhs_height = 1;
+
+        int rhs_width = 2;
+        int rhs_height = 1;
+
         public Component component;
         public bool Disposing { get; internal set; }
         public ComponentEditorData data;
@@ -46,7 +52,6 @@ namespace pixel_editor
 
             Inspector.SetRowAndColumn(myGrid, 1, 1, 0, 15);
         }
-
         private void GetEvents()
         {
             CompositionTarget.Rendering += Update;
@@ -55,7 +60,6 @@ namespace pixel_editor
                 Keyboard.ClearFocus();
             },  Key.Escape);
         }
-
         public void Refresh(Component component)
         {
             this.component = component;
@@ -70,7 +74,6 @@ namespace pixel_editor
 
             AddTextBoxes(mainGrid);
         }
-        
         private int SerializeMethods(Grid viewer, int i)
         {
             foreach (var method in data.Methods)
@@ -121,7 +124,6 @@ namespace pixel_editor
 
             return i;
         }
-
         private void RefreshData()
         {
             if (component != null && data.Component.TryGetTarget(out var dataComp) && dataComp != component)
@@ -134,13 +136,6 @@ namespace pixel_editor
             i = SerializeFields(viewer, i);
             i = SerializeMethods(viewer, i);
         }
-        
-        int lhs_width = 2;
-        int lhs_height = 1;
-
-        int rhs_width = 2;
-        int rhs_height = 1; 
-        
         private void AddStringListTextBox(Grid viewer, ref int i, FieldInfo field, string[] strings, ref int strIndex, string str)
         {
             var label = Inspector.GetTextBox(i.ToString());
@@ -282,7 +277,6 @@ namespace pixel_editor
                     component.OnFieldEdited(name);
                 }
         }
-
         internal void Dispose()
         {
             Disposing = true;
