@@ -18,7 +18,8 @@ namespace pixel_renderer
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] public float speed = 0.1f;
         [Field] private bool isGrounded;
-        Line targetLine = new(Vector2.Zero, Vector2.One * 10);
+        Ray targetRay = new();
+        Line targetLine = new(new Vector2(5,0), new Vector2(5, -5));
         Sprite sprite = new();
         Rigidbody rb = new();
         private bool freezeButtonPressedLastFrame = false;

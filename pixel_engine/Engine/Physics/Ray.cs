@@ -1,12 +1,7 @@
 ﻿using pixel_renderer.ShapeDrawing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace pixel_renderer.Engine.Physics
+namespace pixel_renderer
 {
     internal struct Ray
     {
