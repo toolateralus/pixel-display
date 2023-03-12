@@ -24,8 +24,9 @@ namespace pixel_renderer
         [JsonProperty][Field]
         public int padding = 24;
 
-        [JsonProperty][Field]
-        public bool looping;
+        [JsonProperty]
+        [Field]
+        public bool looping = true; 
 
         [Method]
         void InsertFrame()

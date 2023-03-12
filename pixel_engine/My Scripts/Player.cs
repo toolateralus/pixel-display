@@ -82,7 +82,6 @@ namespace pixel_renderer
         {
             targetRay.direction.Rotate(-turnSpeed);
         }
-
         void Up()
         {
             if (!Get(Key.LeftShift))
@@ -110,28 +109,18 @@ namespace pixel_renderer
                 return;
             moveVector = new Vector2(1 * speed, moveVector.Y);
         }
-
         public override void OnCollision(Collision collider)
         {
             isGrounded = true; 
         }
         public override void FixedUpdate(float delta)
         {
-            if (Get(Key.U))
-            {
-                string path = Constants.WorkingRoot + "\\LuaTest.lua";
-                Runtime.Current.Lua.Run(path);
-            }
-
             if (!takingInput)
                 return;
             if (isGrounded)
                 isGrounded = false;
             Move(moveVector);
             moveVector = Vector2.Zero;
-
-
-
         }
         private void Move(Vector2 moveVector)
         {

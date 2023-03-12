@@ -138,7 +138,7 @@ namespace pixel_renderer
         public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
            EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
-            InspectorEventRaised?.Invoke(e);
+           InspectorEventRaised?.Invoke(e);
         }
 
         private static void OnRenderBegin()
