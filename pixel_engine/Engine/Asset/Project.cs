@@ -72,7 +72,6 @@ namespace pixel_renderer
         }
         public void AddStage(Stage stage)
         {
-
             stagesMeta.Add(stage.Metadata);
             stages.Add(stage);
 
@@ -89,19 +88,8 @@ namespace pixel_renderer
             Name = name;
             stages = new List<Stage>();
         }
-        public static Project Default
-        {
-            get
-            {
-                Project defaultProj = new("Default Project");
-                defaultProj.AddStage(Stage.Standard());
-                return defaultProj;
-            }
-        }
-        public Project()
-        {
-
-        }
+        public static Project Default => new("Default Project");
+        public Project() { }
         [JsonConstructor]
         public Project(List<Metadata> stage_meta, string name, int hash)
         {
