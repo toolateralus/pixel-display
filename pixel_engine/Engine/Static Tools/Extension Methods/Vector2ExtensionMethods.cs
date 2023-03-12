@@ -83,11 +83,28 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWithinMaxExclusive(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithinMaxExclusive(min.X, max.X) && v.Y.IsWithinMaxExclusive(min.Y, max.Y);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 Transformed(this Vector2 v, Matrix3x2 matrix) => Vector2.Transform(v, matrix);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 ToVector2(this System.Windows.Point v) => new((float)v.X, (float)v.Y);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(this ref Vector2 v, Matrix3x2 matrix) => v = Vector2.Transform(v, matrix);
+        public static Vector2 Transformed(this ref Vector2 v, Matrix3x2 matrix)
+        {
+            return new Vector2(
+                (v.X * matrix.M11) + (v.Y * matrix.M21) + matrix.M31,
+                (v.X * matrix.M12) + (v.Y * matrix.M22) + matrix.M32
+            );
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Transform(this ref Vector2 v, Matrix3x2 matrix)
+        {
+            v.X = (v.X * matrix.M11) + (v.Y * matrix.M21) + matrix.M31;
+            v.Y = (v.X * matrix.M12) + (v.Y * matrix.M22) + matrix.M32;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void TransformInverteed(this ref Vector2 v, Matrix3x2 matrix)
+        {
+            v.X = (v.X * matrix.M11) + (v.Y * matrix.M21) + matrix.M31;
+            v.Y = (v.X * matrix.M12) + (v.Y * matrix.M22) + matrix.M32;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MakeDivideSafe(this ref Vector2 v)
         {
