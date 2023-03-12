@@ -47,6 +47,8 @@ namespace pixel_renderer
         public static bool IsRunning { get; private set; }
         public static bool IsDiposing { get; private set; }
 
+        public LuaInterop Lua = new();
+
         private Runtime(Project project)
         {
 
