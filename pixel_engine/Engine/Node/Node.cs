@@ -82,8 +82,8 @@ namespace pixel_renderer
         [JsonProperty] public Vector2 localPos = new();
         
         [JsonProperty] public Node? parent;
-       
 
+        [JsonProperty]
         public List<Node> children = new();
 
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
