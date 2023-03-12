@@ -133,8 +133,8 @@ namespace pixel_renderer.Assets
 
                     foreach (var x in Runtime.Current.project.stages)
                     {
-                        x.Sync(); 
-                        StageIO.WriteStage(x);
+                        x.Sync();
+                        x.Save(); 
                     }
                 }
                 foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
