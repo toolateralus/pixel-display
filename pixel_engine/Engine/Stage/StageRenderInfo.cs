@@ -1,4 +1,5 @@
-﻿using pixel_renderer;
+﻿using Newtonsoft.Json.Linq;
+using pixel_renderer;
 using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
@@ -129,94 +130,8 @@ namespace pixel_renderer
 
             DrawBaseImage(renderer.Resolution, renderer.baseImage, renderer);
             DrawSprites(Runtime.Current.GetStage().StageRenderInfo, renderer.Resolution, renderer);
-            DrawGraphics(renderer.Resolution, renderer);
-        }
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawGraphics(Vector2 resolution, RendererBase renderer)
-        {
-            Vector2 framePos = new Vector2();
-            var refColor = new Pixel();
-            foreach ((ShapeDrawing.Circle circle, Pixel color) in ShapeDrawer.Circles)
-            {
-                refColor = color;
-                float sqrtOfHalf = MathF.Sqrt(0.5f);
-                Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
-                Vector2 centerPos = GlobalToScreen(circle.center) * resolution;
-                Vector2 pixelRadius = GlobalToScreen(radius) * resolution - centerPos;
-                Vector2 quaterArc = pixelRadius * sqrtOfHalf;
-                int quarterArcAsInt = (int)quaterArc.X;
-                for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
-                {
-                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
-                    framePos.X = centerPos.X + x;
-                    framePos.Y = centerPos.Y + y;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    framePos.Y = centerPos.Y - y;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                }
-                quarterArcAsInt = (int)quaterArc.Y;
-                for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
-                {
-                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
-                    framePos.Y = centerPos.Y + y;
-                    framePos.X = centerPos.X + x;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    framePos.X = centerPos.X - x;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                }
-            }
-            foreach ((Line line, Pixel color) in ShapeDrawer.Lines)
-            {
-                refColor = color;
-                Vector2 startPos = GlobalToScreen(line.startPoint) * resolution;
-                Vector2 endPos = GlobalToScreen(line.endPoint) * resolution;
-                if (startPos == endPos)
-                {
-                    if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref startPos);
-                    continue;
-                }
-
-                float xDiff = startPos.X - endPos.X;
-                float yDiff = startPos.Y - endPos.Y;
-
-                if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
-                {
-                    float slope = yDiff / xDiff;
-                    float yIntercept = startPos.Y - (slope * startPos.X);
-
-                    int endX = (int)MathF.Min(MathF.Max(startPos.X, endPos.X), resolution.X);
-
-                    for (int x = (int)MathF.Max(MathF.Min(startPos.X, endPos.X), 0); x < endX; x++)
-                    {
-                        framePos.X = x;
-                        framePos.Y = slope * x + yIntercept;
-                        if (framePos.Y < 0 || framePos.Y >= resolution.Y)
-                            continue;
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
-                }
-                else
-                {
-                    float slope = xDiff / yDiff;
-                    float xIntercept = startPos.X - (slope * startPos.Y);
-
-                    int endY = (int)MathF.Min(MathF.Max(startPos.Y, endPos.Y), resolution.Y);
-
-                    for (int y = (int)MathF.Max(MathF.Min(startPos.Y, endPos.Y), 0); y < endY; y++)
-                    {
-                        framePos.Y = y;
-                        framePos.X = slope * y + xIntercept;
-                        if (framePos.X < 0 || framePos.X >= resolution.X)
-                            continue;
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
-                }
-            }
+            Matrix3x2 projection = Matrix3x2.CreateScale(viewportScale.X, viewportScale.Y) * Matrix3x2.CreateTranslation(viewportOffset.X, viewportOffset.Y);
+            ShapeDrawer.DrawGraphics(renderer, Transform.Inverted(), projection);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawSprites(StageRenderInfo renderInfo, Vector2 resolution, RendererBase renderer)

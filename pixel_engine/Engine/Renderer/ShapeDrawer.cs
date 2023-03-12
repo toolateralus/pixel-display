@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace pixel_renderer.ShapeDrawing
 {
     public static class ShapeDrawer
     {
         public static event Action? DrawShapeActions;
+        static readonly Matrix3x2 screenMat = Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f);
         public static void Refresh(Stage stage)
         {
             Lines.Clear();
@@ -26,8 +28,14 @@ namespace pixel_renderer.ShapeDrawing
 
         internal static List<(Line, Pixel)> Lines = new();
         internal static List<(Circle, Pixel)> Circles = new();
+        internal static List<(Ray, Pixel)> Normals = new();
+        internal static List<(Ray, Pixel)> Rays = new();
         public static void DrawLine(Vector2 startPoint, Vector2 endPoint, Pixel? color = null) =>
             Lines.Add((new Line(startPoint, endPoint), color ?? Pixel.White));
+        public static void DrawNormal(Vector2 position, Vector2 direction, Pixel? color = null) =>
+            Normals.Add((new Ray(position, direction), color ?? Pixel.White));
+        public static void DrawRay(Ray ray, Pixel? color = null) =>
+            Rays.Add((ray, color ?? Pixel.White));
         public static void DrawCircle(Vector2 center, float radius, Pixel? color = null) =>
             Circles.Add((new Circle(center, radius), color ?? Pixel.White));
 
@@ -51,6 +59,96 @@ namespace pixel_renderer.ShapeDrawing
 
         public static void DrawLine(Line line, Pixel? color = null) =>
             Lines.Add((line, color ?? Pixel.White));
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static void DrawGraphics(RendererBase renderer, Matrix3x2 view, Matrix3x2 projection)
+        {
+            Matrix3x2 viewProjection = view * projection;
+            Matrix3x2 viewProjScreen = viewProjection * screenMat;
+            Vector2 resolution = renderer.Resolution;
+            Vector2 framePos = new();
+            var refColor = new Pixel();
+            foreach ((Circle circle, Pixel color) in Circles)
+            {
+                refColor = color;
+                float sqrtOfHalf = MathF.Sqrt(0.5f);
+                Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
+                Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
+                Vector2 pixelRadius = radius.Transformed(viewProjScreen) * resolution - centerPos;
+                Vector2 quaterArc = pixelRadius * sqrtOfHalf;
+                int quarterArcAsInt = (int)quaterArc.X;
+                for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
+                {
+                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
+                    framePos.X = centerPos.X + x;
+                    framePos.Y = centerPos.Y + y;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                    framePos.Y = centerPos.Y - y;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                }
+                quarterArcAsInt = (int)quaterArc.Y;
+                for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
+                {
+                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
+                    framePos.Y = centerPos.Y + y;
+                    framePos.X = centerPos.X + x;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                    framePos.X = centerPos.X - x;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                }
+            }
+            foreach ((Line line, Pixel color) in Lines)
+            {
+                refColor = color;
+                Vector2 startPos = line.startPoint.Transformed(viewProjScreen) * resolution;
+                Vector2 endPos = line.endPoint.Transformed(viewProjScreen) * resolution;
+                if (startPos == endPos)
+                {
+                    if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref startPos);
+                    continue;
+                }
+
+                float xDiff = startPos.X - endPos.X;
+                float yDiff = startPos.Y - endPos.Y;
+
+                if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
+                {
+                    float slope = yDiff / xDiff;
+                    float yIntercept = startPos.Y - (slope * startPos.X);
+
+                    int endX = (int)MathF.Min(MathF.Max(startPos.X, endPos.X), resolution.X);
+
+                    for (int x = (int)MathF.Max(MathF.Min(startPos.X, endPos.X), 0); x < endX; x++)
+                    {
+                        framePos.X = x;
+                        framePos.Y = slope * x + yIntercept;
+                        if (framePos.Y < 0 || framePos.Y >= resolution.Y)
+                            continue;
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                    }
+                }
+                else
+                {
+                    float slope = xDiff / yDiff;
+                    float xIntercept = startPos.X - (slope * startPos.Y);
+
+                    int endY = (int)MathF.Min(MathF.Max(startPos.Y, endPos.Y), resolution.Y);
+
+                    for (int y = (int)MathF.Max(MathF.Min(startPos.Y, endPos.Y), 0); y < endY; y++)
+                    {
+                        framePos.Y = y;
+                        framePos.X = slope * y + xIntercept;
+                        if (framePos.X < 0 || framePos.X >= resolution.X)
+                            continue;
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                    }
+                }
+            }
+        }
     }
     public class Line
     {
