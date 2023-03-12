@@ -469,12 +469,12 @@ namespace pixel_editor
             if (e != null && e.RoutedEvent != null)
             {
                 e.Handled = true;
-                AssetLibrary.Sync();
+                AssetLibrary.SaveAll();
                 return; 
             }
             if (!Input.Get(Key.S))
                 return; 
-            AssetLibrary.Sync();
+            AssetLibrary.SaveAll();
         }
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {

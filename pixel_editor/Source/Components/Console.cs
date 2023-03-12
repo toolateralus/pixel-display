@@ -369,6 +369,18 @@ namespace pixel_editor
             },
 
         };
+        public static Command cmd_save_all() => new() 
+        {
+            phrase = "save;",
+            description = "Saves all assets, stages, and projects currently loaded.",
+            syntax = "save();",
+            action = (o) =>
+            {
+                AssetLibrary.SaveAll();
+            },
+            argumentTypes = null,
+            args = null,
+        };
         public static Command cmd_list_stages() => new()
         {
             phrase = "stages.List;",
