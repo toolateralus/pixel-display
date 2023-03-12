@@ -1,14 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using pixel_renderer;
-using pixel_renderer.ShapeDrawing;
+﻿using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Security.Policy;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.TextFormatting;
 
 namespace pixel_renderer
 {
