@@ -47,7 +47,6 @@ namespace pixel_renderer
                 switch (type)
                 {
                     case LuaType.None:
-
                         break;
                     case LuaType.Nil:
                         Runtime.Log("Lua: Nil");
@@ -55,14 +54,14 @@ namespace pixel_renderer
                     case LuaType.Boolean:
                         Runtime.Log($"Lua: {state.ToBoolean(i)}");
                         break;
-                    case LuaType.LightUserData:
-                        Runtime.Log($"Lua: Light User Data");
-                        break;
                     case LuaType.Number:
                         Runtime.Log($"Lua: {state.ToNumber(i)}");
                         break;
                     case LuaType.String:
                         Runtime.Log($"Lua: {state.ToString(i)}");
+                        break;
+                    case LuaType.LightUserData:
+                        Runtime.Log($"Lua: Light User Data");
                         break;
                     case LuaType.Table:
                         Runtime.Log($"Lua: Table");
@@ -78,7 +77,6 @@ namespace pixel_renderer
                         break;
                     default:
                         break;
-             
                 }
             }
             return 0; 
