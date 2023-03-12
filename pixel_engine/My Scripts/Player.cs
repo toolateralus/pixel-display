@@ -5,14 +5,10 @@ using pixel_renderer.FileIO;
 using System.Drawing;
 using System.Threading.Tasks;
 using pixel_renderer.Assets;
-using System.Linq;
 using System.Numerics;
 using pixel_renderer.ShapeDrawing;
-using System.Drawing.Printing;
-using System.Windows.Media.Media3D;
-using System;
-using System.Windows.Documents;
-using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using KeraLua;
 
 namespace pixel_renderer
 {
@@ -30,7 +26,8 @@ namespace pixel_renderer
         private Curve curve = null; 
         public Vector2 moveVector = default;
         Vector2 thisPos;
-
+        
+        
         public static Metadata? PlayerSprite
         {
             get
@@ -106,6 +103,9 @@ namespace pixel_renderer
         }
         void Right()
         {
+
+           
+
             if (!Get(Key.LeftShift))
                 return;
             moveVector = new Vector2(1 * speed, moveVector.Y);
@@ -117,12 +117,20 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
+            if (Get(Key.U))
+            {
+                string path = Constants.WorkingRoot + "\\LuaTest.lua";
+                Runtime.Current.Lua.Run(path);
+            }
+
             if (!takingInput)
                 return;
             if (isGrounded)
                 isGrounded = false;
             Move(moveVector);
             moveVector = Vector2.Zero;
+
+
 
         }
         private void Move(Vector2 moveVector)
