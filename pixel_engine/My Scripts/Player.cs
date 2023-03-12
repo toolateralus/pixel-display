@@ -2,31 +2,28 @@
 using Key = System.Windows.Input.Key;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
+using pixel_renderer.ShapeDrawing;
 using System.Drawing;
 using System.Threading.Tasks;
 using pixel_renderer.Assets;
 using System.Numerics;
-using pixel_renderer.ShapeDrawing;
-using System.Runtime.InteropServices;
 
 namespace pixel_renderer
 {
     public class Player : Component
     {
+        Ray targetRay = new(new(0,0), new(1,0));
+        Line targetLine = new(new Vector2(5,0), new Vector2(5, -5));
+
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] public float speed = 0.01f;
         [Field] private bool isGrounded;
         [Field] public float turnSpeed = 0.1f;
-        Ray targetRay = new(new(0,0), new(1,0));
-        Line targetLine = new(new Vector2(5,0), new Vector2(5, -5));
+        
         Sprite sprite = new();
         Rigidbody rb = new();
-        private bool freezeButtonPressedLastFrame = false;
-        private Curve curve = null; 
+
         public Vector2 moveVector = default;
-        Vector2 thisPos;
-        
-        
         public static Metadata? PlayerSprite
         {
             get
@@ -35,6 +32,7 @@ namespace pixel_renderer
             }
        
         }
+
         public static Metadata test_animation_data(int index)
         {
             string name = $"Animation{index}"; 
@@ -72,7 +70,41 @@ namespace pixel_renderer
             RegisterAction(LeftArrow, Key.Left);
             RegisterAction(RightArrow, Key.Right);
         }
+        public override void OnCollision(Collision collider)
+        {
+            isGrounded = true;
+        }
+        public override void FixedUpdate(float delta)
+        {
+            if (!takingInput)
+                return;
+            if (isGrounded)
+                isGrounded = false;
+            Move(moveVector);
+            moveVector = Vector2.Zero;
+        }
+        public override void OnDrawShapes()
+        {
+            targetRay.position = Position;
+            ShapeDrawer.DrawLine(new(targetRay.position, targetRay.position + targetRay.direction * 10000), Pixel.Red);
+            if (targetRay.CastToLine(targetLine) is float distance)
+            {
+                ShapeDrawer.DrawCircle(targetRay.position + (targetRay.direction * distance), 0.2f);
+                ShapeDrawer.DrawLine(targetLine, Pixel.Red);
+            }
+            else
+                ShapeDrawer.DrawLine(targetLine, Pixel.Blue);
+            if (node.GetComponent<Collider>()?.Polygon is not Polygon poly)
+                return;
+            foreach (var child in node.children)
+            {
+                if (!child.Value.TryGetComponent(out Collider col)) return;
+                var centroid = col.Polygon.centroid;
+                ShapeDrawer.DrawLine(poly.centroid, centroid, Color.LightCyan);
+            }
+        }
 
+        #region Input
         private void RightArrow()
         {
             targetRay.direction.Rotate(turnSpeed);
@@ -108,43 +140,15 @@ namespace pixel_renderer
                 return;
             moveVector = new Vector2(1 * speed, moveVector.Y);
         }
-        public override void OnCollision(Collision collider)
-        {
-            isGrounded = true; 
-        }
-        public override void FixedUpdate(float delta)
-        {
-            if (!takingInput)
-                return;
-            if (isGrounded)
-                isGrounded = false;
-            Move(moveVector);
-            moveVector = Vector2.Zero;
-        }
+
         private void Move(Vector2 moveVector)
         {
             if (isGrounded)
                 rb?.ApplyImpulse(moveVector.WithValue(y: speed * moveVector.Y) * speed);
             else rb?.ApplyImpulse(moveVector * speed);
         }
-        public void FreezePlayer()
-        {
-            bool freezeButtonPressed = Get(Key.LeftShift);
+        #endregion
 
-            if (freezeButtonPressed && !freezeButtonPressedLastFrame)
-                thisPos = node.Position;
-
-
-            freezeButtonPressedLastFrame = freezeButtonPressed;
-
-            if (freezeButtonPressed)
-            {
-                foreach (var child in node.children)
-                    child.Value.localPos += moveVector;
-
-                node.Position = thisPos;
-            }
-        }
         public static Node Standard()
         {
             Node playerNode = new("Player")
@@ -180,25 +184,6 @@ namespace pixel_renderer
             sprite.Scale = Vector2.One * 36;
             return sprite;
         }
-        public override void OnDrawShapes()
-        {
-            targetRay.position = Position;
-            ShapeDrawer.DrawLine(new(targetRay.position, targetRay.position + targetRay.direction * 10000), Pixel.Red);
-            if (targetRay.CastToLine(targetLine) is float distance)
-            {
-                ShapeDrawer.DrawCircle(targetRay.position + (targetRay.direction * distance), 0.2f);
-                ShapeDrawer.DrawLine(targetLine, Pixel.Red);
-            }
-            else
-                ShapeDrawer.DrawLine(targetLine, Pixel.Blue);
-            if (node.GetComponent<Collider>()?.Polygon is not Polygon poly)
-                return;
-            foreach (var child in node.children)
-            {
-                if (!child.Value.TryGetComponent(out Collider col)) return;
-                var centroid = col.Polygon.centroid;
-                ShapeDrawer.DrawLine(poly.centroid, centroid, Color.LightCyan);
-            }
-        }
+
     }
 }
