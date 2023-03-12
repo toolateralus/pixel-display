@@ -10,10 +10,10 @@ namespace pixel_renderer
     {
         public readonly static Vector2 one = new(1, 1);
         public readonly static Vector2 zero = new(0, 0);
-        public static Vector2 up = new(0, -1);
-        public static Vector2 down = new(0, 1);
-        public static Vector2 left = new(-1, 0);
-        public static Vector2 right = new(1, 0);
+        public readonly static Vector2 up = new(0, -1);
+        public readonly static Vector2 down = new(0, 1);
+        public readonly static Vector2 left = new(-1, 0);
+        public readonly static Vector2 right = new(1, 0);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Normal_LHS(this Vector2 v)
         {
