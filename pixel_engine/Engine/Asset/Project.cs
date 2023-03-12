@@ -25,10 +25,10 @@ namespace pixel_renderer
 
             Stage stage;
 
-            if (stagesMeta.Count - 1 > index)
+            if (stagesMeta.Count > index)
             {
                 Metadata stageMeta = stagesMeta[index];
-                stage = StageIO.ReadStage(stageMeta);
+                stage = IO.ReadJson<Stage>(stageMeta);
             }
             else stage = Runtime.InstantiateDefaultStageIntoProject();
             Runtime.Current.SetStage(stage);

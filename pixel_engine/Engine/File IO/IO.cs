@@ -63,6 +63,8 @@ namespace pixel_renderer
             }
             catch(Exception e)
             {
+                if (!(Runtime.IsRunning && Runtime.Initialized))
+                    throw;
                 Runtime.Log("JSON Read Failed : \n" + e.Message, true, false);
             }
             return obj;
