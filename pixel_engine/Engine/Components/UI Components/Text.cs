@@ -95,5 +95,12 @@ namespace pixel_renderer
 
             DrawImage(renderer, current);
         }
+
+        public static (Node, Text) Standard(string name = "New Text")
+        {
+            Node node = new("Text");
+            var text = node.AddComponent<Text>();
+            return (node, text);
+        }
     }
 }

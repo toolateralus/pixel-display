@@ -74,9 +74,6 @@ namespace pixel_renderer
         private bool _enabled = true;
         private string _uuid = "";
 
-        internal protected int hiearchyLevel = 0; 
-
-
         Rigidbody? rb;
         public void Move(Vector2 destination)
         {
@@ -98,7 +95,7 @@ namespace pixel_renderer
             set
             {
                 Transform.Translation = value;
-                UpdateTransform(this); 
+               // UpdateTransform(this); 
             }
         }
         [JsonProperty]
@@ -115,7 +112,7 @@ namespace pixel_renderer
                 Transform.M21 = -sin;
                 Transform.M22 = cos;
 
-                UpdateTransform(this);
+               // UpdateTransform(this);
             }
         }
         [JsonProperty]
@@ -222,6 +219,8 @@ namespace pixel_renderer
         }
         public bool TryRemoveChild(Node child)
         {
+            ComponentsBusy = true;
+
             foreach (var kvp in children)
                 if (kvp.Value == child)
                 {
@@ -229,10 +228,14 @@ namespace pixel_renderer
                     child.parent = null;
                     return true;
                 }
-            return false; 
+            ComponentsBusy = false;
+            return false;
+
         }
         public void Awake()
         {
+            ComponentsBusy = true;
+
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
@@ -242,11 +245,15 @@ namespace pixel_renderer
                         Components[key].ElementAt(j).init_component_internal();
                 awake = true; 
             }
+            ComponentsBusy = false;
+
         }
         public void FixedUpdate(float delta)
         {
             if (!awake) 
                 return;
+            ComponentsBusy = true;
+
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
@@ -255,11 +262,15 @@ namespace pixel_renderer
                 for (int j = 0; j < Components[key].Count; ++j)
                     Components[key].ElementAt(j)?.FixedUpdate(delta);
             }
+            ComponentsBusy = false;
+
         }
         public void Update()
         {
             if (!awake) 
-                return; 
+                return;
+
+            ComponentsBusy = true;
 
             for (int i = 0; i < Components.Count; i++)
             {
@@ -269,13 +280,19 @@ namespace pixel_renderer
                 for (int j = 0; j < Components[key].Count; ++j)
                     Components[key].ElementAt(j)?.Update();
             }
-           
 
+
+            while(ComponentActionQueue.Count > 0)
+                ComponentActionQueue.Dequeue().Invoke();
+
+            ComponentsBusy = false;
         }
-        
+
         public void SetActive(bool value) => _enabled = value;
         public void Destroy()
         {
+            ComponentsBusy = true;
+
             foreach (var kvp in children)
             {
                 kvp.Value.parent = null;
@@ -292,12 +309,15 @@ namespace pixel_renderer
             foreach (var component in Components)
                 foreach(var comp in component.Value)
                     comp.OnDestroy();
+            ComponentsBusy = false;
+
         }
 
         public void OnTrigger(Collision otherBody)
         {
             if (!awake)
                 return;
+            ComponentsBusy = true;
 
             for (int i = 0; i < Components.Count; i++)
             {
@@ -307,12 +327,15 @@ namespace pixel_renderer
                 for (int j = 0; j < Components[key].Count; ++j)
                     Components[key].ElementAt(j)?.OnTrigger(otherBody);
             }
+            ComponentsBusy = false;
+
         }
         public void OnCollision(Collision otherBody)
         {
             if (!awake)
                 return;
 
+            ComponentsBusy = true;
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
@@ -321,28 +344,42 @@ namespace pixel_renderer
                 for (int j = 0; j < Components[key].Count; ++j)
                     Components[key].ElementAt(j)?.OnCollision(otherBody);
             }
+            ComponentsBusy = false;
+
         }
 
         public T AddComponent<T>(T component) where T : Component
         {
             var type = component.GetType();
-                
+
             if (type == typeof(Component))
                 throw new InvalidOperationException("Generic type component was added.");
 
             if (type == typeof(Rigidbody))
                 rb = component as Rigidbody;
 
-            if (!Components.ContainsKey(type))
-                Components.Add(type, new());
+            void addComponent<T>() where T : Component
+            {
+                if (!Components.ContainsKey(type))
+                    Components.Add(type, new());
 
-            Components[type].Add(component);
-            component.node = this;
+                Components[type].Add(component);
+                component.node = this;
 
-            if(Runtime.IsRunning)
-                component.Awake();
+                if (Runtime.IsRunning)
+                    component.Awake();
+            }
+
+            if (ComponentsBusy)
+            {
+                ComponentActionQueue.Enqueue(addComponent<T>);
+            }else 
+                addComponent<T>();
+
 
             return component;
+
+           
         }
         public T AddComponent<T>() where T : Component, new()
         {
@@ -437,5 +474,8 @@ namespace pixel_renderer
         }
 
         public static Node New => new("New Node", Vector2.Zero, Vector2.One);
+
+        public bool ComponentsBusy { get; private set; }
+        public Queue<Action> ComponentActionQueue { get; private set; } = new();
     }
 }

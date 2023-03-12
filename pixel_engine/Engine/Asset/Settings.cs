@@ -33,7 +33,7 @@ namespace pixel_renderer
         [JsonProperty]
         public Vector2 MouseSensitivity = new(1.0f, 1.0f);
         [JsonProperty]
-        public Vector2 InspectorPosition = new(12, 0);
+        public Vector2 InspectorPosition = new(14, 1);
         [JsonProperty]
         public float MouseZoomSensitivityFactor = 1.001f;
         [JsonProperty]

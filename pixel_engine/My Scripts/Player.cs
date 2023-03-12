@@ -11,6 +11,8 @@ using pixel_renderer.ShapeDrawing;
 using System.Drawing.Printing;
 using System.Windows.Media.Media3D;
 using System;
+using System.Windows.Documents;
+using System.Collections.Generic;
 
 namespace pixel_renderer
 {
@@ -27,6 +29,7 @@ namespace pixel_renderer
         private bool freezeButtonPressedLastFrame = false;
         private Curve curve = null; 
         public Vector2 moveVector = default;
+        Vector2 thisPos;
 
         public static Metadata? PlayerSprite
         {
@@ -41,6 +44,7 @@ namespace pixel_renderer
             string name = $"Animation{index}"; 
             return AssetLibrary.FetchMeta(name);
         }
+
         public override void Awake()
         {
             node.TryGetComponent(out rb);
@@ -59,11 +63,9 @@ namespace pixel_renderer
 
                 sprite.texture.SetImage(PlayerSprite, sprite.Scale);
 
-                await Task.Delay(2500);
-                
-                var node  = Node.New.AddComponent<Text>().node;
+                var node = pixel_renderer.Text.Standard();
 
-                node.Child(node);
+                this.node.Child(node.Item1);
 
             });
             task.Start();
@@ -79,7 +81,6 @@ namespace pixel_renderer
         {
             targetRay.direction.Rotate(turnSpeed);
         }
-
         private void LeftArrow()
         {
             targetRay.direction.Rotate(-turnSpeed);
@@ -91,14 +92,12 @@ namespace pixel_renderer
                 return;
             moveVector = new Vector2(moveVector.X, 1 * speed);
         }
-
         void Down()
         {
             if (!Get(Key.LeftShift))
                 return;
             moveVector = new Vector2(moveVector.X, -1 * speed);
         }
-
         void Left()
         {
             if (!Get(Key.LeftShift))
@@ -120,13 +119,11 @@ namespace pixel_renderer
         {
             if (!takingInput)
                 return;
-
             if (isGrounded)
                 isGrounded = false;
-
             Move(moveVector);
-
             moveVector = Vector2.Zero;
+
         }
         private void Move(Vector2 moveVector)
         {
@@ -134,9 +131,6 @@ namespace pixel_renderer
                 rb?.ApplyImpulse(moveVector.WithValue(y: speed * moveVector.Y) * speed);
             else rb?.ApplyImpulse(moveVector * speed);
         }
-
-        Vector2 thisPos;
-
         public void FreezePlayer()
         {
             bool freezeButtonPressed = Get(Key.LeftShift);
@@ -157,7 +151,6 @@ namespace pixel_renderer
         }
         public static Node Standard()
         {
-
             Node playerNode = new("Player")
             {
                 Position = new Vector2(0, -20)
