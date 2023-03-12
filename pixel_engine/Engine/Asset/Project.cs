@@ -72,11 +72,10 @@ namespace pixel_renderer
         }
         public void AddStage(Stage stage)
         {
-            // makes sure the metadata is up-to-date.
-            stage.Sync();
 
             stagesMeta.Add(stage.Metadata);
             stages.Add(stage);
+
             Constants.RemoveDuplicatesFromList(stagesMeta);
             Constants.RemoveDuplicatesFromList(stages);
         }
@@ -94,7 +93,7 @@ namespace pixel_renderer
         {
             get
             {
-                Project defaultProj = new("Default project");
+                Project defaultProj = new("Default Project");
                 defaultProj.AddStage(Stage.Standard());
                 return defaultProj;
             }

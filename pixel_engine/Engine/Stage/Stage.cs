@@ -295,7 +295,7 @@ namespace pixel_renderer
                 nodes.Add(rbNode);
             }
 
-            var stage = new Stage("Default Stage", DefaultBackgroundMetadata, nodes);
+            var stage = new Stage("Killa Kush Weed Land, Weedagon USA", DefaultBackgroundMetadata, nodes);
             return stage;
         }
 

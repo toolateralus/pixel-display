@@ -98,6 +98,7 @@ namespace pixel_renderer
             if (node.GetComponent<Collider>()?.Polygon is not Polygon poly)
                 return;
 
+            if(node.children != null)
             foreach (var child in node.children)
             {
                 if (!child.TryGetComponent(out Collider col)) return;
