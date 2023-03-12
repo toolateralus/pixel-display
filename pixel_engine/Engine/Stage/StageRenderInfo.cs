@@ -1,4 +1,5 @@
-﻿using pixel_renderer;
+﻿using Newtonsoft.Json.Linq;
+using pixel_renderer;
 using pixel_renderer.ShapeDrawing;
 using System;
 using System.Collections.Generic;
@@ -46,25 +47,31 @@ namespace pixel_renderer
     public abstract class ViewpoortInfoObject
     {
         readonly Vector2 half = new(0.5f, 0.5f);
-        public Matrix3x2 Transform;
-        public Vector2 viewportOffset = new();
-        public Vector2 viewportScale = new();
-        public Vector2 Position { get => Transform.Translation; set => Transform.Translation = value; }
+        public Matrix3x2 transform;
+        public Matrix3x2 projection;
+        public Vector2 ViewportOffset { get => projection.Translation; set => projection.Translation = value; }
+        public Vector2 ViewportScale
+        {
+            set => projection.SetScale(value);
+            get => new(projection.M11, projection.M22);
+        }
+
+        public Vector2 Position { get => transform.Translation; set => transform.Translation = value; }
         public Vector2[] GetCorners()
         {
             var viewport = Polygon.UnitSquare();
-            viewport.Transform(Transform);
+            viewport.Transform(transform);
             return viewport.vertices;
         }
-        public Vector2 LocalToViewport(Vector2 local) => (local + viewportOffset) * viewportScale;
+        public Vector2 LocalToViewport(Vector2 local) => (local + ViewportOffset) * ViewportScale;
         public Vector2 GlobalToScreen(Vector2 globalPos) => LocalToScreen(GlobalToLocal(globalPos));
         public Vector2 ScreenToGlobal(Vector2 normalizedScreenPos) => LocalToGlobal(ScreenToLocal(normalizedScreenPos));
         public Vector2 LocalToScreen(Vector2 local) =>
-            ((local * viewportScale + viewportOffset) / 2) + half;
+            ((local * ViewportScale + ViewportOffset) / 2) + half;
         public Vector2 ScreenToLocal(Vector2 screenViewport) =>
-            (((screenViewport - half) * 2) - viewportOffset) / viewportScale.GetDivideSafe();
-        public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
-        internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
+            (((screenViewport - half) * 2) - ViewportOffset) / ViewportScale.GetDivideSafe();
+        public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(transform);
+        internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(transform.Inverted());
 
         public abstract void Set(object? refObject);
     }
@@ -79,15 +86,15 @@ namespace pixel_renderer
         {
             if (refObject is not Sprite sprite)
                 throw new ArgumentException($"Must pass in object of type {nameof(Sprite)}");
-            viewportOffset = sprite.viewportOffset;
-            viewportScale = sprite.viewportScale.GetDivideSafe();
+            ViewportOffset = sprite.viewportOffset;
+            ViewportScale = sprite.viewportScale.GetDivideSafe();
             camDistance = sprite.camDistance;
             
             image = sprite.texture.GetImage();
             colorDataSize = image.Size;
             filtering = sprite.textureFiltering;
             
-            Transform = sprite.Transform;
+            transform = sprite.Transform;
             scale = sprite.Scale;
         }
         public Vector2 LocalToColorPosition(Vector2 local) => ViewportToColorPosition(LocalToViewport(local));
@@ -111,112 +118,27 @@ namespace pixel_renderer
         {
             if (refObject is not Camera cam)
                 throw new ArgumentException($"Must pass in object of type {nameof(Camera)}");
-            viewportOffset = cam.viewportPosition;
-            viewportScale = cam.viewportSize.GetDivideSafe();
-            Transform = cam.Transform;
+            ViewportOffset = cam.viewportPosition;
+            ViewportScale = cam.viewportSize.GetDivideSafe();
+            transform = cam.Transform;
             cam.camInfo = this;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Draw(RendererBase renderer)
         {
-            if (renderer.Resolution.Y == 0 || renderer.Resolution.X == 0) return;
+            Vector2 resolution = renderer.Resolution;
+            if (resolution.Y == 0 || resolution.X == 0) return;
 
-            if (zBuffer.GetLength(0) != renderer.Resolution.X || zBuffer.GetLength(1) != renderer.Resolution.Y)
-                zBuffer = new float[(int)renderer.Resolution.X, (int)renderer.Resolution.Y];
+            if (zBuffer.GetLength(0) != resolution.X || zBuffer.GetLength(1) != resolution.Y)
+                zBuffer = new float[(int)resolution.X, (int)resolution.Y];
 
             Array.Clear(zBuffer);
 
-            DrawBaseImage(renderer.Resolution, renderer.baseImage, renderer);
-            DrawSprites(Runtime.Current.GetStage().StageRenderInfo, renderer.Resolution, renderer);
-            DrawGraphics(renderer.Resolution, renderer);
-        }
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawGraphics(Vector2 resolution, RendererBase renderer)
-        {
-            Vector2 framePos = new Vector2();
-            var refColor = new Pixel();
-            foreach ((ShapeDrawing.Circle circle, Pixel color) in ShapeDrawer.Circles)
-            {
-                refColor = color;
-                float sqrtOfHalf = MathF.Sqrt(0.5f);
-                Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
-                Vector2 centerPos = GlobalToScreen(circle.center) * resolution;
-                Vector2 pixelRadius = GlobalToScreen(radius) * resolution - centerPos;
-                Vector2 quaterArc = pixelRadius * sqrtOfHalf;
-                int quarterArcAsInt = (int)quaterArc.X;
-                for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
-                {
-                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
-                    framePos.X = centerPos.X + x;
-                    framePos.Y = centerPos.Y + y;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    framePos.Y = centerPos.Y - y;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                }
-                quarterArcAsInt = (int)quaterArc.Y;
-                for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
-                {
-                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
-                    framePos.Y = centerPos.Y + y;
-                    framePos.X = centerPos.X + x;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    framePos.X = centerPos.X - x;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                }
-            }
-            foreach ((Line line, Pixel color) in ShapeDrawer.Lines)
-            {
-                refColor = color;
-                Vector2 startPos = GlobalToScreen(line.startPoint) * resolution;
-                Vector2 endPos = GlobalToScreen(line.endPoint) * resolution;
-                if (startPos == endPos)
-                {
-                    if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref startPos);
-                    continue;
-                }
-
-                float xDiff = startPos.X - endPos.X;
-                float yDiff = startPos.Y - endPos.Y;
-
-                if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
-                {
-                    float slope = yDiff / xDiff;
-                    float yIntercept = startPos.Y - (slope * startPos.X);
-
-                    int endX = (int)MathF.Min(MathF.Max(startPos.X, endPos.X), resolution.X);
-
-                    for (int x = (int)MathF.Max(MathF.Min(startPos.X, endPos.X), 0); x < endX; x++)
-                    {
-                        framePos.X = x;
-                        framePos.Y = slope * x + yIntercept;
-                        if (framePos.Y < 0 || framePos.Y >= resolution.Y)
-                            continue;
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
-                }
-                else
-                {
-                    float slope = xDiff / yDiff;
-                    float xIntercept = startPos.X - (slope * startPos.Y);
-
-                    int endY = (int)MathF.Min(MathF.Max(startPos.Y, endPos.Y), resolution.Y);
-
-                    for (int y = (int)MathF.Max(MathF.Min(startPos.Y, endPos.Y), 0); y < endY; y++)
-                    {
-                        framePos.Y = y;
-                        framePos.X = slope * y + xIntercept;
-                        if (framePos.X < 0 || framePos.X >= resolution.X)
-                            continue;
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
-                }
-            }
+            DrawBaseImage(resolution, renderer.baseImage, renderer);
+            if (Runtime.Current.GetStage() is Stage stage)
+                DrawSprites(stage.StageRenderInfo, resolution, renderer);
+            ShapeDrawer.DrawGraphics(renderer, transform.Inverted(), projection);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawSprites(StageRenderInfo renderInfo, Vector2 resolution, RendererBase renderer)
@@ -253,12 +175,12 @@ namespace pixel_renderer
             BoundingBox2D camBoundingBox = new(GetCorners());
 
             var scale = camBoundingBox.max - camBoundingBox.min;
-            sprite.Transform.Translation = Position;
+            sprite.transform.Translation = Position;
             sprite.scale = scale;
-            sprite.Transform.M11 = scale.X;
-            sprite.Transform.M22 = scale.Y;
-            sprite.viewportScale = sprite.scale / baseImageSize;
-            sprite.viewportOffset = Position.Wrapped(baseImageSize) / baseImageSize / sprite.viewportScale;
+            sprite.transform.M11 = scale.X;
+            sprite.transform.M22 = scale.Y;
+            sprite.ViewportScale = sprite.scale / baseImageSize;
+            sprite.ViewportOffset = Position.Wrapped(baseImageSize) / baseImageSize / sprite.ViewportScale;
 
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;

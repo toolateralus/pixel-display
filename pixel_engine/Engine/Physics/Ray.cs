@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace pixel_renderer
 {
-    internal struct Ray
+    public struct Ray
     {
         public Vector2 position;
         public Vector2 direction;
@@ -62,7 +62,7 @@ namespace pixel_renderer
             var intercept = relYIntercept * direction;
             var interceptOffset = intercept - line.startPoint;
             if (Vector2.Dot(interceptOffset, endOffset) < 0 ||
-                interceptOffset.SqrMagnitude() > endOffset.SqrMagnitude())
+interceptOffset.SqrMagnitude() > endOffset.SqrMagnitude())
                 return null;
             return relYIntercept;
         }

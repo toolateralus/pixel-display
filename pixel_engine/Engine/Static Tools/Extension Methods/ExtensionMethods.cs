@@ -229,9 +229,12 @@ namespace pixel_renderer
             return matrix;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Invert(this ref Matrix3x2 matrix)
-        {
+        public static void Invert(this ref Matrix3x2 matrix) =>
             Matrix3x2.Invert(matrix, out matrix);
+        public static void SetScale(this ref Matrix3x2 matrix, Vector2 scale)
+        {
+            matrix.M11 = scale.X;
+            matrix.M22 = scale.Y;
         }
         #endregion
         #region Strings
