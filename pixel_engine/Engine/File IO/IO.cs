@@ -34,11 +34,17 @@ namespace pixel_renderer
         /// <returns></returns>
         public static T? ReadJson<T>(Metadata meta) where T : new()
         {
-            T? obj = (T)Convert.ChangeType(null, typeof(T));
+            T? obj;
+
+            if (typeof(T) != typeof(ValueType))
+                obj = (T)Convert.ChangeType(null, typeof(T));
+            else obj = default;
+
+            if (meta is null)
+                return obj;
 
             if (!File.Exists(meta.Path))
                 return obj;
-
             try
             {
                 if (meta is null)

@@ -6,38 +6,7 @@ namespace pixel_renderer
     public class LuaInterop
     {
         private Lua state;
-        internal static LuaFunction func;
-
-        public LuaInterop()
-        {
-            state = new();
-
-            func = new(Print);
-
-            state.Register("print", func);
-        }
-        public bool Run(string fileName)
-        {
-            state ??= new();
-
-            var result = state.LoadFile(fileName);
-
-            if (result != LuaStatus.OK)
-            {
-                Runtime.Log(state.ToString(1));
-                return false; 
-            }
-
-            result = state.PCall(0, -1, 0);
-
-            if (result != LuaStatus.OK)
-            {
-                Runtime.Log(state.ToString(1));
-                return false;
-            }
-            return true;
-        }
-        public static int Print(IntPtr p)
+        internal static LuaFunction printFunct = (p) =>
         {
             var state = Lua.FromIntPtr(p);
             var n = state.GetTop();
@@ -80,6 +49,34 @@ namespace pixel_renderer
                 }
             }
             return 0; 
+        };
+        
+        public LuaInterop()
+        {
+            state = new();
+
+            state.Register("print", printFunct);
+        }
+        public bool Run(string fileName)
+        {
+            state ??= new();
+
+            var result = state.LoadFile(fileName);
+
+            if (result != LuaStatus.OK)
+            {
+                Runtime.Log(state.ToString(1));
+                return false; 
+            }
+
+            result = state.PCall(0, -1, 0);
+
+            if (result != LuaStatus.OK)
+            {
+                Runtime.Log(state.ToString(1));
+                return false;
+            }
+            return true;
         }
     }
 }

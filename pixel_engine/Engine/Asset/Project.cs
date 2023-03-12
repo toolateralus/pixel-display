@@ -76,7 +76,9 @@ namespace pixel_renderer
             stagesMeta.Add(stage.Metadata);
             stages.Add(stage);
 
+            if(stagesMeta.Count > 0)
             Constants.RemoveDuplicatesFromList(stagesMeta);
+            if(stages.Count > 0)
             Constants.RemoveDuplicatesFromList(stages);
         }
 
