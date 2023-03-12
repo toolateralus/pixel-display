@@ -11,7 +11,7 @@ namespace pixel_renderer
     {
         #region Json Constructor
         [JsonConstructor]
-        public Node(bool Enabled, Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vector2 position, Vector2 Scale, Node? parentNode, Dictionary<Vector2, Node> children, string nodeUUID)
+        public Node(bool Enabled, Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vector2 position, Vector2 Scale, Node? parentNode, List<Node> children, string nodeUUID)
         {
             this.ParentStage = parentStage;
             Name = name;
@@ -82,8 +82,10 @@ namespace pixel_renderer
         [JsonProperty] public Vector2 localPos = new();
         
         [JsonProperty] public Node? parent;
-       
-        [JsonProperty] public Dictionary<Vector2, Node> children = new();
+
+        [JsonProperty]
+        public List<Node> children = new();
+
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
         [Field]
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
@@ -159,14 +161,12 @@ namespace pixel_renderer
 
             children ??= new();
 
-            if (children.ContainsKey(direction * distance))
+            if (children.Contains(child))
                 return;
 
             _ = child.parent?.TryRemoveChild(child);
 
-            child.localPos = child.Position - Position;
-
-            children.Add(direction * distance, child);
+            children.Add(child);
 
             child.parent = this;
 
@@ -182,7 +182,7 @@ namespace pixel_renderer
             {
                 var current = stack.Pop();
                 visited.Add(current);
-                foreach (var child in current.children.Values)
+                foreach (var child in current.children)
                 {
                     if (child == newNode)
                     {
@@ -222,9 +222,9 @@ namespace pixel_renderer
             ComponentsBusy = true;
 
             foreach (var kvp in children)
-                if (kvp.Value == child)
+                if (kvp == child)
                 {
-                    children.Remove(kvp.Key);
+                    children.Remove(kvp);
                     child.parent = null;
                     return true;
                 }
@@ -294,18 +294,16 @@ namespace pixel_renderer
             ComponentsBusy = true;
 
             foreach (var kvp in children)
-            {
-                kvp.Value.parent = null;
-            }
-            KeyValuePair<Vector2, Node> pair = default; 
+                kvp.parent = null;
+
             if (parent?.children != null)
-            {
                 foreach (var kvp in parent.children)
-                    if (kvp.Value == this)
-                        pair = kvp;
-                parent.children.Remove(pair.Key);
-            }
+                    if (kvp == this)
+                        parent.children.Remove(this);
+
+
             ParentStage?.nodes.Remove(this);
+
             foreach (var component in Components)
                 foreach(var comp in component.Value)
                     comp.OnDestroy();

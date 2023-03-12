@@ -94,11 +94,13 @@ namespace pixel_renderer
             }
             else
                 ShapeDrawer.DrawLine(targetLine, Pixel.Blue);
+
             if (node.GetComponent<Collider>()?.Polygon is not Polygon poly)
                 return;
+
             foreach (var child in node.children)
             {
-                if (!child.Value.TryGetComponent(out Collider col)) return;
+                if (!child.TryGetComponent(out Collider col)) return;
                 var centroid = col.Polygon.centroid;
                 ShapeDrawer.DrawLine(poly.centroid, centroid, Color.LightCyan);
             }
