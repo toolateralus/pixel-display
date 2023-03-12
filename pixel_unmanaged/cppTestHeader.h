@@ -1,28 +1,16 @@
 #pragma once
-#include <vector>
-using namespace std; 
 
-namespace CPP
+using namespace System::Collections::Generic;
+using namespace System; 
+
+public ref class cppClass 
 {
- class TestClassCPP
-	{
-		public:
-		  int value;
-		  vector<int> values; 
+	public:
+		static int val;
 
-		  int GetValue() { return value; };
-		  void SetValue(int newValue)
-		  {
-			  value = newValue;
-		  }
-		  void DoAction() 
-		  {
-			  for (int i = 0; i < values.size(); ++i)
-			  {
-				  auto val = GetValue();
-				  values.push_back(val * i);
-				  SetValue(val);
-			  }
-		  }
-	};
-}
+		property static int integers 
+		{
+			int get() { return val; };
+			void set(int value) { val = value; }
+		}
+};

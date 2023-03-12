@@ -13,6 +13,7 @@ using System.Windows.Media.Media3D;
 using System;
 using System.Windows.Documents;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace pixel_renderer
 {
@@ -30,6 +31,8 @@ namespace pixel_renderer
         private Curve curve = null; 
         public Vector2 moveVector = default;
         Vector2 thisPos;
+        
+
 
         public static Metadata? PlayerSprite
         {
