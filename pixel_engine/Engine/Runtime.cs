@@ -66,7 +66,7 @@ namespace pixel_renderer
             physicsWorker.RunWorkerAsync();
 
             Initialized = true;
-            Project.LoadStage(0);
+            Project.TryLoadStage(0);
             GetProjectSettings();
 
         }

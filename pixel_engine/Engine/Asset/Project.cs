@@ -19,18 +19,12 @@ namespace pixel_renderer
         [JsonProperty]
         public string Name = "DefaultProjectName";
 
-        public static void LoadStage(int index)
+        public static void TryLoadStage(int index)
         {
             List<Metadata> stagesMeta = Runtime.Current.project.stagesMeta;
 
-            Stage stage;
-
-            if (stagesMeta.Count > index)
-            {
-                Metadata stageMeta = stagesMeta[index];
-                stage = IO.ReadJson<Stage>(stageMeta);
-            }
-            else stage = Runtime.InstantiateDefaultStageIntoProject();
+            if (stagesMeta.Count <= index || IO.ReadJson<Stage>(stagesMeta[index]) is not Stage stage)
+                stage = Runtime.InstantiateDefaultStageIntoProject();
             Runtime.Current.SetStage(stage);
         }
         public void Save()

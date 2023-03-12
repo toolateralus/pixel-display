@@ -365,21 +365,9 @@ namespace pixel_editor
             action = (o) =>
             {
                 if (!TryGetArgAtIndex<int>(0, out int index, o)) return;
-                Project.LoadStage(index);
+                Project.TryLoadStage(index);
             },
 
-        };
-        public static Command cmd_save_all() => new() 
-        {
-            phrase = "save;",
-            description = "Saves all assets, stages, and projects currently loaded.",
-            syntax = "save();",
-            action = (o) =>
-            {
-                AssetLibrary.SaveAll();
-            },
-            argumentTypes = null,
-            args = null,
         };
         public static Command cmd_list_stages() => new()
         {
