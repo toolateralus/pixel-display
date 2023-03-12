@@ -22,16 +22,11 @@
         }
         internal protected Vector2 _resolution = Constants.DefaultResolution;
         public bool baseImageDirty = true;
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public abstract void Render(System.Windows.Controls.Image output);
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsWithinMaxExclusive(float x, float y, float min, float max)
-        {
-            return x >= min && x < max && y >= min && y < max;
-        }
-        
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteColorToFrame(ref Pixel color, ref Vector2 framePos)
         {
@@ -49,10 +44,15 @@
             frame[index + 1] = (byte)(colorG + frameG);
             frame[index + 2] = (byte)(colorR + frameR);
         }
-        
         internal void MarkDirty()
         {
             baseImageDirty = true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsWithinMaxExclusive(float x, float y, float min, float max)
+        {
+            return x >= min && x < max && y >= min && y < max;
         }
     }
 }
