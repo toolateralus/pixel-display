@@ -13,11 +13,9 @@ namespace pixel_renderer.FileIO
         [JsonProperty] public string Name;
         [JsonProperty] public string UUID;
         [JsonProperty] public Metadata Metadata;
-        public Asset() : this("New Asset Mode", false)
+        public Asset()
         {
-         
         }
-
         public virtual void Sync()
         {
             string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsFileExtension;
@@ -28,9 +26,9 @@ namespace pixel_renderer.FileIO
             AssetIO.GuaranteeUniqueName(Metadata, this);
             IO.WriteJson(this, Metadata);
         }
-        public Asset(string name = "New Asset", bool shouldUpload = false)
+        public Asset(string name, bool shouldUpload = false)
         {
-            Name = name;
+            Name = name; 
             UUID = pixel_renderer.UUID.NewUUID();
             if(shouldUpload) Upload();
         }
