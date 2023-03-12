@@ -121,7 +121,7 @@ namespace pixel_renderer.Assets
         /// Save the currently loaded asset Library and project to the disk.
         /// </summary>
         /// 
-        public static void Sync()
+        public static void SaveAll()
         {
             Busy = true; 
             lock (Current)
@@ -143,9 +143,7 @@ namespace pixel_renderer.Assets
                         continue; 
 
                     assetPair.Value.Sync();
-
-                    AssetIO.GuaranteeUniqueName(assetPair.Key, assetPair.Value);
-                    AssetIO.WriteAsset(assetPair.Value, assetPair.Key);
+                    assetPair.Value.Save();
                 }
             }
             Busy = false; 

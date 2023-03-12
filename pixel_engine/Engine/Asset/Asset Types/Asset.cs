@@ -23,7 +23,11 @@ namespace pixel_renderer.FileIO
             string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsFileExtension;
             Metadata = new(Name, defaultPath, Constants.AssetsFileExtension);
         }
-    
+        internal protected void Save()
+        {
+            AssetIO.GuaranteeUniqueName(Metadata, this);
+            IO.WriteJson(this, Metadata);
+        }
         public Asset(string name = "New Asset", bool shouldUpload = false)
         {
             Name = name;
