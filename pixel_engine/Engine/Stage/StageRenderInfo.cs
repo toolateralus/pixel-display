@@ -41,44 +41,42 @@ namespace pixel_renderer
     }
     public abstract class ViewpoortInfoObject
     {
-        readonly Vector2 half = new(0.5f, 0.5f);
         public Matrix3x2 transform;
         public Matrix3x2 projectionMat;
         public static readonly Matrix3x2 screenMat = Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f);
-        public Vector2 ViewportOffset { get => projectionMat.Translation; set => projectionMat.Translation = value; }
+        public Vector2 ViewportOffset
+        {
+            get => projectionMat.Translation;
+            set => projectionMat.Translation = value;
+        }
         public Vector2 ViewportScale
         {
             set => projectionMat.SetScale(value);
             get => new(projectionMat.M11, projectionMat.M22);
         }
-
-        public Vector2 Position { get => transform.Translation; set => transform.Translation = value; }
+        public Vector2 Position
+        {
+            get => transform.Translation;
+            set => transform.Translation = value;
+        }
         public Vector2[] GetCorners()
         {
             var viewport = Polygon.UnitSquare();
             viewport.Transform(transform);
             return viewport.vertices;
         }
-        public Vector2 LocalToViewport(Vector2 local)
-        {
-            return local.Transformed(projectionMat);
-            return (local + ViewportOffset) * ViewportScale;
-        }
-
         public Vector2 LocalToScreen(Vector2 local)
         {
             local.Transform(projectionMat);
             local.Transform(screenMat);
             return local;
         }
-
         public Vector2 ScreenToLocal(Vector2 screenViewport)
         {
             screenViewport.Transform(screenMat.Inverted());
             screenViewport.Transform(projectionMat.Inverted());
             return screenViewport;
         }
-
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(transform.Inverted());
 
@@ -106,7 +104,12 @@ namespace pixel_renderer
             transform = sprite.Transform;
             scale = sprite.Scale;
         }
-        public Vector2 LocalToColorPosition(Vector2 local) => ViewportToColorPosition(LocalToViewport(local));
+        public Vector2 LocalToColorPosition(Vector2 local)
+        {
+            local.Transform(projectionMat);
+            return ViewportToColorPosition(local);
+        }
+
         public Vector2 ViewportToColorPosition(Vector2 viewport)
         {
             viewport.X += 0.5f;

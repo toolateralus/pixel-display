@@ -8,7 +8,6 @@ using pixel_renderer.Assets;
 using System.Numerics;
 using pixel_renderer.ShapeDrawing;
 using System.Runtime.InteropServices;
-using KeraLua;
 
 namespace pixel_renderer
 {
