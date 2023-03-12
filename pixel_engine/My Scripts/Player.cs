@@ -5,15 +5,11 @@ using pixel_renderer.FileIO;
 using System.Drawing;
 using System.Threading.Tasks;
 using pixel_renderer.Assets;
-using System.Linq;
 using System.Numerics;
 using pixel_renderer.ShapeDrawing;
-using System.Drawing.Printing;
-using System.Windows.Media.Media3D;
-using System;
-using System.Windows.Documents;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 
 namespace pixel_renderer
 {
@@ -32,8 +28,7 @@ namespace pixel_renderer
         public Vector2 moveVector = default;
         Vector2 thisPos;
         
-
-
+        
         public static Metadata? PlayerSprite
         {
             get
