@@ -456,6 +456,17 @@ namespace pixel_editor
             Runtime.Log($"Rigidbody Added!");
             return x;
         }
+
+        public static CheckBox GetCheckBox(RoutedEventHandler e, string content = "", bool currentValue = false)
+        {
+            CheckBox box = new()
+            {
+                Content = content, 
+            };
+            box.Click += e;
+            return box; 
+        }
+
         #endregion
     }
 }

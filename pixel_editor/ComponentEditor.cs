@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Reflection;
 using System.Data;
 using System.Windows.Markup;
+using Microsoft.VisualBasic;
 
 namespace pixel_editor
 {
@@ -49,11 +50,6 @@ namespace pixel_editor
         private void GetEvents()
         {
             CompositionTarget.Rendering += Update;
-            RegisterAction(delegate 
-            { 
-                Keyboard.ClearFocus();
-                Dispose();
-            },  Key.Escape);
         }
         public void Refresh(Component component)
         {
@@ -87,7 +83,7 @@ namespace pixel_editor
         {
             var fields = data.Fields;
 
-            RefreshData();
+            NewData();
 
             foreach (var field in fields)
             {
@@ -95,6 +91,19 @@ namespace pixel_editor
 
                 if (field.FieldType.BaseType == typeof(Component))
                     return AddNestedComponentEditorButton(viewer, ref i, field, name);
+
+                if (field.FieldType == typeof(bool))
+                {
+                    object obj = field.GetValue(component);
+                    if (obj is not bool val)
+                        break;
+                    AddBoolCheckBox(viewer, ref i, field, val);
+                    
+                }
+
+
+
+
 
                 if (field.FieldType == typeof(string[]))
                 {
@@ -118,7 +127,37 @@ namespace pixel_editor
 
             return i;
         }
-        private void RefreshData()
+
+        private void AddBoolCheckBox(Grid viewer, ref int i, FieldInfo field, bool val)
+        {
+
+            if (field.GetValue(component) is not bool curVal)
+                return;
+
+            var checkBox = Inspector.GetCheckBox(onCheckBoxChecked(field), i.ToString(), curVal);
+
+            checkBox.Name = $"listBox{i}";
+            checkBox.FontSize = 4;
+            uiElements.Add(checkBox);
+            viewer.Children.Add(checkBox);
+            Inspector.SetRowAndColumn(checkBox, 1, 1, 22, i++);
+            RoutedEventHandler onCheckBoxChecked(FieldInfo field)
+            {
+                return (e, o) =>
+                {
+                    o.Handled = true;
+                    if (e is not CheckBox cb)
+                        return;
+
+                    if (cb.IsChecked is bool val)
+                        field.SetValue(component, val);
+
+                    UpdateData();
+                };
+            }
+        }
+
+        private void NewData()
         {
             if (component != null && data.Component.TryGetTarget(out var dataComp) && dataComp != component)
                 data = new(component);
@@ -206,7 +245,8 @@ namespace pixel_editor
                     if (strings.Length > index)
                         strings[index] = txt; 
                     field.SetValue(component, strings);
-                    Keyboard.ClearFocus(); 
+                    Keyboard.ClearFocus();
+                    UpdateData();
                 }
             }
         }
@@ -216,24 +256,37 @@ namespace pixel_editor
                 return;
             if (e.Key == Key.Return)
             {
+                UpdateData();
                 Keyboard.ClearFocus();
-                Refresh(component); 
             }
         }
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
-            
+
             for (int i = 0; i < data.Fields.Count; ++i)
                 ExecuteEditEvent(i);
 
-            Refresh(component);
+            UpdateData();
+
         }
+
+        private void UpdateData()
+        {
+            for (int i = 0; i < data.Values.Count; i++)
+            {
+                if (data.HasValueChanged(i, data.Values[i], out var newVal))
+                    data.Values[i] = newVal;
+            }
+        }
+
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
+            UpdateData();
+
         }
         private void Update(object? sender, EventArgs e)
         {

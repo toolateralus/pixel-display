@@ -22,7 +22,7 @@ namespace pixel_renderer
         };
 
         [JsonProperty][Field]
-        public int padding = 24;
+        public int padding = 12;
 
         [JsonProperty]
         [Field]
