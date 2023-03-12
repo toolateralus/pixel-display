@@ -24,6 +24,5 @@ namespace CPP
 				  SetValue(val);
 			  }
 		  }
-
 	};
 }
