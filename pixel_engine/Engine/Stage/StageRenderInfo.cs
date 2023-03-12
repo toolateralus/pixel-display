@@ -48,12 +48,13 @@ namespace pixel_renderer
     {
         readonly Vector2 half = new(0.5f, 0.5f);
         public Matrix3x2 transform;
-        public Matrix3x2 projection;
-        public Vector2 ViewportOffset { get => projection.Translation; set => projection.Translation = value; }
+        public Matrix3x2 projectionMat;
+        public static readonly Matrix3x2 screenMat = Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f);
+        public Vector2 ViewportOffset { get => projectionMat.Translation; set => projectionMat.Translation = value; }
         public Vector2 ViewportScale
         {
-            set => projection.SetScale(value);
-            get => new(projection.M11, projection.M22);
+            set => projectionMat.SetScale(value);
+            get => new(projectionMat.M11, projectionMat.M22);
         }
 
         public Vector2 Position { get => transform.Translation; set => transform.Translation = value; }
@@ -63,13 +64,26 @@ namespace pixel_renderer
             viewport.Transform(transform);
             return viewport.vertices;
         }
-        public Vector2 LocalToViewport(Vector2 local) => (local + ViewportOffset) * ViewportScale;
-        public Vector2 GlobalToScreen(Vector2 globalPos) => LocalToScreen(GlobalToLocal(globalPos));
-        public Vector2 ScreenToGlobal(Vector2 normalizedScreenPos) => LocalToGlobal(ScreenToLocal(normalizedScreenPos));
-        public Vector2 LocalToScreen(Vector2 local) =>
-            ((local * ViewportScale + ViewportOffset) / 2) + half;
-        public Vector2 ScreenToLocal(Vector2 screenViewport) =>
-            (((screenViewport - half) * 2) - ViewportOffset) / ViewportScale.GetDivideSafe();
+        public Vector2 LocalToViewport(Vector2 local)
+        {
+            return local.Transformed(projectionMat);
+            return (local + ViewportOffset) * ViewportScale;
+        }
+
+        public Vector2 LocalToScreen(Vector2 local)
+        {
+            local.Transform(projectionMat);
+            local.Transform(screenMat);
+            return local;
+        }
+
+        public Vector2 ScreenToLocal(Vector2 screenViewport)
+        {
+            screenViewport.Transform(screenMat.Inverted());
+            screenViewport.Transform(projectionMat.Inverted());
+            return screenViewport;
+        }
+
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(transform.Inverted());
 
@@ -138,7 +152,7 @@ namespace pixel_renderer
             DrawBaseImage(resolution, renderer.baseImage, renderer);
             if (Runtime.Current.GetStage() is Stage stage)
                 DrawSprites(stage.StageRenderInfo, resolution, renderer);
-            ShapeDrawer.DrawGraphics(renderer, transform.Inverted(), projection);
+            ShapeDrawer.DrawGraphics(renderer, transform.Inverted(), projectionMat);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawSprites(StageRenderInfo renderInfo, Vector2 resolution, RendererBase renderer)
@@ -165,22 +179,10 @@ namespace pixel_renderer
         {
             SpriteInfo sprite = new();
 
-            var stage = Runtime.Current.GetStage();
-            Vector2 baseImageSize;
-
-            if (stage != null)
-                baseImageSize = stage.backgroundSize;
-            else baseImageSize = new(16, 16);
-
-            BoundingBox2D camBoundingBox = new(GetCorners());
-
-            var scale = camBoundingBox.max - camBoundingBox.min;
-            sprite.transform.Translation = Position;
-            sprite.scale = scale;
-            sprite.transform.M11 = scale.X;
-            sprite.transform.M22 = scale.Y;
-            sprite.ViewportScale = sprite.scale / baseImageSize;
-            sprite.ViewportOffset = Position.Wrapped(baseImageSize) / baseImageSize / sprite.ViewportScale;
+            if(Runtime.Current.GetStage() is not Stage stage)
+                return;
+            sprite.transform = transform;
+            sprite.projectionMat = transform * stage.bgTransform.Inverted();
 
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;
