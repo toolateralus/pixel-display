@@ -274,16 +274,20 @@ namespace pixel_renderer
             Node camera = new("Camera");
             Node floorNode = Floor.Standard();
             Node light = new("Light");
-           
-            var lt = light.AddComponent<Light>();
-           
-            camera.AddComponent<Camera>().Scale = new(15,15);
             
-            light.Position = new(100, -100);
-            
-            lt.brightness = 0.1f;
-            lt.radius = 10; 
+            Node textTest = new("Text Test a");
+            var img = textTest.AddComponent<Text>();
+            img.viewportSize = new(25, 25);
+            textTest.Scale = new(25, 25);
+            textTest.Position = new Vector2(0, 0);
 
+            var lt = light.AddComponent<Light>();
+            camera.AddComponent<Camera>().Scale = new(15,15);
+            light.Position = new(50, -50);
+            lt.brightness = .75f;
+            lt.radius = 50;
+
+            nodes.Add(textTest);
             nodes.Add(light);
             nodes.Add(camera);
             nodes.Add(floorNode);

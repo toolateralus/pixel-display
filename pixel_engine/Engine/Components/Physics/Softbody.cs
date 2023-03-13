@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.Security.Cryptography.Xml;
+using System.Windows.Media.Animation;
 
 namespace pixel_renderer
 {
@@ -10,19 +11,23 @@ namespace pixel_renderer
         [Field] private float minColliderScale = 0.1f;
         [Field] private float maxColliderScale = 5f;
 
-        [Field]
-        Vector2 minForce = new Vector2(-15f, -15f);
-        [Field]
-        Vector2 maxForce = new Vector2(15f, 15f);
+        private Collider collider;
+        private Polygon model;
+        private Rigidbody rb;
+        private Collision? lastCollision;
+       
+        [Field] private int solverIterations = 16;
+        [Field] private float deformationRadius = 0.5f;
 
-        private Collider collider = null;
-                private Curve curve;
-                private Polygon model;
-                private Rigidbody rb;
-        private Player player;
         public override void FixedUpdate(float delta)
         {
             if (collider is null) return;
+            if (lastCollision is not null)
+            {
+                Deform1(lastCollision);
+                lastCollision = null;
+            }
+
             Resolve();
         }
 
@@ -44,13 +49,10 @@ namespace pixel_renderer
 
         public override void OnCollision(Collision col)
         {
-            Deform1(col);
+            lastCollision = col;
         }
 
-        [Field]
-        private int solverIterations = 16;
-        [Field]
-        private float deformationRadius = 0.01f;
+
         private void Deform1(Collision col)
         {
             if (collider == null || model == null)

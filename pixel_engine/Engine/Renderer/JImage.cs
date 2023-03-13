@@ -64,7 +64,6 @@ namespace pixel_renderer
             byte[] byteData = CBit.ByteFromPixel(pixels);
 
             data = byteData;
-            //bmpInput.Dispose();
         }
         public JImage(BoundingBox2D bounds, byte[] bytes)
         {
@@ -86,7 +85,7 @@ namespace pixel_renderer
         }
         public Pixel GetPixel(int x, int y)
         {
-            if (data.Length == 0)
+            if (data is null || data.Length == 0)
                 return Pixel.Black;
 
             int position = (y * width + x) * 4;
@@ -149,10 +148,9 @@ namespace pixel_renderer
             byte[] drawSurface = new byte[(int)bounds.Width * (int)bounds.Height * 4];
             return drawSurface;
         }
-
-        internal void GetPixel(float x, float y)
+        internal JImage Clone()
         {
-            throw new NotImplementedException();
+            return (JImage)MemberwiseClone();
         }
     }
 }
