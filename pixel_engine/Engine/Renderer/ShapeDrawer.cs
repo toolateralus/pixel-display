@@ -14,14 +14,10 @@ namespace pixel_renderer.ShapeDrawing
         {
             Lines.Clear();
             Circles.Clear();
-            var components = stage.GetAllComponents<Component>();
-            lock (components)
+            var nodesCount = stage.nodes.Count;
+            for (int i = 0; i < nodesCount; i++)
             {
-                for (int i = 0; i < components.Count(); ++i)
-                {
-                    var component = components.ElementAt(i);
-                    component.OnDrawShapes();
-                }
+                stage.nodes[i]?.OnDrawShapes();
             }
             DrawShapeActions?.Invoke();
         }

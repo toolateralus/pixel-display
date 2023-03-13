@@ -475,5 +475,20 @@ namespace pixel_renderer
 
         public bool ComponentsBusy { get; private set; }
         public Queue<Action> ComponentActionQueue { get; private set; } = new();
+
+        public void OnDrawShapes()
+        {
+            var compTypes = Components.Values;
+            var typesCount = compTypes.Count;
+            for (int iType = 0; iType < typesCount; iType++)
+            {
+                var compList = compTypes.ElementAt(iType);
+                var compCount = compList.Count;
+                for (int iComp = 0; iComp < compCount; iComp++)
+                {
+                    compList[iComp].OnDrawShapes();
+                }
+            }
+        }
     }
 }
