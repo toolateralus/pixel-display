@@ -18,17 +18,19 @@ namespace pixel_renderer
        
         [Field] private int solverIterations = 16;
         [Field] private float deformationRadius = 0.5f;
+        [Field] private bool shouldResolve;
 
         public override void FixedUpdate(float delta)
         {
             if (collider is null) return;
-            if (lastCollision is not null)
-            {
-                Deform1(lastCollision);
-                lastCollision = null;
-            }
 
-            Resolve();
+            if(shouldResolve)
+                Resolve();
+
+
+
+            if (lastCollision is not null)
+                lastCollision = null;
         }
 
         public override void Awake()
@@ -88,10 +90,9 @@ namespace pixel_renderer
                     // Calculate the relative velocity of the model vertex with respect to the collision normal
                     Vector2 relativeVelocity = modelVertex - col.contact;
                     Vector2 tangent = Vector2.Dot(relativeVelocity, col.normal) * col.normal;
-                    Vector2 perpendicular = relativeVelocity - tangent;
 
                     // Calculate the force to be applied based on the perpendicular component of the relative velocity
-                    Vector2 forceVector = perpendicular * (-force * Vector2.Dot(modelVertex - edge.start, normal));
+                    Vector2 forceVector = tangent * (-force * Vector2.Dot(modelVertex - edge.start, normal));
 
                     poly.vertices[index] += forceVector;
                 }
@@ -101,10 +102,10 @@ namespace pixel_renderer
             collider.model = poly;
             collider.model.CalculateNormals();
         }
-        private float Force(Polygon collider, int index)
+        private float Force(Collision col, int index)
         {
             // Get the nearest edge of the collider to the vertex
-            var edge = collider.GetNearestEdge(model.vertices[index]);
+            var edge = col.collider.model.GetNearestEdge(model.vertices[index]);
 
             // Calculate the distance between the vertex and the collider edge
             float distance = Vector2.Distance(model.vertices[index], edge.start);
@@ -165,6 +166,27 @@ namespace pixel_renderer
 
             var sb = node.AddComponent<Softbody>();
             return node; 
+        }
+
+        internal void Outward(float amt)
+        {
+            if (collider is null|| model is null) return;
+            Polygon poly = new(collider.model);
+            const int iterations = 1; 
+
+            for (int i = 0; i < poly.vertices.Length * iterations; i++)
+            {
+                var index = i / iterations;
+                if (WithinDeformationRange(poly.vertices[index], model.vertices[index]))
+                {
+                    Vector2 dir = poly.centroid - poly.vertices[index];
+                    Vector2 vert = poly.vertices[index];
+                    vert = (-vert * dir) * amt / iterations;
+                    poly.vertices[index] = vert;
+                }
+            }
+            poly.CalculateNormals(); 
+            collider.model = poly;
         }
     }
 }

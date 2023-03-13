@@ -178,16 +178,6 @@ Gets and returns either the first found `Component` of `Type` `<T>` , or of type
 	// this is a windows application anyway.
  }
  ```
- > This type of query can be used to fetch any runtime instanced data, currently existent or not. 
- >> This also means the reference can easily be null, wrong, or invalid.
-
- ### By `ComponentArray`
- Tags : API, Experimental
-
- This query type is experimental, and could be useless. Given the provided parameter of type `ComponentArray`, return the
- first node that meets the minimum or maximum criteria. 
- 
- To understand this more, let's look at what a `ComponentArray` `object`.
 
  ``` componentArray.cs 
 public class ComponentArray

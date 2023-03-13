@@ -64,7 +64,16 @@ namespace pixel_renderer
             if (isGrounded)
                 isGrounded = false;
             Move(moveVector);
+
+            if (node.TryGetComponent(out Softbody sb))
+            {
+                if (moveVector.SqrMagnitude() > 0)
+                    sb.Outward(moveVector.SqrMagnitude() / 5);
+            }
+
             moveVector = Vector2.Zero;
+
+
         }
         public override void OnDrawShapes()
         {
