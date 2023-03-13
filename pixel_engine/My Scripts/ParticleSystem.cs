@@ -13,7 +13,7 @@ namespace pixel_renderer
             Next(velocity, color);
         }
 
-        private void Next(Vector2 velocity, Pixel color)
+        internal void Next(Vector2 velocity, Pixel color)
         {
             start += velocity;
             end += velocity;
@@ -27,30 +27,23 @@ namespace pixel_renderer
     public class ParticleSystem : Component
     {
         [Field] public List<Pixel> Pallette = new() { Color.Purple, Color.MediumSeaGreen, Color.MediumPurple, Color.MediumBlue };
-        [Field] public Vector2 launcherPos;
-        [Field] public int maxParticleCount = 1;
-        [Field] public int initParticleCount = 10;
-        [Field] public int maxDist = 250; 
-        [Field] public bool preWarm = true;
         [Field] private List<Particle> state = new();
 
         int index = 0;
         public override void Awake()
         {
             state = new();
-            if(preWarm)
-                for (int i = 0; i < initParticleCount; ++i)
+                for (int i = 0; i < 10; ++i)
                 {
                     Particle p = new(Position, Color.White);
                     state.Add(p);
                 }
-
         }
         public override void Update()
         {
             if (index >= state.Count)
                 index = 0;
-            Particle particle = state[index++];
+            Particle particle = state[index++].Next();
         }
         public override void OnDrawShapes()
         {
