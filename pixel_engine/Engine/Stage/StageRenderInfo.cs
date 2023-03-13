@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 
 namespace pixel_renderer
 {
@@ -43,8 +44,10 @@ namespace pixel_renderer
         public Matrix3x2 transformInverted;
         public Matrix3x2 projectionMat;
         public Matrix3x2 projectionMatInverted;
-        public static readonly Matrix3x2 screenMat = Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f);
-        public static readonly Matrix3x2 screenMatInverted = (Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f)).Inverted();
+        public readonly Matrix3x2 screenMat = Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f);
+        public readonly Matrix3x2 screenMatInverted = (Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f)).Inverted();
+        public readonly Vector2 oneVect = Vector2.One;
+        public readonly Vector2 zeroVect;
         public Vector2 ViewportOffset
         {
             get => projectionMat.Translation;
@@ -99,6 +102,7 @@ namespace pixel_renderer
         public TextureFiltering filtering = new();
         public JImage image = new();
         public Vector2 colorDataSize;
+
         public override void Set(object? refObject)
         {
             if (refObject is not Sprite sprite)
@@ -126,7 +130,7 @@ namespace pixel_renderer
         {
             viewport.X += 0.5f;
             viewport.Y += 0.5f;
-            return viewport.Wrapped(Vector2.One) * colorDataSize;
+            return viewport.Wrapped(oneVect) * colorDataSize;
         }
         public void SetColorData(Vector2 size, byte[] data)
         {
@@ -138,6 +142,7 @@ namespace pixel_renderer
     public class CameraInfo : ViewpoortInfoObject
     {
         public float[,] zBuffer = new float[0, 0];
+
         public override void Set(object? refObject)
         {
             if (refObject is not Camera cam)
@@ -203,12 +208,12 @@ namespace pixel_renderer
             sprite.camDistance = float.Epsilon;
             sprite.filtering = stage.backgroundFiltering;
 
-            DrawTransparentSprite(sprite, new BoundingBox2D(Vector2.Zero, resolution), resolution, renderer);
+            DrawTransparentSprite(sprite, new BoundingBox2D(zeroVect, resolution), resolution, renderer);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawTransparentSprite(SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution, RendererBase renderer)
         {
-            drawArea.min = Vector2.Max(Vector2.Zero, drawArea.min);
+            drawArea.min = Vector2.Max(zeroVect, drawArea.min);
             drawArea.max = Vector2.Min(resolution, drawArea.max);
 
             Vector2 framePos = drawArea.min;
@@ -230,8 +235,9 @@ namespace pixel_renderer
                     continue;
                 }
 
-                output = framePos / resolution;
-                output = ScreenToLocal(output);
+                output = framePos / resolution; //frame to projection uncentered
+                output.Transform(screenMatInverted); //center
+                output.Transform(projectionMatInverted); //projection to cam view
 
                 if (!RendererBase.IsWithinMaxExclusive(output.X, output.Y, -1, 1))
                 {
@@ -244,8 +250,8 @@ namespace pixel_renderer
                     continue;
                 }
 
-                output = LocalToGlobal(output);
-                output = sprite.GlobalToLocal(output);
+                output.Transform(transform); //cam view to world
+                output.Transform(sprite.transformInverted); //world to sprite view
 
                 if (!RendererBase.IsWithinMaxExclusive(output.X, output.Y, -1, 1))
                 {
@@ -258,7 +264,16 @@ namespace pixel_renderer
                     continue;
                 }
 
-                output = sprite.LocalToColorPosition(output);
+                //output = sprite.LocalToColorPosition(output);
+                output.Transform(sprite.projectionMat); // sprite view to projection
+
+                output.X += 0.5f; // uncenter projection for texture coord
+                output.Y += 0.5f;
+                output.X -= MathF.Floor(output.X); // wrap X 0-1
+                if (output.X < 0) output.X += 1;
+                output.Y -= MathF.Floor(output.Y); // wrap Y 0-1
+                if (output.Y < 0) output.Y += 1;
+                output *= sprite.colorDataSize; // scale texture coord to img size
 
                 Pixel color = new Pixel();
 

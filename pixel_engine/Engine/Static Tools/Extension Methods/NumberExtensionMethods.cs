@@ -23,14 +23,20 @@ namespace pixel_renderer
         public static float Wrapped(this float v, float max)
         {
             float result = v - max * MathF.Floor(v / max);
-
             if (result >= max)
                 return result - max;
-
             if (result < 0)
                 return result + max;
-
             return result;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Wrap(this ref float v, float max)
+        {
+            v -= max * MathF.Floor(v / max);
+            if (v >= max)
+                v -= max;
+            else if (v < 0)
+                v += max;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWithin(this float v, float min, float max) => v >= min && v <= max;

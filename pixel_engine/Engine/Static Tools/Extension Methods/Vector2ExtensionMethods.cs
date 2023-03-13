@@ -75,7 +75,7 @@ namespace pixel_renderer
             return product;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Wrap(this Vector2 v, Vector2 max) { v.X = v.X.Wrapped(max.X); v.Y = v.Y.Wrapped(max.Y); }
+        public static void Wrap(this ref Vector2 v, Vector2 max) { v.X.Wrap(max.X); v.Y.Wrap(max.Y); }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Wrapped(this Vector2 v, Vector2 max) => new(v.X.Wrapped(max.X), v.Y.Wrapped(max.Y));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
