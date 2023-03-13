@@ -40,8 +40,11 @@ namespace pixel_renderer
     public abstract class ViewpoortInfoObject
     {
         public Matrix3x2 transform;
+        public Matrix3x2 transformInverted;
         public Matrix3x2 projectionMat;
+        public Matrix3x2 projectionMatInverted;
         public static readonly Matrix3x2 screenMat = Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f);
+        public static readonly Matrix3x2 screenMatInverted = (Matrix3x2.CreateTranslation(1, 1) * Matrix3x2.CreateScale(0.5f, 0.5f)).Inverted();
         public Vector2 ViewportOffset
         {
             get => projectionMat.Translation;
@@ -71,8 +74,8 @@ namespace pixel_renderer
         }
         public Vector2 ScreenToLocal(Vector2 screenViewport)
         {
-            screenViewport.TransformInverted(screenMat);
-            screenViewport.TransformInverted(projectionMat);
+            screenViewport.Transform(screenMatInverted);
+            screenViewport.Transform(projectionMatInverted);
             return screenViewport;
         }
         public Vector2 LocalToGlobal(Vector2 local)
@@ -83,7 +86,7 @@ namespace pixel_renderer
 
         internal Vector2 GlobalToLocal(Vector2 global)
         {
-            global.TransformInverted(transform);
+            global.Transform(transformInverted);
             return global;
         }
 
@@ -103,12 +106,14 @@ namespace pixel_renderer
             ViewportOffset = sprite.viewportOffset;
             ViewportScale = sprite.viewportScale.GetDivideSafe();
             camDistance = sprite.camDistance;
+            projectionMatInverted = projectionMat.Inverted();
             
             image = sprite.texture.GetImage();
             colorDataSize = image.Size;
             filtering = sprite.textureFiltering;
-            
+
             transform = sprite.Transform;
+            transformInverted = transform.Inverted();
             scale = sprite.Scale;
         }
         public Vector2 LocalToColorPosition(Vector2 local)
@@ -139,7 +144,9 @@ namespace pixel_renderer
                 throw new ArgumentException($"Must pass in object of type {nameof(Camera)}");
             ViewportOffset = cam.viewportPosition;
             ViewportScale = cam.viewportSize.GetDivideSafe();
+            projectionMatInverted = projectionMat.Inverted();
             transform = cam.Transform;
+            transformInverted = transform.Inverted();
             cam.camInfo = this;
         }
 
@@ -187,7 +194,10 @@ namespace pixel_renderer
             if(Runtime.Current.GetStage() is not Stage stage)
                 return;
             sprite.transform = transform;
+            sprite.transformInverted = transform.Inverted();
+
             sprite.projectionMat = transform * stage.bgTransform.Inverted();
+            sprite.projectionMatInverted = sprite.projectionMat.Inverted();
 
             sprite.SetColorData(baseImage.Size, baseImage.data);
             sprite.camDistance = float.Epsilon;
