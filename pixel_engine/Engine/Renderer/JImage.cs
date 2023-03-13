@@ -5,8 +5,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace pixel_renderer
 {
@@ -95,6 +98,15 @@ namespace pixel_renderer
             var b = data[position + 3];
             Pixel col = new(a, r, g, b);
             return col;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void GetPixel(int x, int y, out Pixel output)
+        {
+            int position = (y * width + x) * 4;
+            output.a = data[position + 0];
+            output.r = data[position + 1];
+            output.g = data[position + 2];
+            output.b = data[position + 3];
         }
         internal static JImage Concat(IReadOnlyCollection<JImage> images, Curve posCurve)
         {

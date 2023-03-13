@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Security.Policy;
 using System.Windows.Controls;
 
 namespace pixel_renderer
@@ -137,7 +138,30 @@ namespace pixel_renderer
             image = new(size, data);
             colorDataSize = new(size.X, size.Y);
         }
+        public void GetFilteredPixel(in Vector2 position, out Pixel output)
+        {
+            switch (filtering)
+            {
+                case TextureFiltering.Point:
+                    image.GetPixel((int)position.X, (int)position.Y, out output);
+                    break;
+                case TextureFiltering.Bilinear:
+                    int left = (int)position.X;
+                    int top = (int)position.Y;
+                    int right = (int)((left + 1) % colorDataSize.X);
+                    int bottom = (int)((top + 1) % colorDataSize.Y);
 
+                    float xOffset = position.X - left;
+                    float yOffset = position.Y - top;
+
+                    Pixel topJPixel = Pixel.Lerp(image.GetPixel(left, top), image.GetPixel(right, top), xOffset);
+                    Pixel botJPixel = Pixel.Lerp(image.GetPixel(left, bottom), image.GetPixel(right, bottom), xOffset);
+                    output = Pixel.Lerp(topJPixel, botJPixel, yOffset);
+                    break;
+                default:
+                    throw new NotImplementedException(nameof(filtering));
+            }
+        }
     }
     public class CameraInfo : ViewpoortInfoObject
     {
@@ -275,31 +299,7 @@ namespace pixel_renderer
                 if (output.Y < 0) output.Y += 1;
                 output *= sprite.colorDataSize; // scale texture coord to img size
 
-                Pixel color = new Pixel();
-
-                switch (sprite.filtering)
-                {
-                    case TextureFiltering.Point:
-                        color = sprite.image.GetPixel((int)output.X, (int)output.Y);
-                        break;
-                    case TextureFiltering.Bilinear:
-                        Vector2 colorSize = sprite.colorDataSize;
-
-                        int left = (int)output.X;
-                        int top = (int)output.Y;
-                        int right = (int)((left + 1) % colorSize.X);
-                        int bottom = (int)((top + 1) % colorSize.Y);
-
-                        float xOffset = output.X - left;
-                        float yOffset = output.Y - top;
-
-                        Pixel topJPixel = Pixel.Lerp(sprite.image.GetPixel(left, top), sprite.image.GetPixel(right, top), xOffset);
-                        Pixel botJPixel = Pixel.Lerp(sprite.image.GetPixel(left, bottom), sprite.image.GetPixel(right, bottom), xOffset);
-                        color = Pixel.Lerp(topJPixel, botJPixel, yOffset);
-                        break;
-                    default:
-                        throw new NotImplementedException(nameof(sprite.filtering));
-                }
+                sprite.GetFilteredPixel(output, out var color);
 
                 if (color.a == 0)
                 {
