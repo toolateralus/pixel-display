@@ -65,18 +65,27 @@ namespace pixel_renderer
         }
         public Vector2 LocalToScreen(Vector2 local)
         {
-            local.Transform(in projectionMat);
-            local.Transform(in screenMat);
+            local.Transform(projectionMat);
+            local.Transform(screenMat);
             return local;
         }
         public Vector2 ScreenToLocal(Vector2 screenViewport)
         {
-            screenViewport.Transform(screenMat.Inverted());
-            screenViewport.Transform(projectionMat.Inverted());
+            screenViewport.TransformInverted(screenMat);
+            screenViewport.TransformInverted(projectionMat);
             return screenViewport;
         }
-        public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(transform);
-        internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(transform.Inverted());
+        public Vector2 LocalToGlobal(Vector2 local)
+        {
+            local.Transform(transform);
+            return local;
+        }
+
+        internal Vector2 GlobalToLocal(Vector2 global)
+        {
+            global.TransformInverted(transform);
+            return global;
+        }
 
         public abstract void Set(object? refObject);
     }
@@ -193,6 +202,7 @@ namespace pixel_renderer
             drawArea.max = Vector2.Min(resolution, drawArea.max);
 
             Vector2 framePos = drawArea.min;
+            Vector2 output;
 
             while (framePos.Y < drawArea.max.Y)
             {
@@ -210,10 +220,10 @@ namespace pixel_renderer
                     continue;
                 }
 
-                Vector2 screenViewport = framePos / resolution;
-                Vector2 camLocal = ScreenToLocal(screenViewport);
+                output = framePos / resolution;
+                output = ScreenToLocal(output);
 
-                if (!RendererBase.IsWithinMaxExclusive(camLocal.X, camLocal.Y, -1, 1))
+                if (!RendererBase.IsWithinMaxExclusive(output.X, output.Y, -1, 1))
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)
@@ -224,10 +234,10 @@ namespace pixel_renderer
                     continue;
                 }
 
-                Vector2 global = LocalToGlobal(camLocal);
-                Vector2 spriteLocal = sprite.GlobalToLocal(global);
+                output = LocalToGlobal(output);
+                output = sprite.GlobalToLocal(output);
 
-                if (!RendererBase.IsWithinMaxExclusive(spriteLocal.X, spriteLocal.Y, -1, 1))
+                if (!RendererBase.IsWithinMaxExclusive(output.X, output.Y, -1, 1))
                 {
                     framePos.X++;
                     if (framePos.X >= drawArea.max.X)
@@ -238,25 +248,25 @@ namespace pixel_renderer
                     continue;
                 }
 
-                var colorPos = sprite.LocalToColorPosition(spriteLocal);
+                output = sprite.LocalToColorPosition(output);
 
                 Pixel color = new Pixel();
 
                 switch (sprite.filtering)
                 {
                     case TextureFiltering.Point:
-                        color = sprite.image.GetPixel((int)colorPos.X, (int)colorPos.Y);
+                        color = sprite.image.GetPixel((int)output.X, (int)output.Y);
                         break;
                     case TextureFiltering.Bilinear:
                         Vector2 colorSize = sprite.colorDataSize;
 
-                        int left = (int)colorPos.X;
-                        int top = (int)colorPos.Y;
+                        int left = (int)output.X;
+                        int top = (int)output.Y;
                         int right = (int)((left + 1) % colorSize.X);
                         int bottom = (int)((top + 1) % colorSize.Y);
 
-                        float xOffset = colorPos.X - left;
-                        float yOffset = colorPos.Y - top;
+                        float xOffset = output.X - left;
+                        float yOffset = output.Y - top;
 
                         Pixel topJPixel = Pixel.Lerp(sprite.image.GetPixel(left, top), sprite.image.GetPixel(right, top), xOffset);
                         Pixel botJPixel = Pixel.Lerp(sprite.image.GetPixel(left, bottom), sprite.image.GetPixel(right, bottom), xOffset);
