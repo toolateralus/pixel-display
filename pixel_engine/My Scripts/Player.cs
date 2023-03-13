@@ -67,8 +67,10 @@ namespace pixel_renderer
 
             if (node.TryGetComponent(out Softbody sb))
             {
-                if (moveVector.SqrMagnitude() > 0)
-                    sb.Outward(moveVector.SqrMagnitude() / 5);
+                if (moveVector.Y != 0)
+                    sb.Outward(1);
+                if (moveVector.X != 0)
+                    sb.Outward(-1);
             }
 
             moveVector = Vector2.Zero;
@@ -133,7 +135,6 @@ namespace pixel_renderer
             playerNode.AddComponent<Player>().takingInput = true;
             playerNode.AddComponent<ProjectileSource>();
             playerNode.AddComponent<Sprite>();
-            //playerNode.AddComponent<Text>(); 
 
             var col = playerNode.AddComponent<Collider>();
 

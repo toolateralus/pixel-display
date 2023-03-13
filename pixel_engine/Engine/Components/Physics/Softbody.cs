@@ -168,22 +168,28 @@ namespace pixel_renderer
             return node; 
         }
 
-        internal void Outward(float amt)
+        internal void Outward(int direction = 1)
         {
             if (collider is null|| model is null) return;
+            
             Polygon poly = new(collider.model);
-            const int iterations = 1; 
+
+            const int iterations = 16;
+            const float amt = 0.1f;
 
             for (int i = 0; i < poly.vertices.Length * iterations; i++)
             {
                 var index = i / iterations;
-                if (WithinDeformationRange(poly.vertices[index], model.vertices[index]))
-                {
-                    Vector2 dir = poly.centroid - poly.vertices[index];
-                    Vector2 vert = poly.vertices[index];
-                    vert = (-vert * dir) * amt / iterations;
-                    poly.vertices[index] = vert;
-                }
+                Vector2 dir = poly.centroid - poly.vertices[index];
+                dir.Normalize();
+                Vector2 vert = poly.vertices[index];
+
+                if(direction == 1)
+                    vert += dir * amt / iterations;
+                if (direction == -1)
+                    vert -= dir * amt / iterations;
+
+                poly.vertices[index] = vert;
             }
             poly.CalculateNormals(); 
             collider.model = poly;
