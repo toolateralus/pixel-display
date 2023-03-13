@@ -6,14 +6,20 @@ using System.Numerics;
 
 namespace pixel_renderer
 {
-    public record Particle
+    public class Particle
     {
         public Particle(Vector2 velocity, Pixel color)
         {
-            this.start += velocity;
-            this.end += velocity;
+            Next(velocity, color);
+        }
+
+        private void Next(Vector2 velocity, Pixel color)
+        {
+            start += velocity;
+            end += velocity;
             this.color = color;
         }
+
         public Vector2 start;
         public Vector2 end;
         public Pixel color;
