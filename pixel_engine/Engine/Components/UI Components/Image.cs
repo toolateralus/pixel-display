@@ -62,7 +62,7 @@ namespace pixel_renderer
 
         public override void Awake()
         {
-            texture = new(Vector2.One, Player.PlayerSprite);
+            TrySetTextureFromString();
             Refresh();
 
         }
@@ -88,9 +88,8 @@ namespace pixel_renderer
         {
             var image = texture.GetImage();
             DrawImage(renderer, image);
-
         }
-
+        
         public Image()
         {
             texture = new Texture(Vector2.One, Pixel.Red);
@@ -101,6 +100,7 @@ namespace pixel_renderer
         }
 
         internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
+
         public void SetImage(Vector2 size, byte[] color)
         {
             texture.SetImage(size, color);
@@ -113,9 +113,8 @@ namespace pixel_renderer
                 SetImage(size, image.data);
             }
         }
-       
-        [Method]
-        public void CycleSpriteType()
+
+        [Method] public void CycleSpriteType()
         {
             if ((int)Type + 1 > sizeof(SpriteType) - 2)
             {
@@ -125,25 +124,24 @@ namespace pixel_renderer
             Type = (SpriteType)((int)Type + 1);
 
         }
-        [Method]
-        public void TrySetTextureFromString()
+        [Method] public void TrySetTextureFromString()
         {
             if (AssetLibrary.FetchMetaRelative(textureName) is Metadata meta)
                 texture.SetImage(meta.Path);
-            Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture.Name}");
+            Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture?.Name}");
         }
-       
         public static Node Standard()
         {
             Node node = new("UI Element");
             var img = node.AddComponent<Image>();
+
             img.Scale = Constants.DefaultNodeScale;
-            img.TrySetTextureFromString();
             img.Type = SpriteType.Image; 
+            img.TrySetTextureFromString();
             img.Refresh();
+
             return node; 
         }
-
         #region Lighting
         public Light? GetFirstLight()
         {

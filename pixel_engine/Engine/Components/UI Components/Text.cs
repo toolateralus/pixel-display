@@ -39,6 +39,9 @@ namespace pixel_renderer
         public override void Awake()
         {
             RefreshFont();
+            RefreshCharacters();
+            Refresh(); 
+            Type = SpriteType.Image;
         }
         [Method]
         public void RefreshFont()
@@ -72,21 +75,18 @@ namespace pixel_renderer
                 if (font_model.ContainsKey(Content[i]))
                 {
                     var img = font_model.ElementAt(i).Value;
-                    output.Add(img);
+
+                    output.Add(img.Clone());
 
                     width += img.width;
                     height += img.height; 
                 }
 
             var start = new Vector2(0, 0);
-            var end = new Vector2(width, height);
+            var end = new Vector2(width, 0);
 
             posCurve = Curve.Linear(start, end, 1, Content.Length);
             current = JImage.Concat(output, posCurve);
-
-            Scale = new(100, 100);
-            viewportPosition = new(0, 0);
-
         }
         public override void Draw(RendererBase renderer)
         {
@@ -98,7 +98,7 @@ namespace pixel_renderer
 
         public static (Node, Text) Standard(string name = "New Text")
         {
-            Node node = new("Text");
+            Node node = new(name);
             var text = node.AddComponent<Text>();
             return (node, text);
         }
