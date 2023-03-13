@@ -27,7 +27,7 @@ namespace pixel_renderer
         Line state = new(Vector2.Zero, Vector2.One);
 
         public Pixel[] Pallette = new Pixel[] { Color.Purple, Color.MediumSeaGreen, Color.MediumPurple, Color.MediumBlue };
-        public List<ParticleFrame> frames; 
+        public List<ParticleFrame> frames = new();
 
         public void SetLifeCycle(int duration)
         {
@@ -97,7 +97,7 @@ namespace pixel_renderer
         [Field] public int maxLifeCycleLength = 1000; 
         [Field] public int minLifeCycleLength = 100; 
 
-        [Field] public bool preWarm = false;
+        [Field] public bool preWarm = true;
 
         Queue<Line> lines = new();
         List<Particle> state = new();
