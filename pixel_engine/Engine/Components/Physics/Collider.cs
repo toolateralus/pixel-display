@@ -14,7 +14,7 @@ namespace pixel_renderer
             get
             {
                 if (model is null)
-                    model = new Box().DefiningGeometry;
+                    model = new Box().Polygon;
                 return model.Transformed(Transform);
             }
         }
@@ -26,6 +26,37 @@ namespace pixel_renderer
         [Field] public Pixel colliderPixel = Color.LimeGreen;
 
         [JsonProperty] public bool IsTrigger { get; internal set; } = false;
+
+
+        enum PrimitiveType { box, circle, triangle };
+        PrimitiveType primitive; 
+        [Method]
+        void CyclePrimitiveType()
+        {
+            switch (primitive)
+            {
+                case PrimitiveType.box:
+                    model = new Triangle().Polygon;
+                    primitive = PrimitiveType.triangle;
+                    model.CalculateNormals(); 
+                    break;
+                case PrimitiveType.circle:
+                    model = new Box().Polygon;
+                    model.CalculateNormals();
+                    primitive = PrimitiveType.box;
+                    break;
+                case PrimitiveType.triangle:
+                    model = new Circle().Polygon;
+                    model.CalculateNormals();
+                    primitive = PrimitiveType.circle;
+                    break;
+                default:
+                    break;
+                    
+            }
+            Runtime.Log($"{node.Name} : Primitive = {primitive}");
+        }
+
 
         private BoundingBox2D boundingBox = new();
         public BoundingBox2D BoundingBox

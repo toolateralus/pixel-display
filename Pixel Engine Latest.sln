@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{04F78B39-FD64-4E51-B0E7-53CF75E8625C}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		toc.md = toc.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pixel_renderer", "pixel_engine\pixel_renderer.csproj", "{4B0695DB-9BD5-465B-82A7-12E91B28B9F5}"

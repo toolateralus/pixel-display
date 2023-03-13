@@ -12,7 +12,7 @@
 ---
 
 
-## Scripting Interface
+## Scripts
 Tags: API, Tutorial
 
 ---
@@ -25,26 +25,16 @@ Tags: API, Tutorial
   1. [Script Debugging (NYI)](#debugging)
   ---
 ### Method Overrides  
-- `public override void Awake()` - Called right after Application Startup.
+- `public override void Awake()` - Called right before the game enters a running state.
 - `public override void Update()`  - Called every rendering frame.
 - `public override void FixedUpdate(float delta)` - Called every physics frame (fixed delta)
 ---
 ---
 ### Component Instantiation
 Tags : Tutorial
- >`Node.AddComponent()` does not instantiate or return an `object`, instead requiring the user to do a few extras before adding a component to a node.
 
- >`Component` and `Script` instantiation are almost identical operations, hence the documentation for both leading to *this page*.
-
- For this example, we insantiate a generic `Component` object `'component'`.
- This is done for learning purposes, but the `abstract class`  `Component` *cannot be instantiated*.
  
- Steps in this tutorial :
- - instantiating the object.
- - adding the object to a node.
 #### Instantiate Object
- We begin by creating an `object` of the `Type` of `Component` that we want to add. (ie. `Text`, `Rigidbody`). The `Type` must derive from `Component` (or derivative of) or `Script`.
- >The following code shows the instantiation of an object using the recent `new(){ }` syntax, but any method is acceptable.
  ```.cs
  Tutorial.cs (CSharp)
  public class Tutorial : Script
@@ -71,25 +61,6 @@ Tags : Tutorial
  ---
 #### Add Component
  ---
- After we've created an `instance` of the type of `Component` or `Script` that we are adding, 
- we simply add the `Component` reference to the `Node`. In this case, we use the `node.parentNode` assuming
- the `Script` is already attached to an `instance` of a `Node`, however, there are various ways to get a reference to a `Node`, as mentioned [Here](#referencing-nodes)
- ```.cs
- Tutorial.cs (CSharp) (Continued)
- public class Tutorial : Script
- {
-		... (public override void Awake()) cont.
-		Component component = new()
-		{
-			isComponent = true,
-			isSentientAI = true,
-			growWeed = true,
-			spawnPosition = position
-		};
-		Node node = this.parentNode;
-		node.AddComponent(component);
-	 } 
-}
 
  ```
   
