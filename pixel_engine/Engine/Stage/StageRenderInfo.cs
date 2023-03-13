@@ -67,8 +67,8 @@ namespace pixel_renderer
         }
         public Vector2 LocalToScreen(Vector2 local)
         {
-            local.Transform(projectionMat);
-            local.Transform(screenMat);
+            local.Transform(in projectionMat);
+            local.Transform(in screenMat);
             return local;
         }
         public Vector2 ScreenToLocal(Vector2 screenViewport)

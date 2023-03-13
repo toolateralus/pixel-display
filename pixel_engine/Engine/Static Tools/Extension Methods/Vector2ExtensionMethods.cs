@@ -85,7 +85,7 @@ namespace pixel_renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 ToVector2(this System.Windows.Point v) => new((float)v.X, (float)v.Y);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 Transformed(this ref Vector2 v, Matrix3x2 matrix)
+        public static Vector2 Transformed(this ref Vector2 v, in Matrix3x2 matrix)
         {
             return new Vector2(
                 (v.X * matrix.M11) + (v.Y * matrix.M21) + matrix.M31,
@@ -93,16 +93,17 @@ namespace pixel_renderer
             );
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Transform(this ref Vector2 v, Matrix3x2 matrix)
+        public static void Transform(this ref Vector2 v, in Matrix3x2 matrix)
         {
             v.X = (v.X * matrix.M11) + (v.Y * matrix.M21) + matrix.M31;
             v.Y = (v.X * matrix.M12) + (v.Y * matrix.M22) + matrix.M32;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void TransformInverteed(this ref Vector2 v, Matrix3x2 matrix)
+        public static void TransformInverted(this ref Vector2 v, in Matrix3x2 matrix)
         {
-            v.X = (v.X * matrix.M11) + (v.Y * matrix.M21) + matrix.M31;
-            v.Y = (v.X * matrix.M12) + (v.Y * matrix.M22) + matrix.M32;
+            float invDet = 1.0f / ((matrix.M11 * matrix.M22) - (matrix.M21 * matrix.M12));
+            v.X = (v.X * ( matrix.M22 * invDet)) + (v.Y * (-matrix.M21 * invDet)) + ((matrix.M21 * matrix.M32 - matrix.M31 * matrix.M22) * invDet);
+            v.Y = (v.X * (-matrix.M12 * invDet)) + (v.Y * ( matrix.M11 * invDet)) + ((matrix.M31 * matrix.M12 - matrix.M11 * matrix.M32) * invDet);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

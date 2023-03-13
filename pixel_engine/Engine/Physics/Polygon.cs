@@ -194,7 +194,7 @@ namespace pixel_renderer
         {
             int vertCount = vertices.Length;
             for (int i = 0; i < vertCount; i++)
-                vertices[i].Transform(matrix);
+                vertices[i].Transform(in matrix);
             CalculateNormals();
         }
         public static Vector2 ClosestPointOnSegment(Vector2 point1, Vector2 point2, Vector2 point)
