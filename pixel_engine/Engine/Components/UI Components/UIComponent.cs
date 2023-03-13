@@ -173,7 +173,7 @@ namespace pixel_renderer
         public Vector2[] GetCorners()
         {
             var viewport = Polygon.UnitSquare();
-            viewport.Transform(ref Transform);
+            viewport.Transform(Transform);
             return viewport.vertices;
         }
 

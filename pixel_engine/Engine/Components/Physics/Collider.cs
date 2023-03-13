@@ -27,7 +27,7 @@ namespace pixel_renderer
             get
             {
                 model.CopyTo(ref transformedModel);
-                transformedModel.Transform(ref Transform);
+                transformedModel.Transform(Transform);
                 return transformedModel;
             }
         }

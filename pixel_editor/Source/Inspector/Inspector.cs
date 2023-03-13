@@ -223,8 +223,15 @@ namespace pixel_editor
                 {"Collider",  AddCollider},
                 {"Rigidbody", AddRigidbody},
                 {"Softbody",  AddSoftbody},
+                {"Firework",  AddFirework }
             };
         }
+
+        private Firework AddFirework()
+        {
+            return lastSelectedNode.AddComponent<Firework>();
+        }
+
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
             e.Handled = true;

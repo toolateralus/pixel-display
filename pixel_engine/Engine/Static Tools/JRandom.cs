@@ -25,7 +25,7 @@
         }
 
       
-        public static Pixel Color()
+        public static Pixel Pixel()
         {
             byte r = Byte(),
                  g = Byte(),
