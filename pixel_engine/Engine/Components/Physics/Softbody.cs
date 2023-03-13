@@ -26,8 +26,6 @@ namespace pixel_renderer
             if(shouldResolve)
                 Resolve();
 
-
-
             if (lastCollision is not null)
                 lastCollision = null;
         }
@@ -53,10 +51,7 @@ namespace pixel_renderer
             Deform1(col);
         }
 
-        [Field]
-        private int solverIterations = 16;
-        [Field]
-        private float deformationRadius = 0.01f;
+      
         private void Deform1(Collision col)
         {
             if (collider == null || model == null)
@@ -106,7 +101,7 @@ namespace pixel_renderer
         private float Force(Collision col, int index)
         {
             // Get the nearest edge of the collider to the vertex
-            var edge = col.collider.model.GetNearestEdge(model.vertices[index]);
+            var edge = col.collider.GetModel().GetNearestEdge(model.vertices[index]);
 
             // Calculate the distance between the vertex and the collider edge
             float distance = Vector2.Distance(model.vertices[index], edge.start);
@@ -172,8 +167,8 @@ namespace pixel_renderer
         internal void Outward(int direction = 1)
         {
             if (collider is null|| model is null) return;
-            
-            Polygon poly = new(collider.model);
+
+            Polygon poly = collider.GetModel();
 
             const int iterations = 16;
             const float amt = 0.1f;
@@ -193,7 +188,7 @@ namespace pixel_renderer
                 poly.vertices[index] = vert;
             }
             poly.CalculateNormals(); 
-            collider.model = poly;
+            collider.SetModel(poly);
         }
     }
 }
