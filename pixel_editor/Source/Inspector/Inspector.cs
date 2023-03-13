@@ -223,13 +223,13 @@ namespace pixel_editor
                 {"Collider",  AddCollider},
                 {"Rigidbody", AddRigidbody},
                 {"Softbody",  AddSoftbody},
-                {"Firework",  AddFirework }
+                {"Particles",  AddParticles }
             };
         }
 
-        private LineAnimator AddFirework()
+        private ParticleSystem AddParticles()
         {
-            return lastSelectedNode?.AddComponent<LineAnimator>();
+            return lastSelectedNode?.AddComponent<ParticleSystem>();
         }
 
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
