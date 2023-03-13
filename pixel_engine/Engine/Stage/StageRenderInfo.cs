@@ -34,9 +34,7 @@ namespace pixel_renderer
                     infoList.RemoveAt(0);
             }
             for (int i = 0; i < objectCount; ++i)
-            {
                 infoList[i].Set(objects.ElementAt(i));
-            }
         }
     }
     public abstract class ViewpoortInfoObject
