@@ -227,9 +227,9 @@ namespace pixel_editor
             };
         }
 
-        private Firework AddFirework()
+        private LineAnimator AddFirework()
         {
-            return lastSelectedNode.AddComponent<Firework>();
+            return lastSelectedNode?.AddComponent<LineAnimator>();
         }
 
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)

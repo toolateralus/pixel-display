@@ -14,10 +14,10 @@ using System.Xml;
 namespace pixel_renderer
 {
 
-    public class Particle
+    public class LineAnimation
     {
         public bool IsAlive = true;
-        public List<ParticleFrame> frames = new();
+        public List<LineFrame> frames = new();
 
         int index = 0;
         private Vector2 origin;
@@ -83,11 +83,11 @@ namespace pixel_renderer
         }
 
     }
-    public class ParticleFrame
+    public class LineFrame
     {
         public Vector2 velocity;
 
-        public ParticleFrame(Vector2 velocity, Vector2 start, Vector2 end, Pixel color)
+        public LineFrame(Vector2 velocity, Vector2 start, Vector2 end, Pixel color)
         {
             this.velocity = velocity;
             this.start = start;
@@ -130,7 +130,7 @@ namespace pixel_renderer
         public Vector2 end;
         public Pixel color;
     }
-    public class Firework : Component
+    public class LineAnimator : Component
     {
         [Field] public Vector2 launcherPos;
         
@@ -140,7 +140,7 @@ namespace pixel_renderer
         [Field] public bool preWarm = true;
 
         Queue<Line> lines = new();
-        List<Particle> state = new();
+        List<LineAnimation> state = new();
 
         private bool drawing;
         Random random = new();
@@ -152,7 +152,7 @@ namespace pixel_renderer
             if(preWarm)
                 for (int i = 0; i < initParticleCount; ++i)
                 {
-                    Particle p = new();
+                    LineAnimation p = new();
                     int duration = (int)(random.NextDouble() * maxDist);
                     p.SetLifeCycle(launcherPos, launcherPos * maxDist, Curve.Circlular(1, 16, 16, true), p.Pallette);
                     state.Add(p);

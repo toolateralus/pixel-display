@@ -35,7 +35,7 @@ namespace pixel_renderer
             if(preWarm)
                 for (int i = 0; i < initParticleCount; ++i)
                 {
-                    Particle p = new(Position);
+                    Particle p = new(Position, Color.White);
                     state.Add(p);
                 }
 
