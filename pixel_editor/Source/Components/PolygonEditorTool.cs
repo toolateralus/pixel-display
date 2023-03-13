@@ -39,16 +39,18 @@ namespace pixel_editor
             selectedCollider = GetSelectedCollider();
             if (selectedCollider == null)
                 return;
-            var localPoly = selectedCollider.model;
+            var localPoly = selectedCollider.GetModel();
             Vector2 mPosLocal = CMouse.GlobalPosition.Transformed(selectedCollider.Transform.Inverted());
             if (grabbedVertexIndex != -1 && Input.Get(Key.V))
             {
                 localPoly.MoveVertex(grabbedVertexIndex, mPosLocal);
+                selectedCollider.SetModel(localPoly);
                 return;
             }
             int closestVertIndex = 0;
             float closestSqrDistance = localPoly.vertices[0].SqrDistanceFrom(mPosLocal);
-            for (int i = 1; i < localPoly.vertices.Length; i++)
+            int vertcount = localPoly.vertices.Length;
+            for (int i = 1; i < vertcount; i++)
                 if (localPoly.vertices[i].SqrDistanceFrom(mPosLocal) < closestSqrDistance)
                 {
                     closestSqrDistance = localPoly.vertices[i].SqrDistanceFrom(mPosLocal);
@@ -58,10 +60,12 @@ namespace pixel_editor
             {
                 grabbedVertexIndex = closestVertIndex;
                 if(Input.Get(Key.V))
+                {
                     localPoly.MoveVertex(grabbedVertexIndex, mPosLocal);
+                    selectedCollider.SetModel(localPoly);
+                }
                 return;
             }
-            int vertcount = localPoly.vertices.Length;
             for (int i = 0; i < vertcount; i++)
             {
                 Vector2 v1 = localPoly.vertices[i];
@@ -76,6 +80,7 @@ namespace pixel_editor
                     if (Input.Get(Key.V))
                     {
                         localPoly.InsertVertex(i + 1, newVertex);
+                        selectedCollider.SetModel(localPoly);
                         grabbedVertexIndex = i + 1;
                         return;
                     }

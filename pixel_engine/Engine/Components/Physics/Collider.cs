@@ -8,14 +8,27 @@ namespace pixel_renderer
     public class Collider : Component
     {
 
-        [JsonProperty] public Polygon model = new();
+        [JsonProperty] private Polygon model = Polygon.UnitSquare();
+        /// <returns>Copy of model, not model itself</returns>
+        public Polygon GetModel() => new(model);
+        /// <summary>
+        /// Sets the model to a copy of input.
+        /// Assumes input polygon has already calculated normals
+        /// </summary>
+        /// <param name="polygon"></param>
+        public void SetModel(Polygon polygon)
+        {
+            model = new(polygon);
+            transformedModel = new(polygon);
+        }
+        Polygon transformedModel = Polygon.UnitSquare();
         public Polygon Polygon
         {
             get
             {
-                if (model is null)
-                    model = new Box().Polygon;
-                return model.Transformed(Transform);
+                model.CopyTo(ref transformedModel);
+                transformedModel.Transform(ref Transform);
+                return transformedModel;
             }
         }
 
@@ -36,18 +49,15 @@ namespace pixel_renderer
             switch (primitive)
             {
                 case PrimitiveType.box:
-                    model = new Triangle().Polygon;
+                    SetModel(new Triangle().Polygon);
                     primitive = PrimitiveType.triangle;
-                    model.CalculateNormals(); 
                     break;
                 case PrimitiveType.circle:
-                    model = new Box().Polygon;
-                    model.CalculateNormals();
+                    SetModel(new Box().Polygon);
                     primitive = PrimitiveType.box;
                     break;
                 case PrimitiveType.triangle:
-                    model = new Circle().Polygon;
-                    model.CalculateNormals();
+                    SetModel(new Circle().Polygon);
                     primitive = PrimitiveType.circle;
                     break;
                 default:
@@ -67,6 +77,7 @@ namespace pixel_renderer
                 return boundingBox;
             }
         }
+
 
         public override void OnDrawShapes()
         {
@@ -96,10 +107,6 @@ namespace pixel_renderer
                 var midpoint = (poly.vertices[i] + poly.vertices[nextIndex]) / 2;
                 ShapeDrawer.DrawLine(midpoint, midpoint + poly.normals[i] * 1, Color.Blue);
             }
-        }
-        public void SetPolygonFromWorldSpace(Polygon worldspacePolygon)
-        {
-            model = worldspacePolygon.Transformed(Transform.Inverted());
         }
     }
 }

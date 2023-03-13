@@ -99,7 +99,7 @@ namespace pixel_renderer
         }
 
         /// <summary>
-        /// Expects vertices to be structed clockwise
+        /// Expects vertices to be structed clockwise, calculates normals and uvs
         /// </summary>
         /// <param name="vertices"></param>
         public Polygon() { }
@@ -115,6 +115,10 @@ namespace pixel_renderer
             //calc uvs (simple)
             CalculateUV();
         }
+        /// <summary>
+        /// Assumes input polygon has already calculated normals
+        /// </summary>
+        /// <param name="polygon"></param>
         public Polygon(Polygon polygon)
         {
             vertices = new Vector2[polygon.vertices.Length];
@@ -179,20 +183,20 @@ namespace pixel_renderer
 
             return new(verts.ToArray());
         }
-        public Polygon Transformed(Matrix3x2 matrix)
+        public Polygon Transformed(Matrix3x2 matrix) => Transformed(ref matrix);
+        public Polygon Transformed(ref Matrix3x2 matrix)
         {
             Polygon polygon = new(this);
-            polygon.Transform(matrix);
+            polygon.Transform(ref matrix);
             return polygon;
         }
-        public void Transform(Matrix3x2 matrix)
+        public void Transform(ref Matrix3x2 matrix)
         {
             int vertCount = vertices.Length;
             for (int i = 0; i < vertCount; i++)
                 vertices[i].Transform(matrix);
             CalculateNormals();
         }
-
         public static Vector2 ClosestPointOnSegment(Vector2 point1, Vector2 point2, Vector2 point)
         {
             Vector2 direction = point2 - point1;
@@ -206,7 +210,6 @@ namespace pixel_renderer
 
             return point1 + direction * t;
         }
-
         public (Vector2 start, Vector2 end) GetNearestEdge(Vector2 point)
         {
             if (vertices.Length < 2)
@@ -235,8 +238,14 @@ namespace pixel_renderer
             }
             return (nearestPoint1, nearestPoint2);
         }
-
         public Pixel debuggingColor = JRandom.Color();
+        public void CopyTo(ref Polygon polygon)
+        {
+            Array.Copy(vertices, polygon.vertices, vertices.Length);
+            Array.Copy(normals, polygon.normals, normals.Length);
+            Array.Copy(uv, polygon.uv, uv.Length);
+            polygon.centroid = centroid;
+        }
     }
 
 }

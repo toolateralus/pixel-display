@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System;
 using System.Security.Cryptography.Xml;
-using System.Windows.Media.Animation;
 
 namespace pixel_renderer
 {
@@ -11,23 +10,19 @@ namespace pixel_renderer
         [Field] private float minColliderScale = 0.1f;
         [Field] private float maxColliderScale = 5f;
 
-        private Collider collider;
-        private Polygon model;
-        private Rigidbody rb;
-        private Collision? lastCollision;
-       
-        [Field] private int solverIterations = 16;
-        [Field] private float deformationRadius = 0.5f;
+        [Field]
+        Vector2 minForce = new Vector2(-15f, -15f);
+        [Field]
+        Vector2 maxForce = new Vector2(15f, 15f);
 
+        private Collider collider = null;
+                private Curve curve;
+                private Polygon model;
+                private Rigidbody rb;
+        private Player player;
         public override void FixedUpdate(float delta)
         {
             if (collider is null) return;
-            if (lastCollision is not null)
-            {
-                Deform1(lastCollision);
-                lastCollision = null;
-            }
-
             Resolve();
         }
 
@@ -40,7 +35,7 @@ namespace pixel_renderer
             if (collider is null)
             {
                 node.TryGetComponent(out collider);
-                model = collider.model;
+                model = collider.GetModel();
                 collider.drawCollider = true;
                 collider.drawNormals = true;
                 return;
@@ -49,16 +44,19 @@ namespace pixel_renderer
 
         public override void OnCollision(Collision col)
         {
-            lastCollision = col;
+            Deform1(col);
         }
 
-
+        [Field]
+        private int solverIterations = 16;
+        [Field]
+        private float deformationRadius = 0.01f;
         private void Deform1(Collision col)
         {
             if (collider == null || model == null)
                 return;
 
-            Polygon poly = new Polygon(collider.model);
+            Polygon poly = collider.GetModel();
 
             for (int index = 0; index < model.vertices.Length; index++)
             {
@@ -97,9 +95,8 @@ namespace pixel_renderer
                 }
 
             }
-
-            collider.model = poly;
-            collider.model.CalculateNormals();
+            poly.CalculateNormals();
+            collider.SetModel(poly);
         }
         private float Force(Polygon collider, int index)
         {
@@ -125,7 +122,7 @@ namespace pixel_renderer
                 return; 
 
 
-            Polygon poly = new(collider.model);
+            Polygon poly = collider.GetModel();
 
             for (int i = 0; i < model.vertices.Length; i++)
             {
@@ -137,8 +134,8 @@ namespace pixel_renderer
                 poly.vertices[i] += antiForce;
             }
 
-            collider.model = poly;
-            collider.model.CalculateNormals();
+            poly.CalculateNormals();
+            collider.SetModel(poly);
         }
         private bool WithinDeformationRange(Vector2 vert, Vector2 original)
         {

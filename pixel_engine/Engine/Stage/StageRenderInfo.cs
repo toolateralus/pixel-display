@@ -62,7 +62,7 @@ namespace pixel_renderer
         public Vector2[] GetCorners()
         {
             var viewport = Polygon.UnitSquare();
-            viewport.Transform(transform);
+            viewport.Transform(ref transform);
             return viewport.vertices;
         }
         public Vector2 LocalToScreen(Vector2 local)
