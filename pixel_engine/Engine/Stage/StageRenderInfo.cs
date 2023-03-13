@@ -33,7 +33,7 @@ namespace pixel_renderer
                 for (int i = infoCount; i > objectCount; --i)
                     infoList.RemoveAt(0);
             }
-            for (int i = 0; i < objects.Count(); ++i)
+            for (int i = 0; i < objectCount; ++i)
             {
                 infoList[i].Set(objects.ElementAt(i));
             }
