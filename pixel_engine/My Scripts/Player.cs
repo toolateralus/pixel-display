@@ -81,7 +81,18 @@ namespace pixel_renderer
             if (isGrounded)
                 isGrounded = false;
             Move(moveVector);
+
+            if (node.TryGetComponent(out Softbody sb))
+            {
+                if (moveVector.Y != 0)
+                    sb.Outward(1);
+                if (moveVector.X != 0)
+                    sb.Outward(-1);
+            }
+
             moveVector = Vector2.Zero;
+
+
         }
         public override void OnDrawShapes()
         {
@@ -162,10 +173,9 @@ namespace pixel_renderer
             playerNode.AddComponent<Rigidbody>();
             
             playerNode.AddComponent<Player>().takingInput = true;
+            playerNode.AddComponent<ProjectileSource>();
+            playerNode.AddComponent<Sprite>();
 
-            var proj = playerNode.AddComponent<ProjectileSource>();
-            AddSprite(playerNode);
-            
             var col = playerNode.AddComponent<Collider>();
 
             col.SetModel(new Box().Polygon);

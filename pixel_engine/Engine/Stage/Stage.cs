@@ -119,7 +119,6 @@ namespace pixel_renderer
             string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
             Metadata = new(Name, defaultPath, Constants.StageFileExtension);
         }
-
         public void SetBackground(JImage value)
         {
             background = value;
