@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Policy;
 using System.Windows.Controls;
+using System.Windows.Markup;
 
 namespace pixel_renderer
 {
@@ -114,29 +115,11 @@ namespace pixel_renderer
             projectionMatInverted = projectionMat.Inverted();
             
             image = sprite.texture.GetImage();
-            colorDataSize = image.Size;
             filtering = sprite.textureFiltering;
 
             transform = sprite.Transform;
             transformInverted = transform.Inverted();
             scale = sprite.Scale;
-        }
-        public Vector2 LocalToColorPosition(Vector2 local)
-        {
-            local.Transform(projectionMat);
-            return ViewportToColorPosition(local);
-        }
-
-        public Vector2 ViewportToColorPosition(Vector2 viewport)
-        {
-            viewport.X += 0.5f;
-            viewport.Y += 0.5f;
-            return viewport.Wrapped(oneVect) * colorDataSize;
-        }
-        public void SetColorData(Vector2 size, byte[] data)
-        {
-            image = new(size, data);
-            colorDataSize = new(size.X, size.Y);
         }
         public void GetFilteredPixel(in Vector2 position, out Pixel output)
         {
@@ -148,33 +131,29 @@ namespace pixel_renderer
                 case TextureFiltering.Bilinear:
                     int left = (int)position.X;
                     int top = (int)position.Y;
-                    int right = (int)((left + 1) % colorDataSize.X);
-                    int bottom = (int)((top + 1) % colorDataSize.Y);
+                    int right = (left + 1) % image.width;
+                    int bottom = (top + 1) % image.height;
 
                     float xOffset = position.X - left;
                     float yOffset = position.Y - top;
 
                     image.GetPixel(left, top, out var A);
-                    image.GetPixel(right, top, out var B);
+                    int byteOffset = (top * image.width + right) * 4;
                     Pixel topJPixel = new()
                     {
-                        r = (byte)(A.r + (B.r - A.r) * xOffset),
-                        g = (byte)(A.g + (B.g - A.g) * xOffset),
-                        b = (byte)(A.b + (B.b - A.b) * xOffset),
-                        a = (byte)(A.a + (B.a - A.a) * xOffset)
+                        r = (byte)(A.r + (image.data[byteOffset + 1] - A.r) * xOffset),
+                        g = (byte)(A.g + (image.data[byteOffset + 2] - A.g) * xOffset),
+                        b = (byte)(A.b + (image.data[byteOffset + 3] - A.b) * xOffset),
+                        a = (byte)(A.a + (image.data[byteOffset + 0] - A.a) * xOffset)
                     };
 
                     image.GetPixel(left, bottom, out A);
-                    image.GetPixel(right, bottom, out B);
-                    A.r = (byte)(A.r + (B.r - A.r) * xOffset); 
-                    A.g = (byte)(A.g + (B.g - A.g) * xOffset);
-                    A.b = (byte)(A.b + (B.b - A.b) * xOffset);
-                    A.a = (byte)(A.a + (B.a - A.a) * xOffset);
+                    byteOffset = (bottom * image.width + right) * 4;
 
-                    output.r = (byte)(topJPixel.r + (A.r - topJPixel.r) * yOffset);
-                    output.g = (byte)(topJPixel.g + (A.g - topJPixel.g) * yOffset);
-                    output.b = (byte)(topJPixel.b + (A.b - topJPixel.b) * yOffset);
-                    output.a = (byte)(topJPixel.a + (A.a - topJPixel.a) * yOffset);
+                    output.r = (byte)(topJPixel.r + ((A.r + (image.data[byteOffset + 1] - A.r) * xOffset) - topJPixel.r) * yOffset);
+                    output.g = (byte)(topJPixel.g + ((A.g + (image.data[byteOffset + 2] - A.g) * xOffset) - topJPixel.g) * yOffset);
+                    output.b = (byte)(topJPixel.b + ((A.b + (image.data[byteOffset + 3] - A.b) * xOffset) - topJPixel.b) * yOffset);
+                    output.a = (byte)(topJPixel.a + ((A.a + (image.data[byteOffset + 0] - A.a) * xOffset) - topJPixel.a) * yOffset);
                     break;
                 default:
                     throw new NotImplementedException(nameof(filtering));
@@ -246,7 +225,7 @@ namespace pixel_renderer
             sprite.projectionMat = transform * stage.bgTransform.Inverted();
             sprite.projectionMatInverted = sprite.projectionMat.Inverted();
 
-            sprite.SetColorData(baseImage.Size, baseImage.data);
+            sprite.image = baseImage;
             sprite.camDistance = float.Epsilon;
             sprite.filtering = stage.backgroundFiltering;
 
@@ -315,7 +294,8 @@ namespace pixel_renderer
                 if (output.X < 0) output.X += 1;
                 output.Y -= MathF.Floor(output.Y); // wrap Y 0-1
                 if (output.Y < 0) output.Y += 1;
-                output *= sprite.colorDataSize; // scale texture coord to img size
+                output.X *= sprite.image.width; // scale texture coord to img size
+                output.Y *= sprite.image.height;
 
                 sprite.GetFilteredPixel(output, out var color);
 
