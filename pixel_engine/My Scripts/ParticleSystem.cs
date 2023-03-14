@@ -87,11 +87,12 @@ namespace pixel_renderer
 
         private Vector2 GetRandomVelocity(float speed = -1f)
         {
-            float x = (float)random.NextDouble();
-            float y = (float)random.NextDouble();
-            if(speed == -1f)
+            float x = (float)random.NextDouble() * 2 - 1;
+            float y = (float)random.NextDouble() * 2 - 1;
+            var dir = new Vector2(x, y).Normalized();
+            if (speed == -1f)
              speed = (float)random.NextDouble() * maxParticleSpeed;
-            return (new Vector2(x, y) * speed).Normalized();
+            return (dir * speed);
         }
 
         public override void Update()
