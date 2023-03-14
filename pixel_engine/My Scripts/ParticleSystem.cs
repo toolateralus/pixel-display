@@ -40,7 +40,7 @@ namespace pixel_renderer
             p.dead = true;
 
             p.position = Position;
-            p.velocity = GetRandomVelocity(500); 
+            p.velocity = GetRandomVelocity(); 
 
             p.dead = false; 
         }
@@ -50,7 +50,6 @@ namespace pixel_renderer
             {
                 float speed;
                 Vector2 initVel = GetRandomVelocity();
-                initVel = new(1, 1);
 
                 Particle particle = new(initVel, particleLifetime);
                 particles.Add(particle);
