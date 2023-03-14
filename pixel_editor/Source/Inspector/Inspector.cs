@@ -223,10 +223,14 @@ namespace pixel_editor
                 {"Collider",  AddCollider},
                 {"Rigidbody", AddRigidbody},
                 {"Softbody",  AddSoftbody},
-                {"Particles",  AddParticles }
+                {"Particles",  AddParticles },
+                {"MouseShooter",  AddShooter},
             };
         }
-
+        private MouseShooter AddShooter()
+        {
+            return lastSelectedNode?.AddComponent<MouseShooter>(); 
+        }
         private ParticleSystem AddParticles()
         {
             return lastSelectedNode?.AddComponent<ParticleSystem>();

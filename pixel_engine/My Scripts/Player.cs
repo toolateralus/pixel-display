@@ -173,7 +173,6 @@ namespace pixel_renderer
             playerNode.AddComponent<Rigidbody>();
             
             playerNode.AddComponent<Player>().takingInput = true;
-            playerNode.AddComponent<ProjectileSource>();
             playerNode.AddComponent<Sprite>();
 
             var col = playerNode.AddComponent<Collider>();

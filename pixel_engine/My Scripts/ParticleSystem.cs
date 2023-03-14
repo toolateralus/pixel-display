@@ -13,7 +13,9 @@ namespace pixel_renderer
         public Pixel color;
         public Vector2 velocity;
         public Vector2 position;
+        public Vector2 size;
         public Action<Particle> lifetime;
+        public Action onDeath; 
         internal bool dead;
         public Particle(Vector2 initVel, Action<Particle> lifetime)
         {
@@ -28,8 +30,12 @@ namespace pixel_renderer
         [Field] private float maxParticleSpeed = 15f;
         [Field] private List<Particle> particles = new();
         [Field] private Random random = new();
+        [Field]
+        internal bool debugBase = false;
+
         public override void Awake()
         {
+            if(debugBase)
             for (int i = 0; i < 10; ++i)
             {
                 float speed;
@@ -37,12 +43,11 @@ namespace pixel_renderer
 
                 Particle particle = new(initVel, Cycle);
                 particles.Add(particle);
-
-                
             }
         }
         public override void OnDrawShapes()
         {
+            if(debugBase)
             lock (particles)
                foreach (var p in particles)
                {
@@ -86,6 +91,7 @@ namespace pixel_renderer
         {
             if (p.dead)
                 return;
+            p.onDeath?.Invoke(); 
             p.dead = true;
 
             p.position = Position;
