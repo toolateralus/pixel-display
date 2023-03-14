@@ -154,9 +154,15 @@ namespace pixel_renderer
                     float xOffset = position.X - left;
                     float yOffset = position.Y - top;
 
-                    Pixel topJPixel = Pixel.Lerp(image.GetPixel(left, top), image.GetPixel(right, top), xOffset);
-                    Pixel botJPixel = Pixel.Lerp(image.GetPixel(left, bottom), image.GetPixel(right, bottom), xOffset);
-                    output = Pixel.Lerp(topJPixel, botJPixel, yOffset);
+                    image.GetPixel(left, top, out var A);
+                    image.GetPixel(right, top, out var B);
+                    Pixel.Lerp(A, B, xOffset, out var topJPixel);
+
+                    image.GetPixel(left, bottom, out A);
+                    image.GetPixel(right, bottom, out B);
+                    Pixel.Lerp(A, B, xOffset, out var botJPixel);
+
+                    Pixel.Lerp(topJPixel, botJPixel, yOffset, out output);
                     break;
                 default:
                     throw new NotImplementedException(nameof(filtering));

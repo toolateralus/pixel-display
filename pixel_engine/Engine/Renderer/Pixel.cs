@@ -57,6 +57,14 @@ namespace pixel_renderer
             byte a = (byte)Math.Round(A.a + (B.a - A.a) * T);
             return Pixel.FromArgb(a, r, g, b);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Lerp(Pixel A, Pixel B, float T, out Pixel output)
+        {
+            output.r = (byte)(A.r + (B.r - A.r) * T);
+            output.g = (byte)(A.g + (B.g - A.g) * T);
+            output.b = (byte)(A.b + (B.b - A.b) * T);
+            output.a = (byte)(A.a + (B.a - A.a) * T);
+        }
         public static Pixel FromArgb(byte a, byte r, byte g, byte b)
         {
             return new(a, r, g, b);
