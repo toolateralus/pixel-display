@@ -156,13 +156,25 @@ namespace pixel_renderer
 
                     image.GetPixel(left, top, out var A);
                     image.GetPixel(right, top, out var B);
-                    Pixel.Lerp(A, B, xOffset, out var topJPixel);
+                    Pixel topJPixel = new()
+                    {
+                        r = (byte)(A.r + (B.r - A.r) * xOffset),
+                        g = (byte)(A.g + (B.g - A.g) * xOffset),
+                        b = (byte)(A.b + (B.b - A.b) * xOffset),
+                        a = (byte)(A.a + (B.a - A.a) * xOffset)
+                    };
 
                     image.GetPixel(left, bottom, out A);
                     image.GetPixel(right, bottom, out B);
-                    Pixel.Lerp(A, B, xOffset, out var botJPixel);
+                    A.r = (byte)(A.r + (B.r - A.r) * xOffset); 
+                    A.g = (byte)(A.g + (B.g - A.g) * xOffset);
+                    A.b = (byte)(A.b + (B.b - A.b) * xOffset);
+                    A.a = (byte)(A.a + (B.a - A.a) * xOffset);
 
-                    Pixel.Lerp(topJPixel, botJPixel, yOffset, out output);
+                    output.r = (byte)(topJPixel.r + (A.r - topJPixel.r) * yOffset);
+                    output.g = (byte)(topJPixel.g + (A.g - topJPixel.g) * yOffset);
+                    output.b = (byte)(topJPixel.b + (A.b - topJPixel.b) * yOffset);
+                    output.a = (byte)(topJPixel.a + (A.a - topJPixel.a) * yOffset);
                     break;
                 default:
                     throw new NotImplementedException(nameof(filtering));
