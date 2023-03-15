@@ -219,20 +219,9 @@ namespace pixel_renderer
 
         public Vector2[] GetCorners()
         {
-            Vector2 topLeft = Vector2.Transform(new Vector2(-0.5f, -0.5f), Transform);
-            Vector2 topRight = Vector2.Transform(new Vector2(0.5f, -0.5f), Transform);
-            Vector2 bottomRight = Vector2.Transform(new Vector2(0.5f, 0.5f), Transform);
-            Vector2 bottomLeft = Vector2.Transform(new Vector2(-0.5f, 0.5f), Transform);
-
-            var vertices = new Vector2[]
-            {
-                    topLeft,
-                    topRight,
-                    bottomRight,
-                    bottomLeft,
-            };
-
-            return vertices;
+            var viewport = Polygon.Square(1);
+            viewport.Transform(Transform);
+            return viewport.vertices;
         }
         internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
         public void SetImage(Vector2 size, byte[] color)

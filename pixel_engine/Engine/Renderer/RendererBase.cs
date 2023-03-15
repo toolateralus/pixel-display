@@ -44,6 +44,23 @@
             frame[index + 1] = (byte)(colorG + frameG);
             frame[index + 2] = (byte)(colorR + frameR);
         }
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public void WriteColorToFrame(ref Pixel color, int x, int y)
+        {
+            int index = y * stride + (x * 3);
+
+            float colorB = (float)color.b / 255 * color.a;
+            float colorG = (float)color.g / 255 * color.a;
+            float colorR = (float)color.r / 255 * color.a;
+
+            float frameB = (float)frame[index + 0] / 255 * (255 - color.a);
+            float frameG = (float)frame[index + 1] / 255 * (255 - color.a);
+            float frameR = (float)frame[index + 2] / 255 * (255 - color.a);
+
+            frame[index + 0] = (byte)(colorB + frameB);
+            frame[index + 1] = (byte)(colorG + frameG);
+            frame[index + 2] = (byte)(colorR + frameR);
+        }
         internal void MarkDirty()
         {
             baseImageDirty = true;

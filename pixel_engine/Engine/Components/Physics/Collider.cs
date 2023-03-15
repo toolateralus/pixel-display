@@ -8,7 +8,7 @@ namespace pixel_renderer
     public class Collider : Component
     {
 
-        [JsonProperty] private Polygon model = Polygon.UnitSquare();
+        [JsonProperty] private Polygon model = Polygon.Square(1);
         /// <returns>Copy of model, not model itself</returns>
         public Polygon GetModel() => new(model);
         /// <summary>
@@ -21,7 +21,7 @@ namespace pixel_renderer
             model = new(polygon);
             transformedModel = new(polygon);
         }
-        Polygon transformedModel = Polygon.UnitSquare();
+        Polygon transformedModel = Polygon.Square(1);
         public Polygon Polygon
         {
             get

@@ -177,8 +177,6 @@ namespace pixel_renderer
 
             var col = playerNode.AddComponent<Collider>();
 
-            col.SetModel(new Box().Polygon);
-
             playerNode.Scale = Constants.DefaultNodeScale;
 
             return playerNode;

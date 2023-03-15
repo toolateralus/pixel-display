@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Policy;
 using System.Windows.Controls;
 using System.Windows.Markup;
+using System.Windows.Media.Media3D;
 
 namespace pixel_renderer
 {
@@ -60,39 +61,11 @@ namespace pixel_renderer
             set => projectionMat.SetScale(value);
             get => new(projectionMat.M11, projectionMat.M22);
         }
-        public Vector2 Position
-        {
-            get => transform.Translation;
-            set => transform.Translation = value;
-        }
         public Vector2[] GetCorners()
         {
-            var viewport = Polygon.UnitSquare();
+            var viewport = Polygon.Square(1);
             viewport.Transform(transform);
             return viewport.vertices;
-        }
-        public Vector2 LocalToScreen(Vector2 local)
-        {
-            local.Transform(projectionMat);
-            local.Transform(screenMat);
-            return local;
-        }
-        public Vector2 ScreenToLocal(Vector2 screenViewport)
-        {
-            screenViewport.Transform(screenMatInverted);
-            screenViewport.Transform(projectionMatInverted);
-            return screenViewport;
-        }
-        public Vector2 LocalToGlobal(Vector2 local)
-        {
-            local.Transform(transform);
-            return local;
-        }
-
-        internal Vector2 GlobalToLocal(Vector2 global)
-        {
-            global.Transform(transformInverted);
-            return global;
         }
 
         public abstract void Set(object? refObject);
@@ -120,44 +93,6 @@ namespace pixel_renderer
             transform = sprite.Transform;
             transformInverted = transform.Inverted();
             scale = sprite.Scale;
-        }
-        public void GetFilteredPixel(in Vector2 position, out Pixel output)
-        {
-            switch (filtering)
-            {
-                case TextureFiltering.Point:
-                    image.GetPixel((int)position.X, (int)position.Y, out output);
-                    break;
-                case TextureFiltering.Bilinear:
-                    int left = (int)position.X;
-                    int top = (int)position.Y;
-                    int right = (left + 1) % image.width;
-                    int bottom = (top + 1) % image.height;
-
-                    float xOffset = position.X - left;
-                    float yOffset = position.Y - top;
-
-                    image.GetPixel(left, top, out var A);
-                    int byteOffset = (top * image.width + right) * 4;
-                    Pixel topJPixel = new()
-                    {
-                        r = (byte)(A.r + (image.data[byteOffset + 1] - A.r) * xOffset),
-                        g = (byte)(A.g + (image.data[byteOffset + 2] - A.g) * xOffset),
-                        b = (byte)(A.b + (image.data[byteOffset + 3] - A.b) * xOffset),
-                        a = (byte)(A.a + (image.data[byteOffset + 0] - A.a) * xOffset)
-                    };
-
-                    image.GetPixel(left, bottom, out A);
-                    byteOffset = (bottom * image.width + right) * 4;
-
-                    output.r = (byte)(topJPixel.r + ((A.r + (image.data[byteOffset + 1] - A.r) * xOffset) - topJPixel.r) * yOffset);
-                    output.g = (byte)(topJPixel.g + ((A.g + (image.data[byteOffset + 2] - A.g) * xOffset) - topJPixel.g) * yOffset);
-                    output.b = (byte)(topJPixel.b + ((A.b + (image.data[byteOffset + 3] - A.b) * xOffset) - topJPixel.b) * yOffset);
-                    output.a = (byte)(topJPixel.a + ((A.a + (image.data[byteOffset + 0] - A.a) * xOffset) - topJPixel.a) * yOffset);
-                    break;
-                default:
-                    throw new NotImplementedException(nameof(filtering));
-            }
         }
     }
     public class CameraInfo : ViewpoortInfoObject
@@ -187,105 +122,203 @@ namespace pixel_renderer
 
             Array.Clear(zBuffer);
 
-            DrawBaseImage(resolution, renderer.baseImage, renderer);
             if (Runtime.Current.GetStage() is Stage stage)
-                DrawSprites(stage.StageRenderInfo, resolution, renderer);
+            {
+                SpriteInfo bgSprite = CameraSpanImageSprite(renderer.baseImage, stage.bgTransform, stage.backgroundFiltering);
+                DrawSprites(stage.StageRenderInfo, resolution, renderer, new() { bgSprite });
+            }
             ShapeDrawer.DrawGraphics(renderer, transform.Inverted(), projectionMat);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawSprites(StageRenderInfo renderInfo, Vector2 resolution, RendererBase renderer)
+        private void DrawSprites(StageRenderInfo renderInfo, Vector2 resolution, RendererBase renderer, List<SpriteInfo> additional)
         {
-            SpriteInfo sprite;
             BoundingBox2D drawArea = new();
-            for (int i = 0; i < renderInfo.spriteInfos.Count; ++i)
+            Vector2 output;
+            int lft, top, rgt, bot, tl, tr, bl, br;
+            float xOffset, yOffset, xOffInv, yOffInv;
+            Pixel color;
+            JImage img;
+            int width;
+            int height;
+            int x, y, maxX, maxY, minX;
+            float resX = resolution.X;
+            float resY = resolution.Y;
+
+            int spriteCount = additional.Count;
+            for (int i = 0; i < spriteCount; ++i)
+                DrawSprite(additional[i]);
+
+            spriteCount = renderInfo.spriteInfos.Count;
+            for (int i = 0; i < spriteCount; ++i)
+                DrawSprite(renderInfo.spriteInfos[i]);
+
+            void DrawSprite(in SpriteInfo sprite)
             {
-                sprite = renderInfo.spriteInfos[i];
                 drawArea = new(sprite.GetCorners());
-                drawArea.min = GlobalToLocal(drawArea.min);
-                drawArea.max = GlobalToLocal(drawArea.max);
+                drawArea.min.Transform(transformInverted);
+                drawArea.max.Transform(transformInverted);
                 if (drawArea.min.X >= 1 || drawArea.max.X <= -1 ||
                     drawArea.min.Y >= 1 || drawArea.max.Y <= -1)
-                    continue;
-                drawArea.min = LocalToScreen(drawArea.min) * resolution;
-                drawArea.max = LocalToScreen(drawArea.max) * resolution;
+                    return;
 
-                DrawTransparentSprite(sprite, drawArea, resolution, renderer);
+                drawArea.min.Transform(projectionMat);
+                drawArea.max.Transform(projectionMat);
+                drawArea.min.Transform(screenMat);
+                drawArea.max.Transform(screenMat);
+                drawArea.min *= resolution;
+                drawArea.max *= resolution;
+
+                drawArea.min = Vector2.Max(zeroVect, drawArea.min);
+                drawArea.max = Vector2.Min(resolution, drawArea.max);
+
+                x = (int)drawArea.min.X - 1;
+                y = (int)drawArea.min.Y;
+                maxX = (int)drawArea.max.X;
+                maxY = (int)drawArea.max.Y;
+                minX = (int)drawArea.min.X;
+                img = sprite.image;
+                width = sprite.image.width;
+                height = sprite.image.height;
+
+                while (true)
+                {
+                    x++;
+                    if (x >= maxX)
+                    {
+                        x = minX;
+                        y++;
+                        if (y >= maxY)
+                            break;
+                    }
+                    if (sprite.camDistance <= zBuffer[x, y])
+                        continue;
+                    output.X = x / resX; //texcoord to screen
+                    output.Y = y / resY;
+                    output.Transform(screenMatInverted); //screen to projection
+                    output.Transform(projectionMatInverted); //projection to cam view
+                    if (output.X > 1 || output.X < -1 || output.Y > 1 || output.Y < -1)
+                        continue;
+                    output.Transform(transform); //cam view to world
+                    output.Transform(sprite.transformInverted); //world to sprite view
+                    if (output.X > 1 || output.X < -1 || output.Y > 1 || output.Y < -1)
+                        continue;
+                    output.Transform(sprite.projectionMat); // sprite view to projection
+                    output.Transform(screenMat); // projection to texture coord
+                    output.X -= MathF.Floor(output.X); // wrap X 0-1
+                    output.Y -= MathF.Floor(output.Y); // wrap Y 0-1
+                    output.X *= width; // scale texture coord to img size
+                    output.Y *= height;
+                    switch (sprite.filtering)
+                    {
+                        case TextureFiltering.Point:
+                            img.GetPixel((int)output.X, (int)output.Y, out color);
+                            break;
+                        case TextureFiltering.Bilinear:
+                            lft = (int)output.X;
+                            top = (int)output.Y;
+                            rgt = lft + 1 - (width * ((lft + 1) / width));
+                            bot = top + 1 - (width * ((top + 1) / height));
+
+                            xOffset = output.X - lft;
+                            yOffset = output.Y - top;
+                            xOffInv = 1 - xOffset;
+                            yOffInv = 1 - yOffset;
+
+                            tl = (top * img.width + lft) * 4;
+                            tr = (top * img.width + rgt) * 4;
+                            bl = (bot * img.width + lft) * 4;
+                            br = (bot * img.width + rgt) * 4;
+
+                            color.r = (byte)((img.data[tl + 1] * xOffInv + img.data[tr + 1] * xOffset) * yOffInv + (img.data[bl + 1] * xOffInv + img.data[br + 1] * xOffset) * yOffset);
+                            color.g = (byte)((img.data[tl + 2] * xOffInv + img.data[tr + 2] * xOffset) * yOffInv + (img.data[bl + 2] * xOffInv + img.data[br + 2] * xOffset) * yOffset);
+                            color.b = (byte)((img.data[tl + 3] * xOffInv + img.data[tr + 3] * xOffset) * yOffInv + (img.data[bl + 3] * xOffInv + img.data[br + 3] * xOffset) * yOffset);
+                            color.a = (byte)((img.data[tl + 0] * xOffInv + img.data[tr + 0] * xOffset) * yOffInv + (img.data[bl + 0] * xOffInv + img.data[br + 0] * xOffset) * yOffset);
+                            break;
+                        default:
+                            throw new NotImplementedException(nameof(sprite.filtering));
+                    }
+                    if (color.a == 0)
+                        continue;
+                    if (color.a == 255)
+                        zBuffer[x, y] = sprite.camDistance;
+                    renderer.WriteColorToFrame(ref color, x, y);
+                }
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void DrawBaseImage(Vector2 resolution, JImage baseImage, RendererBase renderer)
+        private SpriteInfo CameraSpanImageSprite(JImage baseImage, Matrix3x2 worldMat, TextureFiltering filtering) => new()
         {
-            SpriteInfo sprite = new();
-
-            if(Runtime.Current.GetStage() is not Stage stage)
-                return;
-            sprite.transform = transform;
-            sprite.transformInverted = transform.Inverted();
-
-            sprite.projectionMat = transform * stage.bgTransform.Inverted();
-            sprite.projectionMatInverted = sprite.projectionMat.Inverted();
-
-            sprite.image = baseImage;
-            sprite.camDistance = float.Epsilon;
-            sprite.filtering = stage.backgroundFiltering;
-
-            DrawTransparentSprite(sprite, new BoundingBox2D(zeroVect, resolution), resolution, renderer);
-        }
+            transform = transform,
+            transformInverted = transform.Inverted(),
+            projectionMat = transform * worldMat.Inverted(),
+            projectionMatInverted = this.projectionMat.Inverted(),
+            image = baseImage,
+            camDistance = float.Epsilon,
+            filtering = filtering
+        };
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void DrawTransparentSprite(SpriteInfo sprite, BoundingBox2D drawArea, Vector2 resolution, RendererBase renderer)
         {
             drawArea.min = Vector2.Max(zeroVect, drawArea.min);
             drawArea.max = Vector2.Min(resolution, drawArea.max);
 
-            Vector2 framePos = drawArea.min;
+            int x = (int)drawArea.min.X - 1;
+            int y = (int)drawArea.min.Y;
+
+            int maxX = (int)drawArea.max.X;
+            int maxY = (int)drawArea.max.Y;
+
+            int minX = (int)drawArea.min.X;
+
+            float resX = resolution.X;
+            float resY = resolution.Y;
             Vector2 output;
+            int lft, tl;
+            int top, tr;
+            int rgt, bl;
+            int bot, br;
 
-            while (framePos.Y < drawArea.max.Y)
+            float xOffset;
+            float yOffset;
+            float xOffInv;
+            float yOffInv;
+
+            Pixel color;
+            JImage img;
+            int width;
+            int height;
+            img = sprite.image;
+            width = sprite.image.width;
+            height = sprite.image.height;
+
+            while (true)
             {
-                float x = framePos.X;
-                float y = framePos.Y;
-
-                if (sprite.camDistance <= zBuffer[(int)x, (int)y])
+                x++;
+                if (x >= maxX)
                 {
-                    framePos.X++;
-                    if (framePos.X >= drawArea.max.X)
-                    {
-                        framePos.X = drawArea.min.X;
-                        framePos.Y++;
-                    }
-                    continue;
+                    x = minX;
+                    y++;
+                    if (y >= maxY)
+                        break;
                 }
 
-                output = framePos / resolution; //frame to projection uncentered
+                if (sprite.camDistance <= zBuffer[x, y])
+                    continue;
+
+                output.X = x / resX; //frame to projection uncentered
+                output.Y = y / resY;
                 output.Transform(screenMatInverted); //center
                 output.Transform(projectionMatInverted); //projection to cam view
 
-                if (!RendererBase.IsWithinMaxExclusive(output.X, output.Y, -1, 1))
-                {
-                    framePos.X++;
-                    if (framePos.X >= drawArea.max.X)
-                    {
-                        framePos.X = drawArea.min.X;
-                        framePos.Y++;
-                    }
-                    continue;
-                }
+                if (output.X > 1 || output.X < -1 || output.Y > 1 || output.Y < -1)
+                    continue; 
 
                 output.Transform(transform); //cam view to world
                 output.Transform(sprite.transformInverted); //world to sprite view
 
-                if (!RendererBase.IsWithinMaxExclusive(output.X, output.Y, -1, 1))
-                {
-                    framePos.X++;
-                    if (framePos.X >= drawArea.max.X)
-                    {
-                        framePos.X = drawArea.min.X;
-                        framePos.Y++;
-                    }
+                if (output.X > 1 || output.X < -1 || output.Y > 1 || output.Y < -1)
                     continue;
-                }
 
-                //output = sprite.LocalToColorPosition(output);
                 output.Transform(sprite.projectionMat); // sprite view to projection
 
                 output.X += 0.5f; // uncenter projection for texture coord
@@ -297,33 +330,53 @@ namespace pixel_renderer
                 output.X *= sprite.image.width; // scale texture coord to img size
                 output.Y *= sprite.image.height;
 
-                sprite.GetFilteredPixel(output, out var color);
+                switch (sprite.filtering)
+                {
+                    case TextureFiltering.Point:
+                        img.GetPixel((int)output.X, (int)output.Y, out color);
+                        break;
+                    case TextureFiltering.Bilinear:
+                        lft = (int)output.X;
+                        top = (int)output.Y;
+                        rgt = lft + 1 - (width * ((lft + 1) / width));
+                        bot = top + 1 - (width * ((top + 1) / height));
+
+                        xOffset = output.X - lft;
+                        yOffset = output.Y - top;
+                        xOffInv = 1 - xOffset;
+                        yOffInv = 1 - yOffset;
+
+                        tl = (top * img.width + lft) * 4;
+                        tr = (top * img.width + rgt) * 4;
+                        bl = (bot * img.width + lft) * 4;
+                        br = (bot * img.width + rgt) * 4;
+
+                        color.r = (byte)
+                            ((img.data[tl + 1] * xOffInv + img.data[tr + 1] * xOffset) * yOffInv
+                            +(img.data[bl + 1] * xOffInv + img.data[br + 1] * xOffset) * yOffset);
+                        color.g = (byte)
+                            ((img.data[tl + 2] * xOffInv + img.data[tr + 2] * xOffset) * yOffInv
+                            +(img.data[bl + 2] * xOffInv + img.data[br + 2] * xOffset) * yOffset);
+                        color.b = (byte)
+                            ((img.data[tl + 3] * xOffInv + img.data[tr + 3] * xOffset) * yOffInv
+                            +(img.data[bl + 3] * xOffInv + img.data[br + 3] * xOffset) * yOffset);
+                        color.a = (byte)
+                            ((img.data[tl + 0] * xOffInv + img.data[tr + 0] * xOffset) * yOffInv
+                            +(img.data[bl + 0] * xOffInv + img.data[br + 0] * xOffset) * yOffset);
+                        break;
+                    default:
+                        throw new NotImplementedException(nameof(sprite.filtering));
+                }
+
+
 
                 if (color.a == 0)
-                {
-                    framePos.X++;
-                    if (framePos.X >= drawArea.max.X)
-                    {
-                        framePos.X = drawArea.min.X;
-                        framePos.Y++;
-                    }
                     continue;
-                }
 
                 if (color.a == 255)
-                {
-                    zBuffer[(int)x, (int)y] = sprite.camDistance;
-                }
+                    zBuffer[x, y] = sprite.camDistance;
 
-                renderer.WriteColorToFrame(ref color, ref framePos);
-
-                framePos.X++;
-                if (framePos.X >= drawArea.max.X)
-                {
-                    framePos.X = drawArea.min.X;
-                    framePos.Y++;
-                }
-
+                renderer.WriteColorToFrame(ref color, x, y);
             }
         }
     }

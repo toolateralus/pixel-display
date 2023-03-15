@@ -137,6 +137,14 @@ namespace pixel_renderer
                 new Vector2( 0.5f,  0.5f),
                 new Vector2(-0.5f,  0.5f),
             });
+        public static Polygon Square(float centerToCornerDistance) =>
+            new(new Vector2[]
+            {
+                new Vector2(-centerToCornerDistance, -centerToCornerDistance),
+                new Vector2( centerToCornerDistance, -centerToCornerDistance),
+                new Vector2( centerToCornerDistance,  centerToCornerDistance),
+                new Vector2(-centerToCornerDistance,  centerToCornerDistance),
+            });
         public static Polygon Triangle(float width, float height, float topPosScale = 0.5f)
         {
             Vector2 top = new(topPosScale * width, 0);
