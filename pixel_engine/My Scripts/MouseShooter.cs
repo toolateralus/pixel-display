@@ -34,7 +34,7 @@ namespace pixel_renderer
 
         private void Shoot()
         {
-                Fire();
+            Fire();
 
             if (Get(Key.R))
                 Reload();
@@ -55,16 +55,16 @@ namespace pixel_renderer
             
             p.size = new(l, l);
 
-            if (p.velocity.SqrMagnitude() < 0.5f)
-                particle = null; 
+            if (p.velocity.SqrMagnitude() < 0.01f)
+            {
+                particle = null;
+                fired = false; 
+            }
         }
 
 
         private void Reload()
         {
-            if (!Get(Key.LeftShift))
-                return;
-
             ammoCt -= magazineSize;
             currentMag = magazineSize;
         }
@@ -77,8 +77,11 @@ namespace pixel_renderer
         public override void OnDrawShapes()
         {
             particle?.Next();
-            if (particle is null) return;
-                DrawCircle(particle.position, particle.size.X, particle.color);
+
+            if (particle is null) 
+                return;
+
+            DrawCircle(particle.position, particle.size.X, particle.color);
         }
         public override void Update()
         {

@@ -114,11 +114,6 @@ namespace pixel_renderer
                 }
             NodesBusy = false;
         }
-        public override void Sync()
-        {
-            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
-            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
-        }
         public void SetBackground(JImage value)
         {
             background = value;
@@ -130,6 +125,11 @@ namespace pixel_renderer
         public void SetBackground(Pixel[,] value)
         {
             background = new(value);
+        }
+        public override void Sync()
+        {
+            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
+            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
         }
 
         private JImage init_background()
