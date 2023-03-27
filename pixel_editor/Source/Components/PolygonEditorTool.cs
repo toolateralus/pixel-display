@@ -30,7 +30,6 @@ namespace pixel_editor
             if (newVertexTarget != null)
                 ShapeDrawer.DrawCircle((Vector2)newVertexTarget, highlightDistance / 2, Pixel.Green);
         }
-
         public override void Update(float delta)
         {
             // not editing

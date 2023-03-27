@@ -73,6 +73,12 @@ namespace pixel_renderer
         public virtual void OnDestroy()
         {
         }
+
+        public bool TryGetComponent<T>(out T result, int index = 0) where T : Component
+        {
+            result = node.GetComponent<T>(index);
+            return result != null; 
+        }
     }
 
 }

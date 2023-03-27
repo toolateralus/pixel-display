@@ -93,9 +93,9 @@ namespace pixel_renderer
             if (node.TryGetComponent(out Softbody sb))
             {
                 if (moveVector.Y != 0)
-                    sb.Outward(1);
+                    sb.UniformDeformation(1);
                 if (moveVector.X != 0)
-                    sb.Outward(-1);
+                    sb.UniformDeformation(-1);
             }
         }
         #region Input

@@ -271,14 +271,11 @@ namespace pixel_editor
             UpdateData();
 
         }
-
         private void UpdateData()
         {
             for (int i = 0; i < data.Values.Count; i++)
-            {
                 if (data.HasValueChanged(i, data.Values[i], out var newVal))
                     data.Values[i] = newVal;
-            }
         }
 
         private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
