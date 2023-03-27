@@ -12,7 +12,6 @@ namespace pixel_renderer
 {
     public class Player : Component
     {
-
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] public float speed = 0.01f;
         [Field] private bool isGrounded;
@@ -40,10 +39,10 @@ namespace pixel_renderer
         {
             node.TryGetComponent(out rb);
             if (node.TryGetComponent(out sprite))
+            {
                 sprite.Type = SpriteType.Image;
-            sprite.texture.SetImage(PlayerSprite, sprite.Scale);
-            var textNode = Text.Standard();
-            node.Child(textNode.Item1);
+                sprite.texture.SetImage(PlayerSprite, sprite.Scale);
+            }
             RegisterAction(Up, Key.Down);
             RegisterAction(Down, Key.Up);
             RegisterAction(Left, Key.Left);

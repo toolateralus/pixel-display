@@ -34,35 +34,10 @@ Tags: API, Tutorial
 Tags : Tutorial
 
  
-#### Instantiate Object
- ```.cs
- Tutorial.cs (CSharp)
- public class Tutorial : Script
- {
-	 public override void Awake()
-	 {
-		base.Awake(); 
-		// base should always be called to 
-		// register UUID and ComponentName.
-
-		Vec2 position = Vec2.one * 13f;
-		
-
-		Component component = new()
-		{
-			isComponent = true,
-			isSentientAI = true,
-			growWeed = true,
-			spawnPosition = position
-		};
-	 } 
-}
- ```
  ---
 #### Add Component
  ---
 
- ```
   
  - [Finding a Reference to a Node](#referencing-nodes)
  - [Finding a Reference to a Component](#referencing-components)
@@ -70,7 +45,7 @@ Tags : Tutorial
 ## Stage
 Tags: API
 
-The `Stage` class represents the highest-level container in the hierarchy, equivalent to a 'Scene'.
+The `Stage` class represents the second highest-level container in the hierarchy, equivalent to a 'Scene'.
 
 ---
 ### Methods

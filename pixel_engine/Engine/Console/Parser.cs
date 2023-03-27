@@ -36,7 +36,7 @@ namespace pixel_editor
             "float:",
             "bool:",
         };
-        private static void ExecuteCommand(string[] args, int count, Command command)
+        private static void ExecuteCommand(string[] args, Command command)
         {
             try
             {
@@ -51,39 +51,32 @@ namespace pixel_editor
                         if (parse_arg != null)
                             init_args.Add(parse_arg);
                     }
-
                     command.args = init_args.ToArray();
                     command.Invoke();
-                }
-                for (int i = 0; i < count; ++i)
-                    command.Invoke();
+                } 
+                else command.Invoke();
             }
             catch (Exception e)
             {
                 command.error = e.Message;
             }
         }
-
         public static void TryCallLine(string line, List<Command> commands)
         {
             ParseArguments(line, out string[] args, out _);
             line = ParseLoopParams(line, out string loop_param);
 
-            int count = loop_param.ToInt();
-            int cmds = 0;
-
             foreach (Command command in commands)
                 if (command.Equals(line))
                 {
-                    ExecuteCommand(args, count, command);
-
+                    ExecuteCommand(args, command);
                     if (command.error != null)
                     {
                         Runtime.Log(command.error);
+                        command.error = null; 
                         continue;
                     }
                     Command.Success(command.syntax);
-                    cmds++;
                 }
         }
         public static void TryParse(string input, out List<object> value)

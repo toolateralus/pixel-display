@@ -81,10 +81,7 @@ namespace pixel_renderer
                 case SpriteType.Image:
                     Type = SpriteType.SolidColor;
                     break;
-                case SpriteType.Custom:
-                    Type = SpriteType.SolidColor;
-                    break;
-                default:
+                default: Type = 0;
                     break;
             }
 
@@ -101,9 +98,8 @@ namespace pixel_renderer
                 case SpriteType.Image:
                     if (texture is null || texture.Image is null)
                     {
-                        texture = new(null, new Metadata(Name, "", Constants.AssetsFileExtension), Vector2.One);
                         Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
-                        texture.SetImage(colorArray1);
+                        texture = new(colorArray1);
                     }
                     else
                     {

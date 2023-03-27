@@ -25,7 +25,6 @@ namespace pixel_renderer
             UpdateList(spriteInfos, stage.GetSprites());
             UpdateList(cameraInfos, stage.GetAllComponents<Camera>());
         }
-
         private void UpdateList<T>(List<T> infoList, IEnumerable<object> objects) where T : ViewpoortInfoObject, new()
         {
             int objectCount = objects.Count();

@@ -6,7 +6,6 @@ namespace pixel_editor
     public enum CmdError { ArgumentNotFound, NullReference, InvalidOperation, InvalidCast };
     public partial class Command
     {
-
         private static readonly string[] errorMessages = 
         { 
             " was not called: Argument provided was either invalid or null",
@@ -14,13 +13,10 @@ namespace pixel_editor
             " was not called: An invalid operation was attempted.",
             " was not called: An invalid cast operation was attempted."
         };
-
         public static void Error(string cmdName, string errorInfo)
         {
             Runtime.Log($"{cmdName} was not called : {errorInfo}");
         }
-
-
         public static void Error(string cmdName, CmdError error)
         {
             switch (error)

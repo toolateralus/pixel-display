@@ -11,7 +11,7 @@ namespace pixel_renderer
 {
     public enum InterpolationType { Linear, Exponential, ExponentialSqrd}
 
-    public class Text : UIComponent
+    public class Text : Image
     {
         public Dictionary<char , JImage> font_model = new();
         /// <summary>
@@ -22,7 +22,8 @@ namespace pixel_renderer
         public Vector2 end = new(1000, 0);
 
         public Curve posCurve;
-        private JImage current;
+        public Text() : base() { }
+       
 
         public string Content
         {
@@ -38,10 +39,11 @@ namespace pixel_renderer
         private string content = "abc";
         public override void Awake()
         {
+            base.Awake();
+            Type = SpriteType.Image;
             RefreshFont();
             RefreshCharacters();
             Refresh(); 
-            Type = SpriteType.Image;
         }
         [Method]
         public void RefreshFont()
@@ -70,6 +72,8 @@ namespace pixel_renderer
             var output = new List<JImage>();
             int width = 0;
             int height = 0;
+            bool x = false;
+
 
             for (int i = 0; i < Content.Length; i++)
                 if (font_model.ContainsKey(Content[i]))
@@ -86,21 +90,21 @@ namespace pixel_renderer
             var end = new Vector2(width, 0);
 
             posCurve = Curve.Linear(start, end, 1, Content.Length);
-            current = JImage.Concat(output, posCurve);
+            var concatenatedImg = JImage.Concat(output, posCurve);
+
+            if (texture is null) texture = new(concatenatedImg);
+            else texture.SetImage(concatenatedImg);
+
+            Scale = new(end.X,end.X);
         }
         public override void Draw(RendererBase renderer)
         {
-            if (current is null)
-                return;
-
-            DrawImage(renderer, current);
+            if (texture != null)
+            {
+                var texture = this.texture.GetImage();
+                DrawImage(renderer, texture);
+            }
         }
-
-        public static (Node, Text) Standard(string name = "New Text")
-        {
-            Node node = new(name);
-            var text = node.AddComponent<Text>();
-            return (node, text);
-        }
+       
     }
 }

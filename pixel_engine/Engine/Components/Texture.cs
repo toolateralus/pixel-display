@@ -9,37 +9,44 @@ namespace pixel_renderer
     public class Texture : Asset
     {
         #region Constructors / Overrides
-        [JsonConstructor]
-        internal protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name = "Texture Asset") : base(Name, true)
+        public Texture(JImage image)
         {
-            this.imgData = imgData;
-            this.Name = Name;
-            this.scale = scale;
-            this.jImage = image; 
+            jImage = image; 
+        }
+        public Texture(Bitmap source)
+        {
+            SetImage(source);
         }
         public Texture(string filePath)
         {
             SetImage(filePath);
         }
-        public Texture(Bitmap source)
+        public Texture(Pixel[,] colors)
         {
-            SetImage(source);
+            SetImage(colors);
         }
         public Texture(Vector2 size, Pixel color)
         {
             scale = size;
             SetImage(color);
         }
-        public Texture(Pixel[,] colors)
-        {
-            SetImage(colors);
-        }
         public Texture(Vector2 scale, Metadata imgData)
         {
             this.scale = scale; 
             SetImage(imgData, scale);
         }
+        [JsonConstructor] protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name) : base(Name, true)
+        {
+            this.imgData = imgData;
+            this.Name = Name;
+            this.scale = scale;
+            this.jImage = image; 
+        }
 
+        public JImage GetImage()
+        {
+            return jImage; 
+        }
         public void SetImage(string path)
         {
             jImage = new(new Bitmap(path));
@@ -48,13 +55,13 @@ namespace pixel_renderer
         {
             jImage = new(CBit.SolidColorSquare(scale, color));
         }
-        public void SetImage(Bitmap source)
-        {
-            jImage = new(source);
-        }
         public void SetImage(JImage image)
         {
             jImage = image;
+        }
+        public void SetImage(Bitmap source)
+        {
+            jImage = new(source);
         }
         public void SetImage(Pixel[,] colors)
         {
@@ -89,19 +96,38 @@ namespace pixel_renderer
         }
         #endregion
 
-        [Field] 
-        [JsonProperty] 
-        public Vector2 scale = new(1, 1);
-        [JsonProperty] 
-        internal Metadata imgData;
-        [JsonProperty]
-        private JImage jImage = new();
+        [Field][JsonProperty] public Vector2 scale = new(1, 1);
+        [JsonProperty] internal Metadata imgData;
+        [JsonProperty] private JImage jImage = new();
+        public bool HasImage => initializedBitmap != null;
+        internal bool HasImageMetadata => imgData != null;
+        private Bitmap initializedBitmap;
+
+        public Bitmap? Image 
+        {
+            get 
+            {
+                if (!HasImage && HasImageMetadata)
+                    initializedBitmap = new(imgData.Path);
+                return initializedBitmap;
+            }
+            set => initializedBitmap = value;
+        }
+        public byte[] Data
+        {
+            get => jImage.data;
+        }
+        internal int Width
+        {
+            get => jImage.width; 
+        }
+        internal int Height
+        {
+            get => jImage.height; 
+        }
+
         public Pixel GetPixel(int x, int y) => jImage.GetPixel(x, y);
         public void SetPixel(int x, int y, Pixel pixel) => jImage?.SetPixel(x, y, pixel);
-        public JImage GetImage()
-        {
-            return jImage; 
-        }
         public static JImage ApplyGaussianFilter(JImage texture, float radius, int kernelSize)
         {
             int halfKernelSize = kernelSize / 2;
@@ -152,39 +178,8 @@ namespace pixel_renderer
 
                     Pixel filteredColor = new((byte)red, (byte)green, (byte)blue, (byte)alpha);
                     texture.SetPixel(x, y, filteredColor);
-            }
+                }
             return texture;
-        }
-        
-        public Bitmap GetScaledBitmap() => ImageScaling.Scale(Image, scale);
-
-        
-
-        public Bitmap? Image {
-            get 
-            {
-                if (!HasImage && HasImageMetadata)
-                    initializedBitmap = new(imgData.Path);
-                return initializedBitmap;
-            }
-            set => initializedBitmap = value;
-        }
-        private Bitmap initializedBitmap;
-        
-        public bool HasImage => initializedBitmap != null;
-        internal bool HasImageMetadata => imgData != null;
-        
-        public byte[] Data
-        {
-            get => jImage.data;
-        }
-        internal int Width
-        {
-            get => jImage.width; 
-        }
-        internal int Height
-        {
-            get => jImage.height; 
         }
     }
 }

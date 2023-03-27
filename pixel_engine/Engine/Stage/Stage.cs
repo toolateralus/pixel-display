@@ -274,7 +274,7 @@ namespace pixel_renderer
             Node floorNode = Floor.Standard();
             Node light = new("Light");
             
-            Node textTest = new("Text Test a");
+            Node textTest = new("TEXT");
             var img = textTest.AddComponent<Text>();
             img.viewportSize = new(25, 25);
             textTest.Scale = new(25, 25);

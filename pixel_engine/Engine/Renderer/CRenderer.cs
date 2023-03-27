@@ -30,9 +30,8 @@ namespace pixel_renderer
             if (frame.Length != stride * Resolution.Y)
                 frame = new byte[stride * (int)Resolution.Y];
 
-            IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>().AsParallel();
-
-            foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder)) 
+            IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>();
+            foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                 if (uiComponent.IsActive)
                     uiComponent.Draw(this);
 
@@ -40,7 +39,6 @@ namespace pixel_renderer
                 latestFrame = new byte[frame.Length];
 
             Array.Copy(frame, latestFrame, frame.Length);
-
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Render(System.Windows.Controls.Image output)

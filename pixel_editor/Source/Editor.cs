@@ -80,44 +80,35 @@ namespace pixel_editor
         public EditorSettings settings; 
         private void InitializeEditor()
         {
+            if (current != null)
+                throw new InvalidOperationException("Cannot instantiate several editors at once under the same domain."); 
+
             current = this;
-
-
-
-
-            //wpf init
             InitializeComponent();
-
             Importer.Import(false);
+            InitializeSettings();
 
-            Metadata meta = new("editor settings", pixel_renderer.Constants.WorkingRoot + "\\editorSettings.asset", ".asset");
-            
-            var settings = IO.ReadJson<pixel_renderer.EditorSettings>(meta);
-            
-            if (settings is null)
-            {
-                settings = new pixel_renderer.EditorSettings();
-                IO.WriteJson(settings, meta);
-            }
-
-            Current.settings = settings;
-
-
-            Project project = Project.Load();
-            Runtime.Initialize( project);
-            
+            Project project = Project.Default;
+            Runtime.Initialize(project);
             GetEvents();
             Tools = Tool.InitializeToolkit();
-            
             GetInputs();
             Console.Print(motd, true);
-            
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.project);
-
             Runtime.OutputImages.Add(image);
+        }
 
-         
+        private static void InitializeSettings()
+        {
+            Metadata meta = new("editor settings", Constants.WorkingRoot + "\\editorSettings.asset", ".asset");
+            var settings = IO.ReadJson<EditorSettings>(meta);
+            if (settings is null)
+            {
+                settings = new EditorSettings();
+                IO.WriteJson(settings, meta);
+            }
+            Current.settings = settings;
         }
 
         public static void DestroySelected()

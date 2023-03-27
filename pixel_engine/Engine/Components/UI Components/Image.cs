@@ -64,25 +64,11 @@ namespace pixel_renderer
         {
             TrySetTextureFromString();
             Refresh();
-
         }
         public override void FixedUpdate(float delta)
         {
             if (dirty)
                 Refresh();
-        }
-        public override void OnDrawShapes()
-        {
-            if (selected_by_editor)
-            {
-                Polygon mesh = new(GetCorners());
-                int vertLength = mesh.vertices.Length;
-                for (int i = 0; i < vertLength; i++)
-                {
-                    var nextIndex = (i + 1) % vertLength;
-                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Runtime.Current.projectSettings.EditorHighlightColor);
-                }
-            }
         }
         public override void Draw(RendererBase renderer)
         {
@@ -93,25 +79,10 @@ namespace pixel_renderer
         public Image()
         {
             texture = new Texture(Vector2.One, Pixel.Red);
-        }
+        }   
         public Image(int x, int y) : this()
         {
             Scale = new(x, y);
-        }
-
-        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
-
-        public void SetImage(Vector2 size, byte[] color)
-        {
-            texture.SetImage(size, color);
-        }
-        public void SetImage(JImage? image)
-        {
-            if (image is not null)
-            {
-                Vector2 size = new(image.width, image.height);
-                SetImage(size, image.data);
-            }
         }
 
         [Method] public void CycleSpriteType()
@@ -130,6 +101,33 @@ namespace pixel_renderer
                 texture.SetImage(meta.Path);
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture?.Name}");
         }
+        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
+        public void SetImage(Vector2 size, byte[] color)
+        {
+            texture.SetImage(size, color);
+        }
+        public void SetImage(JImage? image)
+        {
+            if (image is not null)
+            {
+                Vector2 size = new(image.width, image.height);
+                SetImage(size, image.data);
+            }
+        }
+        public override void OnDrawShapes()
+        {
+            if (selected_by_editor)
+            {
+                Polygon mesh = new(GetCorners());
+                int vertLength = mesh.vertices.Length;
+                for (int i = 0; i < vertLength; i++)
+                {
+                    var nextIndex = (i + 1) % vertLength;
+                    ShapeDrawer.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Runtime.Current.projectSettings.EditorHighlightColor);
+                }
+            }
+        }
+
         public static Node Standard()
         {
             Node node = new("UI Element");

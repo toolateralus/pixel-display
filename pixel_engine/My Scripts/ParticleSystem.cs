@@ -17,6 +17,7 @@ namespace pixel_renderer
         public Action<Particle> lifetime;
         public Action onDeath; 
         internal bool dead;
+
         public Particle(Vector2 initVel, Action<Particle> lifetime)
         {
             velocity = initVel;
@@ -30,48 +31,44 @@ namespace pixel_renderer
         [Field] private float maxParticleSpeed = 15f;
         [Field] private List<Particle> particles = new();
         [Field] private Random random = new();
-        [Field]
-        internal bool debugBase = false;
+        [Field] internal bool debugBase = true;
+        
 
         public override void Awake()
         {
             if(debugBase)
-            for (int i = 0; i < 10; ++i)
-            {
-                float speed;
-                Vector2 initVel = GetRandomVelocity(3);
-
-                Particle particle = new(initVel, Cycle);
-                particles.Add(particle);
-            }
+                for (int i = 0; i < 10; ++i)
+                {
+                    Vector2 initVel = GetRandomVelocity(0.01f);
+                    Particle particle = new(initVel, Cycle);
+                    particles.Add(particle);
+                }
         }
         public override void OnDrawShapes()
         {
             if(debugBase)
-            lock (particles)
-               foreach (var p in particles)
-               {
-                    if (p.dead)
-                        continue;
+                lock (particles)
+                   foreach (var p in particles)
+                   {
+                        if (p.dead)
+                            continue;
 
-                    p.Next();
-                    ShapeDrawer.DrawCircle(p.position, p.velocity.Length(), p.color);
-               }
+                        p.Next();
+                        ShapeDrawer.DrawLine(p.position, p.position * p.velocity.Length(), p.color);
+                   }
 
         }
         public virtual void Cycle(Particle p)
         {
-            if (p.velocity.SqrMagnitude() < 0.5f)
+            if (p.velocity.SqrMagnitude() < 0.1f)
             {
-
                 OnParticleDied(p);
                 return;
             }
-
             p.position += p.velocity;
             p.velocity *= 0.99f;
 
-            var col = Pixel.White;
+            var col = JRandom.Color();
             _ = color();
 
             async Task color()
@@ -91,6 +88,7 @@ namespace pixel_renderer
         {
             if (p.dead)
                 return;
+
             p.onDeath?.Invoke(); 
             p.dead = true;
 

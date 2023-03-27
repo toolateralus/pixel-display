@@ -101,28 +101,13 @@ namespace pixel_renderer
         
         public static void RenderFromFrame(byte[] frame, int stride, Vector2 resolution, System.Windows.Controls.Image output)
         {
-
-            if (GetStride(resolution) != stride)
-            {
-
-            }
+            // this is expected exactly once on startup, don't know why.
             if (stride <= 0)
-            {
-                Runtime.Log("Stride cannot be zero or less;");
                 return;
-            }
 
-            try
-            {
-                output.Source = BitmapSource.Create(
-                (int)resolution.X, (int)resolution.Y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
-                frame, stride);
-            }
-            catch
-            {
-
-            }
-            
+            output.Source = BitmapSource.Create(
+            (int)resolution.X, (int)resolution.Y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
+            frame, stride);
         }
 
         public static int GetStride(Vector2 resolution)

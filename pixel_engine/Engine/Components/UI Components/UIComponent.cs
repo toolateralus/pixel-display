@@ -45,7 +45,8 @@ namespace pixel_renderer
                         else texture.SetImage(texture.Image);
                     }
                     break;
-                default: throw new NotImplementedException();
+                default: 
+                    return; 
             }
             colorDataSize = new(texture.Width, texture.Height);
             dirty = false;
