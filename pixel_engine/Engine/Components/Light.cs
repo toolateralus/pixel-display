@@ -14,6 +14,7 @@ namespace pixel_renderer
         [Field] public float radius = 55;
         [Field] public Pixel color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
         Random random = new Random();
+        private bool reversing;
         float length = 0;
         Pixel lastColor;
         private float j;
@@ -27,32 +28,29 @@ namespace pixel_renderer
 
             Color color = Pixel.White; 
 
-            length += 0.01f;
 
-            if(length > 7)
-                length = 0.5f;
-            if (length > 1)
-                color = Color.White;
-            if (length > 2)
-                color = Color.Yellow;
-            if (length > 3)
-                color = Color.Orange;
-            if (length > 4)
-                color = Color.Red;
-            if (length > 5)
-                color = Color.DarkRed;
-            if (length > 6)
-                color = Color.Purple;
-            if(Runtime.Current.renderHost.info.frameCount % 16 == 0)
-            if (j < lineCt)
-                j++;
-            else j = 0;
+            if (length > 7 && !reversing)
+            {
+                reversing = true;
+            }
+
+            if (reversing)
+            {
+                if (length <= 0)
+                {
+                    length = 0;
+                    reversing = false; 
+                }
+
+                length -= 0.01f; 
+            } else length += 0.01f;
+
+
+            color = Pixel.Lerp(Color.Purple, Color.Red, length / 7);
+           
+
             for (int i = 0; i < lineCt; i++)
             {
-
-                float x = j / lineCt;
-                color = Pixel.Lerp(color, Color.Gray, x);
-                // calculate start and end points of the line
                 float startAngle = i * sliceAngle;
                 Vector2 startPt = center + new Vector2(MathF.Cos(startAngle * CMath.PI / 180) * radius, (float)(Math.Sin(startAngle * CMath.PI / 180) * radius));
                 Vector2 endPt = (startPt - center) * length + center;   
