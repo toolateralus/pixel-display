@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using pixel_renderer.Assets;
 using System.Numerics;
+using PixelNative;
 
 namespace pixel_renderer
 {
@@ -57,6 +58,7 @@ namespace pixel_renderer
             Move(moveVector);
             TryManipulateSoftbody();
             moveVector = Vector2.Zero;
+           
         }
         public override void OnCollision(Collision collider)
         {
@@ -67,11 +69,12 @@ namespace pixel_renderer
         {
             Node playerNode = new("Player")
             {
-                Position = new Vector2(0, -20)
+                Position = new Vector2(-15, -20)
             };
             playerNode.AddComponent<Rigidbody>();
             playerNode.AddComponent<Player>().takingInput = true;
             playerNode.AddComponent<Sprite>();
+            playerNode.AddComponent<Collider>();
             playerNode.Scale = Constants.DefaultNodeScale;
             return playerNode;
         }

@@ -4,10 +4,7 @@ using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -102,15 +99,44 @@ namespace pixel_editor
         private static void InitializeSettings()
         {
             Metadata meta = new("editor settings", Constants.WorkingRoot + "\\editorSettings.asset", ".asset");
-            var settings = IO.ReadJson<EditorSettings>(meta);
+            EditorSettings settings = IO.ReadJson<EditorSettings>(meta);
             if (settings is null)
             {
-                settings = new EditorSettings();
+                settings = new();
                 IO.WriteJson(settings, meta);
             }
             Current.settings = settings;
         }
+        public static List<Node> DuplicateSelected(bool all = true)
+        {
+            List<Node> result = new(); 
+            if (Input.Get(Key.D))
+            {
+                if (Current.LastSelected != null || Current.ActivelySelected.Count > 0)
+                {
+                    Node selected = Current.LastSelected?.Clone();
+                    if (selected != null)
+                    {
+                        selected.Position += Vector2.One;
+                        result.Add(selected);
+                    }
 
+                    if (all)
+                        for (int i = 0; i < Current.ActivelySelected.Count; i++)
+                        {
+                            Node? node = Current.ActivelySelected[i];
+                            if (node.Clone() is Node clone)
+                            {
+                                clone.Position += Vector2.One;
+                                result.Add(clone);
+                            }
+                        }
+
+                    current.ActivelySelected.AddRange(result);
+                }
+            }
+            return result; 
+        }
         public static void DestroySelected()
         {
             if (Current.LastSelected != null || Current.ActivelySelected.Count > 0)
@@ -127,7 +153,6 @@ namespace pixel_editor
                     
                 }
             }
-            return;
         }
         private void GetEvents()
         {
@@ -170,7 +195,11 @@ namespace pixel_editor
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(() => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(DestroySelected, Key.Delete);
+            Input.RegisterAction(() => Runtime.Current.GetStage()?.AddNodes(DuplicateSelected(true)), Key.LeftCtrl);
         }
+        
+        SolidColorBrush framerateBrush = new(); 
+        internal ComponentEditor componentEditor;
 
         public void Dispose()
         {
@@ -191,7 +220,6 @@ namespace pixel_editor
 
             Application.Current.ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
-
         private void Update(object? sender, EventArgs e)
         {
             CMouse.Update();
@@ -204,7 +232,6 @@ namespace pixel_editor
             foreach (Tool tool in Tools)
                 tool.Update(1f);
         }
-        SolidColorBrush framerateBrush = new(); 
         private void UpdateMetrics()
         {
             RenderHost renderHost = Runtime.Current.renderHost;
@@ -289,8 +316,10 @@ namespace pixel_editor
 
         public Inspector? Inspector => inspector;
         private readonly Inspector inspector;
+
         // for stage creation, hopefully a better solution eventually.
-        private StageWnd? stageWnd;
+        internal StageWnd? stageWnd;
+
         public readonly EditorEventHandler Events = new();
         public byte[] Frame => Runtime.Current.renderHost.GetRenderer().Frame;
         public int Stride => Runtime.Current.renderHost.GetRenderer().Stride;
@@ -334,7 +363,6 @@ namespace pixel_editor
                 consoleOutput.Background = Brushes.Black;
             };
         }
-
         private void OnProjectSet(Project obj)
         {
             projectName = obj.Name;
@@ -345,7 +373,6 @@ namespace pixel_editor
             stageName = obj.Name;
             Current.Title = $"{projectName} : : {stageName}";
         }
-
         private void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
         {
             CMouse.Refresh(e);
@@ -415,7 +442,6 @@ namespace pixel_editor
 
             consoleOpen = false;
         }
-
         /// <summary>
         /// For users to pass an event to the inspector to be executed as soon as possible
         /// </summary>
@@ -488,7 +514,6 @@ namespace pixel_editor
             if (project is not null)
                 Runtime.Current.SetProject(project);
         }
-        internal ComponentEditor componentEditor;
 
         #endregion
         #region Add Node Menu

@@ -1,7 +1,9 @@
 ﻿using System.Numerics;
-using System.Collections.Generic;
 using System;
-using System.Security.Cryptography.Xml;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Text;
+using System.Runtime.InteropServices;
 
 namespace pixel_renderer
 {
@@ -9,6 +11,7 @@ namespace pixel_renderer
     {
         [Field] private float minColliderScale = 0.1f;
         [Field] private float maxColliderScale = 1.5f;
+
 
         private Collider collider;
         private Polygon model;
@@ -18,7 +21,6 @@ namespace pixel_renderer
         [Field] private int solverIterations = 8;
         [Field] private float deformationRadius = 0.3f;
         [Field] private bool shouldResolve = true;
-
         public override void FixedUpdate(float delta)
         {
             if (shouldResolve)
@@ -46,6 +48,7 @@ namespace pixel_renderer
             collider.drawCollider = true;
             collider.drawNormals = true;
         }
+
         public override void OnCollision(Collision col)
         {
             Deformation(col);

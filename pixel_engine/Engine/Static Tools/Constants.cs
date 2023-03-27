@@ -58,8 +58,9 @@ namespace pixel_renderer
         public static T?[] NullifyDuplicatesInArray<T>(in T?[] collection)
         {
             HashSet<T> comparison = new();
-            foreach (var obj in collection)
+            for (int i = 0; i < collection.Length; i++)
             {
+                T? obj = collection[i];
                 if (comparison.Contains(obj))
                 {
                     collection[Array.IndexOf(collection, obj)] = default; 
@@ -72,8 +73,9 @@ namespace pixel_renderer
         public static List<T> RemoveDuplicatesFromList<T>(List<T> collection)
         {
             HashSet<T> comparison = new();
-            foreach (var obj in collection)
+            for (int i = 0; i < collection.Count; i++)
             {
+                T? obj = collection[i];
                 if (comparison.Contains(obj))
                 {
                     collection.Remove(obj);

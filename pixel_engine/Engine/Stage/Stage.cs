@@ -268,23 +268,27 @@ namespace pixel_renderer
         public static Stage Standard()
         {
             var nodes = new List<Node>();
-            nodes.Add(Player.Standard());
+            Node player = Player.Standard();
+            nodes.Add(player);
             
             Node camera = new("Camera");
+            camera.Position = player.Position; 
+
             Node floorNode = Floor.Standard();
             Node light = new("Light");
             
             Node textTest = new("TEXT");
             var img = textTest.AddComponent<Text>();
             img.viewportSize = new(25, 25);
+
             textTest.Scale = new(25, 25);
             textTest.Position = new Vector2(0, 0);
 
             var lt = light.AddComponent<Light>();
-            camera.AddComponent<Camera>().Scale = new(15,15);
+            camera.AddComponent<Camera>().Scale = new(5,5);
             light.Position = new(50, -50);
-            lt.brightness = .75f;
-            lt.radius = 50;
+            lt.brightness = 10;
+            lt.radius = 500;
 
             nodes.Add(textTest);
             nodes.Add(light);
@@ -298,8 +302,13 @@ namespace pixel_renderer
                 nodes.Add(rbNode);
             }
 
-            var stage = new Stage("Killa Kush Weed Land, Weedagon USA", DefaultBackgroundMetadata, nodes);
+            var stage = new Stage("Default Stage", DefaultBackgroundMetadata, nodes);
             return stage;
+        }
+        public void AddNodes(List<Node> nodes) 
+        {
+            foreach (var node in nodes)
+                AddNode(node);
         }
 
         #endregion development defaults

@@ -36,7 +36,7 @@ namespace pixel_renderer
         }
 
         public Node(string name) : this() => Name = name;
-        private protected Node Clone() { return (Node)MemberwiseClone(); }
+        public Node Clone() { return (Node)MemberwiseClone(); }
         public Node(string name, Vector2 pos, Vector2 Scale) : this(name)
         {
             Position = pos;

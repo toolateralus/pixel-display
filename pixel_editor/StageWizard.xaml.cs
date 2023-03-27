@@ -51,8 +51,9 @@ namespace pixel_editor
             get => (double)GetValue(ScaleValueProperty);
             set => SetValue(ScaleValueProperty, value);
         }
+        public Action OnCreated { get; private set; }
         #endregion
-        
+
         bool usingStarterAssets = false;
         Metadata background_meta = Stage.DefaultBackgroundMetadata;
         
@@ -61,7 +62,8 @@ namespace pixel_editor
             InitializeComponent();
             if (File.Exists(background_meta.Path))
                 CBit.Render(new Bitmap(background_meta.Path), imgPreview);
-            mainWnd.Closing += MainWnd_Closing;  
+            mainWnd.Closing += MainWnd_Closing;
+            OnCreated += Close;
         }
 
         private void MainWnd_Closing(object? sender, System.ComponentModel.CancelEventArgs e) => Close(); 
@@ -104,7 +106,7 @@ namespace pixel_editor
                 Runtime.Current.SetStage(stage);
                 Runtime.Current.project.AddStage(stage);
             }
-            Close(); 
+            OnCreated?.Invoke(); 
         }
         private void OnStarterAssetsButtonClicked(object sender, RoutedEventArgs e) => usingStarterAssets = !usingStarterAssets;
     }

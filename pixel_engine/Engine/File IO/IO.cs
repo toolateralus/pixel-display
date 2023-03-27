@@ -5,7 +5,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Markup;
 
 namespace pixel_renderer
 {
@@ -25,13 +24,6 @@ namespace pixel_renderer
             PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
         
-        /// <summary>
-        /// this does not check if the directory or file exists, just deserializes a file into a json object of specified type and returns as C# object
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="meta"></param>
-        /// <param name="closeStreamWhenFinished"></param>
-        /// <returns></returns>
         public static T? ReadJson<T>(Metadata meta) where T : new()
         {
             T? obj;
@@ -104,7 +96,6 @@ namespace pixel_renderer
             writer.Close();
             return output;
         }
-
         public static void Write<T>(T data, Metadata meta)
         {
             using StreamWriter writer = new(meta.Path);
@@ -118,7 +109,6 @@ namespace pixel_renderer
             writer.Close();
             return data; 
         }
-
         public static Bitmap ReadBitmap(Metadata meta)
         {
             var obj = IO.ReadJson<object>(meta);
@@ -128,7 +118,6 @@ namespace pixel_renderer
 
             return new(512,512);
         }
-
         public static MessageBoxResult FileOverrideWarning(string path)
         {
             return MessageBox.Show($"Are you sure you want to overwrite {path}?",
@@ -141,7 +130,6 @@ namespace pixel_renderer
                                                         "", MessageBoxButton.YesNo, MessageBoxImage.Question,
                                                          MessageBoxResult.No, MessageBoxOptions.RtlReading);
         }
-
     }
     public class ProjectIO
     {

@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace pixel_renderer
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class JImage
+    public unsafe class JImage
     {
         [JsonProperty]
         public readonly int width;
@@ -91,6 +91,8 @@ namespace pixel_renderer
             var g = data[position + 2];
             var b = data[position + 3];
             Pixel col = new(a, r, g, b);
+
+
             return col;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
