@@ -301,7 +301,6 @@ namespace pixel_renderer
                     if (kvp == this)
                         parent.children.Remove(this);
 
-
             ParentStage?.nodes.Remove(this);
 
             foreach (var component in Components)
@@ -310,7 +309,6 @@ namespace pixel_renderer
             ComponentsBusy = false;
 
         }
-
         public void OnTrigger(Collision otherBody)
         {
             if (!awake)
@@ -390,24 +388,13 @@ namespace pixel_renderer
             return component;
         }
 
-        public void RemoveComponent(Component component)
+        public bool HasComponent<T>() where T : Component
         {
-            var type = component.GetType();
-            if(Components.ContainsKey(type))
-            if (Components[type].Contains(component))
+            if (!Components.ContainsKey(typeof(T)))
             {
-                var compList = Components[type];
-                var toRemove = new Component();
-                foreach (var comp in from comp in compList
-                                        where comp is not null &&
-                                        comp.UUID.Equals(component.UUID)
-                                        select comp)
-                toRemove = comp;
-
-                if (toRemove is not null)
-                    compList.Remove(toRemove);
-                if (compList.Count == 0) Components.Remove(type);
+                return false;
             }
+            return true;
         }
         public bool TryGetComponent<T>(out T component, int? index = 0) where T : Component
         {
@@ -438,13 +425,39 @@ namespace pixel_renderer
             T? component = Components[typeof(T)][index] as T;
             return component;
         }
-        public bool HasComponent<T>() where T : Component
+        public void RemoveComponent(Component component)
         {
-            if (!Components.ContainsKey(typeof(T)))
+            var type = component.GetType();
+            if(Components.ContainsKey(type))
+            if (Components[type].Contains(component))
             {
-                return false;
+                var compList = Components[type];
+                var toRemove = new Component();
+                foreach (var comp in from comp in compList
+                                        where comp is not null &&
+                                        comp.UUID.Equals(component.UUID)
+                                        select comp)
+                toRemove = comp;
+
+                if (toRemove is not null)
+                    compList.Remove(toRemove);
+                if (compList.Count == 0) Components.Remove(type);
             }
-            return true;
+        }
+
+        public void OnDrawShapes()
+        {
+            var compTypes = Components.Values;
+            var typesCount = compTypes.Count;
+            for (int iType = 0; iType < typesCount; iType++)
+            {
+                var compList = compTypes.ElementAt(iType);
+                var compCount = compList.Count;
+                for (int iComp = 0; iComp < compCount; iComp++)
+                {
+                    compList[iComp].OnDrawShapes();
+                }
+            }
         }
 
         internal static Node Instantiate(Node projectile)
@@ -472,23 +485,7 @@ namespace pixel_renderer
         }
 
         public static Node New => new("New Node", Vector2.Zero, Vector2.One);
-
         public bool ComponentsBusy { get; private set; }
         public Queue<Action> ComponentActionQueue { get; private set; } = new();
-
-        public void OnDrawShapes()
-        {
-            var compTypes = Components.Values;
-            var typesCount = compTypes.Count;
-            for (int iType = 0; iType < typesCount; iType++)
-            {
-                var compList = compTypes.ElementAt(iType);
-                var compCount = compList.Count;
-                for (int iComp = 0; iComp < compCount; iComp++)
-                {
-                    compList[iComp].OnDrawShapes();
-                }
-            }
-        }
     }
 }
