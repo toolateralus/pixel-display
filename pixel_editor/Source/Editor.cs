@@ -79,20 +79,20 @@ namespace pixel_editor
         {
             if (current != null)
                 throw new InvalidOperationException("Cannot instantiate several editors at once under the same domain."); 
-
             current = this;
             InitializeComponent();
             Importer.Import(false);
             InitializeSettings();
-
             Project project = Project.Default;
             Runtime.Initialize(project);
             GetEvents();
-            Tools = Tool.InitializeToolkit();
             GetInputs();
-            Console.Print(motd, true);
+            Tools = Tool.InitializeToolkit();
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.project);
+            Console.Print("Stage " + stageName + " set.");
+            Console.Print("Project " + projectName + " set.");
+            Console.Print(motd, true);
             Runtime.OutputImages.Add(image);
         }
 

@@ -84,6 +84,8 @@ namespace pixel_editor
                 Editor.Current.componentEditor?.Dispose();
 
                 OnObjectDeselected?.Invoke(grid);
+                if (addComponentMenuOpen)
+                    AddComponentButton_Click(new(), new());
             }
             Runtime.Current.stagingHost.DeselectNode();
         }
@@ -224,8 +226,13 @@ namespace pixel_editor
                 {"Rigidbody", AddRigidbody},
                 {"Softbody",  AddSoftbody},
                 {"Particles",  AddParticles },
-                {"MouseShooter",  AddShooter},
+                {"MouseShooterTesting",  AddShooter},
+                {"Joint", AddJoint}
             };
+        }
+        private Joint AddJoint()
+        {
+            return lastSelectedNode?.AddComponent<Joint>();  
         }
         private MouseShooter AddShooter()
         {
@@ -235,37 +242,50 @@ namespace pixel_editor
         {
             return lastSelectedNode?.AddComponent<ParticleSystem>();
         }
-
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
-            e.Handled = true;
+            if(e.RoutedEvent != null)
+                e.Handled = true;
+
             RefreshAddComponentFunctions();
             if (!addComponentMenuOpen)
             {
-                addComponentMenuOpen = true;
-                addComponentGrid = GetGrid();
-                MainGrid.Children.Add(addComponentGrid);
-                SetRowAndColumn(addComponentGrid, 10, 10, (int)Editor.Current.settings.InspectorPosition.X, (int)Editor.Current.settings.InspectorPosition.Y);
-
-                int i = 0;
-                foreach (var item in addComponentFunctions)
-                {
-                    Button button = GetButton(item.Key, new(0, 0, 0, 0));
-                    button.Name = $"button{i}";
-                    addComponentActions.Add(() => AddComponent(new(item.Key, item.Value)));
-                    button.FontSize = 2;
-                    button.Click += AddComponentClicked;
-                    addComponentGrid.Children.Add(button);
-                    SetRowAndColumn(button, 1, 2, 0, i);
-                    i++;
-
-                }
+                PopulateAddComponentTray();
                 return;
             }
+            ClearAddComponentTray();
+        }
+
+        private void PopulateAddComponentTray()
+        {
+            addComponentMenuOpen = true;
+            addComponentGrid = GetGrid();
+            MainGrid.Children.Add(addComponentGrid);
+            SetRowAndColumn(addComponentGrid, 10, 10, (int)Editor.Current.settings.InspectorPosition.X, (int)Editor.Current.settings.InspectorPosition.Y);
+
+            int i = 0;
+            foreach (var item in addComponentFunctions)
+            {
+                Button button = GetButton(item.Key, new(0, 0, 0, 0));
+                button.Name = $"button{i}";
+                addComponentActions.Add(() => AddComponent(new(item.Key, item.Value)));
+                button.FontSize = 2;
+                button.Click += AddComponentClicked;
+                addComponentGrid.Children.Add(button);
+                SetRowAndColumn(button, 1, 2, 0, i);
+                i++;
+
+            }
+            return;
+        }
+
+        private void ClearAddComponentTray()
+        {
             addComponentMenuOpen = false;
             addComponentGrid.Children.Clear();
             addComponentGrid = null;
         }
+
         private Grid NewInspectorGrid()
         {
             Grid grid = GetGrid();
@@ -381,8 +401,6 @@ namespace pixel_editor
             control.Foreground = foreground;
             control.Background = background;
         }
-
-       
 
         #endregion
         #region Events

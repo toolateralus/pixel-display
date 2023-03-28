@@ -1,9 +1,5 @@
 ﻿using System.Numerics;
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Text;
-using System.Runtime.InteropServices;
 
 namespace pixel_renderer
 {
@@ -15,10 +11,12 @@ namespace pixel_renderer
         private Collider collider;
         private Polygon model;
         private Rigidbody rb;
-        private Collision? lastCollision;
        
-        [Field] private int solverIterations = 8;
-        [Field] private float deformationRadius = 0.3f;
+        [Field] private int resolverIterations = 32;
+        /// <summary>
+        /// the max deformation represented as radius around the vertex
+        /// </summary>
+        [Field] private float deformationRadius = 0.15F;
         [Field] private bool shouldResolve = true;
         private Collision collision;
 
@@ -43,15 +41,12 @@ namespace pixel_renderer
                     collider.SetModel(Polygon.nGon(2, 8));
                     BakeOriginalShape();
                 }
-
                 if (rb is null)
                     TryGetComponent(out rb);
 
-                if (lastCollision is not null)
-                    lastCollision = null;
-
                 ResolveDeformities();
             }
+            collision = null;
         }
         public override void OnCollision(Collision col)
         {
@@ -101,7 +96,7 @@ namespace pixel_renderer
                     (Vector2 start, Vector2 end) edge = poly.GetNearestEdge(vertex);
 
                     float distance = Vector2.Distance(modelVertex, edge.start);
-                    float force = Math.Clamp(1f - distance / deformationRadius, 0.01f, 1f);
+                    float force = Math.Clamp(2f - distance / deformationRadius, 0.1f, 2f);
 
                     var edgeVector = edge.end - edge.start;
                     var normal = new Vector2(-edgeVector.Y, edgeVector.X);
@@ -116,7 +111,6 @@ namespace pixel_renderer
             }
             poly.CalculateNormals();
             collider.SetModel(poly);
-            collision = null; 
         }
         private void ResolveDeformities()
         {
@@ -127,7 +121,7 @@ namespace pixel_renderer
             {
                 Vector2 origVert = model.vertices[i];
                 Vector2 currVert = poly.vertices[i];
-                Vector2 antiForce = -((currVert - origVert) / solverIterations);
+                Vector2 antiForce = -((currVert - origVert) / resolverIterations);
                 poly.vertices[i] += antiForce;
             }
             poly.CalculateNormals();
