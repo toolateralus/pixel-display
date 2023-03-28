@@ -308,7 +308,12 @@ namespace pixel_renderer
         public void AddNodes(List<Node> nodes) 
         {
             foreach (var node in nodes)
+            {
+                if (this.nodes.Contains(node))
+                    continue;
+
                 AddNode(node);
+            }
         }
 
         #endregion development defaults

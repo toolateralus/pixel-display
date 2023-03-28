@@ -12,7 +12,6 @@ namespace pixel_renderer
         [Field] private float minColliderScale = 0.1f;
         [Field] private float maxColliderScale = 1.5f;
 
-
         private Collider collider;
         private Polygon model;
         private Rigidbody rb;
@@ -21,6 +20,15 @@ namespace pixel_renderer
         [Field] private int solverIterations = 8;
         [Field] private float deformationRadius = 0.3f;
         [Field] private bool shouldResolve = true;
+       
+        [Method]
+        private void BakeOriginalShape()
+        {
+            TryGetComponent(out collider);
+            model = collider.GetModel();
+            collider.drawCollider = true;
+            collider.drawNormals = true;
+        }
         public override void FixedUpdate(float delta)
         {
             if (shouldResolve)
@@ -28,6 +36,7 @@ namespace pixel_renderer
                 if (collider is null)
                 {
                     TryGetComponent(out collider);
+                    collider.SetModel(Polygon.nGon(2, 8));
                     BakeOriginalShape();
                 }
 
@@ -40,15 +49,6 @@ namespace pixel_renderer
                 ResolveDeformities();
             }
         }
-        [Method]
-        private void BakeOriginalShape()
-        {
-            TryGetComponent(out collider);
-            model = collider.GetModel();
-            collider.drawCollider = true;
-            collider.drawNormals = true;
-        }
-
         public override void OnCollision(Collision col)
         {
             Deformation(col);

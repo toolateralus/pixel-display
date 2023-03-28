@@ -54,7 +54,7 @@ namespace pixel_renderer
                             continue;
 
                         p.Next();
-                        ShapeDrawer.DrawLine(p.position, p.position * p.velocity.Length(), p.color);
+                        ShapeDrawer.DrawRect(p.position, p.position * p.velocity.Length(), p.color);
                    }
 
         }

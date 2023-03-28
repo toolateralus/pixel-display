@@ -38,6 +38,7 @@ namespace pixel_renderer
         public string Name { get; set; } = "";
         [JsonProperty]
         private string _uuid = "";
+        internal protected bool selected_by_editor;
         public string UUID => _uuid;
 
         public Component()

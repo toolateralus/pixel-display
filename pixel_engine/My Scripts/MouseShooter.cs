@@ -32,14 +32,11 @@ namespace pixel_renderer
             p.size = new(l, l);
 
             if (p.velocity.SqrMagnitude() < 0.01f)
-            {
-                particle = null;
-                fired = false; 
-            }
+                particle.onDeath?.Invoke(); 
         }
         public override void Awake()
         {
-            RegisterAction(Shoot, Key.LeftCtrl);
+            RegisterAction(Shoot, Key.G);
             
             ammoCt = initAmmoCt;
             currentMag = magazineSize;
@@ -53,9 +50,13 @@ namespace pixel_renderer
         }
         private void Fire()
         {
-            fired = true;
-            Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
-            particle = new Particle(vel, Particle);
+            if (particle is null)
+            {
+                Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
+                fired = true;
+                particle = new Particle(vel, Particle);
+                particle.onDeath += delegate { fired = false; }; 
+            }
         }
         private void Reload()
         {

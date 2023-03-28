@@ -14,7 +14,7 @@ namespace pixel_renderer
     public class Player : Component
     {
         [Field][JsonProperty] public bool takingInput = true;
-        [Field][JsonProperty] public float speed = 0.01f;
+        [Field][JsonProperty] public float speed = 0.1f;
         [Field] private bool isGrounded;
         [Field] public float turnSpeed = 0.1f;
         
@@ -104,7 +104,7 @@ namespace pixel_renderer
         #region Input
         void Up()
         {
-            if (!Get(Key.LeftShift))
+            if (!selected_by_editor)
                 return;
             moveVector = new Vector2(moveVector.X, 1 * speed);
         }

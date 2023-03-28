@@ -262,18 +262,22 @@ namespace pixel_editor
         }
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
-            if (sender is not TextBox box) return;
+            if (sender is not TextBox box) 
+            
+                return;
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
-
             for (int i = 0; i < data.Fields.Count; ++i)
                 ExecuteEditEvent(i);
-
             UpdateData();
-
         }
         private void UpdateData()
         {
-            for (int i = 0; i < data.Values.Count; i++)
+            if (data is null
+            || data.Fields is null
+            || data.Fields.Count == 0)
+                return; 
+
+                for (int i = 0; i < data.Values.Count; i++)
                 if (data.HasValueChanged(i, data.Values[i], out var newVal))
                     data.Values[i] = newVal;
         }
@@ -303,7 +307,7 @@ namespace pixel_editor
                     foreach(var obj in results)
                         if (obj.GetType() == info.FieldType)
                         {
-                            Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType}");
+                            Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType} of value {obj}");
                             info.SetValue(component, obj);
                         }
                     return true; 

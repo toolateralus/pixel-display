@@ -1,5 +1,6 @@
 ﻿
 using System.Numerics;
+using System.Security.Policy;
 using Point = System.Windows.Point;
 
 namespace pixel_renderer
@@ -18,7 +19,10 @@ namespace pixel_renderer
         {
             foreach (var node in stage.nodes)
             {
-                if (node == lastSelected) continue;
+                if (node == lastSelected)
+                {
+                    DeselectNode();
+                }
 
                 if (node.GetComponent<Sprite>() is not Sprite sprite)
                     continue;
@@ -29,7 +33,7 @@ namespace pixel_renderer
 
                 result = node;
 
-                SelectNode(sprite);
+                SelectNode(node);
 
                 DeselectNode();
 
@@ -40,14 +44,19 @@ namespace pixel_renderer
             result = null;
             return false;
         }
-        private static void SelectNode(Sprite sprite) => sprite.selected_by_editor = true;
+        private static void SelectNode(Node node)
+        {
+            foreach (var comp in node.Components)
+                foreach(var c in comp.Value) 
+                    c.selected_by_editor = true;
+        }
+
         public void DeselectNode()
         {
-            if (lastSelected is null) return;
-            var x = lastSelected.GetComponent<Sprite>();
-            lastSelected = null;
-            if (x is not null)
-            x.selected_by_editor = false;
+            if (lastSelected != null)
+                foreach (var comp in lastSelected.Components)
+                    foreach (var c in comp.Value)
+                        c.selected_by_editor = false;
         }
         public static void FixedUpdate(Stage stage)
         {

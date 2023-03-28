@@ -117,6 +117,7 @@ namespace pixel_editor
                     Node selected = Current.LastSelected?.Clone();
                     if (selected != null)
                     {
+                        selected.UUID = UUID.NewUUID(); 
                         selected.Position += Vector2.One;
                         result.Add(selected);
                     }
@@ -127,6 +128,7 @@ namespace pixel_editor
                             Node? node = Current.ActivelySelected[i];
                             if (node.Clone() is Node clone)
                             {
+                                clone.UUID = UUID.NewUUID(); 
                                 clone.Position += Vector2.One;
                                 result.Add(clone);
                             }
@@ -274,28 +276,7 @@ namespace pixel_editor
                     $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
             }
         }
-        protected internal void EditorEvent(EditorEvent e)
-        {
-            e.action?.Invoke(e.args);
-            if (e.message is "" || e.message.Contains("$nolog"))
-            {
-                if (e is FocusNodeEvent nodeEvent && nodeEvent.args.First() is Node node)
-                {
-                    Current.ActivelySelected.Add(node);
-                    Current.LastSelected = node;
-                    Inspector.DeselectNode(); 
-                    Inspector.SelectNode(node);
-                    StageCameraTool.TryFollowNode(node); 
-                }
-                return; 
-            }
-
-            if (consoleOutput.LineCount == Current.settings.ConsoleMaxLines)
-                Console.Clear(); 
-
-            consoleOutput.Text += e.message + '\n';
-            consoleOutput.ScrollToEnd();
-        }
+       
         #region Fields/Properties
         string stageName, projectName;
         internal static RenderHost? Host => Runtime.Current.renderHost;
@@ -450,11 +431,7 @@ namespace pixel_editor
         {
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
-
-            while (Current.Events.Pending.Count > Current.settings.EditorEventQueueMaxLength)
-                await Task.Delay(15);
-
-            Current.Events.Pending.Enqueue(e);
+            Current.Events.Pending.Push(e);
         }
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
         private void OnDisable(object? sender, EventArgs e)

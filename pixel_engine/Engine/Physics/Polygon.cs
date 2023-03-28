@@ -187,6 +187,20 @@ namespace pixel_renderer
 
             return new(verts.ToArray());
         }
+
+        public static Polygon nGon(float size, int sides = 6)
+        {
+            float angle = 2 * MathF.PI / sides;
+            List<Vector2> verts = new();
+            for (int i = 0; i < sides; i++)
+            {
+                float x = size * MathF.Cos(i * angle);
+                float y = size * MathF.Sin(i * angle);
+                verts.Add(new Vector2(x, y));
+            }
+            return new Polygon(verts.ToArray());
+        }
+
         public Polygon Transformed(Matrix3x2 matrix)
         {
             Polygon polygon = new(this);

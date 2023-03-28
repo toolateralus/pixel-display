@@ -14,7 +14,6 @@ namespace pixel_renderer
     public class Sprite : Component
     {
         internal protected bool IsDirty = true;
-        internal protected bool selected_by_editor;
 
         private void ApplyLighting()
         {

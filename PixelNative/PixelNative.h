@@ -8,44 +8,22 @@ namespace PixelNative {
     {
         char* frame;
 
-    public:
-        Native(int length)
-        {
-            frame = new char[length];
-        }
-
-        ~Native()
-        {
-            delete[] frame;
-        }
-
-        void SetData(char* data)
-        {
-            frame = data;
-        }
-
-        char* GetData()
-        {
-            return frame;
-        }
-
-        void SetPixel(int position, int color)
-        {
-            frame[position] = static_cast<char>(color);
-        }
-
-        char GetPixel(int position)
-        {
-            return frame[position];
-        }
-
-        property int Length
-        {
-            int get()
+        public:
+            Native(int length)
             {
-                return static_cast<int>(std::strlen(frame));
+                frame = new char[length];
             }
-        }
+            ~Native()
+            {
+                delete[] frame;
+            }
+            property int Length
+            {
+                int get()
+                {
+                    return static_cast<int>(std::strlen(frame));
+                }
+            }
     };
 }
 
