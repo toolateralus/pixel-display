@@ -16,9 +16,13 @@ namespace pixel_editor
         {
             if (selectedCollider == null)
                 return;
-            selectedCollider.DrawCollider();
-            selectedCollider.DrawNormals();
-            Polygon poly = selectedCollider.Polygon;
+            selectedCollider?.DrawCollider();
+            selectedCollider?.DrawNormals();
+            Polygon poly = selectedCollider?.Polygon;
+            
+            if (poly is null) 
+                return;
+
             for (int i = 0; i < poly.vertices.Length; i++)
             {
                 Vector2 vert = poly.vertices[i];

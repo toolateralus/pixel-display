@@ -20,7 +20,8 @@ namespace pixel_renderer
         [Field] private int solverIterations = 8;
         [Field] private float deformationRadius = 0.3f;
         [Field] private bool shouldResolve = true;
-       
+        private Collision collision;
+
         [Method]
         private void BakeOriginalShape()
         {
@@ -31,6 +32,9 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
+            if (collision != null)
+                Deformation(collision);
+
             if (shouldResolve)
             {
                 if (collider is null)
@@ -51,7 +55,7 @@ namespace pixel_renderer
         }
         public override void OnCollision(Collision col)
         {
-            Deformation(col);
+            collision = col;
         }
         internal void UniformDeformation(int direction = 1)
         {
@@ -81,8 +85,9 @@ namespace pixel_renderer
         }
         private void Deformation(Collision col)
         {
-            if (collider == null || model == null)
+            if (collider == null || model == null || collision == null)
                 return;
+
             Polygon poly = collider.GetModel();
 
             for (int index = 0; index < model.vertices.Length; index++)
@@ -90,28 +95,28 @@ namespace pixel_renderer
                 Vector2 vertex = poly.vertices[index];
                 Vector2 modelVertex = model.vertices[index];
 
-                bool withinRange;
-                Vector2 deformationPos;
-
-                if (WithinDeformationRange(vertex, modelVertex))
+                bool withinRange = WithinDeformationRange(vertex, modelVertex);
+                if (withinRange)
                 {
                     (Vector2 start, Vector2 end) edge = poly.GetNearestEdge(vertex);
 
                     float distance = Vector2.Distance(modelVertex, edge.start);
-                    float force = Math.Clamp(1f - distance / deformationRadius, 0f, 1f);
+                    float force = Math.Clamp(1f - distance / deformationRadius, 0.01f, 1f);
 
                     var edgeVector = edge.end - edge.start;
                     var normal = new Vector2(-edgeVector.Y, edgeVector.X);
 
                     Vector2 relativeVelocity = modelVertex - col.contact;
                     Vector2 tangent = Vector2.Dot(relativeVelocity, col.normal) * col.normal;
-                    Vector2 forceVector = tangent * (-force * Vector2.Dot(modelVertex - edge.start, normal));
+                    float dot = Vector2.Dot(modelVertex - edge.start, normal);
+                    Vector2 forceVector = tangent * (force * dot);
 
                     poly.vertices[index] += forceVector;
                 }
             }
             poly.CalculateNormals();
             collider.SetModel(poly);
+            collision = null; 
         }
         private void ResolveDeformities()
         {
