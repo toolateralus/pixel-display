@@ -9,6 +9,7 @@ using pixel_renderer;
 using System.Linq;
 using System.Windows.Media;
 using System.DirectoryServices;
+using System.Drawing.Text;
 
 namespace pixel_editor
 {
@@ -230,18 +231,6 @@ namespace pixel_editor
                 {"Joint", AddJoint}
             };
         }
-        private Joint AddJoint()
-        {
-            return lastSelectedNode?.AddComponent<Joint>();  
-        }
-        private MouseShooter AddShooter()
-        {
-            return lastSelectedNode?.AddComponent<MouseShooter>(); 
-        }
-        private ParticleSystem AddParticles()
-        {
-            return lastSelectedNode?.AddComponent<ParticleSystem>();
-        }
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
             if(e.RoutedEvent != null)
@@ -255,7 +244,6 @@ namespace pixel_editor
             }
             ClearAddComponentTray();
         }
-
         private void PopulateAddComponentTray()
         {
             addComponentMenuOpen = true;
@@ -278,7 +266,6 @@ namespace pixel_editor
             }
             return;
         }
-
         private void ClearAddComponentTray()
         {
             addComponentMenuOpen = false;
@@ -301,7 +288,40 @@ namespace pixel_editor
         {
             return style switch
             {
+                "default" => DefaultStyle(componentName),
+                "mint" => MintStyle(componentName),
                 _ => DefaultStyle(componentName),
+            };
+        }
+        public static System.Drawing.FontFamily[] GetFonts()
+        {
+            InstalledFontCollection installedFontCollection = new();
+            System.Drawing.FontFamily[] fonts = installedFontCollection.Families;
+            return fonts;
+        }
+
+        private static TextBox MintStyle(string componentName)
+        {
+            return new()
+            {
+                Text = componentName,
+                FontSize = 4f,
+                FontFamily = new FontFamily("MS Gothic"),
+                IsReadOnly = true,
+
+                AcceptsReturn = false,
+                AcceptsTab = false,
+                AllowDrop = false,
+
+                TextWrapping = TextWrapping.NoWrap,
+
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+
+                BorderThickness = new Thickness(0.1, 0.1, 0.1, 0.1),
+                Foreground = Brushes.Black,
+                Background = Brushes.Gray,
+
             };
         }
         private static TextBox DefaultStyle(string componentName)
@@ -448,6 +468,18 @@ namespace pixel_editor
         //   select field;
 
 
+        Joint AddJoint()
+        {
+            return lastSelectedNode?.AddComponent<Joint>();  
+        }
+        MouseShooter AddShooter()
+        {
+            return lastSelectedNode?.AddComponent<MouseShooter>(); 
+        }
+        ParticleSystem AddParticles()
+        {
+            return lastSelectedNode?.AddComponent<ParticleSystem>();
+        }
         Sprite AddSprite()
         {
             var x = lastSelectedNode.AddComponent<Sprite>();

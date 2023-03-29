@@ -152,7 +152,11 @@ namespace pixel_renderer
             FindOrCreateProjectsDirectory();
             Metadata meta = new(name, Path + "\\" + name + extension, extension);
             var project = IO.ReadJson<Project>(meta);
-            if (project is null) throw new FileNotFoundException(); 
+            if (project is null)
+            {
+                Runtime.Log($"Project {name} not found.");
+                return null;    
+            }
             return project;  
         }
     }

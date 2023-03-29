@@ -11,18 +11,32 @@ namespace pixel_renderer
     {
         #region Json Constructor
         [JsonConstructor]
-        public Node(bool Enabled, Stage parentStage, Dictionary<Type, List<Component>> Components, string name, string tag, Vector2 position, Vector2 Scale, Node? parentNode, List<Node> children, string nodeUUID)
+        public Node(bool Enabled,
+                    Stage parentStage,
+                    Dictionary<Type, List<Component>> Components,
+                    string name,
+                    string tag,
+                    Node? parentNode,
+                    Matrix3x2 Transform,
+                    List<Node> children,
+                    string nodeUUID)
         {
-            this.ParentStage = parentStage;
+            //utils
+            this.Transform = Transform;
+            this.Enabled = Enabled;
+            // strings
             Name = name;
             _uuid = nodeUUID;
-            this.Position = position;
-            this.Scale = Scale;
+            this.tag = tag;
+            
+            // nodes
+            this.ParentStage = parentStage;
             this.parent = parentNode;
             this.children = children;
-            this.tag = tag;
+
+            // components
             this.Components = Components;
-            this.Enabled = Enabled;
+
 
         }
         #endregion
@@ -34,7 +48,6 @@ namespace pixel_renderer
 
             _uuid = pixel_renderer.UUID.NewUUID();
         }
-
         public Node(string name) : this() => Name = name;
         public Node Clone() { return (Node)MemberwiseClone(); }
         public Node(string name, Vector2 pos, Vector2 Scale) : this(name)
@@ -45,10 +58,14 @@ namespace pixel_renderer
 
         #endregion
 
-
-        [JsonProperty]
-        public Stage parentStage;
-        public Stage ParentStage 
+        private bool _enabled = true;
+        private string _uuid = "";
+        internal protected bool awake;
+        Rigidbody? rb;
+        
+        [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
+        [JsonProperty] public Stage parentStage;
+        [JsonProperty] public Stage ParentStage 
         {
             get
             { 
@@ -57,50 +74,21 @@ namespace pixel_renderer
             } 
             set => parentStage = value; 
         }
-
-
-        [JsonProperty]
-        public bool Enabled { get { return _enabled; } set => _enabled = value; }
-
-        [JsonProperty]
-        public string UUID { get { return _uuid; } set { _uuid = value; } }
-
-        [JsonProperty]
-        public string Name { get; set; }
-
-        [JsonProperty]
-        public string tag = "Untagged";
-
-        private bool _enabled = true;
-        private string _uuid = "";
-
-        Rigidbody? rb;
-        public void Move(Vector2 destination)
-        {
-            Position = destination;
-        }
-        [JsonProperty] public Vector2 localPos = new();
-        
+        [JsonProperty] public bool Enabled { get { return _enabled; } set => _enabled = value; }
+        [JsonProperty] public string UUID { get { return _uuid; } set { _uuid = value; } }
+        [JsonProperty] public string Name { get; set; }
+        [JsonProperty] public string tag = "Untagged";
         [JsonProperty] public Node? parent;
-
-        [JsonProperty]
-        public List<Node> children = new();
-
+        [JsonProperty] public List<Node> children = new();
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
-        [Field]
-        [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
-        internal protected bool awake;
-
         public Vector2 Position
         {
             get => Transform.Translation;
             set
             {
                 Transform.Translation = value;
-               // UpdateTransform(this); 
             }
         }
-        [JsonProperty]
         public float Rotation
         {
             get => MathF.Atan2(Transform.M21, Transform.M11);
@@ -113,11 +101,8 @@ namespace pixel_renderer
                 Transform.M12 = sin;
                 Transform.M21 = -sin;
                 Transform.M22 = cos;
-
-               // UpdateTransform(this);
             }
         }
-        [JsonProperty]
         public Vector2 Scale
         {
             get
@@ -130,23 +115,15 @@ namespace pixel_renderer
             {
                 Transform.M11 = value.X;
                 Transform.M22 = value.Y;
-
-                UpdateTransform(this);
             }
         }
-     
-        static void UpdateTransform(Node node)
-        {
-            var rotationMatrix = Matrix3x2.CreateRotation(node.Rotation);
-            var scaleMatrix = Matrix3x2.CreateScale(node.Scale);
-            var translationMatrix = Matrix3x2.CreateTranslation(node.Position);
-            var transformMatrix = rotationMatrix * scaleMatrix * translationMatrix;
-            node.Transform = transformMatrix;
-        }
 
+        public void Move(Vector2 destination)
+        {
+            Position = destination;
+        }
         public void Child(Node child)
         {
-
             if (ContainsCycle(child))
             {
                 Runtime.Log("A cyclic resource inclusion was detected.");
@@ -154,20 +131,17 @@ namespace pixel_renderer
             }
 
             if (!Runtime.Current.GetStage().nodes.Contains(child))
-                    Runtime.Current.GetStage().AddNode(child);
-
-            var distance = Vector2.Distance(child.Position, Position);
-            var direction = child.Position - Position;
+                    Runtime.Current.GetStage()?.AddNode(child);
 
             children ??= new();
+            
+            if (children.Contains(child)) return;
 
-            if (children.Contains(child))
-                return;
-
+            
             _ = child.parent?.TryRemoveChild(child);
-
+            
             children.Add(child);
-
+            
             child.parent = this;
 
         }
@@ -232,10 +206,10 @@ namespace pixel_renderer
             return false;
 
         }
+        public void SetActive(bool value) => _enabled = value;
         public void Awake()
         {
             ComponentsBusy = true;
-
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
@@ -243,10 +217,9 @@ namespace pixel_renderer
 
                 for (int j = 0; j < Components[key].Count; ++j)
                         Components[key].ElementAt(j).init_component_internal();
-                awake = true; 
             }
+            awake = true; 
             ComponentsBusy = false;
-
         }
         public void FixedUpdate(float delta)
         {
@@ -288,7 +261,6 @@ namespace pixel_renderer
             ComponentsBusy = false;
         }
 
-        public void SetActive(bool value) => _enabled = value;
         public void Destroy()
         {
             ComponentsBusy = true;

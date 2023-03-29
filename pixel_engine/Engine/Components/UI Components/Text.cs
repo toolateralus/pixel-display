@@ -89,7 +89,7 @@ namespace pixel_renderer
             var start = new Vector2(0, 0);
             var end = new Vector2(width, 0);
 
-            posCurve = Curve.Linear(start, end, 1, Content.Length);
+            posCurve = Curve.Linear(start, end, 1, width/ Content.Length);
             var concatenatedImg = JImage.Concat(output, posCurve);
 
             if (texture is null) texture = new(concatenatedImg);

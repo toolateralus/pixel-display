@@ -13,9 +13,15 @@ namespace pixel_renderer
 {
     public class Runtime
     {
-        public RenderHost renderHost;
-        public StagingHost stagingHost = new();
-        public Project project;
+
+        private protected volatile static Runtime? current;
+        private protected volatile Stage? stage;
+        private protected Thread renderThread; 
+        private protected BackgroundWorker physicsWorker; 
+        public static event Action<EditorEvent>? InspectorEventRaised;
+        public static event Action<Project> OnProjectSet = new(delegate { });
+        public static event Action<Stage> OnStageSet = new(delegate { });
+        public static List<System.Windows.Controls.Image> OutputImages = new();
         public static Runtime Current
         {
             get
@@ -25,44 +31,25 @@ namespace pixel_renderer
                 return current;
             }
         }
-        public static void GetRenderingData(out RenderHost host, out StageRenderInfo info, out RendererBase renderer, out JImage baseImage)
-        {
-            host = Runtime.Current.renderHost;
-            info = Current.stage.StageRenderInfo; 
-            renderer = Runtime.Current.renderHost.GetRenderer();
-            baseImage = renderer.baseImage;
-        }
-
-        private protected volatile static Runtime? current;
-        private protected volatile Stage? stage;
-        private protected volatile Thread renderThread; 
-        public static event Action<EditorEvent>? InspectorEventRaised;
-        public static event Action<Project> OnProjectSet = new(delegate { });
-        public static event Action<Stage> OnStageSet = new(delegate { });
-        public static List<System.Windows.Controls.Image> OutputImages = new();
-        public BackgroundWorker physicsWorker; 
-
+       
         public object? Inspector = null;
         public static bool Initialized { get; private set; }
         public static bool IsRunning { get; private set; }
         public static bool IsDiposing { get; private set; }
-
-        public LuaInterop Lua = new();
-
+        
         private Runtime(Project project)
         {
-
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             current = this;
             this.project = project;
 
 
             renderHost = new();
-            renderThread = new(OnRenderBegin);
+            renderThread = new(RenderLoop);
             Task.Run(() => renderThread.Start());
 
             physicsWorker = new();
-            physicsWorker.DoWork += OnPhysicsBegin;
+            physicsWorker.DoWork += PhysicsLoop;
             physicsWorker.RunWorkerAsync();
 
             Initialized = true;
@@ -70,7 +57,12 @@ namespace pixel_renderer
             GetProjectSettings();
 
         }
-
+        public RenderHost renderHost;
+        public StagingHost stagingHost = new();
+        public Project project;
+        public LuaInterop Lua = new();
+        public ProjectSettings projectSettings;
+        
         private void GetProjectSettings()
         {
             Metadata meta = new("projectSettings", Constants.WorkingRoot + "\\projectSettings.asset", ".asset");
@@ -87,10 +79,15 @@ namespace pixel_renderer
 
             renderHost.newResolution = projectSettings.CurrentResolution; 
         }
+        public static void GetRenderingData(out RenderHost host, out StageRenderInfo info, out RendererBase renderer, out JImage baseImage)
+        {
+            host = Runtime.Current.renderHost;
+            info = Current.stage.StageRenderInfo; 
+            renderer = Runtime.Current.renderHost.GetRenderer();
+            baseImage = renderer.baseImage;
+        }
 
-        public ProjectSettings projectSettings;
-
-        private void OnPhysicsBegin(object? sender, DoWorkEventArgs e)
+        private void PhysicsLoop(object? sender, DoWorkEventArgs e)
         {
             while (physicsWorker != null)
             {
@@ -118,30 +115,7 @@ namespace pixel_renderer
             Runtime.Log("Physics simulation has ended.");
 
         }
-
-        public static void Toggle()
-        {
-            if (IsRunning)
-            {
-                IsRunning = false;
-                return;
-            }
-            IsRunning = true;
-
-            
-        }
-
-        /// <summary>
-        /// Prints a message in the editor console.
-        /// </summary>
-        /// <param name="message"></param>
-        public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
-        {
-           EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
-           InspectorEventRaised?.Invoke(e);
-        }
-
-        private static void OnRenderBegin()
+        private static void RenderLoop()
         {
             while (Current.renderThread != null && Current.renderThread.IsAlive)
             {
@@ -175,6 +149,27 @@ namespace pixel_renderer
             Runtime.Log("renderer has exited unexpectedly.");
 
         }
+
+        public static void Toggle()
+        {
+            if (IsRunning)
+            {
+                IsRunning = false;
+                return;
+            }
+            IsRunning = true;
+
+            
+        }
+        /// <summary>
+        /// Prints a message in the editor console.
+        /// </summary>
+        /// <param name="message"></param>
+        public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
+        {
+           EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
+           InspectorEventRaised?.Invoke(e);
+        }
         public static void Initialize(Project project)
         {
             current ??= new(project);
@@ -183,14 +178,7 @@ namespace pixel_renderer
         {
             this.project = project;
             OnProjectSet?.Invoke(project);
-        }
-        internal protected static Stage InstantiateDefaultStageIntoProject()
-        {
-            Log("No stage found, either the requested index was out of range or no stages were found in the project." +
-                " A Default will be instantiated and added to the project at the requested index.");
-            Stage stage = Stage.Standard();
-            Current.project.AddStage(stage);
-            return stage; 
+            Project.TryLoadStage(0);
         }
         public Stage? GetStage()
         {
@@ -206,10 +194,15 @@ namespace pixel_renderer
             IsDiposing = true;
             IsRunning = false;
             Task.Run(()=> renderThread?.Join());
-            renderThread = null;
-            current = null;
-            stage = null;
-            project = null;
+        }
+        internal protected static Stage InstantiateDefaultStageIntoProject()
+        {
+            Log("No stage found, either the requested index was out of range or no stages were found in the project." +
+                " A Default will be instantiated and added to the project at the requested index.");
+
+            Stage stage = Stage.Standard();
+            Current.project.AddStage(stage);
+            return stage; 
         }
     }
 }

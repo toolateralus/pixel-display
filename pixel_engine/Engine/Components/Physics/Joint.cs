@@ -2,6 +2,7 @@
 {
     public class Joint : Component
     {
+        [Method]
         void AttachBodiesByName()
         {
             if (Runtime.Current.GetStage() is Stage stage)
@@ -28,9 +29,7 @@
         public Node dominant;
         public Node submissive;
         public bool A_Body_Is_Me = true; 
-        string Body_A_Name = "";
-        string Body_B_Name = "Player";
-        [Field]
-        bool thisValueIsVisibleFromTheInspectorISureHope = true; 
+        [Field] string Body_A_Name = "";
+        [Field] string Body_B_Name = "Player";
     }
 }

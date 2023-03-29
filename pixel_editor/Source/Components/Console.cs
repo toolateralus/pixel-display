@@ -307,6 +307,23 @@ namespace pixel_editor
             args = new object[] { },
             description = "Loads a project @../Pixel/Projects of specified name, and if found, prompts the user to load the project as the current project."
         };
+        public static Command cmd_load_project_2() => new()
+        {
+            phrase = "load;",
+            syntax = "load();",
+            argumentTypes = null,
+            action = (e) =>
+            {
+                string name = (string)e[0];
+                var project = Project.Load();
+                
+                if (project != null)
+                    Runtime.Current.SetProject(project);
+
+            },
+            args = new object[] { },
+            description = "Runs a Load-Project dialog."
+        };
         public static Command cmd_set_stage() => new()
         {
             phrase = "stage.Set;",

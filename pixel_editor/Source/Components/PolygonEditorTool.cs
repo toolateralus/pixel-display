@@ -31,7 +31,7 @@ namespace pixel_editor
                 else
                     ShapeDrawer.DrawCircle(vert, highlightDistance / 2, Pixel.Green);
             }
-            if (newVertexTarget != null)
+            if (newVertexTarget.HasValue)
                 ShapeDrawer.DrawCircle(newVertexTarget.Value, highlightDistance / 2, Pixel.Green);
         }
         public override void Update(float delta)
