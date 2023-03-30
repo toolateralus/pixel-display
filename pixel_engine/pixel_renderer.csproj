@@ -20,10 +20,6 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <Folder Include="Lua Scripts\" />
-  </ItemGroup>
-	
-  <ItemGroup>
     <ProjectReference Include="..\PixelNative\PixelNative.vcxproj" />
   </ItemGroup>
 	
