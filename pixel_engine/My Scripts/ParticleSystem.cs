@@ -15,7 +15,7 @@ namespace pixel_renderer
         public Vector2 position;
         public Vector2 size;
         public Action<Particle> lifetime;
-        public Action onDeath; 
+        public Action<Particle> onDeath; 
         internal bool dead;
 
         public Particle(Vector2 initVel, Action<Particle> lifetime)
@@ -23,6 +23,21 @@ namespace pixel_renderer
             velocity = initVel;
             this.lifetime = lifetime;
         }
+        public Particle(Action<Particle> Lifetime, Action<Particle> onDeath)
+        {
+            lifetime = Lifetime;
+            this.onDeath = onDeath;
+        }
+        public Particle(Pixel initColor, Vector2 initVel, Vector2 initPos, Vector2 initSize, Action<Particle> lifetime, Action<Particle> onDeath)
+        {
+            this.color = initColor;
+            this.velocity = initVel;
+            this.position = initPos;
+            this.size = initSize;
+            this.lifetime = lifetime;
+            this.onDeath = onDeath;
+        }
+
         public void Next() => lifetime.Invoke(this);
     }
     public class ParticleSystem : Component
@@ -89,7 +104,7 @@ namespace pixel_renderer
             if (p.dead)
                 return;
 
-            p.onDeath?.Invoke(); 
+            p.onDeath?.Invoke(p); 
             p.dead = true;
 
             p.position = Position;

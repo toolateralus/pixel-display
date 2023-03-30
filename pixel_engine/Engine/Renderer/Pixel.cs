@@ -11,6 +11,10 @@ namespace pixel_renderer
 {
     public struct Pixel
     {
+        /// <summary>
+        /// shortcut to random pixel
+        /// </summary>
+        internal static Pixel Random => JRandom.Pixel();
         public byte a;
         public byte r;
         public byte g;

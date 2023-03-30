@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Numerics;
+using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using static pixel_renderer.Input;
@@ -20,44 +24,85 @@ namespace pixel_renderer
 
         const int initAmmoCt = 300;
         private int speed = 60;
-        private Particle particle;
+        private List<Particle> particles = new();
+        private bool particlesBusy;
+
+        private int maxParticles = 200;
 
         void Particle(Particle p)
         {
             p.position += p.velocity;
             p.velocity *= 0.99f;
-            
-            var l = p.velocity.Length();
-            
-            p.size = new(l, l);
+            p.size = Vector2.One;
+            p.color = Color.Red; 
 
-            if (p.velocity.SqrMagnitude() < 0.01f)
-                particle.onDeath?.Invoke(); 
+            if (p.velocity.SqrMagnitude() < 0.001f)
+                p.onDeath?.Invoke(p); 
         }
         public override void Awake()
         {
-            RegisterAction(Shoot, Key.G);
-            
+            RegisterAction(Fire, Key.G);
+            RegisterAction(() => fired = false, Key.G, InputEventType.KeyUp);
+
+            RegisterAction(Reload, Key.R);
             ammoCt = initAmmoCt;
             currentMag = magazineSize;
         }
-        private void Shoot()
-        {
-            Fire();
-
-            if (Get(Key.R))
-                Reload();
-        }
         private void Fire()
         {
-            if (particle is null)
+            Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
+            fired = true;
+
+            if (particles.Count >= maxParticles)
             {
-                Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
-                fired = true;
-                particle = new Particle(vel, Particle);
-                particle.onDeath += delegate { fired = false; }; 
+                Rent(true, initPos : Position, initVel : vel);
+                return;
             }
+            InstantiateParticle(vel);
         }
+
+        private void InstantiateParticle(Vector2 vel)
+        {
+            Particle particle = new(Color.Red, vel, Position, Vector2.One, Particle, OnParticleDeath);
+
+            particlesBusy = true;
+            particles.Add(particle);
+            particlesBusy = false;
+        }
+
+        private void Rent(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
+        {
+            var p = particles.Where(p => p.dead).FirstOrDefault();
+
+            if (p is null || p == default)
+                return; 
+
+            if (reset)
+            {
+                if(lifetime != null)
+                    p.lifetime = lifetime;
+                if(death != null)
+                    p.onDeath = death;
+                if (initVel.HasValue)
+                    p.velocity = initVel.Value;
+                if (initPos.HasValue)
+                    p.position = initPos.Value;
+                if (initSize.HasValue)
+                    p.size = initSize.Value;
+                if (initColor.HasValue)
+                    p.color = initColor.Value;
+            }
+
+            p.dead = false;
+        }
+
+        private void OnParticleDeath(Particle p)
+        {
+            p.position = Position;
+            p.color = Pixel.Random;
+            p.dead = true; 
+        }
+
         private void Reload()
         {
             ammoCt -= magazineSize;
@@ -71,10 +116,14 @@ namespace pixel_renderer
         {
             if (Runtime.IsRunning)
             {
-                particle?.Next();
-                if (particle is null) 
-                    return;
-                DrawCircle(particle.position, particle.size.X, particle.color);
+                for (int i = 0; i < particles.Count; i++)
+                {
+                    Particle? particle = particles[i];
+                    particle?.Next();
+                    if (particle is null || particle.dead) 
+                        continue;
+                    DrawCircle(particle.position, particle.size.X, particle.color);
+                }
             }
         }
         public override void Update()
