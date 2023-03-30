@@ -262,8 +262,7 @@ namespace pixel_editor
         }
         private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
-            if (sender is not TextBox box) 
-            
+            if (sender is not TextBox box || data is null)
                 return;
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
             for (int i = 0; i < data.Fields.Count; ++i)

@@ -61,7 +61,7 @@ namespace pixel_renderer
         private bool _enabled = true;
         private string _uuid = "";
         internal protected bool awake;
-        Rigidbody? rb;
+        internal Rigidbody? rb;
         
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
         [JsonProperty] public Stage parentStage;
@@ -281,6 +281,9 @@ namespace pixel_renderer
             ComponentsBusy = false;
 
         }
+        public Action<Collision> OnCollided;
+        public Action<Collision> OnTriggered;
+
         public void OnTrigger(Collision otherBody)
         {
             if (!awake)
@@ -295,6 +298,7 @@ namespace pixel_renderer
                 for (int j = 0; j < Components[key].Count; ++j)
                     Components[key].ElementAt(j)?.OnTrigger(otherBody);
             }
+            OnTriggered?.Invoke(otherBody);
             ComponentsBusy = false;
 
         }
@@ -312,8 +316,8 @@ namespace pixel_renderer
                 for (int j = 0; j < Components[key].Count; ++j)
                     Components[key].ElementAt(j)?.OnCollision(otherBody);
             }
+            OnCollided?.Invoke(otherBody);
             ComponentsBusy = false;
-
         }
 
         public T AddComponent<T>(T component) where T : Component
