@@ -33,8 +33,8 @@ namespace pixel_renderer
                 content = value;
                 RefreshCharacters();
             }
-        }
-        const string alphabet = "abcdefghijklmnopqrstuvwxyz";
+        } 
+        const string alphabet = "abcdefghijklmnopqrstuvwxyz ";
         [Field]
         private string content = "abc";
         public override void Awake()
