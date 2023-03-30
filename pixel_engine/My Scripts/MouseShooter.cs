@@ -13,39 +13,37 @@ namespace pixel_renderer
 {
     public class MouseShooter : Component
     {
-        private bool fired;
-
-        [Field]
-        public Key fireKey = Key.F,
-                  reloadKey = Key.R;
-        [Field]
-        public int ammoCt = 300,
-                   magazineSize = 16,
-                   currentMag = 16;
-
+                 
         const int initAmmoCt = 300;
-        private int speed = 60;
-        private Queue<Particle> particles = new();
-        private bool particlesBusy;
+        [Field] int ammoCt = 300, magazineSize = 16, currentMag = 16;
 
-        private int maxParticles = 2000;
+        [Field] private int speed = 70;
+        [Field] private int maxParticles = 25;
+
+        [Field] private float minVelLength = 0.001f;
+        [Field] private bool particlesDieFromLowVelocity = true;
+        [Field] private bool usingAmmo = false;
+
+        private Queue<Particle> particles = new();
 
         void Particle(Particle p)
         {
             p.position += p.velocity;
             p.velocity *= 0.99f;
             p.size = Vector2.One;
-            p.color = Color.Red; 
+            p.color = Color.Red;
 
-            if (p.velocity.SqrMagnitude() < 0.001f)
-                p.onDeath?.Invoke(p); 
+            if(p.velocity.Length() < minVelLength && particlesDieFromLowVelocity)
+                p.onDeath?.Invoke(p);
+
         }
         public override void Awake()
         {
             RegisterAction(Fire, Key.G);
-            RegisterAction(() => fired = false, Key.G, InputEventType.KeyUp);
             RegisterAction(Reload, Key.R);
-            if(TryGetComponent<Sprite>(out var sprite)) RemoveComponent(sprite);
+            
+            if(TryGetComponent<Sprite>(out var sprite)) 
+                RemoveComponent(sprite);
             
             ammoCt = initAmmoCt;
             currentMag = magazineSize;
@@ -54,12 +52,29 @@ namespace pixel_renderer
         private void Fire()
         {
             Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
-            fired = true;
+            
+            if (usingAmmo)
+            {
+                currentMag--;
+                if (currentMag <= 0)
+                {
+                    Runtime.Log("You must reload.");
+                    return;
+                }
+            }
 
             if (particles.Count >= maxParticles)
             {
-                Runtime.Log("particle recycled.");
-                Rent(true, initPos: Position, initVel: vel, initColor: Pixel.Random);
+                if (!particlesDieFromLowVelocity)
+                {
+                    var p = particles.Dequeue();
+                    p.onDeath?.Invoke(p);
+                    ReviveParticle(p, true, initPos : Position, initVel : vel, initColor: Pixel.Random);
+                }
+                else
+                {
+                    Rent(true, initPos: Position, initVel: vel, initColor: Pixel.Random);
+                }
                 return;
             }
             InstantiateParticle(vel);
@@ -68,10 +83,7 @@ namespace pixel_renderer
         private void InstantiateParticle(Vector2 vel)
         {
             Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Particle, OnParticleDeath);
-
-            particlesBusy = true;
             particles.Enqueue(particle);
-            particlesBusy = false;
         }
 
         private void Rent(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
@@ -79,13 +91,18 @@ namespace pixel_renderer
             var p = particles.Where(p => p.dead).FirstOrDefault();
 
             if (p is null || p == default)
-                p = particles.Dequeue(); 
+                return;
 
+            ReviveParticle(p, reset, lifetime, death, initVel, initPos, initSize, initColor);
+        }
+
+        private static void ReviveParticle(Particle p, bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
+        {
             if (reset)
             {
-                if(lifetime != null)
+                if (lifetime != null)
                     p.lifetime = lifetime;
-                if(death != null)
+                if (death != null)
                     p.onDeath = death;
                 if (initVel.HasValue)
                     p.velocity = initVel.Value;
@@ -102,14 +119,23 @@ namespace pixel_renderer
 
         private void OnParticleDeath(Particle p)
         {
-            p.position = Position;
             p.dead = true; 
         }
 
         private void Reload()
         {
-            ammoCt -= magazineSize;
+            if (!usingAmmo)
+                return;
+
+            if (ammoCt <= 0)
+            {
+                Runtime.Log("Ammo Replenished! (+500)");
+                ammoCt += 500; 
+            }
+
+            ammoCt -= currentMag - magazineSize;
             currentMag = magazineSize;
+           
         }
         public override void FixedUpdate(float delta)
         {
@@ -124,7 +150,9 @@ namespace pixel_renderer
                     particle?.Next();
                     if (particle is null || particle.dead) 
                         continue;
-                    DrawCircle(particle.position, particle.size.X, particle.color);
+
+
+                    DrawCircle(particle.position, particle.size.X, particle.color * particle.velocity.LengthSquared());
                 }
             }
         }
