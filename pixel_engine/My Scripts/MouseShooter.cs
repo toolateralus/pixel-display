@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using static pixel_renderer.Input;
 using static pixel_renderer.ShapeDrawing.ShapeDrawer;
 namespace pixel_renderer
@@ -24,10 +25,10 @@ namespace pixel_renderer
 
         const int initAmmoCt = 300;
         private int speed = 60;
-        private List<Particle> particles = new();
+        private Queue<Particle> particles = new();
         private bool particlesBusy;
 
-        private int maxParticles = 200;
+        private int maxParticles = 2000;
 
         void Particle(Particle p)
         {
@@ -43,11 +44,13 @@ namespace pixel_renderer
         {
             RegisterAction(Fire, Key.G);
             RegisterAction(() => fired = false, Key.G, InputEventType.KeyUp);
-
             RegisterAction(Reload, Key.R);
+            if(TryGetComponent<Sprite>(out var sprite)) RemoveComponent(sprite);
+            
             ammoCt = initAmmoCt;
             currentMag = magazineSize;
         }
+
         private void Fire()
         {
             Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
@@ -55,7 +58,8 @@ namespace pixel_renderer
 
             if (particles.Count >= maxParticles)
             {
-                Rent(true, initPos : Position, initVel : vel);
+                Runtime.Log("particle recycled.");
+                Rent(true, initPos: Position, initVel: vel, initColor: Pixel.Random);
                 return;
             }
             InstantiateParticle(vel);
@@ -63,10 +67,10 @@ namespace pixel_renderer
 
         private void InstantiateParticle(Vector2 vel)
         {
-            Particle particle = new(Color.Red, vel, Position, Vector2.One, Particle, OnParticleDeath);
+            Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Particle, OnParticleDeath);
 
             particlesBusy = true;
-            particles.Add(particle);
+            particles.Enqueue(particle);
             particlesBusy = false;
         }
 
@@ -75,7 +79,7 @@ namespace pixel_renderer
             var p = particles.Where(p => p.dead).FirstOrDefault();
 
             if (p is null || p == default)
-                return; 
+                p = particles.Dequeue(); 
 
             if (reset)
             {
@@ -99,7 +103,6 @@ namespace pixel_renderer
         private void OnParticleDeath(Particle p)
         {
             p.position = Position;
-            p.color = Pixel.Random;
             p.dead = true; 
         }
 
@@ -116,9 +119,8 @@ namespace pixel_renderer
         {
             if (Runtime.IsRunning)
             {
-                for (int i = 0; i < particles.Count; i++)
+                foreach(var particle in particles)
                 {
-                    Particle? particle = particles[i];
                     particle?.Next();
                     if (particle is null || particle.dead) 
                         continue;

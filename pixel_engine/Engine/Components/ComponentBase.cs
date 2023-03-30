@@ -79,6 +79,11 @@ namespace pixel_renderer
             Name = $"{GetType().Name}";
             Awake();
         }
+
+        public void RemoveComponent(Component component)
+        {
+            node?.RemoveComponent(component);
+        }
     }
 
 }
