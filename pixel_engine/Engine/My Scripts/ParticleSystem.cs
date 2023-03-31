@@ -11,6 +11,7 @@ namespace pixel_renderer
     public class Particle 
     {
         public Pixel color;
+        public float birth = 0;
         public Vector2 velocity;
         public Vector2 position;
         public Vector2 size;

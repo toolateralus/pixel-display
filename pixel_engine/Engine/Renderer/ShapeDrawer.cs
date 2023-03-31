@@ -14,11 +14,12 @@ namespace pixel_renderer.ShapeDrawing
         {
             Lines.Clear();
             Circles.Clear();
+            Rays.Clear();
+            Normals.Clear(); 
+
             var nodesCount = stage.nodes.Count;
             for (int i = 0; i < nodesCount; i++)
-            {
                 stage.nodes[i]?.OnDrawShapes();
-            }
             DrawShapeActions?.Invoke();
         }
 
@@ -26,6 +27,21 @@ namespace pixel_renderer.ShapeDrawing
         internal static List<(Circle, Pixel)> Circles = new();
         internal static List<(Ray, Pixel)> Normals = new();
         internal static List<(Ray, Pixel)> Rays = new();
+
+        public static void DrawPolygon(Polygon poly, Pixel? color = null)
+        {
+            List<Line> lines = poly.GetLines();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                Line? line = lines[i];
+                if (color.HasValue)
+                {
+                    DrawLine(line, color.Value);
+                    continue;
+                }
+                DrawLine(line);
+            }
+        }
         public static void DrawLine(Vector2 startPoint, Vector2 endPoint, Pixel? color = null) =>
             Lines.Add((new Line(startPoint, endPoint), color ?? Pixel.White));
         public static void DrawNormal(Vector2 position, Vector2 direction, Pixel? color = null) =>
