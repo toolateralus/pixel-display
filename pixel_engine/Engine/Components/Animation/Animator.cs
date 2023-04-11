@@ -17,8 +17,14 @@ namespace pixel_renderer
         [Field][JsonProperty]
         public string[] frameNames = new string[]
         {
-            "Add/Remove Elements",
-            "With The Buttons Below"
+            "dog_walking_1",
+            "dog_walking_2",
+            "dog_walking_3",
+            "dog_walking_4",
+            "dog_walking_5",
+            "dog_walking_6",
+            "dog_walking_7",
+            "dog_walking_8",
         };
 
         [JsonProperty][Field]
@@ -70,9 +76,9 @@ namespace pixel_renderer
                     metas.Add(meta);
             }
             
-            if (metas.Count == 0)
+            if (metas.Count == 0) 
                 return;
-
+               
             Animation anim = new(metas.ToArray(), padding)
             {
                 looping = true

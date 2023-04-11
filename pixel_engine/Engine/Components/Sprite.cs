@@ -153,12 +153,12 @@ namespace pixel_renderer
             int x = 0, y = 0;
 
             Pixel color = Pixel.White;
-            PixelShader((e) => { color = e; },  getColor, X, Y, OnIterationComplete);
+            PixelShader((e) => { color = e; }, getColor, X, Y, OnIterationComplete);
 
             void OnIterationComplete(JImage image) {
                 texture.SetImage(image);
             }
-            
+
             Pixel getColor() {
                 // color 
                 var localPos = new Vector2(x, y) / colorDataSize;
@@ -198,6 +198,14 @@ namespace pixel_renderer
                 }
             return colors; 
         }
+        /// <summary>
+        /// see LightingPerPixel to see an example 
+        /// </summary>
+        /// <param name="colorOut"></param>
+        /// <param name="colorIn"></param>
+        /// <param name="indexerX"></param>
+        /// <param name="indexerY"></param>
+        /// <param name="onIteraton"></param>
         public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton)
         {
             for (int x = 0; x < texture.Width * 4; x = indexerX.Invoke())
@@ -206,12 +214,9 @@ namespace pixel_renderer
                     var col = texture.GetPixel(x, y);
                     colorOut.Invoke(col);
                     texture.SetPixel(x, y, colorIn.Invoke());
-                    onIteraton.Invoke(texture.GetImage());
                 }
+                onIteraton.Invoke(texture.GetImage());
         }
-
-
-
         public Vector2[] GetCorners()
         {
             var viewport = Polygon.Square(1);

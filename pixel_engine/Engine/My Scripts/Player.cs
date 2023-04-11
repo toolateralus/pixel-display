@@ -1,13 +1,9 @@
 ﻿using static pixel_renderer.Input;
 using Key = System.Windows.Input.Key;
-using Newtonsoft.Json;
 using pixel_renderer.FileIO;
-using pixel_renderer.ShapeDrawing;
-using System.Drawing;
-using System.Threading.Tasks;
 using pixel_renderer.Assets;
 using System.Numerics;
-using PixelNative;
+using Newtonsoft.Json;
 
 namespace pixel_renderer
 {
@@ -22,14 +18,7 @@ namespace pixel_renderer
         Sprite sprite = new();
         Rigidbody rb = new();
 
-        public static Metadata? PlayerSprite
-        {
-            get
-            {
-                return AssetLibrary.FetchMeta("PlayerSprite");
-            }
-       
-        }
+        public static Metadata? PlayerSprite => AssetLibrary.FetchMeta("PlayerSprite");
         public static Metadata test_animation_data(int index)
         {
             string name = $"Animation{index}"; 
@@ -44,10 +33,7 @@ namespace pixel_renderer
                 sprite.Type = SpriteType.Image;
                 sprite.texture.SetImage(PlayerSprite, sprite.Scale);
             }
-            RegisterAction(Up, Key.Down);
-            RegisterAction(Down, Key.Up);
-            RegisterAction(Left, Key.Left);
-            RegisterAction(Right, Key.Right);
+            RegisterActions();
         }
         public override void FixedUpdate(float delta)
         {
@@ -64,33 +50,8 @@ namespace pixel_renderer
         {
             isGrounded = true;
         }
-        
-        public static Node Standard()
-        {
-            Node playerNode = new("Player")
-            {
-                Position = new Vector2(-15, -20)
-            };
-            playerNode.AddComponent<Rigidbody>();
-            playerNode.AddComponent<Player>().takingInput = true;
-            playerNode.AddComponent<Sprite>();
-            playerNode.AddComponent<Collider>();
-            playerNode.Scale = Constants.DefaultNodeScale;
-            return playerNode;
-        }
-        public static Camera AddCamera(Node node, int height = 256, int width = 256)
-        {
-            var cam = node.AddComponent<Camera>();
-            cam.Scale = new(width, height);
-            return cam;
-        }
-        public static Sprite AddSprite(Node playerNode)
-        {
-            var sprite = playerNode.AddComponent<Sprite>();
-            sprite.Scale = Vector2.One * 36;
-            return sprite;
-        }
-        
+
+        #region TESTING/TO BE REMOVED 
         private void TryManipulateSoftbody()
         {
             if (node.TryGetComponent(out Softbody sb))
@@ -101,7 +62,8 @@ namespace pixel_renderer
                     sb.UniformDeformation(-1);
             }
         }
-        #region Input
+        #endregion
+        #region Input / Controller
         void Up()
         {
             if (!selected_by_editor)
@@ -126,6 +88,13 @@ namespace pixel_renderer
                 return;
             moveVector = new Vector2(1 * speed, moveVector.Y);
         }
+        private void RegisterActions()
+        {
+            RegisterAction(Up, Key.Down);
+            RegisterAction(Down, Key.Up);
+            RegisterAction(Left, Key.Left);
+            RegisterAction(Right, Key.Right);
+        }
         private void Move(Vector2 moveVector)
         {
             if (isGrounded)
@@ -133,5 +102,19 @@ namespace pixel_renderer
             else rb?.ApplyImpulse(moveVector * speed);
         }
         #endregion
+
+        public static Node Standard()
+        {
+            Node playerNode = new("Player")
+            {
+                Position = new Vector2(-15, -20)
+            };
+            playerNode.AddComponent<Rigidbody>();
+            playerNode.AddComponent<Player>().takingInput = true;
+            playerNode.AddComponent<Sprite>();
+            playerNode.AddComponent<Collider>();
+            playerNode.Scale = Constants.DefaultNodeScale;
+            return playerNode;
+        }
     }
 }

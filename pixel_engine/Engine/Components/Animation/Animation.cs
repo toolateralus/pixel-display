@@ -45,7 +45,7 @@ namespace pixel_renderer
             {
                 Metadata? imgMetadata = frameData[i / padding];
 
-                if (imgMetadata.extension != Constants.PngExt)
+                if (imgMetadata.extension != Constants.PngExt && imgMetadata.extension != Constants.BmpExt)
                     continue;
 
                 Bitmap img = new(imgMetadata.Path);
