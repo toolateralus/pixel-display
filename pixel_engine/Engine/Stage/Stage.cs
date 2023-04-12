@@ -333,6 +333,7 @@ namespace pixel_renderer
                 {
                     Runtime.Log("JSON_ERROR: Null Node Removed From Stage.");
                     RemoveNode(node);
+                    continue; 
                 }
                 for (int x = 0; x < node.Components.Count; ++x)
                 {

@@ -67,18 +67,13 @@ namespace pixel_renderer
             }
             return obj;
         }
-        /// <summary>
-        /// this does not check if the directory exists nor does it instantiate one where it doesnt exist
-        /// </summary>
-        /// <param name="metadata"></param>
-        /// <returns>null if the writer is closed, and the writer if it's still open</returns>
         public static TextWriter? WriteJson<T>(T data, Metadata meta, bool closeStreamWhenFinished = true)
         {
             
             using TextWriter writer = new StreamWriter(meta.Path);
             var jsonSerializer = JsonSerializer.Create(Settings);
             jsonSerializer.Serialize(writer, data);
-            Runtime.Log($"Data: typeof({data.GetType()}) written to Path: {meta.Path}");
+            Runtime.Log($"{data.GetType()} written at: {meta.Path}");
             if (closeStreamWhenFinished)
             {
                 writer.Close();

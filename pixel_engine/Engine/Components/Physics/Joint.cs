@@ -11,33 +11,29 @@ namespace pixel_renderer
         public Node B;
         internal Vector2? offset;
 
-         string NameA => node.Name;
         [Field] string NameB = "Player";
 
         [Method]
         public void AttachBodiesByName()
         {
-            A = null;
-            B = null;
-
+            A = node;
             if (Runtime.Current.GetStage() is Stage stage)
             {
-                var a = node; 
                 var b = stage.FindNode(NameB);
                 if (b is null)
                 {
                     Runtime.Log($"Body B of Joint on {node.Name} was not set. No connection was made.");
                     return;
                 }
-                Runtime.Log($" node {b.Name} Connected to node {a.Name}.");
+                Runtime.Log($" node {b.Name} Connected to node {node.Name}.");
                 
-                offset = b.Position - a.Position; 
+                offset = b.Position - node.Position; 
 
-                if (a.rb != null && b.rb != null)
+                if (node.rb != null && b.rb != null)
                 {
-                    b.RemoveComponent(b.rb);
-                    A = a;
+                    //b.RemoveComponent(b.rb);
                     B = b;
+
                     A.OnCollided += (c) => OnBodyCollided(c, 0);
                     B.OnCollided += (c) => OnBodyCollided(c, 1);
                 }
@@ -52,7 +48,12 @@ namespace pixel_renderer
                     break;
 
                 case 1:
-                    // somehow make A body respond to B Body collisions, also this only gets called when B has a rigidbody, which is the opposite of what's expected..
+                    if(offset.HasValue)
+                    A.Position = B.Position - offset.Value;
+                    A.rb.velocity = Vector2.Zero;
+                    
+                    // found: 
+                    // that's because static bodies don't inter collide.
                     break;
             }
         }
