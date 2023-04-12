@@ -2,10 +2,7 @@
 using System.Drawing;
 using pixel_renderer.Assets;
 using System.Numerics;
-using System.Security.Policy;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Reflection.Metadata.Ecma335;
 
 namespace pixel_renderer
 {
@@ -41,6 +38,7 @@ namespace pixel_renderer
         {
             base.Awake();
             Type = SpriteType.Image;
+            color = Pixel.White;
             RefreshFont();
             RefreshCharacters();
             Refresh(); 
@@ -72,8 +70,6 @@ namespace pixel_renderer
             var output = new List<JImage>();
             int width = 0;
             int height = 0;
-            bool x = false;
-
 
             for (int i = 0; i < Content.Length; i++)
                 if (font_model.ContainsKey(Content[i]))
@@ -89,13 +85,16 @@ namespace pixel_renderer
             var start = new Vector2(0, 0);
             var end = new Vector2(width, 0);
 
-            posCurve = Curve.Linear(start, end, 1, width/ Content.Length);
+            if (content.Length == 0) 
+                return; 
+          
+            posCurve = Curve.Linear(start, end, 1, width / Content.Length);
             var concatenatedImg = JImage.Concat(output, posCurve);
 
             if (texture is null) texture = new(concatenatedImg);
             else texture.SetImage(concatenatedImg);
 
-            Scale = new(end.X,end.X);
+            Scale = new(width, height);
         }
         public override void Draw(RendererBase renderer)
         {

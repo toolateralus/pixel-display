@@ -7,6 +7,13 @@ namespace pixel_renderer
     [Serializable]
     public class Joint : Component
     {
+        public Node A;
+        public Node B;
+        internal Vector2? offset;
+
+         string NameA => node.Name;
+        [Field] string NameB = "Player";
+
         [Method]
         public void AttachBodiesByName()
         {
@@ -15,24 +22,13 @@ namespace pixel_renderer
 
             if (Runtime.Current.GetStage() is Stage stage)
             {
-                var a = stage.FindNode(NameA);
+                var a = node; 
                 var b = stage.FindNode(NameB);
-               
-
-                if (a is null && !ThisBodyIs_A)
-                {
-                    Runtime.Log($"Body A of Joint on {node.Name} was not set, and it's not in self select mode. No connection was made.");
-                    return;
-                }
                 if (b is null)
                 {
                     Runtime.Log($"Body B of Joint on {node.Name} was not set. No connection was made.");
                     return;
                 }
-                
-                if (ThisBodyIs_A)
-                    a = node;
-
                 Runtime.Log($" node {b.Name} Connected to node {a.Name}.");
                 
                 offset = b.Position - a.Position; 
@@ -40,14 +36,11 @@ namespace pixel_renderer
                 if (a.rb != null && b.rb != null)
                 {
                     b.RemoveComponent(b.rb);
-                    
                     A = a;
                     B = b;
-
                     A.OnCollided += (c) => OnBodyCollided(c, 0);
                     B.OnCollided += (c) => OnBodyCollided(c, 1);
                 }
-
             }
         }
 
@@ -64,19 +57,13 @@ namespace pixel_renderer
             }
         }
 
-        Vector2? offset;
-
+      
         public override void FixedUpdate(float delta)
         {
             if (A is not null && B is not null && offset.HasValue)
                 B.Position = A.Position + offset.Value;
 
         }
-        public Node A;
-        public Node B;
-
-        [Field] public bool ThisBodyIs_A = true; 
-        [Field] string NameA = "";
-        [Field] string NameB= "Player";
+      
     }
 }
