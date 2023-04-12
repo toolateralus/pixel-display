@@ -11,6 +11,7 @@ namespace pixel_renderer
 {
     public class Animator : Component, IAnimate
     {
+        [Field] public float speed = 2f;
         private Animation? animation;
         private Sprite? sprite;
        
@@ -107,6 +108,9 @@ namespace pixel_renderer
         {
             if (animation is null)
                 return;
+
+            if (animation.speed != speed)
+                animation.speed = speed; 
 
             var img = animation?.GetFrame(true);
             sprite?.SetImage(img);
