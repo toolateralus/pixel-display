@@ -94,7 +94,8 @@ namespace pixel_editor
                     case 1:
                         try
                         {
-                            value.Add(bool.Parse(input));
+                            if(bool.TryParse(input, out var val))
+                                value.Add(val);
                         }
                         catch (Exception) 
                         { 
@@ -103,12 +104,19 @@ namespace pixel_editor
                         continue;
                         // int
                     case 2:
-                        try { value.Add(int.Parse(input)); }
+                        try {
+                            if(int.TryParse(input, out var val)) 
+                            value.Add(val);
+                        }
                         catch (Exception) {  };
                         continue;
                         // float
                     case 3:
-                        try { value.Add(float.Parse(input)); }
+
+                        try {
+                            if (float.TryParse(input, out var val))
+                                value.Add(val);
+                        }
                         catch (Exception) {  };
                         continue;
                         // vec2
