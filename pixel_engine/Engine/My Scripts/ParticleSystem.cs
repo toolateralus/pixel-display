@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -45,35 +46,71 @@ namespace pixel_renderer
     {
         [Field] public List<Pixel> Pallette = new() { Color.Purple, Color.MediumSeaGreen, Color.MediumPurple, Color.MediumBlue };
         [Field] private float maxParticleSpeed = 15f;
-        [Field] private List<Particle> particles = new();
+        [Field] internal Queue<Particle> particles = new();
         [Field] private Random random = new();
-        [Field] internal bool debugBase = true;
-        
+        [Field] internal int speed = 70;
+        [Field] private int maxParticles = 250;
 
-        public override void Awake()
+        [Field] internal float minVelLength = 0.001f;
+        [Field] internal bool particlesDieFromLowVelocity = false;
+
+        private void Rent(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
         {
-            if(debugBase)
-                for (int i = 0; i < 10; ++i)
+            var p = particles.Where(p => p.dead).FirstOrDefault();
+
+            if (p is null || p == default)
+                return;
+
+            ReviveParticle(p, reset, lifetime, death, initVel, initPos, initSize, initColor);
+        }
+
+        private static void ReviveParticle(Particle p, bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
+        {
+            if (reset)
+            {
+                if (lifetime != null)
+                    p.lifetime = lifetime;
+                if (death != null)
+                    p.onDeath = death;
+                if (initVel.HasValue)
+                    p.velocity = initVel.Value;
+                if (initPos.HasValue)
+                    p.position = initPos.Value;
+                if (initSize.HasValue)
+                    p.size = initSize.Value;
+                if (initColor.HasValue)
+                    p.color = initColor.Value;
+            }
+
+            p.dead = false;
+        }
+
+        private void InstantiateParticle(Vector2 vel)
+        {
+            Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
+            particles.Enqueue(particle);
+        }
+
+        public void GetParticle(Vector2 vel)
+        {
+
+            if (particles.Count >= maxParticles)
+            {
+                if (!particlesDieFromLowVelocity)
                 {
-                    Vector2 initVel = GetRandomVelocity(0.01f);
-                    Particle particle = new(initVel, Cycle);
-                    particles.Add(particle);
+                    var p = particles.Dequeue();
+                    p.onDeath?.Invoke(p);
+                    ReviveParticle(p, true, initPos: Position, initVel: vel, initColor: Pixel.Random);
                 }
+                else
+                {
+                    Rent(true, initPos: Position, initVel: vel, initColor: Pixel.Random);
+                }
+                return;
+            }
+            InstantiateParticle(vel);
         }
-        public override void OnDrawShapes()
-        {
-            if(debugBase)
-                lock (particles)
-                   foreach (var p in particles)
-                   {
-                        if (p.dead)
-                            continue;
-
-                        p.Next();
-                        ShapeDrawer.DrawRect(p.position, p.position * p.velocity.Length(), p.color);
-                   }
-
-        }
+        
         public virtual void Cycle(Particle p)
         {
             if (p.velocity.SqrMagnitude() < 0.1f)
@@ -100,20 +137,15 @@ namespace pixel_renderer
             }
 
         }
-        public void OnParticleDied(Particle p)
+        public virtual void OnParticleDied(Particle p)
         {
             if (p.dead)
                 return;
 
             p.onDeath?.Invoke(p); 
             p.dead = true;
-
-            p.position = Position;
-            p.velocity = GetRandomVelocity(); 
-
-            p.dead = false; 
         }
-        private Vector2 GetRandomVelocity(float speed = -1f)
+        public Vector2 GetRandomVelocity(float speed = -1f)
         {
             float x = (float)random.NextDouble() * 2 - 1;
             float y = (float)random.NextDouble() * 2 - 1;

@@ -94,6 +94,7 @@ namespace pixel_editor
         public void SelectNode(Node node)
         {
             lastSelectedNode = node;
+            if(node != null)
             foreach (var comp in node.Components)
                 foreach(var component in comp.Value) component.selected_by_editor = true;
 

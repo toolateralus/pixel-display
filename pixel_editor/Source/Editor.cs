@@ -77,8 +77,12 @@ namespace pixel_editor
         public EditorSettings settings; 
         private void InitializeEditor()
         {
-            if (current != null)
-                throw new InvalidOperationException("Cannot instantiate several editors at once under the same domain."); 
+            if (current != null && current != this)
+            {
+                Close();
+                return; 
+            }
+
             current = this;
             InitializeComponent();
             Importer.Import(false);
@@ -227,14 +231,15 @@ namespace pixel_editor
         {
             if(Runtime.IsRunning)
                 Runtime.Toggle(); 
-            Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            Application.Current.Shutdown();
+
+            return; 
+            // Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             Dispose();
 
             current.Close();
-            current = new();  
-            current.Show();
+           // Application.Current.ShutdownMode = ShutdownMode.OnLastWindowClose;
 
-            Application.Current.ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
         private void Update(object? sender, EventArgs e)
         {

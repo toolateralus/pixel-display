@@ -12,13 +12,14 @@ namespace pixel_renderer
     {
         [Field] [JsonProperty] public bool takingInput = true;
         [Field] [JsonProperty] public float speed = 0.1f;
-        [Field] [JsonProperty] private float jumpSpeed = 0.5f;
+        [Field] [JsonProperty] private float jumpSpeed = 0.25f;
         [Field] private bool isGrounded;
         
         public Vector2 moveVector = default;
         Sprite sprite;
         Rigidbody rb;
         Animator anim;
+        private int haltIterations = 16; 
 
         public static Metadata? PlayerSprite => AssetLibrary.FetchMeta("PlayerSprite");
         public static Metadata test_animation_data(int index)
@@ -53,12 +54,16 @@ namespace pixel_renderer
             bool? playing = anim.GetAnimation()?.playing;
             moveAnimation(playing);
 
-            moveVector = Vector2.Zero;
+
+            if (moveVector != Vector2.Zero)
+                moveVector = Vector2.Zero;
+            else rb?.ApplyImpulse((-rb.velocity / haltIterations));
+
 
             void moveAnimation(bool? playing)
             {
                 if (rb is not null)
-                    if (rb.velocity.Length() < 0.1f)
+                    if (rb.velocity.Length() < 0.01f)
                         anim.Stop();
                     else if (playing.HasValue && !playing.Value)
                         anim.Start();
@@ -95,7 +100,12 @@ namespace pixel_renderer
         private void Jump()
         {
             if (isGrounded)
-                rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed);
+            {
+                string path = @"D:\Nightmare folder\Games\Documents\Pixel\Assets\Audio Assets\Cannon Sound Effect.mp3";
+                Audio.Play(path, 0.35f);
+                rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
+            }
+
         }
 
         void Down()
