@@ -12,7 +12,7 @@ namespace pixel_renderer
         [Field] [JsonProperty] public float mass = 1f;
         [Field] [JsonProperty] public float invMass;
         [Field] [JsonProperty] public float restitution = 0.5f;
-        [Field] [JsonProperty] public float drag = 0f;
+        [Field] [JsonProperty] public float drag = 1f;
         [Field] [JsonProperty] public bool usingGravity = true;
         [Field] [JsonProperty] public Vector2 velocity = Vector2.Zero;
         [Field] [JsonProperty] public Vector2 acceleration = Vector2.Zero;
@@ -62,6 +62,11 @@ namespace pixel_renderer
             Rigidbody rb = node.GetComponent<Rigidbody>();
             node.RemoveComponent(rb);
             return node;
+        }
+
+        internal void ApplyImpulse(object value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

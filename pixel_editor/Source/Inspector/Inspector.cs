@@ -89,10 +89,14 @@ namespace pixel_editor
                     AddComponentButton_Click(new(), new());
             }
             Runtime.Current.stagingHost.DeselectNode();
+            lastSelectedNode = null;
         }
         public void SelectNode(Node node)
         {
             lastSelectedNode = node;
+            foreach (var comp in node.Components)
+                foreach(var component in comp.Value) component.selected_by_editor = true;
+
             OnObjectSelected?.Invoke(grid);
         }
 
@@ -319,8 +323,9 @@ namespace pixel_editor
                 VerticalAlignment = VerticalAlignment.Stretch,
 
                 BorderThickness = new Thickness(0.1, 0.1, 0.1, 0.1),
+                BorderBrush = Brushes.Black,
                 Foreground = Brushes.Black,
-                Background = Brushes.Gray,
+                Background = Brushes.Teal,
 
             };
         }
@@ -344,7 +349,7 @@ namespace pixel_editor
 
                 BorderThickness = new Thickness(0.1, 0.1, 0.1, 0.1),
                 Foreground = Brushes.Black,
-                Background = Brushes.Gray,
+                Background = Brushes.MediumSeaGreen,
 
             };
         }

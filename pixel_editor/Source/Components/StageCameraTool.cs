@@ -42,12 +42,9 @@ namespace pixel_editor
             if (node is null || !followNode)
                 return;
             
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
             
-            if (!cams.Any())
-                return;
 
-            cams.First().node.Position = node.Position;
+            Camera.First.node.Position = node.Position;
             
             if (!Input.Get(StopFollowingNodeKey))
                 return;
@@ -60,17 +57,12 @@ namespace pixel_editor
             if (selected == null)
                 return;
 
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
-
-            lock(cams)
-            if (!cams.Any()) return;
-
             bool selectNode = Input.Get(FocusNodeKey);
 
             if (!selectNode)
                 return;
 
-            cams.First().node.Position = selected.Position;
+            Camera.First.node.Position = selected.Position;
 
             if (!Input.Get(FollowModifier))
                 return;
@@ -82,17 +74,14 @@ namespace pixel_editor
             if (node == null)
                 return;
             
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>();
-
-            if (!cams.Any()) 
-                return;
+            
 
             bool selectNode = Input.Get(Key.LeftShift) && Input.Get(Key.Space);
 
             if (!selectNode)
                 return;
 
-            cams.First().node.Position = node.Position;
+            Camera.First.node.Position = node.Position;
 
             if (!Input.Get(FollowModifier))
                 return;
@@ -104,20 +93,13 @@ namespace pixel_editor
         {
             if (CMouse.MouseWheelDelta == 0)
                 return;
-
-            IEnumerable<Camera> enumerable = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
-            if (!enumerable.Any()) return;
-            enumerable.First().Scale *= MathF.Pow(Editor.Current.settings.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
+        
+            Camera.First.Scale *= MathF.Pow(Editor.Current.settings.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
             UpdateCamPosition();
         }
 
         private void UpdateCamPosition()
         {
-            IEnumerable<Camera> cams = Runtime.Current.GetStage().GetAllComponents<Camera>().AsParallel();
-
-            if (!cams.Any())
-                return;
-
             if (!CMouse.Right)
             {
                 draggingCam = false;
@@ -129,7 +111,7 @@ namespace pixel_editor
                 mouseGlobalPos = CMouse.GlobalPosition;
             }
             var offset = CMouse.GlobalPosition - mouseGlobalPos;
-            cams.First().node.Position -= offset;
+            Camera.First.node.Position -= offset;
         }
 
       

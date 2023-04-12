@@ -171,7 +171,7 @@ namespace pixel_editor
         }
         private void AddStringListTextBox(Grid viewer, ref int i, FieldInfo field, string[] strings, ref int strIndex, string str)
         {
-            var label = Inspector.GetTextBox(i.ToString());
+            var label = Inspector.GetTextBox(i.ToString(), "mint");
             var txtBox = Inspector.GetTextBox(str);
             txtBox.IsReadOnly = false;
             txtBox.Name = $"listBox{strIndex}";
@@ -197,13 +197,13 @@ namespace pixel_editor
             viewer.Children.Add(button);
             uiElements.Add(button);
             Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
-            Inspector.SetRowAndColumn(button, 1, 3, 12, i++);
+            Inspector.SetRowAndColumn(button, 1, 3, 18, i++);
             button.FontSize = 3;
             button.Click += delegate
             {
                 Component? Component = (Component)field.GetValue(component);
                 if (Component is null)
-                    throw new NullReferenceException("Component could not be found for component editor nesting.");
+                    Console.Error("Cannot edit a null component.");
                 Refresh(Component);
             };
             i++;

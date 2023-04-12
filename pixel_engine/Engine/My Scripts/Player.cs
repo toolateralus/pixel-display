@@ -4,6 +4,7 @@ using pixel_renderer.FileIO;
 using pixel_renderer.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
+using System.Windows.Input;
 
 namespace pixel_renderer
 {
@@ -11,12 +12,13 @@ namespace pixel_renderer
     {
         [Field] [JsonProperty] public bool takingInput = true;
         [Field] [JsonProperty] public float speed = 0.1f;
+        [Field] [JsonProperty] private float jumpSpeed = 0.5f;
         [Field] private bool isGrounded;
-        [Field] public float turnSpeed = 0.1f;
         
         public Vector2 moveVector = default;
-        Sprite sprite = new();
-        Rigidbody rb = new();
+        Sprite sprite;
+        Rigidbody rb;
+        Animator anim;
 
         public static Metadata? PlayerSprite => AssetLibrary.FetchMeta("PlayerSprite");
         public static Metadata test_animation_data(int index)
@@ -32,20 +34,35 @@ namespace pixel_renderer
             if (node.TryGetComponent(out sprite))
                 sprite.Type = SpriteType.Image;
 
+            if (node.TryGetComponent(out anim))
+                anim.Next();
+
             RegisterActions();
         }
         public override void FixedUpdate(float delta)
         {
             if (!takingInput)
                 return;
-            
+
             Move(moveVector);
             TryManipulateSoftbody();
-            moveVector = Vector2.Zero;
 
             if (isGrounded)
                 isGrounded = false;
+            
+            bool? playing = anim.GetAnimation()?.playing;
+            moveAnimation(playing);
 
+            moveVector = Vector2.Zero;
+
+            void moveAnimation(bool? playing)
+            {
+                if (rb is not null)
+                    if (rb.velocity.Length() < 0.1f)
+                        anim.Stop();
+                    else if (playing.HasValue && !playing.Value)
+                        anim.Start();
+            }
         }
         public override void OnCollision(Collision collider)
         {
@@ -75,11 +92,12 @@ namespace pixel_renderer
         #endregion
         #region Input / Controller
 
-        void Up()
+        private void Jump()
         {
-            if(isGrounded)
-                rb?.ApplyImpulse(-Vector2.UnitY * (speed * speed));   
+            if (isGrounded)
+                rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed);
         }
+
         void Down()
         {
             moveVector.Y = 1 * speed;
@@ -94,7 +112,7 @@ namespace pixel_renderer
         }
         private void RegisterActions()
         {
-            RegisterAction(Up, Key.Up);
+            RegisterAction(Jump, Key.Up);
             RegisterAction(Down, Key.Down);
             RegisterAction(Left, Key.Left);
             RegisterAction(Right, Key.Right);

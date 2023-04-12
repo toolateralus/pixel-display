@@ -18,10 +18,10 @@ namespace pixel_renderer
         [Field] int ammoCt = 300, magazineSize = 16, currentMag = 16;
 
         [Field] private int speed = 70;
-        [Field] private int maxParticles = 25;
+        [Field] private int maxParticles = 250;
 
         [Field] private float minVelLength = 0.001f;
-        [Field] private bool particlesDieFromLowVelocity = true;
+        [Field] private bool particlesDieFromLowVelocity = false;
         [Field] private bool usingAmmo = false;
 
         private Queue<Particle> particles = new();

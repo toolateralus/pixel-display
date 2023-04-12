@@ -33,7 +33,7 @@ namespace pixel_renderer
         public float Rotation { get => node.Rotation; set => node.Rotation = value; }
         public ref Matrix3x2 Transform { get => ref node.Transform; }
         public string Name { get; set; } = "";
-        internal protected bool selected_by_editor;
+        public bool selected_by_editor;
         public string UUID => _uuid;
 
         public Component()
