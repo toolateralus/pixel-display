@@ -28,11 +28,10 @@ namespace pixel_renderer
         public override void Awake()
         {
             node.TryGetComponent(out rb);
+
             if (node.TryGetComponent(out sprite))
-            {
                 sprite.Type = SpriteType.Image;
-                sprite.texture.SetImage(PlayerSprite, sprite.Scale);
-            }
+
             RegisterActions();
         }
         public override void FixedUpdate(float delta)
@@ -54,11 +53,11 @@ namespace pixel_renderer
         #region TESTING/TO BE REMOVED 
         private void TryManipulateSoftbody()
         {
-            if (node.TryGetComponent(out Softbody sb))
+            if (node.TryGetComponent(out Softbody sb) || !Get(Key.B))
             {
                 if (moveVector.Y != 0)
                     sb.UniformDeformation(1);
-                if (moveVector.X != 0)
+                if (moveVector.Y != 0)
                     sb.UniformDeformation(-1);
             }
         }
@@ -66,32 +65,24 @@ namespace pixel_renderer
         #region Input / Controller
         void Up()
         {
-            if (!selected_by_editor)
-                return;
-            moveVector = new Vector2(moveVector.X, 1 * speed);
+            moveVector.Y = -1 * speed;
         }
         void Down()
         {
-            if (!Get(Key.LeftShift))
-                return;
-            moveVector = new Vector2(moveVector.X, -1 * speed);
+            moveVector.Y = 1 * speed;
         }
         void Left()
         {
-            if (!Get(Key.LeftShift))
-                return;
-            moveVector = new Vector2(-1 * speed, moveVector.Y);
+            moveVector.X = -1 * speed;
         }
         void Right()
         {
-            if (!Get(Key.LeftShift))
-                return;
-            moveVector = new Vector2(1 * speed, moveVector.Y);
+            moveVector.X = 1 * speed;
         }
         private void RegisterActions()
         {
-            RegisterAction(Up, Key.Down);
-            RegisterAction(Down, Key.Up);
+            RegisterAction(Up, Key.Up);
+            RegisterAction(Down, Key.Down);
             RegisterAction(Left, Key.Left);
             RegisterAction(Right, Key.Right);
         }
@@ -105,14 +96,10 @@ namespace pixel_renderer
 
         public static Node Standard()
         {
-            Node playerNode = new("Player")
-            {
-                Position = new Vector2(-15, -20)
-            };
-            playerNode.AddComponent<Rigidbody>();
+            Node playerNode = Animator.Standard();
+            playerNode.tag = "Player";
+            playerNode.Position = new Vector2(-15, -20);
             playerNode.AddComponent<Player>().takingInput = true;
-            playerNode.AddComponent<Sprite>();
-            playerNode.AddComponent<Collider>();
             playerNode.Scale = Constants.DefaultNodeScale;
             return playerNode;
         }

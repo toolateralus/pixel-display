@@ -65,7 +65,7 @@ namespace pixel_renderer
         }
         
         [Method]
-        void RefreshAnimationWithFrameNames()
+        internal void RefreshAnimationWithFrameNames()
         {
             List<Metadata> metas = new();
 
@@ -89,7 +89,6 @@ namespace pixel_renderer
         /// <summary>
         /// this wrapper allows params to be passed in when pressed from inspector.
         /// </summary>
-        
         [Method]
         void Start() => Start(1, true);
 
@@ -160,27 +159,19 @@ namespace pixel_renderer
             {
                 sprite.IsReadOnly = false; 
             }
-            anim.test_flame_anim_setup();
+            anim.RefreshAnimationWithFrameNames();
             anim.Start();
             node.Scale = Constants.DefaultNodeScale;
             return node;
         }
-        private void test_flame_anim_setup()
-        {
-            List<Metadata> anim_metas = new()
-            {
-                Player.test_animation_data(1),
-                Player.test_animation_data(2),
-                Player.test_animation_data(3),
-                Player.test_animation_data(4),
-                Player.test_animation_data(5),
-                Player.test_animation_data(6),
-            };
 
-            animation = new(anim_metas.ToArray(), 10);
-            animation.Name = "Animation_Test";
-            animation.Metadata = new("Animation_Test", Constants.WorkingRoot + Constants.AssetsDir + "Animation_Test" + Constants.AssetsFileExtension, Constants.AssetsFileExtension);
-            animation.Upload();
+        internal JImage? TryGetFrame(int index)
+        {
+            if (animation?.frames is null)
+                return null;
+            if (animation?.frames.ElementAt(index) is null)
+                return null;
+            return animation?.frames.ElementAt(index).Value;
         }
     }
 }

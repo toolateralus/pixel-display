@@ -109,7 +109,13 @@ namespace pixel_editor
         }
         public static List<Node> DuplicateSelected(bool all = true)
         {
-            List<Node> result = new(); 
+            List<Node> result = new();
+            return result;
+            // OUT OF COMISSION, THIS DOES REALLY ODD STUFF Such As
+            // Makes a portion of the background black/missing depending on zoom
+            // Makes nodes render as if theyre almost to the max float value in each position vector, just really jittery scribbly odd shaped sprites and stuff.
+
+
             if (Input.Get(Key.D))
             {
                 if (Current.LastSelected != null || Current.ActivelySelected.Count > 0)
@@ -197,9 +203,20 @@ namespace pixel_editor
             Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(() => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(DestroySelected, Key.Delete);
-            Input.RegisterAction(() => Runtime.Current.GetStage()?.AddNodes(DuplicateSelected(true)), Key.LeftCtrl);
+            Input.RegisterAction(TryDuplicate, Key.D);
+
+
+         
         }
-        
+
+        private void TryDuplicate()
+        {
+            if (!Input.Get(Key.D))
+                return;
+
+            Runtime.Current.GetStage()?.AddNodes(DuplicateSelected(true));
+        }
+
         SolidColorBrush framerateBrush = new(); 
         internal ComponentEditor componentEditor;
 
