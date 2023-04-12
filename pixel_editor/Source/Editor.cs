@@ -204,14 +204,11 @@ namespace pixel_editor
             Input.RegisterAction(() => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(DestroySelected, Key.Delete);
             Input.RegisterAction(TryDuplicate, Key.D);
-
-
-         
         }
 
         private void TryDuplicate()
         {
-            if (!Input.Get(Key.D))
+            if (!Input.Get(Key.LeftCtrl))
                 return;
 
             Runtime.Current.GetStage()?.AddNodes(DuplicateSelected(true));

@@ -30,12 +30,12 @@ namespace pixel_editor
         public Grid myGrid; 
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
+        List<UIElement> uiElements = new();
 
         public ComponentEditor()
         {
             GetEvents();
         }
-        List<UIElement> uiElements = new();
 
         private void SetupComponentEditorGrid()
         {
@@ -68,25 +68,27 @@ namespace pixel_editor
         {
             foreach (var method in data.Methods)
             {
-                AddToEditor(viewer, i, "Method", method.Name);
+                AddToEditor(viewer, i, "Method", method.Name, false);
                 var button = Inspector.GetButton(method.Name + "();", new(0, 0, 0, 0));
                 viewer.Children.Add(button);
                 uiElements.Add(button);
                 Inspector.SetRowAndColumn(button, 1, 4, 22, i++ +1);
                 button.FontSize = 3;
-                button.Click += delegate { method.Invoke(component, null); };
+                button.Click += delegate 
+                {
+                    method.Invoke(component, null); 
+                };
             }
-
             return i;
         }
         private int SerializeFields(Grid viewer, int i)
         {
             var fields = data.Fields;
-
             NewData();
 
             foreach (var field in fields)
             {
+                bool bothColumns = true; 
                 string name = field.Name;
 
                 if (field.FieldType.BaseType == typeof(Component))
@@ -95,52 +97,51 @@ namespace pixel_editor
                 if (field.FieldType == typeof(bool))
                 {
                     object obj = field.GetValue(component);
-                    if (obj is not bool val)
-                        break;
-                    AddBoolCheckBox(viewer, ref i, field, val);
                     
+                    if (obj is not bool val)
+                        continue;
+
+                    AddBoolCheckBox(viewer, ref i, field, val);
+                    bothColumns = false; 
                 }
-
-
-
-
 
                 if (field.FieldType == typeof(string[]))
                 {
                     object obj = field.GetValue(component);
+                    
                     if (obj is not string[] strings)
                         continue;
+
                     int strIndex = 0;
+
                     foreach (var str in strings)
                         AddStringListTextBox(viewer, ref i, field, strings, ref strIndex, str);
+                    bothColumns = false;
                     return i;
                 }
 
                 string? valStr;
+
                 if (field != null)
                     valStr = field.GetValue(component)?.ToString();
                 else valStr = "null";
-                AddToEditor(viewer, i, valStr, name);
+
+                AddToEditor(viewer, i, valStr, name, bothColumns);
                 i++;
             }
-
-
             return i;
         }
-
         private void AddBoolCheckBox(Grid viewer, ref int i, FieldInfo field, bool val)
         {
-
             if (field.GetValue(component) is not bool curVal)
                 return;
 
             var checkBox = Inspector.GetCheckBox(onCheckBoxChecked(field), i.ToString(), curVal);
-
             checkBox.Name = $"listBox{i}";
             checkBox.FontSize = 4;
             uiElements.Add(checkBox);
             viewer.Children.Add(checkBox);
-            Inspector.SetRowAndColumn(checkBox, 1, 1, 22, i++);
+            Inspector.SetRowAndColumn(checkBox, 1, 1, 22, i++ +2);
             RoutedEventHandler onCheckBoxChecked(FieldInfo field)
             {
                 return (e, o) =>
@@ -156,7 +157,6 @@ namespace pixel_editor
                 };
             }
         }
-
         private void NewData()
         {
             if (component != null && data.Component.TryGetTarget(out var dataComp) && dataComp != component)
@@ -192,7 +192,7 @@ namespace pixel_editor
         }
         private int AddNestedComponentEditorButton(Grid viewer, ref int i, FieldInfo field, string name)
         {
-            AddToEditor(viewer, i, "open editor for more options.", name);
+            AddToEditor(viewer, i, "open editor for more options.", name, false);
             var button = Inspector.GetButton("Open Editor", new(0, 0, 0, 0));
             viewer.Children.Add(button);
             uiElements.Add(button);
@@ -209,27 +209,27 @@ namespace pixel_editor
             i++;
             return i;
         }
-        private void AddToEditor(Grid viewer, int index, string? valStr, string name)
+        private void AddToEditor(Grid viewer, int index, string? valStr, string name, bool bothColumns)
         {
             var nameDisplay = Inspector.GetTextBox(name);
-            var inputBox = Inspector.GetTextBox(valStr);
+            if (bothColumns)
+            {
+                var inputBox = Inspector.GetTextBox(valStr);
+                Inspector.SetControlColors(inputBox, Brushes.DarkSlateGray, Brushes.White);
+                inputBox.IsReadOnly = false;
+                inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
+                inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
+                inputBox.KeyDown += InputBox_KeyDown;
+                uiElements.Add(inputBox);
+                viewer.Children.Add(inputBox);
+                inputFields.Add(inputBox);
+                Inspector.SetRowAndColumn(inputBox, 1, 4, 22, index + 1);
+            }
             Inspector.SetControlColors(nameDisplay, Brushes.DarkSlateGray, Brushes.White);
-            Inspector.SetControlColors(inputBox, Brushes.DarkSlateGray, Brushes.White);
-            inputBox.IsReadOnly = false;
-            inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
-            inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
-            inputBox.KeyDown += InputBox_KeyDown;
-
             uiElements.Add(nameDisplay);
-            uiElements.Add(inputBox);
-
             viewer.Children.Add(nameDisplay);
-            viewer.Children.Add(inputBox);
-            
-            inputFields.Add(inputBox);
             editEvents.Add((o, e) => SetVariable(o, e));
             Inspector.SetRowAndColumn(nameDisplay, 1, 4, 18, index + 1);
-               Inspector.SetRowAndColumn(inputBox, 1, 4, 22, index + 1);
         }
         #endregion
         #region WPF Events
@@ -363,10 +363,7 @@ namespace pixel_editor
 
         public ComponentEditorData(Component component)
         {
-            
-
-            this.Component = new(component);
-            
+            Component = new(component);
             Fields = Inspector.GetSerializedFields(component).ToList();
             Methods = Inspector.GetSerializedMethods(component).ToList();
 

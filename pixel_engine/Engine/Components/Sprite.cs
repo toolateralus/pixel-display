@@ -153,9 +153,9 @@ namespace pixel_renderer
             int x = 0, y = 0;
 
             Pixel color = Pixel.White;
-            PixelShader((e) => { color = e; }, getColor, X, Y, OnIterationComplete);
+            PixelShader((e) => { color = e; }, getColor, X, Y);
 
-            void OnIterationComplete(JImage image) {
+            void OnShadingComplete(JImage image) {
                 texture.SetImage(image);
             }
 
@@ -206,7 +206,7 @@ namespace pixel_renderer
         /// <param name="indexerX"></param>
         /// <param name="indexerY"></param>
         /// <param name="onIteraton"></param>
-        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY, Action<JImage> onIteraton)
+        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY)
         {
             for (int x = 0; x < texture.Width * 4; x = indexerX.Invoke())
                 for (int y = 0; y < texture.Height; y = indexerY.Invoke())
@@ -215,7 +215,6 @@ namespace pixel_renderer
                     colorOut.Invoke(col);
                     texture.SetPixel(x, y, colorIn.Invoke());
                 }
-                onIteraton.Invoke(texture.GetImage());
         }
         public Vector2[] GetCorners()
         {

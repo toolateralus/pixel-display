@@ -155,10 +155,10 @@ namespace pixel_renderer
             var node = Rigidbody.Standard();
             var anim = node.AddComponent<Animator>();
             anim.looping = true; 
+            
             if (node.TryGetComponent(out Sprite sprite))
-            {
                 sprite.IsReadOnly = false; 
-            }
+
             anim.RefreshAnimationWithFrameNames();
             anim.Start();
             node.Scale = Constants.DefaultNodeScale;

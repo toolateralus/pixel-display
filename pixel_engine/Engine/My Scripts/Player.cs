@@ -9,8 +9,8 @@ namespace pixel_renderer
 {
     public class Player : Component
     {
-        [Field][JsonProperty] public bool takingInput = true;
-        [Field][JsonProperty] public float speed = 0.1f;
+        [Field] [JsonProperty] public bool takingInput = true;
+        [Field] [JsonProperty] public float speed = 0.1f;
         [Field] private bool isGrounded;
         [Field] public float turnSpeed = 0.1f;
         
@@ -38,22 +38,33 @@ namespace pixel_renderer
         {
             if (!takingInput)
                 return;
-            if (isGrounded)
-                isGrounded = false;
+            
             Move(moveVector);
             TryManipulateSoftbody();
             moveVector = Vector2.Zero;
-           
+
+            if (isGrounded)
+                isGrounded = false;
+
         }
         public override void OnCollision(Collision collider)
         {
             isGrounded = true;
         }
+        public static Node Standard()
+        {
+            Node playerNode = Animator.Standard();
+            playerNode.tag = "Player";
+            playerNode.Position = new Vector2(-15, -20);
+            playerNode.AddComponent<Player>().takingInput = true;
+            playerNode.Scale = Constants.DefaultNodeScale;
+            return playerNode;
+        }
 
         #region TESTING/TO BE REMOVED 
         private void TryManipulateSoftbody()
         {
-            if (node.TryGetComponent(out Softbody sb) || !Get(Key.B))
+            if (node.TryGetComponent(out Softbody sb))
             {
                 if (moveVector.Y != 0)
                     sb.UniformDeformation(1);
@@ -63,9 +74,11 @@ namespace pixel_renderer
         }
         #endregion
         #region Input / Controller
+
         void Up()
         {
-            moveVector.Y = -1 * speed;
+            if(isGrounded)
+                rb?.ApplyImpulse(-Vector2.UnitY * (speed * speed));   
         }
         void Down()
         {
@@ -88,20 +101,18 @@ namespace pixel_renderer
         }
         private void Move(Vector2 moveVector)
         {
+            if (sprite is not null)
+            {
+                if (moveVector.X < 0)
+                    sprite.Scale = new(-1, 1);
+                if (moveVector.X > 0)
+                    sprite.Scale = new(1, 1);
+            }
             if (isGrounded)
                 rb?.ApplyImpulse(moveVector.WithValue(y: speed * moveVector.Y) * speed);
             else rb?.ApplyImpulse(moveVector * speed);
         }
-        #endregion
 
-        public static Node Standard()
-        {
-            Node playerNode = Animator.Standard();
-            playerNode.tag = "Player";
-            playerNode.Position = new Vector2(-15, -20);
-            playerNode.AddComponent<Player>().takingInput = true;
-            playerNode.Scale = Constants.DefaultNodeScale;
-            return playerNode;
-        }
+        #endregion
     }
 }
