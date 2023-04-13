@@ -42,18 +42,9 @@ namespace pixel_renderer
                 Node? node = stage.nodes[i];
                 
                 var hasCollider = node.col != null;
-                var isParticleSystem = node.HasComponent<ParticleSystem>();
 
                 if (hasCollider)
                     quadTree.Insert(node);
-
-                if (isParticleSystem)
-                {
-                    Queue<Particle> particles = node.GetComponent<ParticleSystem>()?.particles;
-                    foreach (var particle in particles)
-                        if (particle.polygon != null)
-                            continue; 
-                }
             }
             
             BoundingBox2D range = new(area / -2, area / 2);

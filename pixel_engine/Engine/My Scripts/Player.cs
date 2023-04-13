@@ -64,7 +64,10 @@ namespace pixel_renderer
             {
                 if (rb is not null)
                     if (rb.velocity.Length() < 0.05f)
+                    {
                         anim.Stop();
+                        sprite.texture.SetImageRelative("\\Assets\\Animations\\Dog walking\\dog_standing.bmp");
+                    }
                     else if (playing.HasValue && !playing.Value)
                         anim.Start();
             }

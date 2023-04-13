@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Windows.Media;
 using Newtonsoft.Json;
+using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 namespace pixel_renderer
 {
@@ -47,9 +49,16 @@ namespace pixel_renderer
         {
             return jImage; 
         }
-        public void SetImage(string path)
+        public void SetImageRelative(string relativePath)
         {
-            jImage = new(new Bitmap(path));
+            var meta = AssetLibrary.FetchMetaRelative(relativePath);
+            if (meta is not null)
+                jImage = new(new Bitmap(meta.Path));
+
+        }
+        public void SetImage(string fullPath)
+        {
+            jImage = new(new Bitmap(fullPath));
         }
         public void SetImage(Pixel color)
         {

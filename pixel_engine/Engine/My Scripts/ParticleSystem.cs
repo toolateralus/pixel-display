@@ -9,21 +9,27 @@ using System.Threading.Tasks;
 
 namespace pixel_renderer
 {
-    public class Particle 
+    public class Particle : Node
     {
-        public Pixel color;
         public float birth = 0;
-        public Polygon? polygon = null; 
-        public Vector2 velocity;
-        public Vector2 position;
-        public Vector2 size;
+        public Pixel color;
+        public Vector2 Velocity
+        {
+            get 
+            { 
+                if (rb != null) 
+                    return rb.velocity; 
+                return Vector2.Zero;
+            }
+            set => rb.velocity = value;
+        }
         public Action<Particle> lifetime;
         public Action<Particle> onDeath; 
         internal bool dead;
 
         public Particle(Vector2 initVel, Action<Particle> lifetime)
         {
-            velocity = initVel;
+            Velocity = initVel;
             this.lifetime = lifetime;
         }
         public Particle(Action<Particle> Lifetime, Action<Particle> onDeath)
@@ -34,9 +40,9 @@ namespace pixel_renderer
         public Particle(Pixel initColor, Vector2 initVel, Vector2 initPos, Vector2 initSize, Action<Particle> lifetime, Action<Particle> onDeath)
         {
             this.color = initColor;
-            this.velocity = initVel;
-            this.position = initPos;
-            this.size = initSize;
+            this.Velocity = initVel;
+            this.Position = initPos;
+            this.Scale = initSize;
             this.lifetime = lifetime;
             this.onDeath = onDeath;
         }
@@ -74,11 +80,11 @@ namespace pixel_renderer
                 if (death != null)
                     p.onDeath = death;
                 if (initVel.HasValue)
-                    p.velocity = initVel.Value;
+                    p.Velocity = initVel.Value;
                 if (initPos.HasValue)
-                    p.position = initPos.Value;
+                    p.Position = initPos.Value;
                 if (initSize.HasValue)
-                    p.size = initSize.Value;
+                    p.Scale = initSize.Value;
                 if (initColor.HasValue)
                     p.color = initColor.Value;
             }
@@ -114,13 +120,13 @@ namespace pixel_renderer
         
         public virtual void Cycle(Particle p)
         {
-            if (p.velocity.SqrMagnitude() < 0.1f)
+            if (p.Velocity.SqrMagnitude() < 0.1f)
             {
                 OnParticleDied(p);
                 return;
             }
-            p.position += p.velocity;
-            p.velocity *= 0.99f;
+            p.Position += p.Velocity;
+            p.Velocity *= 0.99f;
 
             var col = JRandom.Color();
             _ = color();
