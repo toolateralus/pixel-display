@@ -27,7 +27,7 @@ namespace pixel_renderer
             sprite.IsDirty = true;
 
             var col = node.AddComponent<Collider>();
-            col.SetModel(new Circle().Polygon);
+
             col.Scale = new(1, 1);
             rb = node.AddComponent<Rigidbody>();
             node.Position = sender.Position; 

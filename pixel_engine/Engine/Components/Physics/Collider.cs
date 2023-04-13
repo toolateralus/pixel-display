@@ -8,7 +8,12 @@ namespace pixel_renderer
     public class Collider : Component
     {
 
-        [JsonProperty] private Polygon model = Polygon.Square(1);
+        [JsonProperty] private Polygon model = Polygon.nGon(1, 4);
+        
+
+        [Field] int vertexCount = 6;
+        [Method] void CreateNGonWithVertexCt() => model = Polygon.nGon(Scale.X - Scale.Y * 2, vertexCount);
+
         /// <returns>Copy of model, not model itself</returns>
         public Polygon GetModel() => new(model);
         /// <summary>
@@ -49,22 +54,27 @@ namespace pixel_renderer
             switch (primitive)
             {
                 case PrimitiveType.box:
-                    SetModel(new Triangle().Polygon);
+
+                    SetModel(pixel_renderer.Polygon.nGon(size: 1, sides: 3));
                     primitive = PrimitiveType.triangle;
+
                     break;
                 case PrimitiveType.circle:
-                    SetModel(new Box().Polygon);
+
+                    SetModel(pixel_renderer.Polygon.nGon(size: 1, sides: 4));
                     primitive = PrimitiveType.box;
+
                     break;
                 case PrimitiveType.triangle:
-                    SetModel(new Circle().Polygon);
+
+                    SetModel(pixel_renderer.Polygon.nGon(size: 1, sides: 32));
                     primitive = PrimitiveType.circle;
                     break;
                 default:
                     break;
                     
             }
-            Runtime.Log($"{node.Name} : Primitive = {primitive}");
+            Runtime.Log($"{node.Name}'s collider now has primitive shape : {primitive}");
         }
 
 

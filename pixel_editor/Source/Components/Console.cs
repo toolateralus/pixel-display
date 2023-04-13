@@ -86,6 +86,7 @@ namespace pixel_editor
 
                 Print(vec.ToString());
                 Runtime.Current.projectSettings.CurrentResolution = vec;
+                Runtime.Current.SetResolution(); 
 
             },
             description = "sets the resolution to the specified Vec2"

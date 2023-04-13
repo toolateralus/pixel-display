@@ -27,7 +27,50 @@ namespace pixel_renderer.ShapeDrawing
         internal static List<(Circle, Pixel)> Circles = new();
         internal static List<(Ray, Pixel)> Normals = new();
         internal static List<(Ray, Pixel)> Rays = new();
+        public static void FillPolygon(Polygon poly, Pixel color)
+        {
+            // Get the polygon edges
+            List<Line> edges = poly.GetLines();
 
+            // Get the polygon bounds
+            int minY = (int)poly.vertices.Min(v => v.Y);
+            int maxY = (int)poly.vertices.Max(v => v.Y);
+
+            // Loop through each scanline
+            for (int y = minY; y <= maxY; y++)
+            {
+                // Get the intersection points with the polygon edges
+                List<Vector2> intersections = new List<Vector2>();
+
+                for (int i = 0; i < edges.Count; i++)
+                {
+                    Line edge = edges[i];
+
+                    if ((edge.startPoint.Y <= y && edge.endPoint.Y > y) ||
+                        (edge.endPoint.Y <= y && edge.startPoint.Y > y))
+                    {
+                        float x = (y - edge.startPoint.Y) /
+                                  (edge.endPoint.Y - edge.startPoint.Y) *
+                                  (edge.endPoint.X - edge.startPoint.X) +
+                                  edge.startPoint.X;
+
+                        intersections.Add(new Vector2(x, y));
+                    }
+                }
+
+                // Sort the intersection points by x-coordinate
+                intersections = intersections.OrderBy(p => p.X).ToList();
+
+                // Fill the space between each pair of intersection points
+                for (int i = 0; i < intersections.Count; i += 2)
+                {
+                    Vector2 start = intersections[i];
+                    Vector2 end = intersections[i + 1];
+
+                    DrawLine(start, end, color);
+                }
+            }
+        }
         public static void DrawPolygon(Polygon poly, Pixel? color = null)
         {
             List<Line> lines = poly.GetLines();

@@ -76,9 +76,14 @@ namespace pixel_renderer
             }
 
             projectSettings = fetchedAsset;
-
-            renderHost.newResolution = projectSettings.CurrentResolution; 
+            SetResolution();
         }
+
+        public void SetResolution()
+        {
+            renderHost.newResolution = projectSettings.CurrentResolution;
+        }
+
         public static void GetRenderingData(out RenderHost host, out StageRenderInfo info, out RendererBase renderer, out JImage baseImage)
         {
             host = Runtime.Current.renderHost;

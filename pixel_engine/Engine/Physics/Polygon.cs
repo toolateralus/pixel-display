@@ -259,9 +259,19 @@ namespace pixel_renderer
         }
         public void CopyTo(ref Polygon polygon)
         {
+            if (polygon.vertices.Length != vertices.Length)
+                polygon.vertices = new Vector2[vertices.Length];
+           
+            if (polygon.normals.Length != normals.Length)
+                polygon.normals = new Vector2[normals.Length];
+
+            if (polygon.uv.Length != uv.Length)
+                polygon.uv = new Vector2[uv.Length];
+
             Array.Copy(vertices, polygon.vertices, vertices.Length);
             Array.Copy(normals, polygon.normals, normals.Length);
             Array.Copy(uv, polygon.uv, uv.Length);
+
             polygon.centroid = centroid;
         }
 
