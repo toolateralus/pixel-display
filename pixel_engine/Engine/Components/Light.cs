@@ -20,13 +20,14 @@ namespace pixel_renderer
 
         public override void OnDrawShapes()
         {
-            const int lineCt = 120;
-            const float sliceAngle = 360f / lineCt; // divide circle into 6 equal slices
             const float radius = 5f; // radius of the circle
             var center = node.Position;
             
             if(animated)
                 AnimateLength();
+
+            int lineCt = (int)(120 * (length * length));
+            float sliceAngle = 360f / lineCt * length; // divide circle into 6 equal slices
 
             for (int i = 0; i < lineCt; i++)
             {
@@ -39,7 +40,7 @@ namespace pixel_renderer
                 float segmentPos = (gradientPos * (gradientColors.Length - 1)) - colorSegment;
                 Pixel currentColor = Pixel.Lerp(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
 
-                currentColor.a = 80;
+                currentColor.a = 120;
 
                 ShapeDrawer.DrawLine(endPt, startPt /2 , currentColor);
             }

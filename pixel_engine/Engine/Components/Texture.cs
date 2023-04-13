@@ -76,11 +76,7 @@ namespace pixel_renderer
                 this.imgData = imgData;
                 Image = new(imgData.Path);
             }
-            else
-            {
-                this.imgData = Player.PlayerSprite;
-                Image = new(imgData.Path);
-            }
+
             jImage = new();
             
             // maybe unneccesary

@@ -27,6 +27,7 @@ namespace pixel_renderer.ShapeDrawing
         internal static List<(Circle, Pixel)> Circles = new();
         internal static List<(Ray, Pixel)> Normals = new();
         internal static List<(Ray, Pixel)> Rays = new();
+        [Obsolete]
         public static void FillPolygon(Polygon poly, Pixel color)
         {
             // Get the polygon edges

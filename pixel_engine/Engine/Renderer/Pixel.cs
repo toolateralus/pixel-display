@@ -15,6 +15,13 @@ namespace pixel_renderer
         /// shortcut to random pixel
         /// </summary>
         internal static Pixel Random => JRandom.Pixel();
+
+        /// <summary>
+        /// it's not actually clear, just ARGB : 1,1,1,1
+        /// </summary>
+        public readonly static Pixel Clear = new(1, 1, 1, 1);
+
+
         public byte a;
         public byte r;
         public byte g;

@@ -10,23 +10,21 @@ namespace pixel_renderer
 {
     public class Player : Component
     {
-        [Field] [JsonProperty] public bool takingInput = true;
         [Field] [JsonProperty] public float speed = 0.1f;
         [Field] [JsonProperty] private float jumpSpeed = 0.25f;
-        [Field] private bool isGrounded;
         
-        public Vector2 moveVector = default;
+        [Field] [JsonProperty] public bool takingInput = true;
+        [Field] [JsonProperty] private bool followPlayer;
+        
+        private bool isGrounded;
+        private Vector2 moveVector = default;
+        private int haltIterations = 16;
+        
         Sprite sprite;
         Rigidbody rb;
         Animator anim;
-        private int haltIterations = 16; 
+        Camera cam;
 
-        public static Metadata? PlayerSprite => AssetLibrary.FetchMeta("PlayerSprite");
-        public static Metadata test_animation_data(int index)
-        {
-            string name = $"Animation{index}"; 
-            return AssetLibrary.FetchMeta(name);
-        }
 
         public override void Awake()
         {
@@ -42,11 +40,12 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
+            cam ??= Camera.First;
+
             if (!takingInput)
                 return;
 
             Move(moveVector);
-            TryManipulateSoftbody();
 
             if (isGrounded)
                 isGrounded = false;
@@ -54,16 +53,17 @@ namespace pixel_renderer
             bool? playing = anim.GetAnimation()?.playing;
             moveAnimation(playing);
 
-
             if (moveVector != Vector2.Zero)
                 moveVector = Vector2.Zero;
             else rb?.ApplyImpulse((-rb.velocity / haltIterations));
 
+            if (cam != null && followPlayer)
+                cam.Position = Position;
 
             void moveAnimation(bool? playing)
             {
                 if (rb is not null)
-                    if (rb.velocity.Length() < 0.01f)
+                    if (rb.velocity.Length() < 0.05f)
                         anim.Stop();
                     else if (playing.HasValue && !playing.Value)
                         anim.Start();
@@ -73,53 +73,7 @@ namespace pixel_renderer
         {
             isGrounded = true;
         }
-        public static Node Standard()
-        {
-            Node playerNode = Animator.Standard();
-            playerNode.tag = "Player";
-            playerNode.Position = new Vector2(-15, -20);
-            playerNode.AddComponent<Player>().takingInput = true;
-            playerNode.Scale = Constants.DefaultNodeScale;
-            return playerNode;
-        }
 
-        #region TESTING/TO BE REMOVED 
-        private void TryManipulateSoftbody()
-        {
-            if (node.TryGetComponent(out Softbody sb))
-            {
-                if (moveVector.Y != 0)
-                    sb.UniformDeformation(1);
-                if (moveVector.Y != 0)
-                    sb.UniformDeformation(-1);
-            }
-        }
-        #endregion
-        #region Input / Controller
-
-        private void Jump()
-        {
-            if (isGrounded)
-            {
-                string path = @"D:\Nightmare folder\Games\Documents\Pixel\Assets\Audio Assets\Cannon Sound Effect.mp3";
-                Audio.Play(path, 0.35f);
-                rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
-            }
-
-        }
-
-        void Down()
-        {
-            moveVector.Y = 1 * speed;
-        }
-        void Left()
-        {
-            moveVector.X = -1 * speed;
-        }
-        void Right()
-        {
-            moveVector.X = 1 * speed;
-        }
         private void RegisterActions()
         {
             RegisterAction(Jump, Key.Up);
@@ -140,7 +94,40 @@ namespace pixel_renderer
                 rb?.ApplyImpulse(moveVector.WithValue(y: speed * moveVector.Y) * speed);
             else rb?.ApplyImpulse(moveVector * speed);
         }
+        
+        #region Input 
+        private void Jump()
+        {
+            if (isGrounded)
+            {
+                string path = @"D:\Nightmare folder\Games\Documents\Pixel\Assets\Audio Assets\Cannon Sound Effect.mp3";
+                Audio.Play(path, 0.35f);
+                rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
+            }
 
+        }
+        private void Down()
+        {
+            moveVector.Y = 1 * speed;
+        }
+        private void Left()
+        {
+            moveVector.X = -1 * speed;
+        }
+        private void Right()
+        {
+            moveVector.X = 1 * speed;
+        }
         #endregion
+
+        public static Node Standard()
+        {
+            Node playerNode = Animator.Standard();
+            playerNode.tag = "Player";
+            playerNode.Position = new Vector2(-15, -20);
+            playerNode.AddComponent<Player>().takingInput = true;
+            playerNode.Scale = Constants.DefaultNodeScale;
+            return playerNode;
+        }
     }
 }

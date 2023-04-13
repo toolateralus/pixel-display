@@ -8,6 +8,9 @@ using System.Numerics;
 
 namespace pixel_renderer
 {
+    /// <summary>
+    /// note :our Polygon uses a clockwise winding order
+    /// </summary>
     public class Polygon
     {
         [Field]
@@ -18,6 +21,7 @@ namespace pixel_renderer
         public Vector2[] uv = Array.Empty<Vector2>();
         [Field]
         public Vector2[] vertices = Array.Empty<Vector2>();
+        public Pixel debuggingColor = Pixel.Random;
 
         /// <summary>
         /// Each line will point clockwise.
@@ -55,6 +59,7 @@ namespace pixel_renderer
             }
             centroid /= vertCount;
         }
+        
         private static void CheckWindingOrder(Vector2[] vertices)
         {
             float area = 0;
@@ -67,7 +72,6 @@ namespace pixel_renderer
             if (area < 0)
                 Array.Reverse(vertices);
         }
-        [Method]
         public List<Line> GetLines()
         {
             List<Line> lines = new();
@@ -98,10 +102,6 @@ namespace pixel_renderer
                 boundingBox.ExpandTo(vertices[i]);
         }
 
-        /// <summary>
-        /// Expects vertices to be structed clockwise
-        /// </summary>
-        /// <param name="vertices"></param>
         public Polygon() { }
         public Polygon(Vector2[] vertices)
         {
@@ -275,7 +275,6 @@ namespace pixel_renderer
             polygon.centroid = centroid;
         }
 
-        public Pixel debuggingColor = JRandom.Pixel();
     }
 
 }

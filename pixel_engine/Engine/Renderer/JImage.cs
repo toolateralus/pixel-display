@@ -16,6 +16,7 @@ namespace pixel_renderer
         public readonly int height;
         [JsonProperty]
         internal byte[] data;
+        [JsonProperty]
         Vector2 size = new();
         public Vector2 Size
         {
@@ -27,46 +28,61 @@ namespace pixel_renderer
             }
         }
 
+        [JsonProperty]
+        public Pixel color = Pixel.Clear; 
+
         public JImage()
         {
             width = 0;
             height = 0;
             data = Array.Empty<byte>();
         }
-        public JImage(Vector2 size, byte[] data)
+        public JImage(Vector2 size, byte[] colorData)
         {
             width = (int)size.X;
             height = (int)size.Y;
-            this.data = data;
+            ApplyColor(colorData);
+            this.data = colorData;
         }
         public JImage(Pixel[,] pixels)
         {
             width = pixels.GetLength(0);
             height = pixels.GetLength(1);
             byte[] byteData = CBit.ByteFromPixel(pixels);
+            ApplyColor(byteData);
             data = byteData;
         }
+
+        private void ApplyColor(byte[] colorData)
+        {
+            for (int i = 0; i < colorData.Length; i += 4)
+            {
+                colorData[i] *= color.a; 
+                colorData[i + 1] *= color.r;
+                colorData[i + 2] *= color.g;
+                colorData[i + 3] *= color.b;
+            }
+        }
+
         public JImage(Bitmap bmpInput)
         {
             if (bmpInput is null)
                 return; 
-
             Pixel[,] pixels;
             lock (bmpInput)
                 pixels = CBit.PixelFromBitmap(bmpInput);
-
             width = pixels.GetLength(0);
             height = pixels.GetLength(1);
-
-            byte[] byteData = CBit.ByteFromPixel(pixels);
-
-            data = byteData;
+            byte[] colorData = CBit.ByteFromPixel(pixels);
+            ApplyColor(colorData);
+            data = colorData;
         }
-        public JImage(BoundingBox2D bounds, byte[] bytes)
+        public JImage(BoundingBox2D bounds, byte[] colorData)
         {
             height = (int)bounds.Height;
             width = (int)bounds.Width;
-            data = bytes; 
+            ApplyColor(colorData);
+            data = colorData; 
         }
 
         public void SetPixel(int x, int y, Pixel color)
@@ -159,6 +175,11 @@ namespace pixel_renderer
         internal JImage Clone()
         {
             return (JImage)MemberwiseClone();
+        }
+        internal void NormalizeAlpha(int value)
+        {
+            for (int i = 0; i < data.Length; i += 4)
+                data[i] = (byte)value;
         }
     }
 }

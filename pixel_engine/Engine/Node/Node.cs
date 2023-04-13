@@ -283,6 +283,7 @@ namespace pixel_renderer
         }
         public Action<Collision> OnCollided;
         public Action<Collision> OnTriggered;
+        internal Collider col;
 
         public void OnTrigger(Collision otherBody)
         {
@@ -329,6 +330,9 @@ namespace pixel_renderer
 
             if (type == typeof(Rigidbody))
                 rb = component as Rigidbody;
+
+            if (type == typeof(Collider))
+                col = component as Collider;
 
             void addComponent<T>() where T : Component
             {
@@ -404,20 +408,29 @@ namespace pixel_renderer
         public void RemoveComponent(Component component)
         {
             var type = component.GetType();
-            if(Components.ContainsKey(type))
-            if (Components[type].Contains(component))
-            {
-                var compList = Components[type];
-                var toRemove = new Component();
-                foreach (var comp in from comp in compList
-                                        where comp is not null &&
-                                        comp.UUID.Equals(component.UUID)
-                                        select comp)
-                toRemove = comp;
 
-                if (toRemove is not null)
-                    compList.Remove(toRemove);
-                if (compList.Count == 0) Components.Remove(type);
+            if (Components.ContainsKey(type))
+            {
+                if (type == typeof(Rigidbody))
+                    rb = null;
+
+                if (type == typeof(Collider))
+                    col = null;
+
+                if (Components[type].Contains(component))
+                {
+                    var compList = Components[type];
+                    var toRemove = new Component();
+                    foreach (var comp in from comp in compList
+                                            where comp is not null &&
+                                            comp.UUID.Equals(component.UUID)
+                                            select comp)
+                    toRemove = comp;
+
+                    if (toRemove is not null)
+                        compList.Remove(toRemove);
+                    if (compList.Count == 0) Components.Remove(type);
+                }
             }
         }
 

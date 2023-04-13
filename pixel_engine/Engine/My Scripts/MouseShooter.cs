@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -17,23 +18,31 @@ namespace pixel_renderer
         const int initAmmoCt = 300;
         [Field] int ammoCt = 300, magazineSize = 16, currentMag = 16;
         [Field] private bool usingAmmo = false;
-        [Field] private Vector2 offsetFromCenter = new(0.6f, 0.6f);
+        [Field] private Vector2 offsetFromCenter = new(0f, 0f);
+        [Field] bool makeTransparent = false;
+      
+
         public override void Cycle(Particle p)
         {
             p.position += p.velocity;
             p.velocity *= 0.99f;
-            p.size = Vector2.One;
+            p.size = new Vector2(0.1f, 0.1f);
             p.color = Pixel.Random;
 
             if(p.velocity.Length() < minVelLength && particlesDieFromLowVelocity)
                 p.onDeath?.Invoke(p);
         }
+        public override void InstantiateParticle(Vector2 vel)
+        {
+            Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
+            particle.polygon = Polygon.nGon(32);
+            particles.Enqueue(particle);
+        }
+
         public override void Awake()
         {
             RegisterAction(() =>
-            { 
-                Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
-                GetParticle(vel); 
+            {
                 if (usingAmmo)
                 {
                     currentMag--;
@@ -43,12 +52,25 @@ namespace pixel_renderer
                         return;
                     }
                 }
-            } , Key.G);
+                Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
+                GetParticle(vel); 
+            } 
+            , Key.G);
+
             RegisterAction(Reload, Key.R);
-            
-            if(TryGetComponent<Sprite>(out var sprite)) 
-                RemoveComponent(sprite);
-            
+
+            if (makeTransparent)
+            {
+
+                if (TryGetComponent<Sprite>(out var sprite))
+                    sprite.texture.GetImage().NormalizeAlpha(75);
+
+                if (TryGetComponent<Animator>(out var anim))
+                    if (anim.GetAnimation() is Animation clip)
+                        foreach (var frame in clip.frames)
+                            frame.Value?.NormalizeAlpha(75);
+            }
+
             ammoCt = initAmmoCt;
             currentMag = magazineSize;
         }
@@ -71,15 +93,6 @@ namespace pixel_renderer
             currentMag = magazineSize;
            
         }
-        public override void FixedUpdate(float delta)
-        {
-            var cam = Camera.First;
-           
-            if (cam is null)
-                return; 
-
-            Position = (cam.Position + (offsetFromCenter * cam.Scale));
-        }
         public override void OnDrawShapes()
         {
             if (Runtime.IsRunning)
@@ -94,9 +107,6 @@ namespace pixel_renderer
                 }
             }
         }
-        public override void Update()
-        {
-
-        }
+       
     }
 }

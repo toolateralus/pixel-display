@@ -113,9 +113,7 @@ namespace pixel_renderer
         }
         public override void Awake()
         {
-            texture = new(Vector2.One, Player.PlayerSprite);
             Refresh();
-
         }
         public override void Update()
         {

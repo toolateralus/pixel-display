@@ -223,17 +223,18 @@ namespace pixel_editor
         }
         private void RefreshAddComponentFunctions()
         {
-             addComponentFunctions = new()
+            addComponentFunctions = new()
             {
                 {"Player",    AddPlayer},
-                {"Animator",  AddAnimator},
-                {"Sprite",    AddSprite},
+                
                 {"Collider",  AddCollider},
+                {"Joint", AddJoint},
                 {"Rigidbody", AddRigidbody},
                 {"Softbody",  AddSoftbody},
-                {"Particles",  AddParticles },
-                {"MouseShooterTesting",  AddShooter},
-                {"Joint", AddJoint}
+
+                {"Particles",  AddParticles},
+                {"Animator",  AddAnimator},
+                {"Sprite",    AddSprite},
             };
         }
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
@@ -277,7 +278,6 @@ namespace pixel_editor
             addComponentGrid.Children.Clear();
             addComponentGrid = null;
         }
-
         private Grid NewInspectorGrid()
         {
             Grid grid = GetGrid();
@@ -478,13 +478,9 @@ namespace pixel_editor
         {
             return lastSelectedNode?.AddComponent<Joint>();  
         }
-        MouseShooter AddShooter()
+        MouseShooter AddParticles()
         {
             return lastSelectedNode?.AddComponent<MouseShooter>(); 
-        }
-        ParticleSystem AddParticles()
-        {
-            return lastSelectedNode?.AddComponent<ParticleSystem>();
         }
         Sprite AddSprite()
         {

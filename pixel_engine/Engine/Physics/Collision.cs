@@ -40,9 +40,20 @@ namespace pixel_renderer
             for (int i = 0; i < stage.nodes.Count; i++)
             {
                 Node? node = stage.nodes[i];
-                var hasCollider = node.HasComponent<Collider>();
+                
+                var hasCollider = node.col != null;
+                var isParticleSystem = node.HasComponent<ParticleSystem>();
+
                 if (hasCollider)
                     quadTree.Insert(node);
+
+                if (isParticleSystem)
+                {
+                    Queue<Particle> particles = node.GetComponent<ParticleSystem>()?.particles;
+                    foreach (var particle in particles)
+                        if (particle.polygon != null)
+                            continue; 
+                }
             }
             
             BoundingBox2D range = new(area / -2, area / 2);
@@ -64,17 +75,17 @@ namespace pixel_renderer
                     if (B == A)
                         continue;
 
-                    bool a_has_rb = A.TryGetComponent(out Rigidbody rbA);
-                    bool b_has_rb = B.TryGetComponent(out Rigidbody rbB);
+                    bool a_has_rb = A.rb != null;
+                    bool b_has_rb = B.rb != null;
 
                     if (a_has_rb && b_has_rb)
-                        Collide(rbB, rbA);
+                        Collide(B.rb, A.rb);
 
                     if (a_has_rb && !b_has_rb)
-                        Collide(rbA, B.GetComponent<Collider>());
+                        Collide(A.rb, B.col);
 
                     if (!a_has_rb && b_has_rb)
-                        Collide(rbB, A.GetComponent<Collider>());
+                        Collide(B.rb, A.col);
 
                 }
             }
@@ -84,18 +95,25 @@ namespace pixel_renderer
         {
             if (rigidBody is null || staticCollider is null)
                 return;
-            var rbCollider = rigidBody.GetComponent<Collider>();
-            if (rbCollider.UUID == staticCollider.UUID)
+            
+            var rbCollider = rigidBody.node.col;
+
+            if (rbCollider is null || rbCollider.UUID == staticCollider.UUID)
                 return;
+
             Polygon polyA = rbCollider.Polygon;
             Polygon polyB = staticCollider.Polygon;
+
             Collision? collision = SATCollision.GetCollisionData(polyA, polyB, rigidBody.velocity);
+
             if (collision == null)
                 return;
+
             if (!rbCollider.IsTrigger && !staticCollider.IsTrigger)
             {
-                rigidBody.Position += collision.normal * collision.depth;
                 var dot = Vector2.Dot(rigidBody.velocity, collision.normal);
+
+                rigidBody.Position += collision.normal * collision.depth;
                 rigidBody.velocity -= collision.normal * dot;
             }
             GetCollisionObjects(staticCollider, rbCollider, collision.normal, collision.depth, out var collisionA, out var collisionB);
@@ -106,25 +124,21 @@ namespace pixel_renderer
             if (A == null || B == null)
                 return;
 
-            Collider aCol = A.GetComponent<Collider>();
-            Collider bCol = B.GetComponent<Collider>();
-
-            Polygon polyA = aCol.Polygon;
-            Polygon polyB = bCol.Polygon;
+            Polygon polyA = A.node.col.Polygon;
+            Polygon polyB = B.node.col.Polygon;
             Collision? collision = SATCollision.GetCollisionData(polyA, polyB, A.velocity - B.velocity);
 
             if (collision == null)
                 return;
 
-            if (!(aCol.IsTrigger || bCol.IsTrigger))
+            if (!(A.node.col.IsTrigger || B.node.col.IsTrigger))
                 ComputeImpulse(A, B, collision);
 
             Collision collisionA, collisionB;
-            GetCollisionObjects(aCol, bCol, collision.normal, collision.depth, out collisionA, out collisionB);
+            GetCollisionObjects(A.node.col, B.node.col, collision.normal, collision.depth, out collisionA, out collisionB);
             AttemptCallbacks(collisionA, collisionB);
 
         }
-
         private static void GetCollisionObjects(Collider aCol, Collider bCol, Vector2 normal, float depth, out Collision collisionA, out Collision collisionB)
         {
             var centroidA = aCol.Polygon.centroid;
@@ -145,7 +159,6 @@ namespace pixel_renderer
             collisionA = new(bCol, aCollisionPoint, normal, depth);
             collisionB = new(aCol, bCollisionPoint, -normal, depth);
         }
-
         private static void AttemptCallbacks(Collision A, Collision B)
         {
             if (A.collider.IsTrigger || B.collider.IsTrigger)

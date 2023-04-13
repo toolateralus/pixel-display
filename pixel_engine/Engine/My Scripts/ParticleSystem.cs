@@ -13,6 +13,7 @@ namespace pixel_renderer
     {
         public Pixel color;
         public float birth = 0;
+        public Polygon? polygon = null; 
         public Vector2 velocity;
         public Vector2 position;
         public Vector2 size;
@@ -85,7 +86,7 @@ namespace pixel_renderer
             p.dead = false;
         }
 
-        private void InstantiateParticle(Vector2 vel)
+        public virtual void InstantiateParticle(Vector2 vel)
         {
             Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
             particles.Enqueue(particle);
