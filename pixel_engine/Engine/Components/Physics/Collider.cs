@@ -8,12 +8,9 @@ namespace pixel_renderer
     public class Collider : Component
     {
 
-        [JsonProperty] private Polygon model = Polygon.nGon(1, 4);
-        
-
+        [JsonProperty] private Polygon model = Polygon.Square(1);
         [Field] int vertexCount = 6;
         [Method] void CreateNGonWithVertexCt() => model = Polygon.nGon(Scale.X - Scale.Y * 2, vertexCount);
-
         /// <returns>Copy of model, not model itself</returns>
         public Polygon GetModel() => new(model);
         /// <summary>
@@ -26,7 +23,8 @@ namespace pixel_renderer
             model = new(polygon);
             transformedModel = new(polygon);
         }
-        Polygon transformedModel = Polygon.Square(1);
+        [JsonProperty] Polygon transformedModel = Polygon.Square(1);
+        [JsonProperty]
         public Polygon Polygon
         {
             get
@@ -36,17 +34,13 @@ namespace pixel_renderer
                 return transformedModel;
             }
         }
-
-        [JsonProperty][Field] public TriggerInteraction InteractionType = TriggerInteraction.All;
-
-        [Field] public bool drawCollider = false;
-        [Field] public bool drawNormals = false;
-        [Field] public Pixel colliderPixel = Color.LimeGreen;
-
+        [JsonProperty][Field] public bool drawCollider = false;
+        [JsonProperty][Field] public bool drawNormals = false;
+        [JsonProperty][Field] public Pixel colliderPixel = Color.LimeGreen;
         [JsonProperty] public bool IsTrigger { get; internal set; } = false;
 
-
         enum PrimitiveType { box, circle, triangle };
+        [JsonProperty]
         PrimitiveType primitive; 
         [Method]
         void CyclePrimitiveType()
@@ -55,7 +49,7 @@ namespace pixel_renderer
             {
                 case PrimitiveType.box:
 
-                    SetModel(pixel_renderer.Polygon.nGon(size: 1, sides: 3));
+                    SetModel(pixel_renderer.Polygon.Rectangle(new(1,1)));
                     primitive = PrimitiveType.triangle;
 
                     break;
@@ -77,7 +71,7 @@ namespace pixel_renderer
             Runtime.Log($"{node.Name}'s collider now has primitive shape : {primitive}");
         }
 
-
+        [JsonProperty]
         private BoundingBox2D boundingBox = new();
         public BoundingBox2D BoundingBox
         {

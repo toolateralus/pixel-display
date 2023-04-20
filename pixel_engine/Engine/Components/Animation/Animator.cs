@@ -11,8 +11,14 @@ namespace pixel_renderer
 {
     public class Animator : Component, IAnimate
     {
+
+        [JsonProperty]
         [Field] public float speed = 2f;
+
+        [JsonProperty]
         private Animation? animation;
+
+        [JsonProperty]
         private Sprite? sprite;
        
         [Field][JsonProperty]

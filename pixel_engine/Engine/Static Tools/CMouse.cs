@@ -79,7 +79,6 @@ namespace pixel_renderer
             else
                 LeftPressedThisFrame = false;
             LeftPressedLastFrame = Left;
-            CMouse.MouseWheelDelta = 0;
 
         }
 

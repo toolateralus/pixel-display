@@ -22,29 +22,40 @@ namespace pixel_renderer
             }
             set
             {
-                if (node is null)
-                    return; 
-                node.Position = value;
+                if (node != null)
+                    node.Position = value;
             }
         }
         [JsonProperty] private string _uuid = "";
-
-        public Vector2 Scale { get => node.Scale; set => node.Scale = value; }
-        public float Rotation { get => node.Rotation; set => node.Rotation = value; }
+        public Vector2 Scale
+        {
+            get => node.Scale; set
+            {
+                if (node != null)
+                    node.Scale = value;
+            }
+        }
+        public float Rotation
+        {
+            get => node.Rotation; set
+            {
+                if (node != null)
+                    node.Rotation = value;
+            }
+        }
         public ref Matrix3x2 Transform { get => ref node.Transform; }
         public string Name { get; set; } = "";
         public bool selected_by_editor;
         public string UUID => _uuid;
-
         public Component()
         {
             _uuid = pixel_renderer.UUID.NewUUID();
         }
-
+        // begin comment
         // idk why this is implented twice nor do I know which ones preferable, I think clone works fine.
         public Component Clone() => (Component)MemberwiseClone();
         internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
-
+        // end comment
         public virtual void Awake() { }
         public virtual void Update() { }
         public virtual void FixedUpdate(float delta) { }
@@ -55,10 +66,8 @@ namespace pixel_renderer
         public virtual void OnDestroy()
         {
         }
-
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
-
         public bool TryGetComponent<T>(out T result, int index = 0) where T : Component
         {
             result = node.GetComponent<T>(index);
@@ -79,7 +88,6 @@ namespace pixel_renderer
             Name = $"{GetType().Name}";
             Awake();
         }
-
         public void RemoveComponent(Component component)
         {
             node?.RemoveComponent(component);

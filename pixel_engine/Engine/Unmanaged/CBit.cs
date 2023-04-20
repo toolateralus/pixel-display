@@ -19,11 +19,6 @@ namespace pixel_renderer
         [DllImport("gdi32.dll")]
         internal static extern bool DeleteObject(IntPtr intPtr);
        
-        /// <summary>
-        /// a cheap way to draw a Bitmap image (in memory) to a Image control reference.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="destination"></param>
         public static unsafe void Render(Bitmap source, System.Windows.Controls.Image destination)
         {
             BitmapData bmd = source.LockBits(source.Rect(), ImageLockMode.ReadOnly, source.PixelFormat);
@@ -31,7 +26,7 @@ namespace pixel_renderer
                 bmd.Width, bmd.Height, 96, 96, source.PixelFormat.ToMediaFormat(), null,
                 bmd.Scan0, bmd.Stride * bmd.Height, bmd.Stride);
             source.UnlockBits(bmd);
-            DeleteObject(bmd.Scan0);
+            DeleteObject(bmd.Scan0); //I don't actually know if this is neccesary, this might be costing some performance for no reason.;
 
         }
         public static byte[] ByteFromPixel(Pixel[,] colorArray)
@@ -54,9 +49,11 @@ namespace pixel_renderer
             }
             return pixelData; 
         }
-
         public static Pixel[,] PixelFromBitmap(Bitmap bmp, bool dispose = false)
         {
+            if (bmp is null)
+                throw new NullReferenceException("bitmap cannot be null.");
+
             lock (bmp)
             {
                 int i = bmp.Width;
@@ -98,7 +95,6 @@ namespace pixel_renderer
                     colorData[x, y] = color;
             return colorData;
         }
-        
         public static void RenderFromFrame(byte[] frame, int stride, Vector2 resolution, System.Windows.Controls.Image output)
         {
             // this (stride <= 0) is expected exactly once on startup, I don't know why.

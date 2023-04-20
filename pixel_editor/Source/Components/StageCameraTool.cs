@@ -95,7 +95,6 @@ namespace pixel_editor
                 return;
         
             Camera.First.Scale *= MathF.Pow(Editor.Current.settings.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
-            UpdateCamPosition();
         }
 
         private void UpdateCamPosition()

@@ -8,6 +8,7 @@ using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace pixel_renderer
 {
@@ -94,7 +95,7 @@ namespace pixel_renderer
                 if (IsDiposing)
                     return;
 
-                
+                CMouse.MouseWheelDelta = 0;
 
                 if (IsRunning)
                 {

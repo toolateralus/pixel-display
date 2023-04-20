@@ -39,11 +39,6 @@ namespace pixel_renderer
                         if (texture is null) texture = new(colorArray1);
                         else texture.SetImage(colorArray1);
                     }
-                    else
-                    {
-                        if (texture is null) texture = new(texture.Image);
-                        else texture.SetImage(texture.Image);
-                    }
                     break;
                 default: 
                     return; 
