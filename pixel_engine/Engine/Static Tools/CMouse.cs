@@ -58,6 +58,7 @@ namespace pixel_renderer
 
         public static void Update()
         {
+
             if (!RightPressedLastFrame && Right)
                 RightPressedThisFrame = true;
             else
@@ -78,6 +79,8 @@ namespace pixel_renderer
             else
                 LeftPressedThisFrame = false;
             LeftPressedLastFrame = Left;
+            CMouse.MouseWheelDelta = 0;
+
         }
 
         public static void Refresh(MouseButtonEventArgs e)

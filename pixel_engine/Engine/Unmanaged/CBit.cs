@@ -101,18 +101,12 @@ namespace pixel_renderer
         
         public static void RenderFromFrame(byte[] frame, int stride, Vector2 resolution, System.Windows.Controls.Image output)
         {
-            // this is expected exactly once on startup, don't know why.
+            // this (stride <= 0) is expected exactly once on startup, I don't know why.
             if (stride <= 0)
                 return;
-
-            output.Source = BitmapSource.Create(
-            (int)resolution.X, (int)resolution.Y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null,
-            frame, stride);
+            output.Source = BitmapSource.Create((int)resolution.X, (int)resolution.Y, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null, frame, stride);
         }
+        public static int GetStride(Vector2 resolution) => 4 * ((int)resolution.X * 24 + 31) / 32;
 
-        public static int GetStride(Vector2 resolution)
-        {
-            return 4 * ((int)resolution.X * 24 + 31) / 32;
-        }
     }
 }

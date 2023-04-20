@@ -79,11 +79,7 @@ namespace pixel_renderer
             SetResolution();
         }
 
-        public void SetResolution()
-        {
-            renderHost.newResolution = projectSettings.CurrentResolution;
-        }
-
+        public void SetResolution() => renderHost.newResolution = projectSettings.CurrentResolution;
         public static void GetRenderingData(out RenderHost host, out StageRenderInfo info, out RendererBase renderer, out JImage baseImage)
         {
             host = Runtime.Current.renderHost;
@@ -91,7 +87,6 @@ namespace pixel_renderer
             renderer = Runtime.Current.renderHost.GetRenderer();
             baseImage = renderer.baseImage;
         }
-
         private void PhysicsLoop(object? sender, DoWorkEventArgs e)
         {
             while (physicsWorker != null)
@@ -99,7 +94,6 @@ namespace pixel_renderer
                 if (IsDiposing)
                     return;
 
-                CMouse.MouseWheelDelta = 0;
                 
 
                 if (IsRunning)
@@ -129,7 +123,6 @@ namespace pixel_renderer
 
                 if (Application.Current is null)
                     return;
-
                 CMouse.Update();
                 Current.renderHost?.Render();
                 Application.Current?.Dispatcher.Invoke(() =>
@@ -151,7 +144,7 @@ namespace pixel_renderer
                     StagingHost.Update(Current.stage);
                 }
             }
-            Runtime.Log("renderer has exited unexpectedly.");
+            if(IsRunning) Log("renderer has exited unexpectedly.");
 
         }
 

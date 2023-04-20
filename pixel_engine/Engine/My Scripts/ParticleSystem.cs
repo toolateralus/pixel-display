@@ -15,29 +15,28 @@ namespace pixel_renderer
         public Pixel color;
         public Vector2 Velocity
         {
-            get 
-            { 
-                if (rb != null) 
-                    return rb.velocity; 
+            get
+            {
+                if (rb != null)
+                    return rb.velocity;
                 return Vector2.Zero;
             }
-            set => rb.velocity = value;
+            set
+            {
+                if(rb != null)
+                    rb.velocity = value;
+            }
         }
         public Action<Particle> lifetime;
         public Action<Particle> onDeath; 
         internal bool dead;
 
-        public Particle(Vector2 initVel, Action<Particle> lifetime)
-        {
-            Velocity = initVel;
-            this.lifetime = lifetime;
-        }
-        public Particle(Action<Particle> Lifetime, Action<Particle> onDeath)
-        {
-            lifetime = Lifetime;
-            this.onDeath = onDeath;
-        }
-        public Particle(Pixel initColor, Vector2 initVel, Vector2 initPos, Vector2 initSize, Action<Particle> lifetime, Action<Particle> onDeath)
+        public Particle(Pixel initColor,
+                        Vector2 initVel,
+                        Vector2 initPos,
+                        Vector2 initSize,
+                        Action<Particle> lifetime,
+                        Action<Particle> onDeath)
         {
             this.color = initColor;
             this.Velocity = initVel;
@@ -151,6 +150,7 @@ namespace pixel_renderer
 
             p.onDeath?.Invoke(p); 
             p.dead = true;
+            p.Destroy();
         }
         public Vector2 GetRandomVelocity(float speed = -1f)
         {
