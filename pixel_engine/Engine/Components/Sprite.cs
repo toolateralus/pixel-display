@@ -9,7 +9,7 @@ using pixel_renderer.ShapeDrawing;
 
 namespace pixel_renderer
 {
-    public enum SpriteType { SolidColor, Image, Custom};
+    public enum ImageType { SolidColor, Image, Custom};
     public enum TextureFiltering { Point, Bilinear }
     public class Sprite : Component
     {
@@ -40,7 +40,7 @@ namespace pixel_renderer
         [Field] [JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
         [Field] [JsonProperty] public float camDistance = 1;
         [Field] [JsonProperty] public Texture texture;
-        [Field] [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
+        [Field] [JsonProperty] public ImageType Type = ImageType.SolidColor;
         [Field] [JsonProperty] public TextureFiltering textureFiltering = 0;
         [Field] [JsonProperty] public bool lit = false;
         [Field] [JsonProperty] public Pixel color = Pixel.Blue;
@@ -74,11 +74,11 @@ namespace pixel_renderer
         {
             switch (Type)
             {
-                case SpriteType.SolidColor:
-                    Type = SpriteType.Image;
+                case ImageType.SolidColor:
+                    Type = ImageType.Image;
                     break;
-                case SpriteType.Image:
-                    Type = SpriteType.SolidColor;
+                case ImageType.Image:
+                    Type = ImageType.SolidColor;
                     break;
                 default: Type = 0;
                     break;
@@ -90,11 +90,11 @@ namespace pixel_renderer
         {
             switch (Type)
             {
-                case SpriteType.SolidColor:
+                case ImageType.SolidColor:
                     Pixel[,] colorArray = CBit.SolidColorSquare(colorDataSize, color);
                     texture.SetImage(colorArray);
                     break;
-                case SpriteType.Image:
+                case ImageType.Image:
                     if (texture is null || texture.Image is null)
                     {
                         Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);

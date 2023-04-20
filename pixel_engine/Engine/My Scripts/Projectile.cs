@@ -22,7 +22,7 @@ namespace pixel_renderer
 
             Metadata meta = FetchMetaRelative(defaultImagePath);
             var sprite = node.AddComponent<Sprite>();
-            sprite.Type = SpriteType.Image;
+            sprite.Type = ImageType.Image;
             sprite.texture = new(meta.Path);
             sprite.IsDirty = true;
 

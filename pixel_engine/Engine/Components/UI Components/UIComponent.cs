@@ -16,7 +16,7 @@ namespace pixel_renderer
         [Field] [JsonProperty] public Pixel color = Pixel.Blue;
                 [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
         [Field] [JsonProperty] public float camDistance = 1;
-        [Field] [JsonProperty] public SpriteType Type = SpriteType.SolidColor;
+        [Field] [JsonProperty] public ImageType Type = ImageType.SolidColor;
         [Field] [JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
         [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
         [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
@@ -27,12 +27,12 @@ namespace pixel_renderer
         {
             switch (Type)
             {
-                case SpriteType.SolidColor:
+                case ImageType.SolidColor:
                     Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
                     if (texture is null) texture = new(colorArray);
                     else texture.SetImage(colorArray);
                     break;
-                case SpriteType.Image:
+                case ImageType.Image:
                     if (texture is null)
                     {
                         Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);

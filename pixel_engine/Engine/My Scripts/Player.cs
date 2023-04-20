@@ -31,7 +31,7 @@ namespace pixel_renderer
             node.TryGetComponent(out rb);
 
             if (node.TryGetComponent(out sprite))
-                sprite.Type = SpriteType.Image;
+                sprite.Type = ImageType.Image;
 
             if (node.TryGetComponent(out anim))
                 anim.Next();

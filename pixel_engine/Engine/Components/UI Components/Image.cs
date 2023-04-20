@@ -87,12 +87,12 @@ namespace pixel_renderer
 
         [Method] public void CycleSpriteType()
         {
-            if ((int)Type + 1 > sizeof(SpriteType) - 2)
+            if ((int)Type + 1 > sizeof(ImageType) - 2)
             {
                 Type = 0;
                 return;
             }
-            Type = (SpriteType)((int)Type + 1);
+            Type = (ImageType)((int)Type + 1);
 
         }
         [Method] public void TrySetTextureFromString()
@@ -134,7 +134,7 @@ namespace pixel_renderer
             var img = node.AddComponent<Image>();
 
             img.Scale = Constants.DefaultNodeScale;
-            img.Type = SpriteType.Image; 
+            img.Type = ImageType.Image; 
             img.TrySetTextureFromString();
             img.Refresh();
 

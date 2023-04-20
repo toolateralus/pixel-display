@@ -37,7 +37,7 @@ namespace pixel_renderer
         public override void Awake()
         {
             base.Awake();
-            Type = SpriteType.Image;
+            Type = ImageType.Image;
             color = Pixel.White;
             RefreshFont();
             RefreshCharacters();
