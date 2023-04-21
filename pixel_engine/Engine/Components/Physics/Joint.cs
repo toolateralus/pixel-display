@@ -31,7 +31,7 @@ namespace pixel_renderer
 
                 if (node.rb != null && b.rb != null)
                 {
-                    //b.RemoveComponent(b.rb);
+                    b.RemoveComponent(b.rb);
                     B = b;
 
                     A.OnCollided += (c) => OnBodyCollided(c, 0);

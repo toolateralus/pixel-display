@@ -16,31 +16,8 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
-            ImportAll(Constants.WorkingRoot);
+            ImportRecursively(Constants.WorkingRoot, 0);
         }
-
-        private static void ImportAssets()
-        {
-            foreach (var x in Import(Constants.WorkingRoot, Constants.AssetsFileExtension))
-            {
-                var asset = IO.ReadJson<Asset>(x);
-                bool result = AssetLibrary.Register(x, asset);
-                if (!result)
-                    Runtime.Log($"Importer tried to register an asset that already been registered. Asset {asset.Name} \n {asset.GetType()} at path {x.Path}");
-            }
-
-        }
-
-        private static void ImportBitmaps()
-        {
-             foreach (var x in Import(Constants.WorkingRoot + Constants.AssetsDir, Constants.PngExt))
-                AssetLibrary.Register(x, null);
-
-            foreach (var dir in Directory.GetDirectories(Constants.WorkingRoot + Constants.AssetsDir))
-                foreach (var x in Import(dir, Constants.PngExt))
-                    AssetLibrary.Register(x, null);
-        }
-
         private static List<Metadata> Import(string directory, string ext)
         {
 
@@ -67,7 +44,8 @@ namespace pixel_renderer.Assets
                 collection.Add(file);
             }
         }
-
+        
+       
         private static void ImportAll(string dir)
         {
             var dirs = Directory.GetDirectories(dir);
@@ -97,6 +75,18 @@ namespace pixel_renderer.Assets
             }
             ImportAndRegister(dir);
 
+        }
+        private static void ImportRecursively(string dir, int depth)
+        {
+            if (depth > 100)
+                return;
+
+            var dirs = Directory.GetDirectories(dir);
+            ImportAndRegister(dir);
+
+            if (dirs.Length > 0)
+                foreach (var sub_dir in dirs)
+                    ImportRecursively(sub_dir, depth++);
         }
 
         private static void ImportAndRegister(string _dir)

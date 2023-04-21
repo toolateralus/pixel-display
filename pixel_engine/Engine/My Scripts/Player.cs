@@ -24,8 +24,6 @@ namespace pixel_renderer
         Rigidbody rb;
         Animator anim;
         Camera cam;
-
-
         public override void Awake()
         {
             node.TryGetComponent(out rb);
@@ -103,7 +101,7 @@ namespace pixel_renderer
         {
             if (isGrounded)
             {
-                string path = @"D:\Nightmare folder\Games\Documents\Pixel\Assets\Audio Assets\Cannon Sound Effect.mp3";
+                string path = @"D:\Nightmare folder\Games\Documents\Pixel\Assets\Audio Assets\dog_barking.mp3";
                 Audio.Play(path, 0.35f);
                 rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
             }

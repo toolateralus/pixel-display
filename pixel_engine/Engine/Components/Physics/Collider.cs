@@ -24,8 +24,7 @@ namespace pixel_renderer
             transformedModel = new(polygon);
         }
         [JsonProperty] Polygon transformedModel = Polygon.Square(1);
-        [JsonProperty]
-        public Polygon Polygon
+        [JsonProperty] public Polygon Polygon
         {
             get
             {
@@ -38,8 +37,7 @@ namespace pixel_renderer
         [JsonProperty][Field] public bool drawNormals = false;
         [JsonProperty][Field] public Pixel colliderPixel = Color.LimeGreen;
         [JsonProperty] public bool IsTrigger { get; internal set; } = false;
-
-        enum PrimitiveType { box, circle, triangle };
+        enum PrimitiveType { Box, Circle, Triangle };
         [JsonProperty]
         PrimitiveType primitive; 
         [Method]
@@ -47,22 +45,22 @@ namespace pixel_renderer
         {
             switch (primitive)
             {
-                case PrimitiveType.box:
+                case PrimitiveType.Box:
+
+                    SetModel(pixel_renderer.Polygon.Triangle(1, 1));
+                    primitive = PrimitiveType.Triangle;
+
+                    break;
+                case PrimitiveType.Circle:
 
                     SetModel(pixel_renderer.Polygon.Rectangle(new(1,1)));
-                    primitive = PrimitiveType.triangle;
+                    primitive = PrimitiveType.Box;
 
                     break;
-                case PrimitiveType.circle:
-
-                    SetModel(pixel_renderer.Polygon.nGon(size: 1, sides: 4));
-                    primitive = PrimitiveType.box;
-
-                    break;
-                case PrimitiveType.triangle:
+                case PrimitiveType.Triangle:
 
                     SetModel(pixel_renderer.Polygon.nGon(size: 1, sides: 32));
-                    primitive = PrimitiveType.circle;
+                    primitive = PrimitiveType.Circle;
                     break;
                 default:
                     break;

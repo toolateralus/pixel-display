@@ -64,10 +64,6 @@ namespace pixel_renderer
             return node;
         }
 
-        internal void ApplyImpulse(object value)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 

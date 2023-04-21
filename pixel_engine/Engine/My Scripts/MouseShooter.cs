@@ -54,9 +54,9 @@ namespace pixel_renderer
                     }
                 }
                 Vector2 vel = (CMouse.GlobalPosition - Position) / speed;
-                GetParticle(vel); 
-            } 
-            , Key.G);
+                GetParticle(vel * 200); 
+            } , Key.G);
+            
 
             RegisterAction(Reload, Key.R);
 
@@ -94,13 +94,17 @@ namespace pixel_renderer
             currentMag = magazineSize;
            
         }
+        public override void Update()
+        {
+            foreach (var particle in particles)
+                particle?.Next(); 
+        }
         public override void OnDrawShapes()
         {
             if (Runtime.IsRunning)
             {
                 foreach(var particle in particles)
                 {
-                    particle?.Next();
                     if (particle is null || particle.dead) 
                         continue;
 

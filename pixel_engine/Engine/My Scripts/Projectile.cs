@@ -33,18 +33,6 @@ namespace pixel_renderer
             node.Position = sender.Position; 
             return node; 
         }
-
-        public override void Awake()
-        {
-            Runtime.Log("Projectile Awoken");
-        }
-        public override void FixedUpdate(float delta)
-        {
-            
-        }
-        public override void OnCollision(Collision collider)
-        {
-        }
         public override void OnDrawShapes()
         {
             if (sender is null)
@@ -54,10 +42,6 @@ namespace pixel_renderer
                   ShapeDrawer.DrawLine(Position + Scale / 2, sender.Position + sender.Scale / 2, Pixel.White);
                   ShapeDrawer.DrawCircle(Position + Scale / 2, 16, Pixel.White);
               }
-        }
-
-        public override void OnTrigger(Collision other)
-        {
         }
     }
 }
