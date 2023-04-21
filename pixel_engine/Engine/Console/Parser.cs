@@ -11,7 +11,7 @@ using System.Windows.Documents;
 
 namespace pixel_editor
 {
-    public class CommandParser 
+    public class CommandParser
     {
         private const char Loop = '$';
         private const char EndLine = ';';
@@ -19,7 +19,7 @@ namespace pixel_editor
         private const char ArgumentsEnd = ')';
         private const string ParameterSeperator = ", ";
 
-        // for the final cleanup of commands before execution
+        // use list for linq methods
         public static List<char> disallowed_chars = new()
         {
             ';',
@@ -28,7 +28,7 @@ namespace pixel_editor
             ')',
             '"',
         };
-        private protected static string[] typeIdentifiers = new string[] 
+        private protected static string[] typeIdentifiers = new string[]
         {
             "vec:",
             "int:",
@@ -42,16 +42,16 @@ namespace pixel_editor
             {
                 if (args.Length > 0)
                 {
-                    List<object> init_args = new();
+                    List<object> parsed_objects = new();
 
                     for (int i = 0; i < args.Length; ++i)
                     {
-                        object? parse_arg = ParseParam(args[i], command, i);
+                        object? parsed_arg_obj = ParseParam(args[i], command, i);
 
-                        if (parse_arg != null)
-                            init_args.Add(parse_arg);
+                        if (parsed_arg_obj != null)
+                            parsed_objects.Add(parsed_arg_obj);
                     }
-                    command.args = init_args.ToArray();
+                    command.args = parsed_objects.ToArray();
                     command.Invoke();
                 } 
                 else command.Invoke();

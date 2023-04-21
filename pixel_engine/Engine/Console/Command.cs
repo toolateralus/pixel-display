@@ -15,11 +15,20 @@ namespace pixel_editor
     {
         public const char PhraseVariantSeperator = '|';
         /// <summary>
-        /// This is the keyword used to invoke the command
+        /// the way the command must be typed to be successfully interpreted. note: if your command looks like this -> node.List(); then you need to type this as node.List;
         /// </summary>
         public string phrase = "";
+        /// <summary>
+        /// A short summary of the function and usage of the command.
+        /// </summary>
         public string description = "Please add a description to this command.";
+        /// <summary>
+        /// Syntactical guidelines for using the command properly, etc default args or explanation of syntax.
+        /// </summary>
         public string syntax = "Please add syntactical guidelines to this command. e.g. node.Get(str:{{target}});";
+        /// <summary>
+        /// declaring members in this list will flag your command to have x arguments of n type, see CommandParser.type_identifiers {todo: make some documentation for this as its a private protected array}.
+        /// </summary>
         public string[]? argumentTypes = null; 
         /// <summary>
         /// this is only not null when there has been an error, and will likely contain a string of information about the error.

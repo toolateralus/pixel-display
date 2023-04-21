@@ -36,7 +36,6 @@ namespace pixel_editor
         {
             GetEvents();
         }
-
         private void SetupComponentEditorGrid()
         {
             mainGrid = Editor.Current.inspectorGrid;
@@ -232,6 +231,64 @@ namespace pixel_editor
             Inspector.SetRowAndColumn(nameDisplay, 1, 4, 18, index + 1);
         }
         #endregion
+        private bool SetVariable(string o, int i)
+        {
+            Inspector.GetComponentRuntimeInfo(component, out var fields, out _);
+
+            foreach (var info in fields)
+                if (info.Name == o)
+                {
+                    CommandParser.TryParse(inputFields[i].Text, out List<object> results);
+                    foreach(var obj in results)
+                        if (obj.GetType() == info.FieldType)
+                        {
+                            Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType} of value {obj}");
+                            info.SetValue(component, obj);
+                        }
+                    return true; 
+                }
+            return false;
+        }
+        private void ExecuteEditEvent(int index)
+        {
+            if (inputFields.Count > index)
+                if (data.Fields.ElementAt(index) is var field)
+                {
+                    Action<string, int> action = editEvents[index];
+                    string name = field.Name;
+                    action.Invoke(name, index);
+                    component?.OnFieldEdited(name);
+                }
+        }
+        internal void Dispose()
+        {
+            Disposing = true;
+            data = null;
+
+            foreach (var element in uiElements)
+            {
+                var hasRefGlobal = mainGrid.Children.Contains(element);
+                if (hasRefGlobal)
+                    mainGrid.Children.Remove(element);
+
+                var hasRefLocal = myGrid.Children.Contains(element);
+                if (hasRefLocal)
+                    myGrid.Children.Remove(element);
+            }
+
+            if (mainGrid != null)
+            {
+                if (mainGrid.Children.Contains(myGrid))
+                    mainGrid.Children.Remove(myGrid);
+            }
+
+            uiElements?.Clear();
+            myGrid?.Children.Clear();
+            inputFields?.Clear();
+            editEvents?.Clear();
+
+            Disposing = false; 
+        }
         #region WPF Events
 
         private void TxtBox_KeyDown(object sender, KeyEventArgs e, FieldInfo field, Component component, string[] strings)
@@ -295,64 +352,6 @@ namespace pixel_editor
         }
 
         #endregion
-        private bool SetVariable(string o, int i)
-        {
-            Inspector.GetComponentRuntimeInfo(component, out var fields, out _);
-
-            foreach (var info in fields)
-                if (info.Name == o)
-                {
-                    CommandParser.TryParse(inputFields[i].Text, out List<object> results);
-                    foreach(var obj in results)
-                        if (obj.GetType() == info.FieldType)
-                        {
-                            Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType} of value {obj}");
-                            info.SetValue(component, obj);
-                        }
-                    return true; 
-                }
-            return false;
-        }
-        private void ExecuteEditEvent(int index)
-        {
-            if (inputFields.Count > index)
-                if (data.Fields.ElementAt(index) is var field)
-                {
-                    Action<string, int> action = editEvents[index];
-                    string name = field.Name;
-                    action.Invoke(name, index);
-                    component.OnFieldEdited(name);
-                }
-        }
-        internal void Dispose()
-        {
-            Disposing = true;
-            data = null;
-
-            foreach (var element in uiElements)
-            {
-                var hasRefGlobal = mainGrid.Children.Contains(element);
-                if (hasRefGlobal)
-                    mainGrid.Children.Remove(element);
-
-                var hasRefLocal = myGrid.Children.Contains(element);
-                if (hasRefLocal)
-                    myGrid.Children.Remove(element);
-            }
-
-            if (mainGrid != null)
-            {
-                if (mainGrid.Children.Contains(myGrid))
-                    mainGrid.Children.Remove(myGrid);
-            }
-
-            uiElements?.Clear();
-            myGrid?.Children.Clear();
-            inputFields?.Clear();
-            editEvents?.Clear();
-
-            Disposing = false; 
-        }
     }
     public record ComponentEditorData
     {
