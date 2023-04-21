@@ -17,6 +17,9 @@ namespace pixel_editor
 {
     public partial class Editor : Window
     {
+        SolidColorBrush framerateBrush = new(); 
+        internal ComponentEditor componentEditor;
+        internal FileViewer fileViewer;
         private const string motd = "Session started. Type 'help();' for a list of commands.";
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty =
@@ -99,7 +102,6 @@ namespace pixel_editor
             Console.Print(motd, true);
             Runtime.OutputImages.Add(image);
         }
-
         private static void InitializeSettings()
         {
             Metadata meta = new("editor settings", Constants.WorkingRoot + "\\editorSettings.asset", ".asset");
@@ -197,8 +199,6 @@ namespace pixel_editor
             Runtime.OnProjectSet -= OnProjectSet;
             Runtime.OnStageSet -= OnStageSet;
         }
-
-
         private void GetInputs()
         {
             Input.RegisterAction(ResetEditor, Key.F5); 
@@ -209,7 +209,6 @@ namespace pixel_editor
             Input.RegisterAction(DestroySelected, Key.Delete);
             Input.RegisterAction(TryDuplicate, Key.D);
         }
-
         private void TryDuplicate()
         {
             if (!Input.Get(Key.LeftCtrl))
@@ -217,10 +216,6 @@ namespace pixel_editor
 
             Runtime.Current.GetStage()?.AddNodes(DuplicateSelected(true));
         }
-
-        SolidColorBrush framerateBrush = new(); 
-        internal ComponentEditor componentEditor;
-
         public void Dispose()
         {
             UnsubscribeEvents();
@@ -295,7 +290,10 @@ namespace pixel_editor
                     $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
             }
         }
-       
+        public void fv_selection_changed(object? sender, EventArgs e)
+        {
+            Runtime.Log("Selection Changed");
+        }
         #region Fields/Properties
         string stageName, projectName;
         internal static RenderHost? Host => Runtime.Current.renderHost;
