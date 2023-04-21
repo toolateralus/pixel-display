@@ -27,14 +27,21 @@ namespace pixel_editor
 
             listBox.ScrollIntoView(lib.First().pathFromProjectRoot); 
         }
-        public Asset? GetSelectedAsset()
+        /// <summary>
+        /// see AssetLibrary.FetchByMeta for more info on why this returns an object and not an asset.
+        /// </summary>
+        /// <returns></returns>
+        public object? GetSelectedObject()
         {
             var item = listBox.SelectedItem;
             if (item is string path)
             {
                 var meta = AssetLibrary.FetchMetaRelative(path);
                 if (meta != null)
-                    return AssetLibrary.FetchByMeta(meta);
+                {
+                    var asset = AssetLibrary.FetchByMeta(meta);
+                    return asset;
+                }
             }
             return null; 
         }

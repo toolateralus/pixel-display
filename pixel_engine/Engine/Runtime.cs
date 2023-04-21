@@ -169,6 +169,10 @@ namespace pixel_renderer
            EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
            InspectorEventRaised?.Invoke(e);
         }
+        public static void RaiseInspectorEvent(EditorEvent e)
+        {
+            InspectorEventRaised?.Invoke(e);
+        }
         public static void Initialize(Project project)
         {
             current ??= new(project);

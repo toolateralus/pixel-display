@@ -5,6 +5,7 @@ using pixel_renderer.FileIO;
 using pixel_renderer.ShapeDrawing;
 using System.Linq;
 using System;
+using System.Drawing;
 
 namespace pixel_renderer
 {
@@ -97,6 +98,17 @@ namespace pixel_renderer
         }
         [Method] public void TrySetTextureFromString()
         {
+            EditorEvent e = new("$nolog_get_selected_asset");
+            object? asset = null;
+            e.action = (e) => { asset = e.First(); };
+            Runtime.RaiseInspectorEvent(e);
+
+            if (asset != null && asset is Bitmap bmp)
+            {
+                texture.SetImage(bmp);
+                return;
+            }
+
             if (AssetLibrary.FetchMetaRelative(textureName) is Metadata meta)
                 texture.SetImage(meta.Path);
             Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture?.Name}");

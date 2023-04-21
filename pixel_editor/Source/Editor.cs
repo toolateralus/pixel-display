@@ -102,7 +102,7 @@ namespace pixel_editor
 
             Console.Print("Stage " + stageName + " set.");
             Console.Print("Project " + projectName + " set.");
-            Console.Print(motd, true);
+            Console.Error(motd);
             Runtime.OutputImages.Add(image);
         }
         private static void InitializeSettings()
@@ -499,8 +499,6 @@ namespace pixel_editor
                 FileViewerGrid.Visibility = Visibility.Visible;
             else FileViewerGrid.Visibility = Visibility.Hidden;
         }
-
-
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
             if (e != null)

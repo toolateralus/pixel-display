@@ -23,7 +23,6 @@ namespace pixel_editor
         }
         protected internal void EditorEvent(EditorEvent e)
         {
-            e.action?.Invoke(e.args);
             if (e.message is "" || e.message.Contains("$nolog"))
             {
                 if (e is FocusNodeEvent nodeEvent && nodeEvent.args.First() is Node node)
@@ -34,9 +33,20 @@ namespace pixel_editor
                     Editor.Current.Inspector.SelectNode(node);
                     StageCameraTool.TryFollowNode(node);
                 }
+
+                if (e.message == "$nolog_get_selected_asset")
+                {
+                    var obj = Editor.fileViewer.GetSelectedObject();
+                    
+                    if(obj != null)
+                        e.args = new object[] { obj };
+                    e.action?.Invoke(e.args);
+                    return; 
+                }
                 return;
             }
-
+            e.action?.Invoke(e.args);
+            e.processed = true;
             if (Editor.Current.consoleOutput.Items.Count >= Editor.Current.settings.ConsoleMaxLines)
                 Console.Clear();
 

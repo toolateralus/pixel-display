@@ -5,6 +5,7 @@ using System.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace pixel_renderer.Assets
 {
@@ -181,9 +182,28 @@ namespace pixel_renderer.Assets
             return Current.Keys.ToList();     
         }
 
-        public static Asset? FetchByMeta(Metadata meta)
+        /// <summary>
+        /// note: due to the way image storage works, when this finds an asset, it returns it. however, if it finds an image, it creates a Bitmap and returns that instead.
+        /// </summary>
+        /// <param name="meta"></param>
+        /// <returns></returns>
+        public static object FetchByMeta(Metadata meta)
         {
-            return Current[meta];
+            var matches = Current.Where(p => p.Key.Path == meta.Path);
+            var match = matches?.First();
+            var asset = match.Value.Value;
+
+            if (asset is null)
+            {
+                if (meta.extension == ".bmp" || meta.extension == ".png")
+                {
+                    Bitmap bmp = new(meta.Path);
+                    return bmp; 
+                }
+            }
+
+            return asset;
+
         }
     }
 }

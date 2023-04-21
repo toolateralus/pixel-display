@@ -11,7 +11,8 @@ namespace pixel_renderer
             + " "
             + DateTime.Now.ToLocalTime().ToLongTimeString()
             + "\n"; 
-        public bool ClearConsole = false; 
+        public bool ClearConsole = false;
+        public bool processed = false;
 
         public EditorEvent(string message, bool includeDateTime = false, bool clearConsole = false)
         {
