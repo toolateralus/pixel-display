@@ -450,7 +450,7 @@ namespace pixel_editor
         public static void QueueEvent(EditorEvent e)
         {
             if (e.ClearConsole)
-                Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
+                Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Items.Clear());
             Current.Events.Pending.Push(e);
         }
         private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;

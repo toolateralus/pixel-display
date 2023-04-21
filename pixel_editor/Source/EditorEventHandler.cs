@@ -37,11 +37,11 @@ namespace pixel_editor
                 return;
             }
 
-            if (Editor.Current.consoleOutput.LineCount >= Editor.Current.settings.ConsoleMaxLines)
+            if (Editor.Current.consoleOutput.Items.Count >= Editor.Current.settings.ConsoleMaxLines)
                 Console.Clear();
 
-            Editor.Current.consoleOutput.Text += e.message + '\n';
-            Editor.Current.consoleOutput.ScrollToEnd();
+            Editor.Current.consoleOutput.Items.Add(e.message);
+            Editor.Current.consoleOutput.ScrollIntoView(e.message);
         }
     }
 }

@@ -78,7 +78,7 @@
                     VerticalAlignment="Top"
                     />
             <TextBox 
-                Visibility="Hidden"
+               
                 FontSize="3.95" 
                 FontFamily="MS Gothic"
                 Grid.Column="18" Grid.Row="22"
@@ -95,15 +95,10 @@
                 AcceptsReturn="True"
                >
             </TextBox>
-            <TextBox 
-                Visibility="Hidden"
+            <ListBox 
                 x:Name="consoleOutput" 
-                TextWrapping="Wrap"
                 Background="Black"
                 Foreground="White"
-                CaretBrush="Black"
-                AcceptsReturn="True"
-                IsReadOnly="true"
                 FontSize="3.95"
                 FontStyle="Normal"
                 FontStretch="SemiCondensed"
@@ -111,9 +106,9 @@
                 Grid.Column="20" 
                 Grid.Row="13"
                 Grid.ColumnSpan="6" 
-                Grid.RowSpan="9" Text="" 
-                >
-            </TextBox>
+                Grid.RowSpan="9">
+                
+            </ListBox>
             <Label  FontSize="3" 
                     FontWeight="Bold" 
                     FontFamily="MS Gothic"
