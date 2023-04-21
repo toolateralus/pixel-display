@@ -49,11 +49,9 @@ namespace pixel_renderer
 
                 case 1:
                     if(offset.HasValue)
+                    
                     A.Position = B.Position - offset.Value;
                     A.rb.velocity = Vector2.Zero;
-                    
-                    // found: 
-                    // that's because static bodies don't inter collide.
                     break;
             }
         }

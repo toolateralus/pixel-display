@@ -119,11 +119,11 @@ namespace pixel_editor
         public static List<Node> DuplicateSelected(bool all = true)
         {
             List<Node> result = new();
-            return result;
+            //return result;
             // OUT OF COMISSION, THIS DOES REALLY ODD STUFF Such As
             // Makes a portion of the background black/missing depending on zoom
             // Makes nodes render as if theyre almost to the max float value in each position vector, just really jittery scribbly odd shaped sprites and stuff.
-
+            return result;
 
             if (Input.Get(Key.D))
             {

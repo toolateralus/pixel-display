@@ -45,8 +45,10 @@ namespace pixel_editor
                 }
                 return;
             }
+            
             e.action?.Invoke(e.args);
             e.processed = true;
+
             if (Editor.Current.consoleOutput.Items.Count >= Editor.Current.settings.ConsoleMaxLines)
                 Console.Clear();
 
