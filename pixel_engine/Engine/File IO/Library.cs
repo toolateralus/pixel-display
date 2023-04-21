@@ -11,9 +11,7 @@ namespace pixel_renderer.Assets
     public class AssetLibrary
     {
         static Dictionary<Metadata, Asset> Current = new();
-
         public static bool Busy { get; private set; }
-
         internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
         /// <summary>
         /// Registers an asset to the AssetLibrary.
@@ -80,7 +78,6 @@ namespace pixel_renderer.Assets
             return default; 
                     
         }
-
         public static Metadata? FetchMeta(string name)
         {
             foreach (var asset in Current)
@@ -179,10 +176,14 @@ namespace pixel_renderer.Assets
 
             return library;
         }
-
-        internal static Metadata FetchMeta(object textureName)
+        public static List<Metadata> GetAllKeys()
         {
-            throw new NotImplementedException();
+            return Current.Keys.ToList();     
+        }
+
+        public static Asset? FetchByMeta(Metadata meta)
+        {
+            return Current[meta];
         }
     }
 }

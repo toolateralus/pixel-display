@@ -97,6 +97,9 @@ namespace pixel_editor
             Tools = Tool.InitializeToolkit();
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.project);
+
+            fileViewer = new(FileViewerGrid, fileViewerListBox);
+
             Console.Print("Stage " + stageName + " set.");
             Console.Print("Project " + projectName + " set.");
             Console.Print(motd, true);
@@ -444,7 +447,7 @@ namespace pixel_editor
         /// For users to pass an event to the inspector to be executed as soon as possible
         /// </summary>
         /// <param name="e"></param>
-        public async static void QueueEvent(EditorEvent e)
+        public static void QueueEvent(EditorEvent e)
         {
             if (e.ClearConsole)
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Clear());
@@ -487,6 +490,17 @@ namespace pixel_editor
                 return; 
             AssetLibrary.SaveAll();
         }
+        private void OnToggleFileViewer(object sender, RoutedEventArgs e)
+        {
+            if(e.RoutedEvent != null)
+                e.Handled = true;
+
+            if (FileViewerGrid.Visibility == Visibility.Hidden)
+                FileViewerGrid.Visibility = Visibility.Visible;
+            else FileViewerGrid.Visibility = Visibility.Hidden;
+        }
+
+
         private void OnStagePressed(object sender, RoutedEventArgs e)
         {
             if (e != null)
