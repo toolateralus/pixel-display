@@ -58,6 +58,9 @@ namespace pixel_renderer
         [Field] internal bool particlesDieFromLowVelocity = false;
         public override void Dispose()
         {
+            foreach (var part in particles)
+                part.Destroy();
+
             particles.Clear();
         }
         private void ReviveParticle(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)

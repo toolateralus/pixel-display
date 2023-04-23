@@ -11,7 +11,7 @@ namespace pixel_renderer
 
         [JsonProperty]
         internal bool playing;
-
+        
         [JsonProperty]
         public bool looping = false;
 
