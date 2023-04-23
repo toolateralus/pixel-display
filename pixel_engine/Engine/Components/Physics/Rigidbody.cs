@@ -9,6 +9,9 @@ namespace pixel_renderer
 {
     public class Rigidbody : Component
     {
+        public override void Dispose()
+        {
+        }
         [Field] [JsonProperty] public float mass = 1f;
         [Field] [JsonProperty] public float invMass;
         [Field] [JsonProperty] public float restitution = 0.5f;

@@ -10,7 +10,7 @@ using System.Dynamic;
 namespace pixel_renderer
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class Component
+    public abstract class Component
     {
         [JsonProperty] public Node node;
         [JsonProperty] public bool IsActive = true;
@@ -63,9 +63,16 @@ namespace pixel_renderer
         public virtual void OnCollision(Collision collision) {  }
         public virtual void OnFieldEdited(string field) { }
         public virtual void OnDrawShapes() { }
-        public virtual void OnDestroy()
+        internal protected void on_destroy_internal()
         {
+            Dispose(); 
+            OnDestroy();
         }
+        public virtual void OnDestroy() { }
+        /// <summary>
+        /// You must release all references to any components, nodes, or other engine objects as of now, otherwise unexpected behavior is iminent
+        /// </summary>
+        public abstract void Dispose(); 
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
         public bool TryGetComponent<T>(out T result, int index = 0) where T : Component

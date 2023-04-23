@@ -68,7 +68,6 @@ namespace pixel_renderer
                 IsDirty = true;
             }
         }
-        
         public Sprite()
         {
             texture = new Texture(Vector2.One, Pixel.Red);
@@ -77,11 +76,10 @@ namespace pixel_renderer
         {
             Scale = new(x, y);
         }
-
         [Method]
         public async Task SetFileAsTexture()
         {
-            EditorEvent e = new("$nolog_get_selected_asset");
+            EditorEvent e = new("$nolog_get_selected_meta");
             object? asset = null;
             e.action = (e) => { asset = e.First(); };
             Runtime.RaiseInspectorEvent(e);
@@ -89,9 +87,9 @@ namespace pixel_renderer
 
             while (!e.processed && time < 1500)
             {
-                if (asset != null && asset is Bitmap bmp)
+                if (asset != null && asset is Metadata meta)
                 {
-                    texture.SetImage(bmp);
+                    texture.SetImage(meta.Path);
                     return;
                 }
                 time += 15f;
@@ -124,18 +122,9 @@ namespace pixel_renderer
                     texture.SetImage(colorArray);
                     break;
                 case ImageType.Image:
-                    if (texture is null || texture.Image is null)
-                    {
-                        Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
-                        texture = new(colorArray1);
-                    }
-                    else
-                    {
-                        Pixel[,] colorArray1 = CBit.PixelFromBitmap(texture.Image);
-                        texture.SetImage(colorArray1);
-                    }
+                    if(texture.imgData != null)
+                        texture.SetImage(texture.imgData.Path);
                     break;
-                default: throw new NotImplementedException();
             }
             IsDirty = false;
         }
@@ -260,6 +249,10 @@ namespace pixel_renderer
                 Vector2 size = new(image.width, image.height);
                 SetImage(size, image.data);
             }
+        }
+
+        public override void Dispose()
+        {
         }
     }
 }

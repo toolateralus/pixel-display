@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Input;
 namespace pixel_editor
@@ -149,6 +150,28 @@ namespace pixel_editor
             }
             sprite.textureFiltering = textureFiltering;
         }
+
+        public Dictionary<string, string> extended_help = new()
+        {
+            {"help", "type help{cmd name} name to get a more in depth description of the function/usages of a command"},
+
+
+        };
+        public static Command cmd_help_cmd() => new()
+        {
+            phrase = "help;",
+            syntax = "help {cmd name}",
+            argumentTypes = new string[] { "str:"},
+            action = (e) =>
+            {
+
+
+
+            },
+            args = null,
+            description = "gets more help for a specified command"
+
+        };
         public static Command cmd_get_node() => new()
         {
             phrase = "node.Get;",

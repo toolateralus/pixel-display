@@ -154,9 +154,8 @@ namespace pixel_renderer
             bl = image.GetPixel(left, bottom);
             br = image.GetPixel(right, bottom);
         }
-        public virtual void Dispose()
+        public override void Dispose()
         {
-            throw new NotImplementedException(); 
         }
         #region Coordinate Functions
         public BoundingBox2D GetSafeDrawArea(RendererBase renderer)

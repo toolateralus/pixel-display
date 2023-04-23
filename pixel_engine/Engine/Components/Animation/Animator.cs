@@ -11,7 +11,11 @@ namespace pixel_renderer
 {
     public class Animator : Component, IAnimate
     {
-
+        public override void Dispose()
+        {
+            sprite = null;
+            animation = null; 
+        }
         [JsonProperty]
         [Field] public float speed = 2f;
 

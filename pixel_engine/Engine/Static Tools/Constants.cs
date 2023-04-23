@@ -33,9 +33,11 @@ namespace pixel_renderer
         public const string BmpExt = ".bmp"; 
         public const string JpegExt = ".jpg"; 
         public const string PngExt = ".png";
+        public const string Mp3Ext = ".mp3";
 
         public static string[] ReadableExtensions = 
         { 
+            Mp3Ext,
             PngExt,
             JpegExt,
             BmpExt,

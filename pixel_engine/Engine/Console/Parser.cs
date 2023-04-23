@@ -1,8 +1,10 @@
 ﻿using pixel_renderer;
+using pixel_renderer.FileIO;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -18,7 +20,7 @@ namespace pixel_editor
         private const char ArgumentsStart = '(';
         private const char ArgumentsEnd = ')';
         private const string ParameterSeperator = ", ";
-
+        
         // use list for linq methods
         public static List<char> disallowed_chars = new()
         {
@@ -79,6 +81,7 @@ namespace pixel_editor
                     Command.Success(command.syntax);
                 }
         }
+
         public static void TryParse(string input, out List<object> value)
         {
             value = new();
@@ -87,13 +90,14 @@ namespace pixel_editor
                 {
                     // string
                     case 0:
-                        try { value.Add(input); }
+                        try {
+                            value.Add(input); 
+                        }
                         catch (Exception) {  };
                         continue;
                         // bool
                     case 1:
-                        try
-                        {
+                        try{
                             if(bool.TryParse(input, out var val))
                                 value.Add(val);
                         }
@@ -112,7 +116,6 @@ namespace pixel_editor
                         continue;
                         // float
                     case 3:
-
                         try {
                             if (float.TryParse(input, out var val))
                                 value.Add(val);
@@ -121,8 +124,7 @@ namespace pixel_editor
                         continue;
                         // vec2
                     case 4:
-                        try
-                        {
+                        try{
                             Vector2 vec = input.ToVector(); 
                             value.Add(vec);
                             
@@ -134,7 +136,7 @@ namespace pixel_editor
         }
         public static object? ParseParam(string arg, Command command, int index)
         {
-            // this string gets treated like a null/void variable.
+            // important : this string gets treated like a null/void variable. //
             object? outArg = "";
             
             arg = RemoveUnwantedChars(arg);

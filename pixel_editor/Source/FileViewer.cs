@@ -45,5 +45,18 @@ namespace pixel_editor
             }
             return null; 
         }
+        public Metadata? GetSelectedMeta()
+        {
+            var item = listBox.SelectedItem;
+            if (item is string path)
+            {
+                var meta = AssetLibrary.FetchMetaRelative(path);
+                if (meta != null)
+                {
+                    return meta;
+                }
+            }
+            return null;
+        }
     }
 }

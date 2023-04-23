@@ -181,9 +181,8 @@ namespace pixel_renderer.Assets
         {
             return Current.Keys.ToList();     
         }
-
         /// <summary>
-        /// note: due to the way image storage works, when this finds an asset, it returns it. however, if it finds an image, it creates a Bitmap and returns that instead.
+        /// note: when this finds an asset, it returns it. however,  due to the way image storage works, if it finds an image it creates a Bitmap and returns that instead.
         /// </summary>
         /// <param name="meta"></param>
         /// <returns></returns>

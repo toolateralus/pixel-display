@@ -43,6 +43,17 @@ namespace pixel_editor
                     e.action?.Invoke(e.args);
                     return; 
                 }
+                if (e.message == "$nolog_get_selected_meta")
+                {
+                    var obj = Editor.fileViewer.GetSelectedMeta();
+
+                    if (obj != null)
+                        e.args = new object[] { obj };
+                    e.action?.Invoke(e.args);
+                    return;
+                }
+
+
                 return;
             }
             

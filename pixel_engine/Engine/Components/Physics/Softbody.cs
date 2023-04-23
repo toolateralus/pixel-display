@@ -5,6 +5,12 @@ namespace pixel_renderer
 {
     public class Softbody : Component
     {
+        public override void Dispose()
+        {
+            collider = null;
+            model = null;
+            rb = null;
+        }
         [Field] private float minColliderScale = 0.1f;
         [Field] private float maxColliderScale = 1.5f;
 

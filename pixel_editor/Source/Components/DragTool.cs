@@ -25,7 +25,7 @@ namespace pixel_editor
         public override void Awake()
         {
             CMouse.OnLeftPressedThisFrame += SetSelectedNodeOffest;
-            Input.RegisterAction(SelectAll, Key.LeftCtrl);
+            Input.RegisterAction(this, SelectAll, Key.LeftCtrl);
             
         }
         private void SelectAll()

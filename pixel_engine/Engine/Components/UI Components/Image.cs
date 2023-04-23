@@ -6,6 +6,7 @@ using pixel_renderer.ShapeDrawing;
 using System.Linq;
 using System;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace pixel_renderer
 {
@@ -15,10 +16,11 @@ namespace pixel_renderer
         internal protected bool selected_by_editor;
         private JImage lightmap;
 
-        [Field]
-        [JsonProperty]
+        [Field] [JsonProperty]
         private string textureName = "Assets\\other\\ball.bmp";
-
+        public override void Dispose()
+        {
+        }
         private JImage LitColorData
         {
             get
@@ -60,10 +62,9 @@ namespace pixel_renderer
             }
 
         }
-
         public override void Awake()
         {
-            TrySetTextureFromString();
+            SetFileAsTexture();
             Refresh();
         }
         public override void FixedUpdate(float delta)
@@ -76,16 +77,10 @@ namespace pixel_renderer
             var image = texture.GetImage();
             DrawImage(renderer, image);
         }
-        
         public Image()
         {
             texture = new Texture(Vector2.One, Pixel.Red);
         }   
-        public Image(int x, int y) : this()
-        {
-            Scale = new(x, y);
-        }
-
         [Method] public void CycleSpriteType()
         {
             if ((int)Type + 1 > sizeof(ImageType) - 2)
@@ -96,35 +91,29 @@ namespace pixel_renderer
             Type = (ImageType)((int)Type + 1);
 
         }
-        [Method] public void TrySetTextureFromString()
+        [Method] public async Task SetFileAsTexture()
         {
-            EditorEvent e = new("$nolog_get_selected_asset");
+            EditorEvent e = new("$nolog_get_selected_meta");
             object? asset = null;
             e.action = (e) => { asset = e.First(); };
             Runtime.RaiseInspectorEvent(e);
+            float time = 0;
 
-            if (asset != null && asset is Bitmap bmp)
+            while (!e.processed && time < 1500)
             {
-                texture.SetImage(bmp);
-                return;
+                if (asset != null && asset is Metadata meta)
+                {
+                    texture.SetImage(meta.Path);
+                    return;
+                }
+                time += 15f;
+                await Task.Delay(15);
             }
-
-            if (AssetLibrary.FetchMetaRelative(textureName) is Metadata meta)
-                texture.SetImage(meta.Path);
-            Runtime.Log($"TrySetTextureFromString Called. Texture is null {texture == null} texName : {texture?.Name}");
         }
         internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
         public void SetImage(Vector2 size, byte[] color)
         {
             texture.SetImage(size, color);
-        }
-        public void SetImage(JImage? image)
-        {
-            if (image is not null)
-            {
-                Vector2 size = new(image.width, image.height);
-                SetImage(size, image.data);
-            }
         }
         public override void OnDrawShapes()
         {
@@ -139,7 +128,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         public static Node Standard()
         {
             Node node = new("UI Element");
@@ -147,7 +135,7 @@ namespace pixel_renderer
 
             img.Scale = Constants.DefaultNodeScale;
             img.Type = ImageType.Image; 
-            img.TrySetTextureFromString();
+            img.SetFileAsTexture();
             img.Refresh();
 
             return node; 

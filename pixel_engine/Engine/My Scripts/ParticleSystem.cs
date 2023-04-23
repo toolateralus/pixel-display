@@ -51,26 +51,24 @@ namespace pixel_renderer
     public class ParticleSystem : Component
     {
         [Field] public List<Pixel> Pallette = new() { Color.Purple, Color.MediumSeaGreen, Color.MediumPurple, Color.MediumBlue };
-        [Field] private float maxParticleSpeed = 15f;
-        [Field] internal Queue<Particle> particles = new();
-        [Field] private Random random = new();
+        [Field] internal List<Particle> particles = new();
         [Field] internal int speed = 70;
         [Field] private int maxParticles = 250;
-
         [Field] internal float minVelLength = 0.001f;
         [Field] internal bool particlesDieFromLowVelocity = false;
-
-        private void Rent(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
+        public override void Dispose()
+        {
+            particles.Clear();
+        }
+        private void ReviveParticle(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
         {
             var p = particles.Where(p => p.dead).FirstOrDefault();
-
             if (p is null || p == default)
                 return;
 
-            ReviveParticle(p, reset, lifetime, death, initVel, initPos, initSize, initColor);
+            ResetParticle(p, reset, lifetime, death, initVel, initPos, initSize, initColor);
         }
-
-        private static void ReviveParticle(Particle p, bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
+        private static void ResetParticle(Particle p, bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
         {
             if (reset)
             {
@@ -90,33 +88,17 @@ namespace pixel_renderer
 
             p.dead = false;
         }
-
         public virtual void InstantiateParticle(Vector2 vel)
         {
             Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
-            particles.Enqueue(particle);
+            particles.Add(particle);
         }
-
         public void GetParticle(Vector2 vel)
         {
-
             if (particles.Count >= maxParticles)
-            {
-                if (!particlesDieFromLowVelocity)
-                {
-                    var p = particles.Dequeue();
-                    p.onDeath?.Invoke(p);
-                    ReviveParticle(p, true, initPos: Position, initVel: vel, initColor: Pixel.Random);
-                }
-                else
-                {
-                    Rent(true, initPos: Position, initVel: vel, initColor: Pixel.Random);
-                }
-                return;
-            }
+                ReviveParticle(false);
             InstantiateParticle(vel);
         }
-        
         public virtual void Cycle(Particle p)
         {
             if (p.Velocity.SqrMagnitude() < 0.1f)
@@ -151,15 +133,6 @@ namespace pixel_renderer
             p.onDeath?.Invoke(p); 
             p.dead = true;
             p.Destroy();
-        }
-        public Vector2 GetRandomVelocity(float speed = -1f)
-        {
-            float x = (float)random.NextDouble() * 2 - 1;
-            float y = (float)random.NextDouble() * 2 - 1;
-            var dir = new Vector2(x, y).Normalized();
-            if (speed == -1f)
-             speed = (float)random.NextDouble() * maxParticleSpeed;
-            return (dir * speed);
         }
     }
 }

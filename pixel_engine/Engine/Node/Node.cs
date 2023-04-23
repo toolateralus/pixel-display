@@ -6,8 +6,10 @@ using System.Numerics;
 
 namespace pixel_renderer
 {
+    
+
     [JsonObject(MemberSerialization.OptIn)]
-    public class Node
+    public class Node 
     {
         #region Json Constructor
         [JsonConstructor]
@@ -55,14 +57,17 @@ namespace pixel_renderer
             Position = pos;
             this.Scale = Scale;
         }
-
         #endregion
-
         private bool _enabled = true;
         private string _uuid = "";
         internal protected bool awake;
+        public bool ComponentsBusy { get; private set; }
         internal Rigidbody? rb;
-        
+        internal Collider col;
+        public Action<Collision> OnCollided;
+        public Action<Collision> OnTriggered;
+        public Action OnDestroyed; 
+        public Queue<Action> ComponentActionQueue { get; private set; } = new();
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
         [JsonProperty] public Stage parentStage;
         [JsonProperty] public Stage ParentStage 
@@ -117,7 +122,6 @@ namespace pixel_renderer
                 Transform.M22 = value.Y;
             }
         }
-
         public void Move(Vector2 destination)
         {
             Position = destination;
@@ -260,7 +264,6 @@ namespace pixel_renderer
 
             ComponentsBusy = false;
         }
-
         public void Destroy()
         {
             ComponentsBusy = true;
@@ -270,21 +273,28 @@ namespace pixel_renderer
 
             if (parent?.children != null)
                 foreach (var kvp in parent.children)
-                    if (kvp == this)
+                    if (kvp == this) { 
                         parent.children.Remove(this);
+                    }
 
             ParentStage?.nodes.Remove(this);
 
             foreach (var component in Components)
-                foreach(var comp in component.Value)
-                    comp.OnDestroy();
+                foreach(var comp in component.Value){
+                    comp.on_destroy_internal();
+                }
+
+            Dispose();
+            OnDestroyed?.Invoke();
             ComponentsBusy = false;
 
+            
         }
-        public Action<Collision> OnCollided;
-        public Action<Collision> OnTriggered;
-        internal Collider col;
-
+        public virtual void Dispose()
+        {
+            rb = null;
+            col = null;
+        }
         public void OnTrigger(Collision otherBody)
         {
             if (!awake)
@@ -320,7 +330,6 @@ namespace pixel_renderer
             OnCollided?.Invoke(otherBody);
             ComponentsBusy = false;
         }
-
         public T AddComponent<T>(T component) where T : Component
         {
             var type = component.GetType();
@@ -367,7 +376,6 @@ namespace pixel_renderer
             AddComponent(component);
             return component;
         }
-
         public bool HasComponent<T>() where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -390,7 +398,6 @@ namespace pixel_renderer
 
             return true;
         }
-
         public IEnumerable<T> GetComponents<T>() where T : Component
         {
             return from Type type in Components.Keys
@@ -420,12 +427,16 @@ namespace pixel_renderer
                 if (Components[type].Contains(component))
                 {
                     var compList = Components[type];
-                    var toRemove = new Component();
-                    foreach (var comp in from comp in compList
+
+                    Component toRemove = null; 
+
+                    foreach (Component? comp in from comp in compList
                                             where comp is not null &&
                                             comp.UUID.Equals(component.UUID)
                                             select comp)
-                    toRemove = comp;
+                    {
+                        toRemove = comp;
+                    }
 
                     if (toRemove is not null)
                         compList.Remove(toRemove);
@@ -433,7 +444,37 @@ namespace pixel_renderer
                 }
             }
         }
+        public class TransformComponent : Component
+        {
+            [Field] public Vector2 position;
+            [Field] public Vector2 scale;
+            [Field] public float rotation;
+            [Field] public string name;
 
+            public override void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void OnFieldEdited(string field)
+            {
+                switch (field)
+                {
+                    case nameof(name):
+                        node.Name = name;
+                        break;
+                    case nameof(position):
+                        Position = position;
+                        break;
+                    case nameof(scale):
+                        Scale = scale;
+                        break;
+                    case nameof(rotation):
+                        Rotation = rotation;
+                        break;
+                }
+            }
+        }
         public void OnDrawShapes()
         {
             var compTypes = Components.Values;
@@ -448,7 +489,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         internal static Node Instantiate(Node projectile)
         {
             
@@ -472,9 +512,7 @@ namespace pixel_renderer
             clone.Position = position;
             return clone; 
         }
-
         public static Node New => new("New Node", Vector2.Zero, Vector2.One);
-        public bool ComponentsBusy { get; private set; }
-        public Queue<Action> ComponentActionQueue { get; private set; } = new();
+        
     }
 }

@@ -17,7 +17,9 @@ namespace pixel_renderer
         float length = 0;
         Color[] gradientColors = { Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta };
         private bool animated = true;
-
+        public override void Dispose()
+        {
+        }
         public override void OnDrawShapes()
         {
             const float radius = 5f; // radius of the circle

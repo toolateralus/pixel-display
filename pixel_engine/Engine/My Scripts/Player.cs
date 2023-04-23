@@ -1,10 +1,9 @@
 ﻿using static pixel_renderer.Input;
 using Key = System.Windows.Input.Key;
-using pixel_renderer.FileIO;
 using pixel_renderer.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
-using System.Windows.Input;
+using System.Diagnostics;
 
 namespace pixel_renderer
 {
@@ -24,6 +23,15 @@ namespace pixel_renderer
         Rigidbody rb;
         Animator anim;
         Camera cam;
+        public override void Dispose()
+        {
+            Runtime.Log("Dispose called");
+            sprite = null;
+            rb = null;
+            anim = null;
+            cam = null; 
+        }
+
         public override void Awake()
         {
             node.TryGetComponent(out rb);
@@ -49,6 +57,7 @@ namespace pixel_renderer
                 isGrounded = false;
             
             bool? playing = anim.GetAnimation()?.playing;
+
             moveAnimation(playing);
 
             if (moveVector != Vector2.Zero)
@@ -77,10 +86,10 @@ namespace pixel_renderer
 
         private void RegisterActions()
         {
-            RegisterAction(Jump, Key.Up);
-            RegisterAction(Down, Key.Down);
-            RegisterAction(Left, Key.Left);
-            RegisterAction(Right, Key.Right);
+            RegisterAction(this, Jump, Key.Up);
+            RegisterAction(this, Down, Key.Down);
+            RegisterAction(this, Left, Key.Left);
+            RegisterAction(this, Right, Key.Right);
         }
         private void Move(Vector2 moveVector)
         {
@@ -99,10 +108,14 @@ namespace pixel_renderer
         #region Input 
         private void Jump()
         {
+            Runtime.Log($"(player.anim == null) == {anim is null}");
             if (isGrounded)
             {
-                string path = @"D:\Nightmare folder\Games\Documents\Pixel\Assets\Audio Assets\dog_barking.mp3";
-                Audio.Play(path, 0.45f);
+                var meta = AssetLibrary.FetchMetaRelative(@"\Assets\Audio Assets\dog_barking.mp3");
+                
+                if(meta != null)
+                    Audio.Play(meta, 0.45f);
+
                 rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
             }
 

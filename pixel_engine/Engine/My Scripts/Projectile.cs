@@ -33,6 +33,11 @@ namespace pixel_renderer
             node.Position = sender.Position; 
             return node; 
         }
+        public override void Dispose()
+        {
+            sender = null;
+        }
+
         public override void OnDrawShapes()
         {
             if (sender is null)

@@ -88,13 +88,19 @@ namespace pixel_editor
 
             current = this;
             InitializeComponent();
+            
             Importer.Import(false);
+           
             InitializeSettings();
+            
             Project project = Project.Default;
             Runtime.Initialize(project);
+           
             GetEvents();
             GetInputs();
+            
             Tools = Tool.InitializeToolkit();
+
             OnStageSet(Runtime.Current.GetStage());
             OnProjectSet(Runtime.Current.project);
 
@@ -204,13 +210,13 @@ namespace pixel_editor
         }
         private void GetInputs()
         {
-            Input.RegisterAction(ResetEditor, Key.F5); 
-            Input.RegisterAction(Console.cmd_clear_console().Invoke, Key.F10);
-            Input.RegisterAction(SendCommandKeybind, Key.Return);
-            Input.RegisterAction(ClearKeyboardFocus, Key.Escape);
-            Input.RegisterAction(() => OnSyncBtnPressed(null, null), Key.LeftCtrl);
-            Input.RegisterAction(DestroySelected, Key.Delete);
-            Input.RegisterAction(TryDuplicate, Key.D);
+            Input.RegisterAction(this, ResetEditor, Key.F5); 
+            Input.RegisterAction(this, Console.cmd_clear_console().Invoke, Key.F10);
+            Input.RegisterAction(this, SendCommandKeybind, Key.Return);
+            Input.RegisterAction(this, ClearKeyboardFocus, Key.Escape);
+            Input.RegisterAction(this, () => OnSyncBtnPressed(null, null), Key.LeftCtrl);
+            Input.RegisterAction(this, DestroySelected, Key.Delete);
+            Input.RegisterAction(this, TryDuplicate, Key.D);
         }
         private void TryDuplicate()
         {
@@ -295,7 +301,6 @@ namespace pixel_editor
         }
         public void fv_selection_changed(object? sender, EventArgs e)
         {
-            Runtime.Log("Selection Changed");
         }
         #region Fields/Properties
         string stageName, projectName;

@@ -13,6 +13,12 @@ namespace pixel_renderer
 
         [Field] string NameB = "Player";
 
+        public override void Dispose()
+        {
+            A = null;
+            B = null;
+        }
+
         [Method]
         public void AttachBodiesByName()
         {

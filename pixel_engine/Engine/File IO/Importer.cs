@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using System.Windows.Shapes;
 using pixel_renderer.FileIO;
 namespace pixel_renderer.Assets
 {
     public class Importer
     {
-        public static string DirectoryPath => Constants.WorkingRoot + Constants.AssetsDir;
+        public const int maxDepth = 100; 
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>
@@ -32,7 +29,6 @@ namespace pixel_renderer.Assets
             }
             return collection;
         }
-
         private static void GetFiles(string directory, string ext, List<Metadata> collection)
         {
             var files = Directory.GetFiles(directory, $"*{ext}");
@@ -44,41 +40,9 @@ namespace pixel_renderer.Assets
                 collection.Add(file);
             }
         }
-        
-       
-        private static void ImportAll(string dir)
-        {
-            var dirs = Directory.GetDirectories(dir);
-            var files = Directory.GetFiles(dir);
-            
-            foreach (var _dir in dirs)
-            {
-                var subDirs = Directory.GetDirectories(_dir);
-                if (subDirs.Length > 0)
-                    foreach (var __dir in subDirs)
-                    {
-                        var _subDirs = Directory.GetDirectories(__dir);
-                        if (_subDirs.Length > 0)
-                            foreach (var ___dir in _subDirs)
-                            {
-                                var __subDirs = Directory.GetDirectories(___dir);
-                                if (__subDirs.Length > 0)
-                                    foreach (var ____dir in __subDirs)
-                                    {
-                                        ImportAndRegister(____dir);
-                                    }
-                                ImportAndRegister(___dir);
-                            }
-                        ImportAndRegister(__dir);
-                    }
-                ImportAndRegister(_dir);
-            }
-            ImportAndRegister(dir);
-
-        }
         private static void ImportRecursively(string dir, int depth)
         {
-            if (depth > 100)
+            if (depth > maxDepth)
                 return;
 
             var dirs = Directory.GetDirectories(dir);
@@ -87,60 +51,31 @@ namespace pixel_renderer.Assets
             if (dirs.Length > 0)
                 foreach (var sub_dir in dirs)
                     ImportRecursively(sub_dir, depth++);
+            else {
+                EditorEvent e = new($"Import ended at {depth}");
+                Runtime.RaiseInspectorEvent(e);
+            }
         }
-
         private static void ImportAndRegister(string _dir)
         {
             var assets = Import(_dir, ".asset");
-            var images = Import(_dir, ".bmp");
+            var bmps = Import(_dir, ".bmp");
+            var pngs = Import(_dir, ".png");
+
+            var audioFiles = Import(_dir, ".mp3");
+
             foreach (var item in assets)
             {
                 var asset = IO.ReadJson<Asset>(item);
                 AssetLibrary.Register(item, asset);
             }
-            foreach (var item in images)
+
+            // this hold all "assets" or files without pre-loaded data, which get stored with a null value and just point to the file.
+            var other = bmps.Concat(pngs);
+            other = other.Concat(audioFiles);
+
+            foreach (var item in other)
                 AssetLibrary.Register(item, null);
-        }
-
-        public static void GetFileNameAndExtensionFromPath(string path, out string name, out string ext)
-        {
-            var split = path.Split('\\');
-            string nameAndExt = split[^1];
-            split = nameAndExt.Split('.');
-            name = split[0];
-            ext = split[1];
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns>type if supported, else returns typeof(object) (generic) </returns>
-        public static Type TypeFromExtension(string type)
-        {
-            if (type.Contains('.'))
-                type = type.Remove('.');
-
-            return type switch
-            {
-                Constants.AssetsFileExtension => typeof(Asset),
-                Constants.ProjectFileExtension => typeof(Project),
-                Constants.MetadataFileExtension => typeof(Metadata),
-                Constants.PngExt => typeof(Bitmap),
-                 _ => typeof(object),
-            };
-        }
-        public static string ExtensionFromType(Type type)
-        {
-            if (type == typeof(Asset))
-                return Constants.AssetsFileExtension;
-            if (type == typeof(Project))
-                return Constants.ProjectFileExtension;
-            if (type == typeof(Bitmap))
-                return Constants.PngExt;
-            if (type == typeof(Metadata))
-                return Constants.MetadataFileExtension;
-
-            return "File Extension not found from type, either it's unsupported or was edited";
         }
         public static void ImportAssetDialog()
         {

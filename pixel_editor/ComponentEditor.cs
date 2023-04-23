@@ -170,7 +170,7 @@ namespace pixel_editor
         }
         private void AddStringListTextBox(Grid viewer, ref int i, FieldInfo field, string[] strings, ref int strIndex, string str)
         {
-            var label = Inspector.GetTextBox(i.ToString(), "mint");
+            var label = Inspector.GetTextBox(i.ToString(), "default");
             var txtBox = Inspector.GetTextBox(str);
             txtBox.IsReadOnly = false;
             txtBox.Name = $"listBox{strIndex}";

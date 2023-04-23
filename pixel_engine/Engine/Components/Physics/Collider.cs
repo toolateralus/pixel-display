@@ -68,7 +68,9 @@ namespace pixel_renderer
             }
             Runtime.Log($"{node.Name}'s collider now has primitive shape : {primitive}");
         }
-
+        public override void Dispose()
+        {
+        }
         [JsonProperty]
         private BoundingBox2D boundingBox = new();
         public BoundingBox2D BoundingBox

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using System.Windows.Media;
 using Newtonsoft.Json;
@@ -43,10 +44,7 @@ namespace pixel_renderer
         {
             jImage = image; 
         }
-        public Texture(Bitmap source)
-        {
-            SetImage(source);
-        }
+       
         public Texture(string filePath)
         {
             SetImage(filePath);
@@ -85,7 +83,12 @@ namespace pixel_renderer
         }
         public void SetImage(string fullPath)
         {
-            jImage = new(new Bitmap(fullPath));
+            if (fullPath.Contains('.'))
+            {
+                imgData = new(Name, fullPath, fullPath.Split('.').Last());
+                jImage = new(new Bitmap(fullPath));
+            }
+            else throw new FileNamingException("Invalid path");
         }
         public void SetImage(Pixel color)
         {
@@ -95,10 +98,7 @@ namespace pixel_renderer
         {
             jImage = image;
         }
-        public void SetImage(Bitmap source)
-        {
-            jImage = new(source);
-        }
+      
         public void SetImage(Pixel[,] colors)
         {
             jImage = new(colors);

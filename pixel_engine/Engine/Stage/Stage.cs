@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace pixel_renderer
 {
@@ -232,21 +234,32 @@ namespace pixel_renderer
                                            select sprite);
             return sprites;
         }
-        internal void RemoveNode(Node? node)
+        internal void RemoveNode(Node node)
         {
             object[] args = { node };
-            void remove_node(object[] o)
-            {
-                if (o[0] is not Node actionTimeNode) return;
-                if (!nodes.Contains(actionTimeNode)) return;
-                nodes.Remove(actionTimeNode);
-            }
+
 
             if (NodesBusy)
             {
                 delayedActionQueue.Enqueue((remove_node, args));
             }
             else remove_node(args);
+        }
+        void remove_node(object[] o)
+        {
+            if (o[0] is Node node)
+            unsafe
+                {
+                    if (!nodes.Contains(node)) return;
+                    nodes.Remove(node);
+
+                    // TODO: remove this probably
+                    Node* objPtr = &node;
+                
+                    IntPtr objIntPtr = new IntPtr(objPtr);
+                    Marshal.FreeHGlobal(objIntPtr);
+                };
+
         }
 
 

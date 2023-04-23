@@ -63,10 +63,13 @@ namespace pixel_renderer
                 return;
 
             fired = true;
-            var proj = Projectile.Standard(this.node, out var rb);
+            var proj = Projectile.Standard(node, out var rb);
             rb.ApplyImpulse(aimDirection * aimDistance);
         }
-
+        public override void Dispose()
+        {
+            projectile = null;
+        }
         private void Reload()
         {
             if (!Get(Key.LeftShift)) 

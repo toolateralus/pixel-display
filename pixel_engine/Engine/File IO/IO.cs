@@ -23,7 +23,6 @@ namespace pixel_renderer
             TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
-        
         public static T? ReadJson<T>(Metadata meta) where T : new()
         {
             T? obj;

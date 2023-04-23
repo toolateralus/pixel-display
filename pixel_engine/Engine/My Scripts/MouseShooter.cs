@@ -20,29 +20,19 @@ namespace pixel_renderer
         [Field] private bool usingAmmo = false;
         [Field] bool makeTransparent = false;
 
-        public override void Cycle(Particle p)
-        {
-            p.Position += p.Velocity;
-            p.Velocity *= 0.99f;
-            p.Scale = new Vector2(0.1f, 0.1f);
-            p.color = Pixel.Random;
-
-            if(p.Velocity.Length() < minVelLength && particlesDieFromLowVelocity)
-                p.onDeath?.Invoke(p);
-        }
         public override void InstantiateParticle(Vector2 vel)
         {
             Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
             var col = particle.AddComponent<Collider>();
-            col.SetModel(Polygon.Square(0.1f));
+            col.SetModel(Polygon.Square(1));
             particle.AddComponent<Rigidbody>();
-
-            particles.Enqueue(particle);
+            var spr = particle.AddComponent<Sprite>();
+            particles.Add(particle);
         }
 
         public override void Awake()
         {
-            RegisterAction(() =>
+            RegisterAction(this, () =>
             {
                 if (usingAmmo)
                 {
@@ -58,7 +48,7 @@ namespace pixel_renderer
             } , Key.G);
             
 
-            RegisterAction(Reload, Key.R);
+            RegisterAction(this, Reload, Key.R);
 
             if (makeTransparent)
             {

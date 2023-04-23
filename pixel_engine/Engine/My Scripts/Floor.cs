@@ -8,7 +8,9 @@ namespace pixel_renderer
         public const float width = 5500;
         private static Vector2 startPosition = new(0, height / 2);
         private static Vector2 size = new(width, height);
-
+        public override void Dispose()
+        {
+        }
         public static Node Standard()
         {
             Node node = new("Floor")
@@ -19,10 +21,10 @@ namespace pixel_renderer
             node.AddComponent<Floor>();
 
             Collider col = node.AddComponent<Collider>();
-
             col.SetModel(Polygon.Rectangle(size));
             col.drawCollider = true;
             col.drawNormals = true;
+
             return node;
         }
 

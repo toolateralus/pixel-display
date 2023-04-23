@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Runtime.CompilerServices;
 using System.Numerics;
+using System.Linq;
 
 namespace pixel_renderer
 {
@@ -68,9 +69,33 @@ namespace pixel_renderer
                 });
             return input_value;
         }
-        public static void RegisterAction(Action action, Key key, InputEventType type = InputEventType.KeyDown)
+        public static void RegisterAction(object caller, Action action, Key key, InputEventType type = InputEventType.KeyDown)
         {
-             InputActions.Add(new(action, key, type: type));
+            InputAction item = new(action, key, type: type);
+           
+            if (caller is Component c)
+            {
+                c.node.OnDestroyed += () =>
+                {
+                    Runtime.Log("InputAction auto-deleted itself on event OnDestroy");
+                    InputActions.Remove(item);
+                };
+            }
+            if (caller is Node n)
+            {
+                n.OnDestroyed += () =>
+                {
+                    Runtime.Log("InputAction auto-deleted itself on event OnDestroy");
+                    InputActions.Remove(item);
+                };
+            }
+            if (caller is Action a)
+            {
+                a += () => InputActions.Remove(item);
+            }
+            else Runtime.Log("Register action caller did not qualify for auto-removal, you must handle it or unexpected behavior will occur");
+
+            InputActions.Add(item);
         }
     }
 }

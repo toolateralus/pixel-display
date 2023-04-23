@@ -33,6 +33,11 @@ namespace pixel_renderer
             float speed = WaveForms.Next.Length() * 5f;
             rb.velocity += windDir * speed;
         }
+
+        public override void Dispose()
+        {
+        }
+
         public Wind()
         { }
         public Wind(Direction direction) => this.direction = direction;

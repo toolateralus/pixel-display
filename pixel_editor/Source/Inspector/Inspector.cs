@@ -23,7 +23,7 @@ namespace pixel_editor
             OnComponentAdded += Refresh;
             OnComponentRemoved += Refresh;
             OnInspectorMoved += Inspector_OnInspectorMoved;
-            RegisterAction(DeselectNode, System.Windows.Input.Key.Escape);
+            RegisterAction(this, DeselectNode, System.Windows.Input.Key.Escape);
         }
         public void Update(object? sender, EventArgs e)
         {
@@ -154,7 +154,7 @@ namespace pixel_editor
 
         private int AddTransform(Grid grid, int index)
         {
-            TransformComponent transform = new()
+            pixel_renderer.Node.TransformComponent transform = new()
             {
                 node = lastSelectedNode,
                 position = lastSelectedNode.Position,
@@ -349,8 +349,8 @@ namespace pixel_editor
                 VerticalAlignment = VerticalAlignment.Stretch,
 
                 BorderThickness = new Thickness(0.1, 0.1, 0.1, 0.1),
-                Foreground = Brushes.Black,
-                Background = Brushes.MediumSeaGreen,
+                Foreground = Brushes.White,
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255,30,30,30)),
 
             };
         }
