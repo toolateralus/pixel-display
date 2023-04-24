@@ -1,52 +1,100 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Drawing;
+using System.Drawing.Imaging;
 using Newtonsoft.Json;
 using pixel_renderer.FileIO;
 
 namespace pixel_renderer
 {
-    public class Animation : Asset
+    public class Tween<T>
     {
-
-        [JsonProperty]
-        internal bool playing;
-        
-        [JsonProperty]
-        public bool looping = false;
-
+        [JsonProperty] internal bool playing;
+        [JsonProperty] public bool looping = false;
         /// <summary>
         /// this is the number of frames to wait between displaying frames.
         /// </summary>
-        [JsonProperty]
-        public int padding = 1;
+        [JsonProperty] public int frameTime = 1;
+        [JsonProperty] internal int startIndex = 0;
+        [JsonProperty] public Dictionary<(int, int), T> frames = new();
 
+        [Field]
         [JsonProperty]
-        internal int startIndex = 0;
+        public float speed = 1.0f;
 
         internal int frameIndex = 0;
-
-        [JsonProperty]
-        public Dictionary<(int, int), JImage> frames = new();
-
-        JImage? lastFrame;
-
-        [Field] [JsonProperty]
-        public float speed = 1.0f; 
-
-        public Animation(Metadata[] frameData, int framePadding = 24) => CreateAnimation(frameData, framePadding);
-
-        public void CreateAnimation(Metadata[] frameData, int framePadding = 24)
+        T? lastFrame;
+        public Tween(T[] frameData, int frameTime = 24)
         {
-
             if (frameData is null)
                 return;
 
-            padding = framePadding;
+            this.frameTime = frameTime;
 
-            for (int i = 0; i < frameData.Length * padding; i += padding)
+            for (int i = 0; i < frameData.Length * this.frameTime; i += this.frameTime)
             {
-                Metadata? imgMetadata = frameData[i / padding];
+                T? value = frameData[i / this.frameTime];
+                SetValue(i, value);
+            }
+        }
+        public void SetValue(int index, T value)
+        {
+            frames.Add((index, index + frameTime - 1), value);
+        }
+        public T GetValue(bool shouldIncrement = true)
+        {
+            if (frameIndex > frames.Count * frameTime - 1 && looping)
+                frameIndex = startIndex;
+
+            if (shouldIncrement) Increment();
+
+            foreach (var frame in frames)
+                if (frameIndex.WithinRange(frame.Key.Item1, frame.Key.Item2))
+                    lastFrame = frame.Value;
+
+            if (lastFrame is null)
+                throw new NullReferenceException();
+
+            return lastFrame;
+        }
+        public void Increment()
+        {
+            frameIndex = (int)(frameIndex + speed);
+        }
+        public void Decrement()
+        {
+            frameIndex = (int)(frameIndex - speed);
+        }
+    }
+
+    public class Animation : Asset
+    {
+        [JsonProperty] internal bool playing;
+        [JsonProperty] public bool looping = false;
+        /// <summary>
+        /// this is the number of frames to wait between displaying frames.
+        /// </summary>
+        [JsonProperty] public int frameTime = 1;
+        [JsonProperty] internal int startIndex = 0;
+        [JsonProperty] public Dictionary<(int, int), JImage> frames = new();
+       
+        [Field]
+        [JsonProperty]
+        public float speed = 1.0f;
+
+        internal int frameIndex = 0;
+        JImage? lastFrame;
+        public Animation(Metadata[] frameData, int frameTime = 24)
+        {
+            if (frameData is null)
+                return;
+
+            this.frameTime = frameTime;
+
+            for (int i = 0; i < frameData.Length * this.frameTime; i += this.frameTime)
+            {
+                Metadata? imgMetadata = frameData[i / this.frameTime];
 
                 if (imgMetadata.extension != Constants.PngExt && imgMetadata.extension != Constants.BmpExt)
                     continue;
@@ -57,27 +105,36 @@ namespace pixel_renderer
                 {
                     var colors = CBit.PixelFromBitmap(img);
                     JImage image = new(colors);
-
-                    frames.Add((i, i + padding - 1), image);
+                    InsertFrame(i, image);
                 }
-
-
             }
+        }
+
+        private void InsertFrame(int index, JImage image)
+        {
+            frames.Add((index, index + frameTime - 1), image);
         }
 
         public JImage GetFrame(bool shouldIncrement = true)
         {
-            if (frameIndex > frames.Count * padding - 1 && looping)
+            if (frameIndex > frames.Count * frameTime - 1 && looping)
                 frameIndex = startIndex;
 
-            if (shouldIncrement)
-                frameIndex = (int)(frameIndex + speed); // use the speed field to control the frame rate
+            if (shouldIncrement) Increment();
 
             foreach (var frame in frames)
                 if (frameIndex.WithinRange(frame.Key.Item1, frame.Key.Item2))
                     lastFrame = frame.Value;
 
+            if (lastFrame is null)
+                throw new NullReferenceException(); 
+
             return lastFrame;
+        }
+
+        private void Increment()
+        {
+            frameIndex = (int)(frameIndex + speed);
         }
     }
 }
