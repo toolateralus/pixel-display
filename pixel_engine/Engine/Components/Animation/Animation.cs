@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlTypes;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -10,8 +11,8 @@ namespace pixel_renderer
 {
     public class Tween<T>
     {
-        [JsonProperty] internal bool playing;
-        [JsonProperty] public bool looping = false;
+        [JsonProperty] public bool looping = true;
+        [JsonProperty] public bool reversed = true;
         /// <summary>
         /// this is the number of frames to wait between displaying frames.
         /// </summary>
@@ -22,16 +23,28 @@ namespace pixel_renderer
         [Field]
         [JsonProperty]
         public float speed = 1.0f;
-
         internal int frameIndex = 0;
-        T? lastFrame;
-        public Tween(T[] frameData, int frameTime = 24)
+        public T? lastFrame;
+        /// <summary>
+        /// frameTime is exclusive (I think, if you input 16 frames will be 15 cycles long.)
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="frameTime"></param>
+        /// <param name="looping"></param>
+        public Tween(T[] data = null, int frameTime = 24, bool looping = true, bool reversed = false)
         {
-            if (frameData is null)
-                return;
-
+            this.reversed = reversed;
+            this.looping = looping;
             this.frameTime = frameTime;
-
+            if (data is null)
+            {
+                Runtime.Log($"Framedata was null in tween of type {typeof(T)} this could be intended.");
+                return;
+            }
+            Refresh(data);
+        }
+        public virtual void Refresh(T[] frameData)
+        {
             for (int i = 0; i < frameData.Length * this.frameTime; i += this.frameTime)
             {
                 T? value = frameData[i / this.frameTime];
@@ -47,7 +60,15 @@ namespace pixel_renderer
             if (frameIndex > frames.Count * frameTime - 1 && looping)
                 frameIndex = startIndex;
 
-            if (shouldIncrement) Increment();
+            if (frameIndex < 0)
+                frameIndex = frames.Count * frameTime - 1; 
+
+            if (shouldIncrement)
+            {
+                if (!reversed)
+                    Increment();
+                else Decrement();
+            }
 
             foreach (var frame in frames)
                 if (frameIndex.WithinRange(frame.Key.Item1, frame.Key.Item2))
@@ -68,23 +89,9 @@ namespace pixel_renderer
         }
     }
 
-    public class Animation : Asset
+    public class Animation : Tween<JImage>
     {
         [JsonProperty] internal bool playing;
-        [JsonProperty] public bool looping = false;
-        /// <summary>
-        /// this is the number of frames to wait between displaying frames.
-        /// </summary>
-        [JsonProperty] public int frameTime = 1;
-        [JsonProperty] internal int startIndex = 0;
-        [JsonProperty] public Dictionary<(int, int), JImage> frames = new();
-       
-        [Field]
-        [JsonProperty]
-        public float speed = 1.0f;
-
-        internal int frameIndex = 0;
-        JImage? lastFrame;
         public Animation(Metadata[] frameData, int frameTime = 24)
         {
             if (frameData is null)
@@ -105,36 +112,9 @@ namespace pixel_renderer
                 {
                     var colors = CBit.PixelFromBitmap(img);
                     JImage image = new(colors);
-                    InsertFrame(i, image);
+                    SetValue(i, image);
                 }
             }
-        }
-
-        private void InsertFrame(int index, JImage image)
-        {
-            frames.Add((index, index + frameTime - 1), image);
-        }
-
-        public JImage GetFrame(bool shouldIncrement = true)
-        {
-            if (frameIndex > frames.Count * frameTime - 1 && looping)
-                frameIndex = startIndex;
-
-            if (shouldIncrement) Increment();
-
-            foreach (var frame in frames)
-                if (frameIndex.WithinRange(frame.Key.Item1, frame.Key.Item2))
-                    lastFrame = frame.Value;
-
-            if (lastFrame is null)
-                throw new NullReferenceException(); 
-
-            return lastFrame;
-        }
-
-        private void Increment()
-        {
-            frameIndex = (int)(frameIndex + speed);
         }
     }
 }

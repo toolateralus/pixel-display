@@ -122,7 +122,7 @@ namespace pixel_renderer
             if (animation.speed != speed)
                 animation.speed = speed; 
 
-            var img = animation?.GetFrame(true);
+            var img = animation?.GetValue(true);
             sprite?.SetImage(img);
         }
         public void Previous()
@@ -131,7 +131,7 @@ namespace pixel_renderer
                 return;
             animation.frameIndex -= 2;
 
-            var img = animation?.GetFrame(true);
+            var img = animation?.GetValue(true);
 
             sprite?.SetImage(img);
         }
