@@ -64,7 +64,6 @@ namespace pixel_renderer
         }
         public override void Awake()
         {
-            SetFileAsTexture();
             Refresh();
         }
         public override void FixedUpdate(float delta)

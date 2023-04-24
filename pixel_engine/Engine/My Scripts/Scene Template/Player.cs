@@ -23,18 +23,7 @@ namespace pixel_renderer
         Rigidbody rb;
         Animator anim;
         Camera cam;
-        [Method]
-        void AnimTest()
-        {
-            curve = Curve.Circlular(245, 240, 24, true);
-            data = curve.frames.Values.ToArray();
-            pos = new(data, 1, true, false);
-        }
-
-        Curve curve;
-        Vector2[] data;
-        Animation<Vector2> pos;
-
+        
         public override void Dispose()
         {
             Runtime.Log("Dispose called");
@@ -45,8 +34,6 @@ namespace pixel_renderer
         }
         public override void Awake()
         {
-            AnimTest();
-
             node.TryGetComponent(out rb);
 
             if (node.TryGetComponent(out sprite))
@@ -63,8 +50,6 @@ namespace pixel_renderer
 
             if (!takingInput)
                 return;
-
-            Position = pos.GetValue(true);
 
             Move(moveVector);
 

@@ -1,50 +1,41 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Numerics;
+using System.Windows.Documents;
 
 namespace pixel_renderer
 {
     public abstract class UIComponent : Component
     {
         internal protected bool dirty = true;
-        public Vector2 ColorDataSize => colorDataSize;
 
         [Field] [JsonProperty] public Texture texture;
         [Field] [JsonProperty] public bool lit = false;
         [Field] [JsonProperty] public float drawOrder = 0f;
         [Field] [JsonProperty] public bool IsReadOnly = false;
-        [Field] [JsonProperty] public Pixel color = Pixel.Blue;
-                [JsonProperty] protected Vector2 colorDataSize = new(1, 1);
         [Field] [JsonProperty] public float camDistance = 1;
         [Field] [JsonProperty] public ImageType Type = ImageType.SolidColor;
         [Field] [JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
+        [Field] [JsonProperty] public Pixel color = Pixel.Blue;
         [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
         [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
         public readonly Vector2 half = Vector2.One * 0.5f;
 
         [Method]
-        internal protected void Refresh()
+        public void Refresh()
         {
             switch (Type)
             {
                 case ImageType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(Vector2.One, color);
-                    if (texture is null) texture = new(colorArray);
-                    else texture.SetImage(colorArray);
+                    Pixel[,] colorArray = CBit.SolidColorSquare(Scale, color);
+                    texture.SetImage(colorArray);
                     break;
                 case ImageType.Image:
-                    if (texture is null)
-                    {
-                        Pixel[,] colorArray1 = CBit.SolidColorSquare(Vector2.One, color);
-                        if (texture is null) texture = new(colorArray1);
-                        else texture.SetImage(colorArray1);
-                    }
+                    if(texture.imgData != null)
+                        texture.SetImage(texture.imgData.Path);
                     break;
-                default: 
-                    return; 
             }
-            colorDataSize = new(texture.Width, texture.Height);
-            dirty = false;
+            dirty= false;
         }
         /// <summary>
         /// re-draws the image *this is always called when marked dirty*
@@ -120,12 +111,11 @@ namespace pixel_renderer
 
                 case TextureFiltering.Bilinear:
 
-                    Vector2 colorSize = colorDataSize;
 
                     int left = (int)colorPos.X;
                     int top = (int)colorPos.Y;
-                    int right = (int)((left + 1) % colorSize.X);
-                    int bottom = (int)((top + 1) % colorSize.Y);
+                    int right = (int)((left + 1) % texture.size.X);
+                    int bottom = (int)((top + 1) % texture.size.Y);
 
                     float xOffset = colorPos.X - left;
                     float yOffset = colorPos.Y - top;
@@ -192,7 +182,7 @@ namespace pixel_renderer
         {
             viewport.X += 0.5f;
             viewport.Y += 0.5f;
-            return viewport.Wrapped(Vector2.One) * colorDataSize;
+            return viewport.Wrapped(Vector2.One) * Scale;
         }
         public Vector2 GlobalToScreen(Vector2 globalPos) => LocalToScreen(GlobalToLocal(globalPos));
         public Vector2 ScreenToGlobal(Vector2 normalizedScreenPos) => LocalToGlobal(ScreenToLocal(normalizedScreenPos));

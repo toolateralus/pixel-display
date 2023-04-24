@@ -99,10 +99,10 @@ namespace pixel_renderer
         }
         public Pixel GetPixel(int x, int y)
         {
-            if (data is null || data.Length == 0)
+            int position = (y * width + x) * 4;
+            if (data is null || data.Length == 0 || data.Length < position + 4)
                 return Pixel.Black;
 
-            int position = (y * width + x) * 4;
             var a = data[position + 0];
             var r = data[position + 1];
             var g = data[position + 2];

@@ -11,7 +11,7 @@ namespace pixel_renderer
 {
     public class Texture : Asset
     {
-        [Field][JsonProperty] public Vector2 scale = new(1, 1);
+        [Field][JsonProperty] public Vector2 size = new(1, 1);
         [JsonProperty] internal Metadata imgData;
         [JsonProperty] private JImage jImage = new();
         public bool HasImage => initializedBitmap != null;
@@ -55,19 +55,19 @@ namespace pixel_renderer
         }
         public Texture(Vector2 size, Pixel color)
         {
-            scale = size;
+            this.size = size;
             SetImage(color);
         }
         public Texture(Vector2 scale, Metadata imgData)
         {
-            this.scale = scale; 
+            this.size = scale; 
             SetImage(imgData, scale);
         }
         [JsonConstructor] protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name) : base(Name, true)
         {
             this.imgData = imgData;
             this.Name = Name;
-            this.scale = scale;
+            this.size = scale;
             this.jImage = image; 
         }
         public JImage GetImage()
@@ -92,20 +92,22 @@ namespace pixel_renderer
         }
         public void SetImage(Pixel color)
         {
-            jImage = new(CBit.SolidColorSquare(scale, color));
+            jImage = new(CBit.SolidColorSquare(size, color));
         }
         public void SetImage(JImage image)
         {
+            this.size = jImage.Size;
             jImage = image;
         }
       
         public void SetImage(Pixel[,] colors)
         {
+            this.size = new(colors.GetLength(0), colors.GetLength(1));
             jImage = new(colors);
         }
         public void SetImage(Metadata imgData, Vector2 scale)
         {
-            this.scale = scale;
+            this.size = scale;
 
             if (imgData is not null)
             {

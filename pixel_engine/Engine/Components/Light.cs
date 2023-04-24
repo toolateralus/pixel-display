@@ -12,16 +12,20 @@ namespace pixel_renderer
         [Field] public Vector2 startPos = Vector2.One;
         [Field] public float radius = 55;
         [Field] public Pixel color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
-        
+        [Field] public bool showDebug = true; 
         private bool reversing;
         float length = 0;
         Color[] gradientColors = { Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta };
         private bool animated = true;
         public override void Dispose()
         {
+
         }
         public override void OnDrawShapes()
         {
+
+            if (!showDebug) return;
+
             const float radius = 5f; // radius of the circle
             var center = node.Position;
             

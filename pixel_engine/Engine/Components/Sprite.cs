@@ -176,7 +176,7 @@ namespace pixel_renderer
 
             Pixel getColor() {
                 // color 
-                var localPos = new Vector2(x, y) / texture.scale;
+                var localPos = new Vector2(x, y) / texture.size;
                 var global = LocalToGlobal(localPos);
                 float distance = Vector2.Distance(global, light.Position);
                 float lightAmount = 0f - Math.Clamp(distance / light.radius, 0, 1);
@@ -193,7 +193,7 @@ namespace pixel_renderer
             for (int x = 0; x < texture.Width; x++)
                 for (int y = 0; y < texture.Height; y++)
                 {
-                    var localPos = new Vector2(x, y) / texture.scale;
+                    var localPos = new Vector2(x, y) / texture.size;
                     var global = LocalToGlobal(localPos);
 
                     float distance = Vector2.Distance(global, light.Position);

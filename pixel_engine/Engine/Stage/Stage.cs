@@ -280,42 +280,48 @@ namespace pixel_renderer
 
         public static Stage Standard()
         {
+
             var nodes = new List<Node>();
-            Node player = Player.Standard();
-            nodes.Add(player);
-            
-            Node camera = new("Camera");
-            camera.Position = player.Position; 
 
             Node floorNode = Floor.Standard();
-            Node light = new("Light");
+            nodes.Add(floorNode);
+
+            Node player = Player.Standard();
+            nodes.Add(player);
+
+            Node camera = new("camera");
+            camera.AddComponent<Camera>().Scale = new(15,15);
+            camera.Position = player.Position; 
+
             
-            Node textTest = new("TEXT");
+            Node textTest = new("text");
             var img = textTest.AddComponent<Text>();
+            
+            //TODO: Eliminate this confusion, I don't know which one's even in use atm.
             img.viewportSize = new(25, 25);
-
             textTest.Scale = new(25, 25);
-            textTest.Position = new Vector2(0, 0);
+            img.viewportPosition = Vector2.Zero;
+            textTest.Position = Vector2.Zero;
 
+
+            Node light = new("light");
             var lt = light.AddComponent<Light>();
-            camera.AddComponent<Camera>().Scale = new(5,5);
             light.Position = new(50, -50);
-            lt.brightness = 10;
-            lt.radius = 500;
+            lt.brightness = 0.9f;
+            lt.radius = 10;
 
             nodes.Add(textTest);
             nodes.Add(light);
             nodes.Add(camera);
-            nodes.Add(floorNode);
 
             for (int i = 0; i < 5; i++)
             {
-                Node rbNode = i < 3 ? Rigidbody.Standard() : Player.Standard();
+                Node rbNode = Rigidbody.Standard();
                 rbNode.Position = new(i * 20, -20);
                 nodes.Add(rbNode);
             }
 
-            var stage = new Stage("default Stage", DefaultBackgroundMetadata, nodes);
+            var stage = new Stage("default stage", DefaultBackgroundMetadata, nodes);
             return stage;
         }
         public void AddNodes(List<Node> nodes) 

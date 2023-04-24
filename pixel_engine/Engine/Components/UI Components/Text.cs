@@ -14,14 +14,7 @@ namespace pixel_renderer
         /// <summary>
         /// the bounding box of the text element
         /// </summary>
-
-        public Vector2 start = new(0, 0);
-        public Vector2 end = new(1000, 0);
-
         public Curve posCurve;
-        public Text() : base() { }
-       
-
         public string Content
         {
             get => content;
@@ -37,8 +30,10 @@ namespace pixel_renderer
         public override void Awake()
         {
             base.Awake();
+
             Type = ImageType.Image;
-            color = Pixel.White;
+            color = Pixel.Red;
+
             RefreshFont();
             RefreshCharacters();
             Refresh(); 
@@ -67,6 +62,9 @@ namespace pixel_renderer
         [Method]
         public void RefreshCharacters()
         {
+            if (content.Length == 0) 
+                return; 
+          
             var output = new List<JImage>();
             int width = 0;
             int height = 0;
@@ -85,9 +83,6 @@ namespace pixel_renderer
             var start = new Vector2(0, 0);
             var end = new Vector2(0, width);
 
-            if (content.Length == 0) 
-                return; 
-          
             posCurve = Curve.Linear(start, end, 1, width / Content.Length);
             var concatenatedImg = JImage.Concat(output, posCurve);
 
