@@ -34,9 +34,11 @@ namespace pixel_renderer
         public const string JpegExt = ".jpg"; 
         public const string PngExt = ".png";
         public const string Mp3Ext = ".mp3";
+        public const string LuaExt = ".lua";
 
-        public static string[] ReadableExtensions = 
+        public static readonly string[] ReadableExtensions = 
         { 
+            LuaExt,
             Mp3Ext,
             PngExt,
             JpegExt,

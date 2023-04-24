@@ -120,11 +120,19 @@ namespace pixel_editor
         {
             obj.node.RemoveComponent(obj);
         }
+        public void Refresh() => Refresh(grid);
         private void Refresh(Grid grid)
         {
+            if (grid != null)
+            {
+                grid.Children.Clear();
+                grid.Visibility = Visibility.Hidden;
+            }
+
             activeGrids.Clear();
             activeControls.Clear();
             editComponentActions.Clear();
+
 
             grid = null;
             grid = NewInspectorGrid();
@@ -145,9 +153,11 @@ namespace pixel_editor
 
             var addComponentButton = Inspector.GetButton("Add Component", new(0, 0, 0, 0));
             addComponentButton.FontSize = 2;
-            grid.Children.Add(addComponentButton);
             addComponentButton.Click += AddComponentButton_Click;
             SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
+            grid.Children.Add(addComponentButton);
+
+
             OnInspectorUpdated?.Invoke(grid);
         }
 

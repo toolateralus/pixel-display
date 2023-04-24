@@ -11,7 +11,7 @@ namespace pixel_renderer.Assets
 {
     public class AssetLibrary
     {
-        static Dictionary<Metadata, Asset> Current = new();
+        static Dictionary<Metadata, object> Current = new();
         public static bool Busy { get; private set; }
         internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
         /// <summary>
@@ -33,6 +33,20 @@ namespace pixel_renderer.Assets
 
             Current.Add(metadata, asset);
             return true; 
+        }
+        public static bool Register(Metadata metadata, object value)
+        {
+            if (Busy)
+                return false;
+
+            if (Current.ContainsKey(metadata))
+            {
+                Current[metadata] = value;
+                return true;
+            }
+
+            Current.Add(metadata, value);
+            return true;
         }
         public static async Task<bool> RegisterAsync(Metadata metadata, Asset asset, int maxTryCount = 1000)
         {
@@ -74,7 +88,7 @@ namespace pixel_renderer.Assets
         public static Metadata? FetchMetaRelative(string pathRelativeToRoot)
         {
             foreach (var asset in Current)
-                if (asset.Value is null && asset.Key is not null && asset.Key.pathFromProjectRoot == pathRelativeToRoot)
+                if (asset.Key is not null && asset.Key.pathFromProjectRoot == pathRelativeToRoot)
                     return asset.Key;
             return default; 
                     
@@ -135,13 +149,13 @@ namespace pixel_renderer.Assets
                         x.Save(); 
                     }
                 }
-                foreach (KeyValuePair<Metadata, Asset> assetPair in Current)
+                foreach (KeyValuePair<Metadata, object> assetPair in Current)
                 {
-                    if (assetPair.Value is null)
+                    if (assetPair.Value is null || assetPair.Value is not Asset a)
                         continue; 
 
-                    assetPair.Value.Sync();
-                    assetPair.Value.Save();
+                    a.Sync();
+                    a.Save();
                 }
             }
             Busy = false; 
@@ -168,9 +182,9 @@ namespace pixel_renderer.Assets
         /// Clone the current Asset Library into a List.
         /// </summary>
         /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
-        public static List<Asset>? Clone()
+        public static List<object>? Clone()
         {
-            List<Asset> library = new();
+            List<object> library = new();
             
             foreach (var pair in Current)
                     library.Add(pair.Value);
@@ -179,15 +193,19 @@ namespace pixel_renderer.Assets
         }
         public static List<Metadata> GetAllKeys()
         {
-            return Current.Keys.ToList();     
+            return Current.Keys.ToList();  
         }
         /// <summary>
-        /// note: when this finds an asset, it returns it. however,  due to the way image storage works, if it finds an image it creates a Bitmap and returns that instead.
+        /// note: when this finds an asset, it returns it. however,  due to the way image storage works, 
+        /// if it finds an image it creates a Bitmap and returns that instead.
         /// </summary>
         /// <param name="meta"></param>
         /// <returns></returns>
         public static object FetchByMeta(Metadata meta)
         {
+            if (meta is null)
+                return null;
+
             var matches = Current.Where(p => p.Key.Path == meta.Path);
             var match = matches?.First();
             var asset = match.Value.Value;
@@ -198,6 +216,11 @@ namespace pixel_renderer.Assets
                 {
                     Bitmap bmp = new(meta.Path);
                     return bmp; 
+                }
+                if (meta.extension == ".lua")
+                {
+                    string script = IO.Read(meta);
+                    return script;
                 }
             }
 

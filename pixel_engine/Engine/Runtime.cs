@@ -212,5 +212,26 @@ namespace pixel_renderer
             Current.project.AddStage(stage);
             return stage; 
         }
+        public static async Task<Metadata> GetSelectedFileMetadataAsync()
+        {
+            EditorEvent e = new("$nolog_get_selected_meta");
+            object? asset = null;
+            e.action = (e) => { asset = e.First(); };
+            Runtime.RaiseInspectorEvent(e);
+            
+            float time = 0;
+            const float timeOut = 250;
+            const int duration = 15;
+
+            while (!e.processed && time < timeOut)
+            {
+                if (asset != null && asset is Metadata meta)
+                    return meta;
+                time += duration;
+                await Task.Delay(duration);
+            }
+            return null; 
+
+        }
     }
 }

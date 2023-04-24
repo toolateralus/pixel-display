@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Data;
 using System.Windows.Markup;
 using Microsoft.VisualBasic;
+using System.Windows.Automation;
 
 namespace pixel_editor
 {
@@ -283,8 +284,12 @@ namespace pixel_editor
                             Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType} of value {obj}");
                             info.SetValue(component, obj);
                         }
+
+                    Refresh(component);
                     return true; 
                 }
+
+            Refresh(component);
             return false;
         }
         private void ExecuteEditEvent(int index)

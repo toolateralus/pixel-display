@@ -90,13 +90,13 @@ namespace pixel_renderer
             writer.Close();
             return output;
         }
-        public static void Write<T>(T data, Metadata meta)
+        public static void Write(object data, Metadata meta)
         {
             using StreamWriter writer = new(meta.Path);
             writer.Write(data);
             writer.Close();
         }
-        public static string Read<T>(Metadata meta)
+        public static string Read(Metadata meta)
         {
             using StreamReader writer = new(meta.Path);
             string data = writer.ReadToEnd();

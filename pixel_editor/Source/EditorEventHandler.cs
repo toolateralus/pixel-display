@@ -58,7 +58,12 @@ namespace pixel_editor
                     e.action?.Invoke(e.args);
                     return;
                 }
-
+              
+                if (e.message == "$nolog_update_component_editor")
+                {
+                    var component = Editor.Current.componentEditor.component;
+                    Editor.Current?.componentEditor.Refresh(component);
+                }
 
                 return;
             }

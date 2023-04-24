@@ -24,9 +24,8 @@ namespace pixel_renderer.Assets
                 Directory.CreateDirectory(directory);
 
             if (Constants.ReadableExtensions.Contains(ext))
-            {
                 GetFiles(directory, ext, collection);
-            }
+
             return collection;
         }
         private static void GetFiles(string directory, string ext, List<Metadata> collection)
@@ -61,8 +60,8 @@ namespace pixel_renderer.Assets
             var assets = Import(_dir, ".asset");
             var bmps = Import(_dir, ".bmp");
             var pngs = Import(_dir, ".png");
-
             var audioFiles = Import(_dir, ".mp3");
+            var lua_scripts = Import(_dir, ".lua");
 
             foreach (var item in assets)
             {
@@ -70,6 +69,11 @@ namespace pixel_renderer.Assets
                 AssetLibrary.Register(item, asset);
             }
 
+            foreach (var script in lua_scripts)
+            {
+                string text = IO.Read(script);
+                AssetLibrary.Register(script, text);
+            }
             // this hold all "assets" or files without pre-loaded data, which get stored with a null value and just point to the file.
             var other = bmps.Concat(pngs);
             other = other.Concat(audioFiles);
