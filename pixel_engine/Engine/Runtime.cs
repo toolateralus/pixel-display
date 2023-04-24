@@ -169,6 +169,11 @@ namespace pixel_renderer
            EditorEvent e = new(obj.ToString(), includeDateTime, clearConsole);
            InspectorEventRaised?.Invoke(e);
         }
+        public static void Error(object obj)
+        {
+            EditorEvent e = new("$nolog $err_err" + obj.ToString(), true, false);
+            InspectorEventRaised?.Invoke(e);
+        }
         public static void RaiseInspectorEvent(EditorEvent e)
         {
             InspectorEventRaised?.Invoke(e);

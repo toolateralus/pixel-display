@@ -33,7 +33,13 @@ namespace pixel_editor
                     Editor.Current.Inspector.SelectNode(node);
                     StageCameraTool.TryFollowNode(node);
                 }
-
+                if (e.message == "$err_err" || e.message.Contains("$err_err"))
+                {
+                    var msg = e.message.Replace("$err_err", "");
+                    var newMsg = msg.Replace("$nolog", "");
+                    Console.Error(newMsg, 1);
+                    return; 
+                }
                 if (e.message == "$nolog_get_selected_asset")
                 {
                     var obj = Editor.fileViewer.GetSelectedObject();

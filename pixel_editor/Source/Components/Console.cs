@@ -564,7 +564,7 @@ namespace pixel_editor
         public static void Error(object? o = null, int? textColorAlterationDuration = null)
         {
             string? msg = o.ToString();
-            EditorEvent e = new(msg, true);
+            EditorEvent e = new(msg, false, false);
 
             if (textColorAlterationDuration is not null)
                 e.action = RedTextAsync((int)textColorAlterationDuration);

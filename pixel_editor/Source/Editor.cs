@@ -106,9 +106,7 @@ namespace pixel_editor
 
             fileViewer = new(FileViewerGrid, fileViewerListBox);
 
-            Console.Print("Stage " + stageName + " set.");
-            Console.Print("Project " + projectName + " set.");
-            Console.Error(motd);
+            Console.Print(motd);
             Runtime.OutputImages.Add(image);
         }
         private static void InitializeSettings()
@@ -365,18 +363,20 @@ namespace pixel_editor
         {
             return (o) =>
             {
-                consoleOutput.Foreground = Brushes.Green;
+                consoleOutput.Foreground = Brushes.White;
                 consoleOutput.Background = Brushes.Black;
             };
         }
         private void OnProjectSet(Project obj)
         {
             projectName = obj.Name;
+            Console.Print("Project " + projectName + " set.");
             Current.Title = $"{projectName} : : {stageName}";
         }
         private void OnStageSet(Stage obj)
         {
             stageName = obj.Name;
+            Console.Print("Stage " + stageName + " set.");
             Current.Title = $"{projectName} : : {stageName}";
         }
         private void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
