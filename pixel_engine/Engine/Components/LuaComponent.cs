@@ -47,7 +47,6 @@ namespace pixel_renderer
                 Importer.Import();
             }
         }
-
         [Method]
         public void Run()
         {
