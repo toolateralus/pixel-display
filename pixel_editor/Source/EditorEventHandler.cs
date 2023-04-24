@@ -1,4 +1,5 @@
 ﻿using pixel_renderer;
+using pixel_renderer.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,6 +65,12 @@ namespace pixel_editor
                     var component = Editor.Current.componentEditor.component;
                     Editor.Current?.componentEditor.Refresh(component);
                 }
+                
+                if (e.message == "$nolog_update_fileviewer")
+                {
+                    Editor.Current.fileViewer.Refresh();
+                }
+
 
                 return;
             }

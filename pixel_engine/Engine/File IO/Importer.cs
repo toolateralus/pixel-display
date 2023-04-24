@@ -14,6 +14,8 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
+            var e = new EditorEvent("$nolog_update_fileviewer");
+            Runtime.RaiseInspectorEvent(e);
             AssetLibrary.Dispose();
             ImportRecursively(Constants.WorkingRoot, 0);
         }

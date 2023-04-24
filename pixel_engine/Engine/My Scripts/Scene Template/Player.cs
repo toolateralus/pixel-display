@@ -108,7 +108,6 @@ namespace pixel_renderer
         #region Input 
         private void Jump()
         {
-            Runtime.Error($"(player.anim == null) == {anim is null}");
             if (isGrounded)
             {
                 var meta = AssetLibrary.FetchMetaRelative(@"\Assets\Audio Assets\dog_barking.mp3");
