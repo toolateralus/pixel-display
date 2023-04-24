@@ -161,17 +161,6 @@ namespace pixel_renderer
             A.collider.node.OnCollision(B);
             B.collider.node.OnCollision(A);
         }
-        private static void PositionalCorrection(Rigidbody a, Rigidbody b, Vector2 normal, float depth)
-        {
-            const float k_slop = 0.01f;
-            const float percent = 0.2f;
-
-            float correction = MathF.Max(depth - k_slop, 0.0f) / (a.invMass + b.invMass) * percent;
-            Vector2 correctionVector = normal * correction;
-
-            a.Position -= a.invMass * correctionVector;
-            b.Position += b.invMass * correctionVector;
-        }
         private static void ComputeImpulse(Rigidbody rbA, Rigidbody rbB, Collision collision)
         {
             Vector2 correction = collision.normal * collision.depth;

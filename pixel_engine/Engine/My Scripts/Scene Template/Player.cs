@@ -32,10 +32,6 @@ namespace pixel_renderer
             anim = null;
             cam = null; 
         }
-        
-        static int[] values = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        Tween<int> tween = new(values, 16);
-        
         public override void Awake()
         {
             
@@ -55,11 +51,6 @@ namespace pixel_renderer
         }
         public override void FixedUpdate(float delta)
         {
-
-
-            var x = tween.GetValue(true);
-            Runtime.Log(x);
-
             cam ??= Camera.First;
 
             if (!takingInput)

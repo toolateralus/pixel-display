@@ -84,7 +84,6 @@ namespace pixel_renderer
             ApplyColor(colorData);
             data = colorData; 
         }
-
         public void SetPixel(int x, int y, Pixel color)
         {
             int position = (y * width + x) * 4;

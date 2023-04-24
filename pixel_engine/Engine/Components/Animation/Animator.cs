@@ -18,13 +18,10 @@ namespace pixel_renderer
         }
         [JsonProperty]
         [Field] public float speed = 2f;
-
         [JsonProperty]
         private Animation? animation;
-
         [JsonProperty]
         private Sprite? sprite;
-       
         [Field][JsonProperty]
         public string[] frameNames = new string[]
         {
@@ -37,14 +34,11 @@ namespace pixel_renderer
             "dog_walking_7",
             "dog_walking_8",
         };
-
         [JsonProperty][Field]
         public int padding = 12;
-
         [JsonProperty]
         [Field]
         public bool looping = true; 
-
         [Method]
         void InsertFrame()
         {
@@ -56,7 +50,6 @@ namespace pixel_renderer
 
             frameNames = newArray;
         }
-        
         [Method]
         void RemoveFrame()
         {
@@ -74,7 +67,6 @@ namespace pixel_renderer
 
             frameNames = newArray;
         }
-        
         [Method]
         internal void RefreshAnimationWithFrameNames()
         {
@@ -102,18 +94,12 @@ namespace pixel_renderer
         /// </summary>
         [Method]
         void Start() => Start(1, true);
-
-        public override void Awake()
-        {
-
-        }
         public override void FixedUpdate(float delta)
         {
             if (animation is null || !animation.playing)
                 return;
             Next();
         }
-
         public void Next()
         {
             if (animation is null)
@@ -135,7 +121,6 @@ namespace pixel_renderer
 
             sprite?.SetImage(img);
         }
-
         public void Start(float speed = 1, bool looping = true)
         {
             node.TryGetComponent(out sprite);
@@ -160,10 +145,8 @@ namespace pixel_renderer
             if (reset)
                 animation.frameIndex = animation.startIndex;
         }
-
         public void SetAnimation(Animation animation) => this.animation = animation;
         public Animation? GetAnimation() => animation;
-
         public static Node Standard()
         {
             var node = Rigidbody.Standard();
@@ -178,7 +161,6 @@ namespace pixel_renderer
             node.Scale = Constants.DefaultNodeScale;
             return node;
         }
-
         internal JImage? TryGetFrame(int index)
         {
             if (animation?.frames is null)

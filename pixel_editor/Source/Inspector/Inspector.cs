@@ -478,9 +478,9 @@ namespace pixel_editor
         {
             return lastSelectedNode?.AddComponent<Joint>();  
         }
-        MouseShooter AddParticles()
+        ParticleSystem AddParticles()
         {
-            return lastSelectedNode?.AddComponent<MouseShooter>(); 
+            return lastSelectedNode?.AddComponent<ParticleSystem>(); 
         }
         Sprite AddSprite()
         {

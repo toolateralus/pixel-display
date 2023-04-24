@@ -12,13 +12,11 @@ namespace pixel_renderer
         internal Vector2? offset;
 
         [Field] string NameB = "Player";
-
         public override void Dispose()
         {
             A = null;
             B = null;
         }
-
         [Method]
         public void AttachBodiesByName()
         {
@@ -45,7 +43,6 @@ namespace pixel_renderer
                 }
             }
         }
-
         private void OnBodyCollided(Collision obj, int body)
         {
             switch (body)
@@ -61,14 +58,11 @@ namespace pixel_renderer
                     break;
             }
         }
-
-      
         public override void FixedUpdate(float delta)
         {
             if (A is not null && B is not null && offset.HasValue)
                 B.Position = A.Position + offset.Value;
 
         }
-      
     }
 }

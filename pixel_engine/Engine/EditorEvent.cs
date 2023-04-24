@@ -20,9 +20,7 @@ namespace pixel_renderer
             if (!includeDateTime)
                 this.message = message; 
             else
-            {
                 this.message = DateAndTime + message;
-            }
         }
     }
     public class FocusNodeEvent : EditorEvent

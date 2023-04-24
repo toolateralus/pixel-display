@@ -6,10 +6,10 @@ using System.Numerics;
 
 namespace pixel_renderer
 {
-    
+
 
     [JsonObject(MemberSerialization.OptIn)]
-    public class Node 
+    public partial class Node 
     {
         #region Json Constructor
         [JsonConstructor]
@@ -64,8 +64,10 @@ namespace pixel_renderer
         public bool ComponentsBusy { get; private set; }
         internal Rigidbody? rb;
         internal Collider col;
+
         public Action<Collision> OnCollided;
         public Action<Collision> OnTriggered;
+
         public Action OnDestroyed; 
         public Queue<Action> ComponentActionQueue { get; private set; } = new();
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
@@ -441,37 +443,6 @@ namespace pixel_renderer
                     if (toRemove is not null)
                         compList.Remove(toRemove);
                     if (compList.Count == 0) Components.Remove(type);
-                }
-            }
-        }
-        public class TransformComponent : Component
-        {
-            [Field] public Vector2 position;
-            [Field] public Vector2 scale;
-            [Field] public float rotation;
-            [Field] public string name;
-
-            public override void Dispose()
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void OnFieldEdited(string field)
-            {
-                switch (field)
-                {
-                    case nameof(name):
-                        node.Name = name;
-                        break;
-                    case nameof(position):
-                        Position = position;
-                        break;
-                    case nameof(scale):
-                        Scale = scale;
-                        break;
-                    case nameof(rotation):
-                        Rotation = rotation;
-                        break;
                 }
             }
         }
