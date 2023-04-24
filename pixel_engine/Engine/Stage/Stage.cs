@@ -315,7 +315,7 @@ namespace pixel_renderer
                 nodes.Add(rbNode);
             }
 
-            var stage = new Stage("Default Stage", DefaultBackgroundMetadata, nodes);
+            var stage = new Stage("default Stage", DefaultBackgroundMetadata, nodes);
             return stage;
         }
         public void AddNodes(List<Node> nodes) 
