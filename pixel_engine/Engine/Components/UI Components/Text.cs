@@ -83,7 +83,7 @@ namespace pixel_renderer
                 }
 
             var start = new Vector2(0, 0);
-            var end = new Vector2(width, 0);
+            var end = new Vector2(0, width);
 
             if (content.Length == 0) 
                 return; 

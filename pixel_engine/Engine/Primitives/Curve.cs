@@ -46,6 +46,9 @@ namespace pixel_renderer
                 return min;
             }
         }
+
+        #region static methods
+
         public static Curve Circlular(float speed, int length, float radius = 1f, bool looping = true)
         {
             Curve curve = new()
@@ -145,7 +148,6 @@ namespace pixel_renderer
 
             return curve;
         }
-
-        
+        #endregion
     }
 }
