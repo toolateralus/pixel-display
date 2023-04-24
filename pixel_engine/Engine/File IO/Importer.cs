@@ -13,6 +13,7 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
+            AssetLibrary.Dispose();
             ImportRecursively(Constants.WorkingRoot, 0);
         }
         private static List<Metadata> Import(string directory, string ext)

@@ -227,5 +227,10 @@ namespace pixel_renderer.Assets
             return asset;
 
         }
+
+        internal static void Dispose()
+        {
+            Current.Clear();
+        }
     }
 }

@@ -82,12 +82,12 @@ namespace pixel_editor
             argumentTypes = new string[] { "vec:" },
             action = (e) =>
             {
-                if(TryGetArgAtIndex(0, out Vector2 vec, e)) 
+                if (TryGetArgAtIndex(0, out Vector2 vec, e))
                     return;
 
                 Print(vec.ToString());
                 Runtime.Current.projectSettings.CurrentResolution = vec;
-                Runtime.Current.SetResolution(); 
+                Runtime.Current.SetResolution();
 
             },
             description = "sets the resolution to the specified Vec2"
@@ -118,7 +118,7 @@ namespace pixel_editor
         {
             phrase = "sprite.Filtering;",
             syntax = "sprite.Filtering(string: nodeName, string: enumValue);",
-            argumentTypes = new string[] { "str:", "str:"},
+            argumentTypes = new string[] { "str:", "str:" },
             args = null,
             action = SetSpriteFiltering,
             description = "Gets a node and attempts to set the texture filtering on the sprite if available.",
@@ -161,7 +161,7 @@ namespace pixel_editor
         {
             phrase = "help;",
             syntax = "help {cmd name}",
-            argumentTypes = new string[] { "str:"},
+            argumentTypes = new string[] { "str:" },
             action = (e) =>
             {
 
@@ -236,7 +236,7 @@ namespace pixel_editor
             phrase = "node.Destroy;",
             syntax = "node.Destroy(null || string nodeName);",
             description = "Attempts to destroy the selected node or node by name. This command can either take no arguments or a string for a node name.",
-            argumentTypes = new string[] {"str:"},
+            argumentTypes = new string[] { "str:" },
             action = (e) =>
             {
                 if (!TryGetNodeByNameAtIndex(e, out Node node, 0))
@@ -278,6 +278,18 @@ namespace pixel_editor
                 field.SetValue(cam, value);
             },
             description = "\n {must not be a property or method} Sets Field in camera by name on node of provided name \n syntax : cam(str:<nodeName>, str:<fieldName>, object:value)",
+        };
+        public static Command cmd_reimport() => new()
+        {
+            description = "Reimports and refreshes asset library, does not force update references.",
+            phrase = "import;",
+            syntax = "import();",
+            argumentTypes = null,
+            action = (e) =>
+            {
+                Editor.Current.fileViewer.Refresh();
+                Importer.Import();
+            },
         };
         public static Command cmd_asset_exists() => new()
         {
