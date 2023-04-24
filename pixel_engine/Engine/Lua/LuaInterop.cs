@@ -57,6 +57,23 @@ namespace pixel_renderer
 
             state.Register("print", printFunct);
         }
+        public (bool result, string err) Script(string luaString)
+        {
+
+            if (luaString is null || luaString is "")
+            {
+                Runtime.Log("Lua component was called to run but it had no valid lua code to run.");
+                return(true, "No code found"); 
+            }
+
+            state ??= new();
+
+            var result = state.DoString(luaString);
+
+            if (result)
+                return (false, "nil");
+            return (true, state.ToString(1));
+        }
         public bool Run(string fileName)
         {
             state ??= new();

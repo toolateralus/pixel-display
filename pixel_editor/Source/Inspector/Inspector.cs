@@ -10,6 +10,7 @@ using System.Linq;
 using System.Windows.Media;
 using System.DirectoryServices;
 using System.Drawing.Text;
+using System.Reflection.Metadata;
 
 namespace pixel_editor
 {
@@ -528,6 +529,15 @@ namespace pixel_editor
             };
             box.Click += e;
             return box; 
+        }
+
+        internal static TextBox GetInputField(string curVal)
+        {
+            TextBox box = new()
+            {
+                Text = curVal,
+            };
+            return box;
         }
 
         #endregion

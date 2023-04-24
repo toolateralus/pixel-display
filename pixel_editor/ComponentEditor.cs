@@ -104,6 +104,12 @@ namespace pixel_editor
                     bothColumns = false; 
                 }
 
+                foreach (var attr in field.GetCustomAttributes())
+                    if (attr.GetType() == typeof(InputFieldAttribute))
+                        AddInputFieldTextBox(viewer, ref i , field, name);
+
+
+
                 if (field.FieldType == typeof(string[]))
                 {
                     object obj = field.GetValue(component);
@@ -130,6 +136,38 @@ namespace pixel_editor
             }
             return i;
         }
+
+        private void AddInputFieldTextBox(Grid viewer, ref int i, FieldInfo field, string name)
+        {
+            string currentvalue = (string)field.GetValue(component);
+            
+            if(currentvalue is null)
+                return;
+
+            var textbox = Inspector.GetInputField(currentvalue);
+            textbox.Name = $"textBox{i}";
+            textbox.AcceptsReturn = true;
+            textbox.AcceptsTab = true;
+            textbox.FontSize = 4;
+            textbox.VerticalAlignment = VerticalAlignment.Stretch;
+            textbox.HorizontalAlignment = HorizontalAlignment.Stretch;
+            textbox.LostFocus += (e, o) =>
+            {
+                if(o.RoutedEvent != null)
+                    o.Handled = true;
+
+                if (e is not TextBox tb)
+                    return;
+
+                field.SetValue(component, tb.Text);
+
+                UpdateData();
+            }; 
+            uiElements.Add(textbox);
+            viewer.Children.Add(textbox);
+            Inspector.SetRowAndColumn(textbox, 3, 4, 18, (i += 4) + 4);
+        }
+
         private void AddBoolCheckBox(Grid viewer, ref int i, FieldInfo field, bool val)
         {
             if (field.GetValue(component) is not bool curVal)
