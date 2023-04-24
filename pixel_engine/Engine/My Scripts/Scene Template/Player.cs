@@ -3,27 +3,38 @@ using Key = System.Windows.Input.Key;
 using pixel_renderer.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
-using System.Diagnostics;
-using System;
+using System.Linq;
 
 namespace pixel_renderer
 {
     public class Player : Component
     {
-        [Field] [JsonProperty] public float speed = 0.1f;
-        [Field] [JsonProperty] private float jumpSpeed = 0.25f;
-        
-        [Field] [JsonProperty] public bool takingInput = true;
-        [Field] [JsonProperty] private bool followPlayer;
-        
+        [Field][JsonProperty] public float speed = 0.1f;
+        [Field][JsonProperty] private float jumpSpeed = 0.25f;
+
+        [Field][JsonProperty] public bool takingInput = true;
+        [Field][JsonProperty] private bool followPlayer;
+
         private bool isGrounded;
         private Vector2 moveVector = default;
         private int haltIterations = 16;
-        
+
         Sprite sprite;
         Rigidbody rb;
         Animator anim;
         Camera cam;
+        [Method]
+        void AnimTest()
+        {
+            curve = Curve.Circlular(245, 240, 24, true);
+            data = curve.frames.Values.ToArray();
+            pos = new(data, 1, true, false);
+        }
+
+        Curve curve;
+        Vector2[] data;
+        Animation<Vector2> pos;
+
         public override void Dispose()
         {
             Runtime.Log("Dispose called");
@@ -34,10 +45,7 @@ namespace pixel_renderer
         }
         public override void Awake()
         {
-            
-
-
-
+            AnimTest();
 
             node.TryGetComponent(out rb);
 
@@ -55,6 +63,8 @@ namespace pixel_renderer
 
             if (!takingInput)
                 return;
+
+            Position = pos.GetValue(true);
 
             Move(moveVector);
 

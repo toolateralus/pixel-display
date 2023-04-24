@@ -8,9 +8,7 @@ using System.Windows.Controls;
 using pixel_renderer;
 using System.Linq;
 using System.Windows.Media;
-using System.DirectoryServices;
 using System.Drawing.Text;
-using System.Reflection.Metadata;
 
 namespace pixel_editor
 {
@@ -207,6 +205,7 @@ namespace pixel_editor
             {
                 Runtime.Log($"Component {nameof(funct.Method.ReturnType)} added!");
                 funct.Invoke();
+                //TODO: Make it so the component list/ data refreshes on click here.
             }
         }
         private void AddComponentClicked(object sender, RoutedEventArgs e)
@@ -227,15 +226,14 @@ namespace pixel_editor
             addComponentFunctions = new()
             {
                 {"Player",    AddPlayer},
-                
                 {"Collider",  AddCollider},
                 {"Joint", AddJoint},
                 {"Rigidbody", AddRigidbody},
                 {"Softbody",  AddSoftbody},
-
                 {"Particles",  AddParticles},
                 {"Animator",  AddAnimator},
                 {"Sprite",    AddSprite},
+                {"Lua Script",  AddLuaComponent},
             };
         }
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
@@ -474,7 +472,10 @@ namespace pixel_editor
         //   where data.AttributeType == typeof(null)
         //   select field;
 
-
+        LuaComponent AddLuaComponent()
+        {
+            return lastSelectedNode?.AddComponent<LuaComponent>();
+        }
         Joint AddJoint()
         {
             return lastSelectedNode?.AddComponent<Joint>();  
@@ -485,19 +486,19 @@ namespace pixel_editor
         }
         Sprite AddSprite()
         {
-            var x = lastSelectedNode.AddComponent<Sprite>();
+            var x = lastSelectedNode?.AddComponent<Sprite>();
             Runtime.Log($"Sprite Added!");
             return x;
         }
         Player AddPlayer()
         {
-            var x = lastSelectedNode.AddComponent<Player>();
+            var x = lastSelectedNode?.AddComponent<Player>();
             Runtime.Log($"Player Added!");
             return x;
         }
         Animator AddAnimator()
         {
-            var x = lastSelectedNode.AddComponent<Animator>();
+            var x = lastSelectedNode?.AddComponent<Animator>();
             Runtime.Log($"Animator Added!");
 
             return x;

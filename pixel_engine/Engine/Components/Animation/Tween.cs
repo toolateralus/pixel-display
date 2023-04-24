@@ -7,7 +7,7 @@ namespace pixel_renderer
     public class Animation<T>
     {
         [JsonProperty] public bool looping = true;
-        [JsonProperty] public bool reversed = true;
+        [JsonProperty] public bool reversed = false;
         /// <summary>
         /// this is the number of frames to wait between displaying frames.
         /// </summary>
@@ -37,6 +37,10 @@ namespace pixel_renderer
                 return;
             }
             Refresh(data);
+        }
+        public void Reset()
+        {
+            frameIndex = startIndex;
         }
         public virtual void Refresh(T[] frameData)
         {

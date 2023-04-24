@@ -310,7 +310,7 @@ namespace pixel_renderer
 
             for (int i = 0; i < 5; i++)
             {
-                Node rbNode = Rigidbody.Standard();
+                Node rbNode = i < 3 ? Rigidbody.Standard() : Player.Standard();
                 rbNode.Position = new(i * 20, -20);
                 nodes.Add(rbNode);
             }

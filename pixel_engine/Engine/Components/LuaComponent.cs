@@ -11,11 +11,11 @@ namespace pixel_renderer
         [Field]
         [InputField]
         string value = "Write your script here.";
-
         internal bool lastExecutionResult;
         internal string lastErr;
         [Method]
-        public void Run() {
+        public void Run()
+        {
 
             var script = Runtime.Current.Lua.Script(value);
             if (script.result)
@@ -25,7 +25,7 @@ namespace pixel_renderer
             }
             else
             {
-                lastExecutionResult = false; 
+                lastExecutionResult = false;
                 lastErr = "nil";
             }
         }

@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace pixel_renderer
 {
@@ -124,7 +126,7 @@ namespace pixel_renderer
             byte[] drawSurface = GetDrawSurface(images, posCurve, out var bounds);
             foreach (var image in images)
             {
-                var position = posCurve.Next();
+                var position = posCurve.GetValue(true);
 
                 var startX = Math.Max(0, (int)Math.Floor(position.X));
                 var startY = Math.Max(0, (int)Math.Floor(position.Y));
@@ -163,11 +165,11 @@ namespace pixel_renderer
             var pos = Vector2.Zero;
             foreach (var img in images)
             {
-                pos = posCurve.Next();
+                pos = posCurve.GetValue(true);
                 bounds.ExpandTo(pos);
                 bounds.ExpandTo(pos + img.Size);
             }
-            posCurve.Reset();
+            posCurve.Reset(); 
             byte[] drawSurface = new byte[(int)bounds.Width * (int)bounds.Height * 4];
             return drawSurface;
         }

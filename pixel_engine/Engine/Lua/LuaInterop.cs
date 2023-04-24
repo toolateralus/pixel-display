@@ -1,5 +1,7 @@
 ﻿using KeraLua;
 using System;
+using System.Diagnostics.Tracing;
+using System.Numerics;
 
 namespace pixel_renderer
 {
@@ -50,11 +52,9 @@ namespace pixel_renderer
             }
             return 0; 
         };
-        
         public LuaInterop()
         {
             state = new();
-
             state.Register("print", printFunct);
         }
         public (bool result, string err) Script(string luaString)

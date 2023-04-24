@@ -183,7 +183,7 @@ namespace pixel_renderer
             List<Vector2> verts = new();
 
             for (int i = 0; i < subdivisions; i++)
-                verts.Add(curve.Next());
+                verts.Add(curve.GetValue(true));
 
             return new(verts.ToArray());
         }

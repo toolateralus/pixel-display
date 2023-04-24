@@ -364,7 +364,7 @@ namespace pixel_editor
                 ExecuteEditEvent(i);
             UpdateData();
         }
-        private void UpdateData()
+        internal void UpdateData()
         {
             if (data is null
             || data.Fields is null

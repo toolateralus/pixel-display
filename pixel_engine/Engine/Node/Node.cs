@@ -236,10 +236,8 @@ namespace pixel_renderer
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
-                var key = pair.Key;
-
-                for (int j = 0; j < Components[key].Count; ++j)
-                    Components[key].ElementAt(j)?.FixedUpdate(delta);
+                for (int j = 0; j < pair.Value.Count; ++j)
+                    pair.Value[j]?.FixedUpdate(delta);
             }
             ComponentsBusy = false;
 
@@ -256,8 +254,8 @@ namespace pixel_renderer
                 var pair = Components.ElementAt(i);
                 var key = pair.Key; 
 
-                for (int j = 0; j < Components[key].Count; ++j)
-                    Components[key].ElementAt(j)?.Update();
+                for (int j = 0; j < pair.Value.Count; ++j)
+                    pair.Value.ElementAt(j)?.Update();
             }
 
 
