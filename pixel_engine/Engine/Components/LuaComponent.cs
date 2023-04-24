@@ -35,7 +35,7 @@ namespace pixel_renderer
                 EditorEvent refresh_event = new(EditorEventFlags.COMPONENT_EDITOR_UPDATE);
                 Runtime.RaiseInspectorEvent(refresh_event);
             }
-            else Runtime.Log($"Meta {meta} not found");
+            else Runtime.Log($"Meta {meta} not found from GetSelectedFileMetadataAsync call result");
 
         }
         [Method]
@@ -50,12 +50,11 @@ namespace pixel_renderer
         [Method]
         public void Run()
         {
-
-            var script = Runtime.Current.Lua.Script(value);
-            if (script.result)
+            var execution = Runtime.Current.Lua.Script(value);
+            if (execution.result)
             {
                 lastExecutionResult = true;
-                lastErr = script.err;
+                lastErr = execution.err;
                 Runtime.Log(lastErr);
             }
             else

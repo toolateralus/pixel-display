@@ -40,12 +40,4 @@ namespace pixel_renderer
                 this.message = DateAndTime + message;
         }
     }
-    public class FocusNodeEvent : EditorEvent
-    {
-        public FocusNodeEvent(Node focused, EditorEventFlags flags = EditorEventFlags.FOCUS_NODE | EditorEventFlags.DO_NOT_PRINT, string message = "", bool includeDateTime = false, bool clearConsole = false) : base(flags, message, includeDateTime, clearConsole)
-        {
-            action = (e) => { };
-            args = new object[] { focused };
-        }
-    }
 }
