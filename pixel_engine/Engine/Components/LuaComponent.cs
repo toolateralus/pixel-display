@@ -32,7 +32,7 @@ namespace pixel_renderer
                 this.value = value;
                 path = meta.pathFromProjectRoot;
 
-                EditorEvent refresh_event = new("$nolog_update_component_editor");
+                EditorEvent refresh_event = new(EditorEventFlags.COMPONENT_EDITOR_UPDATE);
                 Runtime.RaiseInspectorEvent(refresh_event);
             }
             else Runtime.Log($"Meta {meta} not found");

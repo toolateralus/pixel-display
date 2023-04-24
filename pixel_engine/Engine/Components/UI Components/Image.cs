@@ -92,7 +92,7 @@ namespace pixel_renderer
         }
         [Method] public async Task SetFileAsTexture()
         {
-            EditorEvent e = new("$nolog_get_selected_meta");
+            EditorEvent e = new(EditorEventFlags.GET_FILE_VIEWER_SELECTED_METADATA);
             object? asset = null;
             e.action = (e) => { asset = e.First(); };
             Runtime.RaiseInspectorEvent(e);

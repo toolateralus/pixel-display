@@ -14,7 +14,7 @@ namespace pixel_renderer.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
-            var e = new EditorEvent("$nolog_update_fileviewer");
+            var e = new EditorEvent(EditorEventFlags.FILE_VIEWER_UPDATE);
             Runtime.RaiseInspectorEvent(e);
             AssetLibrary.Dispose();
             ImportRecursively(Constants.WorkingRoot, 0);
@@ -55,8 +55,7 @@ namespace pixel_renderer.Assets
                 foreach (var sub_dir in dirs)
                     ImportRecursively(sub_dir, depth++);
             else {
-                EditorEvent e = new($"Import ended at {depth}");
-                Runtime.RaiseInspectorEvent(e);
+                Runtime.Log($"{depth} deep at import time.");
             }
         }
         private static void ImportAndRegister(string _dir)

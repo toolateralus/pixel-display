@@ -570,13 +570,13 @@ namespace pixel_editor
         public static void Print(object? o, bool includeDateTime = false)
         {
             var msg = o.ToString();
-            var e = new EditorEvent(msg, includeDateTime);
+            var e = new EditorEvent(EditorEventFlags.PRINT_NO_ERROR, msg, includeDateTime);
             Editor.QueueEvent(e);
         }
         public static void Error(object? o = null, int? textColorAlterationDuration = null)
         {
             string? msg = o.ToString();
-            EditorEvent e = new(msg, false, false);
+            EditorEvent e = new(EditorEventFlags.LOG_ERROR, msg, false, false);
 
             if (textColorAlterationDuration is not null)
                 e.action = RedTextAsync((int)textColorAlterationDuration);
@@ -606,7 +606,7 @@ namespace pixel_editor
         }
         public static void Clear(bool randomPixel = false)
         {
-            EditorEvent editorEvent = new EditorEvent("");
+            EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE, "");
             editorEvent.ClearConsole = true;
             Editor.QueueEvent(editorEvent);
 
