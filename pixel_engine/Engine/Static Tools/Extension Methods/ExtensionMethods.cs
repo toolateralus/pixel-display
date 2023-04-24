@@ -1,5 +1,4 @@
-﻿using pixel_editor;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -40,7 +39,7 @@ namespace pixel_renderer
             string x = split.First();
             string y = split.Last();
 
-            foreach (var _char in CommandParser.disallowed_chars)
+            foreach (var _char in Constants.disallowed_chars)
             {
                 if (x.Contains(_char))
                     x = x.Replace($"{_char}", "");

@@ -79,27 +79,9 @@ namespace pixel_renderer
         [Method]
         public async Task SetFileAsTexture()
         {
-
-            //EditorEvent e = new("$nolog_get_selected_meta");
-            //object? asset = null;
-            //e.action = (e) => { asset = e.First(); };
-            //Runtime.RaiseInspectorEvent(e);
-            //float time = 0;
-
-            //while (!e.processed && time < 1500)
-            //{
-            //    if (asset != null && asset is Metadata meta)
-            //    {
-            //        texture.SetImage(meta.Path);
-            //        return;
-            //    }
-            //    time += 15f;
-            //    await Task.Delay(15);
-            //}
-
-            var x = Runtime.GetSelectedFileMetadataAsync();
-            await x;
-            texture.SetImage(x.Result.Path);
+            var task = Runtime.GetSelectedFileMetadataAsync();
+            await task;
+            texture.SetImage(task.Result.Path);
         }
         [Method]
         public void CycleSpriteType()

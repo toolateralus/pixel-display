@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using pixel_renderer.FileIO;
+
 namespace pixel_renderer.Assets
 {
     public class Importer

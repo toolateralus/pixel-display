@@ -9,7 +9,22 @@ namespace pixel_renderer
 
     public class Constants
     {
-
+        public static List<char> disallowed_chars = new()
+        {
+            ';',
+            '\0',
+            '(',
+            ')',
+            '"',
+        };
+        private protected static string[] typeIdentifiers = new string[]
+       {
+            "vec:",
+            "int:",
+            "str:",
+            "float:",
+            "bool:",
+       };
         public const int FramerateSampleThreshold = 60;
         public static Vector2 MaxResolution = new(3840, 3840);
         public static Vector2 MinResolution = new(4, 4);

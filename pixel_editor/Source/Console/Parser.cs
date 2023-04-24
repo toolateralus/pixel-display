@@ -20,24 +20,10 @@ namespace pixel_editor
         private const char ArgumentsStart = '(';
         private const char ArgumentsEnd = ')';
         private const string ParameterSeperator = ", ";
-        
+
         // use list for linq methods
-        public static List<char> disallowed_chars = new()
-        {
-            ';',
-            '\0',
-            '(',
-            ')',
-            '"',
-        };
-        private protected static string[] typeIdentifiers = new string[]
-        {
-            "vec:",
-            "int:",
-            "str:",
-            "float:",
-            "bool:",
-        };
+      
+       
         private static void ExecuteCommand(string[] args, Command command)
         {
             try
@@ -55,7 +41,7 @@ namespace pixel_editor
                     }
                     command.args = parsed_objects.ToArray();
                     command.Invoke();
-                } 
+                }
                 else command.Invoke();
             }
             catch (Exception e)
@@ -63,11 +49,11 @@ namespace pixel_editor
                 command.error = e.Message;
             }
         }
-        public static void TryCallLine(string line, List<Command> commands)
+        public static void TryCallLine(string line)
         {
             ParseArguments(line, out string[] args, out _);
             line = ParseLoopParams(line, out string loop_param);
-
+            var commands = Console.Current.LoadedCommands;
             foreach (Command command in commands)
                 if (command.Equals(line))
                 {
@@ -75,7 +61,7 @@ namespace pixel_editor
                     if (command.error != null)
                     {
                         Runtime.Log(command.error);
-                        command.error = null; 
+                        command.error = null;
                         continue;
                     }
                     Command.Success(command.syntax);
@@ -90,44 +76,49 @@ namespace pixel_editor
                 {
                     // string
                     case 0:
-                        try {
-                            value.Add(input); 
+                        try
+                        {
+                            value.Add(input);
                         }
-                        catch (Exception) {  };
+                        catch (Exception) { };
                         continue;
-                        // bool
+                    // bool
                     case 1:
-                        try{
-                            if(bool.TryParse(input, out var val))
+                        try
+                        {
+                            if (bool.TryParse(input, out var val))
                                 value.Add(val);
                         }
-                        catch (Exception) 
-                        { 
-                        
+                        catch (Exception)
+                        {
+
                         };
                         continue;
-                        // int
+                    // int
                     case 2:
-                        try {
-                            if(int.TryParse(input, out var val)) 
-                            value.Add(val);
+                        try
+                        {
+                            if (int.TryParse(input, out var val))
+                                value.Add(val);
                         }
-                        catch (Exception) {  };
+                        catch (Exception) { };
                         continue;
-                        // float
+                    // float
                     case 3:
-                        try {
+                        try
+                        {
                             if (float.TryParse(input, out var val))
                                 value.Add(val);
                         }
-                        catch (Exception) {  };
+                        catch (Exception) { };
                         continue;
-                        // vec2
+                    // vec2
                     case 4:
-                        try{
-                            Vector2 vec = input.ToVector(); 
+                        try
+                        {
+                            Vector2 vec = input.ToVector();
                             value.Add(vec);
-                            
+
                         }
                         catch (Exception) { };
                         continue;
@@ -138,11 +129,11 @@ namespace pixel_editor
         {
             // important : this string gets treated like a null/void variable. //
             object? outArg = "";
-            
+
             arg = RemoveUnwantedChars(arg);
 
             if (command.argumentTypes is null || command.argumentTypes.Length < index)
-                return outArg; 
+                return outArg;
 
             try
             {
@@ -174,21 +165,21 @@ namespace pixel_editor
         public static string ParseLoopParams(string input, out string repeaterArgs)
         {
             string withoutArgs = "";
-            repeaterArgs = ""; 
+            repeaterArgs = "";
             if (input.Contains(Loop))
             {
                 int indexOfStart = input.IndexOf(Loop);
                 int indexOfEnd = input.IndexOf(EndLine);
-                
+
                 for (int i = indexOfStart; i < indexOfEnd; ++i)
                     repeaterArgs += input[i];
 
-                if(repeaterArgs.Length > 0)
+                if (repeaterArgs.Length > 0)
                     withoutArgs = input.Replace(repeaterArgs, "");
             }
             else withoutArgs = input;
             return withoutArgs;
-        } 
+        }
         public static void ParseArguments(string input, out string[] arguments, out string commandPhrase)
         {
             var args_str = "";
@@ -199,31 +190,31 @@ namespace pixel_editor
             if (HasArgs(input))
                 arguments = GetParameterArray(input, ref args_str);
 
-           
+
         }
         private static Vector2 Vec2(string? arg0)
         {
             string[] values = arg0.Split(',');
-            
-            if(values.Length < 2 )
-            return Vector2.Zero; 
+
+            if (values.Length < 2)
+                return Vector2.Zero;
 
             var x = RemoveUnwantedChars(values[0]).ToFloat();
             var y = RemoveUnwantedChars(values[1]).ToFloat();
 
-            return new Vector2(x,y);
+            return new Vector2(x, y);
         }
         private static string String(string arg0)
         {
             foreach (var x in arg0)
-                if (disallowed_chars.Contains(x))
+                if (Constants.disallowed_chars.Contains(x))
                     arg0 = arg0.Replace(x, (char)0);
             return arg0;
         }
         private static string RemoveUnwantedChars(string? arg0)
         {
             foreach (var _char in arg0)
-                if (disallowed_chars.Contains(_char))
+                if (Constants.disallowed_chars.Contains(_char))
                     arg0 = arg0.Replace($"{_char}", "");
             return arg0;
         }
@@ -251,7 +242,7 @@ namespace pixel_editor
             arguments = SplitArgsIntoParams(args_str);
             return arguments;
         }
-        public static bool HasArgs(string input)    
+        public static bool HasArgs(string input)
         {
             return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
         }

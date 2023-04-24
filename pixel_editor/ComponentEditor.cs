@@ -166,7 +166,7 @@ namespace pixel_editor
             }; 
             uiElements.Add(textbox);
             viewer.Children.Add(textbox);
-            Inspector.SetRowAndColumn(textbox, 3, 4, 18, (i += 4) + 4);
+            Inspector.SetRowAndColumn(textbox, 6, 6, 12, (i += 4) + 4);
         }
 
         private void AddBoolCheckBox(Grid viewer, ref int i, FieldInfo field, bool val)

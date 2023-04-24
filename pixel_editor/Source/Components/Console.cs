@@ -287,7 +287,7 @@ namespace pixel_editor
             argumentTypes = null,
             action = (e) =>
             {
-                Editor.Current.fileViewer.Refresh();
+                Editor.Current.fileViewer?.Refresh();
                 Importer.Import();
             },
         };

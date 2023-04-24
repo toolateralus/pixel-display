@@ -14,6 +14,10 @@ namespace pixel_renderer
         [Field]
         [InputField]
         string value = "Write your script here.";
+
+        [Field]
+        string path = "no path selected.";
+
         internal bool lastExecutionResult;
         internal string lastErr;
         [Method]
@@ -26,12 +30,22 @@ namespace pixel_renderer
             if (meta is not null && AssetLibrary.FetchByMeta(meta) is string value)
             {
                 this.value = value;
+                path = meta.pathFromProjectRoot;
+
                 EditorEvent refresh_event = new("$nolog_update_component_editor");
                 Runtime.RaiseInspectorEvent(refresh_event);
             }
-
             else Runtime.Log($"Meta {meta} not found");
 
+        }
+        [Method]
+        public void SaveScriptToPath()
+        {
+            if (AssetLibrary.FetchMetaRelative(path) is Metadata meta)
+            {
+                IO.Write(value, meta);
+                Importer.Import();
+            }
         }
 
         [Method]
@@ -43,6 +57,7 @@ namespace pixel_renderer
             {
                 lastExecutionResult = true;
                 lastErr = script.err;
+                Runtime.Log(lastErr);
             }
             else
             {

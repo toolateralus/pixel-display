@@ -428,7 +428,7 @@ namespace pixel_editor
                 }
 
                 if (line != "")
-                    CommandParser.TryCallLine(line, Console.Current.LoadedCommands);
+                    CommandParser.TryCallLine(line);
             }
         }
         private void OnToggleConsole(object sender, RoutedEventArgs e)
