@@ -140,12 +140,14 @@ namespace pixel_renderer
 
                 if (IsRunning)
                 {
-                    if (Current.stage is null) 
-                        return; 
+                    if (Current.stage is null)
+                        return;
                     StagingHost.Update(Current.stage);
                 }
             }
-            if(IsRunning) Log("renderer has exited unexpectedly.");
+
+            if (IsRunning)
+                Log("renderer has exited unexpectedly.");
 
         }
 

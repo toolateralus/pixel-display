@@ -175,7 +175,7 @@
                     Content="New"
                     Click="NewNodeButtonPressed"
                     x:Name="newButton"/>
-            <Grid Visibility="Hidden" x:Name="FileViewerGrid" Height="Auto" Width="Auto" Grid.ColumnSpan="12" Grid.RowSpan="10" Grid.Row="15">
+            <Grid Visibility="Hidden" x:Name="FileViewerGrid" Height="Auto" Width="Auto" Grid.ColumnSpan="18" Grid.RowSpan="18" Grid.Row="5" Grid.Column="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="3*"/>
                     <RowDefinition Height="3*"/>
@@ -240,7 +240,7 @@
                          x:Name="fileViewerListBox"
                          SelectionChanged="fv_selection_changed" 
                          Grid.Column="0"
-                         Grid.Row="12"
+                         Grid.Row="8"
                          Grid.ColumnSpan="36" 
                          Grid.RowSpan="24"
                          >
