@@ -120,7 +120,6 @@ namespace pixel_editor
         {
             obj.node.RemoveComponent(obj);
         }
-        public void Refresh() => Refresh(grid);
         private void Refresh(Grid grid)
         {
             if (grid != null)
@@ -230,20 +229,21 @@ namespace pixel_editor
                     addComponentActions[i]?.Invoke();
                     return; 
                 }
+            ClearAddComponentTray();
         }
         private void RefreshAddComponentFunctions()
         {
             addComponentFunctions = new()
             {
-                {"Player",    AddPlayer},
+                {"Sprite",    AddSprite},
                 {"Collider",  AddCollider},
-                {"Joint", AddJoint},
+                {"Animator",  AddAnimator},
                 {"Rigidbody", AddRigidbody},
                 {"Softbody",  AddSoftbody},
-                {"Particles",  AddParticles},
-                {"Animator",  AddAnimator},
-                {"Sprite",    AddSprite},
-                {"Lua Script",  AddLuaComponent},
+                {"Lua",       AddLuaComponent},
+                {"Particles", AddParticles},
+                {"Player",    AddPlayer},
+                {"Joint",     AddJoint},
             };
         }
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
@@ -450,7 +450,6 @@ namespace pixel_editor
         {
             Editor.Current.settings.InspectorPosition.X = x;
             Editor.Current.settings.InspectorPosition.Y = y;
-            Refresh(grid);
         }
         private static void HandleEditPressed(object sender, RoutedEventArgs e)
         {

@@ -116,6 +116,13 @@ namespace pixel_renderer
                 }
             NodesBusy = false;
         }
+        public static void SetAndLoadBackground(Metadata meta)
+        {
+            Runtime.Current.GetStage().backgroundMetadata = meta;
+            var bmp = new Bitmap(meta.Path);
+            Runtime.Current.GetStage()?.SetBackground(bmp);
+            Runtime.Current.renderHost.GetRenderer().baseImageDirty = true;
+        }
         public void SetBackground(JImage value)
         {
             background = value;

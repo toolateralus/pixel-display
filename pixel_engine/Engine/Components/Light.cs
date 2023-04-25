@@ -13,9 +13,8 @@ namespace pixel_renderer
         [Field] public float radius = 55;
         [Field] public Pixel color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
         [Field] public bool showDebug = true; 
-        private bool reversing;
         float length = 0;
-        Color[] gradientColors = { Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta };
+        private bool reversing;
         private bool animated = true;
 
         public override void Dispose()
@@ -42,15 +41,37 @@ namespace pixel_renderer
                 Vector2 startPt = center + new Vector2(MathF.Cos(startAngle * CMath.PI / 180) * radius, (float)(Math.Sin(startAngle * CMath.PI / 180) * radius));
                 Vector2 endPt = center + new Vector2(MathF.Cos(startAngle * CMath.PI / 180) * radius * length, (float)(Math.Sin(startAngle * CMath.PI / 180) * radius * length));
 
-                float gradientPos = (float)i / lineCt;
-                int colorSegment = (int)(gradientPos * (gradientColors.Length - 1));
-                float segmentPos = (gradientPos * (gradientColors.Length - 1)) - colorSegment;
-                Pixel currentColor = Pixel.Lerp(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
+                Pixel currentColor = GetGradient(i, lineCt, alpha: 20);
 
-                currentColor.a = 120;
-
-                ShapeDrawer.DrawLine(endPt, startPt /2 , currentColor);
+                ShapeDrawer.DrawLine(endPt, startPt / 2, currentColor);
             }
+        }
+
+        /// <summary>
+        /// <code>
+        ///     Position = the index of the sample to return (between 0 and subdivisions - 1)
+        ///     Subdivisions = the amount of positions possible to sample on the gradient
+        ///     Alpha = the transparency of the output colors (0 - 255)
+        ///     GradientColors = the array to sample
+        /// </code>
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="subdivisions"></param>
+        /// <param name="alpha"></param>
+        /// <param name="gradientColors"></param>
+        /// <returns></returns>
+        public static Pixel GetGradient(int position, int subdivisions = 360, byte alpha = 255, Pixel[]? gradientColors = null)
+        {
+            if (position >= subdivisions)
+                position = subdivisions - 1;
+            
+            gradientColors ??= new Pixel[] { Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta };
+            float gradientPos = (float)position / subdivisions;
+            int colorSegment = (int)(gradientPos * (gradientColors.Length - 1));
+            float segmentPos = (gradientPos * (gradientColors.Length - 1)) - colorSegment;
+            Pixel currentColor = Pixel.Lerp(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
+            currentColor.a = alpha;
+            return currentColor;
         }
 
         private void AnimateLength()

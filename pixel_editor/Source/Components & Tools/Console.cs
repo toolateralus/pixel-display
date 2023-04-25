@@ -453,6 +453,47 @@ namespace pixel_editor
         };
         #endregion
         #region Editor Commands
+
+        public static Command cmd_set_background_from_fileviewer()
+        {
+            var x = new Command();
+            x.phrase = "background;";
+            x.syntax = "background();";
+            x.action = setBackgroundFileViewer;
+            x.argumentTypes = null;
+            x.description = "If the file viewer has an item selected, load that selected file and set it as stage background.";
+            return x;
+        }
+        public static async void setBackgroundFileViewer(object[]? obj)
+        {
+            var foundMetadata = Editor.Current.fileViewer.GetSelectedMeta();
+            if (foundMetadata != null &&
+                Constants.ReadableExtensions.Contains(foundMetadata.extension) &&
+                foundMetadata.extension is not Constants.LuaExt or Constants.Mp3Ext)
+                {
+                    var task = PromptAsync($"Asset {foundMetadata.Name} Found. Do you want to load this background?");
+                    await task;
+                    switch (task.Result)
+                    {
+                        case PromptResult.Yes:
+                            Stage.SetAndLoadBackground(foundMetadata);
+                            Runtime.Log("Background set.");
+                            break;
+                        case PromptResult.No:
+                            Runtime.Log("SetBackground cancelled.");
+                            break;
+                        case PromptResult.Cancel:
+                            Runtime.Log("SetBackground cancelled.");
+                            break;
+                        case PromptResult.Timeout:
+                            Runtime.Log("SetBackground cancelled.");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
         public static Command cmd_set_stage_background_relative()
         {
             var x = new Command(); 
@@ -472,7 +513,8 @@ namespace pixel_editor
                 return;
             }
             var foundMetadata = AssetLibrary.FetchMetaRelative(name);
-            if (foundMetadata != null && foundMetadata.extension == pixel_renderer.Constants.PngExt)
+            if (foundMetadata != null && Constants.ReadableExtensions.Contains(foundMetadata.extension) && 
+                foundMetadata.extension is not Constants.LuaExt or Constants.Mp3Ext)
             {
                 var task = PromptAsync($"Asset {foundMetadata.Name} Found. Do you want to load this background?");
                 await task;
