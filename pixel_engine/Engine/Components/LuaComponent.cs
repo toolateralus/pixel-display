@@ -10,12 +10,12 @@ using System.Windows.Media.TextFormatting;
 
 namespace pixel_renderer
 {
-    public class LuaComponent : Component
+    public class Lua : Component
     {
         [Field]
         [InputField]
         [JsonProperty]
-        string value = "Write your script here.";
+        string value = "print(\"string\") \n return 0 \n end";
 
         [Field]
         [JsonProperty]

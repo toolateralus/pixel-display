@@ -137,7 +137,7 @@ namespace pixel_renderer
         public static Node Standard()
         {
             Node playerNode = Animator.Standard();
-            playerNode.AddComponent<LuaComponent>();
+            playerNode.AddComponent<Lua>();
             playerNode.tag = "Player";
             playerNode.Position = new Vector2(-15, -20);
             playerNode.AddComponent<Player>().takingInput = true;

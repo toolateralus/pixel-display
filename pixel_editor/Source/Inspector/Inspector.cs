@@ -482,9 +482,9 @@ namespace pixel_editor
         //   where data.AttributeType == typeof(null)
         //   select field;
 
-        LuaComponent AddLuaComponent()
+        Lua AddLuaComponent()
         {
-            return lastSelectedNode?.AddComponent<LuaComponent>();
+            return lastSelectedNode?.AddComponent<Lua>();
         }
         Joint AddJoint()
         {

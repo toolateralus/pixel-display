@@ -72,29 +72,9 @@ namespace pixel_renderer
         public static void RegisterAction(object caller, Action action, Key key, InputEventType type = InputEventType.KeyDown)
         {
             InputAction item = new(action, key, type: type);
-           
-            if (caller is Component c)
-            {
-                c.node.OnDestroyed += () =>
-                {
-                    Runtime.Log("InputAction auto-deleted itself on event OnDestroy");
-                    InputActions.Remove(item);
-                };
-            }
-            if (caller is Node n)
-            {
-                n.OnDestroyed += () =>
-                {
-                    Runtime.Log("InputAction auto-deleted itself on event OnDestroy");
-                    InputActions.Remove(item);
-                };
-            }
-            if (caller is Action a)
-            {
-                a += () => InputActions.Remove(item);
-            }
-            else Runtime.Log("Register action caller did not qualify for auto-removal, you must handle it or unexpected behavior will occur");
-
+            if (caller is Component c) c.node.OnDestroyed += () => InputActions.Remove(item);
+            if (caller is Node n) n.OnDestroyed += () => InputActions.Remove(item);
+            if (caller is Action a) a += () => InputActions.Remove(item);
             InputActions.Add(item);
         }
     }

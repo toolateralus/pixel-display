@@ -17,7 +17,7 @@ namespace pixel_renderer
         }); 
         public static LuaFunction print() => new((p) =>
         {
-            var state = Lua.FromIntPtr(p);
+            var state = KeraLua.Lua.FromIntPtr(p);
             var n = state.GetTop();
             for (int i = 1; i <= n; ++i)
             {
@@ -61,7 +61,7 @@ namespace pixel_renderer
         });
         public static LuaFunction getnode() => new((p) =>
         {
-            var state = Lua.FromIntPtr(p);
+            var state = KeraLua.Lua.FromIntPtr(p);
             var n = state.GetTop();
             for (int i = 1; i <= n; ++i)
             {
@@ -95,7 +95,7 @@ namespace pixel_renderer
 
         public static LuaFunction list_env() => new((p) =>
         {
-            var state = Lua.FromIntPtr(p);
+            var state = KeraLua.Lua.FromIntPtr(p);
             var n = state.GetTop();
             for (int i = 1; i <= n; ++i)
             {
@@ -119,7 +119,7 @@ namespace pixel_renderer
 
 
         static Dictionary<string, object> env_vars = new();
-        private static readonly Lua state = new();
+        private static readonly KeraLua.Lua state = new();
         public LUA() => RefreshFunctions();
         public void RefreshFunctions()
         {

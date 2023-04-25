@@ -4,7 +4,6 @@ using pixel_renderer.Assets;
 using System.Numerics;
 using System.Linq;
 using System.Windows.Media;
-using System;
 
 namespace pixel_renderer
 {
@@ -21,6 +20,7 @@ namespace pixel_renderer
         /// the bounding box of the text element
         /// </summary>
         public Curve posCurve;
+        const string alphabet = "abcdefghijklmnopqrstuvwxyz ";
         public string Content
         {
             get => content;
@@ -30,7 +30,6 @@ namespace pixel_renderer
                 RefreshCharacters();
             }
         } 
-        const string alphabet = "abcdefghijklmnopqrstuvwxyz ";
         [Field]
         private string content = "abc";
         public override void Awake()
