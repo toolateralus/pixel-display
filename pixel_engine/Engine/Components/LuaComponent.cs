@@ -50,7 +50,7 @@ namespace pixel_renderer
         [Method]
         public void Run()
         {
-            var execution = Runtime.Current.Lua.Script(value);
+            var execution = LUA.FromString(value);
             if (execution.result)
             {
                 lastExecutionResult = true;

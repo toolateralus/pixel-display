@@ -6,6 +6,7 @@ using System.Windows.Media.TextFormatting;
 using System.Windows.Controls;
 using System.Numerics;
 using System.Dynamic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace pixel_renderer
 {
@@ -75,7 +76,7 @@ namespace pixel_renderer
         public abstract void Dispose(); 
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
-        public bool TryGetComponent<T>(out T result, int index = 0) where T : Component
+        public bool TryGetComponent<T>([NotNullWhen(true)]out T result, int index = 0) where T : Component
         {
             result = node.GetComponent<T>(index);
             return result != null; 

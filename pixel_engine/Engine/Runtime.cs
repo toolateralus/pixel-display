@@ -61,7 +61,7 @@ namespace pixel_renderer
         public RenderHost renderHost;
         public StagingHost stagingHost = new();
         public Project project;
-        public LuaInterop Lua = new();
+        public LUA Lua = new();
         public ProjectSettings projectSettings;
         
         private void GetProjectSettings()

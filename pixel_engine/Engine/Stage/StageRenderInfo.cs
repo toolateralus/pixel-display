@@ -81,6 +81,7 @@ namespace pixel_renderer
         {
             if (refObject is not Sprite sprite)
                 throw new ArgumentException($"Must pass in object of type {nameof(Sprite)}");
+
             ViewportOffset = sprite.viewportOffset;
             ViewportScale = sprite.viewportScale.GetDivideSafe();
             camDistance = sprite.camDistance;
