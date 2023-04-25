@@ -168,12 +168,12 @@ namespace pixel_renderer
         /// <param name="message"></param>
         public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
-           EditorEvent e = new(EditorEventFlags.PRINT_NO_ERROR, obj.ToString(), includeDateTime, clearConsole);
+           EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), includeDateTime, clearConsole);
            InspectorEventRaised?.Invoke(e);
         }
         public static void Error(object obj)
         {
-            EditorEvent e = new(EditorEventFlags.DO_NOT_PRINT | EditorEventFlags.LOG_ERROR, obj.ToString(), true, false);
+            EditorEvent e = new(EditorEventFlags.DO_NOT_PRINT | EditorEventFlags.PRINT_ERR, obj.ToString(), true, false);
             InspectorEventRaised?.Invoke(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e)

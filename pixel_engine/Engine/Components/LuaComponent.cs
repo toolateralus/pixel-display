@@ -1,4 +1,5 @@
-﻿using pixel_renderer.Assets;
+﻿using Newtonsoft.Json;
+using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,11 @@ namespace pixel_renderer
     {
         [Field]
         [InputField]
+        [JsonProperty]
         string value = "Write your script here.";
 
         [Field]
+        [JsonProperty]
         string path = "no path selected.";
 
         internal bool lastExecutionResult;
@@ -43,6 +46,12 @@ namespace pixel_renderer
         {
             if (AssetLibrary.FetchMetaRelative(path) is Metadata meta)
             {
+                IO.Write(value, meta);
+                Importer.Import();
+            } else
+            {
+                meta = new("Script_Test", Constants.WorkingRoot + "\\" + path, Constants.LuaExt);
+                AssetLibrary.Register(meta, value);
                 IO.Write(value, meta);
                 Importer.Import();
             }

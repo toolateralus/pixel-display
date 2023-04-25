@@ -229,7 +229,8 @@
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-                <ListBox Background="Black"
+                <ListBox 
+                    Background="Black"
                          Foreground="White"
                          FontSize="3.95"
                          FontStyle="Normal"

@@ -4,8 +4,8 @@ namespace pixel_renderer
     [Flags]
     public enum EditorEventFlags
     {
-        PRINT_NO_ERROR = 0,
-        LOG_ERROR = 1,
+        PRINT = 0,
+        PRINT_ERR = 1,
         DO_NOT_PRINT = 2,
         COMPONENT_EDITOR_UPDATE = 4,
         FILE_VIEWER_UPDATE = 8,

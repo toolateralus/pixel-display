@@ -108,6 +108,7 @@ namespace pixel_renderer
         #region Input 
         private void Jump()
         {
+            Runtime.Error("test_error");
             if (isGrounded)
             {
                 var meta = AssetLibrary.FetchMetaRelative(@"\Assets\Audio Assets\dog_barking.mp3");

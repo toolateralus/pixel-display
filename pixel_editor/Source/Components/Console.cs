@@ -570,13 +570,13 @@ namespace pixel_editor
         public static void Print(object? o, bool includeDateTime = false)
         {
             var msg = o.ToString();
-            var e = new EditorEvent(EditorEventFlags.PRINT_NO_ERROR, msg, includeDateTime);
+            var e = new EditorEvent(EditorEventFlags.PRINT, msg, includeDateTime);
             Editor.QueueEvent(e);
         }
         public static void Error(object? o = null, int? textColorAlterationDuration = null)
         {
             string? msg = o.ToString();
-            EditorEvent e = new(EditorEventFlags.LOG_ERROR, msg, false, false);
+            EditorEvent e = new(EditorEventFlags.PRINT_ERR, msg, false, false);
 
             if (textColorAlterationDuration is not null)
                 e.action = RedTextAsync((int)textColorAlterationDuration);

@@ -25,11 +25,38 @@ namespace pixel_editor
         }
         protected internal void ExecuteEditorEvent(EditorEvent e)
         {
-
-
             switch (e.flags)
             {
+                case EditorEventFlags.PRINT:
+                    break;
+                case EditorEventFlags.PRINT_ERR:
+                    Console.Error(e.message, 1);
+                    break;
+
+
                 case EditorEventFlags.DO_NOT_PRINT:
+                case EditorEventFlags.COMPONENT_EDITOR_UPDATE:
+                    var component = Editor.Current.componentEditor.component;
+                    Editor.Current?.componentEditor.Refresh(component);
+                    break;
+
+                case EditorEventFlags.FILE_VIEWER_UPDATE:
+                    Editor.Current.fileViewer.Refresh();
+                    break;
+
+                case EditorEventFlags.GET_FILE_VIEWER_SELECTED_METADATA:
+                    var obj = Editor.fileViewer.GetSelectedMeta();
+                    if (obj != null)
+                        e.args = new object[] { obj };
+                    e.action.Invoke(e.args);
+                    return;
+
+                case EditorEventFlags.GET_FILE_VIEWER_SELECTED_OBJECT:
+                    var obj1 = Editor.fileViewer.GetSelectedObject();
+                    if (obj1 != null)
+                        e.args = new object[] { obj1 };
+                    e.action.Invoke(e.args);
+                    return;
                 case EditorEventFlags.FOCUS_NODE:
                     if (e.args.Any() && e.args.First() is Node node)
                     {
@@ -40,33 +67,7 @@ namespace pixel_editor
                         StageCameraTool.TryFollowNode(node);
                     }
                     break;
-                case EditorEventFlags.PRINT_NO_ERROR:
-                    
-                    break;
-                case EditorEventFlags.LOG_ERROR:
-                    Console.Error(e.message, 1);
-                    break;
-                case EditorEventFlags.COMPONENT_EDITOR_UPDATE:
-                    var component = Editor.Current.componentEditor.component;
-                    Editor.Current?.componentEditor.Refresh(component);
-                    break;
-                case EditorEventFlags.FILE_VIEWER_UPDATE:
-                    Editor.Current.fileViewer.Refresh();
-                    break;
-                case EditorEventFlags.GET_FILE_VIEWER_SELECTED_METADATA:
-                    var obj = Editor.fileViewer.GetSelectedMeta();
-                    if (obj != null)
-                        e.args = new object[] { obj };
-                    e.action.Invoke(e.args);
-                    return;
-                case EditorEventFlags.GET_FILE_VIEWER_SELECTED_OBJECT:
-                    var obj1 = Editor.fileViewer.GetSelectedObject();
 
-                    if (obj1 != null)
-                        e.args = new object[] { obj1 };
-                    e.action.Invoke(e.args);
-
-                    return;
             }
 
             e.action?.Invoke(e.args);
