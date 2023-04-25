@@ -8,42 +8,46 @@ namespace pixel_renderer
 {
     public class Light : Component
     {
+        [Field] public float heightModifier = 2.5f;
         [Field] public float brightness = 25f;
         [Field] public Vector2 startPos = Vector2.One;
         [Field] public float radius = 55;
         [Field] public Pixel color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
-        [Field] public bool showDebug = true; 
+        [Field] public bool showDebug = true;
         float length = 0;
         private bool reversing;
         private bool animated = true;
-
+        Curve curve = Curve.Linear(-Vector2.One, Vector2.One, 1, 250);
         public override void Dispose()
         {
 
         }
         public override void OnDrawShapes()
         {
-
             if (!showDebug) return;
-
-            const float radius = 5f; // radius of the circle
             var center = node.Position;
             
             if(animated)
                 AnimateLength();
 
-            int lineCt = (int)(120 * (length * length));
-            float sliceAngle = 360f / lineCt * length; // divide circle into 6 equal slices
+            int lineCt = (int)(240 * (length * length));
+            float sliceAngle = 360f / lineCt; // divide circle into 6 equal slices
 
             for (int i = 0; i < lineCt; i++)
             {
                 float startAngle = i * sliceAngle;
-                Vector2 startPt = center + new Vector2(MathF.Cos(startAngle * CMath.PI / 180) * radius, (float)(Math.Sin(startAngle * CMath.PI / 180) * radius));
-                Vector2 endPt = center + new Vector2(MathF.Cos(startAngle * CMath.PI / 180) * radius * length, (float)(Math.Sin(startAngle * CMath.PI / 180) * radius * length));
+                float angle = startAngle * CMath.PI / 180;
+                
+                float cos = MathF.Cos(angle) * length * radius;
+                double sin = Math.Sin(angle * length * radius);
+                
+                Vector2 A = (new Vector2(cos, (float)sin));
+                Vector2 startPt = center;
+                Vector2 endPt = startPt + A * 2; 
 
-                Pixel currentColor = GetGradient(i, lineCt, alpha: 20);
+                Pixel currentColor = GetGradient(i, lineCt, alpha: 5);
 
-                ShapeDrawer.DrawLine(endPt, startPt / 2, currentColor);
+                ShapeDrawer.DrawLine(endPt, startPt/ heightModifier, currentColor);
             }
         }
 
