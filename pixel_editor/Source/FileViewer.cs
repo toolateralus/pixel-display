@@ -3,6 +3,7 @@ using pixel_renderer.Assets;
 using pixel_renderer.FileIO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,43 +35,59 @@ namespace pixel_editor
                 // Sort the list of Metadata objects by their file extension
                 lib = lib.OrderBy(m => GetExtensionIndex(m.extension)).ToList();
 
-
                 foreach (var item in lib)
                 {
                     if (item.extension != lastExt)
+                    {
                         listBox.Items.Add(GetExtensionFullName(item.extension));
-
-                    lastExt = item.extension;
-                    listBox.Items.Add(item.pathFromProjectRoot);
+                        lastExt = item.extension;
+                    }
+                    var path = item.pathFromProjectRoot;
+                    listBox.Items.Add(path);
                 }
-
                 listBox.ScrollIntoView(lib.First().pathFromProjectRoot);
             }
-
-            listBox.ScrollIntoView(lib.First().pathFromProjectRoot);
         }
-
+        private static Color GetColorFromExtension(string extension)
+        {
+            switch (extension)
+            {
+                case ".bmp":
+                    return Color.Red;
+                case ".png":
+                    return Color.Green;
+                case ".jpg":
+                    return Color.Blue;
+                case ".mp3":
+                    return Color.Orange;
+                case ".asset":
+                    return Color.Purple;
+                case ".lua":
+                    return Color.Teal;
+                default:
+                    return Color.Black;
+            }
+        }
         private string GetExtensionFullName(string ext)
         {
             switch (ext)
             {
                 case ".bmp":
-                    return "\t- - - Bitmap Image Files - - -\n";
+                    return "\n\t- - - Bitmap Image Files - - -\n";
                 case ".png":
-                    return "\t- - - Png Image Files - - -\n";
+                    return "\n\t- - - Png Image Files - - -\n";
                 case ".jpg":
-                    return "\t- - - Jpeg Image Files - - -\n";
+                    return "\n\t- - - Jpeg Image Files - - -\n";
                 case ".mp3":
-                    return "\t- - - Mp3 Audio Files - - -\n";
+                    return "\n\t- - - Mp3 Audio Files - - -\n";
                 case ".asset":
-                    return "\t- - - User Asset Files - - -\n";
+                    return "\n\t- - - User Asset Files - - -\n";
                 case ".lua":
-                    return "\t- - - Lua Script Files - - -\n";
+                    return "\n\t- - - Lua Script Files - - -\n";
                 default:
-                    return "\t- !! - Unknown Files - !! -\n"; // Sort unknown file extensions to the end
+                    return "\n\t- !! - Unknown Files - !! -\n"; // Sort unknown file extensions to the end
             }
         }
-
         private int GetExtensionIndex(string extension)
         {
             switch (extension)

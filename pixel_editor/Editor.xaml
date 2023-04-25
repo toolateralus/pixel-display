@@ -235,7 +235,6 @@
                          FontSize="3.95"
                          FontStyle="Normal"
                          FontStretch="SemiCondensed"
-                         FontFamily="MS Gothic"
                          Height="auto" 
                          Width="auto" 
                          x:Name="fileViewerListBox"

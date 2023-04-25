@@ -3,13 +3,19 @@ using System.Drawing;
 using pixel_renderer.Assets;
 using System.Numerics;
 using System.Linq;
+using System.Windows.Media;
+using System;
 
 namespace pixel_renderer
 {
     public enum InterpolationType { Linear, Exponential, ExponentialSqrd}
 
     public class Text : Image
-    {
+    { 
+        public static ICollection<System.Windows.Media.FontFamily> GetSystemFonts()
+        {
+            return Fonts.SystemFontFamilies;
+        }
         public Dictionary<char , JImage> font_model = new();
         /// <summary>
         /// the bounding box of the text element
