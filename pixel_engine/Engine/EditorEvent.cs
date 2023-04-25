@@ -7,10 +7,8 @@ namespace pixel_renderer
         PRINT_NO_ERROR = 0,
         LOG_ERROR = 1,
         DO_NOT_PRINT = 2,
-
         COMPONENT_EDITOR_UPDATE = 4,
         FILE_VIEWER_UPDATE = 8,
-
         GET_FILE_VIEWER_SELECTED_METADATA = 16,
         GET_FILE_VIEWER_SELECTED_OBJECT = 32,
         FOCUS_NODE = 64,
