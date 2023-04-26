@@ -71,11 +71,15 @@ namespace pixel_core
         public Action OnDestroyed; 
         public Queue<Action> ComponentActionQueue { get; private set; } = new();
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
+        [Field]
         [JsonProperty] public Stage parentStage;
         [JsonProperty] public Stage ParentStage 
         {
             get
-            { 
+            {
+                if (parentStage is null)
+                    parentStage = Interop.GetStage()
+                        ;
                 return parentStage ?? throw new NullStageException();
             } 
             set => parentStage = value; 

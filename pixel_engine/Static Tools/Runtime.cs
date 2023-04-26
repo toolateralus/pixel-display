@@ -73,6 +73,7 @@ namespace pixel_core
             Interop.OnDrawCircle += Interop_OnDrawCircle;
             Interop.OnDrawLine += Interop_OnDrawLine;
             Interop.OnProjectGotten += Interop_OnProjectGotten;
+            Interop.OnDefaultStageRequested += () => SetStage(StagingHost.Standard());
             Interop.OnProjectSet += SetProject;
             
             Interop.OnStageGotten += GetStage;
@@ -233,7 +234,8 @@ namespace pixel_core
                 return;
             }
             IsRunning = true;
-
+            if (Current.GetStage() is Stage stage)
+                Log($"Stage is fully awake: {stage.Awake()}");
 
         }
         /// <summary>
@@ -287,7 +289,7 @@ namespace pixel_core
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
                 " A Default will be instantiated and added to the project at the requested index.");
 
-            Stage stage = Stage.Standard();
+            Stage stage = StagingHost.Standard();
             Current.project.AddStage(stage);
             return stage;
         }

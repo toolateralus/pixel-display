@@ -25,11 +25,14 @@ namespace pixel_core
         {
             if (stagesMeta.Count == 0 || stagesMeta.Count <= index)
             {
-                Interop.Log("No stage found. Stage not set.");
+                Interop.Log("No stage found");
+                Interop.InstantiateDefaultStageIntoProject();
                 return; 
             }
+
             if (IO.ReadJson<Stage>(stagesMeta[index]) is Stage stage)
                 Interop.SetStage(stage);
+            else Interop.InstantiateDefaultStageIntoProject();
         }
         public void Save()
         {

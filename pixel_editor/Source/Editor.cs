@@ -102,7 +102,7 @@ namespace pixel_editor
             
             Tools = Tool.InitializeToolkit();
 
-            OnStageSet(Stage.Standard());
+            OnStageSet(StagingHost.Standard());
 
             OnProjectSet(Runtime.Current.project);
 

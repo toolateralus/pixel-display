@@ -17,6 +17,7 @@ namespace pixel_core
         
         public static event Action<Project>? OnProjectSet;
         public static event Func<Project>? OnProjectGotten;
+        public static event Action OnDefaultStageRequested;
         
         public static event Action<EditorEvent>? OnEditorEventRaised;
         public static event Func<Task<Metadata>>? OnFileViewer_SelectedMetadata_Query;
@@ -54,6 +55,15 @@ namespace pixel_core
         internal static Task<Metadata> GetSelectedFileMetadataAsync()
         {
             return OnFileViewer_SelectedMetadata_Query?.Invoke(); 
+        }
+        
+        
+        internal protected static void InstantiateDefaultStageIntoProject()
+        {
+            Log("No stage found, either the requested index was out of range or no stages were found in the project." +
+                " A Default will be instantiated and added to the project at the requested index.");
+
+             OnDefaultStageRequested?.Invoke();
         }
 
         internal static void RaiseInspectorEvent(EditorEvent e)

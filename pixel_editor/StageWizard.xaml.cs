@@ -86,7 +86,7 @@ namespace pixel_editor
             int count = nodeCtTxt.Text.ToInt();
             var name = stageNameTxt.Text.ToFileNameFormat();
             
-            var stage = Stage.Standard();
+            var stage = StagingHost.Standard();
 
             for (int i = 0; i < count; i++) 
                 stage.AddNode(Rigidbody.Standard());

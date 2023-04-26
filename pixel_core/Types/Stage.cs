@@ -57,7 +57,7 @@ namespace pixel_core
         /// Checks whether all of the nodes in the stages have or havent been awoken, and if not, calls awake.
         /// </summary>
         /// <returns></returns>
-        public bool IsFullyAwake()
+        public bool Awake()
         {
             var awokenNodes = 0; 
             int count = nodes.Count;
@@ -72,15 +72,7 @@ namespace pixel_core
             return true;
 
         }
-        public void Awake()
-        {
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                Node node = nodes[i];
-                node.ParentStage = this;
-                node.Awake();
-            }
-        }
+        
         public void Update()
         {
             NodesBusy = true;
@@ -271,45 +263,7 @@ namespace pixel_core
             }
         }
 
-        public static Stage Standard()
-        {
-            var nodes = new List<Node>();
-
-            Node camera = new("camera");
-            camera.AddComponent<Camera>();
-            camera.Position = new(0,0); 
-
-            
-            Node textTest = new("text");
-            var img = textTest.AddComponent<Text>();
-            
-            //TODO: Eliminate this confusion, I don't know which one's even in use atm.
-            img.viewportSize = new(25, 25);
-            textTest.Scale = new(25, 25);
-            img.viewportPosition = Vector2.Zero;
-            textTest.Position = Vector2.Zero;
-
-
-            Node light = new("light");
-            var lt = light.AddComponent<Light>();
-            light.Position = new(50, -50);
-            lt.brightness = 0.9f;
-            lt.radius = 10;
-
-            nodes.Add(textTest);
-            nodes.Add(light);
-            nodes.Add(camera);
-
-            for (int i = 0; i < 5; i++)
-            {
-                Node rbNode = Rigidbody.Standard();
-                rbNode.Position = new(i * 20, -20);
-                nodes.Add(rbNode);
-            }
-
-            var stage = new Stage("default stage", DefaultBackgroundMetadata, nodes);
-            return stage;
-        }
+       
         public void AddNodes(List<Node> nodes) 
         {
             foreach (var node in nodes)
@@ -370,7 +324,7 @@ namespace pixel_core
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        internal Stage(string Name, Metadata backgroundMetadata, List<Node> nodes, string? existingUUID = null) : this()
+        public Stage(string Name, Metadata backgroundMetadata, List<Node> nodes, string? existingUUID = null) : this()
         {
             this.Name = Name;
             UUID = existingUUID ?? pixel_core.Statics.UUID.NewUUID();
