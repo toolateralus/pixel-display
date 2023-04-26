@@ -59,7 +59,7 @@ namespace pixel_core
             if (isGrounded)
                 isGrounded = false;
             
-            bool? playing = anim.GetAnimation()?.playing;
+            bool? playing = anim?.GetAnimation()?.playing;
 
             moveAnimation(playing);
 
@@ -72,14 +72,14 @@ namespace pixel_core
 
             void moveAnimation(bool? playing)
             {
-                if (rb is not null)
+                if (rb is not null && playing.HasValue)
                     if (rb.velocity.Length() < 0.05f)
                     {
-                        anim.Stop();
-                        sprite.texture.SetImageRelative("\\Assets\\Animations\\Dog walking\\dog_standing.bmp");
+                        anim?.Stop();
+                        sprite?.texture.SetImageRelative("\\Assets\\Animations\\Dog walking\\dog_standing.bmp");
                     }
                     else if (playing.HasValue && !playing.Value)
-                        anim.Start();
+                        anim?.Start();
             }
         }
         public override void OnCollision(Collision collider)

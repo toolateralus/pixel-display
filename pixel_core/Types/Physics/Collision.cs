@@ -30,7 +30,7 @@ namespace pixel_core.types.physics
         public static void SetActive(bool value) => AllowEntries = value;
         public static void Step()
         {
-            if (Interop.GetStage() is not Stage stage)
+            if (Interop.Stage is not Stage stage)
                 return;
 
             var area = ProjectSettings.PhysicsArea;

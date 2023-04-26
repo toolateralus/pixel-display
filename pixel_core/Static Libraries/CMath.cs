@@ -25,7 +25,6 @@
             X = -v.X,
             Y = -v.Y,
         };
-
         public static Vector3 Negate(Vector3 v) => new()
         {
             X = -v.X,

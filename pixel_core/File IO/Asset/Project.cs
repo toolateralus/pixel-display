@@ -28,7 +28,7 @@ namespace pixel_core
             }
 
             if (IO.ReadJson<Stage>(stagesMeta[index]) is Stage stage)
-                Interop.SetStage(stage);
+                Interop.Stage = stage;
             else Interop.InstantiateDefaultStageIntoProject();
         }
         public void Save()

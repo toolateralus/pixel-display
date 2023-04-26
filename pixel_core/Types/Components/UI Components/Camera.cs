@@ -6,7 +6,7 @@ namespace pixel_core
     {
         public CameraInfo? camInfo;
         public static Camera? First =>
-            Interop.GetStage()?.GetAllComponents<Camera>().FirstOrDefault();
+            Interop.            Stage?.GetAllComponents<Camera>().FirstOrDefault();
         public override void Draw(RendererBase renderer) => camInfo?.Draw(renderer);
         public override void Dispose()
         {

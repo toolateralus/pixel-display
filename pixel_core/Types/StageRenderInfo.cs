@@ -118,7 +118,7 @@ namespace pixel_core
 
             Array.Clear(zBuffer);
 
-            if (Interop.GetStage() is Stage stage)
+            if (Interop.Stage is Stage stage)
             {
                 SpriteInfo bgSprite = CameraSpanImageSprite(renderer.baseImage, stage.bgTransform, stage.backgroundFiltering);
                 DrawSprites(stage.StageRenderInfo, resolution, renderer, new() { bgSprite });

@@ -143,7 +143,7 @@ namespace pixel_core
         {
             get
             {
-                var lights = Interop.GetStage().GetAllComponents<Light>();
+                var lights = Interop.Stage.GetAllComponents<Light>();
                 if (!lights.Any())
                     return null;
                 return lights.First();

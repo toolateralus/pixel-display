@@ -45,7 +45,7 @@ namespace pixel_core
         #region Other Constructors
         public Node()
         {
-            if (Interop.IsRunning && Interop.GetStage() is Stage stage)
+            if (Interop.IsRunning && Interop.Stage is Stage stage)
                 stage.AddNode(this);
 
             _uuid = Statics.UUID.NewUUID();
@@ -79,7 +79,7 @@ namespace pixel_core
             get
             {
                 if (parentStage is null)
-                    parentStage = Interop.GetStage()
+                    parentStage = Interop.Stage
                         ;
                 return parentStage ?? throw new NullStageException();
             }
@@ -140,8 +140,8 @@ namespace pixel_core
                 return;
             }
 
-            if (!Interop.GetStage().nodes.Contains(child))
-                Interop.GetStage()?.AddNode(child);
+            if (!Interop.Stage.nodes.Contains(child))
+                Interop.                Stage?.AddNode(child);
 
             children ??= new();
 
@@ -469,7 +469,7 @@ namespace pixel_core
         {
 
             var clone = projectile.Clone();
-            var stage = Interop.GetStage();
+            var stage = Interop.Stage;
 
             if (stage is null)
                 throw new EngineInstanceException("Stage was not initialized during a clone or instantiate call.");

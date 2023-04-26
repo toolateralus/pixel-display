@@ -144,7 +144,7 @@ namespace pixel_core
         #region Lighting
         public Light? GetFirstLight()
         {
-            var lights = Interop.GetStage().GetAllComponents<Light>();
+            var lights = Interop.Stage.GetAllComponents<Light>();
             if (!lights.Any())
                 return null;
             return lights.First();

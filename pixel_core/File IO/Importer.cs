@@ -15,6 +15,7 @@ namespace pixel_core.Assets
         /// </summary>
         public static void Import(bool showMessage = false)
         {
+            Interop.OnImport?.Invoke(); 
             var e = new EditorEvent(EditorEventFlags.FILE_VIEWER_UPDATE);
             Interop.RaiseInspectorEvent(e);
             AssetLibrary.Dispose();
@@ -22,7 +23,6 @@ namespace pixel_core.Assets
         }
         private static List<Metadata> Import(string directory, string ext)
         {
-
             List<Metadata> collection = new();
 
             if (!Directory.Exists(directory))

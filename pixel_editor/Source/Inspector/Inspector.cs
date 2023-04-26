@@ -163,7 +163,7 @@ namespace pixel_editor
 
         private int AddTransform(Grid grid, int index)
         {
-            pixel_core.Node.TransformComponent transform = new()
+            TransformComponent transform = new()
             {
                 node = lastSelectedNode,
                 position = lastSelectedNode.Position,
@@ -234,19 +234,45 @@ namespace pixel_editor
         }
         private void RefreshAddComponentFunctions()
         {
-            addComponentFunctions = new()
+            addComponentFunctions ??= new();
+            addComponentFunctions.Clear();
+            
+
+            var types = Runtime.AllComponents;
+            foreach (var type in types)
             {
-                {"Sprite",    AddSprite},
-                {"Collider",  AddCollider},
-                {"Animator",  AddAnimator},
-                {"Rigidbody", AddRigidbody},
-                {"Softbody",  AddSoftbody},
-                {"Lua",       AddLuaComponent},
-                {"Particles", AddParticles},
-                {"Player",    AddPlayer},
-                {"Joint",     AddJoint},
-            };
+
+                var attr = type.GetCustomAttribute(typeof(HideFromEditorAttribute));
+
+                if (attr is not null)
+                    continue; 
+
+                if (!addComponentFunctions.ContainsKey(type.Name))
+                    AddAndInstantiateComponent(type);
+            }
         }
+
+        private void AddAndInstantiateComponent(Type type)
+        {
+            addComponentFunctions.Add(type.Name, () =>
+            {
+                Component? v = (Component)Activator.CreateInstance(type);
+
+                if (lastSelectedNode is null)
+                    return null;
+
+                v.node = lastSelectedNode;
+
+                if (lastSelectedNode.Components.ContainsKey(type))
+                    lastSelectedNode.Components[type].Add(v);
+                else lastSelectedNode?.Components.Add(type, new() { v });
+
+                v.Awake();
+
+                return v;
+            });
+        }
+
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
             if(e.RoutedEvent != null)

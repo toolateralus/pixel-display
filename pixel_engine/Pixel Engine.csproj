@@ -23,4 +23,8 @@
     <ProjectReference Include="..\pixel_core\Pixel Core.csproj" />
   </ItemGroup>
 	
+  <ItemGroup>
+    <Folder Include="My Scripts\" />
+  </ItemGroup>
+	
 </Project>

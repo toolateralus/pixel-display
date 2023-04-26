@@ -2,17 +2,18 @@
 using pixel_core.FileIO;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
-using pixel_core.FileIO;
 using System.Drawing;
 using pixel_core.Statics;
 using pixel_core.types.physics;
+using System.Reflection;
+using System.ComponentModel;
+using Component = pixel_core.types.Components.Component;
+using System.Diagnostics;
 
 namespace pixel_core
 {
@@ -27,6 +28,24 @@ namespace pixel_core
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
         public static List<System.Windows.Controls.Image> OutputImages = new();
+        /// <summary>
+        /// This is a list of every component found in PixelEngine and PixelCore Assemblies.
+        /// </summary>
+        public static List<Type> AllComponents = new();
+
+        public void GetAllTypes()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Type[] types = assembly.GetTypes();
+
+            Interop.GetAllTypes();
+
+            foreach (Type type in types.Where(t => t.IsSubclassOf(typeof(Component))))
+                AllComponents.Add(type);
+
+           AllComponents = AllComponents.Concat(Interop.AllComponents).ToList();
+        }
+
         public static Runtime Current
         {
             get
@@ -62,6 +81,10 @@ namespace pixel_core
 
         private Runtime(Project project)
         {
+            // for the editor.
+            Interop.OnImport += GetAllTypes;
+            GetAllTypes();
+
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
             current = this;
             this.project = project;
@@ -93,6 +116,8 @@ namespace pixel_core
             Initialized = true;
             project.TryLoadStage(0);
             GetProjectSettings();
+
+            Importer.Import();
 
         }
 

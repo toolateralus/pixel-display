@@ -22,7 +22,7 @@ namespace pixel_core
         public void AttachBodiesByName()
         {
             A = node;
-            if (Interop.GetStage() is Stage stage)
+            if (Interop.Stage is Stage stage)
             {
                 var b = stage.FindNode(NameB);
                 if (b is null)

@@ -31,16 +31,16 @@ namespace pixel_core.Statics
         public static char[] unsupported_chars = { '_', '-', '.', '`' };
         public static char[] int_chars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-        public const string ImagesDir = "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
+        public const string ImagesDir = "\\Images";      // Images Import folder (temporary solution until assets are done, for importing backgrounds)
         public const string ProjectsDir = "\\Projects"; // Project files 
-        public const string AssetsDir = "\\Assets";   // Asset files (user - created)
-        public const string StagesDir = "\\Stages"; //Stage files
+        public const string AssetsDir = "\\Assets";    // Asset files (user - created)
+        public const string StagesDir = "\\Stages";   //Stage files
         // metadata is saved next to all files.
 
-        public const string AssetsFileExtension = ".asset";  // .asset {Pixel Asset Data}
+        public const string AssetsFileExtension = ".asset";     // .asset {Pixel Asset Data}
         public const string ProjectFileExtension = ".pixel";   // .pixel {Pixel Project}
         public const string MetadataFileExtension = ".meta";  // .meta {File Metadata} 
-        public const string StageFileExtension = ".stage";    // .stage {Stage File}
+        public const string StageFileExtension = ".stage";   // .stage {Stage File}
 
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
 

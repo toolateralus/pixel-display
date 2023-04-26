@@ -1,9 +1,11 @@
 ﻿using pixel_core.types.Components;
+using pixel_editor;
 using System;
 using System.Numerics;
 
 namespace pixel_core
 {
+    [HideFromEditor]
     public class TransformComponent : Component
     {
         [Field] public Vector2 position;

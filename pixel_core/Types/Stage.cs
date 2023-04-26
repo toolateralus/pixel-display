@@ -33,7 +33,7 @@ namespace pixel_core
             get
             {
                 var wasNull = stage_render_info is null;
-                var stage = Interop.GetStage();
+                var stage = Interop.Stage;
                 stage_render_info ??= new(stage);
 
                 if (!wasNull)

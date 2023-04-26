@@ -71,7 +71,7 @@ namespace pixel_core
                         break;
                     case LuaType.String:
                         string name = state.ToString(i);
-                        Stage stage = Interop.GetStage();
+                        Stage stage = Interop.Stage;
                         Node result = stage?.FindNode(name);
                         if (result != null)
                         {
