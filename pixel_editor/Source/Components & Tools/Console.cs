@@ -1,6 +1,7 @@
-﻿using pixel_renderer;
-using pixel_renderer.Assets;
-using pixel_renderer.FileIO;
+﻿using pixel_core;
+using pixel_core.Assets;
+using pixel_core.FileIO;
+using pixel_core.Statics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -86,7 +87,7 @@ namespace pixel_editor
                     return;
 
                 Print(vec.ToString());
-                Runtime.Current.projectSettings.CurrentResolution = vec;
+                ProjectSettings.CurrentResolution = vec;
                 Runtime.Current.SetResolution();
 
             },
@@ -476,7 +477,7 @@ namespace pixel_editor
                     switch (task.Result)
                     {
                         case PromptResult.Yes:
-                            Stage.SetAndLoadBackground(foundMetadata);
+                            Runtime.SetAndLoadBackground(foundMetadata);
                             Runtime.Log("Background set.");
                             break;
                         case PromptResult.No:

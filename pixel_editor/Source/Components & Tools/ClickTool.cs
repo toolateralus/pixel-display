@@ -1,4 +1,4 @@
-﻿using pixel_renderer;
+﻿using pixel_core;
 using System;
 using System.Windows.Input;
 

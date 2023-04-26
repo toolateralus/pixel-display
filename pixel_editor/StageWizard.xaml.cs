@@ -1,6 +1,7 @@
-﻿using pixel_renderer;
-using pixel_renderer.Assets;
-using pixel_renderer.FileIO;
+﻿using pixel_core;
+using pixel_core.Assets;
+using pixel_core.FileIO;
+using pixel_core.Statics;
 using System;
 using System.Drawing;
 using System.IO;
@@ -92,8 +93,8 @@ namespace pixel_editor
 
             var meta = new Metadata(
                 stage.Name,
-                pixel_renderer.Constants.WorkingRoot + pixel_renderer.Constants.AssetsDir + "\\" + stage.Name + pixel_renderer.Constants.AssetsFileExtension,
-                pixel_renderer.Constants.AssetsFileExtension);
+                Constants.WorkingRoot + Constants.AssetsDir + "\\" + stage.Name + Constants.AssetsFileExtension,
+                Constants.AssetsFileExtension);
             
             AssetLibrary.Register(meta, stage);
 

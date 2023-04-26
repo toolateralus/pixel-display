@@ -1,5 +1,6 @@
-﻿using pixel_renderer;
-using pixel_renderer.FileIO;
+﻿using pixel_core;
+using pixel_core.FileIO;
+using pixel_core.Statics;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;

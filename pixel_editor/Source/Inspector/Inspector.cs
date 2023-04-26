@@ -2,13 +2,14 @@
 using System.Reflection;
 using System.Collections.Generic;
 using Brushes = System.Windows.Media.Brushes;
-using static pixel_renderer.Input;
+using static pixel_core.Input;
 using System.Windows;
 using System.Windows.Controls;
-using pixel_renderer;
+using pixel_core;
 using System.Linq;
 using System.Windows.Media;
 using System.Drawing.Text;
+using pixel_core.Types.Components;
 
 namespace pixel_editor
 {
@@ -162,7 +163,7 @@ namespace pixel_editor
 
         private int AddTransform(Grid grid, int index)
         {
-            pixel_renderer.Node.TransformComponent transform = new()
+            pixel_core.Node.TransformComponent transform = new()
             {
                 node = lastSelectedNode,
                 position = lastSelectedNode.Position,

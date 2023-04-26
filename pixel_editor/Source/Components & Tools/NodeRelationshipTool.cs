@@ -1,8 +1,7 @@
-﻿using pixel_renderer;
-using pixel_renderer.ShapeDrawing;
+﻿using pixel_core;
 using System;
 using System.Threading.Tasks;
-using System.Windows.Input; 
+using System.Windows.Input;
 namespace pixel_editor
 {
     public class NodeRelationshipTool : Tool

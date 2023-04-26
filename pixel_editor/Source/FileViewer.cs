@@ -1,6 +1,6 @@
-﻿using pixel_renderer;
-using pixel_renderer.Assets;
-using pixel_renderer.FileIO;
+﻿using pixel_core;
+using pixel_core.Assets;
+using pixel_core.FileIO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
