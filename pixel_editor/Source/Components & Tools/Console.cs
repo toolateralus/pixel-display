@@ -419,7 +419,7 @@ namespace pixel_editor
             action = (o) =>
             {
                 if (!TryGetArgAtIndex<int>(0, out int index, o)) return;
-                Project.TryLoadStage(index);
+                Runtime.Current.project.TryLoadStage(index);
             },
 
         };

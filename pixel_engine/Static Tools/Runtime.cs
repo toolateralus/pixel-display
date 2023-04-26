@@ -39,8 +39,16 @@ namespace pixel_core
         }
         public static void SetAndLoadBackground(Metadata meta)
         {
-            Current.GetStage().backgroundMetadata = meta;
+            if (meta is null)
+                return;
+
+            Stage? stage1 = Current.GetStage();
+
+            if (stage1 is null) return;
+            
+            stage1.backgroundMetadata = meta;
             var bmp = new Bitmap(meta.Path);
+
             Current.GetStage()?.SetBackground(bmp);
             Current.renderHost.GetRenderer().baseImageDirty = true;
         }
@@ -64,10 +72,9 @@ namespace pixel_core
             Interop.OnDrawGraphicsFinalize += Interop_OnDrawGraphicsFinalize;
             Interop.OnDrawCircle += Interop_OnDrawCircle;
             Interop.OnDrawLine += Interop_OnDrawLine;
-            
             Interop.OnProjectGotten += Interop_OnProjectGotten;
             Interop.OnProjectSet += SetProject;
-
+            
             Interop.OnStageGotten += GetStage;
             Interop.OnStageSet += SetStage;
 
@@ -84,7 +91,7 @@ namespace pixel_core
             physicsWorker.RunWorkerAsync();
 
             Initialized = true;
-            Project.TryLoadStage(0);
+            project.TryLoadStage(0);
             GetProjectSettings();
 
         }
@@ -208,7 +215,7 @@ namespace pixel_core
                 if (IsRunning)
                 {
                     if (Current.stage is null)
-                        return;
+                        continue;
                     StagingHost.Update(Current.stage);
                 }
             }
@@ -255,7 +262,7 @@ namespace pixel_core
         {
             this.project = project;
             OnProjectSet?.Invoke(project);
-            Project.TryLoadStage(0);
+            project.TryLoadStage(0);
         }
         public Stage? GetStage()
         {
@@ -263,6 +270,9 @@ namespace pixel_core
         }
         public void SetStage(Stage stage)
         {
+            if (stage is null)
+                return;
+
             this.stage = stage;
             OnStageSet?.Invoke(stage);
         }

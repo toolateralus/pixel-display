@@ -51,14 +51,10 @@ namespace pixel_core
             EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), includeDateTime, clearConsole);
             RaiseInspectorEvent(e);
         }
-
         internal static Task<Metadata> GetSelectedFileMetadataAsync()
         {
             return OnFileViewer_SelectedMetadata_Query?.Invoke(); 
         }
-
-        
-      
 
         internal static void RaiseInspectorEvent(EditorEvent e)
         {

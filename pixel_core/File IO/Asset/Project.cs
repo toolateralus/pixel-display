@@ -21,10 +21,8 @@ namespace pixel_core
         [JsonProperty]
         public string Name = "DefaultProjectName";
 
-        public static void TryLoadStage(int index)
+        public void TryLoadStage(int index)
         {
-            List<Metadata> stagesMeta = Interop.Project.stagesMeta;
-
             if (stagesMeta.Count == 0 || stagesMeta.Count <= index)
             {
                 Interop.Log("No stage found. Stage not set.");
