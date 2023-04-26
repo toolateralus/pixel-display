@@ -29,16 +29,7 @@ namespace pixel_core
         public static event Func<bool>? OnIsRunningQuery;
         public static event Func<bool>? OnIsInitializedQuery;
 
-        #endregion
 
-        public static bool IsRunning { get => OnIsRunningQuery.Invoke(); }
-        public static bool Initialized { get => OnIsInitializedQuery.Invoke(); }
-        public static Project Project 
-        {
-            get => OnProjectGotten?.Invoke();
-            set => OnProjectSet?.Invoke(value); 
-        }
-        // these will have to be wrappers for functions in the engine
         public static Stage? GetStage()
         {
             return OnStageGotten?.Invoke();
@@ -54,23 +45,19 @@ namespace pixel_core
         }
         internal static Task<Metadata> GetSelectedFileMetadataAsync()
         {
-            return OnFileViewer_SelectedMetadata_Query?.Invoke(); 
+            return OnFileViewer_SelectedMetadata_Query?.Invoke();
         }
-        
-        
         internal protected static void InstantiateDefaultStageIntoProject()
         {
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
                 " A Default will be instantiated and added to the project at the requested index.");
 
-             OnDefaultStageRequested?.Invoke();
+            OnDefaultStageRequested?.Invoke();
         }
-
         internal static void RaiseInspectorEvent(EditorEvent e)
         {
             OnEditorEventRaised?.Invoke(e);
         }
-
         public static void Error(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
             EditorEvent e = new(EditorEventFlags.PRINT_ERR, obj.ToString(), includeDateTime, clearConsole);
@@ -80,16 +67,24 @@ namespace pixel_core
         {
             OnDrawLine?.Invoke(a, b, color);
         }
-
         internal static void DrawCircle(Vector2 vector2, int v, Pixel blue)
         {
             OnDrawCircle?.Invoke(vector2, v, blue);
         }
-
         internal static void DrawGraphics(RendererBase renderer, Matrix3x2 matrix3x2, Matrix3x2 projectionMat)
         {
             OnDrawGraphicsFinalize?.Invoke(renderer, matrix3x2, projectionMat);
         }
+        #endregion
+
+        public static bool IsRunning { get => OnIsRunningQuery.Invoke(); }
+        public static bool Initialized { get => OnIsInitializedQuery.Invoke(); }
+        public static Project Project 
+        {
+            get => OnProjectGotten?.Invoke();
+            set => OnProjectSet?.Invoke(value); 
+        }
+       
     }
        
 }
