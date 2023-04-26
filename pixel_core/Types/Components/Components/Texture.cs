@@ -1,10 +1,10 @@
-﻿using System.Numerics;
-using System.Drawing;
-using Newtonsoft.Json;
-using pixel_core.FileIO;
-using System.Linq;
+﻿using Newtonsoft.Json;
 using pixel_core.Assets;
+using pixel_core.FileIO;
 using System;
+using System.Drawing;
+using System.Linq;
+using System.Numerics;
 
 namespace pixel_core
 {
@@ -17,9 +17,9 @@ namespace pixel_core
         internal bool HasImageMetadata => imgData != null;
 
         private Bitmap initializedBitmap;
-        public Bitmap? Image 
+        public Bitmap? Image
         {
-            get 
+            get
             {
                 if (!HasImage && HasImageMetadata)
                     initializedBitmap = new(imgData.Path);
@@ -33,18 +33,18 @@ namespace pixel_core
         }
         internal int Width
         {
-            get => jImage.width; 
+            get => jImage.width;
         }
         internal int Height
         {
-            get => jImage.height; 
+            get => jImage.height;
         }
         #region Constructors / Overrides
         public Texture(JImage image)
         {
-            jImage = image; 
+            jImage = image;
         }
-       
+
         public Texture(string filePath)
         {
             SetImage(filePath);
@@ -60,19 +60,20 @@ namespace pixel_core
         }
         public Texture(Vector2 scale, Metadata imgData)
         {
-            this.size = scale; 
+            this.size = scale;
             SetImage(imgData, scale);
         }
-        [JsonConstructor] protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name) : base(Name, true)
+        [JsonConstructor]
+        protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name) : base(Name, true)
         {
             this.imgData = imgData;
             this.Name = Name;
             this.size = scale;
-            this.jImage = image; 
+            this.jImage = image;
         }
         public JImage GetImage()
         {
-            return jImage; 
+            return jImage;
         }
         public void SetImageRelative(string relativePath)
         {
@@ -99,7 +100,7 @@ namespace pixel_core
             this.size = jImage.Size;
             jImage = image;
         }
-      
+
         public void SetImage(Pixel[,] colors)
         {
             this.size = new(colors.GetLength(0), colors.GetLength(1));
@@ -116,7 +117,7 @@ namespace pixel_core
             }
 
             jImage = new();
-            
+
             // maybe unneccesary
             if (Image is null)
                 return;

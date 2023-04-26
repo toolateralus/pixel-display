@@ -1,14 +1,9 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Types.Components;
 using pixel_core.Assets;
 using pixel_core.FileIO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.TextFormatting;
 using pixel_core.Statics;
+using pixel_core.types.Components;
+using System.Threading.Tasks;
 
 namespace pixel_core
 {
@@ -50,7 +45,8 @@ namespace pixel_core
             {
                 IO.Write(value, meta);
                 Importer.Import();
-            } else
+            }
+            else
             {
                 meta = new("Script_Test", Constants.WorkingRoot + "\\" + path, Constants.LuaExt);
                 AssetLibrary.Register(meta, value);

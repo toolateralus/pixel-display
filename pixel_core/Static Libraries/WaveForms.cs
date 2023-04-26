@@ -2,7 +2,6 @@
 {
     using System;
     using System.Numerics;
-    using pixel_core;
 
     /// <summary>
     /// must be refactored to not be static or to not use instanced data.

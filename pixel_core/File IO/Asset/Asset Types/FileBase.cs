@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using pixel_core.Statics;
+﻿using pixel_core.Statics;
 
 namespace pixel_core.FileIO
 {

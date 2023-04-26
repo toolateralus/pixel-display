@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using pixel_core.Statics;
 using System;
-using System.Drawing;
-using System.IO;
 using System.Collections.Generic;
-using System.Windows.Shapes;
+using System.IO;
 using System.Linq;
-using pixel_core.Statics;
 
 namespace pixel_core.FileIO
 {
@@ -29,7 +26,7 @@ namespace pixel_core.FileIO
             IO.WriteJson(data, meta);
         }
 
-        static Dictionary<string, int> filesWritten = new(); 
+        static Dictionary<string, int> filesWritten = new();
 
         public static bool FindOrCreatePath(string path)
         {
@@ -112,7 +109,7 @@ namespace pixel_core.FileIO
 
             Metadata meta = new(name, fullPath, extension);
 
-            Asset foundAsset = IO.ReadJson<Asset>(meta); 
+            Asset foundAsset = IO.ReadJson<Asset>(meta);
 
             if (File.Exists(fullPath) && foundAsset is not null && foundAsset.UUID == asset.UUID)
                 return fullName;

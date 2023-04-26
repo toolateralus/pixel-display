@@ -2,11 +2,8 @@
 using pixel_core.Assets;
 using pixel_core.FileIO;
 using pixel_core.Statics;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Windows.Media.Animation;
 
 namespace pixel_core
 {
@@ -15,7 +12,7 @@ namespace pixel_core
     {
         public List<Stage> stages = new();
         [JsonProperty]
-        public Settings settings = new(); 
+        public Settings settings = new();
         [JsonProperty]
         public List<Metadata> stagesMeta = new();
         [JsonProperty]
@@ -27,7 +24,7 @@ namespace pixel_core
             {
                 Interop.Log("No stage found");
                 Interop.InstantiateDefaultStageIntoProject();
-                return; 
+                return;
             }
 
             if (IO.ReadJson<Stage>(stagesMeta[index]) is Stage stage)
@@ -59,7 +56,7 @@ namespace pixel_core
             Project project = Default;
             Metadata meta = FileDialog.ImportFileDialog();
 
-            if (string.IsNullOrWhiteSpace(meta.fullPath) || 
+            if (string.IsNullOrWhiteSpace(meta.fullPath) ||
                 !Path.IsPathFullyQualified(meta.fullPath))
                 return project;
 
@@ -69,23 +66,23 @@ namespace pixel_core
         internal static string GetPathFromRoot(string filePath)
         {
             var output = filePath.Replace(Constants.WorkingRoot, "");
-            return output; 
+            return output;
         }
         public static Stage? GetStageByName(string stageName)
         {
             bool gotAsset = AssetLibrary.Fetch(stageName, out Stage stage);
-            if (gotAsset) return stage; 
-            return null; 
+            if (gotAsset) return stage;
+            return null;
         }
         public void AddStage(Stage stage)
         {
             stagesMeta.Add(stage.Metadata);
             stages.Add(stage);
 
-            if(stagesMeta.Count > 0)
-            Constants.RemoveDuplicatesFromList(stagesMeta);
-            if(stages.Count > 0)
-            Constants.RemoveDuplicatesFromList(stages);
+            if (stagesMeta.Count > 0)
+                Constants.RemoveDuplicatesFromList(stagesMeta);
+            if (stages.Count > 0)
+                Constants.RemoveDuplicatesFromList(stages);
         }
 
         /// <summary>
@@ -103,7 +100,7 @@ namespace pixel_core
         public Project(List<Metadata> stage_meta, string name, int hash)
         {
             this.stagesMeta = stage_meta;
-            this.stages = new(); 
+            this.stages = new();
             Name = name;
         }
     }

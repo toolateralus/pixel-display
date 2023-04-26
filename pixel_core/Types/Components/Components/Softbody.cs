@@ -1,6 +1,7 @@
-﻿using System.Numerics;
+﻿using pixel_core.types.Components;
+using pixel_core.types.physics;
 using System;
-using pixel_core.Types.Components;
+using System.Numerics;
 
 namespace pixel_core
 {
@@ -18,7 +19,7 @@ namespace pixel_core
         private Collider collider;
         private Polygon model;
         private Rigidbody rb;
-       
+
         [Field] private int resolverIterations = 32;
         /// <summary>
         /// the max deformation represented as radius around the vertex
@@ -61,7 +62,7 @@ namespace pixel_core
         }
         internal void UniformDeformation(int direction = 1)
         {
-            if (collider is null|| model is null) return;
+            if (collider is null || model is null) return;
 
             Polygon poly = collider.GetModel();
 
@@ -82,7 +83,7 @@ namespace pixel_core
 
                 poly.vertices[index] = vert;
             }
-            poly.CalculateNormals(); 
+            poly.CalculateNormals();
             collider.SetModel(poly);
         }
         private void Deformation(Collision col)
@@ -121,8 +122,8 @@ namespace pixel_core
         }
         private void ResolveDeformities()
         {
-            if (collider is null || model is null) 
-                return; 
+            if (collider is null || model is null)
+                return;
             Polygon poly = collider.GetModel();
             for (int i = 0; i < model.vertices.Length; i++)
             {
@@ -137,7 +138,7 @@ namespace pixel_core
         private bool WithinDeformationRange(Vector2 vert, Vector2 original)
         {
             float scale = vert.Length() / original.Length();
-           
+
             var min = minColliderScale;
             var max = maxColliderScale;
 
@@ -147,18 +148,18 @@ namespace pixel_core
             if (scale > max)
                 return false;
 
-            return true; 
+            return true;
         }
         public static Node SoftBody()
         {
             Node node = Rigidbody.Standard();
 
 
-            if(!node.TryGetComponent(out Collider col))
+            if (!node.TryGetComponent(out Collider col))
                 return node;
 
             var sb = node.AddComponent<Softbody>();
-            return node; 
+            return node;
         }
     }
 }

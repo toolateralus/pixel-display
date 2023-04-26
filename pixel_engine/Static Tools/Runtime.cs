@@ -11,9 +11,8 @@ using System.Windows;
 using System.Windows.Media;
 using pixel_core.FileIO;
 using System.Drawing;
-using pixel_core;
-using pixel_core;
 using pixel_core.Statics;
+using pixel_core.types.physics;
 
 namespace pixel_core
 {

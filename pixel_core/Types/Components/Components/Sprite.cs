@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using pixel_core.types.Components;
+using pixel_core.types.physics;
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using pixel_core.Types.Components;
 
 namespace pixel_core
 {
-    public enum ImageType { SolidColor, Image, Custom};
+    public enum ImageType { SolidColor, Image, Custom };
     public enum TextureFiltering { Point, Bilinear }
     public class Sprite : Component
     {
@@ -16,37 +17,37 @@ namespace pixel_core
         /// color data is refreshed from source on update if this is true
         /// </summary>
         public bool IsDirty = true;
-        [Field] [JsonProperty] public Vector2 viewportScale = new(1, 1);
-        [Field] [JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
-        [Field] [JsonProperty] public float camDistance = 1;
+        [Field][JsonProperty] public Vector2 viewportScale = new(1, 1);
+        [Field][JsonProperty] public Vector2 viewportOffset = new(0.0f, 0.0f);
+        [Field][JsonProperty] public float camDistance = 1;
         /// <summary>
         /// stores color data
         /// </summary>
-        [Field] [JsonProperty] public Texture texture;
+        [Field][JsonProperty] public Texture texture;
         /// <summary>
         /// this determines what source the color data will come from
         /// </summary>
-        [Field] [JsonProperty] public ImageType Type = ImageType.SolidColor;
+        [Field][JsonProperty] public ImageType Type = ImageType.SolidColor;
         /// <summary>
         /// this dictates how the renderer filters the sprite during drawing
         /// </summary>
-        [Field] [JsonProperty] public TextureFiltering textureFiltering = 0;
+        [Field][JsonProperty] public TextureFiltering textureFiltering = 0;
         /// <summary>
         /// this will toggle participation in lighting
         /// </summary>
-        [Field] [JsonProperty] public bool lit = false;
+        [Field][JsonProperty] public bool lit = false;
         /// <summary>
         /// this is the color that a solid color sprite will be drawn as
         /// </summary>
-        [Field] [JsonProperty] public Pixel color = Pixel.Blue;
+        [Field][JsonProperty] public Pixel color = Pixel.Blue;
         /// <summary>
         /// this determines what layer the sprite will be drawn in, ie -1 for bckground and 1 for on top of that.
         /// </summary>
-        [Field] [JsonProperty] public float drawOrder = 0f;
+        [Field][JsonProperty] public float drawOrder = 0f;
         /// <summary>
         /// this prevents the image/color data from being overwritten or changed.
         /// </summary>
-        [Field] [JsonProperty] public bool IsReadOnly = false;
+        [Field][JsonProperty] public bool IsReadOnly = false;
         private void ApplyLighting()
         {
             var light = FirstLight;
@@ -54,9 +55,9 @@ namespace pixel_core
             if (light is null)
                 return;
             if (!node.TryGetComponent<Collider>(out var col))
-                return; 
+                return;
 
-            JImage lightmap; 
+            JImage lightmap;
             if (data is not null)
             {
                 Pixel[,] colors = VertexLighting(light);
@@ -91,7 +92,8 @@ namespace pixel_core
                 case ImageType.Image:
                     Type = ImageType.SolidColor;
                     break;
-                default: Type = 0;
+                default:
+                    Type = 0;
                     break;
             }
 
@@ -106,7 +108,7 @@ namespace pixel_core
                     texture.SetImage(colorArray);
                     break;
                 case ImageType.Image:
-                    if(texture.imgData != null)
+                    if (texture.imgData != null)
                         texture.SetImage(texture.imgData.Path);
                     break;
             }
@@ -132,8 +134,8 @@ namespace pixel_core
                 int vertLength = mesh.vertices.Length;
                 for (int i = 0; i < vertLength; i++)
                 {
-                   var nextIndex = (i + 1) % vertLength;
-                   Interop.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Color.Orange);
+                    var nextIndex = (i + 1) % vertLength;
+                    Interop.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Color.Orange);
                 }
             }
         }
@@ -154,11 +156,13 @@ namespace pixel_core
             Pixel color = Pixel.White;
             PixelShader((e) => { color = e; }, getColor, X, Y);
 
-            void OnShadingComplete(JImage image) {
+            void OnShadingComplete(JImage image)
+            {
                 texture.SetImage(image);
             }
 
-            Pixel getColor() {
+            Pixel getColor()
+            {
                 // color 
                 var localPos = new Vector2(x, y) / texture.size;
                 var global = LocalToGlobal(localPos);
@@ -169,11 +173,11 @@ namespace pixel_core
             };
 
             int X() => x++;
-            int Y() => y++; 
+            int Y() => y++;
         }
         Pixel[,] VertexLighting(Light light)
         {
-            Pixel[,] colors = new Pixel[texture.Width, texture.Height]; 
+            Pixel[,] colors = new Pixel[texture.Width, texture.Height];
             for (int x = 0; x < texture.Width; x++)
                 for (int y = 0; y < texture.Height; y++)
                 {
@@ -195,7 +199,7 @@ namespace pixel_core
                     blendedPixel = Pixel.Lerp(existingPixel, light.color, lightAmount);
                     colors[x, y] = blendedPixel;
                 }
-            return colors; 
+            return colors;
         }
         /// <summary>
         /// see LightingPerPixel to see an example 
@@ -205,7 +209,7 @@ namespace pixel_core
         /// <param name="indexerX"></param>
         /// <param name="indexerY"></param>
         /// <param name="onIteraton"></param>
-        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn,  Func<int> indexerX, Func<int> indexerY)
+        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn, Func<int> indexerX, Func<int> indexerY)
         {
             for (int x = 0; x < texture.Width * 4; x = indexerX.Invoke())
                 for (int y = 0; y < texture.Height; y = indexerY.Invoke())

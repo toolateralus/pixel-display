@@ -1,15 +1,15 @@
-﻿using System;
+﻿using pixel_core.FileIO;
+using pixel_core.Statics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using pixel_core.FileIO;
-using pixel_core.Statics;
 
 namespace pixel_core.Assets
 {
     public class Importer
     {
-        public const int maxDepth = 100; 
+        public const int maxDepth = 100;
         /// <summary>
         /// Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
         /// </summary>
@@ -55,7 +55,8 @@ namespace pixel_core.Assets
             if (dirs.Length > 0)
                 foreach (var sub_dir in dirs)
                     ImportRecursively(sub_dir, depth++);
-            else {
+            else
+            {
                 Interop.Log($"{depth} deep at import time.");
             }
         }
@@ -90,8 +91,8 @@ namespace pixel_core.Assets
             Metadata metadata = FileDialog.ImportFileDialog();
 
             var isPathValid = System.IO.Path.IsPathFullyQualified(metadata.Path);
-            
-            if (!isPathValid) 
+
+            if (!isPathValid)
                 return;
         }
     }

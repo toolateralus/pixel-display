@@ -1,15 +1,15 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
+using pixel_core.types.physics;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using pixel_core.Statics;
 using System.Linq;
+using System.Numerics;
 
 namespace pixel_core
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public partial class Node 
+    public partial class Node
     {
         #region Json Constructor
         [JsonConstructor]
@@ -30,7 +30,7 @@ namespace pixel_core
             Name = name;
             _uuid = nodeUUID;
             this.tag = tag;
-            
+
             // nodes
             this.ParentStage = parentStage;
             this.parent = parentNode;
@@ -68,12 +68,13 @@ namespace pixel_core
         public Action<Collision> OnCollided;
         public Action<Collision> OnTriggered;
 
-        public Action OnDestroyed; 
+        public Action OnDestroyed;
         public Queue<Action> ComponentActionQueue { get; private set; } = new();
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
         [Field]
         [JsonProperty] public Stage parentStage;
-        [JsonProperty] public Stage ParentStage 
+        [JsonProperty]
+        public Stage ParentStage
         {
             get
             {
@@ -81,8 +82,8 @@ namespace pixel_core
                     parentStage = Interop.GetStage()
                         ;
                 return parentStage ?? throw new NullStageException();
-            } 
-            set => parentStage = value; 
+            }
+            set => parentStage = value;
         }
         [JsonProperty] public bool Enabled { get { return _enabled; } set => _enabled = value; }
         [JsonProperty] public string UUID { get { return _uuid; } set { _uuid = value; } }
@@ -106,7 +107,7 @@ namespace pixel_core
             {
                 var cos = MathF.Cos(value);
                 var sin = MathF.Sin(value);
-                
+
                 Transform.M11 = cos;
                 Transform.M12 = sin;
                 Transform.M21 = -sin;
@@ -140,17 +141,17 @@ namespace pixel_core
             }
 
             if (!Interop.GetStage().nodes.Contains(child))
-                    Interop.GetStage()?.AddNode(child);
+                Interop.GetStage()?.AddNode(child);
 
             children ??= new();
-            
+
             if (children.Contains(child)) return;
 
-            
+
             _ = child.parent?.TryRemoveChild(child);
-            
+
             children.Add(child);
-            
+
             child.parent = this;
 
         }
@@ -225,14 +226,14 @@ namespace pixel_core
                 var key = pair.Key;
 
                 for (int j = 0; j < Components[key].Count; ++j)
-                        Components[key].ElementAt(j).init_component_internal();
+                    Components[key].ElementAt(j).init_component_internal();
             }
-            awake = true; 
+            awake = true;
             ComponentsBusy = false;
         }
         public void FixedUpdate(float delta)
         {
-            if (!awake) 
+            if (!awake)
                 return;
             ComponentsBusy = true;
 
@@ -247,7 +248,7 @@ namespace pixel_core
         }
         public void Update()
         {
-            if (!awake) 
+            if (!awake)
                 return;
 
             ComponentsBusy = true;
@@ -255,14 +256,14 @@ namespace pixel_core
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
-                var key = pair.Key; 
+                var key = pair.Key;
 
                 for (int j = 0; j < pair.Value.Count; ++j)
                     pair.Value.ElementAt(j)?.Update();
             }
 
 
-            while(ComponentActionQueue.Count > 0)
+            while (ComponentActionQueue.Count > 0)
                 ComponentActionQueue.Dequeue().Invoke();
 
             ComponentsBusy = false;
@@ -276,14 +277,16 @@ namespace pixel_core
 
             if (parent?.children != null)
                 foreach (var kvp in parent.children)
-                    if (kvp == this) { 
+                    if (kvp == this)
+                    {
                         parent.children.Remove(this);
                     }
 
             ParentStage?.nodes.Remove(this);
 
             foreach (var component in Components)
-                foreach(var comp in component.Value){
+                foreach (var comp in component.Value)
+                {
                     comp.on_destroy_internal();
                 }
 
@@ -291,7 +294,7 @@ namespace pixel_core
             OnDestroyed?.Invoke();
             ComponentsBusy = false;
 
-            
+
         }
         public virtual void Dispose()
         {
@@ -361,13 +364,14 @@ namespace pixel_core
             if (ComponentsBusy)
             {
                 ComponentActionQueue.Enqueue(addComponent<T>);
-            }else 
+            }
+            else
                 addComponent<T>();
 
 
             return component;
 
-           
+
         }
         public T AddComponent<T>() where T : Component, new()
         {
@@ -395,8 +399,8 @@ namespace pixel_core
                 return false;
             }
             component = Components[typeof(T)][index ?? 0] as T;
-                
-            if (component is null) 
+
+            if (component is null)
                 return false;
 
             return true;
@@ -404,9 +408,9 @@ namespace pixel_core
         public IEnumerable<T> GetComponents<T>() where T : Component
         {
             return from Type type in Components.Keys
-                    where type.IsAssignableTo(typeof(T))
-                    from T component in Components[type]
-                    select component;
+                   where type.IsAssignableTo(typeof(T))
+                   from T component in Components[type]
+                   select component;
         }
         public T? GetComponent<T>(int index = 0) where T : Component
         {
@@ -431,12 +435,12 @@ namespace pixel_core
                 {
                     var compList = Components[type];
 
-                    Component toRemove = null; 
+                    Component toRemove = null;
 
                     foreach (Component? comp in from comp in compList
-                                            where comp is not null &&
-                                            comp.UUID.Equals(component.UUID)
-                                            select comp)
+                                                where comp is not null &&
+                                                comp.UUID.Equals(component.UUID)
+                                                select comp)
                     {
                         toRemove = comp;
                     }
@@ -463,7 +467,7 @@ namespace pixel_core
         }
         internal static Node Instantiate(Node projectile)
         {
-            
+
             var clone = projectile.Clone();
             var stage = Interop.GetStage();
 
@@ -475,16 +479,16 @@ namespace pixel_core
 
             if (clone.ParentStage is null || clone.parentStage != stage)
 
-            clone.Awake();
-            return clone; 
+                clone.Awake();
+            return clone;
         }
         internal static Node Instantiate(Node projectile, Vector2 position)
         {
             var clone = Instantiate(projectile);
             clone.Position = position;
-            return clone; 
+            return clone;
         }
         public static Node New => new("New Node", Vector2.Zero, Vector2.One);
-        
+
     }
 }

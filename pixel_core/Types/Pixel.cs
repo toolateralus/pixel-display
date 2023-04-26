@@ -1,11 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pixel_core
 {
@@ -39,7 +34,7 @@ namespace pixel_core
             a.r *= b.r;
             a.g *= b.g;
             a.b *= b.b;
-            return a; 
+            return a;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pixel operator *(Pixel A, float B)
@@ -80,8 +75,8 @@ namespace pixel_core
         {
             return new(a, r, g, b);
         }
-        public static implicit operator System.Drawing.Color(Pixel v) => Color.FromArgb(v.a, v.r, v.g, v.b );
-        public static implicit operator Pixel(System.Drawing.Color v) => Pixel.FromArgb(v.A, v.R, v.G, v.B );
+        public static implicit operator System.Drawing.Color(Pixel v) => Color.FromArgb(v.a, v.r, v.g, v.b);
+        public static implicit operator Pixel(System.Drawing.Color v) => Pixel.FromArgb(v.A, v.R, v.G, v.B);
 
     }
 }

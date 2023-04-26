@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using System.Text.Json.Serialization;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
 
 namespace pixel_core
 {

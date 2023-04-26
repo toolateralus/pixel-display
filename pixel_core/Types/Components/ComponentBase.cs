@@ -1,15 +1,9 @@
-﻿
-using pixel_core.Assets;
-using Newtonsoft.Json;
-using System;
-using System.Windows.Media.TextFormatting;
-using System.Windows.Controls;
-using System.Numerics;
-using System.Dynamic;
+﻿using Newtonsoft.Json;
+using pixel_core.types.physics;
 using System.Diagnostics.CodeAnalysis;
-using pixel_core;
+using System.Numerics;
 
-namespace pixel_core.Types.Components
+namespace pixel_core.types.Components
 {
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class Component

@@ -1,11 +1,8 @@
 ﻿using Newtonsoft.Json;
 using pixel_core.Statics;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
 using System;
-using System.Drawing;
 using System.Numerics;
-using System.Windows;
-using System.Windows.Documents;
 
 namespace pixel_core
 {
@@ -14,13 +11,13 @@ namespace pixel_core
         public override void Dispose()
         {
         }
-        [Field] [JsonProperty] public float mass = 1f;
-        [Field] [JsonProperty] public float invMass;
-        [Field] [JsonProperty] public float restitution = 0.5f;
-        [Field] [JsonProperty] public float drag = 1f;
-        [Field] [JsonProperty] public bool usingGravity = true;
-        [Field] [JsonProperty] public Vector2 velocity = Vector2.Zero;
-        [Field] [JsonProperty] public Vector2 acceleration = Vector2.Zero;
+        [Field][JsonProperty] public float mass = 1f;
+        [Field][JsonProperty] public float invMass;
+        [Field][JsonProperty] public float restitution = 0.5f;
+        [Field][JsonProperty] public float drag = 1f;
+        [Field][JsonProperty] public bool usingGravity = true;
+        [Field][JsonProperty] public Vector2 velocity = Vector2.Zero;
+        [Field][JsonProperty] public Vector2 acceleration = Vector2.Zero;
 
         public override void FixedUpdate(float deltaTime)
         {

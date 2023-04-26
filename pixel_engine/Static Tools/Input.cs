@@ -7,8 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Numerics;
 using System.Linq;
 using pixel_core;
-using pixel_core.Types;
-using pixel_core.Types.Components;
+using pixel_core.types;
+using pixel_core.types.Components;
 
 namespace pixel_core
 {

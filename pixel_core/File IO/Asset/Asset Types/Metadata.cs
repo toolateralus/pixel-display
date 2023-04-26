@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using pixel_core.Statics;
 
 namespace pixel_core.FileIO
@@ -43,8 +42,8 @@ namespace pixel_core.FileIO
             Name = name;
             this.fullPath = fullPath;
             this.extension = extension;
-            this.pathFromProjectRoot = pathFromProjectRoot; 
-            _uuid = uuid; 
+            this.pathFromProjectRoot = pathFromProjectRoot;
+            _uuid = uuid;
         }
     }
 }

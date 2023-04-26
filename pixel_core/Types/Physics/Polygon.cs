@@ -1,10 +1,9 @@
-﻿using pixel_core.Types.Shapes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace pixel_core
+namespace pixel_core.types.physics
 {
     /// <summary>
     /// note :our Polygon uses a clockwise winding order
@@ -26,7 +25,7 @@ namespace pixel_core
         /// Will have one line that starts and ends in the same spot if there's only one vertex in the polygon
         /// </summary>
         /// <returns></returns>
-        [Method]        
+        [Method]
         private void CalculateUV()
         {
             int vertCount = vertices.Length;
@@ -57,7 +56,7 @@ namespace pixel_core
             }
             centroid /= vertCount;
         }
-        
+
         private static void CheckWindingOrder(Vector2[] vertices)
         {
             float area = 0;
@@ -92,11 +91,11 @@ namespace pixel_core
         public void GetBoundingBox(ref BoundingBox2D boundingBox)
         {
             var vertLength = vertices.Length;
-            
+
             boundingBox.min = vertices[0];
             boundingBox.max = vertices[0];
 
-            for(int i = 1; i < vertLength; i++)
+            for (int i = 1; i < vertLength; i++)
                 boundingBox.ExpandTo(vertices[i]);
         }
 
@@ -119,7 +118,7 @@ namespace pixel_core
             normals = new Vector2[polygon.normals.Length];
             uv = new Vector2[polygon.uv.Length];
             centroid = polygon.centroid;
-            Array.Copy(polygon.vertices,vertices,vertices.Length);
+            Array.Copy(polygon.vertices, vertices, vertices.Length);
             Array.Copy(polygon.normals, normals, normals.Length);
             Array.Copy(polygon.uv, uv, uv.Length);
         }
@@ -147,9 +146,9 @@ namespace pixel_core
         {
             Vector2 top = new(topPosScale * width, 0);
             Vector2 right = new(0, height);
-            Vector2 left = new(width, height); 
+            Vector2 left = new(width, height);
 
-            return new(new Vector2[] { top, right, left});
+            return new(new Vector2[] { top, right, left });
         }
 
         public void MoveVertex(int index, Vector2 moveTo)
@@ -259,7 +258,7 @@ namespace pixel_core
         {
             if (polygon.vertices.Length != vertices.Length)
                 polygon.vertices = new Vector2[vertices.Length];
-           
+
             if (polygon.normals.Length != normals.Length)
                 polygon.normals = new Vector2[normals.Length];
 

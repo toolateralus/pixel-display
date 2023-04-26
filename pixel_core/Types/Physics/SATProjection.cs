@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace pixel_core
+namespace pixel_core.types.physics
 {
     public class SATProjection
     {

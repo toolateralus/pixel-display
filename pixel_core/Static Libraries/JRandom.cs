@@ -3,15 +3,14 @@
     using System;
     using System.Numerics;
     using System.Security.Cryptography;
-    using System.Text;
     using Random = System.Random;
     public enum Direction
     { Left, Right, Up, Down };
     public static class JRandom
     {
-        public static Random random = new(); 
+        public static Random random = new();
         public static Direction Direction() => (Direction)Int(0, sizeof(Direction) - 1);
-        
+
         public static Pixel Color(byte aMin = 0, byte rMin = 0, byte gMin = 0, byte bMin = 0, byte aMax = 255, byte rMax = 255, byte gMax = 255, byte bMax = 255)
         {
             var A = Int(aMin, aMax);
@@ -29,7 +28,7 @@
             float x = (float)random.NextDouble() * 2 - 1;
             float y = (float)random.NextDouble() * 2 - 1;
             var dir = new Vector2(x, y).Normalized();
-            
+
             if (speed == -1f)
                 speed = (float)random.NextDouble();
 
@@ -54,7 +53,7 @@
             return min + RandomNumberGenerator.GetInt32(max - min);
         }
         public static bool Bool() => Int(-32000, 32000) > 0;
-        
+
         internal static Vector2 Vec2(Vector2 min, Vector2 max)
         {
             return new()

@@ -1,7 +1,6 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Media;
-using System;
 
 namespace pixel_core
 {
@@ -101,8 +100,8 @@ namespace pixel_core
         public static void TransformInverted(this ref Vector2 v, in Matrix3x2 matrix)
         {
             float invDet = 1.0f / ((matrix.M11 * matrix.M22) - (matrix.M21 * matrix.M12));
-            v.X = (v.X * ( matrix.M22 * invDet)) + (v.Y * (-matrix.M21 * invDet)) + ((matrix.M21 * matrix.M32 - matrix.M31 * matrix.M22) * invDet);
-            v.Y = (v.X * (-matrix.M12 * invDet)) + (v.Y * ( matrix.M11 * invDet)) + ((matrix.M31 * matrix.M12 - matrix.M11 * matrix.M32) * invDet);
+            v.X = (v.X * (matrix.M22 * invDet)) + (v.Y * (-matrix.M21 * invDet)) + ((matrix.M21 * matrix.M32 - matrix.M31 * matrix.M22) * invDet);
+            v.Y = (v.X * (-matrix.M12 * invDet)) + (v.Y * (matrix.M11 * invDet)) + ((matrix.M31 * matrix.M12 - matrix.M11 * matrix.M32) * invDet);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

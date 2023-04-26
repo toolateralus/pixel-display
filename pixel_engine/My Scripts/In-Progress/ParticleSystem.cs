@@ -1,4 +1,4 @@
-﻿using pixel_core.Types.Components;
+﻿using pixel_core.types.Components;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

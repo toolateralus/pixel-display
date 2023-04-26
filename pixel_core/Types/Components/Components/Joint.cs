@@ -1,7 +1,7 @@
-﻿using System;
-using System.Data;
+﻿using pixel_core.types.Components;
+using pixel_core.types.physics;
+using System;
 using System.Numerics;
-using pixel_core.Types.Components;
 
 namespace pixel_core
 {
@@ -31,8 +31,8 @@ namespace pixel_core
                     return;
                 }
                 Interop.Log($" node {b.Name} Connected to node {node.Name}.");
-                
-                offset = b.Position - node.Position; 
+
+                offset = b.Position - node.Position;
 
                 if (node.rb != null && b.rb != null)
                 {
@@ -48,13 +48,13 @@ namespace pixel_core
         {
             switch (body)
             {
-                case 0: 
+                case 0:
                     break;
 
                 case 1:
-                    if(offset.HasValue)
-                    
-                    A.Position = B.Position - offset.Value;
+                    if (offset.HasValue)
+
+                        A.Position = B.Position - offset.Value;
                     A.rb.velocity = Vector2.Zero;
                     break;
             }

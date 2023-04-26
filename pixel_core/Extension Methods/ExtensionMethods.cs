@@ -1,4 +1,6 @@
-﻿using System;
+﻿using pixel_core.Statics;
+using pixel_core.types.Components;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -6,8 +8,6 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using pixel_core.Statics;
-using pixel_core.Types.Components;
 
 namespace pixel_core
 {
@@ -67,7 +67,7 @@ namespace pixel_core
             string intResult = "";
 
             foreach (var x in input)
-                if (Constants.int_chars.Contains(x)) 
+                if (Constants.int_chars.Contains(x))
                     intResult += x;
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);

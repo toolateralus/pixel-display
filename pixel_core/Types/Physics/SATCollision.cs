@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace pixel_core
+namespace pixel_core.types.physics
 {
     public class SATCollision
     {
@@ -77,10 +77,10 @@ namespace pixel_core
         }
         private static bool Overlap(SATProjection p1, SATProjection p2)
         {
-            return (p1.min <= p2.max && p1.max >= p2.min);
+            return p1.min <= p2.max && p1.max >= p2.min;
         }
 
-        private static void ProjectAllNormals(List<Vector2> normals, Polygon polygonA,  Polygon polygonB, ref Collision collision)
+        private static void ProjectAllNormals(List<Vector2> normals, Polygon polygonA, Polygon polygonB, ref Collision collision)
         {
             foreach (Vector2 normal in normals)
             {

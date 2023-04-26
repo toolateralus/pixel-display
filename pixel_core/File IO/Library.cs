@@ -1,11 +1,9 @@
-﻿using System;
+﻿using pixel_core.FileIO;
+using System;
 using System.Collections.Generic;
-using pixel_core.FileIO;
-using System.Linq;
-using System.Diagnostics.CodeAnalysis;
-using System.Dynamic;
-using System.Threading.Tasks;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace pixel_core.Assets
 {
@@ -13,7 +11,7 @@ namespace pixel_core.Assets
     {
         static Dictionary<Metadata, object> Current = new();
         public static bool Busy { get; private set; }
-        internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList(); 
+        internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList();
         /// <summary>
         /// Registers an asset to the AssetLibrary.
         /// </summary>
@@ -22,17 +20,17 @@ namespace pixel_core.Assets
         /// <returns>false if the asset was already in the library, and true if it was successfully added.</returns>
         public static bool Register(Metadata metadata, Asset asset)
         {
-            if (Busy) 
+            if (Busy)
                 return false;
 
             if (Current.ContainsKey(metadata))
             {
                 Current[metadata] = asset;
-                return true; 
+                return true;
             }
 
             Current.Add(metadata, asset);
-            return true; 
+            return true;
         }
         public static bool Register(Metadata metadata, object value)
         {
@@ -55,13 +53,13 @@ namespace pixel_core.Assets
             {
                 tries++;
                 if (tries > maxTryCount)
-                    return false; 
+                    return false;
                 await Task.Delay(10);
             }
             if (Current.ContainsKey(metadata))
             {
                 Current[metadata] = asset;
-                return true; 
+                return true;
             }
             Current.Add(metadata, asset);
             return true;
@@ -77,7 +75,7 @@ namespace pixel_core.Assets
         public static bool Fetch<T>(out T? result) where T : Asset
         {
             result = null;
-            foreach(var asset in Current.Values)
+            foreach (var asset in Current.Values)
                 if (asset != null && asset.GetType() == typeof(T))
                 {
                     result = asset as T;
@@ -90,15 +88,15 @@ namespace pixel_core.Assets
             foreach (var asset in Current)
                 if (asset.Key is not null && asset.Key.pathFromProjectRoot == pathRelativeToRoot)
                     return asset.Key;
-            return default; 
-                    
+            return default;
+
         }
         public static Metadata? FetchMeta(string name)
         {
             foreach (var asset in Current)
                 if (asset.Value is null && asset.Key is not null && name == asset.Key.Name)
                     return asset.Key;
-            return default; 
+            return default;
         }
         public static bool Fetch<T>(out List<T> output) where T : Asset
         {
@@ -110,8 +108,8 @@ namespace pixel_core.Assets
                     output.Add((T)obj);
                 }
 
-            if(output.Count > 0) return true;
-            return false; 
+            if (output.Count > 0) return true;
+            return false;
         }
         public static bool Fetch<T>(string name, out T result) where T : Asset
         {
@@ -125,9 +123,9 @@ namespace pixel_core.Assets
                 {
                     result = item;
                     r = true;
-                    break; 
+                    break;
                 }
-            return r; 
+            return r;
         }
         /// <summary>
         /// Save the currently loaded asset Library and project to the disk.
@@ -135,7 +133,7 @@ namespace pixel_core.Assets
         /// 
         public static void SaveAll()
         {
-            Busy = true; 
+            Busy = true;
             lock (Current)
             {
                 if (Interop.Initialized)
@@ -146,19 +144,19 @@ namespace pixel_core.Assets
                     foreach (var x in Interop.Project.stages)
                     {
                         x.Sync();
-                        x.Save(); 
+                        x.Save();
                     }
                 }
                 foreach (KeyValuePair<Metadata, object> assetPair in Current)
                 {
                     if (assetPair.Value is null || assetPair.Value is not Asset a)
-                        continue; 
+                        continue;
 
                     a.Sync();
                     a.Save();
                 }
             }
-            Busy = false; 
+            Busy = false;
         }
         private static void RefreshStageMetadataWithinLoadedProject()
         {
@@ -166,9 +164,9 @@ namespace pixel_core.Assets
                 return;
 
             var stages = Interop.Project.stages;
-            
-            if (stages is null) 
-                return; 
+
+            if (stages is null)
+                return;
 
             foreach (var stage in stages)
             {
@@ -185,15 +183,15 @@ namespace pixel_core.Assets
         public static List<object>? Clone()
         {
             List<object> library = new();
-            
+
             foreach (var pair in Current)
-                    library.Add(pair.Value);
+                library.Add(pair.Value);
 
             return library;
         }
         public static List<Metadata> GetAllKeys()
         {
-            return Current.Keys.ToList();  
+            return Current.Keys.ToList();
         }
         /// <summary>
         /// note: when this finds an asset, it returns it. however,  due to the way image storage works, 
@@ -215,7 +213,7 @@ namespace pixel_core.Assets
                 if (meta.extension == ".bmp" || meta.extension == ".png")
                 {
                     Bitmap bmp = new(meta.Path);
-                    return bmp; 
+                    return bmp;
                 }
                 if (meta.extension == ".lua")
                 {

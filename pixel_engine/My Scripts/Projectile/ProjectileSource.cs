@@ -3,9 +3,9 @@ using Key = System.Windows.Input.Key;
 using System.Drawing;
 using System.Numerics;
 using static pixel_core.Input;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
 using pixel_core;
-using pixel_core.Types;
+using pixel_core.types;
 
 namespace pixel_core
 {

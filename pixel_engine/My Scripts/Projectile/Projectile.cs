@@ -1,4 +1,4 @@
-﻿using pixel_core.Types.Components;
+﻿using pixel_core.types.Components;
 using pixel_core.FileIO;
 using static pixel_core.Assets.AssetLibrary;
 

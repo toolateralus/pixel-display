@@ -4,9 +4,9 @@ using pixel_core.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
 using System.Linq;
-using pixel_core.Types.Components;
-using pixel_core;
+using pixel_core.types.Components;
 using pixel_core.Statics;
+using pixel_core.types.physics;
 
 namespace pixel_core
 {

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using pixel_core.types.Components;
+using System;
 using System.Numerics;
-using pixel_core.Types.Components;
 
 namespace pixel_core
 {
-    public partial class Node 
+    public partial class Node
     {
         public class TransformComponent : Component
         {
@@ -37,6 +37,6 @@ namespace pixel_core
                 }
             }
         }
-        
+
     }
 }

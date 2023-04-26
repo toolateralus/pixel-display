@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
+using pixel_core.types.physics;
 using System.Drawing;
 
 namespace pixel_core
@@ -10,12 +11,12 @@ namespace pixel_core
     {
 
         [JsonProperty]
-        private PrimitiveType primitive; 
+        private PrimitiveType primitive;
 
-        [JsonProperty] 
+        [JsonProperty]
         private Polygon model = Polygon.Square(1);
 
-        [Field] 
+        [Field]
         // this is for the nGon editor method
         int vertexCount = 6;
 
@@ -24,10 +25,10 @@ namespace pixel_core
         /// Assumes input polygon has already calculated normals
         /// </summary>
         /// <param name="polygon"></param>
-        [JsonProperty] 
+        [JsonProperty]
         Polygon transformedModel = Polygon.Square(1);
 
-        [JsonProperty] 
+        [JsonProperty]
         public Polygon Polygon
         {
             get
@@ -38,24 +39,24 @@ namespace pixel_core
             }
         }
 
-        [Field] 
+        [Field]
         [JsonProperty]
         public bool drawCollider = false;
 
-        [Field] 
+        [Field]
         [JsonProperty]
         public bool drawNormals = false;
 
-        [Field] 
+        [Field]
         [JsonProperty]
         public Pixel colliderPixel = Color.LimeGreen;
 
-        [JsonProperty] 
+        [JsonProperty]
         public bool IsTrigger { get; internal set; } = false;
 
         [JsonProperty]
         private BoundingBox2D boundingBox = new();
-       
+
         public BoundingBox2D BoundingBox
         {
             get
@@ -84,24 +85,24 @@ namespace pixel_core
             {
                 case PrimitiveType.Box:
 
-                    SetModel(pixel_core.Polygon.Triangle(1, 1));
+                    SetModel(Polygon.Triangle(1, 1));
                     primitive = PrimitiveType.Triangle;
 
                     break;
                 case PrimitiveType.Circle:
 
-                    SetModel(pixel_core.Polygon.Rectangle(new(1,1)));
+                    SetModel(Polygon.Rectangle(new(1, 1)));
                     primitive = PrimitiveType.Box;
 
                     break;
                 case PrimitiveType.Triangle:
 
-                    SetModel(pixel_core.Polygon.nGon(size: 1, sides: 32));
+                    SetModel(Polygon.nGon(size: 1, sides: 32));
                     primitive = PrimitiveType.Circle;
                     break;
                 default:
                     break;
-                    
+
             }
             Interop.Log($"{node.Name}'s collider now has primitive shape : {primitive}");
         }

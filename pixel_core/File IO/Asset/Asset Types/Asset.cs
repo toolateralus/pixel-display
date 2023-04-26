@@ -1,15 +1,11 @@
 ﻿using Newtonsoft.Json;
 using pixel_core.Assets;
 using pixel_core.Statics;
-using System;
-using System.CodeDom;
-using System.DirectoryServices.ActiveDirectory;
-using System.Xml.Linq;
 
 namespace pixel_core.FileIO
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class Asset 
+    public class Asset
     {
         [JsonProperty] public string Name;
         [JsonProperty] public string UUID;
@@ -29,9 +25,9 @@ namespace pixel_core.FileIO
         }
         public Asset(string name, bool shouldUpload = false)
         {
-            Name = name; 
+            Name = name;
             UUID = pixel_core.Statics.UUID.NewUUID();
-            if(shouldUpload) Upload();
+            if (shouldUpload) Upload();
         }
 
         public void Upload()

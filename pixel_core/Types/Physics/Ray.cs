@@ -1,7 +1,6 @@
-﻿using pixel_core.Types.Shapes;
-using System.Numerics;
+﻿using System.Numerics;
 
-namespace pixel_core
+namespace pixel_core.types.physics
 {
     public struct Ray
     {
@@ -58,7 +57,7 @@ namespace pixel_core
             var relSlope = relDirY / relDirX;
             var relPosY = Vector2.Dot(line.startPoint, direction);
             var relPosX = Vector2.Dot(line.startPoint, dirLHS);
-            var relYIntercept = relPosY - (relSlope * relPosX);
+            var relYIntercept = relPosY - relSlope * relPosX;
             var intercept = relYIntercept * direction;
             var interceptOffset = intercept - line.startPoint;
             if (Vector2.Dot(interceptOffset, endOffset) < 0 ||

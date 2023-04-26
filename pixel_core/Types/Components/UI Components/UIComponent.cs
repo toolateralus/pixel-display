@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
+using pixel_core.types.physics;
 using System;
 using System.Numerics;
 
@@ -9,16 +10,16 @@ namespace pixel_core
     {
         internal protected bool dirty = true;
 
-        [Field] [JsonProperty] public Texture texture;
-        [Field] [JsonProperty] public bool lit = false;
-        [Field] [JsonProperty] public float drawOrder = 0f;
-        [Field] [JsonProperty] public bool IsReadOnly = false;
-        [Field] [JsonProperty] public float camDistance = 1;
-        [Field] [JsonProperty] public ImageType Type = ImageType.SolidColor;
-        [Field] [JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
-        [Field] [JsonProperty] public Pixel color = Pixel.Blue;
-        [Field] [JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
-        [Field] [JsonProperty] public Vector2 viewportSize = Vector2.One;
+        [Field][JsonProperty] public Texture texture;
+        [Field][JsonProperty] public bool lit = false;
+        [Field][JsonProperty] public float drawOrder = 0f;
+        [Field][JsonProperty] public bool IsReadOnly = false;
+        [Field][JsonProperty] public float camDistance = 1;
+        [Field][JsonProperty] public ImageType Type = ImageType.SolidColor;
+        [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
+        [Field][JsonProperty] public Pixel color = Pixel.Blue;
+        [Field][JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
+        [Field][JsonProperty] public Vector2 viewportSize = Vector2.One;
         public readonly Vector2 half = Vector2.One * 0.5f;
 
         [Method]
@@ -31,11 +32,11 @@ namespace pixel_core
                     texture.SetImage(colorArray);
                     break;
                 case ImageType.Image:
-                    if(texture.imgData != null)
+                    if (texture.imgData != null)
                         texture.SetImage(texture.imgData.Path);
                     break;
             }
-            dirty= false;
+            dirty = false;
         }
         /// <summary>
         /// re-draws the image *this is always called when marked dirty*
@@ -44,7 +45,7 @@ namespace pixel_core
         /// <summary>
         /// for any unmanaged resources that need to be disposed of, this is usually unneccesary.
         /// </summary>
-        public abstract void Draw(RendererBase renderer); 
+        public abstract void Draw(RendererBase renderer);
         /// <summary>
         /// this is the default method for drawing.
         /// </summary>
@@ -63,7 +64,7 @@ namespace pixel_core
                 Vector2 screenViewport = framePos / renderer.Resolution;
 
                 var localPos = ScreenToLocal(screenViewport);
-                
+
                 if (!RendererBase.IsWithinMaxExclusive(localPos.X, localPos.Y, -1, 1))
                 {
                     framePos.X++;
@@ -76,9 +77,9 @@ namespace pixel_core
                 }
 
                 var colorPos = LocalToColorPosition(localPos);
-                
+
                 Pixel color = FilterPixel(image, colorPos);
-                
+
                 if (color.a == 0)
                 {
                     framePos.X++;
@@ -89,9 +90,9 @@ namespace pixel_core
                     }
                     continue;
                 }
-                
+
                 renderer.WriteColorToFrame(ref color, ref framePos);
-                
+
                 framePos.X++;
                 if (framePos.X >= drawArea.max.X)
                 {
@@ -186,7 +187,7 @@ namespace pixel_core
         }
         public Vector2 GlobalToScreen(Vector2 globalPos) => LocalToScreen(GlobalToLocal(globalPos));
         public Vector2 ScreenToGlobal(Vector2 normalizedScreenPos) => LocalToGlobal(ScreenToLocal(normalizedScreenPos));
-        public Vector2 LocalToScreen(Vector2 local) => 
+        public Vector2 LocalToScreen(Vector2 local) =>
             ((local * viewportSize + viewportPosition) / 2) + half;
         public Vector2 ScreenToLocal(Vector2 screenViewport) =>
             (((screenViewport - half) * 2) - viewportPosition) / viewportSize.GetDivideSafe();

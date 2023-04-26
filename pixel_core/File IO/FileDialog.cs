@@ -1,7 +1,6 @@
 ﻿
 using Microsoft.Win32;
 using pixel_core.FileIO;
-using System;
 using System.IO;
 using System.Linq;
 
@@ -13,7 +12,7 @@ namespace pixel_core.Assets
         {
             OpenFileDialog fileDialog = new();
             bool? result = fileDialog.ShowDialog();
-            Metadata meta = new("", "", ""); 
+            Metadata meta = new("", "", "");
             if (result == true)
             {
                 var fullPath = Path.GetFullPath(fileDialog.FileName);

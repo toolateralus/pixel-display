@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using pixel_core.Assets;
+using pixel_core.types.physics;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Numerics;
 using System.Linq;
-using pixel_core;
-using pixel_core.Assets;
+using System.Numerics;
 
 namespace pixel_core
 {
-    public enum InterpolationType { Linear, Exponential, ExponentialSqrd}
+    public enum InterpolationType { Linear, Exponential, ExponentialSqrd }
 
     public class Text : Image
-    { 
-        public Dictionary<char , JImage> font_model = new();
+    {
+        public Dictionary<char, JImage> font_model = new();
         /// <summary>
         /// the bounding box of the text element
         /// </summary>
@@ -25,7 +25,7 @@ namespace pixel_core
                 content = value;
                 RefreshCharacters();
             }
-        } 
+        }
         [Field]
         private string content = "abc";
         public override void Awake()
@@ -37,13 +37,13 @@ namespace pixel_core
 
             RefreshFont();
             RefreshCharacters();
-            Refresh(); 
+            Refresh();
         }
         [Method]
         public void RefreshFont()
         {
             font_model.Clear();
-            
+
             lock (font_model)
                 for (int i = 0; i < 3; ++i)
                 {
@@ -52,7 +52,7 @@ namespace pixel_core
                     {
                         Bitmap bmp = new(meta.Path);
                         JImage image = new(bmp);
-                        
+
                         if (font_model.ContainsKey(alphabet[i]))
                             continue;
 
@@ -63,9 +63,9 @@ namespace pixel_core
         [Method]
         public void RefreshCharacters()
         {
-            if (content.Length == 0) 
-                return; 
-          
+            if (content.Length == 0)
+                return;
+
             var output = new List<JImage>();
             int width = 0;
             int height = 0;
@@ -78,7 +78,7 @@ namespace pixel_core
                     output.Add(img.Clone());
 
                     width += img.width;
-                    height += img.height; 
+                    height += img.height;
                 }
 
             var start = new Vector2(0, 0);
@@ -100,6 +100,6 @@ namespace pixel_core
                 DrawImage(renderer, texture);
             }
         }
-       
+
     }
 }

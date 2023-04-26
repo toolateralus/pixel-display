@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using Bitmap = System.Drawing.Bitmap;
-using Pixel = System.Drawing.Color;
-using Image = System.Windows.Controls.Image;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Windows.Media.Imaging;
+using Bitmap = System.Drawing.Bitmap;
 
 namespace pixel_core
 {
@@ -18,7 +11,7 @@ namespace pixel_core
     {
         [DllImport("gdi32.dll")]
         internal static extern bool DeleteObject(IntPtr intPtr);
-       
+
         public static unsafe void Render(Bitmap source, System.Windows.Controls.Image destination)
         {
             BitmapData bmd = source.LockBits(source.Rect(), ImageLockMode.ReadOnly, source.PixelFormat);
@@ -41,13 +34,13 @@ namespace pixel_core
                 {
                     Pixel color = colorArray[x, y];
                     int index = (y * width + x) * 4;
-                    pixelData[index] =     color.a;
+                    pixelData[index] = color.a;
                     pixelData[index + 1] = color.r;
                     pixelData[index + 2] = color.g;
                     pixelData[index + 3] = color.b;
                 }
             }
-            return pixelData; 
+            return pixelData;
         }
         public static Pixel[,] PixelFromBitmap(Bitmap bmp, bool dispose = false)
         {
@@ -61,7 +54,7 @@ namespace pixel_core
 
                 if (bmp == null)
                     return new Pixel[0, 0];
-                Pixel[,] colors = new Pixel[i,j];
+                Pixel[,] colors = new Pixel[i, j];
 
                 for (int y = 0; y < bmp.Height; y++)
                 {
@@ -70,7 +63,7 @@ namespace pixel_core
                         colors[x, y] = bmp.GetPixel(x, y);
                     }
                 }
-                if(dispose)
+                if (dispose)
                     bmp.Dispose();
                 return colors;
             }

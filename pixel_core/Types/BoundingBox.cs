@@ -26,7 +26,7 @@ namespace pixel_core
             max.Y = Math.Max(point.Y + 1, max.Y);
         }
 
-  
+
 
     }
 
@@ -44,7 +44,7 @@ namespace pixel_core
             get { return min.Y; }
             set { min.Y = value; }
         }
-       
+
         public float Width
         {
             get { return max.X - min.X; }
@@ -79,7 +79,7 @@ namespace pixel_core
         {
             this.min = expandToAll[0];
             this.max = expandToAll[0];
-            for(int i = 1; i < expandToAll.Length; i++)
+            for (int i = 1; i < expandToAll.Length; i++)
                 ExpandTo(expandToAll[i]);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

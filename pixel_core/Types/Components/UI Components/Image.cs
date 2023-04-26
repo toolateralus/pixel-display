@@ -1,22 +1,22 @@
-﻿using pixel_core.Assets;
-using System.Numerics;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using pixel_core.FileIO;
-using System.Linq;
-using System;
-using System.Drawing;
-using System.Threading.Tasks;
 using pixel_core.Statics;
+using pixel_core.types.physics;
+using System;
+using System.Linq;
+using System.Numerics;
+using System.Threading.Tasks;
 
 namespace pixel_core
 {
     public class Image : UIComponent
     {
-        
+
         internal protected bool selected_by_editor;
         private JImage lightmap;
 
-        [Field] [JsonProperty]
+        [Field]
+        [JsonProperty]
         private string textureName = "Assets\\other\\ball.bmp";
         public override void Dispose()
         {
@@ -79,8 +79,9 @@ namespace pixel_core
         public Image()
         {
             texture = new Texture(Vector2.One, Pixel.Red);
-        }   
-        [Method] public void CycleSpriteType()
+        }
+        [Method]
+        public void CycleSpriteType()
         {
             if ((int)Type + 1 > sizeof(ImageType) - 2)
             {
@@ -90,7 +91,8 @@ namespace pixel_core
             Type = (ImageType)((int)Type + 1);
 
         }
-        [Method] public async Task SetFileAsTexture()
+        [Method]
+        public async Task SetFileAsTexture()
         {
             EditorEvent e = new(EditorEventFlags.GET_FILE_VIEWER_SELECTED_METADATA);
             object? asset = null;
@@ -133,11 +135,11 @@ namespace pixel_core
             var img = node.AddComponent<Image>();
 
             img.Scale = Constants.DefaultNodeScale;
-            img.Type = ImageType.Image; 
+            img.Type = ImageType.Image;
             img.SetFileAsTexture();
             img.Refresh();
 
-            return node; 
+            return node;
         }
         #region Lighting
         public Light? GetFirstLight()
@@ -207,6 +209,6 @@ namespace pixel_core
             return colors;
         }
         #endregion
-       
+
     }
 }

@@ -1,9 +1,6 @@
 ﻿using pixel_core.FileIO;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pixel_core
@@ -14,11 +11,11 @@ namespace pixel_core
         #region Wrapper Actions/Functions
         public static event Action<Stage>? OnStageSet;
         public static event Func<Stage>? OnStageGotten;
-        
+
         public static event Action<Project>? OnProjectSet;
         public static event Func<Project>? OnProjectGotten;
         public static event Action OnDefaultStageRequested;
-        
+
         public static event Action<EditorEvent>? OnEditorEventRaised;
         public static event Func<Task<Metadata>>? OnFileViewer_SelectedMetadata_Query;
 
@@ -79,12 +76,12 @@ namespace pixel_core
 
         public static bool IsRunning { get => OnIsRunningQuery.Invoke(); }
         public static bool Initialized { get => OnIsInitializedQuery.Invoke(); }
-        public static Project Project 
+        public static Project Project
         {
             get => OnProjectGotten?.Invoke();
-            set => OnProjectSet?.Invoke(value); 
+            set => OnProjectSet?.Invoke(value);
         }
-       
+
     }
-       
+
 }

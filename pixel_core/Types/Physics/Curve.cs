@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Numerics;
 
-namespace pixel_core
+namespace pixel_core.types.physics
 {
     public class Curve : Animation<Vector2>
     {
@@ -68,7 +68,7 @@ namespace pixel_core
             if (frameTime <= 0)
                 frameTime = 1;
 
-            Curve curve = new(); 
+            Curve curve = new();
 
             curve.frameTime = frameTime;
 
@@ -82,7 +82,7 @@ namespace pixel_core
         }
         public static Curve Normalize(Curve curve)
         {
-            float max = curve.Max; 
+            float max = curve.Max;
 
             var normalizedCurve = new Curve();
             for (int i = 0; i < curve.frames.Count; i++)
@@ -137,9 +137,9 @@ namespace pixel_core
             }
 
             int frameTime = (int)(vertices / speed);
-            
-            if (frameTime <= 0) 
-                frameTime = 1; 
+
+            if (frameTime <= 0)
+                frameTime = 1;
 
             return curve;
         }

@@ -1,11 +1,10 @@
 ﻿using Newtonsoft.Json;
+using pixel_core.types.physics;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Windows;
 
 namespace pixel_core
 {
@@ -31,7 +30,7 @@ namespace pixel_core
         }
 
         [JsonProperty]
-        public Pixel color = Pixel.Clear; 
+        public Pixel color = Pixel.Clear;
 
         public JImage()
         {
@@ -59,7 +58,7 @@ namespace pixel_core
         {
             for (int i = 0; i < colorData.Length; i += 4)
             {
-                colorData[i] *= color.a; 
+                colorData[i] *= color.a;
                 colorData[i + 1] *= color.r;
                 colorData[i + 2] *= color.g;
                 colorData[i + 3] *= color.b;
@@ -69,7 +68,7 @@ namespace pixel_core
         public JImage(Bitmap bmpInput)
         {
             if (bmpInput is null)
-                return; 
+                return;
             Pixel[,] pixels;
             lock (bmpInput)
                 pixels = CBit.PixelFromBitmap(bmpInput);
@@ -84,7 +83,7 @@ namespace pixel_core
             height = (int)bounds.Height;
             width = (int)bounds.Width;
             ApplyColor(colorData);
-            data = colorData; 
+            data = colorData;
         }
         public void SetPixel(int x, int y, Pixel color)
         {
@@ -133,19 +132,19 @@ namespace pixel_core
                 var endX = Math.Min((int)bounds.Width, startX + image.width);
                 var endY = Math.Min((int)bounds.Height, startY + image.height);
 
-                for (int x = startX; x < endX -1 ; x++)
+                for (int x = startX; x < endX - 1; x++)
                 {
-                    for (int y = startY; y < endY -1; y++)
+                    for (int y = startY; y < endY - 1; y++)
                     {
                         var pxPos = new Vector2(x, y);
 
                         int mapPos = ((int)pxPos.Y * (int)bounds.Width + (int)pxPos.X) * 4;
 
-                        if (3 + mapPos > drawSurface.Length) 
+                        if (3 + mapPos > drawSurface.Length)
                             continue;
 
                         int imgPos = ((y - startY) * image.width + (x - startX)) * 4;
-                        
+
                         if (3 + imgPos > image.data.Length)
                             continue;
 
@@ -169,7 +168,7 @@ namespace pixel_core
                 bounds.ExpandTo(pos);
                 bounds.ExpandTo(pos + img.Size);
             }
-            posCurve.Reset(); 
+            posCurve.Reset();
             byte[] drawSurface = new byte[(int)bounds.Width * (int)bounds.Height * 4];
             return drawSurface;
         }

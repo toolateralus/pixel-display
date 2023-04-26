@@ -2,7 +2,7 @@
 using pixel_core.Assets;
 using pixel_core.FileIO;
 using pixel_core.Statics;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -16,11 +16,11 @@ namespace pixel_core
     public class Stage : Asset
     {
         [JsonProperty]
-        public Metadata backgroundMetadata; 
+        public Metadata backgroundMetadata;
         [JsonProperty]
-        public Matrix3x2 bgTransform = Matrix3x2.CreateScale(128,128);
+        public Matrix3x2 bgTransform = Matrix3x2.CreateScale(128, 128);
         [JsonProperty]
-        public TextureFiltering backgroundFiltering = TextureFiltering.Point; 
+        public TextureFiltering backgroundFiltering = TextureFiltering.Point;
         [JsonProperty]
         public Vector2 backgroundOffset = new(0, 0);
         [JsonProperty]
@@ -46,11 +46,11 @@ namespace pixel_core
         public JImage GetBackground()
         {
             if (background == null && backgroundMetadata != null)
-                    return background = init_background();
+                return background = init_background();
             return background ?? throw new NullReferenceException(nameof(background));
         }
         public JImage background = new();
-       
+
         public bool NodesBusy { get; private set; }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace pixel_core
         /// <returns></returns>
         public bool Awake()
         {
-            var awokenNodes = 0; 
+            var awokenNodes = 0;
             int count = nodes.Count;
             for (int i = 0; i < count; i++)
                 if (!nodes[i].awake)
@@ -72,7 +72,7 @@ namespace pixel_core
             return true;
 
         }
-        
+
         public void Update()
         {
             NodesBusy = true;
@@ -105,7 +105,7 @@ namespace pixel_core
                 }
             NodesBusy = false;
         }
-        
+
         public void SetBackground(JImage value)
         {
             background = value;
@@ -233,17 +233,17 @@ namespace pixel_core
         void remove_node(object[] o)
         {
             if (o[0] is Node node)
-            unsafe
-            {
+                unsafe
+                {
                     if (!nodes.Contains(node)) return;
                     nodes.Remove(node);
 
                     // TODO: remove this probably
                     Node* objPtr = &node;
-                
+
                     IntPtr objIntPtr = new IntPtr(objPtr);
                     Marshal.FreeHGlobal(objIntPtr);
-            };
+                };
 
         }
 
@@ -263,8 +263,8 @@ namespace pixel_core
             }
         }
 
-       
-        public void AddNodes(List<Node> nodes) 
+
+        public void AddNodes(List<Node> nodes)
         {
             foreach (var node in nodes)
             {
@@ -292,13 +292,13 @@ namespace pixel_core
                 {
                     Interop.Log("JSON_ERROR: Null Node Removed From Stage.");
                     RemoveNode(node);
-                    continue; 
+                    continue;
                 }
                 for (int x = 0; x < node.Components.Count; ++x)
                 {
                     var type = node.Components.Keys.ElementAt(x);
                     var compList = node.Components[type];
-                    for(int y = 0; y < compList.Count; ++y)
+                    for (int y = 0; y < compList.Count; ++y)
                     {
                         var component = compList[y];
                         if (component is null)
@@ -313,7 +313,7 @@ namespace pixel_core
             }
             Metadata = metadata;
             this.backgroundMetadata = backgroundMetadata;
-            init_background(); 
+            init_background();
         }
 
 

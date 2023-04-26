@@ -48,18 +48,18 @@ namespace pixel_core
                 if (Constants.ReadableExtensions.Contains(meta.extension))
                 {
                     var jsonSerializer = JsonSerializer.Create(Settings);
-                    
+
                     StreamReader reader = new(meta.Path);
-                    
+
                     using JsonTextReader jsonReader = new(reader);
-                    
+
                     obj = jsonSerializer.Deserialize<T>(jsonReader);
 
                     return obj;
                 }
                 throw new FileNotFoundException($"JSON file was not found at provided path, or had an unsupported file extension \n Path: {meta.Path} \n Extension: {meta.extension}");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 if (!(Interop.IsRunning && Interop.Initialized))
                     throw;
@@ -69,7 +69,7 @@ namespace pixel_core
         }
         public static TextWriter? WriteJson<T>(T data, Metadata meta, bool closeStreamWhenFinished = true)
         {
-            
+
             using TextWriter writer = new StreamWriter(meta.Path);
             var jsonSerializer = JsonSerializer.Create(Settings);
             jsonSerializer.Serialize(writer, data);
@@ -102,16 +102,16 @@ namespace pixel_core
             using StreamReader writer = new(meta.Path);
             string data = writer.ReadToEnd();
             writer.Close();
-            return data; 
+            return data;
         }
         public static Bitmap ReadBitmap(Metadata meta)
         {
             var obj = IO.ReadJson<object>(meta);
-            
+
             if (obj is Bitmap bitmap)
                 return bitmap;
 
-            return new(512,512);
+            return new(512, 512);
         }
         public static MessageBoxResult FileOverrideWarning(string path)
         {
@@ -150,9 +150,9 @@ namespace pixel_core
             if (project is null)
             {
                 Interop.Log($"Project {name} not found.");
-                return null;    
+                return null;
             }
-            return project;  
+            return project;
         }
 
         internal static void WriteProject(object project, Metadata metadata)

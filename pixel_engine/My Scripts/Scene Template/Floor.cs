@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
-using pixel_core.Types.Components;
-using pixel_core;
+using pixel_core.types.Components;
+using pixel_core.types.physics;
 
 namespace pixel_core
 {

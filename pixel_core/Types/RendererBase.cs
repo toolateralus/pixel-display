@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace pixel_core
 {
 
-    public abstract class  RendererBase 
+    public abstract class RendererBase
     {
         Vector2 zero = Vector2.Zero;
         Vector2 one = Vector2.One;
@@ -16,10 +16,10 @@ namespace pixel_core
         public int stride = 0;
         public byte[] Frame => latestFrame;
         public int Stride => stride;
-        public Vector2 Resolution 
-        { 
+        public Vector2 Resolution
+        {
             get => _resolution;
-            set => _resolution = value; 
+            set => _resolution = value;
         }
         public Vector2 _resolution = Constants.DefaultResolution;
         public bool baseImageDirty = true;

@@ -1,6 +1,6 @@
-﻿using pixel_core.Types.Components;
+﻿using pixel_core.types.Components;
+using pixel_core.types.physics;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
 
@@ -26,8 +26,8 @@ namespace pixel_core
         {
             if (!showDebug) return;
             var center = node.Position;
-            
-            if(animated)
+
+            if (animated)
                 AnimateLength();
 
             int lineCt = (int)(240 * (length * length));
@@ -37,17 +37,17 @@ namespace pixel_core
             {
                 float startAngle = i * sliceAngle;
                 float angle = startAngle * CMath.PI / 180;
-                
+
                 float cos = MathF.Cos(angle) * length * radius;
                 double sin = Math.Sin(angle * length * radius);
-                
+
                 Vector2 A = (new Vector2(cos, (float)sin));
                 Vector2 startPt = center;
-                Vector2 endPt = startPt + A * 2; 
+                Vector2 endPt = startPt + A * 2;
 
                 Pixel currentColor = GetGradient(i, lineCt, alpha: 5);
 
-                Interop.DrawLine(endPt, startPt/ heightModifier, currentColor);
+                Interop.DrawLine(endPt, startPt / heightModifier, currentColor);
             }
         }
 
@@ -68,7 +68,7 @@ namespace pixel_core
         {
             if (position >= subdivisions)
                 position = subdivisions - 1;
-            
+
             gradientColors ??= new Pixel[] { Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta };
             float gradientPos = (float)position / subdivisions;
             int colorSegment = (int)(gradientPos * (gradientColors.Length - 1));
@@ -102,7 +102,7 @@ namespace pixel_core
         {
             Node x = new("Light");
             x.AddComponent<Light>();
-            return x; 
+            return x;
         }
     }
 }

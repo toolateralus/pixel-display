@@ -60,7 +60,7 @@ namespace pixel_core
                 frameIndex = startIndex;
 
             if (frameIndex < 0)
-                frameIndex = frames.Count * frameTime - 1; 
+                frameIndex = frames.Count * frameTime - 1;
 
             if (shouldIncrement)
             {
@@ -87,5 +87,5 @@ namespace pixel_core
             frameIndex = (int)(frameIndex - speed);
         }
     }
-   
+
 }

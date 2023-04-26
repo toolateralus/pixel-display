@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace pixel_core
+namespace pixel_core.types.physics
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };
 
@@ -11,7 +11,7 @@ namespace pixel_core
     {
         public SATProjection thisProjection;
         public SATProjection otherProjection;
-        public Collider collider = null;  
+        public Collider collider = null;
         public Vector2 contact = default;
         public Vector2 normal = default;
         public float depth = default;
@@ -40,15 +40,15 @@ namespace pixel_core
             for (int i = 0; i < stage.nodes.Count; i++)
             {
                 Node? node = stage.nodes[i];
-                
+
                 var hasCollider = node.col != null;
 
                 if (hasCollider)
                     quadTree.Insert(node);
             }
-            
+
             BoundingBox2D range = new(area / -2, area / 2);
-           
+
             List<Node> foundNodes = new();
 
             quadTree.Query(range, foundNodes);
@@ -86,7 +86,7 @@ namespace pixel_core
         {
             if (rigidBody is null || staticCollider is null)
                 return;
-            
+
             var rbCollider = rigidBody.node.col;
 
             if (rbCollider is null || rbCollider.UUID == staticCollider.UUID)
@@ -138,8 +138,8 @@ namespace pixel_core
             var aDistance = Vector2.Dot(centroidA, normal);
             var bDistance = Vector2.Dot(centroidB, normal);
 
-            Vector2 aCollisionPoint = centroidA - (normal * aDistance);
-            Vector2 bCollisionPoint = centroidB - (normal * bDistance);
+            Vector2 aCollisionPoint = centroidA - normal * aDistance;
+            Vector2 bCollisionPoint = centroidB - normal * bDistance;
 
             aCollisionPoint += normal * (depth / 2);
             bCollisionPoint -= normal * (depth / 2);
@@ -219,8 +219,8 @@ public class QuadTree
     {
         int index = -1;
         Vector2 midpoint = (bounds.max + bounds.min) / 2;
-        bool topQuadrant = (bounds.min.Y < midpoint.Y && bounds.max.Y < midpoint.Y);
-        bool bottomQuadrant = (bounds.min.Y > midpoint.Y);
+        bool topQuadrant = bounds.min.Y < midpoint.Y && bounds.max.Y < midpoint.Y;
+        bool bottomQuadrant = bounds.min.Y > midpoint.Y;
 
         if (bounds.min.X < midpoint.X && bounds.max.X < midpoint.X)
         {

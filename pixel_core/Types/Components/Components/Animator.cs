@@ -2,7 +2,7 @@
 using pixel_core.Assets;
 using pixel_core.FileIO;
 using pixel_core.Statics;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +13,7 @@ namespace pixel_core
         public override void Dispose()
         {
             sprite = null;
-            animation = null; 
+            animation = null;
         }
         [JsonProperty]
         [Field] public float speed = 2f;
@@ -21,7 +21,8 @@ namespace pixel_core
         private Animation? animation;
         [JsonProperty]
         private Sprite? sprite;
-        [Field][JsonProperty]
+        [Field]
+        [JsonProperty]
         public string[] frameNames = new string[]
         {
             "dog_walking_1",
@@ -33,11 +34,12 @@ namespace pixel_core
             "dog_walking_7",
             "dog_walking_8",
         };
-        [JsonProperty][Field]
+        [JsonProperty]
+        [Field]
         public int padding = 12;
         [JsonProperty]
         [Field]
-        public bool looping = true; 
+        public bool looping = true;
         [Method]
         void InsertFrame()
         {
@@ -77,10 +79,10 @@ namespace pixel_core
                 if (AssetLibrary.FetchMeta(name) is Metadata meta)
                     metas.Add(meta);
             }
-            
-            if (metas.Count == 0) 
+
+            if (metas.Count == 0)
                 return;
-               
+
             Animation anim = new(metas.ToArray(), padding)
             {
                 looping = true
@@ -105,7 +107,7 @@ namespace pixel_core
                 return;
 
             if (animation.speed != speed)
-                animation.speed = speed; 
+                animation.speed = speed;
 
             var img = animation?.GetValue(true);
             sprite?.SetImage(img);
@@ -150,10 +152,10 @@ namespace pixel_core
         {
             var node = Rigidbody.Standard();
             var anim = node.AddComponent<Animator>();
-            anim.looping = true; 
-            
+            anim.looping = true;
+
             if (node.TryGetComponent(out Sprite sprite))
-                sprite.IsReadOnly = false; 
+                sprite.IsReadOnly = false;
 
             anim.RefreshAnimationWithFrameNames();
             anim.Start();

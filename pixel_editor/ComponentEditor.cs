@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using static pixel_core.Input;
 using pixel_core;
-using Component = pixel_core.Types.Components.Component;
+using Component = pixel_core.types.Components.Component;
 using System.Windows.Input;
 using System.Reflection;
 using System.Data;

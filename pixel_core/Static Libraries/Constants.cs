@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
@@ -42,17 +41,17 @@ namespace pixel_core.Statics
         public const string ProjectFileExtension = ".pixel";   // .pixel {Pixel Project}
         public const string MetadataFileExtension = ".meta";  // .meta {File Metadata} 
         public const string StageFileExtension = ".stage";    // .stage {Stage File}
-        
+
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
 
-        public const string BmpExt = ".bmp"; 
-        public const string JpegExt = ".jpg"; 
+        public const string BmpExt = ".bmp";
+        public const string JpegExt = ".jpg";
         public const string PngExt = ".png";
         public const string Mp3Ext = ".mp3";
         public const string LuaExt = ".lua";
 
-        public static readonly string[] ReadableExtensions = 
-        { 
+        public static readonly string[] ReadableExtensions =
+        {
             LuaExt,
             Mp3Ext,
             PngExt,
@@ -82,12 +81,12 @@ namespace pixel_core.Statics
                 T? obj = collection[i];
                 if (comparison.Contains(obj))
                 {
-                    collection[Array.IndexOf(collection, obj)] = default; 
+                    collection[Array.IndexOf(collection, obj)] = default;
                     continue;
                 }
                 comparison.Add(obj);
             }
-            return collection; 
+            return collection;
         }
         public static List<T> RemoveDuplicatesFromList<T>(List<T> collection)
         {
@@ -102,7 +101,7 @@ namespace pixel_core.Statics
                 }
                 comparison.Add(obj);
             }
-            return collection; 
+            return collection;
         }
     }
 

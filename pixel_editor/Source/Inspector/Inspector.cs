@@ -9,7 +9,7 @@ using pixel_core;
 using System.Linq;
 using System.Windows.Media;
 using System.Drawing.Text;
-using pixel_core.Types.Components;
+using pixel_core.types.Components;
 
 namespace pixel_editor
 {
