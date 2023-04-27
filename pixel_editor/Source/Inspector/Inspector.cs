@@ -15,21 +15,6 @@ namespace pixel_editor
 {
     public class Inspector
     {
-        public Inspector(Grid grid)
-        {
-            MainGrid = grid;
-            OnObjectSelected += Refresh;
-            OnObjectDeselected += Refresh;
-            OnComponentAdded += Refresh;
-            OnComponentRemoved += Refresh;
-            OnInspectorMoved += Inspector_OnInspectorMoved;
-            RegisterAction(this, DeselectNode, System.Windows.Input.Key.Escape);
-        }
-        public void Update(object? sender, EventArgs e)
-        {
-
-
-        }
         #region Reflection Functions
         public static string GetComponentInfo(Component component)
         {
@@ -68,6 +53,17 @@ namespace pixel_editor
             properties = component.GetType().GetProperties();
         }
         #endregion
+        public Inspector(Grid grid)
+        {
+            MainGrid = grid;
+            OnObjectSelected += RefreshInspector;
+            OnObjectDeselected += RefreshInspector;
+            OnComponentAdded += RefreshInspector;
+            OnComponentRemoved += RefreshInspector;
+            OnInspectorMoved += Inspector_OnInspectorMoved;
+            RegisterAction(this, DeselectNode, System.Windows.Input.Key.Escape);
+        }
+        
         #region Node Function
         public Node? lastSelectedNode;
         public void DeselectNode()
@@ -102,66 +98,44 @@ namespace pixel_editor
         }
 
         #endregion
-        #region UI Function
-        
-        private List<Control> activeControls = new();
-        private List<Grid> activeGrids = new();
-        bool addComponentMenuOpen = false;
-
-        private Grid MainGrid;
-        private Grid grid;
+        #region Component Editor
         Grid addComponentGrid;
-
-        Dictionary<string, Func<Component>> addComponentFunctions;
+        bool addComponentMenuOpen = false;
+        private Dictionary<string, Func<Component>> addComponentFunctions;
+        private List<Action> addComponentActions = new();
         public static List<Action> editComponentActions = new();
-        private Dictionary<Type, List<Component>> components = new();
-        List<Action> addComponentActions = new();
-        
-        private static void RemoveComponent(Component obj)
-        {
-            obj.node.RemoveComponent(obj);
-        }
-        private void Refresh(Grid grid)
+
+        /// <summary>
+        /// Todo: figure out why this dupes the inspector when it's open, It should always just refresh it entirely.
+        /// </summary>
+        /// <param name="grid"></param>
+        private void RefreshInspector(Grid grid)
         {
             if (grid != null)
             {
                 grid.Children.Clear();
                 grid.Visibility = Visibility.Hidden;
             }
-
             activeGrids.Clear();
             activeControls.Clear();
             editComponentActions.Clear();
-
-
             grid = null;
             grid = NewInspectorGrid();
-
             if (lastSelectedNode == null)
                 return;
-
-            components = lastSelectedNode.Components;
-
             int index = 0;
-
-            index = AddTransform(grid, index);
-
-            foreach (var componentType in components.Values)
+            index = TransformHeader(grid, index);
+            foreach (var componentType in lastSelectedNode.Components.Values)
                 foreach (var component in componentType)
-                    index = AddComponentToInspector(grid, index, component);
-
-
+                    index = ComponentHeader(grid, index, component);
             var addComponentButton = Inspector.GetButton("Add Component", new(0, 0, 0, 0));
             addComponentButton.FontSize = 2;
             addComponentButton.Click += AddComponentButton_Click;
             SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
             grid.Children.Add(addComponentButton);
-
-
             OnInspectorUpdated?.Invoke(grid);
         }
-
-        private int AddTransform(Grid grid, int index)
+        private int TransformHeader(Grid grid, int index)
         {
             TransformComponent transform = new()
             {
@@ -170,13 +144,10 @@ namespace pixel_editor
                 scale = lastSelectedNode.Scale,
                 rotation = lastSelectedNode.Rotation
             };
-
-
-            index = AddComponentToInspector(grid, index, transform, false, lastSelectedNode.Name);
+            index = ComponentHeader(grid, index, transform, false, lastSelectedNode.Name);
             return index;
         }
-
-        private int AddComponentToInspector(Grid grid, int index, Component component, bool removable = true, string? name = null)
+        private int ComponentHeader(Grid grid, int index, Component component, bool removable = true, string? name = null)
         {
             var box = GetTextBox(name ?? component.GetType().Name);
             SetRowAndColumn(box, 2, 4, 0, index * 2);
@@ -193,21 +164,16 @@ namespace pixel_editor
                 grid.Children.Add(removeButton);
             }
 
-
             editComponentActions.Add(delegate
             {
                 Editor.Current.componentEditor ??= new();
                 Editor.Current.componentEditor.Dispose();
                 Editor.Current.componentEditor.Refresh(component);
             });
+
             index++;
+
             return index;
-        }
-        public void AddGridToInspector(Grid grid)
-        {
-            this.MainGrid.Children.Add(grid);
-            this.MainGrid.UpdateLayout();
-            activeGrids.Add(grid);
         }
         private void AddComponent(KeyValuePair<string, object> item)
         {
@@ -215,7 +181,6 @@ namespace pixel_editor
             {
                 Runtime.Log($"Component {nameof(funct.Method.ReturnType)} added!");
                 funct.Invoke();
-                //TODO: Make it so the component list/ data refreshes on click here.
             }
         }
         private void AddComponentClicked(object sender, RoutedEventArgs e)
@@ -236,7 +201,6 @@ namespace pixel_editor
         {
             addComponentFunctions ??= new();
             addComponentFunctions.Clear();
-            
 
             var types = Runtime.AllComponents;
             foreach (var type in types)
@@ -248,11 +212,10 @@ namespace pixel_editor
                     continue; 
 
                 if (!addComponentFunctions.ContainsKey(type.Name))
-                    AddAndInstantiateComponent(type);
+                    InstantiateAndAddComponent(type);
             }
         }
-
-        private void AddAndInstantiateComponent(Type type)
+        private void InstantiateAndAddComponent(Type type)
         {
             addComponentFunctions.Add(type.Name, () =>
             {
@@ -272,7 +235,6 @@ namespace pixel_editor
                 return v;
             });
         }
-
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
             if(e.RoutedEvent != null)
@@ -314,13 +276,27 @@ namespace pixel_editor
             addComponentGrid.Children.Clear();
             addComponentGrid = null;
         }
+
+        #endregion
+        #region UI Function
+        
+        private List<Control> activeControls = new();
+        private List<Grid> activeGrids = new();
+
+        private Grid MainGrid;
+        private Grid grid;
+
+
         private Grid NewInspectorGrid()
         {
             Grid grid = GetGrid();
-            AddGridToInspector(grid);
+            this.MainGrid.Children.Add(grid);
+            this.MainGrid.UpdateLayout();
+            activeGrids.Add(grid);
             RePositionInspectorGrid(grid);
             return grid;
         }
+
         private static void RePositionInspectorGrid(Grid grid)
         {
             SetRowAndColumn(grid, Editor.Current.settings.InspectorWidth , Editor.Current.settings.InspectorHeight, (int)Editor.Current.settings.InspectorPosition.X, (int)Editor.Current.settings.InspectorPosition.Y);
@@ -340,7 +316,6 @@ namespace pixel_editor
             System.Drawing.FontFamily[] fonts = installedFontCollection.Families;
             return fonts;
         }
-
         private static TextBox MintStyle(string componentName)
         {
             return new()
@@ -403,7 +378,7 @@ namespace pixel_editor
             editComponentButton.Click += (_, e) =>
             {
                 e.Handled = true; 
-                RemoveComponent(component);
+                component.RemoveComponent(component);
             };
             editComponentButton.Name = "remove_button_" + index.ToString();
             return editComponentButton;
@@ -466,12 +441,12 @@ namespace pixel_editor
 
         #endregion
         #region Events
-        public static event Action<Grid> OnObjectSelected;
-        public static event Action<Grid> OnObjectDeselected;
-        public static event Action<Grid> OnInspectorUpdated;
-        public static event Action<Grid> OnComponentAdded;
-        public static event Action<Grid> OnComponentRemoved;
-        public static Action<int, int> OnInspectorMoved;
+        public static event Action<Grid>? OnObjectSelected;
+        public static event Action<Grid>? OnObjectDeselected;
+        public static event Action<Grid>? OnInspectorUpdated;
+        public static event Action<Grid>? OnComponentAdded;
+        public static event Action<Grid>? OnComponentRemoved;
+        public static Action<int, int>? OnInspectorMoved;
 
         private void Inspector_OnInspectorMoved(int x = 0, int y = 0)
         {
@@ -501,63 +476,6 @@ namespace pixel_editor
            from CustomAttributeData data in method.CustomAttributes
            where data.AttributeType == typeof(MethodAttribute)
            select method;
-
-        //public static IEnumerable<PropertyInfo> GetSerializedProperties(this Component component) =>
-        //   from PropertyInfo field in component.GetType().GetRuntimeProperties()
-        //   from CustomAttributeData data in field.CustomAttributes
-        //   where data.AttributeType == typeof(null)
-        //   select field;
-
-        Lua AddLuaComponent()
-        {
-            return lastSelectedNode?.AddComponent<Lua>();
-        }
-        Joint AddJoint()
-        {
-            return lastSelectedNode?.AddComponent<Joint>();  
-        }
-        ParticleSystem AddParticles()
-        {
-            return lastSelectedNode?.AddComponent<ParticleSystem>(); 
-        }
-        Sprite AddSprite()
-        {
-            var x = lastSelectedNode?.AddComponent<Sprite>();
-            Runtime.Log($"Sprite Added!");
-            return x;
-        }
-        Player AddPlayer()
-        {
-            var x = lastSelectedNode?.AddComponent<Player>();
-            Runtime.Log($"Player Added!");
-            return x;
-        }
-        Animator AddAnimator()
-        {
-            var x = lastSelectedNode?.AddComponent<Animator>();
-            Runtime.Log($"Animator Added!");
-
-            return x;
-        }
-        Collider AddCollider()
-        {
-            var x = lastSelectedNode.AddComponent<Collider>();
-            Runtime.Log($"Collider Added!");
-            return x;
-        }
-        Softbody AddSoftbody()
-        {
-            var x = lastSelectedNode.AddComponent<Softbody>();
-            Runtime.Log($"Player Added!");
-            return x;
-        }
-        Rigidbody AddRigidbody()
-        {
-            var x = lastSelectedNode.AddComponent<Rigidbody>();
-            Runtime.Log($"Rigidbody Added!");
-            return x;
-        }
-
         public static CheckBox GetCheckBox(RoutedEventHandler e, string content = "", bool currentValue = false)
         {
             CheckBox box = new()
@@ -567,7 +485,6 @@ namespace pixel_editor
             box.Click += e;
             return box; 
         }
-
         internal static TextBox GetInputField(string curVal)
         {
             TextBox box = new()
