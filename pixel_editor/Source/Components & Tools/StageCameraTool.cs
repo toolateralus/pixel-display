@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Windows.Input;
 using System.Numerics;
-using pixel_core;
+using Pixel;
 
 namespace pixel_editor
 {

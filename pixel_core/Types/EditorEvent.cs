@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace pixel_core
+namespace Pixel
 {
     [Flags]
     public enum EditorEventFlags

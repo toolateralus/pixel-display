@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.FileIO;
-using pixel_core.Statics;
+using Pixel.FileIO;
+using Pixel.Statics;
 using System.Drawing;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Animation : Animation<JImage>
     {

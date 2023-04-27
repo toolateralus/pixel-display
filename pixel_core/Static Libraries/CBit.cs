@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using Bitmap = System.Drawing.Bitmap;
 
-namespace pixel_core
+namespace Pixel
 {
     public static unsafe class CBit
     {
@@ -22,7 +22,7 @@ namespace pixel_core
             DeleteObject(bmd.Scan0); //I don't actually know if this is neccesary, this might be costing some performance for no reason.;
 
         }
-        public static byte[] ByteFromPixel(Pixel[,] colorArray)
+        public static byte[] ByteFromPixel(Color[,] colorArray)
         {
             var width = colorArray.GetLength(0);
             var height = colorArray.GetLength(1);
@@ -32,7 +32,7 @@ namespace pixel_core
             {
                 for (int x = 0; x < width; x++)
                 {
-                    Pixel color = colorArray[x, y];
+                    Color color = colorArray[x, y];
                     int index = (y * width + x) * 4;
                     pixelData[index] = color.a;
                     pixelData[index + 1] = color.r;
@@ -42,7 +42,7 @@ namespace pixel_core
             }
             return pixelData;
         }
-        public static Pixel[,] PixelFromBitmap(Bitmap bmp, bool dispose = false)
+        public static Color[,] PixelFromBitmap(Bitmap bmp, bool dispose = false)
         {
             if (bmp is null)
                 throw new NullReferenceException("bitmap cannot be null.");
@@ -53,8 +53,8 @@ namespace pixel_core
                 int j = bmp.Height;
 
                 if (bmp == null)
-                    return new Pixel[0, 0];
-                Pixel[,] colors = new Pixel[i, j];
+                    return new Color[0, 0];
+                Color[,] colors = new Color[i, j];
 
                 for (int y = 0; y < bmp.Height; y++)
                 {
@@ -68,7 +68,7 @@ namespace pixel_core
                 return colors;
             }
         }
-        public static Bitmap SolidColorBitmap(Vector2 size, Pixel color)
+        public static Bitmap SolidColorBitmap(Vector2 size, Color color)
         {
             int x = (int)size.X;
             int y = (int)size.Y;
@@ -80,9 +80,9 @@ namespace pixel_core
                     bitmap.SetPixel(i, j, color);
             return bitmap;
         }
-        public static Pixel[,] SolidColorSquare(Vector2 size, Pixel color)
+        public static Color[,] SolidColorSquare(Vector2 size, Color color)
         {
-            var colorData = new Pixel[(int)size.X, (int)size.Y];
+            var colorData = new Color[(int)size.X, (int)size.Y];
             for (int x = 0; x < size.X; x++)
                 for (int y = 0; y < size.Y; y++)
                     colorData[x, y] = color;

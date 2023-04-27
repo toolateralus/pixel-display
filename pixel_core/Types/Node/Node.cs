@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.types.Components;
-using pixel_core.types.physics;
+using Pixel.Types.Components;
+using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     [JsonObject(MemberSerialization.OptIn)]
     public partial class Node
@@ -473,7 +473,7 @@ namespace pixel_core
 
             if (stage is null)
                 throw new EngineInstanceException("Stage was not initialized during a clone or instantiate call.");
-            clone.UUID = pixel_core.Statics.UUID.NewUUID();
+            clone.UUID = Pixel.Statics.UUID.NewUUID();
 
             stage.AddNode(clone);
 

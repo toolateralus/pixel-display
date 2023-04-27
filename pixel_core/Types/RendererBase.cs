@@ -1,9 +1,9 @@
-﻿using pixel_core.Statics;
+﻿using Pixel.Statics;
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel
 {
 
     public abstract class RendererBase
@@ -29,7 +29,7 @@ namespace pixel_core
         public abstract void Draw(StageRenderInfo info);
         public abstract void Dispose();
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void WriteColorToFrame(ref Pixel color, ref Vector2 framePos)
+        public void WriteColorToFrame(ref Color color, ref Vector2 framePos)
         {
             int index = (int)framePos.Y * stride + ((int)framePos.X * 3);
 
@@ -46,7 +46,7 @@ namespace pixel_core
             frame[index + 2] = (byte)(colorR + frameR);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void WriteColorToFrame(ref Pixel color, int x, int y)
+        public void WriteColorToFrame(ref Color color, int x, int y)
         {
             int index = y * stride + (x * 3);
 

@@ -1,5 +1,5 @@
-﻿using pixel_core.Statics;
-using pixel_core.types.Components;
+﻿using Pixel.Statics;
+using Pixel.Types.Components;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,7 +9,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel
 {
     public static class ExtensionMethods
     {
@@ -118,7 +118,7 @@ namespace pixel_core
             return pos;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Bitmap ToBitmap(this Pixel[,] colors)
+        public static Bitmap ToBitmap(this Color[,] colors)
         {
             int sizeX = colors.GetLength(0);
             int sizeY = colors.GetLength(1);
@@ -150,14 +150,14 @@ namespace pixel_core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Rectangle Rect(this Bitmap bmp) => new Rectangle(0, 0, bmp.Width, bmp.Height);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pixel Lerp(this Pixel A, Pixel B, float T)
+        public static Color Lerp(this Color A, Color B, float T)
         {
             T = Math.Max(0, Math.Min(1, T));
             int r = (int)Math.Round(A.r + (B.r - A.r) * T);
             int g = (int)Math.Round(A.g + (B.g - A.g) * T);
             int b = (int)Math.Round(A.b + (B.b - A.b) * T);
             int a = (int)Math.Round(A.a + (B.a - A.a) * T);
-            return Color.FromArgb(a, r, g, b);
+            return System.Drawing.Color.FromArgb(a, r, g, b);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<FieldInfo> GetSerializedFields(this Component component) =>

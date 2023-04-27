@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace pixel_core.types.physics
+namespace Pixel.Types.Physics
 {
     /// <summary>
     /// note :our Polygon uses a clockwise winding order
@@ -18,7 +18,7 @@ namespace pixel_core.types.physics
         public Vector2[] uv = Array.Empty<Vector2>();
         [Field]
         public Vector2[] vertices = Array.Empty<Vector2>();
-        public Pixel debuggingColor = Pixel.Random;
+        public Color debuggingColor = Color.Random;
 
         /// <summary>
         /// Each line will point clockwise.

@@ -1,5 +1,5 @@
 ﻿                                                                                                                                                                                                                                                                                  using System;
-using pixel_core;
+using Pixel;
 
 namespace pixel_editor
 {

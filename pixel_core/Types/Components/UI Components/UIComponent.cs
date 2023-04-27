@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.types.Components;
-using pixel_core.types.physics;
+using Pixel.Types.Components;
+using Pixel.Types.Physics;
 using System;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public abstract class UIComponent : Component
     {
@@ -17,7 +17,7 @@ namespace pixel_core
         [Field][JsonProperty] public float camDistance = 1;
         [Field][JsonProperty] public ImageType Type = ImageType.SolidColor;
         [Field][JsonProperty] public TextureFiltering filtering = TextureFiltering.Point;
-        [Field][JsonProperty] public Pixel color = Pixel.Blue;
+        [Field][JsonProperty] public Color color = Color.Blue;
         [Field][JsonProperty] public Vector2 viewportPosition = Vector2.Zero;
         [Field][JsonProperty] public Vector2 viewportSize = Vector2.One;
         public readonly Vector2 half = Vector2.One * 0.5f;
@@ -28,7 +28,7 @@ namespace pixel_core
             switch (Type)
             {
                 case ImageType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(Scale, color);
+                    Color[,] colorArray = CBit.SolidColorSquare(Scale, color);
                     texture.SetImage(colorArray);
                     break;
                 case ImageType.Image:
@@ -78,7 +78,7 @@ namespace pixel_core
 
                 var colorPos = LocalToColorPosition(localPos);
 
-                Pixel color = FilterPixel(image, colorPos);
+                Color color = FilterPixel(image, colorPos);
 
                 if (color.a == 0)
                 {
@@ -101,9 +101,9 @@ namespace pixel_core
                 }
             }
         }
-        private Pixel FilterPixel(JImage image, Vector2 colorPos)
+        private Color FilterPixel(JImage image, Vector2 colorPos)
         {
-            Pixel color;
+            Color color;
             switch (filtering)
             {
                 case TextureFiltering.Point:
@@ -121,14 +121,14 @@ namespace pixel_core
                     float xOffset = colorPos.X - left;
                     float yOffset = colorPos.Y - top;
 
-                    Pixel tl, tr, bl, br;
+                    Color tl, tr, bl, br;
 
                     GetAdjacentPixels(image, left, top, right, bottom, out tl, out tr, out bl, out br);
 
-                    Pixel topPx = Pixel.Lerp(tl, tr, xOffset);
-                    Pixel bottomPx = Pixel.Lerp(bl, br, xOffset);
+                    Color topPx = Color.Lerp(tl, tr, xOffset);
+                    Color bottomPx = Color.Lerp(bl, br, xOffset);
 
-                    color = Pixel.Lerp(topPx, bottomPx, yOffset);
+                    color = Color.Lerp(topPx, bottomPx, yOffset);
 
                     break;
 
@@ -138,7 +138,7 @@ namespace pixel_core
 
             return color;
         }
-        private static void GetAdjacentPixels(JImage image, int left, int top, int right, int bottom, out Pixel tl, out Pixel tr, out Pixel bl, out Pixel br)
+        private static void GetAdjacentPixels(JImage image, int left, int top, int right, int bottom, out Color tl, out Color tr, out Color bl, out Color br)
         {
             tl = image.GetPixel(left, top);
             tr = image.GetPixel(right, top);

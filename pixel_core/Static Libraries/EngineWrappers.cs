@@ -1,5 +1,5 @@
-﻿using pixel_core.FileIO;
-using pixel_core.types.Components;
+﻿using Pixel.FileIO;
+using Pixel.Types.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Interop
     {
@@ -18,8 +18,8 @@ namespace pixel_core
         public static event Action<Stage>? OnStageSet;
         public static event Action<Project>? OnProjectSet;
         public static event Action<EditorEvent>? OnEditorEventRaised;
-        public static event Action<Vector2, int, Pixel>? OnDrawCircle;
-        public static event Action<Vector2, Vector2, Pixel>? OnDrawLine;
+        public static event Action<Vector2, int, Color>? OnDrawCircle;
+        public static event Action<Vector2, Vector2, Color>? OnDrawLine;
         public static event Action<RendererBase, Matrix3x2, Matrix3x2>? OnDrawGraphicsFinalize;
         
         public static event Func<Project>? OnProjectGotten;
@@ -79,11 +79,11 @@ namespace pixel_core
             EditorEvent e = new(EditorEventFlags.PRINT_ERR, obj.ToString(), includeDateTime, clearConsole);
             RaiseInspectorEvent(e);
         }
-        public static void DrawLine(Vector2 a, Vector2 b, Pixel color)
+        public static void DrawLine(Vector2 a, Vector2 b, Color color)
         {
             OnDrawLine?.Invoke(a, b, color);
         }
-        internal static void DrawCircle(Vector2 vector2, int v, Pixel blue)
+        internal static void DrawCircle(Vector2 vector2, int v, Color blue)
         {
             OnDrawCircle?.Invoke(vector2, v, blue);
         }

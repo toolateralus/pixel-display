@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using pixel_core;
-using static pixel_core.Input; 
-using static pixel_core.Runtime; 
-using static pixel_core.ShapeDrawer; 
-using pixel_core.types.Components;
+using Pixel;
+using static Pixel.Input; 
+using static Pixel.Runtime; 
+using static Pixel.ShapeDrawer; 
+using Pixel.Types.Components;
 using System.Numerics;
-using pixel_core.types.physics;
-using pixel_core.types;
+using Pixel.Types.Physics;
+using Pixel.Types;
 using System.Windows.Input;
 using pixel_editor;
 
-namespace pixel_core
+namespace Pixel
 {
     /// <summary>
     /// This just prevents this class from being instantiated by the add component menu, you should remove this.
@@ -55,7 +55,7 @@ namespace pixel_core
             if (!y_pressed)
                 return;
 
-            DrawLine(Position, Position + (Vector2.One * 5), Pixel.Red);
+            DrawLine(Position, Position + (Vector2.One * 5), Color.Red);
         }
         // Called every rendering frame.
         public override void Update()

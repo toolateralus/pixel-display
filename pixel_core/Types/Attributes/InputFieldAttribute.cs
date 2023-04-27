@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace pixel_core
+namespace Pixel
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class InputFieldAttribute : Attribute

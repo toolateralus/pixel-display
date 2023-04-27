@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace pixel_core.Statics
+namespace Pixel.Statics
 {
 
     public class Constants

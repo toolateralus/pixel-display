@@ -1,11 +1,11 @@
-﻿using pixel_core.types.physics;
+﻿using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel
 {
     public static class ShapeDrawer
     {
@@ -24,12 +24,12 @@ namespace pixel_core
             DrawShapeActions?.Invoke();
         }
 
-        internal static List<(Line, Pixel)> Lines = new();
-        internal static List<(Circle, Pixel)> Circles = new();
-        internal static List<(Ray, Pixel)> Normals = new();
-        internal static List<(Ray, Pixel)> Rays = new();
+        internal static List<(Line, Color)> Lines = new();
+        internal static List<(Circle, Color)> Circles = new();
+        internal static List<(Ray, Color)> Normals = new();
+        internal static List<(Ray, Color)> Rays = new();
         [Obsolete]
-        public static void FillPolygon(Polygon poly, Pixel color)
+        public static void FillPolygon(Polygon poly, Color color)
         {
             // Get the polygon edges
             List<Line> edges = poly.GetLines();
@@ -73,7 +73,7 @@ namespace pixel_core
                 }
             }
         }
-        public static void DrawPolygon(Polygon poly, Pixel? color = null)
+        public static void DrawPolygon(Polygon poly, Color? color = null)
         {
             List<Line> lines = poly.GetLines();
             for (int i = 0; i < lines.Count; i++)
@@ -87,25 +87,25 @@ namespace pixel_core
                 DrawLine(line);
             }
         }
-        public static void DrawLine(Vector2 startPoint, Vector2 endPoint, Pixel? color = null) =>
-            Lines.Add((new Line(startPoint, endPoint), color ?? Pixel.White));
-        public static void DrawNormal(Vector2 position, Vector2 direction, Pixel? color = null) =>
-            Normals.Add((new Ray(position, direction), color ?? Pixel.White));
-        public static void DrawRay(Ray ray, Pixel? color = null) =>
-            Rays.Add((ray, color ?? Pixel.White));
-        public static void DrawCircle(Vector2 center, float radius, Pixel? color = null) =>
-            Circles.Add((new Circle(center, radius), color ?? Pixel.White));
+        public static void DrawLine(Vector2 startPoint, Vector2 endPoint, Color? color = null) =>
+            Lines.Add((new Line(startPoint, endPoint), color ?? Color.White));
+        public static void DrawNormal(Vector2 position, Vector2 direction, Color? color = null) =>
+            Normals.Add((new Ray(position, direction), color ?? Color.White));
+        public static void DrawRay(Ray ray, Color? color = null) =>
+            Rays.Add((ray, color ?? Color.White));
+        public static void DrawCircle(Vector2 center, float radius, Color? color = null) =>
+            Circles.Add((new Circle(center, radius), color ?? Color.White));
 
-        public static void DrawRect(Vector2 boxStart, Vector2 boxEnd, Pixel green)
+        public static void DrawRect(Vector2 boxStart, Vector2 boxEnd, Color green)
         {
             // top bottom left right
-            (Line, Pixel)[] lines = GetSides(boxStart, boxEnd, green);
+            (Line, Color)[] lines = GetSides(boxStart, boxEnd, green);
             Lines.AddRange(lines);
         }
 
-        private static (Line, Pixel)[] GetSides(Vector2 boxStart, Vector2 boxEnd, Pixel color)
+        private static (Line, Color)[] GetSides(Vector2 boxStart, Vector2 boxEnd, Color color)
         {
-            return new (Line, Pixel)[]
+            return new (Line, Color)[]
             {
               (new(boxStart, boxStart.WithValue(x: boxEnd.X)), color),
               (new(boxEnd.WithValue(x: boxStart.X), boxEnd), color),
@@ -114,8 +114,8 @@ namespace pixel_core
             };
         }
 
-        public static void DrawLine(Line line, Pixel? color = null) =>
-            Lines.Add((line, color ?? Pixel.White));
+        public static void DrawLine(Line line, Color? color = null) =>
+            Lines.Add((line, color ?? Color.White));
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void DrawGraphics(RendererBase renderer, Matrix3x2 view, Matrix3x2 projection)
         {
@@ -123,8 +123,8 @@ namespace pixel_core
             Matrix3x2 viewProjScreen = viewProjection * screenMat;
             Vector2 resolution = renderer.Resolution;
             Vector2 framePos = new();
-            var refColor = new Pixel();
-            foreach ((Circle circle, Pixel color) in Circles)
+            var refColor = new Color();
+            foreach ((Circle circle, Color color) in Circles)
             {
                 refColor = color;
                 float sqrtOfHalf = MathF.Sqrt(0.5f);
@@ -157,7 +157,7 @@ namespace pixel_core
                         renderer.WriteColorToFrame(ref refColor, ref framePos);
                 }
             }
-            foreach ((Line line, Pixel color) in Lines)
+            foreach ((Line line, Color color) in Lines)
             {
                 refColor = color;
                 Vector2 startPos = line.startPoint.Transformed(viewProjScreen) * resolution;

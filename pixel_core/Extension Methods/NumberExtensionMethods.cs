@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel
 {
     public static class NumberExtensionMethods
     {

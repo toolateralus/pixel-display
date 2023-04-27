@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Assets;
-using pixel_core.FileIO;
+using Pixel.Assets;
+using Pixel.FileIO;
 using System;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Texture : Asset
     {
@@ -49,11 +49,11 @@ namespace pixel_core
         {
             SetImage(filePath);
         }
-        public Texture(Pixel[,] colors)
+        public Texture(Color[,] colors)
         {
             SetImage(colors);
         }
-        public Texture(Vector2 size, Pixel color)
+        public Texture(Vector2 size, Color color)
         {
             this.size = size;
             SetImage(color);
@@ -91,7 +91,7 @@ namespace pixel_core
             }
             else throw new FileNamingException("Invalid path");
         }
-        public void SetImage(Pixel color)
+        public void SetImage(Color color)
         {
             jImage = new(CBit.SolidColorSquare(size, color));
         }
@@ -101,7 +101,7 @@ namespace pixel_core
             jImage = image;
         }
 
-        public void SetImage(Pixel[,] colors)
+        public void SetImage(Color[,] colors)
         {
             this.size = new(colors.GetLength(0), colors.GetLength(1));
             jImage = new(colors);
@@ -130,8 +130,8 @@ namespace pixel_core
             jImage = new(size, data);
         }
         #endregion
-        public Pixel GetPixel(int x, int y) => jImage.GetPixel(x, y);
-        public void SetPixel(int x, int y, Pixel pixel) => jImage?.SetPixel(x, y, pixel);
+        public Color GetPixel(int x, int y) => jImage.GetPixel(x, y);
+        public void SetPixel(int x, int y, Color pixel) => jImage?.SetPixel(x, y, pixel);
         public static JImage ApplyGaussianFilter(JImage texture, float radius, int kernelSize)
         {
             int halfKernelSize = kernelSize / 2;
@@ -157,7 +157,7 @@ namespace pixel_core
             for (int x = 0; x < texture.width; x++)
                 for (int y = 0; y < texture.height; y++)
                 {
-                    Pixel color = texture.GetPixel(x, y);
+                    Color color = texture.GetPixel(x, y);
                     float red = 0, green = 0, blue = 0, alpha = color.a;
 
                     // Apply the kernel to the pixel and its neighboring pixels
@@ -170,7 +170,7 @@ namespace pixel_core
 
                             if (neighborX >= 0 && neighborX < texture.width && neighborY >= 0 && neighborY < texture.height)
                             {
-                                Pixel neighborColor = texture.GetPixel(neighborX, neighborY);
+                                Color neighborColor = texture.GetPixel(neighborX, neighborY);
                                 float neighborWeight = kernel[i + halfKernelSize, j + halfKernelSize];
 
                                 red += neighborColor.r * neighborWeight;
@@ -180,7 +180,7 @@ namespace pixel_core
                         }
                     }
 
-                    Pixel filteredColor = new((byte)red, (byte)green, (byte)blue, (byte)alpha);
+                    Color filteredColor = new((byte)red, (byte)green, (byte)blue, (byte)alpha);
                     texture.SetPixel(x, y, filteredColor);
                 }
             return texture;

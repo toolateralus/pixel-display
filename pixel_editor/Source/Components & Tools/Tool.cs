@@ -1,4 +1,4 @@
-﻿using pixel_core;
+﻿using Pixel;
 using System;
 using System.Collections.Generic;
 
@@ -26,7 +26,7 @@ namespace pixel_editor
         public static List<Tool> InitializeToolkit()
         {
             List<Tool> list = new List<Tool>();
-            var toolsTypes = pixel_core.Statics.Constants.GetInheritedTypesFromBase<Tool>();
+            var toolsTypes = Pixel.Statics.Constants.GetInheritedTypesFromBase<Tool>();
             foreach (Type type in toolsTypes)
             {
                 var obj = Activator.CreateInstance(type);

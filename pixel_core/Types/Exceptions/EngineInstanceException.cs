@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace pixel_core
+namespace Pixel
 {
     [Serializable]
     public class EngineInstanceException : Exception

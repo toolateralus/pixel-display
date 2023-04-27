@@ -1,5 +1,5 @@
-﻿using pixel_core;
-using pixel_core.types.physics;
+﻿using Pixel;
+using Pixel.Types.Physics;
 using System.Numerics;
 using System.Windows.Input;
 
@@ -27,12 +27,12 @@ namespace pixel_editor
             {
                 Vector2 vert = poly.vertices[i];
                 if (i == grabbedVertexIndex)
-                    ShapeDrawer.DrawCircle(vert, highlightDistance, Pixel.Green);
+                    ShapeDrawer.DrawCircle(vert, highlightDistance, Color.Green);
                 else
-                    ShapeDrawer.DrawCircle(vert, highlightDistance / 2, Pixel.Green);
+                    ShapeDrawer.DrawCircle(vert, highlightDistance / 2, Color.Green);
             }
             if (newVertexTarget.HasValue)
-                ShapeDrawer.DrawCircle(newVertexTarget.Value, highlightDistance / 2, Pixel.Green);
+                ShapeDrawer.DrawCircle(newVertexTarget.Value, highlightDistance / 2, Color.Green);
         }
         public override void Update(float delta)
         {

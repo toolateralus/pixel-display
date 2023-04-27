@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace pixel_core
+namespace Pixel
 {
     public class LUA
     {

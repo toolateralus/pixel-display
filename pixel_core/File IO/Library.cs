@@ -1,11 +1,11 @@
-﻿using pixel_core.FileIO;
+﻿using Pixel.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace pixel_core.Assets
+namespace Pixel.Assets
 {
     public class AssetLibrary
     {

@@ -1,10 +1,10 @@
-﻿using pixel_core.Statics;
+﻿using Pixel.Statics;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace pixel_core.FileIO
+namespace Pixel.FileIO
 {
     public class AssetIO
     {

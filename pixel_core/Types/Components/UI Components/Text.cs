@@ -1,11 +1,11 @@
-﻿using pixel_core.Assets;
-using pixel_core.types.physics;
+﻿using Pixel.Assets;
+using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public enum InterpolationType { Linear, Exponential, ExponentialSqrd }
 
@@ -33,7 +33,7 @@ namespace pixel_core
             base.Awake();
 
             Type = ImageType.Image;
-            color = Pixel.Red;
+            color = Color.Red;
 
             RefreshFont();
             RefreshCharacters();

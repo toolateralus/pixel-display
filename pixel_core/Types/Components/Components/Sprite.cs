@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.types.Components;
-using pixel_core.types.physics;
+using Pixel.Types.Components;
+using Pixel.Types.Physics;
 using System;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace pixel_core
+namespace Pixel
 {
     public enum ImageType { SolidColor, Image, Custom };
     public enum TextureFiltering { Point, Bilinear }
@@ -39,7 +39,7 @@ namespace pixel_core
         /// <summary>
         /// this is the color that a solid color sprite will be drawn as
         /// </summary>
-        [Field][JsonProperty] public Pixel color = Pixel.Blue;
+        [Field][JsonProperty] public Color color = Color.Blue;
         /// <summary>
         /// this determines what layer the sprite will be drawn in, ie -1 for bckground and 1 for on top of that.
         /// </summary>
@@ -60,7 +60,7 @@ namespace pixel_core
             JImage lightmap;
             if (data is not null)
             {
-                Pixel[,] colors = VertexLighting(light);
+                Color[,] colors = VertexLighting(light);
                 lightmap = new(colors);
                 texture?.SetImage(lightmap);
                 IsDirty = true;
@@ -68,7 +68,7 @@ namespace pixel_core
         }
         public Sprite()
         {
-            texture = new Texture(Vector2.One, Pixel.Red);
+            texture = new Texture(Vector2.One, Color.Red);
         }
         public Sprite(int x, int y) : this()
         {
@@ -104,7 +104,7 @@ namespace pixel_core
             switch (Type)
             {
                 case ImageType.SolidColor:
-                    Pixel[,] colorArray = CBit.SolidColorSquare(Scale, color);
+                    Color[,] colorArray = CBit.SolidColorSquare(Scale, color);
                     texture.SetImage(colorArray);
                     break;
                 case ImageType.Image:
@@ -135,7 +135,7 @@ namespace pixel_core
                 for (int i = 0; i < vertLength; i++)
                 {
                     var nextIndex = (i + 1) % vertLength;
-                    Interop.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], Color.Orange);
+                    Interop.DrawLine(mesh.vertices[i], mesh.vertices[nextIndex], System.Drawing.Color.Orange);
                 }
             }
         }
@@ -153,7 +153,7 @@ namespace pixel_core
         {
             int x = 0, y = 0;
 
-            Pixel color = Pixel.White;
+            Color color = Color.White;
             PixelShader((e) => { color = e; }, getColor, X, Y);
 
             void OnShadingComplete(JImage image)
@@ -161,23 +161,23 @@ namespace pixel_core
                 texture.SetImage(image);
             }
 
-            Pixel getColor()
+            Color getColor()
             {
                 // color 
                 var localPos = new Vector2(x, y) / texture.size;
                 var global = LocalToGlobal(localPos);
                 float distance = Vector2.Distance(global, light.Position);
                 float lightAmount = 0f - Math.Clamp(distance / light.radius, 0, 1);
-                Pixel blendedPixel = Pixel.Lerp(color, light.color, lightAmount) * distance;
+                Color blendedPixel = Color.Lerp(color, light.color, lightAmount) * distance;
                 return blendedPixel;
             };
 
             int X() => x++;
             int Y() => y++;
         }
-        Pixel[,] VertexLighting(Light light)
+        Color[,] VertexLighting(Light light)
         {
-            Pixel[,] colors = new Pixel[texture.Width, texture.Height];
+            Color[,] colors = new Color[texture.Width, texture.Height];
             for (int x = 0; x < texture.Width; x++)
                 for (int y = 0; y < texture.Height; y++)
                 {
@@ -188,15 +188,15 @@ namespace pixel_core
 
                     float lightAmount = 0f - Math.Clamp(distance / light.radius, 0, 1);
 
-                    Pixel existingPixel = texture.GetPixel(x, y);
-                    Pixel blendedPixel;
+                    Color existingPixel = texture.GetPixel(x, y);
+                    Color blendedPixel;
 
                     if (lightAmount > 0)
                     {
                         lightAmount = (float)CMath.Negate((double)lightAmount);
-                        blendedPixel = Pixel.Lerp(existingPixel, Pixel.Black, lightAmount);
+                        blendedPixel = Color.Lerp(existingPixel, Color.Black, lightAmount);
                     }
-                    blendedPixel = Pixel.Lerp(existingPixel, light.color, lightAmount);
+                    blendedPixel = Color.Lerp(existingPixel, light.color, lightAmount);
                     colors[x, y] = blendedPixel;
                 }
             return colors;
@@ -209,7 +209,7 @@ namespace pixel_core
         /// <param name="indexerX"></param>
         /// <param name="indexerY"></param>
         /// <param name="onIteraton"></param>
-        public virtual void PixelShader(Action<Pixel> colorOut, Func<Pixel> colorIn, Func<int> indexerX, Func<int> indexerY)
+        public virtual void PixelShader(Action<Color> colorOut, Func<Color> colorIn, Func<int> indexerX, Func<int> indexerY)
         {
             for (int x = 0; x < texture.Width * 4; x = indexerX.Invoke())
                 for (int y = 0; y < texture.Height; y = indexerY.Invoke())
@@ -225,7 +225,7 @@ namespace pixel_core
             viewport.Transform(Transform);
             return viewport.vertices;
         }
-        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
+        internal void SetImage(Color[,] colors) => texture.SetImage(colors);
         public void SetImage(Vector2 size, byte[] color)
         {
             texture.SetImage(size, color);

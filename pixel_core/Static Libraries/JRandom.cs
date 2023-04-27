@@ -1,4 +1,4 @@
-﻿namespace pixel_core
+﻿namespace Pixel
 {
     using System;
     using System.Numerics;
@@ -11,7 +11,7 @@
         public static Random random = new();
         public static Direction Direction() => (Direction)Int(0, sizeof(Direction) - 1);
 
-        public static Pixel Color(byte aMin = 0, byte rMin = 0, byte gMin = 0, byte bMin = 0, byte aMax = 255, byte rMax = 255, byte gMax = 255, byte bMax = 255)
+        public static Color Color(byte aMin = 0, byte rMin = 0, byte gMin = 0, byte bMin = 0, byte aMax = 255, byte rMax = 255, byte gMax = 255, byte bMax = 255)
         {
             var A = Int(aMin, aMax);
             var R = Int(rMin, rMax);
@@ -19,7 +19,7 @@
             var B = Int(bMin, bMax);
             return System.Drawing.Color.FromArgb(A, R, G, B);
         }
-        public static Pixel OpaqueColor()
+        public static Color OpaqueColor()
         {
             return Color(255);
         }
@@ -34,7 +34,7 @@
 
             return (dir * speed);
         }
-        public static Pixel Pixel()
+        public static Color Pixel()
         {
             byte r = Byte(),
                  g = Byte(),

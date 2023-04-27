@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.types.physics;
+using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel
 {
     [JsonObject(MemberSerialization.OptIn)]
     public unsafe class JImage
@@ -30,7 +30,7 @@ namespace pixel_core
         }
 
         [JsonProperty]
-        public Pixel color = Pixel.Clear;
+        public Color color = Color.Clear;
 
         public JImage()
         {
@@ -45,7 +45,7 @@ namespace pixel_core
             ApplyColor(colorData);
             this.data = colorData;
         }
-        public JImage(Pixel[,] pixels)
+        public JImage(Color[,] pixels)
         {
             width = pixels.GetLength(0);
             height = pixels.GetLength(1);
@@ -69,7 +69,7 @@ namespace pixel_core
         {
             if (bmpInput is null)
                 return;
-            Pixel[,] pixels;
+            Color[,] pixels;
             lock (bmpInput)
                 pixels = CBit.PixelFromBitmap(bmpInput);
             width = pixels.GetLength(0);
@@ -85,7 +85,7 @@ namespace pixel_core
             ApplyColor(colorData);
             data = colorData;
         }
-        public void SetPixel(int x, int y, Pixel color)
+        public void SetPixel(int x, int y, Color color)
         {
             int position = (y * width + x) * 4;
             if (data.Length < position + 4)
@@ -96,23 +96,23 @@ namespace pixel_core
             data[position + 2] = color.g;
             data[position + 3] = color.b;
         }
-        public Pixel GetPixel(int x, int y)
+        public Color GetPixel(int x, int y)
         {
             int position = (y * width + x) * 4;
             if (data is null || data.Length == 0 || data.Length < position + 4)
-                return Pixel.Black;
+                return Color.Black;
 
             var a = data[position + 0];
             var r = data[position + 1];
             var g = data[position + 2];
             var b = data[position + 3];
-            Pixel col = new(a, r, g, b);
+            Color col = new(a, r, g, b);
 
 
             return col;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void GetPixel(int x, int y, out Pixel output)
+        public void GetPixel(int x, int y, out Color output)
         {
             int position = (y * width + x) * 4;
             output.a = data[position + 0];

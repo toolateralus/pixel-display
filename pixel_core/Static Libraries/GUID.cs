@@ -1,5 +1,5 @@
 ﻿
-namespace pixel_core.Statics
+namespace Pixel.Statics
 {
     using System;
     public class UUID

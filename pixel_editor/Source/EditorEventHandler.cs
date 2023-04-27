@@ -1,5 +1,5 @@
-﻿using pixel_core;
-using pixel_core.Assets;
+﻿using Pixel;
+using Pixel.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;

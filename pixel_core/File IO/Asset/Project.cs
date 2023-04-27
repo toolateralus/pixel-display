@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Assets;
-using pixel_core.FileIO;
-using pixel_core.Statics;
+using Pixel.Assets;
+using Pixel.FileIO;
+using Pixel.Statics;
 using System.Collections.Generic;
 using System.IO;
 
-namespace pixel_core
+namespace Pixel
 {
     [JsonObject(MemberSerialization.OptIn)]
     public class Project

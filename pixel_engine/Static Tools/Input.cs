@@ -6,11 +6,11 @@ using System.Windows;
 using System.Runtime.CompilerServices;
 using System.Numerics;
 using System.Linq;
-using pixel_core;
-using pixel_core.types;
-using pixel_core.types.Components;
+using Pixel;
+using Pixel.Types;
+using Pixel.Types.Components;
 
-namespace pixel_core
+namespace Pixel
 {
     public static class Input
     {

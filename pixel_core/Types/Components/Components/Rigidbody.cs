@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Statics;
-using pixel_core.types.Components;
+using Pixel.Statics;
+using Pixel.Types.Components;
 using System;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Rigidbody : Component
     {

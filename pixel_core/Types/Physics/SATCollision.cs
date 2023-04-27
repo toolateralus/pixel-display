@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace pixel_core.types.physics
+namespace Pixel.Types.Physics
 {
     public class SATCollision
     {

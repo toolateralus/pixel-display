@@ -1,4 +1,4 @@
-﻿using pixel_core.types.Components;
+﻿using Pixel.Types.Components;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -6,12 +6,12 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Particle : Node
     {
         public float birth = 0;
-        public Pixel color;
+        public Color color;
         public Vector2 Velocity
         {
             get
@@ -30,7 +30,7 @@ namespace pixel_core
         public Action<Particle> onDeath; 
         internal bool dead;
 
-        public Particle(Pixel initColor,
+        public Particle(Color initColor,
                         Vector2 initVel,
                         Vector2 initPos,
                         Vector2 initSize,
@@ -49,7 +49,7 @@ namespace pixel_core
     }
     public class ParticleSystem : Component
     {
-        [Field] public List<Pixel> Pallette = new() { Color.Purple, Color.MediumSeaGreen, Color.MediumPurple, Color.MediumBlue };
+        [Field] public List<Color> Pallette = new() { System.Drawing.Color.Purple, System.Drawing.Color.MediumSeaGreen, System.Drawing.Color.MediumPurple, System.Drawing.Color.MediumBlue };
         [Field] internal List<Particle> particles = new();
         [Field] internal int speed = 70;
         [Field] private int maxParticles = 250;
@@ -62,7 +62,7 @@ namespace pixel_core
 
             particles.Clear();
         }
-        private void ReviveParticle(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
+        private void ReviveParticle(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Color? initColor = null)
         {
             var p = particles.Where(p => p.dead).FirstOrDefault();
             if (p is null || p == default)
@@ -70,7 +70,7 @@ namespace pixel_core
 
             ResetParticle(p, reset, lifetime, death, initVel, initPos, initSize, initColor);
         }
-        private static void ResetParticle(Particle p, bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Pixel? initColor = null)
+        private static void ResetParticle(Particle p, bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Color? initColor = null)
         {
             if (reset)
             {
@@ -92,7 +92,7 @@ namespace pixel_core
         }
         public virtual void InstantiateParticle(Vector2 vel)
         {
-            Particle particle = new(Pixel.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
+            Particle particle = new(Color.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
             particles.Add(particle);
         }
         public void GetParticle(Vector2 vel)
@@ -119,7 +119,7 @@ namespace pixel_core
                 float j = 0;
                 while (j <= 1)
                 {
-                    p.color = Pixel.Lerp(p.color, col, j);
+                    p.color = Color.Lerp(p.color, col, j);
                     j += 0.01f;
                     await Task.Delay(1);
                 }

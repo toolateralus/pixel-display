@@ -1,11 +1,11 @@
-﻿using pixel_core.types.physics;
+﻿using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel
 {
     public class StageRenderInfo
     {
@@ -132,7 +132,7 @@ namespace pixel_core
             Vector2 output;
             int lft, top, rgt, bot, tl, tr, bl, br;
             float xOffset, yOffset, xOffInv, yOffInv;
-            Pixel color;
+            Color color;
             JImage img;
             int width;
             int height;
@@ -279,7 +279,7 @@ namespace pixel_core
             float xOffInv;
             float yOffInv;
 
-            Pixel color;
+            Color color;
             JImage img;
             int width;
             int height;

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Statics;
+using Pixel.Statics;
 
-namespace pixel_core.FileIO
+namespace Pixel.FileIO
 {
     public class Metadata : FileBase
     {
@@ -12,7 +12,7 @@ namespace pixel_core.FileIO
             extension = VerifyExtension(extension);
             this.extension = extension;
             pathFromProjectRoot = Project.GetPathFromRoot(fullPath);
-            _uuid = pixel_core.Statics.UUID.NewUUID();
+            _uuid = Pixel.Statics.UUID.NewUUID();
         }
         private static string VerifyExtension(string extension)
         {

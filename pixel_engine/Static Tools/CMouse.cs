@@ -3,10 +3,10 @@ using System.Windows.Input;
 using System.Windows;
 using System.Linq;
 using System.Numerics;
-using pixel_core;
+using Pixel;
 using System.Threading;
 
-namespace pixel_core
+namespace Pixel
 {
     public class CMouse
     {

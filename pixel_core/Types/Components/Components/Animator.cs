@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Assets;
-using pixel_core.FileIO;
-using pixel_core.Statics;
-using pixel_core.types.Components;
+using Pixel.Assets;
+using Pixel.FileIO;
+using Pixel.Statics;
+using Pixel.Types.Components;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Animator : Component, IAnimate
     {

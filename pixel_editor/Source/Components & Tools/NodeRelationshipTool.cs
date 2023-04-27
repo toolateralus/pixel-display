@@ -1,4 +1,4 @@
-﻿using pixel_core;
+﻿using Pixel;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;

@@ -1,9 +1,9 @@
-﻿using pixel_core.types.Components;
-using pixel_core.types.physics;
+﻿using Pixel.Types.Components;
+using Pixel.Types.Physics;
 using System;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Softbody : Component
     {

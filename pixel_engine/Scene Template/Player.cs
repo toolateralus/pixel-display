@@ -1,14 +1,14 @@
-﻿using static pixel_core.Input;
+﻿using static Pixel.Input;
 using Key = System.Windows.Input.Key;
-using pixel_core.Assets;
+using Pixel.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
 using System.Linq;
-using pixel_core.types.Components;
-using pixel_core.Statics;
-using pixel_core.types.physics;
+using Pixel.Types.Components;
+using Pixel.Statics;
+using Pixel.Types.Physics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Player : Component
     {

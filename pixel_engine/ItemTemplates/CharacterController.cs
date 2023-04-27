@@ -1,17 +1,12 @@
-﻿using pixel_core;
-using pixel_core.types;
-using pixel_core.types.Components;
-using pixel_core.types.physics;
-using System;
-using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
+﻿using Pixel.Types;
+using Pixel.Types.Components;
 using System.Numerics;
 using System.Windows.Input;
-using static pixel_core.Input;
-using static pixel_core.Runtime;
-using static pixel_core.ShapeDrawer;
+using static Pixel.Input;
+using static Pixel.Runtime;
+using static Pixel.ShapeDrawer;
 
-namespace pixel_core
+namespace Pixel
 {
     public class CharacterController : Component
     {
@@ -54,7 +49,7 @@ namespace pixel_core
             if (!y_pressed)
                 return;
 
-            DrawLine(Position, Position + (Vector2.One * 5), Pixel.Red);
+            DrawLine(Position, Position + (Vector2.One * 5), Color.Red);
         }
         // Called every rendering frame.
         public override void Update()

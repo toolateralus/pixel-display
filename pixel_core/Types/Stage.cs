@@ -1,8 +1,9 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.Assets;
-using pixel_core.FileIO;
-using pixel_core.Statics;
-using pixel_core.types.Components;
+using Pixel.Assets;
+using Pixel.FileIO;
+using Pixel.Statics;
+using Pixel.Types.Components;
+using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,7 +12,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Stage : Asset
     {
@@ -114,7 +115,7 @@ namespace pixel_core
         {
             background = new(value);
         }
-        public void SetBackground(Pixel[,] value)
+        public void SetBackground(Color[,] value)
         {
             background = new(value);
         }
@@ -327,7 +328,7 @@ namespace pixel_core
         public Stage(string Name, Metadata backgroundMetadata, List<Node> nodes, string? existingUUID = null) : this()
         {
             this.Name = Name;
-            UUID = existingUUID ?? pixel_core.Statics.UUID.NewUUID();
+            UUID = existingUUID ?? Pixel.Statics.UUID.NewUUID();
             this.nodes = nodes;
             this.backgroundMetadata = backgroundMetadata;
             init_background();

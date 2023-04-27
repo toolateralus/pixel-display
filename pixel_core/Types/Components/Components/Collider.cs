@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.types.Components;
-using pixel_core.types.physics;
+using Pixel.Types.Components;
+using Pixel.Types.Physics;
 using System.Drawing;
 
-namespace pixel_core
+namespace Pixel
 {
 
     public enum PrimitiveType { Box, Circle, Triangle };
@@ -49,7 +49,7 @@ namespace pixel_core
 
         [Field]
         [JsonProperty]
-        public Pixel colliderPixel = Color.LimeGreen;
+        public Color colliderPixel = System.Drawing.Color.LimeGreen;
 
         [JsonProperty]
         public bool IsTrigger { get; internal set; } = false;
@@ -136,7 +136,7 @@ namespace pixel_core
             {
                 var nextIndex = (i + 1) % vertLength;
                 var midpoint = (poly.vertices[i] + poly.vertices[nextIndex]) / 2;
-                Interop.DrawLine(midpoint, midpoint + poly.normals[i] * 1, Color.Blue);
+                Interop.DrawLine(midpoint, midpoint + poly.normals[i] * 1, System.Drawing.Color.Blue);
             }
         }
     }

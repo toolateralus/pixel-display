@@ -1,5 +1,5 @@
-﻿using pixel_core.Assets;
-using pixel_core.FileIO;
+﻿using Pixel.Assets;
+using Pixel.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,15 +8,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Drawing;
-using pixel_core.Statics;
-using pixel_core.types.physics;
+using Pixel.Statics;
+using Pixel.Types.Physics;
 using System.Reflection;
 using System.ComponentModel;
-using Component = pixel_core.types.Components.Component;
+using Component = Pixel.Types.Components.Component;
 using Microsoft.Win32;
 using System.Windows.Input;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Runtime
     {
@@ -277,12 +277,12 @@ namespace pixel_core
             return project;
         }
 
-        private void Interop_OnDrawLine(System.Numerics.Vector2 arg1, System.Numerics.Vector2 arg2, Pixel arg3)
+        private void Interop_OnDrawLine(System.Numerics.Vector2 arg1, System.Numerics.Vector2 arg2, Color arg3)
         {
             ShapeDrawer.DrawLine(arg1, arg2, arg3);
         }
 
-        private void Interop_OnDrawCircle(System.Numerics.Vector2 arg1, int arg2, Pixel arg3)
+        private void Interop_OnDrawCircle(System.Numerics.Vector2 arg1, int arg2, Color arg3)
         {
             ShapeDrawer.DrawCircle(arg1, arg2, arg3);
         }

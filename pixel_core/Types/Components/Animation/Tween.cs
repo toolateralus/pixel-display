@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Animation<T>
     {

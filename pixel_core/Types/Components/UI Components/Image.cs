@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.FileIO;
-using pixel_core.Statics;
-using pixel_core.types.physics;
+using Pixel.FileIO;
+using Pixel.Statics;
+using Pixel.Types.Physics;
 using System;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Image : UIComponent
     {
@@ -34,12 +34,12 @@ namespace pixel_core
 
                 if (node.TryGetComponent<Collider>(out var col))
                 {
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
+                    Color[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
                 else
                 {
-                    Pixel[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
+                    Color[,] colors = VertexLighting(col.Polygon, light.node.Position, light.radius, light.color, col.BoundingBox);
                     lightmap = new(colors);
                 }
                 return lightmap;
@@ -78,7 +78,7 @@ namespace pixel_core
         }
         public Image()
         {
-            texture = new Texture(Vector2.One, Pixel.Red);
+            texture = new Texture(Vector2.One, Color.Red);
         }
         [Method]
         public void CycleSpriteType()
@@ -111,7 +111,7 @@ namespace pixel_core
                 await Task.Delay(15);
             }
         }
-        internal void SetImage(Pixel[,] colors) => texture.SetImage(colors);
+        internal void SetImage(Color[,] colors) => texture.SetImage(colors);
         public void SetImage(Vector2 size, byte[] color)
         {
             texture.SetImage(size, color);
@@ -161,7 +161,7 @@ namespace pixel_core
 
                     float brightness = light.brightness / (distance * distance);
 
-                    Pixel originalPixel = texture.GetPixel(x, y);
+                    Color originalPixel = texture.GetPixel(x, y);
 
                     float newR = originalPixel.r * brightness;
                     float newG = originalPixel.g * brightness;
@@ -171,20 +171,20 @@ namespace pixel_core
                     newG = Math.Max(0, Math.Min(255, newG));
                     newB = Math.Max(0, Math.Min(255, newB));
 
-                    Pixel newPixel = new(originalPixel.a, (byte)newR, (byte)newG, (byte)newB);
+                    Color newPixel = new(originalPixel.a, (byte)newR, (byte)newG, (byte)newB);
 
                     texture.SetPixel(x, y, newPixel);
                 }
             }
         }
-        Pixel[,] VertexLighting(Polygon poly, Vector2 lightPosition, float lightRadius, Pixel lightColor, BoundingBox2D bounds)
+        Color[,] VertexLighting(Polygon poly, Vector2 lightPosition, float lightRadius, Color lightColor, BoundingBox2D bounds)
         {
             // Get the vertices of the polygon
             Vector2[] vertices = poly.vertices;
 
             int vertexCount = vertices.Length;
 
-            Pixel[,] colors = new Pixel[texture.Width, texture.Height];
+            Color[,] colors = new Color[texture.Width, texture.Height];
 
             int minY = (int)bounds.min.Y;
             int maxY = (int)bounds.max.Y;
@@ -202,8 +202,8 @@ namespace pixel_core
                         int _y = y - minY;
                         int _x = x - minX;
 
-                        Pixel existingPixel = texture.GetPixel(_x, _y);
-                        Pixel blendedPixel = Pixel.Lerp(existingPixel, lightColor, lightAmount);
+                        Color existingPixel = texture.GetPixel(_x, _y);
+                        Color blendedPixel = Color.Lerp(existingPixel, lightColor, lightAmount);
                         colors[_x, _y] = blendedPixel;
                     }
             return colors;

@@ -2,19 +2,19 @@
 using System.Drawing;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel
 {
-    public struct Pixel
+    public struct Color
     {
         /// <summary>
         /// shortcut to random pixel
         /// </summary>
-        public static Pixel Random => JRandom.Pixel();
+        public static Color Random => JRandom.Pixel();
 
         /// <summary>
         /// it's not actually clear, just ARGB : 1,1,1,1
         /// </summary>
-        public readonly static Pixel Clear = new(1, 1, 1, 1);
+        public readonly static Color Clear = new(1, 1, 1, 1);
 
 
         public byte a;
@@ -22,13 +22,13 @@ namespace pixel_core
         public byte g;
         public byte b;
 
-        public readonly static Pixel White = new(255, 255, 255, 255);
-        public readonly static Pixel Black = new(255, 0, 0, 0);
-        public readonly static Pixel Green = new(255, 0, 255, 0);
-        public readonly static Pixel Red = new(255, 255, 0, 0);
-        public readonly static Pixel Blue = new(255, 0, 0, 255);
+        public readonly static Color White = new(255, 255, 255, 255);
+        public readonly static Color Black = new(255, 0, 0, 0);
+        public readonly static Color Green = new(255, 0, 255, 0);
+        public readonly static Color Red = new(255, 255, 0, 0);
+        public readonly static Color Blue = new(255, 0, 0, 255);
 
-        public static Pixel operator *(Pixel a, Pixel b)
+        public static Color operator *(Color a, Color b)
         {
             a.a *= b.a;
             a.r *= b.r;
@@ -37,7 +37,7 @@ namespace pixel_core
             return a;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pixel operator *(Pixel A, float B)
+        public static Color operator *(Color A, float B)
         {
             A.a = (byte)(A.a * B);
             A.r = (byte)(A.r * B);
@@ -46,7 +46,7 @@ namespace pixel_core
             return A;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Pixel(byte a, byte r, byte g, byte b)
+        public Color(byte a, byte r, byte g, byte b)
         {
             this.a = a;
             this.r = r;
@@ -54,29 +54,29 @@ namespace pixel_core
             this.b = b;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pixel Lerp(Pixel A, Pixel B, float T)
+        public static Color Lerp(Color A, Color B, float T)
         {
             T = Math.Max(0, Math.Min(1, T));
             byte r = (byte)Math.Round(A.r + (B.r - A.r) * T);
             byte g = (byte)Math.Round(A.g + (B.g - A.g) * T);
             byte b = (byte)Math.Round(A.b + (B.b - A.b) * T);
             byte a = (byte)Math.Round(A.a + (B.a - A.a) * T);
-            return Pixel.FromArgb(a, r, g, b);
+            return Color.FromArgb(a, r, g, b);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Lerp(Pixel A, Pixel B, float T, out Pixel output)
+        public static void Lerp(Color A, Color B, float T, out Color output)
         {
             output.r = (byte)(A.r + (B.r - A.r) * T);
             output.g = (byte)(A.g + (B.g - A.g) * T);
             output.b = (byte)(A.b + (B.b - A.b) * T);
             output.a = (byte)(A.a + (B.a - A.a) * T);
         }
-        public static Pixel FromArgb(byte a, byte r, byte g, byte b)
+        public static Color FromArgb(byte a, byte r, byte g, byte b)
         {
             return new(a, r, g, b);
         }
-        public static implicit operator System.Drawing.Color(Pixel v) => Color.FromArgb(v.a, v.r, v.g, v.b);
-        public static implicit operator Pixel(System.Drawing.Color v) => Pixel.FromArgb(v.A, v.R, v.G, v.B);
+        public static implicit operator System.Drawing.Color(Color v) => System.Drawing.Color.FromArgb(v.a, v.r, v.g, v.b);
+        public static implicit operator Color(System.Drawing.Color v) => Color.FromArgb(v.A, v.R, v.G, v.B);
 
     }
 }

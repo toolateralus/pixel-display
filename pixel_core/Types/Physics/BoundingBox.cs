@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace pixel_core
+namespace Pixel.Types.Physics
 {
 
     public struct BoundingBox2DInt

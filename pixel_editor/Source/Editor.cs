@@ -1,7 +1,7 @@
-﻿using pixel_core;
-using pixel_core.Assets;
-using pixel_core.FileIO;
-using pixel_core.Statics;
+﻿using Pixel;
+using Pixel.Assets;
+using Pixel.FileIO;
+using Pixel.Statics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
-using Image = pixel_core.Image;
+using Image = Pixel.Image;
 
 namespace pixel_editor
 {

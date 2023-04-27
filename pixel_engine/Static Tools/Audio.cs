@@ -1,8 +1,8 @@
-﻿using pixel_core.FileIO;
+﻿using Pixel.FileIO;
 using System;
 using System.Windows.Media;
 
-namespace pixel_core
+namespace Pixel
 {
     public static class Audio
     {

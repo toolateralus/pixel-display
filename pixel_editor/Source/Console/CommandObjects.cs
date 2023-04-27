@@ -1,4 +1,4 @@
-﻿using pixel_core;
+﻿using Pixel;
 using System;
 
 namespace pixel_editor

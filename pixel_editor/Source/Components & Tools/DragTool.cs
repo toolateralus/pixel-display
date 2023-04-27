@@ -1,4 +1,4 @@
-﻿using pixel_core;
+﻿using Pixel;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -46,7 +46,7 @@ namespace pixel_editor
                         if(!node.TryGetComponent(out Collider col)) return;
                         col.drawCollider = true;
                         col.drawNormals = true;
-                        col.colliderPixel = Color.Orange;
+                        col.colliderPixel = System.Drawing.Color.Orange;
                     }
                 }
             }
@@ -66,7 +66,7 @@ namespace pixel_editor
                             if (!x.TryGetComponent<Collider>(out var c)) continue;
                             c.drawCollider = false;
                             c.drawNormals = false;
-                            c.colliderPixel = Color.Blue;
+                            c.colliderPixel = System.Drawing.Color.Blue;
                         }
                         Editor.Current.ActivelySelected.Clear();
                         break;
@@ -152,7 +152,7 @@ namespace pixel_editor
                                     Editor.Current.ActivelySelected.Add(node);
                                     sprite.drawCollider = true;
                                     sprite.drawNormals = true;
-                                    sprite.colliderPixel = Color.Orange;
+                                    sprite.colliderPixel = System.Drawing.Color.Orange;
                                 }
                 }
 

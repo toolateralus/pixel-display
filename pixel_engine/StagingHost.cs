@@ -1,8 +1,9 @@
 ﻿
+using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class StagingHost
     {

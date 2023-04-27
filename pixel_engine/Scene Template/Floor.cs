@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
-using pixel_core.types.Components;
-using pixel_core.types.physics;
+using Pixel.Types.Components;
+using Pixel.Types.Physics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Floor : Component
     {

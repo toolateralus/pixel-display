@@ -1,9 +1,9 @@
-﻿using pixel_core.types.Components;
+﻿using Pixel.Types.Components;
 using pixel_editor;
 using System;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     [HideFromEditor]
     public class TransformComponent : Component

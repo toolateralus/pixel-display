@@ -1,10 +1,10 @@
-﻿using pixel_core.types.Components;
-using pixel_core.types.physics;
+﻿using Pixel.Types.Components;
+using Pixel.Types.Physics;
 using System;
 using System.Drawing;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Light : Component
     {
@@ -12,7 +12,7 @@ namespace pixel_core
         [Field] public float brightness = 25f;
         [Field] public Vector2 startPos = Vector2.One;
         [Field] public float radius = 55;
-        [Field] public Pixel color = ExtensionMethods.Lerp(Color.White, Color.Yellow, 0.7f);
+        [Field] public Color color = ExtensionMethods.Lerp(System.Drawing.Color.White, System.Drawing.Color.Yellow, 0.7f);
         [Field] public bool showDebug = true;
         float length = 0;
         private bool reversing;
@@ -45,7 +45,7 @@ namespace pixel_core
                 Vector2 startPt = center;
                 Vector2 endPt = startPt + A * 2;
 
-                Pixel currentColor = GetGradient(i, lineCt, alpha: 5);
+                Color currentColor = GetGradient(i, lineCt, alpha: 5);
 
                 Interop.DrawLine(endPt, startPt / heightModifier, currentColor);
             }
@@ -64,16 +64,16 @@ namespace pixel_core
         /// <param name="alpha"></param>
         /// <param name="gradientColors"></param>
         /// <returns></returns>
-        public static Pixel GetGradient(int position, int subdivisions = 360, byte alpha = 255, Pixel[]? gradientColors = null)
+        public static Color GetGradient(int position, int subdivisions = 360, byte alpha = 255, Color[]? gradientColors = null)
         {
             if (position >= subdivisions)
                 position = subdivisions - 1;
 
-            gradientColors ??= new Pixel[] { Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta };
+            gradientColors ??= new Color[] { System.Drawing.Color.Red, System.Drawing.Color.Yellow, System.Drawing.Color.Green, System.Drawing.Color.Cyan, System.Drawing.Color.Blue, System.Drawing.Color.Magenta };
             float gradientPos = (float)position / subdivisions;
             int colorSegment = (int)(gradientPos * (gradientColors.Length - 1));
             float segmentPos = (gradientPos * (gradientColors.Length - 1)) - colorSegment;
-            Pixel currentColor = Pixel.Lerp(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
+            Color currentColor = Color.Lerp(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
             currentColor.a = alpha;
             return currentColor;
         }

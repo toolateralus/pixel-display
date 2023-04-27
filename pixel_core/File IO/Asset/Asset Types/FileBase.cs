@@ -1,6 +1,6 @@
-﻿using pixel_core.Statics;
+﻿using Pixel.Statics;
 
-namespace pixel_core.FileIO
+namespace Pixel.FileIO
 {
     public abstract class FileBase
     {

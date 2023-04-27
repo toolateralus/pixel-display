@@ -4,9 +4,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using static pixel_core.Input;
-using pixel_core;
-using Component = pixel_core.types.Components.Component;
+using static Pixel.Input;
+using Pixel;
+using Component = Pixel.Types.Components.Component;
 using System.Windows.Input;
 using System.Reflection;
 

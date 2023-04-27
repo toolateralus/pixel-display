@@ -1,6 +1,6 @@
-﻿using pixel_core;
-using pixel_core.Assets;
-using pixel_core.FileIO;
+﻿using Pixel;
+using Pixel.Assets;
+using Pixel.FileIO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
@@ -48,24 +48,24 @@ namespace pixel_editor
                 listBox.ScrollIntoView(lib.First().pathFromProjectRoot);
             }
         }
-        private static Color GetColorFromExtension(string extension)
+        private static System.Drawing.Color GetColorFromExtension(string extension)
         {
             switch (extension)
             {
                 case ".bmp":
-                    return Color.Red;
+                    return System.Drawing.Color.Red;
                 case ".png":
-                    return Color.Green;
+                    return System.Drawing.Color.Green;
                 case ".jpg":
-                    return Color.Blue;
+                    return System.Drawing.Color.Blue;
                 case ".mp3":
-                    return Color.Orange;
+                    return System.Drawing.Color.Orange;
                 case ".asset":
-                    return Color.Purple;
+                    return System.Drawing.Color.Purple;
                 case ".lua":
-                    return Color.Teal;
+                    return System.Drawing.Color.Teal;
                 default:
-                    return Color.Black;
+                    return System.Drawing.Color.Black;
             }
         }
         private string GetExtensionFullName(string ext)

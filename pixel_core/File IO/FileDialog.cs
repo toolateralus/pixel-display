@@ -1,10 +1,10 @@
 ﻿
 using Microsoft.Win32;
-using pixel_core.FileIO;
+using Pixel.FileIO;
 using System.IO;
 using System.Linq;
 
-namespace pixel_core.Assets
+namespace Pixel.Assets
 {
     public class FileDialog
     {

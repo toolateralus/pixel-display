@@ -5,9 +5,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using static pixel_core.CBit;
+using static Pixel.CBit;
 
-namespace pixel_core
+namespace Pixel
 {
     public class CRenderer : RendererBase
     {

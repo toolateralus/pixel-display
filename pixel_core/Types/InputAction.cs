@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace pixel_core.types
+namespace Pixel.Types
 {
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
     public class InputAction

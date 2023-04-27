@@ -8,7 +8,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Image = System.Windows.Controls.Image;
 
-namespace pixel_core
+namespace Pixel
 {
     public class RenderHost
     {

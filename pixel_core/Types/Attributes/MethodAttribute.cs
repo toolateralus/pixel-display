@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace pixel_core
+namespace Pixel
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class MethodAttribute : Attribute

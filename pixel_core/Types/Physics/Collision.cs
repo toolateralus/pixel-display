@@ -1,9 +1,10 @@
-﻿using pixel_core;
+﻿using Pixel;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using BoundingBox2D = Pixel.Types.Physics.BoundingBox2D;
 
-namespace pixel_core.types.physics
+namespace Pixel.Types.Physics
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };
 

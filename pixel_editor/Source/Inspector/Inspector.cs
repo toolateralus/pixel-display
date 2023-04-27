@@ -2,14 +2,14 @@
 using System.Reflection;
 using System.Collections.Generic;
 using Brushes = System.Windows.Media.Brushes;
-using static pixel_core.Input;
+using static Pixel.Input;
 using System.Windows;
 using System.Windows.Controls;
-using pixel_core;
+using Pixel;
 using System.Linq;
 using System.Windows.Media;
 using System.Drawing.Text;
-using pixel_core.types.Components;
+using Pixel.Types.Components;
 
 namespace pixel_editor
 {

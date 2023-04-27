@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.FileIO;
-using pixel_core.Statics;
+using Pixel.FileIO;
+using Pixel.Statics;
 using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
 
-namespace pixel_core
+namespace Pixel
 {
     public enum PixelDirectory
     {

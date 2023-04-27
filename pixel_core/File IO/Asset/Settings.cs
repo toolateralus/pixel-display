@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.FileIO;
-using pixel_core.Statics;
+using Pixel.FileIO;
+using Pixel.Statics;
 using System;
 using System.Drawing;
 using System.Numerics;
 
-namespace pixel_core
+namespace Pixel
 {
     public class Settings : Asset
     {
@@ -44,11 +44,11 @@ namespace pixel_core
         [JsonProperty]
         public int InspectorWidth = 6;
         [JsonProperty]
-        public Pixel DragCursorColor = Color.White;
+        public Color DragCursorColor = System.Drawing.Color.White;
         [JsonProperty]
-        public Pixel DragBoxColor = Color.MediumPurple;
+        public Color DragBoxColor = System.Drawing.Color.MediumPurple;
         [JsonProperty]
-        public Pixel EditorHighlightColor = Color.Orange;
+        public Color EditorHighlightColor = System.Drawing.Color.Orange;
 
         public override void Sync()
         {

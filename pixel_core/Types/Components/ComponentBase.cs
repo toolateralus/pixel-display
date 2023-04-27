@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using pixel_core.types.physics;
+using Pixel.Types.Physics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
-namespace pixel_core.types.Components
+namespace Pixel.Types.Components
 {
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class Component
@@ -46,7 +46,7 @@ namespace pixel_core.types.Components
         public string UUID => _uuid;
         public Component()
         {
-            _uuid = pixel_core.Statics.UUID.NewUUID();
+            _uuid = Pixel.Statics.UUID.NewUUID();
         }
         // begin comment
         // idk why this is implented twice nor do I know which ones preferable, I think clone works fine.

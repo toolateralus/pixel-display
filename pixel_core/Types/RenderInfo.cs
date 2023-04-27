@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace pixel_core
+namespace Pixel
 {
     public class RenderInfo
     {

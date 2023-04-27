@@ -1,11 +1,11 @@
-﻿using pixel_core.FileIO;
-using pixel_core.Statics;
+﻿using Pixel.FileIO;
+using Pixel.Statics;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace pixel_core.Assets
+namespace Pixel.Assets
 {
     public class Importer
     {

@@ -1,4 +1,4 @@
-﻿namespace pixel_core
+﻿namespace Pixel
 {
     using System;
     using System.Numerics;
