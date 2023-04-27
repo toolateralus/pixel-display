@@ -9,10 +9,6 @@ using pixel_core;
 using Component = pixel_core.types.Components.Component;
 using System.Windows.Input;
 using System.Reflection;
-using System.Data;
-using System.Windows.Markup;
-using Microsoft.VisualBasic;
-using System.Windows.Automation;
 
 namespace pixel_editor
 {
@@ -72,11 +68,16 @@ namespace pixel_editor
                 var button = Inspector.GetButton(method.Name + "();", new(0, 0, 0, 0));
                 viewer.Children.Add(button);
                 uiElements.Add(button);
-                Inspector.SetRowAndColumn(button, 1, 4, 22, i++ +1);
+                Inspector.SetRowAndColumn(button, 1, 4, 22, i++ + 1);
                 button.FontSize = 3;
-                button.Click += delegate 
-                {
-                    method.Invoke(component, null); 
+                button.Click += delegate{
+                    try{
+                        method.Invoke(component, null);
+                    }
+                    catch (Exception ex){
+                        Runtime.Log(ex.Message);
+                        return;
+                    }
                 };
             }
             return i;

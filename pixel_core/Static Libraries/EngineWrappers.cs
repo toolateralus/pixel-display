@@ -1,4 +1,5 @@
 ﻿using pixel_core.FileIO;
+using pixel_core.types.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace pixel_core
             Assembly assembly = Assembly.GetExecutingAssembly();
             Type[] types = assembly.GetTypes();
 
-            foreach (Type type in types.Where(t => t.IsSubclassOf(typeof(pixel_core.types.Components.Component))))
+            foreach (Type type in types.Where(t => t.IsSubclassOf(typeof(Component))))
                 AllComponents.Add(type);
         }
         public static Stage? Stage
