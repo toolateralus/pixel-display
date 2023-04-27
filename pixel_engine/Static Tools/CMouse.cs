@@ -4,6 +4,7 @@ using System.Windows;
 using System.Linq;
 using System.Numerics;
 using pixel_core;
+using System.Threading;
 
 namespace pixel_core
 {
@@ -43,8 +44,6 @@ namespace pixel_core
                 return current;
             }
         }
-
-
         public CMouse(MouseButtonEventArgs? e = null)
         {
             if (current != this)
@@ -53,37 +52,46 @@ namespace pixel_core
             current = this;
 
             if(e is not null)
-                Refresh(e);
-
+                MouseButtonRefresh(e);
         }
-
         public static void Update()
         {
-
-            if (!RightPressedLastFrame && Right)
-                RightPressedThisFrame = true;
-            else
-                RightPressedThisFrame = false;
-            RightPressedLastFrame = Right;
-
-            if (!LeftPressedLastFrame && Left)
+            right_pressedThisFrame();
+            left_pressedThisFrame();
+            mouse_wheelDelta();
+            static void mouse_wheelDelta()
             {
-                LeftPressedThisFrame = true;
-                LastClickPosition = Position;
-                
-                var img = Runtime.OutputImages.First();
-                var normalizedPos = img.GetNormalizedPoint(new Point(LastClickPosition.X, LastClickPosition.Y));
-
-                LastClickGlobalPosition = Camera.First.ScreenToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
-                OnLeftPressedThisFrame?.Invoke();
+                if (Math.Abs(CMouse.MouseWheelDelta) == 1)
+                    CMouse.MouseWheelDelta = 0;
+                else CMouse.MouseWheelDelta -= CMouse.MouseWheelDelta / 2;
             }
-            else
-                LeftPressedThisFrame = false;
-            LeftPressedLastFrame = Left;
+            static void right_pressedThisFrame()
+            {
+                if (!RightPressedLastFrame && Right)
+                    RightPressedThisFrame = true;
+                else
+                    RightPressedThisFrame = false;
+                RightPressedLastFrame = Right;
+            }
+            static void left_pressedThisFrame()
+            {
+                if (!LeftPressedLastFrame && Left)
+                {
+                    LeftPressedThisFrame = true;
+                    LastClickPosition = Position;
 
+                    var img = Runtime.OutputImages.First();
+                    var normalizedPos = img.GetNormalizedPoint(new Point(LastClickPosition.X, LastClickPosition.Y));
+
+                    LastClickGlobalPosition = Camera.First.ScreenToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
+                    OnLeftPressedThisFrame?.Invoke();
+                }
+                else
+                    LeftPressedThisFrame = false;
+                LeftPressedLastFrame = Left;
+            }
         }
-
-        public static void Refresh(MouseButtonEventArgs e)
+        public static void MouseButtonRefresh(MouseButtonEventArgs e)
         {
             e.Handled = true;
             switch (e.ChangedButton)
@@ -105,12 +113,12 @@ namespace pixel_core
                     break;
             }
         }
-        public static void Refresh(MouseWheelEventArgs e)
+        public static void MouseWheelRefresh(MouseWheelEventArgs e)
         {
             e.Handled = true;
-            MouseWheelDelta = e.Delta;
+            MouseWheelDelta += e.Delta;
         }
-        public static void Refresh(MouseEventArgs e)
+        public static void RefreshMousePosition(MouseEventArgs e)
         {
             e.Handled = true; 
             LastPosition = Position;

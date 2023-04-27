@@ -248,8 +248,7 @@ namespace pixel_editor
         private void Update(object? sender, EventArgs e)
         {
             CMouse.Update();
-            inspector.Update(sender, e);
-            
+
             UpdateMetrics();
             
             Events.ExecuteAll();
@@ -390,15 +389,15 @@ namespace pixel_editor
         }
         private void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
         {
-            CMouse.Refresh(e);
+            CMouse.MouseWheelRefresh(e);
         }
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
-            CMouse.Refresh(e);
+            CMouse.RefreshMousePosition(e);
         }
         private void Image_MouseBtnChanged(object sender, MouseButtonEventArgs e)
         {
-            CMouse.Refresh(e);
+            CMouse.MouseButtonRefresh(e);
         }
         private async void OnCommandSent(object sender, RoutedEventArgs e)
         {
