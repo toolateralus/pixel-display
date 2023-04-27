@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pixel_editor", "pixel_editor\pixel_editor.csproj", "{932C2F53-F9DA-48E4-BD49-14984398A402}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel Editor", "pixel_editor\Pixel Editor.csproj", "{932C2F53-F9DA-48E4-BD49-14984398A402}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{04F78B39-FD64-4E51-B0E7-53CF75E8625C}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,7 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		toc.md = toc.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pixel_renderer", "pixel_engine\pixel_renderer.csproj", "{4B0695DB-9BD5-465B-82A7-12E91B28B9F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel Engine", "pixel_engine\Pixel Engine.csproj", "{4B0695DB-9BD5-465B-82A7-12E91B28B9F5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel Core", "pixel_core\Pixel Core.csproj", "{995C220C-7911-4643-ADA5-3FADBEC8A272}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,18 @@ Global
 		{4B0695DB-9BD5-465B-82A7-12E91B28B9F5}.Release|x64.Build.0 = Release|x64
 		{4B0695DB-9BD5-465B-82A7-12E91B28B9F5}.Release|x86.ActiveCfg = Release|Any CPU
 		{4B0695DB-9BD5-465B-82A7-12E91B28B9F5}.Release|x86.Build.0 = Release|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Debug|x64.Build.0 = Debug|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Debug|x86.Build.0 = Debug|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|Any CPU.Build.0 = Release|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|x64.ActiveCfg = Release|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|x64.Build.0 = Release|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|x86.ActiveCfg = Release|Any CPU
+		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

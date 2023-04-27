@@ -1,5 +1,5 @@
-﻿using pixel_renderer;
-using pixel_renderer.ShapeDrawing;
+﻿using pixel_core;
+using pixel_core.types.physics;
 using System.Numerics;
 using System.Windows.Input;
 

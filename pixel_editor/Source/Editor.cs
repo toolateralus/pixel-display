@@ -1,6 +1,7 @@
-﻿using pixel_renderer;
-using pixel_renderer.Assets;
-using pixel_renderer.FileIO;
+﻿using pixel_core;
+using pixel_core.Assets;
+using pixel_core.FileIO;
+using pixel_core.Statics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
-using Image = pixel_renderer.Image;
+using Image = pixel_core.Image;
 
 namespace pixel_editor
 {
@@ -101,7 +102,8 @@ namespace pixel_editor
             
             Tools = Tool.InitializeToolkit();
 
-            OnStageSet(Runtime.Current.GetStage());
+            OnStageSet(StagingHost.Standard());
+
             OnProjectSet(Runtime.Current.project);
 
             fileViewer = new(FileViewerGrid, fileViewerListBox);
@@ -375,6 +377,13 @@ namespace pixel_editor
         }
         private void OnStageSet(Stage obj)
         {
+            if (obj is null)
+            {
+                Console.Print("Stage was null, not set.");
+                return;
+            }
+
+
             stageName = obj.Name;
             Console.Print("Stage " + stageName + " set.");
             Current.Title = $"{projectName} : : {stageName}";
