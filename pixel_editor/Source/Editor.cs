@@ -529,7 +529,7 @@ namespace pixel_editor
                 e.Handled = true;
             
             if(gameView is null)
-                gameView = new();
+                gameView = new(this);
             else
             {
                 gameView.Close();
