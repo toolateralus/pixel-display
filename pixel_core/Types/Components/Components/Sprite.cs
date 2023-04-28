@@ -27,7 +27,7 @@ namespace Pixel
         /// <summary>
         /// this determines what source the color data will come from
         /// </summary>
-        [Field][JsonProperty] public ImageType Type = ImageType.SolidColor;
+        [Field][JsonProperty] public ImageType Type = ImageType.Image;
         /// <summary>
         /// this dictates how the renderer filters the sprite during drawing
         /// </summary>
@@ -48,23 +48,30 @@ namespace Pixel
         /// this prevents the image/color data from being overwritten or changed.
         /// </summary>
         [Field][JsonProperty] public bool IsReadOnly = false;
-        private void ApplyLighting()
+
+        internal JImage lightmap;
+        public JImage GetLightmap()
         {
             var light = FirstLight;
-            var data = texture?.GetImage();
-            if (light is null)
-                return;
-            if (!node.TryGetComponent<Collider>(out var col))
-                return;
 
-            JImage lightmap;
+            var data = texture.GetImage();
+
+            if (light is null)
+                return data;
+
+            if (!node.TryGetComponent<Collider>(out var col))
+                return data;
+
             if (data is not null)
             {
-                Color[,] colors = VertexLighting(light);
-                lightmap = new(colors);
-                texture?.SetImage(lightmap);
-                IsDirty = true;
+                if (!IsDirty && lightmap is not null)
+                    return lightmap;
+
+                IsDirty = false;
+                lightmap = VertexLighting(light);
             }
+
+            return lightmap; 
         }
         public Sprite()
         {
@@ -124,7 +131,7 @@ namespace Pixel
                 Refresh();
 
             if (lit)
-                ApplyLighting();
+                GetLightmap();
         }
         public override void OnDrawShapes()
         {
@@ -175,9 +182,9 @@ namespace Pixel
             int X() => x++;
             int Y() => y++;
         }
-        Color[,] VertexLighting(Light light)
+        JImage VertexLighting(Light light)
         {
-            Color[,] colors = new Color[texture.Width, texture.Height];
+            JImage image = new(); 
             for (int x = 0; x < texture.Width; x++)
                 for (int y = 0; y < texture.Height; y++)
                 {
@@ -186,9 +193,16 @@ namespace Pixel
 
                     float distance = Vector2.Distance(global, light.Position);
 
-                    float lightAmount = 0f - Math.Clamp(distance / light.radius, 0, 1);
+                    float lightAmount = 1f - Math.Clamp(distance / light.radius, 0, 1);
 
                     Color existingPixel = texture.GetPixel(x, y);
+                    
+                    if (existingPixel.a == 0)
+                    {
+                        image.SetPixel(x, y, existingPixel);
+                        continue;
+                    }
+
                     Color blendedPixel;
 
                     if (lightAmount > 0)
@@ -196,10 +210,11 @@ namespace Pixel
                         lightAmount = (float)CMath.Negate((double)lightAmount);
                         blendedPixel = Color.Blend(existingPixel, Color.Black, lightAmount);
                     }
-                    blendedPixel = Color.Blend(existingPixel, light.color, lightAmount);
-                    colors[x, y] = blendedPixel;
+                    else blendedPixel = Color.Blend(existingPixel, light.color, Math.Clamp(lightAmount, 0, 1));
+
+                    image.SetPixel(x, y, blendedPixel);
                 }
-            return colors;
+            return image; 
         }
         /// <summary>
         /// see LightingPerPixel to see an example 

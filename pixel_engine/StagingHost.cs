@@ -1,4 +1,6 @@
 ﻿
+using Pixel.Assets;
+using Pixel.FileIO;
 using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Numerics;
@@ -15,6 +17,7 @@ namespace Pixel
             Node camera = new("camera");
             camera.AddComponent<Camera>();
             camera.Position = new(0, 0);
+            camera.Scale = new(25, 25);
 
             Node floor = Floor.Standard();
             nodes.Add(floor);
@@ -28,12 +31,7 @@ namespace Pixel
             img.viewportPosition = Vector2.Zero;
             textTest.Position = Vector2.Zero;
 
-
-            Node light = new("light");
-            var lt = light.AddComponent<Light>();
-            light.Position = new(50, -50);
-            lt.brightness = 0.9f;
-            lt.radius = 10;
+            Node light = Light.Standard();
 
             nodes.Add(textTest);
             nodes.Add(light);
@@ -42,6 +40,11 @@ namespace Pixel
             for (int i = 0; i < 5; i++)
             {
                 Node rbNode = Rigidbody.Standard();
+                Sprite spr = rbNode.GetComponent<Sprite>();
+
+                Metadata meta = Library.FetchMeta("ball");
+                spr.texture.SetImage(meta);
+
                 rbNode.Position = new(i * 20, -20);
                 nodes.Add(rbNode);
             }

@@ -2,6 +2,7 @@
 using Pixel.Assets;
 using Pixel.FileIO;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -81,6 +82,15 @@ namespace Pixel
             if (meta is not null)
                 jImage = new(new Bitmap(meta.Path));
 
+        }
+        /// <summary>
+        /// probably the best way to set image.
+        /// </summary>
+        /// <param name="meta"></param>
+        public void SetImage(Metadata meta)
+        {
+            Metadata = meta;
+            SetImage(meta.Path);
         }
         public void SetImage(string fullPath)
         {

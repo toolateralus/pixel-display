@@ -88,8 +88,9 @@ namespace Pixel
         public void SetPixel(int x, int y, Color color)
         {
             int position = (y * width + x) * 4;
+            
             if (data.Length < position + 4)
-                throw new InvalidOperationException("image did not contain requested pixel");
+                return;
 
             data[position + 0] = color.a;
             data[position + 1] = color.r;
@@ -115,6 +116,12 @@ namespace Pixel
         public void GetPixel(int x, int y, out Color output)
         {
             int position = (y * width + x) * 4;
+            if (data is null || data.Length == 0 || data.Length < position + 4)
+            {
+                output = Color.Black;
+                return;
+            }
+
             output.a = data[position + 0];
             output.r = data[position + 1];
             output.g = data[position + 2];

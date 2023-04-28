@@ -83,7 +83,10 @@ namespace Pixel
             camDistance = sprite.camDistance;
             projectionMatInverted = projectionMat.Inverted();
 
-            image = sprite.texture.GetImage();
+            if (!sprite.lit)
+                image = sprite.texture.GetImage();
+            else image = sprite.GetLightmap(); 
+
             filtering = sprite.textureFiltering;
 
             transform = sprite.Transform;
