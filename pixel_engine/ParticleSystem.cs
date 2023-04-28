@@ -8,44 +8,33 @@ using System.Threading.Tasks;
 
 namespace Pixel
 {
-    public class Particle : Node
+    public class Particle : Component
     {
         public float birth = 0;
+        internal bool dead;
         public Color color;
-        public Vector2 Velocity
-        {
-            get
-            {
-                if (rb != null)
-                    return rb.velocity;
-                return Vector2.Zero;
-            }
-            set
-            {
-                if(rb != null)
-                    rb.velocity = value;
-            }
-        }
+
         public Action<Particle> lifetime;
         public Action<Particle> onDeath; 
-        internal bool dead;
 
-        public Particle(Color initColor,
-                        Vector2 initVel,
-                        Vector2 initPos,
-                        Vector2 initSize,
-                        Action<Particle> lifetime,
-                        Action<Particle> onDeath)
+        public Particle(Color initColor, Vector2 initPos, Vector2 initSize, Action<Particle> lifetime, Action<Particle> onDeath)
         {
             this.color = initColor;
-            this.Velocity = initVel;
             this.Position = initPos;
             this.Scale = initSize;
             this.lifetime = lifetime;
             this.onDeath = onDeath;
         }
 
+        public Particle()
+        {
+        }
+
         public void Next() => lifetime.Invoke(this);
+
+        public override void Dispose()
+        {
+        }
     }
     public class ParticleSystem : Component
     {
@@ -58,7 +47,7 @@ namespace Pixel
         public override void Dispose()
         {
             foreach (var part in particles)
-                part.Destroy();
+                part.node.Destroy();
 
             particles.Clear();
         }
@@ -79,7 +68,7 @@ namespace Pixel
                 if (death != null)
                     p.onDeath = death;
                 if (initVel.HasValue)
-                    p.Velocity = initVel.Value;
+                    p.GetComponent<Rigidbody>().velocity = initVel.Value;
                 if (initPos.HasValue)
                     p.Position = initPos.Value;
                 if (initSize.HasValue)
@@ -92,7 +81,11 @@ namespace Pixel
         }
         public virtual void InstantiateParticle(Vector2 vel)
         {
-            Particle particle = new(Color.Random, vel, Position, Vector2.One, Cycle, OnParticleDied);
+            Node node = new("temp_particle");
+
+            var particle = node.AddComponent<Particle>();
+            particle = new(Color.Random, Position, Vector2.One, Cycle, OnParticleDied);
+
             particles.Add(particle);
         }
         public void GetParticle(Vector2 vel)
@@ -103,17 +96,14 @@ namespace Pixel
         }
         public virtual void Cycle(Particle p)
         {
-            if (p.Velocity.SqrMagnitude() < 0.1f)
+            Rigidbody rb = p.GetComponent<Rigidbody>();
+            if (rb.velocity.SqrMagnitude() < 0.1f)
             {
                 OnParticleDied(p);
                 return;
             }
-            p.Position += p.Velocity;
-            p.Velocity *= 0.99f;
-
             var col = JRandom.Color();
             _ = color();
-
             async Task color()
             {
                 float j = 0;
@@ -134,7 +124,7 @@ namespace Pixel
 
             p.onDeath?.Invoke(p); 
             p.dead = true;
-            p.Destroy();
+            p.node.Destroy();
         }
     }
 }

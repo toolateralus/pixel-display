@@ -93,8 +93,13 @@ namespace Pixel
             Normals.Add((new Ray(position, direction), color ?? Color.White));
         public static void DrawRay(Ray ray, Color? color = null) =>
             Rays.Add((ray, color ?? Color.White));
-        public static void DrawCircle(Vector2 center, float radius, Color? color = null) =>
-            Circles.Add((new Circle(center, radius), color ?? Color.White));
+        public static void DrawCircle(Vector2 center, float radius, Color? color = null)
+        {
+            Circle circle = new Circle(center, radius);
+            circle.filled = false; 
+            Circles.Add((circle, color ?? Color.White));
+        }
+
         public static void DrawCircleFilled(Vector2 center, float radius, Color? color = null)
         {
             (Circle circle, Color color) item = (new Circle(center, radius), color ?? Color.White);
@@ -141,6 +146,9 @@ namespace Pixel
         {
             foreach ((Circle circle, Color color) in Circles)
             {
+                if (!circle.filled)
+                    return;
+
                 refColor = color;
                 Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
                 float radius = circle.radius * resolution.X;
@@ -213,45 +221,46 @@ namespace Pixel
             }
         }
         static void draw_circles(RendererBase renderer, Matrix3x2 viewProjScreen, Vector2 resolution, ref Vector2 framePos, ref Color refColor)
+        {
+            foreach ((Circle circle, Color color) in Circles)
             {
-                foreach ((Circle circle, Color color) in Circles)
-                {
-                    if (circle.filled)
-                        continue;
+                if (circle.filled)
+                    continue;
 
-                    refColor = color;
-                    float sqrtOfHalf = MathF.Sqrt(0.5f);
-                    Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
-                    Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
-                    Vector2 pixelRadius = radius.Transformed(viewProjScreen) * resolution - centerPos;
-                    Vector2 quaterArc = pixelRadius * sqrtOfHalf;
-                    int quarterArcAsInt = (int)quaterArc.X;
-                    for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
-                    {
-                        float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
-                        framePos.X = centerPos.X + x;
-                        framePos.Y = centerPos.Y + y;
-                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                            renderer.WriteColorToFrame(ref refColor, ref framePos);
-                        framePos.Y = centerPos.Y - y;
-                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                            renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
-                    quarterArcAsInt = (int)quaterArc.Y;
-                    for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
-                    {
-                        float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
-                        framePos.Y = centerPos.Y + y;
-                        framePos.X = centerPos.X + x;
-                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                            renderer.WriteColorToFrame(ref refColor, ref framePos);
-                        framePos.X = centerPos.X - x;
-                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                            renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
+                refColor = color;
+                float sqrtOfHalf = MathF.Sqrt(0.5f);
+                Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
+                Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
+                Vector2 pixelRadius = radius.Transformed(viewProjScreen) * resolution - centerPos;
+                Vector2 quaterArc = pixelRadius * sqrtOfHalf;
+                int quarterArcAsInt = (int)quaterArc.X;
+                for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
+                {
+                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
+                    framePos.X = centerPos.X + x;
+                    framePos.Y = centerPos.Y + y;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                    framePos.Y = centerPos.Y - y;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                }
+                quarterArcAsInt = (int)quaterArc.Y;
+                for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
+                {
+                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
+                    framePos.Y = centerPos.Y + y;
+                    framePos.X = centerPos.X + x;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                    framePos.X = centerPos.X - x;
+                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        renderer.WriteColorToFrame(ref refColor, ref framePos);
                 }
             }
         }
-    }
+        }
+
+}
    
 

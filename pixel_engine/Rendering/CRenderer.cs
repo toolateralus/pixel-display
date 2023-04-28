@@ -16,10 +16,11 @@ namespace Pixel
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Draw(StageRenderInfo renderInfo)
         {
-
             var Resolution = this.Resolution;
 
-            if (Runtime.Current.GetStage() is not Stage stage) return;
+            if (Runtime.Current.GetStage() is not Stage stage)
+                return;
+
             if (baseImageDirty)
             {
                 baseImage = stage.GetBackground();
