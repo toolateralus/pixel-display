@@ -7,29 +7,6 @@ using System.Numerics;
 
 namespace Pixel
 {
-    public class Settings : Asset
-    {
-        public Vector2 PhysicsArea = new Vector2(10000, 10000);
-
-        public int ScreenH = 256;
-        public int ScreenW = 256;
-
-        // 16 == 60FPS
-        public int PhysicsTimeStep = 160;
-        public int FramerateSampleThreshold = 30;
-
-        public string ImagesDir = "\\Images";  // Images Import folder (temporary solution until assets are done, for importing backgrounds)
-        public string ProjectsDir = "\\Projects"; // Project files 
-        public string AssetsDir = "\\Assets";   // Asset files (user - created)
-        public string StagesDir = "\\Stages"; //Stage files
-
-        public string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
-
-        public Settings(string name, bool shouldUpload = false) : base(name, shouldUpload)
-        {
-
-        }
-    }
     public class EditorSettings : Asset
     {
         [JsonProperty]

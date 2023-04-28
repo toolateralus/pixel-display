@@ -8,25 +8,6 @@ namespace Pixel.FileIO
 {
     public class AssetIO
     {
-        public static string Path => Constants.WorkingRoot + Constants.AssetsDir;
-        internal static void FindOrCreateAssetsDirectory()
-        {
-            if (!Directory.Exists(Path))
-                Directory.CreateDirectory(Path);
-        }
-
-        /// <summary>
-        /// Checks for the existence of the Assets directory and if it exists, tries to read from the location of the data specified in the metadata object, then registers it to the AssetLibrary..
-        /// </summary>
-        /// <param name="meta"></param>
-        /// <returns>Asset if found, else null </returns>
-        public static void WriteAsset(Asset data, Metadata meta)
-        {
-            FindOrCreateAssetsDirectory();
-            IO.WriteJson(data, meta);
-        }
-
-        static Dictionary<string, int> filesWritten = new();
 
         public static bool FindOrCreatePath(string path)
         {
@@ -37,10 +18,9 @@ namespace Pixel.FileIO
             }
             return true;
         }
-
         internal static void GuaranteeUniqueName(Metadata meta, Asset asset)
         {
-            GetDir(meta, out string name, out string dir);
+            IO.GetDir(meta, out string name, out string dir);
 
             _ = FindOrCreatePath(dir);
 
@@ -48,56 +28,7 @@ namespace Pixel.FileIO
 
             asset.Upload();
         }
-        public static void GetDir(Metadata meta, out string name, out string dir)
-        {
-            var split = meta.Path.Split('\\');
-
-            // nullifies C:\\ cuz for some reason it would double up when reconstructing from array
-            split[0] = "";
-
-            name = split[^1];
-            dir = meta.Path.Replace(name, "");
-        }
-
-        public static string DuplicateCheck(string name, string dir)
-        {
-            foreach (var path in Directory.EnumerateFiles(dir))
-            {
-                var splitPath = path.Split("\\");
-                var fileName = splitPath[^1];
-
-                if (fileName == name)
-                {
-                    var fileNameSplit = name.Split(".");
-                    var isolated_name = fileNameSplit[0];
-                    var extension = fileNameSplit[1];
-
-                    // this metadata is created to check if there are any existing files in place of this one
-
-                    Metadata meta = new(path);
-                    object obj = IO.ReadJson<object>(meta);
-
-                    // this allows us to overwrite files that have already been
-                    // read and or written this session by comparing their data
-
-
-                    if (isolated_name == "")
-                        isolated_name = "NamelessAsset";
-
-                    if (filesWritten.ContainsKey(name))
-                    {
-                        isolated_name += filesWritten[name]++;
-                        name = isolated_name + "." + extension;
-                    }
-                    else filesWritten.Add(name, 1);
-
-                    Interop.Log($"Number added to file {name}");
-                }
-
-
-            }
-            return name;
-        }
+       
         private static string DuplicateCheck(string fullName, string dir, Asset asset)
         {
             var fileNameSplit = fullName.Split(".").ToList();

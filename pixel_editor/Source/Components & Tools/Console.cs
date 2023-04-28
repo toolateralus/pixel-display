@@ -41,6 +41,14 @@ namespace pixel_editor
             set => current = value;
         }
         private static Console current;
+        
+        // todo: implement a typical function helper like help set(); or whatever, so you can search up a command and get deeper description.
+        public Dictionary<string, string> extended_help = new()
+        {
+            {"help", "type help{cmd name} name to get a more in depth description of the function/usages of a command"},
+
+
+        };
         #region General Commands
         public static Command cmd_help() => new()
         {
@@ -56,8 +64,8 @@ namespace pixel_editor
         };
         public static Command cmd_clear_console() => new()
         {
-            phrase = "cclear;",
-            syntax = "cclear();",
+            phrase = "*c;",
+            syntax = "*c",
             action = (e) =>
             {
                 if (e is not null && e[0] is bool color)
@@ -115,49 +123,8 @@ namespace pixel_editor
             description = "gets a node and attempts to write the provided value to specified field.",
 
         };
-        public static Command cmd_set_sprite_filtering() => new()
-        {
-            phrase = "sprite.Filtering;",
-            syntax = "sprite.Filtering(string: nodeName, string: enumValue);",
-            argumentTypes = new string[] { "str:", "str:" },
-            args = null,
-            action = SetSpriteFiltering,
-            description = "Gets a node and attempts to set the texture filtering on the sprite if available.",
 
-        };
-        private static void SetSpriteFiltering(object[]? obj)
-        {
-            if (obj is null || obj.Length != 2)
-                Command.Error("SetSpriteFiltering", CmdError.ArgumentNotFound);
-            if (!TryGetNodeByNameAtIndex(obj, out Node node, 0))
-            {
-                Command.Error("SetSpriteFiltering", $"Node \"{obj?[0]}\" not found in hierarchy.");
-                return;
-            }
-            if (node.GetComponent<Sprite>() is not Sprite sprite)
-            {
-                Command.Error("SetSpriteFiltering", $"Sprite not found on node \"{node.Name}\".");
-                return;
-            }
-            if (!TryGetArgAtIndex(1, out string filteringString, obj))
-            {
-                Command.Error("SetSpriteFiltering", CmdError.InvalidCast);
-                return;
-            }
-            if (Enum.Parse(typeof(TextureFiltering), filteringString) is not TextureFiltering textureFiltering)
-            {
-                Command.Error("SetSpriteFiltering", $"\"{filteringString}\" not valid TextureFiltering enum.");
-                return;
-            }
-            sprite.textureFiltering = textureFiltering;
-        }
-
-        public Dictionary<string, string> extended_help = new()
-        {
-            {"help", "type help{cmd name} name to get a more in depth description of the function/usages of a command"},
-
-
-        };
+        
         public static Command cmd_help_cmd() => new()
         {
             phrase = "help;",
@@ -256,30 +223,7 @@ namespace pixel_editor
         };
         #endregion
         #region Asset/Project/Stage/IO Commands
-        public static Command cmd_set_camera() => new()
-        {
-            phrase = "cam;",
-            syntax = "cam(Name, Field, float Value);",
-            argumentTypes = new string[] { "str:", "str:", "float:" },
-            action = (e) =>
-            {
-                if (e.Length < 3)
-                    return;
-
-                string nName = (string)e[0];
-                string fName = (string)e[1];
-                object value = e[2];
-
-                Node? node = Runtime.Current.GetStage().FindNode(nName);
-                if (node is null)
-                    Console.Print("Node was not found.");
-                Camera cam = node.GetComponent<Camera>();
-                Type type = cam.GetType();
-                FieldInfo? field = type.GetRuntimeField(fName);
-                field.SetValue(cam, value);
-            },
-            description = "\n {must not be a property or method} Sets Field in camera by name on node of provided name \n syntax : cam(str:<nodeName>, str:<fieldName>, object:value)",
-        };
+       
         public static Command cmd_reimport() => new()
         {
             description = "Reimports and refreshes asset library, does not force update references.",
@@ -302,50 +246,6 @@ namespace pixel_editor
         };
         public static Command cmd_load_project() => new()
         {
-            phrase = "loadProject;",
-            syntax = "loadProject(projectName);",
-            argumentTypes = new string[] { "str:" },
-            action = async (e) =>
-            {
-                string name = (string)e[0];
-                var project = ProjectIO.ReadProject(name);
-
-                if (project is not null)
-                {
-                    string question = $"Project Found! " +
-                                            $"\n Name : {project.Name} " +
-                                            $"Do you want to load this project?";
-
-                    Task<PromptResult> result = PromptAsync(question, 60f);
-
-                    await result;
-
-                    switch (result.Result)
-                    {
-                        case PromptResult.Yes:
-                            Console.Print($"Project {name} set.");
-                            Runtime.Current.SetProject(project);
-                            break;
-                        case PromptResult.No:
-                            Console.Print("Project not set.");
-                            break;
-                        case PromptResult.Cancel:
-                            Console.Print("Load Project cancelled.");
-                            break;
-                        case PromptResult.Timeout:
-                            Console.Print("Load Project timed out.");
-                            break;
-                        default:
-                            break;
-                    }
-
-                }
-            },
-            args = new object[] { },
-            description = "Loads a project @../Pixel/Projects of specified name, and if found, prompts the user to load the project as the current project."
-        };
-        public static Command cmd_load_project_2() => new()
-        {
             phrase = "load;",
             syntax = "load();",
             argumentTypes = null,
@@ -360,55 +260,6 @@ namespace pixel_editor
             },
             args = new object[] { },
             description = "Runs a Load-Project dialog."
-        };
-        public static Command cmd_set_stage() => new()
-        {
-            phrase = "stage.Set;",
-            syntax = "stage.Set(stageName);",
-            argumentTypes = new string[] { "str:" },
-            action = async (o) =>
-            {
-                string stageName = (string)o[0];
-                bool loadAsynchronously = false;
-
-                if (o.Length > 1 && o[1] is bool)
-                    loadAsynchronously = (bool)o[1];
-
-                Project project = Runtime.Current.project;
-
-                if (project is null) return;
-
-                var stage = Project.GetStageByName(stageName);
-
-                if (stage == null)
-                {
-                    Runtime.Log($"Stage load cancelled : Stage {stageName} not found.");
-                    return;
-                }
-
-                var prompt = PromptAsync($"{stage.Name} Found. Do you want to load this stage?");
-                await prompt;
-
-                switch (prompt.Result)
-                {
-                    case PromptResult.Yes:
-                        Print($"Stage {stage.Name} set.");
-                        Runtime.Current.SetStage(stage);
-                        break;
-                    case PromptResult.No:
-                        Print("Stage not set.");
-                        break;
-                    case PromptResult.Cancel:
-                        Print("Set Stage cancelled.");
-                        break;
-                    case PromptResult.Timeout:
-                        Print("Set Stage timed out.");
-                        break;
-                    default:
-                        break;
-                }
-            },
-            description = "[STAGE MUST BE IN PROJECT] \nAttempts to find a stage by name, and if found, prompts the user to load it or not."
         };
         public static Command cmd_reload_stage() => new()
         {
@@ -454,7 +305,6 @@ namespace pixel_editor
         };
         #endregion
         #region Editor Commands
-
         public static Command cmd_set_background_from_fileviewer()
         {
             var x = new Command();
@@ -494,59 +344,6 @@ namespace pixel_editor
                     }
                 }
             }
-
-        public static Command cmd_set_stage_background_relative()
-        {
-            var x = new Command(); 
-            x.phrase = "stage.SetBackground;";
-            x.syntax = "stage.SetBackground(string assetNameRelativeToWorkingRoot);";
-            x.action = setBackgroundRelative;
-            x.argumentTypes = new string[] { "str:" };
-            x.description = "Attempts to find asset of provided name and if it's a valid texture, prompts the user to load it as the stages background.";
-                return x;
-        }
-        private static async void setBackgroundRelative(object[]? obj)  
-        {
-            string name;
-            if (!TryGetArgAtIndex(0, out name, obj))
-            {
-                Command.Error("stage.SetBackground();", 0);
-                return;
-            }
-            var foundMetadata = AssetLibrary.FetchMetaRelative(name);
-            if (foundMetadata != null && Constants.ReadableExtensions.Contains(foundMetadata.extension) && 
-                foundMetadata.extension is not Constants.LuaExt or Constants.Mp3Ext)
-            {
-                var task = PromptAsync($"Asset {foundMetadata.Name} Found. Do you want to load this background?");
-                await task;
-                switch (task.Result)
-                {
-                    case PromptResult.Yes:
-                        if (Runtime.Current.GetStage() is not Stage stage)
-                        {
-                            Command.Error("stage.SetBackground();", "No stage was loaded");
-                            return; 
-                        }
-                        Runtime.Current.GetStage().backgroundMetadata = foundMetadata;
-                        var bmp = new Bitmap(foundMetadata.Path);
-                        Runtime.Current.GetStage()?.SetBackground(bmp);
-                        Runtime.Current.renderHost.GetRenderer().baseImageDirty = true; 
-                        Runtime.Log("Background set.");
-                        break;
-                    case PromptResult.No:
-                        Runtime.Log("SetBackground cancelled.");
-                        break;
-                    case PromptResult.Cancel:
-                        Runtime.Log("SetBackground cancelled.");
-                        break;
-                    case PromptResult.Timeout:
-                        Runtime.Log("SetBackground cancelled.");
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
         public static Command cmd_show_colliders() => new()
         {
             phrase = "showColliders;",

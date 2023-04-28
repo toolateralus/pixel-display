@@ -31,7 +31,7 @@ namespace Pixel
         }
         public void Save()
         {
-            ProjectIO.WriteProject(Interop.Project, Metadata);
+            IO.Write(Interop.Project, Metadata);
         }
         private Metadata Metadata
         {

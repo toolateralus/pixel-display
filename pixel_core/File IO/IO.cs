@@ -2,6 +2,7 @@
 using Pixel.FileIO;
 using Pixel.Statics;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,6 @@ using System.Windows;
 
 namespace Pixel
 {
-
     public enum PixelDirectory
     {
         Root = 0,
@@ -19,12 +19,24 @@ namespace Pixel
     }
     public static class IO
     {
+        static Dictionary<string, int> filesWritten = new();
         private static JsonSerializerSettings Settings = new()
         {
             Formatting = Formatting.Indented,
             TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
+        public static string GetDirectory(PixelDirectory dir)
+        {
+            return dir switch
+            {
+                PixelDirectory.Root => Constants.WorkingRoot,
+                PixelDirectory.Projects => Constants.ProjectsDir,
+                PixelDirectory.Stages => Constants.StagesDir,
+                PixelDirectory.Assets => Constants.AssetsDir,
+                _ => throw new NotImplementedException(),
+            };
+        }
         public static T? ReadJson<T>(Metadata meta) 
         {
             T? obj = default; 
@@ -100,60 +112,54 @@ namespace Pixel
             writer.Close();
             return data;
         }
-        public static Bitmap ReadBitmap(Metadata meta)
+        public static void GetDir(Metadata meta, out string name, out string dir)
         {
-            var obj = IO.ReadJson<object>(meta);
+            var split = meta.Path.Split('\\');
 
-            if (obj is Bitmap bitmap)
-                return bitmap;
+            // nullifies C:\\ cuz for some reason it would double up when reconstructing from array
+            split[0] = "";
 
-            return new(512, 512);
+            name = split[^1];
+            dir = meta.Path.Replace(name, "");
         }
-        public static MessageBoxResult FileOverrideWarning(string path)
+        public static string DuplicateCheck(string name, string dir)
         {
-            return MessageBox.Show($"Are you sure you want to overwrite {path}?",
-                                                        "", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning,
-                                                         MessageBoxResult.No, MessageBoxOptions.RtlReading);
-        }
-        public static MessageBoxResult DoForAllQuestion()
-        {
-            return MessageBox.Show($"Do for all (uses last choice)",
-                                                        "", MessageBoxButton.YesNo, MessageBoxImage.Question,
-                                                         MessageBoxResult.No, MessageBoxOptions.RtlReading);
-        }
-    }
-    public class ProjectIO
-    {
-        public static string root = Constants.WorkingRoot;
-        public const string directory = Constants.ProjectsDir;
-        public const string extension = Constants.ProjectFileExtension;
-        public static string Path => root + directory;
-        private static void FindOrCreateProjectsDirectory()
-        {
-            if (!Directory.Exists(Path))
-                Directory.CreateDirectory(Path);
-        }
-        public static void WriteProject(Project? proj, Metadata meta)
-        {
-            FindOrCreateProjectsDirectory();
-            IO.WriteJson(proj, meta);
-        }
-        public static Project ReadProject(string name)
-        {
-            FindOrCreateProjectsDirectory();
-            Metadata meta = new(Path + "\\" + name + extension);
-            var project = IO.ReadJson<Project>(meta);
-            if (project is null)
+            foreach (var path in Directory.EnumerateFiles(dir))
             {
-                Interop.Log($"Project {name} not found.");
-                return null;
-            }
-            return project;
-        }
+                var splitPath = path.Split("\\");
+                var fileName = splitPath[^1];
 
-        internal static void WriteProject(object project, Metadata metadata)
-        {
-            throw new NotImplementedException();
+                if (fileName == name)
+                {
+                    var fileNameSplit = name.Split(".");
+                    var isolated_name = fileNameSplit[0];
+                    var extension = fileNameSplit[1];
+
+                    // this metadata is created to check if there are any existing files in place of this one
+
+                    Metadata meta = new(path);
+                    object obj = IO.ReadJson<object>(meta);
+
+                    // this allows us to overwrite files that have already been
+                    // read and or written this session by comparing their data
+
+
+                    if (isolated_name == "")
+                        isolated_name = "NamelessAsset";
+
+                    if (filesWritten.ContainsKey(name))
+                    {
+                        isolated_name += filesWritten[name]++;
+                        name = isolated_name + "." + extension;
+                    }
+                    else filesWritten.Add(name, 1);
+
+                    Interop.Log($"Number added to file {name}");
+                }
+
+
+            }
+            return name;
         }
     }
 }
