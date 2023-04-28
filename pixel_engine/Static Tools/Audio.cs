@@ -50,8 +50,6 @@ namespace Pixel
             for (int i = 0; i < 25; ++i)
                 Players.Add(new AudioInstance());      
         }
-
-
         /// <summary>
         /// this allocates an entirely new instance of mediaplayer, it seems to have a gigantic delay. PlayFromPath/PlayFromMeta methods use a cheaper way of cloning the MediaPlayer.
         /// </summary>
@@ -80,10 +78,8 @@ namespace Pixel
             }
             return playerCopy;
         }
-        public static void PlayFromPath(string fileName = "", float volume = 0.5f, double speed = 1)
+        private static void Play(string fileName, float volume, double speed, MediaPlayer playerCopy)
         {
-            var playerCopy = GetFreePlayer();
-
             if (fileName != "")
                 playerCopy.Open(new Uri(fileName, UriKind.RelativeOrAbsolute));
 
@@ -91,16 +87,17 @@ namespace Pixel
             playerCopy.Volume = volume;
             playerCopy.Play();
         }
-        public static void PlayFromMeta(Metadata metadata, float volume = 0.5f, double speed = 1)
+        public static void PlayFromPath(string fileName = "", float volume = 0.5f, double speed = 1)
         {
             var playerCopy = GetFreePlayer();
 
-            if (metadata.Path != "")
-                playerCopy.Open(new Uri(metadata.Path, UriKind.RelativeOrAbsolute));
-
-            playerCopy.SpeedRatio = speed;
-            playerCopy.Volume = volume;
-            playerCopy.Play();
+            Play(fileName, volume, speed, playerCopy);
+        }
+        public static void PlayFromMeta(Metadata metadata, float volume = 0.5f, double speed = 1)
+        {
+            var playerCopy = GetFreePlayer();
+            if (metadata is not null)
+                Play(metadata.Path, volume, speed, playerCopy);
         }
     }
 }
