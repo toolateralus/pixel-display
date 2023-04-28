@@ -29,7 +29,6 @@ namespace Pixel
         
         public override void Dispose()
         {
-            Interop.Log("Dispose called");
             sprite = null;
             rb = null;
             anim = null;
@@ -38,6 +37,11 @@ namespace Pixel
         public override void Awake()
         {
             node.TryGetComponent(out rb);
+
+            var meta = AssetLibrary.FetchMeta("KingCrimsonRequiem");
+
+            if (meta != null)
+                Audio.PlayFromPath(meta.Path, 0.45f);
 
             if (node.TryGetComponent(out sprite))
                 sprite.Type = ImageType.Image;
@@ -113,10 +117,10 @@ namespace Pixel
         {
             if (isGrounded)
             {
-                var meta = AssetLibrary.FetchMetaRelative(@"\Assets\Audio Assets\dog_barking.mp3");
+                var meta = AssetLibrary.FetchMeta("dog_barking");
                 
                 if(meta != null)
-                    Audio.Play(meta, 0.45f);
+                    Audio.PlayFromMeta(meta, 0.45f);
 
                 rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
             }

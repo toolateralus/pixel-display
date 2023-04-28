@@ -72,7 +72,7 @@ namespace Pixel.Assets
         /// <param name="path"></param>
         /// <exception cref="NotImplementedException"></exception>
         /// 
-        public static bool Fetch<T>(out T? result) where T : Asset
+        public static bool FetchFirstOfType<T>(out T? result) where T : Asset
         {
             result = null;
             foreach (var asset in Current.Values)

@@ -118,7 +118,7 @@ namespace Pixel
         }
         private void GetProjectSettings()
         {
-            Metadata meta = new("projectSettings", Constants.WorkingRoot + "\\projectSettings.asset", ".asset");
+            Metadata meta = new("projectSettings", Constants.WorkingRoot + "\\obj\\projectSettings.asset", ".asset");
 
             var fetchedAsset = IO.ReadJson<ProjectSettings>(meta);
 
