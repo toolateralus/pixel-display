@@ -2,6 +2,7 @@
 using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
+using Pixel_Editor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -541,7 +542,22 @@ namespace pixel_editor
         bool addNodeContextMenuOpen = false;
         Grid addNodeContextMenu;
         List<Action> addNodeActions = new();
+        GameView gameView = null;
+        private void OnToggleGameView(object sender, RoutedEventArgs e)
+        {
+            if (e.RoutedEvent != null)
+                e.Handled = true;
+            
+            if(gameView is null)
+                gameView = new();
+            else
+            {
+                gameView.Close();
 
+                Runtime.OutputImages.Clear();
+                Runtime.OutputImages.Add(image); 
+            }
+        }
         private void NewNodeButtonPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
