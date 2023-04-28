@@ -40,7 +40,7 @@ namespace Pixel.Assets
             {
                 var split = item.Split('\\');
                 var name = split[^1].Replace($"{ext}", "");
-                Metadata file = new(name, item, ext);
+                Metadata file = new(item);
                 collection.Add(file);
             }
         }

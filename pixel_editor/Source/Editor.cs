@@ -113,11 +113,11 @@ namespace pixel_editor
         }
         private static void InitializeSettings()
         {
-            Metadata meta = new("editor settings", Constants.WorkingRoot + "\\obj\\editorSettings.asset", ".asset");
+            Metadata meta = new(Constants.WorkingRoot + "\\obj\\editorSettings.asset");
             EditorSettings settings = IO.ReadJson<EditorSettings>(meta);
             if (settings is null)
             {
-                settings = new();
+                settings = new("temp"+UUID.NewUUID());
                 IO.WriteJson(settings, meta);
             }
             Current.settings = settings;

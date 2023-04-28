@@ -12,8 +12,6 @@ namespace Pixel
     {
         public List<Stage> stages = new();
         [JsonProperty]
-        public Settings settings = new();
-        [JsonProperty]
         public List<Metadata> stagesMeta = new();
         [JsonProperty]
         public string Name = "DefaultProjectName";
@@ -44,7 +42,7 @@ namespace Pixel
                 string ext = Constants.ProjectFileExtension;
                 string path = rootDir + projDir + '\\' + Name + ext;
 
-                return new Metadata(Name, path, ext);
+                return new Metadata(path);
             }
         }
         /// <summary>

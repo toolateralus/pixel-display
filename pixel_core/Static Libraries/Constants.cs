@@ -37,7 +37,7 @@ namespace Pixel.Statics
         public const string StagesDir = "\\Stages";   //Stage files
         // metadata is saved next to all files.
 
-        public const string AssetsFileExtension = ".asset";     // .asset {Pixel Asset Data}
+        public const string AssetsExt = ".asset";     // .asset {Pixel Asset Data}
         public const string ProjectFileExtension = ".pixel";   // .pixel {Pixel Project}
         public const string MetadataFileExtension = ".meta";  // .meta {File Metadata} 
         public const string StageFileExtension = ".stage";   // .stage {Stage File}
@@ -57,7 +57,7 @@ namespace Pixel.Statics
             PngExt,
             JpegExt,
             BmpExt,
-            AssetsFileExtension,
+            AssetsExt,
             ProjectFileExtension,
             StageFileExtension,
         };

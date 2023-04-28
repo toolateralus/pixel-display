@@ -48,7 +48,7 @@ namespace Pixel
             }
             else
             {
-                meta = new("Script_Test", Constants.WorkingRoot + "\\" + path, Constants.LuaExt);
+                meta = new(Constants.WorkingRoot + "\\" + path);
                 AssetLibrary.Register(meta, value);
                 IO.Write(value, meta);
                 Importer.Import();

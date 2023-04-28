@@ -24,6 +24,11 @@ namespace Pixel
         public string StagesDir = "\\Stages"; //Stage files
 
         public string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
+
+        public Settings(string name, bool shouldUpload = false) : base(name, shouldUpload)
+        {
+
+        }
     }
     public class EditorSettings : Asset
     {
@@ -50,9 +55,14 @@ namespace Pixel
         [JsonProperty]
         public Color EditorHighlightColor = System.Drawing.Color.Orange;
 
+        public EditorSettings(string name, bool shouldUpload = false) : base(name, shouldUpload)
+        {
+           
+        }
+
         public override void Sync()
         {
-            Metadata = new("Editor Settings", Constants.WorkingRoot + "editorSettings.asset", Constants.AssetsFileExtension);
+            Metadata = new(Constants.WorkingRoot + "editorSettings.asset");
         }
 
     }

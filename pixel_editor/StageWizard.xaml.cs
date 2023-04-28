@@ -91,11 +91,9 @@ namespace pixel_editor
             for (int i = 0; i < count; i++) 
                 stage.AddNode(Rigidbody.Standard());
 
-            var meta = new Metadata(
-                stage.Name,
-                Constants.WorkingRoot + Constants.AssetsDir + "\\" + stage.Name + Constants.AssetsFileExtension,
-                Constants.AssetsFileExtension);
-            
+            var meta = new Metadata(Constants.WorkingRoot + Constants.AssetsDir + "\\" + stage.Name + Constants.AssetsExt);
+
+
             AssetLibrary.Register(meta, stage);
 
             var msgResult = MessageBox.Show(

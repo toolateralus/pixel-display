@@ -74,7 +74,7 @@ namespace Pixel.FileIO
 
                     // this metadata is created to check if there are any existing files in place of this one
 
-                    Metadata meta = new(isolated_name, path, extension);
+                    Metadata meta = new(path);
                     object obj = IO.ReadJson<object>(meta);
 
                     // this allows us to overwrite files that have already been
@@ -107,7 +107,7 @@ namespace Pixel.FileIO
 
             string fullPath = $"{dir}{fullName}";
 
-            Metadata meta = new(name, fullPath, extension);
+            Metadata meta = new(fullPath);
 
             Asset foundAsset = IO.ReadJson<Asset>(meta);
 

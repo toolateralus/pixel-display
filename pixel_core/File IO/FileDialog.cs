@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.Win32;
 using Pixel.FileIO;
+using Pixel.Statics;
 using System.IO;
 using System.Linq;
 
@@ -12,15 +13,11 @@ namespace Pixel.Assets
         {
             OpenFileDialog fileDialog = new();
             bool? result = fileDialog.ShowDialog();
-            Metadata meta = new("", "", "");
+            Metadata meta = new("temp" + UUID.NewUUID());
             if (result == true)
             {
                 var fullPath = Path.GetFullPath(fileDialog.FileName);
-                var name = fileDialog.FileName;
-                var split = name.Split('.');
-                var extension = split.Last();
-                var fileName = split[0].Split("\\").Last();
-                meta = new(fileName, fullPath, extension);
+                meta = new(fullPath);
             }
             return meta;
         }

@@ -122,7 +122,7 @@ namespace Pixel
         public override void Sync()
         {
             string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
-            Metadata = new(Name, defaultPath, Constants.StageFileExtension);
+            Metadata = new(defaultPath);
         }
 
         private JImage init_background()
@@ -259,7 +259,7 @@ namespace Pixel
             get
             {
                 if (AssetLibrary.FetchMeta("Background") is not Metadata meta)
-                    return new("Background", Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.PngExt, Constants.PngExt);
+                    return new(Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.PngExt);
                 return meta;
             }
         }
@@ -278,10 +278,7 @@ namespace Pixel
 
         #endregion development defaults
         #region constructors
-        public Stage()
-        {
-
-        }
+        
         [JsonConstructor]
         internal Stage(List<Node> nodes, Metadata metadata, Metadata backgroundMetadata, string name = "Stage Asset") : base(name, true)
         {
@@ -321,13 +318,13 @@ namespace Pixel
         /// <summary>
         /// Memberwise copy constructor
         /// </summary>
-        /// <param name="Name"></param>
+        /// <param name="name"></param>
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        public Stage(string Name, Metadata backgroundMetadata, List<Node> nodes, string? existingUUID = null) : this()
+        public Stage(string name, Metadata backgroundMetadata, List<Node> nodes, string? existingUUID = null) : base(name, true)
         {
-            this.Name = Name;
+            this.Name = name;
             UUID = existingUUID ?? Pixel.Statics.UUID.NewUUID();
             this.nodes = nodes;
             this.backgroundMetadata = backgroundMetadata;

@@ -118,13 +118,13 @@ namespace Pixel
         }
         private void GetProjectSettings()
         {
-            Metadata meta = new("projectSettings", Constants.WorkingRoot + "\\obj\\projectSettings.asset", ".asset");
+            Metadata meta = new(Constants.WorkingRoot + "\\obj\\projectSettings.asset");
 
             var fetchedAsset = IO.ReadJson<ProjectSettings>(meta);
 
             if (fetchedAsset is null)
             {
-                fetchedAsset = new();
+                fetchedAsset = new("temp"+UUID.NewUUID());
                 IO.WriteJson(fetchedAsset, meta);
             }
 

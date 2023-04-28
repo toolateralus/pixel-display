@@ -16,9 +16,13 @@ namespace Pixel
         [JsonProperty] public static int PhysicsTimeStep = 16;
         [JsonProperty] public static Vector2 CurrentResolution = new(256, 256);
 
+        public ProjectSettings(string name, bool shouldUpload = false) : base(name, shouldUpload)
+        {
+        }
+
         public override void Sync()
         {
-            Metadata = new("Project Settings", Constants.WorkingRoot + "projectSettings.asset", Constants.AssetsFileExtension);
+            Metadata = new(Constants.WorkingRoot + "projectSettings.asset");
         }
     }
 

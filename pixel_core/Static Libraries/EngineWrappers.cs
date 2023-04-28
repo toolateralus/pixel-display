@@ -92,8 +92,22 @@ namespace Pixel
             OnDrawGraphicsFinalize?.Invoke(renderer, matrix3x2, projectionMat);
         }
         #endregion
-        public static bool IsRunning { get => OnIsRunningQuery.Invoke(); }
-        public static bool Initialized { get => OnIsInitializedQuery.Invoke(); }
+        public static bool IsRunning
+        {
+            get
+            {
+                var x = OnIsRunningQuery?.Invoke();
+                return x.HasValue && x.Value;
+            }
+        }
+        public static bool Initialized
+        {
+            get
+            {
+                var x = OnIsInitializedQuery?.Invoke();
+                return x.HasValue && x.Value;
+            }
+        }
         public static Project Project
         {
             get => OnProjectGotten?.Invoke();

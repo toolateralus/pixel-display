@@ -1,18 +1,41 @@
 ﻿using Newtonsoft.Json;
 using Pixel.Statics;
+using System;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace Pixel.FileIO
 {
     public class Metadata : FileBase
     {
-        public Metadata(string name, string fullPath, string extension)
+
+        public Metadata(string fullPath)
         {
+            string name_and_extension = "";
+            string[] backslash_split = fullPath.Split('\\');
+
+            foreach (string str in backslash_split)
+                if (str.Contains('.'))
+                    name_and_extension = str;
+
+            string name = "";
+            string extension = ""; 
+            string[] period_split = name_and_extension.Split('.');
+
+            if (period_split.Any())
+            {
+                name = period_split.First();
+                extension = period_split.Last();
+            }
+
+            Interop.Log("Name and Extension : " + name_and_extension);
+            Interop.Log("FullPath : " + fullPath);
+
             Name = name;
             this.fullPath = fullPath;
-            extension = VerifyExtension(extension);
-            this.extension = extension;
+            _uuid = Statics.UUID.NewUUID();
+            this.extension = VerifyExtension(extension);
             pathFromProjectRoot = Project.GetPathFromRoot(fullPath);
-            _uuid = Pixel.Statics.UUID.NewUUID();
         }
         private static string VerifyExtension(string extension)
         {
@@ -34,7 +57,7 @@ namespace Pixel.FileIO
         public Metadata()
         {
             Name = "Default Metadata";
-            fullPath = Constants.WorkingRoot + Constants.AssetsDir + Name + Constants.AssetsFileExtension;
+            fullPath = Constants.WorkingRoot + Constants.AssetsDir + Name + Constants.AssetsExt;
         }
         [JsonConstructor]
         public Metadata(string name, string fullPath, string pathFromProjectRoot, string uuid, string extension)

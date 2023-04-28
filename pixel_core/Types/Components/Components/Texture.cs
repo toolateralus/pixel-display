@@ -40,25 +40,25 @@ namespace Pixel
             get => jImage.height;
         }
         #region Constructors / Overrides
-        public Texture(JImage image)
+        public Texture(JImage image, string name = "Default Texture Asset") : base(name, true)
         {
             jImage = image;
         }
 
-        public Texture(string filePath)
+        public Texture(string filePath, string name = "Default Texture Asset") : base(name, true)
         {
             SetImage(filePath);
         }
-        public Texture(Color[,] colors)
+        public Texture(Color[,] colors, string name = "Default Texture Asset") : base(name, true)
         {
             SetImage(colors);
         }
-        public Texture(Vector2 size, Color color)
+        public Texture(Vector2 size, Color color, string name = "Default Texture Asset") : base(name, true)
         {
             this.size = size;
             SetImage(color);
         }
-        public Texture(Vector2 scale, Metadata imgData)
+        public Texture(Vector2 scale, Metadata imgData, string name = "Default Texture Asset") : base(name, true)
         {
             this.size = scale;
             SetImage(imgData, scale);
@@ -86,7 +86,7 @@ namespace Pixel
         {
             if (fullPath.Contains('.'))
             {
-                imgData = new(Name, fullPath, fullPath.Split('.').Last());
+                imgData = new(fullPath);
                 jImage = new(new Bitmap(fullPath));
             }
             else throw new FileNamingException("Invalid path");

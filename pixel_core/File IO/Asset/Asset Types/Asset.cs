@@ -7,16 +7,13 @@ namespace Pixel.FileIO
     [JsonObject(MemberSerialization.OptIn)]
     public class Asset
     {
-        [JsonProperty] public string Name;
-        [JsonProperty] public string UUID;
+        [JsonProperty] public string Name = "NULL";
+        [JsonProperty] public string UUID = "NULL";
         [JsonProperty] public Metadata Metadata;
-        public Asset()
-        {
-        }
         public virtual void Sync()
         {
-            string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsFileExtension;
-            Metadata = new(Name, defaultPath, Constants.AssetsFileExtension);
+            string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsExt;
+            Metadata = new(defaultPath);
         }
         internal protected void Save()
         {

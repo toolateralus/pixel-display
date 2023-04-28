@@ -9,6 +9,7 @@ using System.Windows;
 
 namespace Pixel
 {
+
     public enum PixelDirectory
     {
         Root = 0,
@@ -24,26 +25,22 @@ namespace Pixel
             TypeNameHandling = TypeNameHandling.Auto,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
-        public static T? ReadJson<T>(Metadata meta) where T : new()
+        public static T? ReadJson<T>(Metadata meta) 
         {
-            T? obj;
-
-            if (typeof(T) != typeof(ValueType))
-                obj = (T)Convert.ChangeType(null, typeof(T));
-            else obj = default;
+            T? obj = default; 
 
             if (meta is null)
                 return obj;
 
             if (!File.Exists(meta.Path))
                 return obj;
+           
             try
             {
                 if (meta is null)
                 {
                     Interop.Log("Metadata was not found.");
                     return obj;
-
                 }
                 if (Constants.ReadableExtensions.Contains(meta.extension))
                 {
@@ -57,7 +54,6 @@ namespace Pixel
 
                     return obj;
                 }
-                throw new FileNotFoundException($"JSON file was not found at provided path, or had an unsupported file extension \n Path: {meta.Path} \n Extension: {meta.extension}");
             }
             catch (Exception e)
             {
@@ -145,7 +141,7 @@ namespace Pixel
         public static Project ReadProject(string name)
         {
             FindOrCreateProjectsDirectory();
-            Metadata meta = new(name, Path + "\\" + name + extension, extension);
+            Metadata meta = new(Path + "\\" + name + extension);
             var project = IO.ReadJson<Project>(meta);
             if (project is null)
             {

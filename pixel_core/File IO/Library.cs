@@ -149,7 +149,7 @@ namespace Pixel.Assets
                 }
                 foreach (KeyValuePair<Metadata, object> assetPair in Current)
                 {
-                    if (assetPair.Value is null || assetPair.Value is not Asset a)
+                    if (assetPair.Value is null || assetPair.Value is not Asset a || a.Name == "NULL")
                         continue;
 
                     a.Sync();
