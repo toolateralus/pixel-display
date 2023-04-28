@@ -168,7 +168,7 @@ namespace Pixel
                 var global = LocalToGlobal(localPos);
                 float distance = Vector2.Distance(global, light.Position);
                 float lightAmount = 0f - Math.Clamp(distance / light.radius, 0, 1);
-                Color blendedPixel = Color.Lerp(color, light.color, lightAmount) * distance;
+                Color blendedPixel = Color.Blend(color, light.color, lightAmount) * distance;
                 return blendedPixel;
             };
 
@@ -194,9 +194,9 @@ namespace Pixel
                     if (lightAmount > 0)
                     {
                         lightAmount = (float)CMath.Negate((double)lightAmount);
-                        blendedPixel = Color.Lerp(existingPixel, Color.Black, lightAmount);
+                        blendedPixel = Color.Blend(existingPixel, Color.Black, lightAmount);
                     }
-                    blendedPixel = Color.Lerp(existingPixel, light.color, lightAmount);
+                    blendedPixel = Color.Blend(existingPixel, light.color, lightAmount);
                     colors[x, y] = blendedPixel;
                 }
             return colors;

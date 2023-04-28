@@ -119,7 +119,7 @@ namespace Pixel
                 float j = 0;
                 while (j <= 1)
                 {
-                    p.color = Color.Lerp(p.color, col, j);
+                    p.color = Color.Blend(p.color, col, j);
                     j += 0.01f;
                     await Task.Delay(1);
                 }

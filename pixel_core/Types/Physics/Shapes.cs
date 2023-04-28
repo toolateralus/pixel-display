@@ -17,7 +17,7 @@ namespace Pixel.Types.Physics
     {
         public Vector2 center;
         public float radius;
-        public bool filled;
+        public bool filled = false;
 
         public Circle(Vector2 center, float radius)
         {

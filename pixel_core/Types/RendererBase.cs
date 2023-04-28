@@ -83,15 +83,9 @@ namespace Pixel
 
             byte a = 255; // assume full alpha
             if (frameB == 0 && frameG == 0 && frameR == 0)
-            {
-                // If the pixel is fully transparent, return a Color with alpha 0
                 a = 0;
-            }
             else if (frameB == 1 && frameG == 1 && frameR == 1)
-            {
-                // If the pixel is fully opaque, return a Color with alpha 255
                 a = 255;
-            }
             else
             {
                 // Otherwise, compute the alpha value based on the RGB values

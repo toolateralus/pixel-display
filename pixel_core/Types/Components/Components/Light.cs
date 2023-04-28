@@ -73,7 +73,7 @@ namespace Pixel
             float gradientPos = (float)position / subdivisions;
             int colorSegment = (int)(gradientPos * (gradientColors.Length - 1));
             float segmentPos = (gradientPos * (gradientColors.Length - 1)) - colorSegment;
-            Color currentColor = Color.Lerp(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
+            Color currentColor = Color.Blend(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
             currentColor.a = alpha;
             return currentColor;
         }

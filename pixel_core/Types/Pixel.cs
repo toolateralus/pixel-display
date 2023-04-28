@@ -54,7 +54,7 @@ namespace Pixel
             this.b = b;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color Lerp(Color A, Color B, float T)
+        public static Color Blend(Color A, Color B, float T)
         {
             T = Math.Max(0, Math.Min(1, T));
             byte r = (byte)Math.Round(A.r + (B.r - A.r) * T);

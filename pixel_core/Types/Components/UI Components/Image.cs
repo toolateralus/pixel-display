@@ -203,7 +203,7 @@ namespace Pixel
                         int _x = x - minX;
 
                         Color existingPixel = texture.GetPixel(_x, _y);
-                        Color blendedPixel = Color.Lerp(existingPixel, lightColor, lightAmount);
+                        Color blendedPixel = Color.Blend(existingPixel, lightColor, lightAmount);
                         colors[_x, _y] = blendedPixel;
                     }
             return colors;

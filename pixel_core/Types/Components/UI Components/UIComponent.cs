@@ -125,10 +125,10 @@ namespace Pixel
 
                     GetAdjacentPixels(image, left, top, right, bottom, out tl, out tr, out bl, out br);
 
-                    Color topPx = Color.Lerp(tl, tr, xOffset);
-                    Color bottomPx = Color.Lerp(bl, br, xOffset);
+                    Color topPx = Color.Blend(tl, tr, xOffset);
+                    Color bottomPx = Color.Blend(bl, br, xOffset);
 
-                    color = Color.Lerp(topPx, bottomPx, yOffset);
+                    color = Color.Blend(topPx, bottomPx, yOffset);
 
                     break;
 
