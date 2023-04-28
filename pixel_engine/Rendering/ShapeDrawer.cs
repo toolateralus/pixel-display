@@ -95,6 +95,12 @@ namespace Pixel
             Rays.Add((ray, color ?? Color.White));
         public static void DrawCircle(Vector2 center, float radius, Color? color = null) =>
             Circles.Add((new Circle(center, radius), color ?? Color.White));
+        public static void DrawCircleFilled(Vector2 center, float radius, Color? color = null)
+        {
+            (Circle circle, Color color) item = (new Circle(center, radius), color ?? Color.White);
+            item.circle.filled = true;
+            Circles.Add(item);
+        }
 
         public static void DrawRect(Vector2 boxStart, Vector2 boxEnd, Color green)
         {
@@ -124,84 +130,151 @@ namespace Pixel
             Vector2 resolution = renderer.Resolution;
             Vector2 framePos = new();
             var refColor = new Color();
-            foreach ((Circle circle, Color color) in Circles)
+
+
+            draw_circles(renderer, viewProjScreen, resolution, ref framePos, ref refColor);
+            draw_lines(renderer, viewProjScreen, resolution, ref framePos, ref refColor);
+            draw_filled_circles(renderer, viewProjScreen, resolution, ref framePos, ref refColor);
+
+            static void draw_filled_circles(RendererBase renderer, Matrix3x2 viewProjScreen, Vector2 resolution, ref Vector2 framePos, ref Color refColor)
             {
-                refColor = color;
-                float sqrtOfHalf = MathF.Sqrt(0.5f);
-                Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
-                Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
-                Vector2 pixelRadius = radius.Transformed(viewProjScreen) * resolution - centerPos;
-                Vector2 quaterArc = pixelRadius * sqrtOfHalf;
-                int quarterArcAsInt = (int)quaterArc.X;
-                for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
+                foreach ((Circle circle, Color color) in Circles)
                 {
-                    float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
-                    framePos.X = centerPos.X + x;
-                    framePos.Y = centerPos.Y + y;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    framePos.Y = centerPos.Y - y;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                }
-                quarterArcAsInt = (int)quaterArc.Y;
-                for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
-                {
-                    float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
-                    framePos.Y = centerPos.Y + y;
-                    framePos.X = centerPos.X + x;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    framePos.X = centerPos.X - x;
-                    if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                }
-            }
-            foreach ((Line line, Color color) in Lines)
-            {
-                refColor = color;
-                Vector2 startPos = line.startPoint.Transformed(viewProjScreen) * resolution;
-                Vector2 endPos = line.endPoint.Transformed(viewProjScreen) * resolution;
-                if (startPos == endPos)
-                {
-                    if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref startPos);
-                    continue;
-                }
+                    if (!circle.filled)
+                        continue;
+                    refColor = color;
+                    float sqrtOfHalf = MathF.Sqrt(0.5f);
+                    Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
+                    Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
+                    Vector2 pixelRadius = radius.Transformed(viewProjScreen) * resolution - centerPos;
 
-                float xDiff = startPos.X - endPos.X;
-                float yDiff = startPos.Y - endPos.Y;
+                    float radiusX = pixelRadius.X;
+                    float radiusY = pixelRadius.Y;
 
-                if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
-                {
-                    float slope = yDiff / xDiff;
-                    float yIntercept = startPos.Y - slope * startPos.X;
+                    // Initialize the SIMD vectors
+                    Vector<float> centerPosXVec = new Vector<float>(centerPos.X);
+                    Vector<float> centerPosYVec = new Vector<float>(centerPos.Y);
+                    Vector<float> radiusXVec = new Vector<float>(radiusX);
+                    Vector<float> radiusYVec = new Vector<float>(radiusY);
+                    Vector<float> zeroVec = Vector<float>.Zero;
 
-                    int endX = (int)MathF.Min(MathF.Max(startPos.X, endPos.X), resolution.X);
-
-                    for (int x = (int)MathF.Max(MathF.Min(startPos.X, endPos.X), 0); x < endX; x++)
+                    // Compute the squared distances from the center to all points on the circle
+                    for (int x = (int)-MathF.Ceiling(radiusX); x <= MathF.Floor(radiusX); x += Vector<float>.Count)
                     {
-                        framePos.X = x;
-                        framePos.Y = slope * x + yIntercept;
-                        if (framePos.Y < 0 || framePos.Y >= resolution.Y)
-                            continue;
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                        Vector<float> xVec = new Vector<float>(x);
+                        Vector<float> xSquaredVec = xVec * xVec;
+                        Vector<float> ySquaredVec = (radiusYVec * radiusYVec) - (xSquaredVec * (radiusYVec * radiusYVec) / (radiusXVec * radiusXVec));
+                        Vector<float> distancesVec = Vector.SquareRoot(Vector.Max(zeroVec, xSquaredVec + ySquaredVec));
+                        Vector<float> alphaVec = Vector.Max(zeroVec, Vector.Min(Vector<float>.One, (radiusXVec - xVec) / radiusXVec));
+                        Vector<float> yVec = centerPosYVec + distancesVec;
+                        Vector2 framePosVec;
+
+                        // Write the pixels
+                        for (int i = 0; i < Vector<float>.Count; i++)
+                        {
+                            float y = yVec[i];
+                            if (y >= 0 && y < resolution.Y)
+                            {
+                                float alpha = alphaVec[i];
+                                float weight = alpha * alpha * (3 - 2 * alpha);
+                                float xFrac = (xVec[i] + radiusX) / (2 * radiusX);
+                                refColor.a = (byte)(refColor.a * weight);
+                                refColor.BlendTo(renderer.ReadColorFromFrame(framePosVec = new Vector2(centerPosXVec[i] + xVec[i], y)), weight);
+                                renderer.WriteColorToFrame(ref refColor, ref framePosVec);
+                                refColor.BlendTo(renderer.ReadColorFromFrame(framePosVec = new Vector2(centerPosXVec[i] - xVec[i], y)), weight);
+                                renderer.WriteColorToFrame(ref refColor, ref framePosVec);
+                            }
+                        }
                     }
                 }
-                else
+            }
+
+
+            static void draw_lines(RendererBase renderer, Matrix3x2 viewProjScreen, Vector2 resolution, ref Vector2 framePos, ref Color refColor)
+            {
+                foreach ((Line line, Color color) in Lines)
                 {
-                    float slope = xDiff / yDiff;
-                    float xIntercept = startPos.X - slope * startPos.Y;
-
-                    int endY = (int)MathF.Min(MathF.Max(startPos.Y, endPos.Y), resolution.Y);
-
-                    for (int y = (int)MathF.Max(MathF.Min(startPos.Y, endPos.Y), 0); y < endY; y++)
+                    refColor = color;
+                    Vector2 startPos = line.startPoint.Transformed(viewProjScreen) * resolution;
+                    Vector2 endPos = line.endPoint.Transformed(viewProjScreen) * resolution;
+                    if (startPos == endPos)
                     {
-                        framePos.Y = y;
-                        framePos.X = slope * y + xIntercept;
-                        if (framePos.X < 0 || framePos.X >= resolution.X)
-                            continue;
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
+                        if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                            renderer.WriteColorToFrame(ref refColor, ref startPos);
+                        continue;
+                    }
+
+                    float xDiff = startPos.X - endPos.X;
+                    float yDiff = startPos.Y - endPos.Y;
+
+                    if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
+                    {
+                        float slope = yDiff / xDiff;
+                        float yIntercept = startPos.Y - slope * startPos.X;
+
+                        int endX = (int)MathF.Min(MathF.Max(startPos.X, endPos.X), resolution.X);
+
+                        for (int x = (int)MathF.Max(MathF.Min(startPos.X, endPos.X), 0); x < endX; x++)
+                        {
+                            framePos.X = x;
+                            framePos.Y = slope * x + yIntercept;
+                            if (framePos.Y < 0 || framePos.Y >= resolution.Y)
+                                continue;
+                            renderer.WriteColorToFrame(ref refColor, ref framePos);
+                        }
+                    }
+                    else
+                    {
+                        float slope = xDiff / yDiff;
+                        float xIntercept = startPos.X - slope * startPos.Y;
+
+                        int endY = (int)MathF.Min(MathF.Max(startPos.Y, endPos.Y), resolution.Y);
+
+                        for (int y = (int)MathF.Max(MathF.Min(startPos.Y, endPos.Y), 0); y < endY; y++)
+                        {
+                            framePos.Y = y;
+                            framePos.X = slope * y + xIntercept;
+                            if (framePos.X < 0 || framePos.X >= resolution.X)
+                                continue;
+                            renderer.WriteColorToFrame(ref refColor, ref framePos);
+                        }
+                    }
+                }
+            }
+
+            static void draw_circles(RendererBase renderer, Matrix3x2 viewProjScreen, Vector2 resolution, ref Vector2 framePos, ref Color refColor)
+            {
+                foreach ((Circle circle, Color color) in Circles)
+                {
+                    refColor = color;
+                    float sqrtOfHalf = MathF.Sqrt(0.5f);
+                    Vector2 radius = circle.center + new Vector2(circle.radius, circle.radius);
+                    Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
+                    Vector2 pixelRadius = radius.Transformed(viewProjScreen) * resolution - centerPos;
+                    Vector2 quaterArc = pixelRadius * sqrtOfHalf;
+                    int quarterArcAsInt = (int)quaterArc.X;
+                    for (int x = -quarterArcAsInt; x <= quarterArcAsInt; x++)
+                    {
+                        float y = MathF.Cos(MathF.Asin(x / pixelRadius.X)) * pixelRadius.Y;
+                        framePos.X = centerPos.X + x;
+                        framePos.Y = centerPos.Y + y;
+                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                            renderer.WriteColorToFrame(ref refColor, ref framePos);
+                        framePos.Y = centerPos.Y - y;
+                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                            renderer.WriteColorToFrame(ref refColor, ref framePos);
+                    }
+                    quarterArcAsInt = (int)quaterArc.Y;
+                    for (int y = -quarterArcAsInt; y <= quarterArcAsInt; y++)
+                    {
+                        float x = MathF.Cos(MathF.Asin(y / pixelRadius.Y)) * pixelRadius.X;
+                        framePos.Y = centerPos.Y + y;
+                        framePos.X = centerPos.X + x;
+                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                            renderer.WriteColorToFrame(ref refColor, ref framePos);
+                        framePos.X = centerPos.X - x;
+                        if (framePos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                            renderer.WriteColorToFrame(ref refColor, ref framePos);
                     }
                 }
             }

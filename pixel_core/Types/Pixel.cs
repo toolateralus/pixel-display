@@ -75,6 +75,20 @@ namespace Pixel
         {
             return new(a, r, g, b);
         }
+
+        public void BlendTo(Color v, float weight)
+        {
+            byte r = (byte)((1 - weight) * this.r + weight * v.r);
+            byte g = (byte)((1 - weight) * this.g + weight * v.g);
+            byte b = (byte)((1 - weight) * this.b + weight * v.b);
+            byte a = (byte)((1 - weight) * this.a + weight * v.a);
+            
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;;
+        }
+
         public static implicit operator System.Drawing.Color(Color v) => System.Drawing.Color.FromArgb(v.a, v.r, v.g, v.b);
         public static implicit operator Color(System.Drawing.Color v) => Color.FromArgb(v.A, v.R, v.G, v.B);
 

@@ -72,6 +72,35 @@ namespace Pixel
         {
             return x >= min && x < max && y >= min && y < max;
         }
+
+        public Color ReadColorFromFrame(Vector2 vector2)
+        {
+            int index = (int)vector2.Y * stride + ((int)vector2.X * 3);
+
+            float frameB = (float)frame[index + 0] / 255;
+            float frameG = (float)frame[index + 1] / 255;
+            float frameR = (float)frame[index + 2] / 255;
+
+            byte a = 255; // assume full alpha
+            if (frameB == 0 && frameG == 0 && frameR == 0)
+            {
+                // If the pixel is fully transparent, return a Color with alpha 0
+                a = 0;
+            }
+            else if (frameB == 1 && frameG == 1 && frameR == 1)
+            {
+                // If the pixel is fully opaque, return a Color with alpha 255
+                a = 255;
+            }
+            else
+            {
+                // Otherwise, compute the alpha value based on the RGB values
+                float max = MathF.Max(MathF.Max(frameR, frameG), frameB);
+                a = (byte)(max * 255);
+            }
+
+            return new Color((byte)(frameR * 255), (byte)(frameG * 255), (byte)(frameB * 255), a);
+        }
     }
 }
 
