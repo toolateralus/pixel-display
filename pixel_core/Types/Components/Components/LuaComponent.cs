@@ -27,7 +27,7 @@ namespace Pixel
             await search;
             var meta = search.Result;
 
-            if (meta is not null && AssetLibrary.FetchByMeta(meta) is string value)
+            if (meta is not null && Library.FetchByMeta(meta) is string value)
             {
                 this.value = value;
                 path = meta.pathFromProjectRoot;
@@ -41,7 +41,7 @@ namespace Pixel
         [Method]
         public void SaveScriptToPath()
         {
-            if (AssetLibrary.FetchMetaRelative(path) is Metadata meta)
+            if (Library.FetchMetaRelative(path) is Metadata meta)
             {
                 IO.Write(value, meta);
                 Importer.Import();
@@ -49,7 +49,7 @@ namespace Pixel
             else
             {
                 meta = new(Constants.WorkingRoot + "\\" + path);
-                AssetLibrary.Register(meta, value);
+                Library.Register(meta, value);
                 IO.Write(value, meta);
                 Importer.Import();
             }

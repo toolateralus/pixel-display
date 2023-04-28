@@ -68,7 +68,7 @@ namespace Pixel
         }
         public static Stage? GetStageByName(string stageName)
         {
-            bool gotAsset = AssetLibrary.Fetch(stageName, out Stage stage);
+            bool gotAsset = Library.Fetch(stageName, out Stage stage);
             if (gotAsset) return stage;
             return null;
         }

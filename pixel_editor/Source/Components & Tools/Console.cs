@@ -536,7 +536,7 @@ namespace pixel_editor
         {
 
             if(!TryGetArgAtIndex<string>(0, out var arg, obj )) return;
-            var assets = AssetLibrary.FetchMeta(arg);
+            var assets = Library.FetchMeta(arg);
             if (assets is null)
             {
                 Print($"File {arg} was not found.");

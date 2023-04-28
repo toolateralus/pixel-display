@@ -94,7 +94,7 @@ namespace pixel_editor
             var meta = new Metadata(Constants.WorkingRoot + Constants.AssetsDir + "\\" + stage.Name + Constants.AssetsExt);
 
 
-            AssetLibrary.Register(meta, stage);
+            Library.Register(meta, stage);
 
             var msgResult = MessageBox.Show(
                 "Stage Creation complete : Would you like to set this as the current stage and add it to the current project?",

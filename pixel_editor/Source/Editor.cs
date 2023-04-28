@@ -496,12 +496,12 @@ namespace pixel_editor
             if (e != null && e.RoutedEvent != null)
             {
                 e.Handled = true;
-                AssetLibrary.SaveAll();
+                Library.SaveAll();
                 return; 
             }
             if (!Input.Get(Key.S))
                 return; 
-            AssetLibrary.SaveAll();
+            Library.SaveAll();
         }
         private void OnToggleFileViewer(object sender, RoutedEventArgs e)
         {

@@ -38,7 +38,7 @@ namespace Pixel
         {
             node.TryGetComponent(out rb);
 
-            var meta = AssetLibrary.FetchMeta("KingCrimsonRequiem");
+            var meta = Library.FetchMeta("KingCrimsonRequiem");
 
             if (meta != null)
                 Audio.PlayFromPath(meta.Path, 0.45f);
@@ -117,7 +117,7 @@ namespace Pixel
         {
             if (isGrounded)
             {
-                var meta = AssetLibrary.FetchMeta("dog_barking");
+                var meta = Library.FetchMeta("dog_barking");
                 
                 if(meta != null)
                     Audio.PlayFromMeta(meta, 0.45f);

@@ -47,7 +47,7 @@ namespace Pixel
             lock (font_model)
                 for (int i = 0; i < 3; ++i)
                 {
-                    var meta = AssetLibrary.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
+                    var meta = Library.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
                     if (meta != null)
                     {
                         Bitmap bmp = new(meta.Path);

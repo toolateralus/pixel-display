@@ -18,7 +18,7 @@ namespace Pixel.Assets
             Interop.OnImport?.Invoke(); 
             var e = new EditorEvent(EditorEventFlags.FILE_VIEWER_UPDATE);
             Interop.RaiseInspectorEvent(e);
-            AssetLibrary.Dispose();
+            Library.Dispose();
             ImportRecursively(Constants.WorkingRoot, 0);
         }
         private static List<Metadata> Import(string directory, string ext)
@@ -71,20 +71,20 @@ namespace Pixel.Assets
             foreach (var item in assets)
             {
                 var asset = IO.ReadJson<Asset>(item);
-                AssetLibrary.Register(item, asset);
+                Library.Register(item, asset);
             }
 
             foreach (var script in lua_scripts)
             {
                 string text = IO.Read(script);
-                AssetLibrary.Register(script, text);
+                Library.Register(script, text);
             }
             // this hold all "assets" or files without pre-loaded data, which get stored with a null value and just point to the file.
             var other = bmps.Concat(pngs);
             other = other.Concat(audioFiles);
 
             foreach (var item in other)
-                AssetLibrary.Register(item, null);
+                Library.Register(item, null);
         }
         public static void ImportAssetDialog()
         {

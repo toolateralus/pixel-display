@@ -76,7 +76,7 @@ namespace Pixel
             for (int i = 0; i < frameNames.Length; i++)
             {
                 string? name = frameNames[i];
-                if (AssetLibrary.FetchMeta(name) is Metadata meta)
+                if (Library.FetchMeta(name) is Metadata meta)
                     metas.Add(meta);
             }
 

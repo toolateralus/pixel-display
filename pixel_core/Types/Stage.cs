@@ -258,7 +258,7 @@ namespace Pixel
         {
             get
             {
-                if (AssetLibrary.FetchMeta("Background") is not Metadata meta)
+                if (Library.FetchMeta("Background") is not Metadata meta)
                     return new(Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.PngExt);
                 return meta;
             }

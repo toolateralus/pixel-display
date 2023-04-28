@@ -7,8 +7,8 @@ namespace Pixel.FileIO
     [JsonObject(MemberSerialization.OptIn)]
     public class Asset
     {
-        [JsonProperty] public string Name = "NULL";
-        [JsonProperty] public string UUID = "NULL";
+        [JsonProperty] public string Name = "Null Asset!";
+        [JsonProperty] public string UUID = "ae86-1999-krack-uuid";
         [JsonProperty] public Metadata Metadata;
         public virtual void Sync()
         {
@@ -17,7 +17,7 @@ namespace Pixel.FileIO
         }
         internal protected void Save()
         {
-            AssetIO.GuaranteeUniqueName(Metadata, this);
+            IO.GuaranteeUniqueName(Metadata, this);
             IO.WriteJson(this, Metadata);
         }
         public Asset(string name, bool shouldUpload = false)
@@ -30,7 +30,7 @@ namespace Pixel.FileIO
         public void Upload()
         {
             Sync();
-            AssetLibrary.Register(Metadata, this);
+            Library.Register(Metadata, this);
         }
     }
 }

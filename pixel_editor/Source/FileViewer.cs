@@ -25,7 +25,7 @@ namespace pixel_editor
 
         public void Refresh()
         {
-            List<Metadata> lib = AssetLibrary.GetAllKeys();
+            List<Metadata> lib = Library.GetAllKeys();
 
             listBox.Items.Clear();
 
@@ -117,10 +117,10 @@ namespace pixel_editor
             var item = listBox.SelectedItem;
             if (item is string path)
             {
-                var meta = AssetLibrary.FetchMetaRelative(path);
+                var meta = Library.FetchMetaRelative(path);
                 if (meta != null)
                 {
-                    var asset = AssetLibrary.FetchByMeta(meta);
+                    var asset = Library.FetchByMeta(meta);
                     return asset;
                 }
             }
@@ -131,7 +131,7 @@ namespace pixel_editor
             var item = listBox.SelectedItem;
             if (item is string path)
             {
-                var meta = AssetLibrary.FetchMetaRelative(path);
+                var meta = Library.FetchMetaRelative(path);
                 if (meta != null)
                 {
                     return meta;

@@ -7,17 +7,11 @@ using System.Threading.Tasks;
 
 namespace Pixel.Assets
 {
-    public class AssetLibrary
+    public class Library
     {
         static Dictionary<Metadata, object> Current = new();
         public static bool Busy { get; private set; }
         internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList();
-        /// <summary>
-        /// Registers an asset to the AssetLibrary.
-        /// </summary>
-        /// <param name="metadata"></param>
-        /// <param name="asset"></param>
-        /// <returns>false if the asset was already in the library, and true if it was successfully added.</returns>
         public static bool Register(Metadata metadata, Asset asset)
         {
             if (Busy)
@@ -65,13 +59,6 @@ namespace Pixel.Assets
             return true;
         }
         public static void Unregister(Metadata metadata) => Current.Remove(metadata);
-        /// <summary>
-        /// Try to retrieve Asset by UUID and Type@ ..\AppData\Assets\$path$
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="path"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        /// 
         public static bool FetchFirstOfType<T>(out T? result) where T : Asset
         {
             result = null;
@@ -127,10 +114,6 @@ namespace Pixel.Assets
                 }
             return r;
         }
-        /// <summary>
-        /// Save the currently loaded asset Library and project to the disk.
-        /// </summary>
-        /// 
         public static void SaveAll()
         {
             Busy = true;
@@ -176,10 +159,6 @@ namespace Pixel.Assets
                     stages_meta.Add(stage.Metadata);
             }
         }
-        /// <summary>
-        /// Clone the current Asset Library into a List.
-        /// </summary>
-        /// <returns>a clone of the currently loaded Assets library in a one dimensional list.</returns>
         public static List<object>? Clone()
         {
             List<object> library = new();
@@ -193,12 +172,6 @@ namespace Pixel.Assets
         {
             return Current.Keys.ToList();
         }
-        /// <summary>
-        /// note: when this finds an asset, it returns it. however,  due to the way image storage works, 
-        /// if it finds an image it creates a Bitmap and returns that instead.
-        /// </summary>
-        /// <param name="meta"></param>
-        /// <returns></returns>
         public static object FetchByMeta(Metadata meta)
         {
             if (meta is null)
@@ -225,7 +198,6 @@ namespace Pixel.Assets
             return asset;
 
         }
-
         internal static void Dispose()
         {
             Current.Clear();

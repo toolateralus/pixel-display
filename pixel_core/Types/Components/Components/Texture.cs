@@ -77,7 +77,7 @@ namespace Pixel
         }
         public void SetImageRelative(string relativePath)
         {
-            var meta = AssetLibrary.FetchMetaRelative(relativePath);
+            var meta = Library.FetchMetaRelative(relativePath);
             if (meta is not null)
                 jImage = new(new Bitmap(meta.Path));
 
