@@ -25,7 +25,6 @@ namespace Pixel
         Color currentColor = Color.White;
         Vector2 endPt = default;
 
-
         public override void OnDrawShapes()
         {
             if (!showDebug)
@@ -36,6 +35,7 @@ namespace Pixel
 
             int lineCt = (int)length.Squared() * 50;
             float sliceAngle = 360f / lineCt;
+
             for (int i = lineCt; i > 0; i--)
             {
                 float startAngle = i * sliceAngle;
@@ -48,7 +48,6 @@ namespace Pixel
                 float depth = MathF.Abs(sine); // Calculate depth based on sine of angle
                 if (sine < 0)
                     depth /= 3;
-
 
                 currentColor = GetGradient(i, lineCt, alpha: 25);
                 Interop.DrawCircleFilled(endPt, 0.015f * depth, currentColor);
