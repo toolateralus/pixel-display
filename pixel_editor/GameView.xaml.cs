@@ -20,11 +20,11 @@ namespace Pixel_Editor
     /// </summary>
     public partial class GameView : Window
     {
-        public GameView()
+        public GameView(Window owner)
         {
             InitializeComponent();
-            Runtime.OutputImages.Clear();
-            Runtime.OutputImages.Add(RenderImage);
+            Runtime.SetOutputImageAsMain(RenderImage);
+            Closing += (e, o) => owner.Close();
             Show();
         }
     }

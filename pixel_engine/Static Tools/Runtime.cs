@@ -301,6 +301,17 @@ namespace Pixel
         {
             return IsRunning;
         }
+
+      
+        public static void SetOutputImageAsMain(System.Windows.Controls.Image image)
+        {
+            // this is how we subscribe to the input events.
+            CMouse.FocusImage(image);
+            OutputImages.Clear();
+            OutputImages.Add(image);
+        }
+
+      
         #endregion
         #region Ctor
         private Runtime(Project project)

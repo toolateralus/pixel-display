@@ -111,6 +111,7 @@ namespace pixel_editor
 
             Console.Print(motd);
             Runtime.OutputImages.Add(image);
+            Runtime.SetOutputImageAsMain(image);
         }
         private static void InitializeSettings()
         {
@@ -181,11 +182,7 @@ namespace pixel_editor
         private void GetEvents()
         {
             Closing += OnDisable;
-            MouseWheel += OnMouseWheelMoved;
 
-            image.MouseDown += Image_MouseBtnChanged;
-            image.MouseUp += Image_MouseBtnChanged;
-            image.MouseMove += Image_MouseMove;
 
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
@@ -196,12 +193,6 @@ namespace pixel_editor
         private void UnsubscribeEvents()
         {
             Closing -= OnDisable;
-
-            MouseWheel -= OnMouseWheelMoved;
-
-            image.MouseDown -= Image_MouseBtnChanged;
-            image.MouseUp -= Image_MouseBtnChanged;
-            image.MouseMove -= Image_MouseMove;
 
             Runtime.InspectorEventRaised -= QueueEvent;
             CompositionTarget.Rendering -= Update;
@@ -388,18 +379,7 @@ namespace pixel_editor
             Console.Print("Stage " + stageName + " set.");
             Current.Title = $"{projectName} : : {stageName}";
         }
-        private void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
-        {
-            CMouse.MouseWheelRefresh(e);
-        }
-        private void Image_MouseMove(object sender, MouseEventArgs e)
-        {
-            CMouse.RefreshMousePosition(e);
-        }
-        private void Image_MouseBtnChanged(object sender, MouseButtonEventArgs e)
-        {
-            CMouse.MouseButtonRefresh(e);
-        }
+       
         private async void OnCommandSent(object sender, RoutedEventArgs e)
         {
             if (e.RoutedEvent != null)
@@ -553,9 +533,8 @@ namespace pixel_editor
             else
             {
                 gameView.Close();
-
-                Runtime.OutputImages.Clear();
-                Runtime.OutputImages.Add(image); 
+                gameView = null;
+                Runtime.SetOutputImageAsMain(image);
             }
         }
         private void NewNodeButtonPressed(object sender, RoutedEventArgs e)

@@ -36,6 +36,40 @@ namespace Pixel
         private static CMouse current = null;
         public static Action? OnMouseMove;
 
+        public static WeakReference<System.Windows.Controls.Image> last_image;
+        public static void FocusImage(System.Windows.Controls.Image image)
+        {
+            if (last_image is not null)
+                if (last_image.TryGetTarget(out var lastImageRef))
+                { 
+                    if (lastImageRef is System.Windows.Controls.Image img)
+                    {
+                        img.MouseDown -= Image_MouseBtnChanged;
+                        img.MouseUp -= Image_MouseBtnChanged;
+                        img.MouseMove -= Image_MouseMove;
+                        img.MouseWheel -= OnMouseWheelMoved;
+                    }
+                }
+
+            last_image = new(image);
+            image.MouseDown += Image_MouseBtnChanged;
+            image.MouseUp += Image_MouseBtnChanged;
+            image.MouseMove += Image_MouseMove;
+            image.MouseWheel += OnMouseWheelMoved;
+
+        }
+        public static void OnMouseWheelMoved(object sender, MouseWheelEventArgs e)
+        {
+            MouseWheelRefresh(e);
+        }
+        private static void Image_MouseMove(object sender, MouseEventArgs e)
+        {
+            RefreshMousePosition(e);
+        }
+        private static void Image_MouseBtnChanged(object sender, MouseButtonEventArgs e)
+        {
+            MouseButtonRefresh(e);
+        }
         public static CMouse Current
         {
             get
