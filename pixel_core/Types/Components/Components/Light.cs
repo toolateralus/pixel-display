@@ -24,27 +24,34 @@ namespace Pixel
         }
         Color currentColor = Color.White;
         Vector2 endPt = default;
+
+
         public override void OnDrawShapes()
         {
-            if (!showDebug) 
+            if (!showDebug)
                 return;
 
             if (animated)
                 AnimateLength();
-                
-            int lineCt = (int)length.Squared() * 3;
-            float sliceAngle = 360f / lineCt;
 
-            for (int i = 0; i < lineCt; i++)
+            int lineCt = (int)length.Squared() * 50;
+            float sliceAngle = 360f / lineCt;
+            for (int i = lineCt; i > 0; i--)
             {
                 float startAngle = i * sliceAngle;
                 float angle = startAngle * CMath.PI / 180;
                 float cos = MathF.Cos(angle) * length * radius * 2;
-                double sin = Math.Sin(angle * length) * radius * 2;
-                endPt = node.Position + new Vector2(cos, (float)sin);
+                float sin = MathF.Sin(angle * length) * radius * 2;
+                endPt = node.Position + new Vector2(cos, sin);
+
+                var sine = MathF.Sin(angle);
+                float depth = MathF.Abs(sine); // Calculate depth based on sine of angle
+                if (sine < 0)
+                    depth /= 3;
+
+
                 currentColor = GetGradient(i, lineCt, alpha: 25);
-                Interop.DrawCircleFilled(endPt, 0.015f, currentColor);
-                Interop.DrawLine(endPt, node.Position + endPt, currentColor * 3);
+                Interop.DrawCircleFilled(endPt, 0.015f * depth, currentColor);
             }
         }
 
