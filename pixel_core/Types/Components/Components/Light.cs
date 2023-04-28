@@ -30,7 +30,7 @@ namespace Pixel
             if (animated)
                 AnimateLength();
 
-            int lineCt = (int)(240 * (length * length));
+            int lineCt = (int)(52 * (length * length));
             float sliceAngle = 360f / lineCt; // divide circle into 6 equal slices
 
             for (int i = 0; i < lineCt; i++)
@@ -39,15 +39,15 @@ namespace Pixel
                 float angle = startAngle * CMath.PI / 180;
 
                 float cos = MathF.Cos(angle) * length * radius;
-                double sin = Math.Sin(angle * length * radius);
+                double sin = Math.Sin(angle * length) * radius;
 
                 Vector2 A = (new Vector2(cos, (float)sin));
                 Vector2 startPt = center;
                 Vector2 endPt = startPt + A * 2;
 
-                Color currentColor = GetGradient(i, lineCt, alpha: 5);
+                Color currentColor = GetGradient(i, lineCt, alpha: 25);
 
-                Interop.DrawLine(endPt, startPt / heightModifier, currentColor);
+                Interop.DrawCircleFilled(endPt, 0.015f, currentColor);
             }
         }
 

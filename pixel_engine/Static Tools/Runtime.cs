@@ -327,6 +327,7 @@ namespace Pixel
             Interop.OnIsRunningQuery += Interop_OnIsRunningQuery;
             Interop.OnIsInitializedQuery += Interop_OnIsInitializedQuery;
             Interop.OnDrawGraphicsFinalize += Interop_OnDrawGraphicsFinalize;
+            Interop.OnDrawCircleFilled += (a, b, c) => ShapeDrawer.DrawCircleFilled(a, b, c);
             Interop.OnDrawCircle += Interop_OnDrawCircle;
             Interop.OnDrawLine += Interop_OnDrawLine;
             Interop.OnProjectGotten += Interop_OnProjectGotten;

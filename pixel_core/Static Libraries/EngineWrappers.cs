@@ -21,7 +21,8 @@ namespace Pixel
         public static event Action<Vector2, int, Color>? OnDrawCircle;
         public static event Action<Vector2, Vector2, Color>? OnDrawLine;
         public static event Action<RendererBase, Matrix3x2, Matrix3x2>? OnDrawGraphicsFinalize;
-        
+        public static event Action<Vector2, float, Color>? OnDrawCircleFilled;
+
         public static event Func<Project>? OnProjectGotten;
         public static event Func<Stage>? OnStageGotten;
         public static event Func<Task<Metadata>>? OnFileViewer_SelectedMetadata_Query;
@@ -90,6 +91,11 @@ namespace Pixel
         internal static void DrawGraphics(RendererBase renderer, Matrix3x2 matrix3x2, Matrix3x2 projectionMat)
         {
             OnDrawGraphicsFinalize?.Invoke(renderer, matrix3x2, projectionMat);
+        }
+
+        internal static void DrawCircleFilled(Vector2 endPt, float radius, Color currentColor)
+        {
+            OnDrawCircleFilled?.Invoke(endPt, radius, currentColor);
         }
         #endregion
         public static bool IsRunning
