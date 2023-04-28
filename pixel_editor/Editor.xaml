@@ -69,11 +69,11 @@
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <Image  x:Name="image"
-                    Grid.Row="1" 
-                    Grid.Column="1" 
+                    Grid.Row="0" 
+                    Grid.Column="0" 
                     RenderOptions.BitmapScalingMode = "NearestNeighbor"
-                    Grid.RowSpan="20"
-                    Grid.ColumnSpan="22" 
+                    Grid.RowSpan="23"
+                    Grid.ColumnSpan="23" 
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     />
