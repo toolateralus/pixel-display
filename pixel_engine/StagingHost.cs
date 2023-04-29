@@ -17,7 +17,8 @@ namespace Pixel
             Node camera = new("camera");
             camera.AddComponent<Camera>();
             camera.Position = new(0, 0);
-            camera.Scale = new(25, 25);
+            float fov = 3; 
+            camera.Scale = new Vector2(16, 9) * fov;
 
             Node floor = Floor.Standard();
             nodes.Add(floor);
@@ -25,13 +26,13 @@ namespace Pixel
             Node textTest = new("text");
             var img = textTest.AddComponent<Text>();
 
-            //TODO: Eliminate this confusion, I don't know which one's even in use atm.
-            img.viewportSize = new(25, 25);
+            img.viewportSize = new(1, 1);
             textTest.Scale = new(25, 25);
             img.viewportPosition = Vector2.Zero;
             textTest.Position = Vector2.Zero;
 
             Node light = Light.Standard();
+            light.AddComponent<SineAnimationTests>();
 
             nodes.Add(textTest);
             nodes.Add(light);

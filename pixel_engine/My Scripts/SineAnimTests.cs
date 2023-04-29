@@ -60,7 +60,7 @@ namespace Pixel
                 float startAngle = i * sliceAngle;
                 float angle = startAngle * CMath.PI / 180;
                 float cos = MathF.Cos(angle) * length * radius * 2;
-                float sin = MathF.Sin(angle * length) * radius * 2;
+                float sin = MathF.Sin(angle * length * radius) * 2;
                 endPt = node.Position + new Vector2(cos, sin);
 
                 var sine = MathF.Sin(angle);

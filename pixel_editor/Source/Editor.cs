@@ -522,7 +522,7 @@ namespace pixel_editor
         bool addNodeContextMenuOpen = false;
         Grid addNodeContextMenu;
         List<Action> addNodeActions = new();
-        GameView gameView = null;
+        internal GameView gameView = null;
         private void OnToggleGameView(object sender, RoutedEventArgs e)
         {
             if (e.RoutedEvent != null)
@@ -533,8 +533,6 @@ namespace pixel_editor
             else
             {
                 gameView.Close();
-                gameView = null;
-                Runtime.SetOutputImageAsMain(image);
             }
         }
         private void NewNodeButtonPressed(object sender, RoutedEventArgs e)

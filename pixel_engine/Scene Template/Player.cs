@@ -14,7 +14,6 @@ namespace Pixel
     {
         [Field][JsonProperty] public float speed = 0.1f;
         [Field][JsonProperty] private float jumpSpeed = 0.25f;
-
         [Field][JsonProperty] public bool takingInput = true;
         [Field][JsonProperty] private bool followPlayer;
 

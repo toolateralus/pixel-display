@@ -16,7 +16,7 @@ namespace Pixel
         public override void Dispose(){}
         public static Node Standard()
         {
-            Node x = Rigidbody.StaticBody();
+            Node x = Rigidbody.Standard();
             x.Name = "light";
             x.AddComponent<Light>();
             x.Position = new(0, 1);

@@ -13,8 +13,6 @@ using Pixel.Types.Physics;
 using System.Reflection;
 using System.ComponentModel;
 using Component = Pixel.Types.Components.Component;
-using Microsoft.Win32;
-using System.Windows.Input;
 
 namespace Pixel
 {

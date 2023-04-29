@@ -1,4 +1,5 @@
 ﻿using Pixel;
+using pixel_editor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,20 @@ namespace Pixel_Editor
         {
             InitializeComponent();
             Runtime.SetOutputImageAsMain(RenderImage);
-            Closing += (e, o) => owner.Close();
+
+
+            Closing += (e, o) => 
+            {
+                if (owner is Editor editor)
+                {
+                    Runtime.SetOutputImageAsMain(editor.image);
+                    editor.gameView = null;
+                }
+            };
+            owner.Closing += (e, o) =>
+            {
+                Close();
+            };
             Show();
         }
     }
