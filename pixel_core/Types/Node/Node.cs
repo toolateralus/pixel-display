@@ -90,7 +90,11 @@ namespace Pixel
         [JsonProperty] public string Name { get; set; }
         [JsonProperty] public string tag = "Untagged";
         [JsonProperty] public Node? parent;
+
         [JsonProperty] public List<Node> children = new();
+        internal List<Vector2> child_offsets = new();
+
+
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
         public Vector2 Position
         {
@@ -139,18 +143,20 @@ namespace Pixel
                 Interop.Log("A cyclic resource inclusion was detected.");
                 return;
             }
-
             if (!Interop.Stage.nodes.Contains(child))
-                Interop.                Stage?.AddNode(child);
+                Interop.Stage?.AddNode(child);
 
             children ??= new();
 
-            if (children.Contains(child)) return;
-
+            if (children.Contains(child))
+                return;
 
             _ = child.parent?.TryRemoveChild(child);
 
             children.Add(child);
+
+            Vector2 offset = Position + child.Position;
+            child_offsets.Add(offset);
 
             child.parent = this;
 
@@ -235,6 +241,18 @@ namespace Pixel
         {
             if (!awake)
                 return;
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+                
+                if (child_offsets.Count < i)
+                    continue;
+
+                child.Position = Position + child_offsets[i];
+            }
+
+
             ComponentsBusy = true;
 
             for (int i = 0; i < Components.Count; i++)

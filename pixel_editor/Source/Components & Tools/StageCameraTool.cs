@@ -93,7 +93,10 @@ namespace pixel_editor
         {
             if (CMouse.MouseWheelDelta == 0)
                 return;
-        
+
+            if (Camera.First is null)
+                return;
+
             Camera.First.Scale *= MathF.Pow(Editor.Current.settings.MouseZoomSensitivityFactor, -CMouse.MouseWheelDelta);
         }
 

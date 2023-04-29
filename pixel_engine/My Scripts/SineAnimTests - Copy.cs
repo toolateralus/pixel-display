@@ -7,6 +7,7 @@ using static Pixel.Input;
 using static Pixel.ShapeDrawer;
 using static Pixel.Runtime;
 using System;
+using System.Windows.Shell;
 
 namespace Pixel
 {
@@ -22,9 +23,12 @@ namespace Pixel
         public override void Awake()
         {
             
-            Camera.First.node?.Destroy();
+            Camera.First?.node?.Destroy();
+
             Node camera = new("thisCamera");
             camera.AddComponent<Camera>();
+            node.Child(camera);
+
 
 
             RegisterAction(this, OnKeyDown_Y, key);
@@ -32,6 +36,10 @@ namespace Pixel
         }
         public override void FixedUpdate(float delta)
         {
+            if(pressedThisFrame)
+
+
+
 
             pressedThisFrame = false;
         }

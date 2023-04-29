@@ -117,7 +117,9 @@ namespace Pixel
                     var img = Runtime.OutputImages.First();
                     var normalizedPos = img.GetNormalizedPoint(new Point(LastClickPosition.X, LastClickPosition.Y));
 
-                    LastClickGlobalPosition = Camera.First.ScreenToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
+                    if(Camera.First != null)
+                        LastClickGlobalPosition = Camera.First.ScreenToGlobal(new Vector2((float)normalizedPos.X, (float)normalizedPos.Y));
+
                     OnLeftPressedThisFrame?.Invoke();
                 }
                 else
