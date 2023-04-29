@@ -92,7 +92,7 @@ namespace Pixel
         [JsonProperty] public Node? parent;
 
         [JsonProperty] public List<Node> children = new();
-        internal List<Vector2> child_offsets = new();
+        internal Dictionary<string, Vector2> child_offsets = new();
 
 
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
@@ -145,21 +145,15 @@ namespace Pixel
             }
             if (!Interop.Stage.nodes.Contains(child))
                 Interop.Stage?.AddNode(child);
-
             children ??= new();
-
             if (children.Contains(child))
                 return;
 
             _ = child.parent?.TryRemoveChild(child);
-
             children.Add(child);
-
             Vector2 offset = Position + child.Position;
-            child_offsets.Add(offset);
-
+            child_offsets.Add(child.UUID, offset);
             child.parent = this;
-
         }
         public bool ContainsCycle(Node newNode)
         {
@@ -246,10 +240,10 @@ namespace Pixel
             {
                 Node? child = children[i];
                 
-                if (child_offsets.Count < i)
+                if (child_offsets.Count < i || !(child_offsets.ElementAt(i) is var kvp && kvp.Key != UUID))
                     continue;
 
-                child.Position = Position + child_offsets[i];
+                child.Position = Position + kvp.Value;
             }
 
 
