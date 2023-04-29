@@ -65,8 +65,8 @@
                 <!-- Add more tab items as needed -->
             </TabControl>
             <Image  x:Name="image"
-                    Grid.Row="0" 
-                    Grid.Column="0" 
+                    Grid.Row="1" 
+                    Grid.Column="1" 
                     RenderOptions.BitmapScalingMode = "NearestNeighbor"
                     Grid.RowSpan="23"
                     Grid.ColumnSpan="23" 
@@ -127,7 +127,6 @@
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-
                 <Label  FontSize="3" 
                     FontWeight="Bold" 
                     FontFamily="MS Gothic"

@@ -79,7 +79,43 @@ namespace pixel_editor
             inspector = new Inspector(inspectorGrid);
             Runtime.Current.Inspector = inspector;
         }
-        public EditorSettings settings; 
+        public EditorSettings settings;
+
+        private TabItem draggedTabItem;
+
+        private void TabItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Get the TabItem that is being dragged
+            draggedTabItem = sender as TabItem;
+        }
+
+        private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (draggedTabItem != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                // Start the drag-and-drop operation
+                DragDrop.DoDragDrop(draggedTabItem, draggedTabItem, DragDropEffects.Move);
+            }
+        }
+
+        private void TabItem_Drop(object sender, DragEventArgs e)
+        {
+            // Get the target DockPanel
+            DockPanel targetDockPanel = sender as DockPanel;
+
+            if (targetDockPanel != null && e.Data.GetDataPresent(typeof(TabItem)))
+            {
+                // Get the TabItem that is being dropped
+                TabItem droppedTabItem = e.Data.GetData(typeof(TabItem)) as TabItem;
+
+                // Remove the TabItem from its current DockPanel
+                DockPanel sourceDockPanel = VisualTreeHelper.GetParent(droppedTabItem) as DockPanel;
+                sourceDockPanel.Children.Remove(droppedTabItem);
+
+                // Add the TabItem to the target DockPanel
+                targetDockPanel.Children.Add(droppedTabItem);
+            }
+        }
         private void InitializeEditor()
         {
             if (current != null && current != this)
@@ -87,6 +123,7 @@ namespace pixel_editor
                 Close();
                 return; 
             }
+
 
             current = this;
             InitializeComponent();
