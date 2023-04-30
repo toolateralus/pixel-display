@@ -152,7 +152,11 @@ namespace Pixel
             _ = child.parent?.TryRemoveChild(child);
             children.Add(child);
             Vector2 offset = Position + child.Position;
-            child_offsets.Add(child.UUID, offset);
+
+            if (child_offsets.ContainsKey(child.UUID))
+                child_offsets[child.UUID] = offset;
+            else child_offsets.Add(child.UUID, offset);
+
             child.parent = this;
         }
         public bool ContainsCycle(Node newNode)
@@ -288,11 +292,12 @@ namespace Pixel
                 kvp.parent = null;
 
             if (parent?.children != null)
-                foreach (var kvp in parent.children)
+                for (int i = 0; i < parent.children.Count; i++)
+                {
+                    Node? kvp = parent.children[i];
                     if (kvp == this)
-                    {
                         parent.children.Remove(this);
-                    }
+                }
 
             ParentStage?.nodes.Remove(this);
 

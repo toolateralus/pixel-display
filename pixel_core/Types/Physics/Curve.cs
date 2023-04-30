@@ -114,6 +114,8 @@ namespace Pixel.Types.Physics
             if (frameTime <= 0)
                 frameTime = 1;
 
+            curve.looping = true;
+
             return curve;
 
         }
@@ -137,6 +139,8 @@ namespace Pixel.Types.Physics
             }
 
             int frameTime = (int)(vertices / speed);
+
+            curve.looping = true;
 
             if (frameTime <= 0)
                 frameTime = 1;

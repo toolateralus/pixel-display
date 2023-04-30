@@ -32,7 +32,7 @@ namespace Pixel
             textTest.Position = Vector2.Zero;
 
             Node light = Light.Standard();
-            light.AddComponent<SineAnimationTests>();
+            light.AddComponent<SineAnimator>();
 
             nodes.Add(textTest);
             nodes.Add(light);

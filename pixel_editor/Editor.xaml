@@ -162,10 +162,14 @@
                                         TextElement.FontStretch="SemiCondensed"
                                         TextWrapping="Wrap"
                                         AcceptsReturn="True"
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Stretch"
                                         >
                             </TextBox>
                             <ListBox 
                                        Visibility="Visible"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Stretch"
                                         x:Name="consoleOutput" 
                                         Background="Black"
                                         Foreground="White"
