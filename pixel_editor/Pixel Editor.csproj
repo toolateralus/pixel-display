@@ -22,7 +22,7 @@
 	  <ProjectReference Include="..\pixel_engine\Pixel Engine.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Compile Update="ComponentEditor.cs">
+	  <Compile Update="Source\ComponentEditor.cs">
 	    <SubType>Code</SubType>
 	  </Compile>
 	</ItemGroup>

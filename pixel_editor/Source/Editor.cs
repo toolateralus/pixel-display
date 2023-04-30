@@ -3,6 +3,7 @@ using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
 using Pixel_Editor;
+using Pixel_Editor.Source;
 using System;
 using System.Collections.Generic;
 using System.Linq;

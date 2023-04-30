@@ -65,6 +65,5 @@ namespace Pixel
             }
             else length += 0.01f;
         }
-
     }
 }

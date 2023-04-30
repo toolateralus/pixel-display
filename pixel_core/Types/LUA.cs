@@ -1,4 +1,5 @@
 ﻿using KeraLua;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -7,11 +8,23 @@ namespace Pixel
     public class LUA
     {
         #region pixel_engine lua library (C# functions)
+
+        public static List<LuaFunction> functions_list = new();
+        public static bool envMode = false;
+
         public static LuaFunction dispose() => new((p) =>
         {
             var ct = env_vars.Count;
             env_vars.Clear();
             FromString($"{ct} environment variables released.");
+            return 0;
+        });
+
+        public static LuaFunction env() => new((p) =>
+        {
+            dispose();
+            env_vars = new();
+            envMode = true;
             return 0;
         });
         public static LuaFunction print() => new((p) =>
@@ -126,7 +139,11 @@ namespace Pixel
             var methods = type.GetRuntimeMethods();
             foreach (var method in methods)
                 if (method.ReturnType == typeof(LuaFunction))
-                    state.Register(method.Name, (LuaFunction)method.Invoke(null, null));
+                {
+                    LuaFunction function = (LuaFunction)method.Invoke(null, null);
+                    functions_list.Add(function);
+                    state.Register(method.Name, function);
+                }
         }
         public static (bool result, string err) FromString(string luaString)
         {
@@ -155,6 +172,11 @@ namespace Pixel
                 return false;
             }
             return true;
+        }
+
+        public static IntPtr GetHandle()
+        {
+            return state.Handle; 
         }
     }
 }

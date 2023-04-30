@@ -1,4 +1,5 @@
-﻿using Pixel;
+﻿using KeraLua;
+using Pixel;
 using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
@@ -33,13 +34,52 @@ namespace pixel_editor
                             Command? item = (Command)method.Invoke(null, null);
                             if (item != null && !Current.LoadedCommands.Contains(item))
                                 Current.LoadedCommands.Add(item);
+
+
+
                         }
+
+
+                    foreach (var item in LUA.functions_list)
+                    {
+                        Command cmd = new();
+                        cmd.action = (a) => item.Invoke(LUA.GetHandle());
+                        cmd.args = null;
+
+                        string name = ParseMethodName(item);
+
+                        cmd.phrase = name;
+                        cmd.error = null;
+                        Current.LoadedCommands.Add(cmd);
+
+                        Runtime.Log(cmd.phrase + " Added!");
+                    }
                 }
 
                 return current;
             }
             set => current = value;
         }
+
+        private static string ParseMethodName(LuaFunction item)
+        {
+            const string nums = "1234567890<>_";
+            var name = item.Method.Name;
+
+            foreach (char disallowed in nums)
+                for (int found = 0; found < name.Length; found++)
+                {
+                    char y = name[found];
+                    if (y == disallowed)
+                    {
+                        found = 0;
+                        name = name.Replace($"{y}", "");
+                    }
+                }
+            name = name.Remove(name.Length - 1);
+            return name;
+        }
+
         private static Console current;
         
         // todo: implement a typical function helper like help set(); or whatever, so you can search up a command and get deeper description.
@@ -64,7 +104,7 @@ namespace pixel_editor
         };
         public static Command cmd_clear_console() => new()
         {
-            phrase = "*c;",
+            phrase = "*c;", 
             syntax = "*c",
             action = (e) =>
             {

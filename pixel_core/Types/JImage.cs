@@ -28,10 +28,8 @@ namespace Pixel
                 return size;
             }
         }
-
         [JsonProperty]
         public Color color = Color.Clear;
-
         public JImage()
         {
             width = 0;
@@ -53,18 +51,6 @@ namespace Pixel
             ApplyColor(byteData);
             data = byteData;
         }
-
-        private void ApplyColor(byte[] colorData)
-        {
-            for (int i = 0; i < colorData.Length; i += 4)
-            {
-                colorData[i] *= color.a;
-                colorData[i + 1] *= color.r;
-                colorData[i + 2] *= color.g;
-                colorData[i + 3] *= color.b;
-            }
-        }
-
         public JImage(Bitmap bmpInput)
         {
             if (bmpInput is null)
@@ -85,18 +71,12 @@ namespace Pixel
             ApplyColor(colorData);
             data = colorData;
         }
-        public void SetPixel(int x, int y, Color color)
+        internal JImage Clone()
         {
-            int position = (y * width + x) * 4;
-            
-            if (data.Length < position + 4)
-                return;
-
-            data[position + 0] = color.a;
-            data[position + 1] = color.r;
-            data[position + 2] = color.g;
-            data[position + 3] = color.b;
+            return (JImage)MemberwiseClone();
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Color GetPixel(int x, int y)
         {
             int position = (y * width + x) * 4;
@@ -112,6 +92,21 @@ namespace Pixel
 
             return col;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetPixel(int x, int y, Color color)
+        {
+            int position = (y * width + x) * 4;
+            
+            if (data.Length < position + 4)
+                return;
+
+            data[position + 0] = color.a;
+            data[position + 1] = color.r;
+            data[position + 2] = color.g;
+            data[position + 3] = color.b;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void GetPixel(int x, int y, out Color output)
         {
@@ -127,6 +122,26 @@ namespace Pixel
             output.g = data[position + 2];
             output.b = data[position + 3];
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void NormalizeAlpha(int value)
+        {
+            for (int i = 0; i < data.Length; i += 4)
+                data[i] = (byte)value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ApplyColor(byte[] colorData)
+        {
+            for (int i = 0; i < colorData.Length; i += 4)
+            {
+                colorData[i] *= color.a;
+                colorData[i + 1] *= color.r;
+                colorData[i + 2] *= color.g;
+                colorData[i + 3] *= color.b;
+            }
+        }
+
         internal static JImage Concat(IReadOnlyCollection<JImage> images, Curve posCurve)
         {
             byte[] drawSurface = GetDrawSurface(images, posCurve, out var bounds);
@@ -178,15 +193,6 @@ namespace Pixel
             posCurve.Reset();
             byte[] drawSurface = new byte[(int)bounds.Width * (int)bounds.Height * 4];
             return drawSurface;
-        }
-        internal JImage Clone()
-        {
-            return (JImage)MemberwiseClone();
-        }
-        internal void NormalizeAlpha(int value)
-        {
-            for (int i = 0; i < data.Length; i += 4)
-                data[i] = (byte)value;
         }
     }
 }

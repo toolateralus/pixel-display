@@ -9,8 +9,9 @@ using Pixel;
 using Component = Pixel.Types.Components.Component;
 using System.Windows.Input;
 using System.Reflection;
+using pixel_editor;
 
-namespace pixel_editor
+namespace Pixel_Editor.Source
 {
     public class ComponentEditor
     {
@@ -24,7 +25,7 @@ namespace pixel_editor
         public bool Disposing { get; internal set; }
         public ComponentEditorData data;
         public Grid mainGrid;
-        public Grid myGrid; 
+        public Grid myGrid;
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
         List<UIElement> uiElements = new();
@@ -37,9 +38,9 @@ namespace pixel_editor
         {
             mainGrid = Editor.Current.inspectorGrid;
             myGrid ??= new();
-            
-           if (!mainGrid.Children.Contains(myGrid))
-               mainGrid.Children.Add(myGrid);
+
+            if (!mainGrid.Children.Contains(myGrid))
+                mainGrid.Children.Add(myGrid);
 
             Inspector.SetRowAndColumn(myGrid, 1, 3, 0, 15);
         }
@@ -70,11 +71,14 @@ namespace pixel_editor
                 uiElements.Add(button);
                 Inspector.SetRowAndColumn(button, 1, 4, 22, i++ + 1);
                 button.FontSize = 3;
-                button.Click += delegate{
-                    try{
+                button.Click += delegate
+                {
+                    try
+                    {
                         method.Invoke(component, null);
                     }
-                    catch (Exception ex){
+                    catch (Exception ex)
+                    {
                         Runtime.Log(ex.Message);
                         return;
                     }
@@ -89,7 +93,7 @@ namespace pixel_editor
 
             foreach (var field in fields)
             {
-                bool bothColumns = true; 
+                bool bothColumns = true;
                 string name = field.Name;
 
                 if (field.FieldType.BaseType == typeof(Component))
@@ -98,24 +102,24 @@ namespace pixel_editor
                 if (field.FieldType == typeof(bool))
                 {
                     object obj = field.GetValue(component);
-                    
+
                     if (obj is not bool val)
                         continue;
 
                     AddBoolCheckBox(viewer, ref i, field, val);
-                    bothColumns = false; 
+                    bothColumns = false;
                 }
 
                 foreach (var attr in field.GetCustomAttributes())
                     if (attr.GetType() == typeof(InputFieldAttribute))
-                        AddInputFieldTextBox(viewer, ref i , field, name);
+                        AddInputFieldTextBox(viewer, ref i, field, name);
 
 
 
                 if (field.FieldType == typeof(string[]))
                 {
                     object obj = field.GetValue(component);
-                    
+
                     if (obj is not string[] strings)
                         continue;
 
@@ -142,8 +146,8 @@ namespace pixel_editor
         private void AddInputFieldTextBox(Grid viewer, ref int i, FieldInfo field, string name)
         {
             string currentvalue = (string)field.GetValue(component);
-            
-            if(currentvalue is null)
+
+            if (currentvalue is null)
                 return;
 
             var textbox = Inspector.GetInputField(currentvalue);
@@ -155,7 +159,7 @@ namespace pixel_editor
             textbox.HorizontalAlignment = HorizontalAlignment.Stretch;
             textbox.LostFocus += (e, o) =>
             {
-                if(o.RoutedEvent != null)
+                if (o.RoutedEvent != null)
                     o.Handled = true;
 
                 if (e is not TextBox tb)
@@ -164,10 +168,10 @@ namespace pixel_editor
                 field.SetValue(component, tb.Text);
 
                 UpdateData();
-            }; 
+            };
             uiElements.Add(textbox);
             viewer.Children.Add(textbox);
-            Inspector.SetRowAndColumn(textbox, 6, 6, 18, (i));
+            Inspector.SetRowAndColumn(textbox, 6, 6, 18, i);
             i += 6;
         }
 
@@ -181,7 +185,7 @@ namespace pixel_editor
             checkBox.FontSize = 4;
             uiElements.Add(checkBox);
             viewer.Children.Add(checkBox);
-            Inspector.SetRowAndColumn(checkBox, 1, 1, 22, i++ +2);
+            Inspector.SetRowAndColumn(checkBox, 1, 1, 22, i++ + 2);
             RoutedEventHandler onCheckBoxChecked(FieldInfo field)
             {
                 return (e, o) =>
@@ -216,8 +220,8 @@ namespace pixel_editor
             txtBox.IsReadOnly = false;
             txtBox.Name = $"listBox{strIndex}";
             txtBox.KeyDown += (s, e) => TxtBox_KeyDown(s, e, field, component, strings);
-            txtBox.LostKeyboardFocus += Input_LostKeyboardFocus; 
-            txtBox.GotKeyboardFocus += Input_GotKeyboardFocus; 
+            txtBox.LostKeyboardFocus += Input_LostKeyboardFocus;
+            txtBox.GotKeyboardFocus += Input_GotKeyboardFocus;
             txtBox.FontSize = 4;
             label.FontSize = 4;
 
@@ -243,7 +247,7 @@ namespace pixel_editor
             {
                 Component? Component = (Component)field.GetValue(component);
                 if (Component is null)
-                    Console.Error("Cannot edit a null component.");
+                    pixel_editor.Console.Error("Cannot edit a null component.");
                 Refresh(Component);
             };
             i++;
@@ -280,7 +284,7 @@ namespace pixel_editor
                 if (info.Name == o)
                 {
                     CommandParser.TryParse(inputFields[i].Text, out List<object> results);
-                    foreach(var obj in results)
+                    foreach (var obj in results)
                         if (obj.GetType() == info.FieldType)
                         {
                             Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType} of value {obj}");
@@ -288,7 +292,7 @@ namespace pixel_editor
                         }
 
                     Refresh(component);
-                    return true; 
+                    return true;
                 }
 
             Refresh(component);
@@ -332,7 +336,7 @@ namespace pixel_editor
             inputFields?.Clear();
             editEvents?.Clear();
 
-            Disposing = false; 
+            Disposing = false;
         }
         #region WPF Events
 
@@ -340,12 +344,12 @@ namespace pixel_editor
         {
             if (sender is TextBox box)
             {
-                var index = box.Name.ToInt(); 
+                var index = box.Name.ToInt();
                 var txt = box.Text;
                 if (e.Key == Key.Return)
                 {
                     if (strings.Length > index)
-                        strings[index] = txt; 
+                        strings[index] = txt;
                     field.SetValue(component, strings);
                     Keyboard.ClearFocus();
                     UpdateData();
@@ -362,7 +366,7 @@ namespace pixel_editor
                 Keyboard.ClearFocus();
             }
         }
-        private void Input_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        private void Input_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box || data is null)
                 return;
@@ -377,16 +381,16 @@ namespace pixel_editor
             if (data is null
             || data.Fields is null
             || data.Fields.Count == 0)
-                return; 
+                return;
 
-                for (int i = 0; i < data.Values.Count; i++)
+            for (int i = 0; i < data.Values.Count; i++)
                 if (data.HasValueChanged(i, data.Values[i], out var newVal))
                 {
                     data.Values[i] = newVal;
                 }
         }
 
-        private void Input_GotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        private void Input_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
@@ -406,7 +410,7 @@ namespace pixel_editor
         public readonly IReadOnlyCollection<FieldInfo> Fields;
         public readonly IReadOnlyCollection<MethodInfo> Methods;
         public readonly List<object> Values;
-        public readonly WeakReference<Component> Component; 
+        public readonly WeakReference<Component> Component;
 
         public ComponentEditorData(Component component)
         {
@@ -422,12 +426,12 @@ namespace pixel_editor
                 values[i] = GetValueAtIndex(i);
             }
 
-            this.Values = values.ToList();
+            Values = values.ToList();
         }
         public IReadOnlyCollection<object> GetAllValues(out int count)
         {
             count = Values.Count;
-            return Values; 
+            return Values;
         }
         public object? GetValueAtIndex(int index)
         {
@@ -440,7 +444,7 @@ namespace pixel_editor
             if (data.Length != Values.Count)
             {
                 Runtime.Log("component update invalidated : input array was the wrong size.");
-                return; 
+                return;
             }
 
             for (int i = 0; i < Values.Count; ++i)
@@ -451,7 +455,7 @@ namespace pixel_editor
                 if (localVal == newVal)
                     continue;
 
-                Values[i] = newVal; 
+                Values[i] = newVal;
             }
         }
         public bool SetValueAtIndex(int index, object value)
@@ -461,11 +465,11 @@ namespace pixel_editor
                 Fields.ElementAt(index).SetValue(component, value);
                 return true;
             }
-            return false; 
+            return false;
         }
         public bool IsReferenceAlive(out Component component)
         {
-            if (!this.Component.TryGetTarget(out component))
+            if (!Component.TryGetTarget(out component))
                 return false;
             return true;
         }
@@ -474,7 +478,7 @@ namespace pixel_editor
             newValue = GetValueAtIndex(index);
             if (newValue == value)
                 return true;
-            return false; 
+            return false;
         }
 
     }
