@@ -358,8 +358,6 @@ namespace Pixel
         {
             var type = component.GetType();
 
-
-
             if (type == typeof(Component))
                 throw new InvalidOperationException("Generic type component was added.");
 
@@ -414,14 +412,14 @@ namespace Pixel
             }
             return true;
         }
-        public bool TryGetComponent<T>(out T component, int? index = 0) where T : Component
+        public bool TryGetComponent<T>(out T component, int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
             {
                 component = null;
                 return false;
             }
-            component = Components[typeof(T)][index ?? 0] as T;
+            component = Components[typeof(T)][index] as T;
 
             if (component is null)
                 return false;
