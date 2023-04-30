@@ -214,10 +214,8 @@ namespace Pixel
                 return null;
 
             IEnumerable<Sprite> sprites = (from Node node in nodes
-                                           where node.HasComponent<Sprite>()
-                                           let sprite = node.GetComponent<Sprite>()
-                                           where sprite is not null
-                                           select sprite);
+                                           where node.sprite is not null
+                                           select node.sprite);
             return sprites;
         }
         internal void RemoveNode(Node node)

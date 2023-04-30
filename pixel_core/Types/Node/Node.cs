@@ -93,7 +93,7 @@ namespace Pixel
 
         [JsonProperty] public List<Node> children = new();
         internal Dictionary<string, Vector2> child_offsets = new();
-
+        internal Sprite sprite;
 
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
         public Vector2 Position
@@ -317,6 +317,7 @@ namespace Pixel
         {
             rb = null;
             col = null;
+            sprite = null;
         }
         public void OnTrigger(Collision otherBody)
         {
@@ -357,8 +358,13 @@ namespace Pixel
         {
             var type = component.GetType();
 
+
+
             if (type == typeof(Component))
                 throw new InvalidOperationException("Generic type component was added.");
+
+            if (type == typeof(Sprite))
+                sprite = component as Sprite; 
 
             if (type == typeof(Rigidbody))
                 rb = component as Rigidbody;

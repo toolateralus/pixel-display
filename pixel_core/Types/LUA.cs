@@ -1,6 +1,7 @@
 ﻿using KeraLua;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Reflection;
 
 namespace Pixel
@@ -22,9 +23,8 @@ namespace Pixel
 
         public static LuaFunction env() => new((p) =>
         {
-            dispose();
-            env_vars = new();
-            envMode = true;
+            env_vars ??= new();
+            envMode = !envMode;
             return 0;
         });
         public static LuaFunction print() => new((p) =>
@@ -179,9 +179,38 @@ namespace Pixel
             return state.Handle; 
         }
 
-        public static void Environment(string line)
+        public static string Environment(string line)
         {
-            throw new NotImplementedException();
+            if (line == "*c();\r\n")
+            {
+                Interop.Log("", false, true);
+                return "";
+            }
+
+            if (line == "env();\r\n")
+            {
+                env();
+                return "";
+            }
+
+            if (line.Contains(' '))
+            {
+                string[] split = line.Split(' ');
+                
+                if (split[0] is not string s1 || s1 is  "" || split[1] is not string s2 || s2 is "")
+                    return "";
+
+
+                if (!env_vars.ContainsKey(s1))
+                    env_vars.Add(s1, s2);
+                else env_vars[s1] = s2;
+
+                Interop.Log($"{s1} : {s2} added to environment vars.");
+
+                return s2;
+            }
+
+            return "";
         }
     }
 }

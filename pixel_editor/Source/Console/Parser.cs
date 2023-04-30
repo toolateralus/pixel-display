@@ -54,7 +54,9 @@ namespace pixel_editor
         {
             if (LUA.envMode)
             {
-                LUA.Environment(line);
+                var arg = LUA.Environment(line);
+                TryParse(arg, out var objs);
+                // TODO: store the instantiated value somewhere it can get called from.
                 return;
             }
 
