@@ -34,7 +34,7 @@ namespace Pixel
 
             IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>();
             foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
-                if (uiComponent.IsActive)
+                if (uiComponent.Enabled)
                     uiComponent.Draw(this);
 
             if (latestFrame.Length != frame.Length)

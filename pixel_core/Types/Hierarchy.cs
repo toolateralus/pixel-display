@@ -18,7 +18,7 @@ namespace Pixel
             }
             return null;
         }
-        public int GetRootIndex(string name)
+        public int RootIndex(string name)
         {
             foreach (var i in this)
                 if (i.Name == name)

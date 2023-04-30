@@ -85,14 +85,14 @@ namespace Pixel
                 action.Invoke(args);
             }
         }
-        public void FixedUpdate(float delta)
+        public void FixedUpdate(ref float delta)
         {
             NodesBusy = true;
             lock (nodes)
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     Node node = nodes[i];
-                    node.FixedUpdate(delta);
+                    node.FixedUpdate(ref delta);
                 }
             NodesBusy = false;
         }
@@ -190,18 +190,51 @@ namespace Pixel
         }
         public IEnumerable<T> GetAllComponents<T>() where T : Component
         {
-            return from Node node in nodes
-                   from T component in node.GetComponents<T>()
-                   select component;
+            if (nodes is null)
+                return null;
+            List<T> components_found = new();
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                Node? root = nodes[i];
+                foreach (var group in root.Components)
+                    for (int i1 = 0; i1 < group.Value.Count; i1++)
+                    {
+                        Component? component = group.Value[i1];
+                        if (component is T val)
+                        components_found.Add(val);
+                    }
+
+                for (int i2 = 0; i2 < root.children.Count; i2++)
+                {
+                    Node? child = root.children[i2];
+                    if (child.Components.ContainsKey(typeof(T)))
+                    {
+                        foreach (var component in child.Components)
+                        {
+                            var comp = component.Value.Where(c => c.GetType() == typeof(T));
+                            if(comp is T val)
+                                components_found.Add(val);
+
+                        }
+                    }
+                }
+            }
+            return components_found;
         }
         public IEnumerable<Sprite> GetSprites()
         {
             if (nodes is null)
                 return null;
+            List<Sprite> sprites = new();
+            foreach (var root in nodes)
+            {
+                if (root.sprite != null)
+                    sprites.Add(root.sprite);
 
-            IEnumerable<Sprite> sprites = (from Node node in nodes
-                                           where node.sprite is not null
-                                           select node.sprite);
+                foreach (var child in root.children)
+                    if (child.sprite != null)
+                        sprites.Add(child.sprite);
+            }
             return sprites;
         }
         internal void RemoveNode(Node node)

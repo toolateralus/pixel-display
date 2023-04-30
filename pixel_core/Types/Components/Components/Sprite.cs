@@ -27,7 +27,7 @@ namespace Pixel
         /// <summary>
         /// this determines what source the color data will come from
         /// </summary>
-        [Field][JsonProperty] public ImageType Type = ImageType.Image;
+        [Field][JsonProperty] public ImageType Type = ImageType.SolidColor;
         /// <summary>
         /// this dictates how the renderer filters the sprite during drawing
         /// </summary>
@@ -86,7 +86,10 @@ namespace Pixel
         {
             var task = Interop.GetSelectedFileMetadataAsync();
             await task;
-            texture.SetImage(task.Result.Path);
+            string path = task.Result.Path;
+            
+            if(path != null)
+                texture.SetImage(path);
         }
         [Method]
         public void CycleSpriteType()

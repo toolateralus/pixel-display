@@ -9,7 +9,7 @@ namespace Pixel.Types.Components
     public abstract class Component
     {
         [JsonProperty] public Node node;
-        [JsonProperty] public bool IsActive = true;
+        [JsonProperty] public bool Enabled = true;
         [JsonProperty]
         public Vector2 Position
         {

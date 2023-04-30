@@ -113,7 +113,7 @@ namespace Pixel.Types.Physics
         }
         private static void Collide(Rigidbody A, Rigidbody B)
         {
-            if (A == null || B == null)
+            if ((A == null || B == null ) || (A.node is null || B.node is null))
                 return;
 
             Polygon polyA = A.node.col.Polygon;

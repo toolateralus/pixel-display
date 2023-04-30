@@ -41,7 +41,7 @@ namespace Pixel
 
         [Field]
         [JsonProperty]
-        public bool drawCollider = false;
+        public bool drawCollider = true;
 
         [Field]
         [JsonProperty]

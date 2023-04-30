@@ -2,7 +2,9 @@
 using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Types.Physics;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Pixel
@@ -38,15 +40,14 @@ namespace Pixel
             nodes.Add(light);
             nodes.Add(camera);
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 500; i++)
             {
                 Node rbNode = Rigidbody.Standard();
                 Sprite spr = rbNode.GetComponent<Sprite>();
+                //Library.Fetch<Texture>(out var output);
+                //if(output.Any())
+                //spr.texture = output.First();
 
-                Metadata meta = Library.FetchMeta("ball");
-                spr.texture.SetImage(meta);
-
-                rbNode.Position = new(i * 20, -20);
                 nodes.Add(rbNode);
             }
 
@@ -103,10 +104,12 @@ namespace Pixel
                     foreach (var c in comp.Value)
                         c.selected_by_editor = false;
         }
+
+        static float lastFrameTime = 0;
         public static void FixedUpdate(Stage stage)
         {
-            var delta = Runtime.Current.renderHost.info.FrameTime;
-            stage.FixedUpdate((float)delta);
+            lastFrameTime = (float)Runtime.Current.renderHost.info.FrameTime;
+            stage.FixedUpdate(ref lastFrameTime);
         }
         public static void Update(Stage m_stage)
         {

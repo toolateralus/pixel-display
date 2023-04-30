@@ -43,7 +43,7 @@ namespace Pixel
             node.Name = name;
 
             Rigidbody rb = node.AddComponent<Rigidbody>();
-            rb.IsActive = true;
+            rb.Enabled = true;
 
             Collider col = node.AddComponent<Collider>();
 
