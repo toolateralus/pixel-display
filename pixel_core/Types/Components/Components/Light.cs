@@ -9,10 +9,9 @@ namespace Pixel
 {
     public class Light : Component
     {
-        [Field] public float brightness = 250f;
-        [Field] public float radius = 25;
+        [Field] public float brightness = 1f;
+        [Field] public float radius = 32;
         [Field] public Color color = ExtensionMethods.Lerp(System.Drawing.Color.White, System.Drawing.Color.Yellow, 0.125f);
-
         public override void Dispose(){}
         public static Node Standard()
         {

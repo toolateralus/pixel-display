@@ -10,7 +10,7 @@ namespace Pixel
     public class EditorSettings : Asset
     {
         [JsonProperty]
-        public float DragCursorRadius = 0.2f;
+        public float DragCursorRadius = 0.05f;
         [JsonProperty]
         public Vector2 MouseSensitivity = new(1.0f, 1.0f);
         [JsonProperty]

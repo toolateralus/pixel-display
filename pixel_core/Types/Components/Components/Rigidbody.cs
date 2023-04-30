@@ -8,9 +8,6 @@ namespace Pixel
 {
     public class Rigidbody : Component
     {
-        public override void Dispose()
-        {
-        }
         [Field][JsonProperty] public float mass = 1f;
         [Field][JsonProperty] public float invMass;
         [Field][JsonProperty] public float restitution = 0.5f;
@@ -18,7 +15,7 @@ namespace Pixel
         [Field][JsonProperty] public bool usingGravity = true;
         [Field][JsonProperty] public Vector2 velocity = Vector2.Zero;
         [Field][JsonProperty] public Vector2 acceleration = Vector2.Zero;
-
+        public override void Dispose() { }
         public override void FixedUpdate(float deltaTime)
         {
             if (usingGravity)
@@ -65,7 +62,6 @@ namespace Pixel
             node.RemoveComponent(rb);
             return node;
         }
-
     }
 }
 

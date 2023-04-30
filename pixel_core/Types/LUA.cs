@@ -178,5 +178,10 @@ namespace Pixel
         {
             return state.Handle; 
         }
+
+        public static void Environment(string line)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

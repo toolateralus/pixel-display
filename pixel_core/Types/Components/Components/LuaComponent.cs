@@ -19,7 +19,7 @@ namespace Pixel
         string path = "no path selected.";
 
         internal bool lastExecutionResult;
-        internal string lastErr;
+        internal string lastErr = "";
         [Method]
         public async Task SetScriptFromFileViewer()
         {

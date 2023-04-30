@@ -52,6 +52,12 @@ namespace pixel_editor
         }
         public static void TryCallLine(string line)
         {
+            if (LUA.envMode)
+            {
+                LUA.Environment(line);
+                return;
+            }
+
             ParseArguments(line, out string[] args, out _);
             line = ParseLoopParams(line, out string loop_param);
             var commands = Console.Current.LoadedCommands;
