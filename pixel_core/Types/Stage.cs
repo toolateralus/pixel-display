@@ -25,12 +25,9 @@ namespace Pixel
         public TextureFiltering backgroundFiltering = TextureFiltering.Point;
         [JsonProperty]
         public Vector2 backgroundOffset = new(0, 0);
-
-
         [JsonProperty]
         public Hierarchy nodes = new(); 
-
-
+        public bool NodesBusy { get; private set; }
         private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
         private StageRenderInfo? stage_render_info = null;
         public StageRenderInfo StageRenderInfo
@@ -48,19 +45,7 @@ namespace Pixel
             }
             set { stage_render_info = value; }
         }
-        public JImage GetBackground()
-        {
-            if (background == null && backgroundMetadata != null)
-                return background = init_background();
-            return background ?? throw new NullReferenceException(nameof(background));
-        }
         public JImage background = new();
-        public bool NodesBusy { get; private set; }
-
-        /// <summary>
-        /// Checks whether all of the nodes in the stages have or havent been awoken, and if not, calls awake.
-        /// </summary>
-        /// <returns></returns>
         public bool Awake()
         {
             var awokenNodes = 0;
@@ -79,6 +64,9 @@ namespace Pixel
         public void Update()
         {
             NodesBusy = true;
+
+            Awake();
+
             lock (nodes)
                 for (int i = 0; i < nodes.Count; i++)
                 {
@@ -120,10 +108,11 @@ namespace Pixel
         {
             background = new(value);
         }
-        public override void Sync()
+        public JImage GetBackground()
         {
-            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
-            Metadata = new(defaultPath);
+            if (background == null && backgroundMetadata != null)
+                return background = init_background();
+            return background ?? throw new NullReferenceException(nameof(background));
         }
         private JImage init_background()
         {
@@ -243,6 +232,11 @@ namespace Pixel
 
         }
 
+        public override void Sync()
+        {
+            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
+            Metadata = new(defaultPath);
+        }
 
         #endregion Node Utils
         #region development defaults
