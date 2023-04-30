@@ -56,7 +56,7 @@ namespace Pixel
         }
         public T GetValue(bool shouldIncrement = true)
         {
-            if (frameIndex > frames.Count * frameTime - 1 && looping)
+            if (frameIndex > frames.Count * frameTime - 1)
                 frameIndex = startIndex;
 
             if (frameIndex < 0)

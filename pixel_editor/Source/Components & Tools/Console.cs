@@ -47,7 +47,7 @@ namespace pixel_editor
                         cmd.args = null;
 
                         string name = ParseMethodName(item);
-
+                        cmd.syntax = $"{name}";
                         cmd.phrase = name;
                         cmd.error = null;
                         Current.LoadedCommands.Add(cmd);
@@ -77,6 +77,7 @@ namespace pixel_editor
                     }
                 }
             name = name.Remove(name.Length - 1);
+            name += ';';
             return name;
         }
 
