@@ -11,25 +11,63 @@ namespace Pixel.Assets
     {
         static Dictionary<Metadata, object> Current = new();
         public static bool Busy { get; private set; }
-        internal static List<Metadata> LibraryMetadata() => Current.Keys.ToList();
-        public static bool Register(Metadata metadata, Asset asset)
+        public static bool Register(ref Metadata metadata, Asset asset)
         {
             if (Busy)
                 return false;
+            
+            CheckForDuplicates(ref metadata);
 
             if (Current.ContainsKey(metadata))
             {
                 Current[metadata] = asset;
                 return true;
             }
+            Current.Add(metadata, asset);
+            return true;
+        }
+        public static bool Register(Metadata metadata, Asset asset)
+        {
+            if (Busy)
+                return false;
 
+            CheckForDuplicates(ref metadata);
+
+            if (Current.ContainsKey(metadata))
+            {
+                Current[metadata] = asset;
+                return true;
+            }
+            Current.Add(metadata, asset);
+            return true;
+        }
+
+        public static void CheckForDuplicates(ref Metadata meta)
+        {
+            foreach (var item in Current)
+                if (item.Key.Path == meta.Path)
+                    meta = item.Key;
+        }
+        public static bool Register(ref Metadata metadata, object asset)
+        {
+            if (Busy)
+                return false;
+
+            CheckForDuplicates(ref metadata);
+
+            if (Current.ContainsKey(metadata))
+            {
+                Current[metadata] = asset;
+                return true;
+            }
             Current.Add(metadata, asset);
             return true;
         }
         public static bool Register(Metadata metadata, object value)
         {
-            if (Busy)
+            if (Busy) 
                 return false;
+            CheckForDuplicates(ref metadata);
 
             if (Current.ContainsKey(metadata))
             {
@@ -134,6 +172,8 @@ namespace Pixel.Assets
                 {
                     if (assetPair.Value is null || assetPair.Value is not Asset a || a.Name == "NULL")
                         continue;
+
+                    a.Metadata = assetPair.Key;
 
                     a.Sync();
                     a.Save();

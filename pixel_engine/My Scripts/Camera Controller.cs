@@ -5,6 +5,7 @@ using System.Windows.Input;
 using static Pixel.Input;
 using static Pixel.ShapeDrawer;
 using static Pixel.Runtime;
+using System;
 
 namespace Pixel
 {
@@ -33,7 +34,13 @@ namespace Pixel
             RegisterAction(this, down, Key.S);
             RegisterAction(this, left, Key.A);
             RegisterAction(this, right, Key.D);
+            RegisterAction(this, shoot, Key.G);
         }
+
+        private void shoot()
+        {
+        }
+
         public override void FixedUpdate(float delta)
         {
             Position += vel;

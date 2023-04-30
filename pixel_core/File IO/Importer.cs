@@ -16,8 +16,10 @@ namespace Pixel.Assets
         public static void Import(bool showMessage = false)
         {
             Interop.OnImport?.Invoke(); 
+            
             var e = new EditorEvent(EditorEventFlags.FILE_VIEWER_UPDATE);
             Interop.RaiseInspectorEvent(e);
+
             Library.Dispose();
             ImportRecursively(Constants.WorkingRoot, 0);
         }

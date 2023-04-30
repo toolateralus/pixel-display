@@ -45,7 +45,6 @@ namespace Pixel
         {
             jImage = image;
         }
-
         public Texture(string filePath, string name = "Default Texture Asset") : base(name, true)
         {
             SetImage(filePath);

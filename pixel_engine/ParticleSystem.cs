@@ -5,35 +5,33 @@ using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
 
 namespace Pixel
 {
-    public class Particle : Component
+    public class Particle
     {
         public float birth = 0;
         internal bool dead;
         public Color color;
 
+        public Vector2 Position { get; set; }
+        public Vector2 Velocity { get; set; }
+        public Vector2 Scale { get; set; }
+
         public Action<Particle> lifetime;
         public Action<Particle> onDeath; 
 
-        public Particle(Color initColor, Vector2 initPos, Vector2 initSize, Action<Particle> lifetime, Action<Particle> onDeath)
-        {
-            this.color = initColor;
-            this.Position = initPos;
-            this.Scale = initSize;
-            this.lifetime = lifetime;
-            this.onDeath = onDeath;
-        }
+        public void Next() => lifetime?.Invoke(this);
 
-        public Particle()
+        internal void Set(Color random, Vector2 position, Vector2 scale, Action<Particle> cycle, Action<Particle> onParticleDied)
         {
-        }
-
-        public void Next() => lifetime.Invoke(this);
-
-        public override void Dispose()
-        {
+            this.color = random;
+            this.Position = position;
+            this.Scale = scale;
+            this.lifetime = cycle;
+            this.onDeath = onParticleDied;
         }
     }
     public class ParticleSystem : Component
@@ -44,11 +42,9 @@ namespace Pixel
         [Field] private int maxParticles = 250;
         [Field] internal float minVelLength = 0.001f;
         [Field] internal bool particlesDieFromLowVelocity = false;
+
         public override void Dispose()
         {
-            foreach (var part in particles)
-                part.node.Destroy();
-
             particles.Clear();
         }
         private void ReviveParticle(bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Color? initColor = null)
@@ -59,6 +55,20 @@ namespace Pixel
 
             ResetParticle(p, reset, lifetime, death, initVel, initPos, initSize, initColor);
         }
+        public override void FixedUpdate(float delta)
+        {
+            for (int i = 0; i < particles.Count; i++)
+            {
+                Particle? part = particles[i];
+                if (part is null || part.dead)
+                    continue;
+               // TODO: somehow fix this
+            }
+        }
+        public override void OnDrawShapes()
+        {
+            // ShapeDrawer.DrawCircleFilled(part.Position, 0.0015f);
+        }
         private static void ResetParticle(Particle p, bool reset, Action<Particle> lifetime = null, Action<Particle> death = null, Vector2? initVel = null, Vector2? initPos = null, Vector2? initSize = null, Color? initColor = null)
         {
             if (reset)
@@ -68,7 +78,7 @@ namespace Pixel
                 if (death != null)
                     p.onDeath = death;
                 if (initVel.HasValue)
-                    p.GetComponent<Rigidbody>().velocity = initVel.Value;
+                    p.Velocity = initVel.Value;
                 if (initPos.HasValue)
                     p.Position = initPos.Value;
                 if (initSize.HasValue)
@@ -81,10 +91,9 @@ namespace Pixel
         }
         public virtual void InstantiateParticle(Vector2 vel)
         {
-            Node node = new("temp_particle");
-
-            var particle = node.AddComponent<Particle>();
-            particle = new(Color.Random, Position, Vector2.One, Cycle, OnParticleDied);
+            Particle particle = new();
+            
+            particle.Set(Color.Random, Position, Vector2.One, Cycle, OnParticleDied);
 
             particles.Add(particle);
         }
@@ -92,30 +101,18 @@ namespace Pixel
         {
             if (particles.Count >= maxParticles)
                 ReviveParticle(false);
-            InstantiateParticle(vel);
+             else InstantiateParticle(vel);
+
         }
         public virtual void Cycle(Particle p)
         {
-            Rigidbody rb = p.GetComponent<Rigidbody>();
-            if (rb.velocity.SqrMagnitude() < 0.1f)
+            if (p.Velocity.SqrMagnitude() < 0.1f)
             {
                 OnParticleDied(p);
                 return;
             }
-            var col = JRandom.Color();
-            _ = color();
-            async Task color()
-            {
-                float j = 0;
-                while (j <= 1)
-                {
-                    p.color = Color.Blend(p.color, col, j);
-                    j += 0.01f;
-                    await Task.Delay(1);
-                }
-                return;
-            }
-
+            p.Position += p.Velocity;
+            p.Velocity *= 0.99f;
         }
         public virtual void OnParticleDied(Particle p)
         {
@@ -124,7 +121,6 @@ namespace Pixel
 
             p.onDeath?.Invoke(p); 
             p.dead = true;
-            p.node.Destroy();
         }
     }
 }
