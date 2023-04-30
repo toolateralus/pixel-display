@@ -12,7 +12,7 @@ namespace Pixel
         public Node? lastSelected;
         public static Stage Standard()
         {
-            var nodes = new List<Node>();
+            var nodes = new Hierarchy();
 
             Node camera = new("camera");
             camera.AddComponent<Camera>();

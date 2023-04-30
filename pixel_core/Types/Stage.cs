@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Windows;
 
 namespace Pixel
 {
@@ -24,8 +25,11 @@ namespace Pixel
         public TextureFiltering backgroundFiltering = TextureFiltering.Point;
         [JsonProperty]
         public Vector2 backgroundOffset = new(0, 0);
+
+
         [JsonProperty]
-        public List<Node> nodes = new();
+        public Hierarchy nodes = new(); 
+
 
         private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
         private StageRenderInfo? stage_render_info = null;
@@ -51,7 +55,6 @@ namespace Pixel
             return background ?? throw new NullReferenceException(nameof(background));
         }
         public JImage background = new();
-
         public bool NodesBusy { get; private set; }
 
         /// <summary>
@@ -73,7 +76,6 @@ namespace Pixel
             return true;
 
         }
-
         public void Update()
         {
             NodesBusy = true;
@@ -106,7 +108,6 @@ namespace Pixel
                 }
             NodesBusy = false;
         }
-
         public void SetBackground(JImage value)
         {
             background = value;
@@ -124,7 +125,6 @@ namespace Pixel
             string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
             Metadata = new(defaultPath);
         }
-
         private JImage init_background()
         {
             if (File.Exists(backgroundMetadata.Path))
@@ -147,7 +147,6 @@ namespace Pixel
             }
             return outNodes;
         }
-
         public void AddNode(Node node)
         {
             void add_node(object[] o)
@@ -159,7 +158,10 @@ namespace Pixel
                     return;
 
                 newNode.ParentStage = this;
-                nodes.Add(newNode);
+
+
+                if(node.parent is null)
+                    nodes.Add(newNode);
             }
             object[] args = { node };
 
@@ -169,12 +171,7 @@ namespace Pixel
         }
         public Node? FindNode(string name)
         {
-            IEnumerable<Node> result = (
-                from node
-                in nodes
-                where node.Name.Equals(name)
-                select node);
-            return result.Any() ? result.First() : null;
+            return nodes.Find(name);
         }
         public Node FindNodeByTag(string tag)
         {
@@ -247,11 +244,8 @@ namespace Pixel
         }
 
 
-
-
         #endregion Node Utils
         #region development defaults
-
         public static Metadata DefaultBackgroundMetadata
         {
             get
@@ -261,8 +255,6 @@ namespace Pixel
                 return meta;
             }
         }
-
-
         public void AddNodes(List<Node> nodes)
         {
             foreach (var node in nodes)
@@ -278,7 +270,7 @@ namespace Pixel
         #region constructors
         
         [JsonConstructor]
-        internal Stage(List<Node> nodes, Metadata metadata, Metadata backgroundMetadata, string name = "Stage Asset") : base(name, true)
+        internal Stage(Hierarchy nodes, Metadata metadata, Metadata backgroundMetadata, string name = "Stage Asset") : base(name, true)
         {
             Name = name;
             this.nodes = nodes;
@@ -320,7 +312,7 @@ namespace Pixel
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        public Stage(string name, Metadata backgroundMetadata, List<Node> nodes, string? existingUUID = null) : base(name, true)
+        public Stage(string name, Metadata backgroundMetadata, Hierarchy nodes, string? existingUUID = null) : base(name, true)
         {
             this.Name = name;
             UUID = existingUUID ?? Pixel.Statics.UUID.NewUUID();

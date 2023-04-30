@@ -224,6 +224,12 @@ namespace Pixel
         public void Awake()
         {
             ComponentsBusy = true;
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+                child.Awake();
+            }
+
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
@@ -246,7 +252,7 @@ namespace Pixel
                 
                 if (child_offsets.Count < i || !(child_offsets.ElementAt(i) is var kvp && kvp.Key != UUID))
                     continue;
-
+                child.FixedUpdate(delta);
                 child.Position = Position + kvp.Value;
             }
 
@@ -267,7 +273,15 @@ namespace Pixel
             if (!awake)
                 return;
 
+
+
             ComponentsBusy = true;
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+                child.Update();
+            }
 
             for (int i = 0; i < Components.Count; i++)
             {
@@ -288,8 +302,11 @@ namespace Pixel
         {
             ComponentsBusy = true;
 
-            foreach (var kvp in children)
-                kvp.parent = null;
+            foreach (var node in children)
+            {
+                node.parent = null;
+                node.Destroy();
+            }
 
             if (parent?.children != null)
                 for (int i = 0; i < parent.children.Count; i++)
@@ -297,6 +314,7 @@ namespace Pixel
                     Node? kvp = parent.children[i];
                     if (kvp == this)
                         parent.children.Remove(this);
+
                 }
 
             ParentStage?.nodes.Remove(this);
@@ -318,12 +336,23 @@ namespace Pixel
             rb = null;
             col = null;
             sprite = null;
+
+            foreach (var component in Components)
+                foreach (var c in component.Value)
+                    c.Dispose();
         }
         public void OnTrigger(Collision otherBody)
         {
             if (!awake)
                 return;
             ComponentsBusy = true;
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+                child.OnTrigger(otherBody);
+            }
+
 
             for (int i = 0; i < Components.Count; i++)
             {
@@ -342,7 +371,16 @@ namespace Pixel
             if (!awake)
                 return;
 
+
+
             ComponentsBusy = true;
+
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+                child.OnCollision(otherBody);
+            }
             for (int i = 0; i < Components.Count; i++)
             {
                 var pair = Components.ElementAt(i);
@@ -476,6 +514,13 @@ namespace Pixel
         {
             var compTypes = Components.Values;
             var typesCount = compTypes.Count;
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+                child.OnDrawShapes();
+            }
+
             for (int iType = 0; iType < typesCount; iType++)
             {
                 var compList = compTypes.ElementAt(iType);
