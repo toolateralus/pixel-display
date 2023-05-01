@@ -15,38 +15,14 @@ namespace Pixel
         public static Stage Standard()
         {
             var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, new());
-
-            Node camera = new("camera");
-            camera.AddComponent<Camera>();
-            camera.Position = new(0, 0);
-            float fov = 3; 
-            camera.Scale = new Vector2(16, 9) * fov;
-
             Node floor = Floor.Standard();
+
+            Node node = new("camera");
+            var cam = node.AddComponent<CameraController>();
+           
             stage.AddNode(floor);
-
-            Node textTest = new("text");
-            var img = textTest.AddComponent<Text>();
-
-            img.viewportSize = new(1, 1);
-            textTest.Scale = new(25, 25);
-            img.viewportPosition = Vector2.Zero;
-            textTest.Position = Vector2.Zero;
-
-            Node light = Light.Standard();
-            light.AddComponent<SineAnimator>();
-
-            stage.AddNode(textTest);
-            stage.AddNode(light);
-            stage.AddNode(camera);
-
-            for (int i = 0; i < 500; i++)
-            {
-                Node rbNode = Rigidbody.Standard();
-                Sprite spr = rbNode.GetComponent<Sprite>();
-                stage.AddNode(rbNode);
-            }
-
+            stage.AddNode(node);
+           
             return stage;
         }
         /// <summary>
@@ -74,9 +50,9 @@ namespace Pixel
 
                 result = node;
 
-                SelectNode(node);
-
                 DeselectNode();
+
+                SelectNode(node);
 
                 lastSelected = node;
 
@@ -91,7 +67,6 @@ namespace Pixel
                 foreach (var c in comp.Value)
                     c.selected_by_editor = true;
         }
-
         public void DeselectNode()
         {
             if (lastSelected != null)
@@ -99,9 +74,6 @@ namespace Pixel
                     foreach (var c in comp.Value)
                         c.selected_by_editor = false;
         }
-
-        static float lastFrameTime = 0;
-    
         public static void Update(Stage m_stage)
         {
             m_stage.UpdateMethod();

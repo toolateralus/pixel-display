@@ -3,10 +3,12 @@ using Pixel.Types.Components;
 using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.DirectoryServices;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Component = Pixel.Types.Components.Component;
 
 namespace Pixel
 {
@@ -282,20 +284,15 @@ namespace Pixel
                 if (Interop.Stage != null)
                     Interop.Stage.FixedUpdate += update_transform_hierarchy_internal;
 
-                Parallel.ForEach(Components, (comp) => {
+                Parallel.ForEach(Components, (comp) => 
+                {
                     foreach (Component _component in comp.Value)
                         SubscribeComponent(_component);
                 });
-
-                foreach (var node in children)
-                {
-                    Parallel.ForEach(node.Components, (comp) => {
-                        foreach (Component _component in comp.Value)
-                            SubscribeComponent(_component);
-                    });
-                    Interop.Stage.FixedUpdate += node.update_transform_hierarchy_internal;
-                }
-            } 
+             
+                foreach (var node in children) 
+                    node.SubscribeToEngine(v);
+            }
             else
             {
                 if (Interop.Stage != null)
@@ -307,14 +304,7 @@ namespace Pixel
                 });
 
                 foreach (var node in children)
-                {
-                    Parallel.ForEach(node.Components, (comp) => {
-                        foreach (Component _component in comp.Value)
-                            UnsubscribeComponent(_component);
-
-                    });
-                    Interop.Stage.FixedUpdate -= node.update_transform_hierarchy_internal;
-                }
+                    node.SubscribeToEngine(v);
             }
         }
 
@@ -361,12 +351,22 @@ namespace Pixel
 
         public Component AddComponent(Type type)
         {
+            if (type.IsAbstract)
+                throw new AccessViolationException("Can't create an instance of an abstract type");
+
+
             Component? v = (Component)Activator.CreateInstance(type);
             v.node = this;
+            
             if(Components.ContainsKey(type))
                 Components[type].Add(v);
             else Components.Add(type, new() { v });
+
+            if (Interop.IsRunning && !v.awake)
+                v.init_component_internal();
+
             SubscribeComponent(v);
+
             return v;
         }
         public T AddComponent<T>(T component) where T : Component

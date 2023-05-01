@@ -66,6 +66,33 @@ namespace Pixel.Types.Components
         public Component Clone() => (Component)MemberwiseClone();
         internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
         // end comment
+       
+        
+        internal protected void fixed_update_internal(float frameTime)
+        {
+            FixedUpdate(frameTime);
+        }
+        internal protected void update_internal() => Update();
+        internal protected void on_draw_shapes_internal() => OnDrawShapes();
+        internal protected void on_trigger_internal(Collision collision) => OnTrigger(collision);
+        internal protected void on_collision_internal(Collision collision) => OnCollision(collision);
+        internal protected void on_destroy_internal()
+        {
+            Dispose();
+            OnDestroy();
+            node.RemoveComponent(this);
+        }
+        internal protected void init_component_internal()
+        {
+            if (awake)
+                return;
+
+            awake = true;
+            Name = $"{GetType().Name}";
+            Awake();
+        }
+
+        #region User Overrides
 
         /// <summary>
         /// Will be called before <see cref="Update"/>
@@ -75,21 +102,6 @@ namespace Pixel.Types.Components
         /// Will be called after <see cref="Awake"/> and each subsequent render frame while running.
         /// </summary>
         public virtual void Update() { }
-
-        /// <summary>
-        /// this sort of wrapper is neccesary for the way the events have been re-implemented.
-        /// </summary>
-        /// <param name="frameTime"></param>
-        internal protected void fixed_update_internal(float frameTime)
-        {
-            FixedUpdate(frameTime);
-        }
-        /// <summary>
-        /// this sort of wrapper is neccesary for the way the events have been re-implemented, the inherited method won't get called only the base.
-        /// </summary>
-        /// <param name="frameTime"></param>
-        internal protected void update_internal() => Update();
-
         /// <summary>
         /// Will be called after <see cref="Awake"/> and each subsequent physics frame while running.
         /// </summary>
@@ -99,13 +111,10 @@ namespace Pixel.Types.Components
         /// </summary>
         /// 
         public virtual void OnTrigger(Collision collision) { }
-        internal protected void on_trigger_internal(Collision collision) => OnTrigger(collision);
-        internal protected void on_collision_internal(Collision collision) => OnCollision(collision);
         /// <summary>
         /// Will be called in the event that this Component's parent <see cref="Node"/>'s components participated in a collision.
         /// </summary>
         public virtual void OnCollision(Collision collision) { }
-
         /// <summary>
         /// Will be called in the event that a field is edited by reflection and the Editor's Component Editor
         /// </summary>
@@ -115,17 +124,10 @@ namespace Pixel.Types.Components
         /// Will be called each frame by the renderer at the time that the shape drawer is collecting a cycle's worth of debug data.
         /// </summary>
         /// 
-        internal protected void on_draw_shapes_internal() => OnDrawShapes();
         public virtual void OnDrawShapes() { }
         /// <summary>
         /// is called before Destroy to perform Dispose.
         /// </summary>
-        internal protected void on_destroy_internal()
-        {
-            Dispose();
-            OnDestroy();
-            node.RemoveComponent(this);
-        }
         /// <summary>
         /// Destroy's this component.
         /// </summary>
@@ -134,17 +136,9 @@ namespace Pixel.Types.Components
         /// You must release all references to any components, nodes, or other engine objects as of now, otherwise unexpected behavior is iminent
         /// </summary>
         public abstract void Dispose();
-        /// <summary>
-        /// Transforms a vector to this node's Transform.
-        /// </summary>
-        /// <param name="local"></param>
-        /// <returns></returns>
+
+        #endregion
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
-        /// <summary>
-        /// Transforms a vector to this nodes Transform
-        /// </summary>
-        /// <param name="global"></param>
-        /// <returns></returns>
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
         public bool TryGetComponent<T>([NotNullWhen(true)] out T result, int index = 0) where T : Component
         {
@@ -161,15 +155,6 @@ namespace Pixel.Types.Components
         /// <summary>
         /// initializes UUID and other readonly info, should NEVER be called by the user.
         /// </summary>
-        internal protected void init_component_internal()
-        {
-            if (awake)
-                return;
-
-            awake = true;
-            Name = $"{GetType().Name}";
-            Awake();
-        }
         /// <summary>
         /// A wrapper for <see cref="Node.RemoveComponent"/>
         /// </summary>

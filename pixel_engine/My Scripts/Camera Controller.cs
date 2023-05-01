@@ -14,6 +14,8 @@ namespace Pixel
         Node camera;
         ParticleSystem ps;
         Vector2 vel = Vector2.Zero;
+        [Field] float speed = 0.15f;
+
         public override void Dispose()
         {
             camera = null;
@@ -21,12 +23,10 @@ namespace Pixel
         }
         public override void Awake()
         {
-            Camera.First?.node?.Destroy();
-            camera = new("camera");
-            camera.AddComponent<Camera>();
+            camera = new("camera2");
+            Camera.First = camera.AddComponent<Camera>();
             camera.Scale = new(16, 9);
             camera.Position = Position + Vector2.One;
-            ps = node.AddComponent<ParticleSystem>();
             node.Child(camera);
 
 
@@ -34,36 +34,41 @@ namespace Pixel
             RegisterAction(this, down, Key.S);
             RegisterAction(this, left, Key.A);
             RegisterAction(this, right, Key.D);
-            RegisterAction(this, shoot, Key.G);
-        }
-
-        private void shoot()
-        {
         }
 
         public override void FixedUpdate(float delta)
         {
-            Position += vel;
+            const int divisorA = 10;
+            const int divisorB = divisorA * 10;
 
-            if (vel != Vector2.Zero)
-                vel *= 0.9f;
+            if (camera is null)
+                return;
+
+            float velocity = Math.Abs(((speed + (vel.Length() / divisorA)) - Math.Max(0.5f, camera.Scale.Length() / divisorB)));
+            
+            if (Get(Key.LeftShift))
+                velocity *= 0.5f;
+
+            Position += vel * velocity;
+
+            vel *= 0.9f;
 
         }
         private void down()
         {
-            vel += new Vector2(0, 1) / 4;
+            vel += new Vector2(0, speed);
         }
         private void left()
         {
-            vel += new Vector2(-1, 0) / 4;
+            vel += new Vector2(-speed, 0);
         }
         private void right()
         {
-            vel += new Vector2(1, 0) / 4;
+            vel += new Vector2(speed, 0);
         }
         private void up()
         {
-            vel += new Vector2(0, -1) / 4;
+            vel += new Vector2(0, -speed);
         }
     }
 }
