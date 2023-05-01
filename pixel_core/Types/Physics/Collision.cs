@@ -43,7 +43,9 @@ namespace Pixel.Types.Physics
 
             quadTree.Clear();
 
-            for (int i = 0; i < stage.nodes.Count; i++)
+            stage.FixedUpdateMethod(0.1f);
+
+            Parallel.For(0, stage.nodes.Count, (i) =>
             {
                 Node? node = stage.nodes[i];
 
@@ -51,7 +53,7 @@ namespace Pixel.Types.Physics
 
                 if (hasCollider)
                     quadTree.Insert(node);
-            }
+            });
 
             BoundingBox2D range = new(area / -2, area / 2);
 

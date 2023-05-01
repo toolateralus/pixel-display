@@ -219,19 +219,13 @@ namespace Pixel
                 if (IsDiposing)
                     return;
 
-
                 if (IsRunning)
                 {
                     if (Current.stage is null)
                         continue;
-
-                    StagingHost.FixedUpdate(Current.stage);
-
+                    
                     Physics.Step();
-
-                    if (Application.Current is null)
-                        return;
-
+                    
                     Thread.Sleep(ProjectSettings.PhysicsTimeStep);
                 }
             }

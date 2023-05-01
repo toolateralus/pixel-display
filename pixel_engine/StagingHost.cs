@@ -101,11 +101,7 @@ namespace Pixel
         }
 
         static float lastFrameTime = 0;
-        public static void FixedUpdate(Stage stage)
-        {
-            lastFrameTime = (float)Runtime.Current.renderHost.info.FrameTime;
-            stage.FixedUpdateMethod(ref lastFrameTime);
-        }
+    
         public static void Update(Stage m_stage)
         {
             m_stage.UpdateMethod();

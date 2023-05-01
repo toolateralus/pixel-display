@@ -73,6 +73,10 @@ namespace Pixel
         {
             FixedUpdate?.Invoke(delta);
         }
+        public void FixedUpdateMethod(float delta)
+        {
+            FixedUpdate?.Invoke(delta);
+        }
         #endregion
 
 
