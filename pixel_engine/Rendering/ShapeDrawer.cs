@@ -19,8 +19,9 @@ namespace Pixel
             Normals.Clear();
 
             var nodesCount = stage.nodes.Count;
-            for (int i = 0; i < nodesCount; i++)
-                stage.nodes[i]?.OnDrawShapes();
+            
+            stage.OnDrawShapes?.Invoke();
+
             DrawShapeActions?.Invoke();
         }
 

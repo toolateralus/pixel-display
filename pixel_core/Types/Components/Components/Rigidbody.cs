@@ -39,7 +39,7 @@ namespace Pixel
         }
         public static Node Standard(string name)
         {
-            Node node = Node.New;
+            Node node = new("Standard Node");
             node.Name = name;
 
             Rigidbody rb = node.AddComponent<Rigidbody>();

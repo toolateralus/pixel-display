@@ -27,13 +27,13 @@ namespace Pixel
             //utils
             this.Transform = Transform;
             this.Enabled = Enabled;
+
             // strings
             Name = name;
             _uuid = nodeUUID;
             this.tag = tag;
 
             // nodes
-            this.ParentStage = parentStage;
             this.parent = parentNode;
             this.children = children;
 
@@ -59,44 +59,35 @@ namespace Pixel
             this.Scale = Scale;
         }
         #endregion
+
+        // Events
+        public Action<Collision> OnCollided;
+        public Action<Collision> OnTriggered;
+        public Action OnDestroyed;
+        
         private bool _enabled = true;
         private string _uuid = "";
         public bool awake;
-        public bool ComponentsBusy { get; private set; }
-        public Rigidbody? rb;
-        public Collider col;
 
-        public Action<Collision> OnCollided;
-        public Action<Collision> OnTriggered;
-
-        public Action OnDestroyed;
-        public Queue<Action> ComponentActionQueue { get; private set; } = new();
-        [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
-        [Field]
-        [JsonProperty] public Stage parentStage;
-        [JsonProperty]
-        public Stage ParentStage
-        {
-            get
-            {
-                if (parentStage is null)
-                    parentStage = Interop.Stage
-                        ;
-                return parentStage ?? throw new NullStageException();
-            }
-            set => parentStage = value;
-        }
+        // ID
         [JsonProperty] public bool Enabled { get { return _enabled; } set => _enabled = value; }
         [JsonProperty] public string UUID { get { return _uuid; } set { _uuid = value; } }
         [JsonProperty] public string Name { get; set; }
         [JsonProperty] public string tag = "Untagged";
-        [JsonProperty] public Node? parent;
 
+        // Hierarchy 
+        [JsonProperty] public Node? parent;
         [JsonProperty] public List<Node> children = new();
         internal Dictionary<string, Vector2> child_offsets = new();
-        internal Sprite sprite;
 
+        // Components
+        public Rigidbody? rb;
+        public Collider col;
+        internal Sprite sprite;
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
+
+        // Transform
+        [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
         public Vector2 Position
         {
             get => Transform.Translation;
@@ -133,7 +124,11 @@ namespace Pixel
                 Transform.M22 = value.Y;
             }
         }
-        public void SetActive(bool value) => _enabled = value;
+
+        public void SetActive(bool value) => Enabled = value;
+
+
+        #region Hierarchy Functions
         public void Child(Node child)
         {
             if (ContainsCycle(child))
@@ -156,6 +151,18 @@ namespace Pixel
             else child_offsets.Add(child.UUID, offset);
 
             child.parent = this;
+        }
+        public bool TryRemoveChild(Node child)
+        {
+            foreach (var kvp in children)
+                if (kvp == child)
+                {
+                    children.Remove(kvp);
+                    child.parent = null;
+                    return true;
+                }
+            return false;
+
         }
         public bool ContainsCycle(Node newNode)
         {
@@ -203,29 +210,55 @@ namespace Pixel
 
             return false;
         }
-        public bool TryRemoveChild(Node child)
+        #endregion
+        #region Events/Messages
+        internal void SubscribeToEngine(bool v, Stage stage)
         {
-            ComponentsBusy = true;
+            Parallel.ForEach(Components, (comp) => {
+                foreach (Component _component in comp.Value)
+                    GetEvents(v, stage, _component);
+            });
 
-            foreach (var kvp in children)
-                if (kvp == child)
-                {
-                    children.Remove(kvp);
-                    child.parent = null;
-                    return true;
-                }
-            ComponentsBusy = false;
-            return false;
+            foreach (var node in children)
+            {
+                Parallel.ForEach(node.Components, (comp) => {
+                    foreach (Component _component in comp.Value)
+                        GetEvents(v, stage, _component);
+                });
+            }
+
 
         }
 
-        #region Events/Messages
+        private void GetEvents(bool v, Stage stage, Component _component)
+        {
+            if (v)
+            {
+                OnDestroyed += _component.on_destroy_internal;
+                stage.OnDrawShapes += _component.OnDrawShapes;
+                OnCollided += _component.OnCollision;
+                OnTriggered += _component.OnTrigger;
 
-        
+                stage.Awake += _component.init_component_internal;
+                stage.Update += _component.Update;
+                stage.FixedUpdate += _component.FixedUpdate;
+            }
+            else
+            {
+                OnDestroyed -= _component.on_destroy_internal;
+                stage.OnDrawShapes -= _component.OnDrawShapes;
+
+                OnCollided -= _component.OnCollision;
+                OnTriggered -= _component.OnTrigger;
+
+                stage.Awake -= _component.init_component_internal;
+                stage.Update -= _component.Update;
+                stage.FixedUpdate -= _component.FixedUpdate;
+            }
+        }
+
         public void Destroy()
         {
-            ComponentsBusy = true;
-
             foreach (var node in children)
             {
                 node.parent = null;
@@ -241,7 +274,7 @@ namespace Pixel
 
                 }
 
-            ParentStage?.nodes.Remove(this);
+            Interop.Stage?.nodes.Remove(this);
 
             foreach (var component in Components)
                 foreach (var comp in component.Value)
@@ -251,9 +284,6 @@ namespace Pixel
 
             Dispose();
             OnDestroyed?.Invoke();
-            ComponentsBusy = false;
-
-
         }
         public virtual void Dispose()
         {
@@ -264,29 +294,9 @@ namespace Pixel
                 foreach (var c in component.Value)
                     c.Dispose();
         }
-        public void OnDrawShapes()
-        {
-            var compTypes = Components.Values;
-            var typesCount = compTypes.Count;
-
-            for (int i = 0; i < children.Count; i++)
-            {
-                Node? child = children[i];
-                child.OnDrawShapes();
-            }
-
-            for (int iType = 0; iType < typesCount; iType++)
-            {
-                var compList = compTypes.ElementAt(iType);
-                var compCount = compList.Count;
-                for (int iComp = 0; iComp < compCount; iComp++)
-                {
-                    compList[iComp].OnDrawShapes();
-                }
-            }
-        }
+       
         #endregion
-
+        #region Component Functions
         public T AddComponent<T>(T component) where T : Component
         {
             var type = component.GetType();
@@ -303,29 +313,16 @@ namespace Pixel
             if (type == typeof(Collider))
                 col = component as Collider;
 
-            void addComponent<T>() where T : Component
-            {
-                if (!Components.ContainsKey(type))
-                    Components.Add(type, new());
+            if (!Components.ContainsKey(type))
+                Components.Add(type, new());
 
-                Components[type].Add(component);
-                component.node = this;
+            Components[type].Add(component);
+            component.node = this;
 
-                if (Interop.IsRunning)
-                    component.init_component_internal();
-            }
-
-            if (ComponentsBusy)
-            {
-                ComponentActionQueue.Enqueue(addComponent<T>);
-            }
-            else
-                addComponent<T>();
-
+            if (Interop.IsRunning)
+                component.init_component_internal();
 
             return component;
-
-
         }
         public T AddComponent<T>() where T : Component, new()
         {
@@ -369,7 +366,6 @@ namespace Pixel
                 }
             }
         }
-
         public bool HasComponent<T>() where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -378,7 +374,6 @@ namespace Pixel
             }
             return true;
         }
-
         public bool TryGetComponent<T>(out T component, int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -407,61 +402,7 @@ namespace Pixel
             T? component = Components[typeof(T)][index] as T;
             return component;
         }
-
-        internal static Node Instantiate(Node projectile)
-        {
-
-            var clone = projectile.Clone();
-            var stage = Interop.Stage;
-
-            if (stage is null)
-                throw new EngineInstanceException("Stage was not initialized during a clone or instantiate call.");
-            clone.UUID = Pixel.Statics.UUID.NewUUID();
-
-            stage.AddNode(clone);
-
-            return clone;
-        }
-        internal static Node Instantiate(Node projectile, Vector2 position)
-        {
-            var clone = Instantiate(projectile);
-            clone.Position = position;
-            return clone;
-        }
-
-        internal void SubscribeToEngine(bool v, Stage stage)
-        {
-            Parallel.ForEach(Components, (comp) => {
-                foreach (Component _component in comp.Value)
-                    if (v)
-                    {
-                        OnDestroyed += _component.on_destroy_internal;
-
-                        OnCollided += _component.OnCollision;
-                        OnTriggered += _component.OnTrigger;
-
-                        stage.Awake += _component.init_component_internal;
-                        stage.Update += _component.Update;
-                        stage.FixedUpdate += _component.FixedUpdate;
-                    }
-                    else
-                    {
-                        OnDestroyed -= _component.on_destroy_internal;
-
-
-                        OnCollided -= _component.OnCollision;
-                        OnTriggered -= _component.OnTrigger;
-
-                        stage.Awake -= _component.init_component_internal;
-                        stage.Update -= _component.Update;
-                        stage.FixedUpdate -= _component.FixedUpdate;
-                    }
-            });
-              
-
-        }
-
-        public static Node New => new("New Node", Vector2.Zero, Vector2.One);
+        #endregion
 
     }
 }

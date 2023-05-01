@@ -60,6 +60,7 @@ namespace Pixel
         public bool NodesBusy { get; private set; }
 
         #region Events/Messages
+        public Action OnDrawShapes;
         public event Action Awake;
         public event Action Update;
         public event Action<float> FixedUpdate;
@@ -129,7 +130,6 @@ namespace Pixel
             if (nodes.Contains(node))
                 return;
 
-            node.ParentStage = this;
             node.SubscribeToEngine(true, this);
 
             if(node.parent is null)
