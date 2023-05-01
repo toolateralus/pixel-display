@@ -243,14 +243,14 @@ namespace Pixel
         }
         #endregion
         #region Editor Events
-        public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
+        public static void Log(object obj, bool includeDateTime = false)
         {
-            EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), includeDateTime, clearConsole);
+            EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), includeDateTime);
             InspectorEventRaised?.Invoke(e);
         }
         public static void Error(object obj)
         {
-            EditorEvent e = new(EditorEventFlags.DO_NOT_PRINT | EditorEventFlags.PRINT_ERR, obj.ToString(), true, false);
+            EditorEvent e = new(EditorEventFlags.PRINT_ERR, obj.ToString(), true);
             InspectorEventRaised?.Invoke(e);
         }
         public static void RaiseInspectorEvent(EditorEvent e)

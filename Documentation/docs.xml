@@ -411,6 +411,7 @@
             <summary>
             This is a class used to pass info and requests to the Editor without the context neccesary from being lower in the hierarchy.
             </summary>
+            
         </member>
         <member name="T:Pixel.Hierarchy">
             <summary>

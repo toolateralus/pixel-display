@@ -21,6 +21,7 @@ namespace Pixel
     /// <summary>
     /// This is a class used to pass info and requests to the Editor without the context neccesary from being lower in the hierarchy.
     /// </summary>
+    /// 
     public class EditorEvent
     {
         public string message;
@@ -31,14 +32,14 @@ namespace Pixel
             + " "
             + DateTime.Now.ToLocalTime().ToLongTimeString()
             + "\n";
-        public bool ClearConsole = false;
+
         public bool processed = false;
+
         public EditorEventFlags flags = EditorEventFlags.GET_FILE_VIEWER_SELECTED_OBJECT;
 
-        public EditorEvent(EditorEventFlags flags, string message = "", bool includeDateTime = false, bool clearConsole = false)
+        public EditorEvent(EditorEventFlags flags, string message = "", bool includeDateTime = false)
         {
             this.flags = flags;
-            ClearConsole = clearConsole;
             if (!includeDateTime)
                 this.message = message;
             else

@@ -243,7 +243,6 @@ namespace Pixel
         {
             if (!nodes.Contains(node))
                 return;
-
             nodes.Remove(node);
             node.SubscribeToEngine(false, this);
         }

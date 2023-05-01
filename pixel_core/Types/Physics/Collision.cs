@@ -2,15 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using BoundingBox2D = Pixel.Types.Physics.BoundingBox2D;
 
 namespace Pixel.Types.Physics
 {
-    public enum TriggerInteraction { Colliders, Triggers, None, All };
-
     /// <summary>
     /// Stores data representing a single collision between two colliders.
     /// </summary>
@@ -30,7 +26,6 @@ namespace Pixel.Types.Physics
             this.normal = normal;
         }
     }
-
     public class Physics
     {
         static QuadTree quadTree = null;

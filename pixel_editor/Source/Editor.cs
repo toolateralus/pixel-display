@@ -216,7 +216,6 @@ namespace pixel_editor
                     
                 }
             }
-
             Current.ActivelySelected.Clear();
             Current.LastSelected = null;
         }
@@ -475,9 +474,9 @@ namespace pixel_editor
         /// <param name="e"></param>
         public static void QueueEvent(EditorEvent e)
         {
-            if (e.ClearConsole)
+            if (e.flags.HasFlag(EditorEventFlags.CLEAR_CONSOLE))
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Items.Clear());
-            Current.Events.Pending.Push(e);
+            Current.Events.Pending.Push(e); 
         }
         private void OnPlay(object sender, RoutedEventArgs e)
         {

@@ -57,7 +57,7 @@ namespace Pixel
 
         public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
         {
-            EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), includeDateTime, clearConsole);
+            EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), includeDateTime);
             RaiseInspectorEvent(e);
         }
         internal static Task<Metadata> GetSelectedFileMetadataAsync()
@@ -75,9 +75,9 @@ namespace Pixel
         {
             OnEditorEventRaised?.Invoke(e);
         }
-        public static void Error(object obj, bool includeDateTime = false, bool clearConsole = false)
+        public static void Error(object obj, bool includeDateTime = false)
         {
-            EditorEvent e = new(EditorEventFlags.PRINT_ERR, obj.ToString(), includeDateTime, clearConsole);
+            EditorEvent e = new(EditorEventFlags.PRINT_ERR, obj.ToString(), includeDateTime);
             RaiseInspectorEvent(e);
         }
         public static void DrawLine(Vector2 a, Vector2 b, Color color)
