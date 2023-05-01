@@ -5,29 +5,70 @@ using System.Runtime.CompilerServices;
 
 namespace Pixel
 {
-
+    /// <summary>
+    /// an abstract starter class to base all Renderers on, which are utilized by the RenderHost.
+    /// </summary>
     public abstract class RendererBase
     {
         Vector2 zero = Vector2.Zero;
         Vector2 one = Vector2.One;
+        /// <summary>
+        /// The stage's background cached.
+        /// </summary>
         public JImage baseImage;
+
+        /// <summary>
+        /// the frame that will be drawn to each cycle.
+        /// </summary>
         public byte[] frame = Array.Empty<byte>();
+     
         public byte[] latestFrame = Array.Empty<byte>();
+  
         public int stride = 0;
+
+        /// <summary>
+        /// the frame that is sent out after each cycle, cached.
+        /// </summary>
         public byte[] Frame => latestFrame;
+        /// <summary>
+        /// the stride of the render output image.
+        /// </summary>
         public int Stride => stride;
+        /// <summary>
+        /// the cached resolution of the screen.
+        /// </summary>
         public Vector2 Resolution
         {
             get => _resolution;
             set => _resolution = value;
         }
         public Vector2 _resolution = Constants.DefaultResolution;
+
+        /// <summary>
+        /// dictates whether to redraw the background or not on the next cycle.
+        /// </summary>
         public bool baseImageDirty = true;
 
+        /// <summary>
+        /// Sends the last rendered frame up to the UI.
+        /// </summary>
+        /// <param name="output"></param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public abstract void Render(System.Windows.Controls.Image output);
+        /// <summary>
+        /// Takes all the prepared renderInfo from the stage and constructs an image starting with the base image.
+        /// </summary>
+        /// <param name="info"></param>
         public abstract void Draw(StageRenderInfo info);
+        /// <summary>
+        /// cleans up any managed/unmanaged resources from last cycle.
+        /// </summary>
         public abstract void Dispose();
+        /// <summary>
+        /// Places a pixel on the render texture of this cycle at the desired position.
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="framePos"></param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteColorToFrame(ref Color color, ref Vector2 framePos)
         {
@@ -45,6 +86,11 @@ namespace Pixel
             frame[index + 1] = (byte)(colorG + frameG);
             frame[index + 2] = (byte)(colorR + frameR);
         }
+        /// <summary>
+        /// Places a pixel on the render texture of this cycle at the desired position.
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="framePos"></param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteColorToFrame(ref Color color, int x, int y)
         {
@@ -62,6 +108,9 @@ namespace Pixel
             frame[index + 1] = (byte)(colorG + frameG);
             frame[index + 2] = (byte)(colorR + frameR);
         }
+        /// <summary>
+        /// calling this will redraw the background next frame
+        /// </summary>
         public void MarkDirty()
         {
             baseImageDirty = true;
@@ -72,7 +121,11 @@ namespace Pixel
         {
             return x >= min && x < max && y >= min && y < max;
         }
-
+        /// <summary>
+        /// Reads a color from the current render texture.
+        /// </summary>
+        /// <param name="vector2"></param>
+        /// <returns></returns>
         public Color ReadColorFromFrame(Vector2 vector2)
         {
             int index = (int)vector2.Y * stride + ((int)vector2.X * 3);

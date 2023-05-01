@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Pixel
 {
+    /// <summary>
+    /// A container that stores info about rendering such as metrics.
+    /// </summary>
     public class RenderInfo
     {
         string cachedGCValue = "";

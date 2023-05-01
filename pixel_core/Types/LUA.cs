@@ -6,6 +6,9 @@ using System.Reflection;
 
 namespace Pixel
 {
+    /// <summary>
+    /// A mostly static class functioning as a wrapper for KeraLua Lua usage. Also contains all Pixel LuaFunctions aka PixelLua library :D
+    /// </summary>
     public class LUA
     {
         #region pixel_engine lua library (C# functions)

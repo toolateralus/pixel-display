@@ -2,6 +2,9 @@
 
 namespace Pixel.Types.Physics
 {
+    /// <summary>
+    /// A basic shape mostly used for drawing debug shapes.
+    /// </summary>
     public class Line
     {
         public Vector2 EndOffset => endPoint - startPoint;
@@ -13,6 +16,9 @@ namespace Pixel.Types.Physics
             this.endPoint = endPoint;
         }
     }
+    /// <summary>
+    /// A basic shape mostly used for drawing debug shapes.
+    /// </summary>
     public class Circle
     {
         public Vector2 center;

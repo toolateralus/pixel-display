@@ -7,6 +7,9 @@ using System.Runtime.CompilerServices;
 
 namespace Pixel
 {
+    /// <summary>
+    /// A container that represents a render cycle worth of any renderable data that exists in the current stage.
+    /// </summary>
     public class StageRenderInfo
     {
         public List<SpriteInfo> spriteInfos = new();

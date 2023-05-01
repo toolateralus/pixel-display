@@ -4,7 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace Pixel.Types.Physics
 {
-
+    /// <summary>
+    /// A bounding box.
+    /// </summary>
     public struct BoundingBox2DInt
     {
         public Vector2 min, max;

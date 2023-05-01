@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace Pixel
 {
+    /// <summary>
+    /// The node represents a GameObject, which always includes a Transform (position , scale, rotation).
+    /// Components are modules added to a Node which are routinely updated auto with subscribed events and
+    /// overriden virutal methods.
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public partial class Node
     {
@@ -61,32 +66,77 @@ namespace Pixel
         #endregion
 
         // Events
+        /// <summary>
+        /// Is triggered when this node or any of is components participate in a collision.
+        /// </summary>
         public Action<Collision> OnCollided;
+        /// <summary>
+        /// Is triggered when this node or any of it's components participate in a collision where
+        /// one or more of the colliders had "IsTriggered" set to true.
+        /// </summary>
         public Action<Collision> OnTriggered;
+        /// <summary>
+        /// Is triggered when this node is called to be destroyed, after <see cref="Dispose"/> is called.
+        /// </summary>
         public Action OnDestroyed;
         
         private bool _enabled = true;
         private string _uuid = "";
         public bool awake;
 
-        // ID
+        /// <summary>
+        /// if this is false the node won't be moved or updated, nor visible.
+        /// </summary>
         [JsonProperty] public bool Enabled { get { return _enabled; } set => _enabled = value; }
+        /// <summary>
+        /// a Universally Unique Identifier.
+        /// </summary>
         [JsonProperty] public string UUID { get { return _uuid; } set { _uuid = value; } }
+        /// <summary>
+        /// The name of the node.
+        /// </summary>
         [JsonProperty] public string Name { get; set; }
+        /// <summary>
+        /// A way to group nodes and query them without looking for components.
+        /// </summary>
         [JsonProperty] public string tag = "Untagged";
 
-        // Hierarchy 
+        /// <summary>
+        /// The node directly above this one in the hierarchy.
+        /// </summary>
         [JsonProperty] public Node? parent;
+        /// <summary>
+        /// Every child node of this node.
+        /// </summary>
         [JsonProperty] public List<Node> children = new();
+
+        /// <summary>
+        /// A list of the offset between <see cref="this"/> <see cref="Node"/> and it's children to maintain during physics updates.
+        /// </summary>
         internal Dictionary<string, Vector2> child_offsets = new();
 
-        // Components
+        /// <summary>
+        /// A cached <see cref="Rigidbody"></see> to save <see cref="GetComponent{T}(int)"></see> calls/allocations.
+        /// </summary>
         public Rigidbody? rb;
+        /// <summary>
+        /// A cached <see cref="Collider"></see> to save <see cref="GetComponent{T}(int)"></see> calls/allocations.
+        /// </summary>
         public Collider col;
+        /// <summary>
+        /// A cached <see cref="Sprite"></see> to save <see cref="GetComponent{T}(int)"></see> calls/allocations.
+        /// </summary>
         internal Sprite sprite;
+
+        /// <summary>
+        /// A dictionary of lists of <see cref="Component"/> stored by <see cref="Type"/>
+        /// </summary>
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
 
         // Transform
+        /// <summary>
+        /// A transform matrix updated with Position,Rotation,Scale frequently.
+        /// </summary>
         [JsonProperty] public Matrix3x2 Transform = Matrix3x2.Identity;
         public Vector2 Position
         {
@@ -129,6 +179,10 @@ namespace Pixel
 
 
         #region Hierarchy Functions
+        /// <summary>
+        /// The method used to insert a node as child of this one.
+        /// </summary>
+        /// <param name="child"></param>
         public void Child(Node child)
         {
             if (ContainsCycle(child))
@@ -152,6 +206,11 @@ namespace Pixel
 
             child.parent = this;
         }
+        /// <summary>
+        /// A way to remove children if they exist under this one.
+        /// </summary>
+        /// <param name="child"></param>
+        /// <returns></returns>
         public bool TryRemoveChild(Node child)
         {
             foreach (var kvp in children)
@@ -164,6 +223,11 @@ namespace Pixel
             return false;
 
         }
+        /// <summary>
+        /// Used to check whether theres a cyclic inclusion in the hierarchy above and below this node.
+        /// </summary>
+        /// <param name="newNode"></param>
+        /// <returns></returns>
         public bool ContainsCycle(Node newNode)
         {
             // Check for cycles in child nodes
@@ -212,6 +276,11 @@ namespace Pixel
         }
         #endregion
         #region Events/Messages
+        /// <summary>
+        /// A way for a node to subscribe/unsubscribe from events like Update/FixedUpdate/Awake/OnCollision etc. this does not need to be called by the user.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <param name="stage"></param>
         internal void SubscribeToEngine(bool v, Stage stage)
         {
             Parallel.ForEach(Components, (comp) => {
@@ -257,6 +326,9 @@ namespace Pixel
             }
         }
 
+        /// <summary>
+        /// Destroys this node and all of it's components.
+        /// </summary>
         public void Destroy()
         {
             foreach (var node in children)
@@ -285,6 +357,9 @@ namespace Pixel
             Dispose();
             OnDestroyed?.Invoke();
         }
+        /// <summary>
+        /// Cleans up any managed resources referring to Node/Component as they don't have a great disposal system yet.
+        /// </summary>
         public virtual void Dispose()
         {
             rb = null;
@@ -324,6 +399,11 @@ namespace Pixel
 
             return component;
         }
+        /// <summary>
+        /// Used to add a component of type <see cref="T"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T AddComponent<T>() where T : Component, new()
         {
             Type type = typeof(T);
@@ -334,6 +414,10 @@ namespace Pixel
             AddComponent(component);
             return component;
         }
+        /// <summary>
+        /// Used to remove the specified instance of a component from this node.
+        /// </summary>
+        /// <param name="component"></param>
         public void RemoveComponent(Component component)
         {
             var type = component.GetType();
@@ -366,6 +450,11 @@ namespace Pixel
                 }
             }
         }
+        /// <summary>
+        /// Check whether a node does or doesn't have a certain type of component.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>True if exists, false if doesn't.</returns>
         public bool HasComponent<T>() where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -374,6 +463,13 @@ namespace Pixel
             }
             return true;
         }
+        /// <summary>
+        /// Fetches a component only if it exists in this node.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="component"></param>
+        /// <param name="index"></param>
+        /// <returns>False and null if component didn't exist, else true and component will be the component found.</returns>
         public bool TryGetComponent<T>(out T component, int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
@@ -388,6 +484,10 @@ namespace Pixel
 
             return true;
         }
+        /// <summary>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>A list of components matching type T</returns>
         public IEnumerable<T> GetComponents<T>() where T : Component
         {
             return from Type type in Components.Keys
@@ -395,6 +495,12 @@ namespace Pixel
                    from T component in Components[type]
                    select component;
         }
+        /// <summary>
+        /// Gets a component by type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="index"></param>
+        /// <returns>A component of type T if exists, else null.</returns>
         public T? GetComponent<T>(int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))

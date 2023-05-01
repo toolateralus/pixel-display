@@ -15,6 +15,9 @@ using System.Windows;
 
 namespace Pixel
 {
+    /// <summary>
+    /// The container that represents a 2D Scene.
+    /// </summary>
     public class Stage : Asset
     {
         [JsonProperty]

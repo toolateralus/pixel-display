@@ -10,6 +10,9 @@ namespace Pixel.Types.Physics
 {
     public enum TriggerInteraction { Colliders, Triggers, None, All };
 
+    /// <summary>
+    /// Stores data representing a single collision between two colliders.
+    /// </summary>
     public record Collision
     {
         public SATProjection thisProjection;

@@ -8,6 +8,9 @@ using System.Runtime.CompilerServices;
 
 namespace Pixel
 {
+    /// <summary>
+    /// The lowest-level Image type in Pixel, which only contains a byte[] and the neccesary data to process it from various contexts.
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public unsafe class JImage
     {

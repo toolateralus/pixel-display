@@ -6,6 +6,7 @@ using System.Numerics;
 namespace Pixel.Types.Physics
 {
     /// <summary>
+    /// A collection of vertices representing a single shape.
     /// note :our Polygon uses a clockwise winding order
     /// </summary>
     public class Polygon

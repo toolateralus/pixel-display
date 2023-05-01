@@ -4,6 +4,9 @@ using System.Numerics;
 
 namespace Pixel.Types.Physics
 {
+    /// <summary>
+    /// A simple Vector2 Animation class with helpers like primitve curves etc.
+    /// </summary>
     public class Curve : Animation<Vector2>
     {
         public float Max

@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace Pixel
 {
+    /// <summary>
+    /// A basic color structure used by Pixel. implicitly converts with System.Drawing.Color.
+    /// </summary>
     public struct Color
     {
         /// <summary>

@@ -2,6 +2,9 @@
 
 namespace Pixel.Types.Physics
 {
+    /// <summary>
+    /// A line.
+    /// </summary>
     public struct Ray
     {
         public Vector2 position;

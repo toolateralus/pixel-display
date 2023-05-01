@@ -4,6 +4,9 @@ using System.Numerics;
 
 namespace Pixel.Types.Physics
 {
+    /// <summary>
+    /// A helper class for performing SAT collisions, our supported algorithm.
+    /// </summary>
     public class SATCollision
     {
         static Vector2 zero = Vector2.Zero;

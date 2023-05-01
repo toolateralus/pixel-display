@@ -3,8 +3,16 @@ using System.Net;
 
 namespace Pixel
 {
+    /// <summary>
+    /// The container that the Stage uses to store nodes and make queries.
+    /// </summary>
     public class Hierarchy : List<Node>
     {
+        /// <summary>
+        /// Finds a node based on its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public Node? Find(string name)
         {
             foreach (var node in this)
@@ -18,6 +26,11 @@ namespace Pixel
             }
             return null;
         }
+        /// <summary>
+        /// Finds the index of a node if it exists as a root in the stage hierarchy based on its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public int RootIndex(string name)
         {
             foreach (var i in this)
@@ -25,6 +38,11 @@ namespace Pixel
                     return IndexOf(i);
             return -1;
         }
+        /// <summary>
+        /// Searches for a node by index in the root nodes.
+        /// </summary>
+        /// <param name="rootIndex"></param>
+        /// <returns></returns>
         public Node? RootSearch(int rootIndex)
         {
             if (Count < rootIndex)
@@ -32,6 +50,12 @@ namespace Pixel
 
             return this[rootIndex];
         }
+        /// <summary>
+        /// searches for a child under the specified root by index
+        /// </summary>
+        /// <param name="rootIndex"></param>
+        /// <param name="child_index"></param>
+        /// <returns></returns>
         public Node? ChildSearch(int rootIndex, int child_index)
         {
             if (Count < rootIndex)

@@ -2,6 +2,9 @@
 
 namespace Pixel
 {
+    /// <summary>
+    /// Shortcut flags for EditorEvents to quickly make requests/calls.
+    /// </summary>
     [Flags]
     public enum EditorEventFlags
     {
@@ -15,6 +18,9 @@ namespace Pixel
         FOCUS_NODE = 64,
         CLEAR_CONSOLE = 128,
     }
+    /// <summary>
+    /// This is a class used to pass info and requests to the Editor without the context neccesary from being lower in the hierarchy.
+    /// </summary>
     public class EditorEvent
     {
         public string message;

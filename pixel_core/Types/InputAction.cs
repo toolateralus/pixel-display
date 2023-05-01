@@ -5,6 +5,9 @@ using System.Windows.Input;
 namespace Pixel.Types
 {
     public enum InputEventType { KeyDown, KeyUp, KeyToggle }
+    /// <summary>
+    /// A container for an action with some args, used to fire RegesterAction input event types.
+    /// </summary>
     public class InputAction
     {
         public Key Key;
