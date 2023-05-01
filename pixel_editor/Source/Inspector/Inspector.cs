@@ -219,20 +219,7 @@ namespace pixel_editor
         {
             addComponentFunctions.Add(type.Name, () =>
             {
-                Component? v = (Component)Activator.CreateInstance(type);
-
-                if (lastSelectedNode is null)
-                    return null;
-
-                v.node = lastSelectedNode;
-
-                if (lastSelectedNode.Components.ContainsKey(type))
-                    lastSelectedNode.Components[type].Add(v);
-                else lastSelectedNode?.Components.Add(type, new() { v });
-
-                v.Awake();
-
-                return v;
+                return lastSelectedNode.AddComponent(type);
             });
         }
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)

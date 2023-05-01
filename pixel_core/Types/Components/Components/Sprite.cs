@@ -35,7 +35,7 @@ namespace Pixel
         /// <summary>
         /// this will toggle participation in lighting
         /// </summary>
-        [Field][JsonProperty] public bool lit = false;
+        [Field][JsonProperty] public bool lit = true;
         /// <summary>
         /// this is the color that a solid color sprite will be drawn as
         /// </summary>
@@ -134,9 +134,9 @@ namespace Pixel
                 Refresh();
 
             if (lit)
-                GetLightmap();
+               lightmap =  GetLightmap();
         }
-        public override void OnDrawShapes()
+        public override void on_draw_shapes_internal()
         {
             if (selected_by_editor)
             {

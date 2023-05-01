@@ -116,7 +116,7 @@ namespace Pixel
         {
             texture.SetImage(size, color);
         }
-        public override void OnDrawShapes()
+        public override void on_draw_shapes_internal()
         {
             if (selected_by_editor)
             {

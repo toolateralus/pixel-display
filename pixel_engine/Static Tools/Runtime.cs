@@ -223,7 +223,9 @@ namespace Pixel
                 {
                     if (Current.stage is null)
                         continue;
-                    
+                     
+                    Current.stage.FixedUpdateMethod(0.1f);
+
                     Physics.Step();
                     
                     Thread.Sleep(ProjectSettings.PhysicsTimeStep);

@@ -148,6 +148,18 @@
             Will be called after <see cref="M:Pixel.Types.Components.Component.Awake"/> and each subsequent render frame while running.
             </summary>
         </member>
+        <member name="M:Pixel.Types.Components.Component.fixed_update_internal(System.Single)">
+            <summary>
+            this sort of wrapper is neccesary for the way the events have been re-implemented.
+            </summary>
+            <param name="frameTime"></param>
+        </member>
+        <member name="M:Pixel.Types.Components.Component.update_internal">
+            <summary>
+            this sort of wrapper is neccesary for the way the events have been re-implemented, the inherited method won't get called only the base.
+            </summary>
+            <param name="frameTime"></param>
+        </member>
         <member name="M:Pixel.Types.Components.Component.FixedUpdate(System.Single)">
             <summary>
             Will be called after <see cref="M:Pixel.Types.Components.Component.Awake"/> and each subsequent physics frame while running.
@@ -157,6 +169,7 @@
             <summary>
             Will be called in the event that this Component's parent <see cref="T:Pixel.Node"/>'s components participated in a collision where one or more of the colliders were flagged IsTrigger.
             </summary>
+            
         </member>
         <member name="M:Pixel.Types.Components.Component.OnCollision(Pixel.Types.Physics.Collision)">
             <summary>
@@ -169,7 +182,7 @@
             </summary>
             <param name="field"> the field that was called to be edited.</param>
         </member>
-        <member name="M:Pixel.Types.Components.Component.OnDrawShapes">
+        <member name="M:Pixel.Types.Components.Component.on_draw_shapes_internal">
             <summary>
             Will be called each frame by the renderer at the time that the shape drawer is collecting a cycle's worth of debug data.
             </summary>

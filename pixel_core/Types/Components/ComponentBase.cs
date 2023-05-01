@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Pixel.Types.Physics;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
@@ -51,8 +52,9 @@ namespace Pixel.Types.Components
         }
         public ref Matrix3x2 Transform { get => ref node.Transform; }
         public string Name { get; set; } = "";
+        
         public bool selected_by_editor;
-        private bool awake;
+        public bool awake;
 
         public string UUID => _uuid;
         public Component()
@@ -73,6 +75,21 @@ namespace Pixel.Types.Components
         /// Will be called after <see cref="Awake"/> and each subsequent render frame while running.
         /// </summary>
         public virtual void Update() { }
+
+        /// <summary>
+        /// this sort of wrapper is neccesary for the way the events have been re-implemented.
+        /// </summary>
+        /// <param name="frameTime"></param>
+        internal protected void fixed_update_internal(float frameTime)
+        {
+            FixedUpdate(frameTime);
+        }
+        /// <summary>
+        /// this sort of wrapper is neccesary for the way the events have been re-implemented, the inherited method won't get called only the base.
+        /// </summary>
+        /// <param name="frameTime"></param>
+        internal protected void update_internal() => Update();
+
         /// <summary>
         /// Will be called after <see cref="Awake"/> and each subsequent physics frame while running.
         /// </summary>
@@ -80,11 +97,15 @@ namespace Pixel.Types.Components
         /// <summary>
         /// Will be called in the event that this Component's parent <see cref="Node"/>'s components participated in a collision where one or more of the colliders were flagged IsTrigger.
         /// </summary>
+        /// 
         public virtual void OnTrigger(Collision collision) { }
+        internal protected void on_trigger_internal(Collision collision) => OnTrigger(collision);
+        internal protected void on_collision_internal(Collision collision) => OnCollision(collision);
         /// <summary>
         /// Will be called in the event that this Component's parent <see cref="Node"/>'s components participated in a collision.
         /// </summary>
         public virtual void OnCollision(Collision collision) { }
+
         /// <summary>
         /// Will be called in the event that a field is edited by reflection and the Editor's Component Editor
         /// </summary>
@@ -93,7 +114,7 @@ namespace Pixel.Types.Components
         /// <summary>
         /// Will be called each frame by the renderer at the time that the shape drawer is collecting a cycle's worth of debug data.
         /// </summary>
-        public virtual void OnDrawShapes() { }
+        public virtual void on_draw_shapes_internal() { }
         /// <summary>
         /// is called before Destroy to perform Dispose.
         /// </summary>

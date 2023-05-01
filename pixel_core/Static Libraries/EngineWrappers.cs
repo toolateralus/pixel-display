@@ -119,6 +119,7 @@ namespace Pixel
             get => OnProjectGotten?.Invoke();
             set => OnProjectSet?.Invoke(value);
         }
+        public static float GetLastFrameTime { get; internal set; } = 0.1f;
     }
 
 }

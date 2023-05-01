@@ -36,6 +36,8 @@ namespace Pixel.Types.Physics
         {
             if (Interop.Stage is not Stage stage)
                 return;
+
+
             var area = ProjectSettings.PhysicsArea;
             quadTree ??= new QuadTree(new BoundingBox2D(-area.X, -area.Y, area.X, area.Y));
             
@@ -52,8 +54,6 @@ namespace Pixel.Types.Physics
                     quadTree.Insert(node);
             };
             
-            // This is here so the physics updates are all more precise for collision, it's not the best cuz it's a bit harder to find/read
-            stage.FixedUpdateMethod(0.1f);
 
             quadTree.Query(range, foundNodes);
 

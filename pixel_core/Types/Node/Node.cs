@@ -304,7 +304,7 @@ namespace Pixel
             if (v)
             {
                 OnDestroyed += _component.on_destroy_internal;
-                stage.OnDrawShapes += _component.OnDrawShapes;
+                stage.OnDrawShapes += _component.on_draw_shapes_internal;
                 OnCollided += _component.OnCollision;
                 OnTriggered += _component.OnTrigger;
 
@@ -315,7 +315,7 @@ namespace Pixel
             else
             {
                 OnDestroyed -= _component.on_destroy_internal;
-                stage.OnDrawShapes -= _component.OnDrawShapes;
+                stage.OnDrawShapes -= _component.on_draw_shapes_internal;
 
                 OnCollided -= _component.OnCollision;
                 OnTriggered -= _component.OnTrigger;
@@ -351,12 +351,25 @@ namespace Pixel
        
         #endregion
         #region Component Functions
+
+        public Component AddComponent(Type type)
+        {
+            Component? v = (Component)Activator.CreateInstance(type);
+            v.node = this;
+            if(Components.ContainsKey(type))
+                Components[type].Add(v);
+            else Components.Add(type, new() { v });
+            SubscribeComponent(v);
+            return v;
+        }
         public T AddComponent<T>(T component) where T : Component
         {
             var type = component.GetType();
 
+
             if (type == typeof(Component))
                 throw new InvalidOperationException("Generic type component was added.");
+
 
             if (type == typeof(Sprite))
                 sprite = component as Sprite; 
@@ -373,10 +386,39 @@ namespace Pixel
             Components[type].Add(component);
             component.node = this;
 
-            if (Interop.IsRunning)
+
+            if (Interop.IsRunning && !component.awake)
                 component.init_component_internal();
 
+            SubscribeComponent(component);
+
             return component;
+        }
+        private void SubscribeComponent(Component component)        
+        {
+            if (Interop.Stage is Stage stage)
+            {
+                OnDestroyed         += component.on_destroy_internal;
+                stage.OnDrawShapes  += component.on_draw_shapes_internal;
+                OnCollided          += component.on_collision_internal;
+                OnTriggered         += component.on_trigger_internal;
+                stage.Awake         += component.init_component_internal;
+                stage.Update        += component.update_internal;
+                stage.FixedUpdate   += component.fixed_update_internal;
+            }
+        }
+        private void UnsubscribeComponent(Component component)
+        {
+            if (Interop.Stage is Stage stage)
+            {
+                OnDestroyed         -= component.on_destroy_internal;
+                stage.OnDrawShapes  -= component.on_draw_shapes_internal;
+                OnCollided          -= component.on_collision_internal;
+                OnTriggered         -= component.on_trigger_internal;
+                stage.Awake         -= component.init_component_internal;
+                stage.Update        -= component.update_internal;
+                stage.FixedUpdate   -= component.fixed_update_internal;
+            }
         }
         /// <summary>
         /// Used to add a component of type <see cref="T"/>
@@ -386,6 +428,7 @@ namespace Pixel
         public T AddComponent<T>() where T : Component, new()
         {
             Type type = typeof(T);
+
             if (!Components.ContainsKey(type))
                 Components.Add(type, new());
 
@@ -401,7 +444,7 @@ namespace Pixel
         {
             var type = component.GetType();
 
-            UnsubscribeComponent(Interop.Stage, component);
+            UnsubscribeComponent(component);
 
             if (Components.ContainsKey(type))
             {
@@ -429,20 +472,6 @@ namespace Pixel
                         compList.Remove(toRemove);
                     if (compList.Count == 0) Components.Remove(type);
                 }
-            }
-        }
-
-        private void UnsubscribeComponent(Stage? stage, Component component)
-        {
-            if (stage is not null)
-            {
-                OnDestroyed -= component.on_destroy_internal;
-                stage.OnDrawShapes -= component.OnDrawShapes;
-                OnCollided -= component.OnCollision;
-                OnTriggered -= component.OnTrigger;
-                stage.Awake -= component.init_component_internal;
-                stage.Update -= component.Update;
-                stage.FixedUpdate -= component.FixedUpdate;
             }
         }
 

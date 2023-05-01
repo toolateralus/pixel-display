@@ -46,7 +46,8 @@ namespace Pixel
             Position += vel;
 
             if (vel != Vector2.Zero)
-                vel *= 0.9f; 
+                vel *= 0.9f;
+
         }
         private void down()
         {

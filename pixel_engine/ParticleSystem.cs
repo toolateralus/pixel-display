@@ -65,7 +65,7 @@ namespace Pixel
                // TODO: somehow fix this
             }
         }
-        public override void OnDrawShapes()
+        public override void on_draw_shapes_internal()
         {
             // ShapeDrawer.DrawCircleFilled(part.Position, 0.0015f);
         }

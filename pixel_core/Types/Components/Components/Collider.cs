@@ -110,7 +110,7 @@ namespace Pixel
         {
         }
 
-        public override void OnDrawShapes()
+        public override void on_draw_shapes_internal()
         {
             if (drawCollider)
                 DrawCollider();

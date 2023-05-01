@@ -78,15 +78,10 @@ namespace Pixel
         public event Action Awake;
         public event Action Update;
         public event Action<float> FixedUpdate;
-
         public void UpdateMethod()
         {
             Awake?.Invoke();
             Update?.Invoke();
-        }
-        public void FixedUpdateMethod(ref float delta)
-        {
-            FixedUpdate?.Invoke(delta);
         }
         public void FixedUpdateMethod(float delta)
         {
