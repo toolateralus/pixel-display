@@ -132,10 +132,8 @@ namespace Pixel
                 Transform.M22 = value.Y;
             }
         }
-        public void Move(Vector2 destination)
-        {
-            Position = destination;
-        }
+        public void SetActive(bool value) => _enabled = value;
+
         public void Child(Node child)
         {
             if (ContainsCycle(child))
@@ -220,7 +218,9 @@ namespace Pixel
             return false;
 
         }
-        public void SetActive(bool value) => _enabled = value;
+
+        #region Events/Messages
+
         public void Awake()
         {
             ComponentsBusy = true;
@@ -291,6 +291,7 @@ namespace Pixel
                 ComponentActionQueue.Dequeue().Invoke();
             ComponentsBusy = false;
         }
+
         public void Destroy()
         {
             ComponentsBusy = true;
@@ -333,6 +334,7 @@ namespace Pixel
                 foreach (var c in component.Value)
                     c.Dispose();
         }
+
         public void OnTrigger(Collision otherBody)
         {
             if (!awake) return;
@@ -373,6 +375,30 @@ namespace Pixel
             OnCollided?.Invoke(otherBody);
             ComponentsBusy = false;
         }
+
+        public void OnDrawShapes()
+        {
+            var compTypes = Components.Values;
+            var typesCount = compTypes.Count;
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+                child.OnDrawShapes();
+            }
+
+            for (int iType = 0; iType < typesCount; iType++)
+            {
+                var compList = compTypes.ElementAt(iType);
+                var compCount = compList.Count;
+                for (int iComp = 0; iComp < compCount; iComp++)
+                {
+                    compList[iComp].OnDrawShapes();
+                }
+            }
+        }
+        #endregion
+
         public T AddComponent<T>(T component) where T : Component
         {
             var type = component.GetType();
@@ -423,42 +449,6 @@ namespace Pixel
             AddComponent(component);
             return component;
         }
-        public bool HasComponent<T>() where T : Component
-        {
-            if (!Components.ContainsKey(typeof(T)))
-            {
-                return false;
-            }
-            return true;
-        }
-        public bool TryGetComponent<T>(out T component, int index = 0) where T : Component
-        {
-            if (!Components.ContainsKey(typeof(T)))
-            {
-                component = null;
-                return false;
-            }
-            component = Components[typeof(T)][index] as T;
-
-            if (component is null)
-                return false;
-
-            return true;
-        }
-        public IEnumerable<T> GetComponents<T>() where T : Component
-        {
-            return from Type type in Components.Keys
-                   where type.IsAssignableTo(typeof(T))
-                   from T component in Components[type]
-                   select component;
-        }
-        public T? GetComponent<T>(int index = 0) where T : Component
-        {
-            if (!Components.ContainsKey(typeof(T)))
-                return null;
-            T? component = Components[typeof(T)][index] as T;
-            return component;
-        }
         public void RemoveComponent(Component component)
         {
             var type = component.GetType();
@@ -491,27 +481,45 @@ namespace Pixel
                 }
             }
         }
-        public void OnDrawShapes()
+
+        public bool HasComponent<T>() where T : Component
         {
-            var compTypes = Components.Values;
-            var typesCount = compTypes.Count;
-
-            for (int i = 0; i < children.Count; i++)
+            if (!Components.ContainsKey(typeof(T)))
             {
-                Node? child = children[i];
-                child.OnDrawShapes();
+                return false;
             }
-
-            for (int iType = 0; iType < typesCount; iType++)
-            {
-                var compList = compTypes.ElementAt(iType);
-                var compCount = compList.Count;
-                for (int iComp = 0; iComp < compCount; iComp++)
-                {
-                    compList[iComp].OnDrawShapes();
-                }
-            }
+            return true;
         }
+
+        public bool TryGetComponent<T>(out T component, int index = 0) where T : Component
+        {
+            if (!Components.ContainsKey(typeof(T)))
+            {
+                component = null;
+                return false;
+            }
+            component = Components[typeof(T)][index] as T;
+
+            if (component is null)
+                return false;
+
+            return true;
+        }
+        public IEnumerable<T> GetComponents<T>() where T : Component
+        {
+            return from Type type in Components.Keys
+                   where type.IsAssignableTo(typeof(T))
+                   from T component in Components[type]
+                   select component;
+        }
+        public T? GetComponent<T>(int index = 0) where T : Component
+        {
+            if (!Components.ContainsKey(typeof(T)))
+                return null;
+            T? component = Components[typeof(T)][index] as T;
+            return component;
+        }
+
         internal static Node Instantiate(Node projectile)
         {
 

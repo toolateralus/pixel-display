@@ -20,15 +20,17 @@ namespace Pixel
         [JsonProperty]
         public Metadata backgroundMetadata;
         [JsonProperty]
-        public Matrix3x2 bgTransform = Matrix3x2.CreateScale(128, 128);
+        public Matrix3x2 bgTransform = Matrix3x2.CreateScale(512, 512);
         [JsonProperty]
         public TextureFiltering backgroundFiltering = TextureFiltering.Point;
         [JsonProperty]
         public Vector2 backgroundOffset = new(0, 0);
         [JsonProperty]
+        public JImage background = new();
+
+        [JsonProperty]
         public Hierarchy nodes = new(); 
-        public bool NodesBusy { get; private set; }
-        private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
+
         private StageRenderInfo? stage_render_info = null;
         public StageRenderInfo StageRenderInfo
         {
@@ -45,7 +47,21 @@ namespace Pixel
             }
             set { stage_render_info = value; }
         }
-        public JImage background = new();
+
+        public static Metadata DefaultBackgroundMetadata
+        {
+            get
+            {
+                if (Library.FetchMeta("Background") is not Metadata meta)
+                    return new(Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.PngExt);
+                return meta;
+            }
+        }
+        public bool NodesBusy { get; private set; }
+
+        #region Events/Messages
+        private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
+
         public bool Awake()
         {
             var awokenNodes = 0;
@@ -73,6 +89,7 @@ namespace Pixel
                     Node node = nodes[i];
                     node.Update();
                 }
+
             NodesBusy = false;
 
             for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
@@ -96,6 +113,11 @@ namespace Pixel
                 }
             NodesBusy = false;
         }
+        #endregion
+
+
+        #region Background Helpers
+
         public void SetBackground(JImage value)
         {
             background = value;
@@ -120,6 +142,8 @@ namespace Pixel
                 return background = new(new Bitmap(backgroundMetadata.Path));
             throw new MissingMetadataException($"Metadata :\"{backgroundMetadata.Path}\". File not found.");
         }
+        
+        #endregion
         #region Node Utils
         public List<Node> GetNodesAtGlobalPosition(Vector2 position)
         {
@@ -157,6 +181,16 @@ namespace Pixel
             if (NodesBusy)
                 delayedActionQueue.Enqueue((add_node, args));
             else add_node(args);
+        }
+        public void AddNodes(List<Node> nodes)
+        {
+            foreach (var node in nodes)
+            {
+                if (this.nodes.Contains(node))
+                    continue;
+
+                AddNode(node);
+            }
         }
         public Node? FindNode(string name)
         {
@@ -264,36 +298,12 @@ namespace Pixel
                 };
 
         }
-
         public override void Sync()
         {
             string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
             Metadata = new(defaultPath);
         }
-
         #endregion Node Utils
-        #region development defaults
-        public static Metadata DefaultBackgroundMetadata
-        {
-            get
-            {
-                if (Library.FetchMeta("Background") is not Metadata meta)
-                    return new(Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.PngExt);
-                return meta;
-            }
-        }
-        public void AddNodes(List<Node> nodes)
-        {
-            foreach (var node in nodes)
-            {
-                if (this.nodes.Contains(node))
-                    continue;
-
-                AddNode(node);
-            }
-        }
-
-        #endregion development defaults
         #region constructors
         
         [JsonConstructor]
@@ -330,8 +340,6 @@ namespace Pixel
             this.backgroundMetadata = backgroundMetadata;
             init_background();
         }
-
-
         /// <summary>
         /// Memberwise copy constructor
         /// </summary>
@@ -348,5 +356,6 @@ namespace Pixel
             init_background();
         }
         #endregion
+        
     }
 }

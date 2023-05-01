@@ -237,7 +237,7 @@ namespace pixel_editor
             {
                 if (!TryGetNodeByNameAtIndex(e, out Node node, 0)) return;
                 if (!TryGetArgAtIndex(1, out Vector2 vec, e)) return;
-                node.Move(vec);
+                node.Position = vec;
             },
         };
         public static Command cmd_destroy_node() => new()

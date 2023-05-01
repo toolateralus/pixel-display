@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 using BoundingBox2D = Pixel.Types.Physics.BoundingBox2D;
 
 namespace Pixel.Types.Physics
@@ -54,8 +55,8 @@ namespace Pixel.Types.Physics
 
             quadTree.Query(range, foundNodes);
 
-            for (int i = 1; i < foundNodes.Count; i++)
-            {
+
+            Parallel.For(0, foundNodes.Count, (i) => {
                 var A = foundNodes[i];
                 for (int j = 0; j < i; ++j)
                 {
@@ -80,8 +81,7 @@ namespace Pixel.Types.Physics
                         Collide(B.rb, A.col);
 
                 }
-            }
-
+            });
         }
         private static void Collide(Rigidbody rigidBody, Collider staticCollider)
         {
