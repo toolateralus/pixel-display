@@ -28,13 +28,22 @@ namespace Pixel
         public TextureFiltering backgroundFiltering = TextureFiltering.Point;
         [JsonProperty]
         public Vector2 backgroundOffset = new(0, 0);
+        /// <summary>
+        /// The base image/ skybox that everything else will be drawn on/behind.
+        /// </summary>
         [JsonProperty]
         public JImage background = new();
 
+        /// <summary>
+        /// the collection of nodes that belong to this stage.
+        /// </summary>
         [JsonProperty]
         public Hierarchy nodes = new(); 
 
         private StageRenderInfo? stage_render_info = null;
+        /// <summary>
+        /// A collection of data used to render this stage's renderables.
+        /// </summary>
         public StageRenderInfo StageRenderInfo
         {
             get
@@ -51,6 +60,9 @@ namespace Pixel
             set { stage_render_info = value; }
         }
 
+        /// <summary>
+        /// Backup background image data.
+        /// </summary>
         public static Metadata DefaultBackgroundMetadata
         {
             get
@@ -60,7 +72,6 @@ namespace Pixel
                 return meta;
             }
         }
-        public bool NodesBusy { get; private set; }
 
         #region Events/Messages
         public Action OnDrawShapes;
