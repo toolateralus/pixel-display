@@ -88,7 +88,6 @@ namespace pixel_editor
         {
             {"help", "type help{cmd name} name to get a more in depth description of the function/usages of a command"},
 
-
         };
         #region General Commands
         public static Command cmd_help() => new()
@@ -314,20 +313,6 @@ namespace pixel_editor
                 Runtime.Current.project.TryLoadStage(index);
             },
 
-        };
-        public static Command cmd_new_stage() => new()
-        {
-            phrase = "stage = new;",
-            syntax = "stage = new();",
-            description = "opens the stage wizard",
-            argumentTypes = null,
-            action = (o) =>
-            {
-                Runtime.Log("stageWnd opened.");
-                Editor.Current.stageWnd = new(Editor.Current);
-                Editor.Current.stageWnd.Show();
-            },
-            args = null,
         };
         public static Command cmd_list_stages() => new()
         {

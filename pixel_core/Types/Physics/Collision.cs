@@ -33,8 +33,9 @@ namespace Pixel.Types.Physics
     public class Physics
     {
         static QuadTree quadTree = null;
-        public static bool AllowEntries { get; private set; } = true;
-        public static void SetActive(bool value) => AllowEntries = value;
+        /// <summary>
+        /// Moves the physics simulation one step forward.
+        /// </summary>
         public static void Step()
         {
             if (Interop.Stage is not Stage stage)
@@ -91,6 +92,7 @@ namespace Pixel.Types.Physics
                 }
             });
         }
+
         private static void Collide(Rigidbody rigidBody, Collider staticCollider)
         {
             if (rigidBody is null || staticCollider is null)
@@ -129,11 +131,12 @@ namespace Pixel.Types.Physics
         }
         private static void Collide(Rigidbody A, Rigidbody B)
         {
-            if ((A == null || B == null ) || (A.node is null || B.node is null) ||( A.node.col is null || B.node.col is null))
+            if (A == null || B == null || A.node is null || B.node is null || A.node.col is null || B.node.col is null)
                 return;
 
             Polygon polyA = A.node.col.Polygon;
             Polygon polyB = B.node.col.Polygon;
+
             Collision? collision = SATCollision.GetCollisionData(polyA, polyB, A.velocity - B.velocity);
 
             if (collision == null)

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pixel_Editor"
         mc:Ignorable="d"
-        Title="Game View" Height="1920" Width="1080"
+        Title="Game View" Height="1080" Width="1920"
         Background="Black">
     <Grid Height="auto" Width="auto">
 

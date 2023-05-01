@@ -219,9 +219,6 @@ namespace pixel_editor
         }
         private void GetEvents()
         {
-            Closing += OnDisable;
-
-
             Runtime.InspectorEventRaised += QueueEvent;
             CompositionTarget.Rendering += Update;
 
@@ -230,8 +227,6 @@ namespace pixel_editor
         }
         private void UnsubscribeEvents()
         {
-            Closing -= OnDisable;
-
             Runtime.InspectorEventRaised -= QueueEvent;
             CompositionTarget.Rendering -= Update;
 
@@ -351,10 +346,6 @@ namespace pixel_editor
 
         public Inspector? Inspector => inspector;
         private readonly Inspector inspector;
-
-        // for stage creation, hopefully a better solution eventually.
-        internal StageWnd? stageWnd;
-
         public readonly EditorEventHandler Events = new();
         public byte[] Frame => Runtime.Current.renderHost.GetRenderer().Frame;
         public int Stride => Runtime.Current.renderHost.GetRenderer().Stride;
@@ -485,11 +476,6 @@ namespace pixel_editor
                 Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Items.Clear());
             Current.Events.Pending.Push(e);
         }
-        private void Wnd_Closed(object? sender, EventArgs e) => stageWnd = null;
-        private void OnDisable(object? sender, EventArgs e)
-        {
-            stageWnd?.Close();
-        }
         private void OnPlay(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
@@ -531,15 +517,7 @@ namespace pixel_editor
                 FileViewerGrid.Visibility = Visibility.Visible;
             else FileViewerGrid.Visibility = Visibility.Hidden;
         }
-        private void OnStagePressed(object sender, RoutedEventArgs e)
-        {
-            if (e != null)
-                e.Handled = true;
-
-            stageWnd = new StageWnd(this);
-            stageWnd.Show();
-            stageWnd.Closed += Wnd_Closed;
-        }
+   
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;

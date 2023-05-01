@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>C:\Users\Josh\source\repos\pixel-display\Documentation\docs.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
