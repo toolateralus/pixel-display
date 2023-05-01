@@ -60,58 +60,24 @@ namespace Pixel
         public bool NodesBusy { get; private set; }
 
         #region Events/Messages
-        private Queue<(Action<object[]>, object[])> delayedActionQueue = new();
+        public event Action Awake;
+        public event Action Update;
+        public event Action<float> FixedUpdate;
 
-        public bool Awake()
+        public bool AwakeMethod()
         {
-            var awokenNodes = 0;
-            int count = nodes.Count;
-            for (int i = 0; i < count; i++)
-                if (!nodes[i].awake)
-                {
-                    nodes[i].Awake();
-                    awokenNodes++;
-                }
-            if (awokenNodes > 0)
-                return false;
-            return true;
+            Awake?.Invoke();
+            return false; 
 
         }
-        public void Update()
+        public void UpdateMethod()
         {
-            NodesBusy = true;
-
-            Awake();
-
-            lock (nodes)
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    Node node = nodes[i];
-                    node.Update();
-                }
-
-            NodesBusy = false;
-
-            for (int i = 0; delayedActionQueue.Count - 1 > 0; ++i)
-            {
-                (Action<object[]>, object[]) kvp = delayedActionQueue.Dequeue();
-
-                object[] args = kvp.Item2;
-                Action<object[]> action = kvp.Item1;
-
-                action.Invoke(args);
-            }
+            Awake?.Invoke();
+            Update?.Invoke();
         }
-        public void FixedUpdate(ref float delta)
+        public void FixedUpdateMethod(ref float delta)
         {
-            NodesBusy = true;
-            lock (nodes)
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    Node node = nodes[i];
-                    node.FixedUpdate(ref delta);
-                }
-            NodesBusy = false;
+            FixedUpdate?.Invoke(delta);
         }
         #endregion
 
@@ -162,25 +128,15 @@ namespace Pixel
         }
         public void AddNode(Node node)
         {
-            void add_node(object[] o)
-            {
-                if (o[0] is not Node newNode)
-                    return;
+            if (nodes.Contains(node))
+                return;
 
-                if (nodes.Contains(newNode))
-                    return;
+            node.ParentStage = this;
+            node.SubscribeToEngine(true, this);
 
-                newNode.ParentStage = this;
-
-
-                if(node.parent is null)
-                    nodes.Add(newNode);
-            }
-            object[] args = { node };
-
-            if (NodesBusy)
-                delayedActionQueue.Enqueue((add_node, args));
-            else add_node(args);
+            if(node.parent is null)
+                nodes.Add(node);
+          
         }
         public void AddNodes(List<Node> nodes)
         {
@@ -273,31 +229,21 @@ namespace Pixel
         }
         internal void RemoveNode(Node node)
         {
-            object[] args = { node };
-
-
-            if (NodesBusy)
+            unsafe
             {
-                delayedActionQueue.Enqueue((remove_node, args));
-            }
-            else remove_node(args);
+                if (!nodes.Contains(node)) return;
+                nodes.Remove(node);
+
+                node.SubscribeToEngine(false, this);
+                // TODO: remove this probably
+
+                Node* objPtr = &node;
+
+                IntPtr objIntPtr = new IntPtr(objPtr);
+                Marshal.FreeHGlobal(objIntPtr);
+            };
         }
-        void remove_node(object[] o)
-        {
-            if (o[0] is Node node)
-                unsafe
-                {
-                    if (!nodes.Contains(node)) return;
-                    nodes.Remove(node);
-
-                    // TODO: remove this probably
-                    Node* objPtr = &node;
-
-                    IntPtr objIntPtr = new IntPtr(objPtr);
-                    Marshal.FreeHGlobal(objIntPtr);
-                };
-
-        }
+      
         public override void Sync()
         {
             string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;

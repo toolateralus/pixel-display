@@ -14,7 +14,7 @@ namespace Pixel
         public Node? lastSelected;
         public static Stage Standard()
         {
-            var nodes = new Hierarchy();
+            var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, new());
 
             Node camera = new("camera");
             camera.AddComponent<Camera>();
@@ -23,7 +23,7 @@ namespace Pixel
             camera.Scale = new Vector2(16, 9) * fov;
 
             Node floor = Floor.Standard();
-            nodes.Add(floor);
+            stage.AddNode(floor);
 
             Node textTest = new("text");
             var img = textTest.AddComponent<Text>();
@@ -36,22 +36,17 @@ namespace Pixel
             Node light = Light.Standard();
             light.AddComponent<SineAnimator>();
 
-            nodes.Add(textTest);
-            nodes.Add(light);
-            nodes.Add(camera);
+            stage.AddNode(textTest);
+            stage.AddNode(light);
+            stage.AddNode(camera);
 
             for (int i = 0; i < 500; i++)
             {
                 Node rbNode = Rigidbody.Standard();
                 Sprite spr = rbNode.GetComponent<Sprite>();
-                //Library.Fetch<Texture>(out var output);
-                //if(output.Any())
-                //spr.texture = output.First();
-
-                nodes.Add(rbNode);
+                stage.AddNode(rbNode);
             }
 
-            var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, nodes);
             return stage;
         }
         /// <summary>
@@ -109,11 +104,11 @@ namespace Pixel
         public static void FixedUpdate(Stage stage)
         {
             lastFrameTime = (float)Runtime.Current.renderHost.info.FrameTime;
-            stage.FixedUpdate(ref lastFrameTime);
+            stage.FixedUpdateMethod(ref lastFrameTime);
         }
         public static void Update(Stage m_stage)
         {
-            m_stage.Update();
+            m_stage.UpdateMethod();
         }
     }
 }

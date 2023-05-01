@@ -223,6 +223,9 @@ namespace Pixel
 
         public void Awake()
         {
+            if (awake)
+                return;
+
             ComponentsBusy = true;
             for (int i = 0; i < children.Count; i++)
             {
@@ -237,10 +240,11 @@ namespace Pixel
                 for (int j = 0; j < Components[key].Count; ++j)
                     Components[key].ElementAt(j).init_component_internal();
             }
+
             awake = true;
             ComponentsBusy = false;
         }
-        public void FixedUpdate(ref float delta)
+        public void FixedUpdate(float delta)
         {
             if (!awake || !Enabled)  return;
             for (int i = 0; i < children.Count; i++)
@@ -249,7 +253,7 @@ namespace Pixel
                 
                 if (child_offsets.Count < i || !(child_offsets.ElementAt(i) is var kvp && kvp.Key != UUID))
                     continue;
-                child.FixedUpdate(ref delta);
+                child.FixedUpdate(delta);
                 child.Position = Position + kvp.Value;
             }
             ComponentsBusy = true;
@@ -543,6 +547,24 @@ namespace Pixel
             clone.Position = position;
             return clone;
         }
+
+        internal void SubscribeToEngine(bool v, Stage stage)
+        {
+            if (v)
+            {
+                stage.Awake += Awake;
+                stage.Update += Update;
+                stage.FixedUpdate += FixedUpdate;
+            }
+            else
+            {
+                stage.Awake -= Awake;
+                stage.Update -= Update;
+                stage.FixedUpdate -= FixedUpdate;
+            }
+
+        }
+
         public static Node New => new("New Node", Vector2.Zero, Vector2.One);
 
     }
