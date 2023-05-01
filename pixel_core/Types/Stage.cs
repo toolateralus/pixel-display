@@ -241,19 +241,11 @@ namespace Pixel
         }
         internal void RemoveNode(Node node)
         {
-            unsafe
-            {
-                if (!nodes.Contains(node)) return;
-                nodes.Remove(node);
+            if (!nodes.Contains(node))
+                return;
 
-                node.SubscribeToEngine(false, this);
-                // TODO: remove this probably
-
-                Node* objPtr = &node;
-
-                IntPtr objIntPtr = new IntPtr(objPtr);
-                Marshal.FreeHGlobal(objIntPtr);
-            };
+            nodes.Remove(node);
+            node.SubscribeToEngine(false, this);
         }
       
         public override void Sync()

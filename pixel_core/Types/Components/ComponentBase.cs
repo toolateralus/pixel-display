@@ -101,6 +101,7 @@ namespace Pixel.Types.Components
         {
             Dispose();
             OnDestroy();
+            node.RemoveComponent(this);
         }
         /// <summary>
         /// Destroy's this component.

@@ -237,6 +237,11 @@
             Stores data representing a single collision between two colliders.
             </summary>
         </member>
+        <member name="M:Pixel.Types.Physics.Physics.Step">
+            <summary>
+            Moves the physics simulation one step forward.
+            </summary>
+        </member>
         <member name="T:Pixel.Types.Physics.Curve">
             <summary>
             A simple Vector2 Animation class with helpers like primitve curves etc.

@@ -331,31 +331,10 @@ namespace Pixel
         /// </summary>
         public void Destroy()
         {
-            foreach (var node in children)
-            {
-                node.parent = null;
-                node.Destroy();
-            }
-
-            if (parent?.children != null)
-                for (int i = 0; i < parent.children.Count; i++)
-                {
-                    Node? kvp = parent.children[i];
-                    if (kvp == this)
-                        parent.children.Remove(this);
-
-                }
-
-            Interop.Stage?.nodes.Remove(this);
-
-            foreach (var component in Components)
-                foreach (var comp in component.Value)
-                {
-                    comp.on_destroy_internal();
-                }
-
-            Dispose();
             OnDestroyed?.Invoke();
+            Dispose();
+            if (Interop.Stage is not null)
+                Interop.Stage.RemoveNode(this);
         }
         /// <summary>
         /// Cleans up any managed resources referring to Node/Component as they don't have a great disposal system yet.
@@ -422,6 +401,8 @@ namespace Pixel
         {
             var type = component.GetType();
 
+            UnsubscribeComponent(Interop.Stage, component);
+
             if (Components.ContainsKey(type))
             {
                 if (type == typeof(Rigidbody))
@@ -450,6 +431,21 @@ namespace Pixel
                 }
             }
         }
+
+        private void UnsubscribeComponent(Stage? stage, Component component)
+        {
+            if (stage is not null)
+            {
+                OnDestroyed -= component.on_destroy_internal;
+                stage.OnDrawShapes -= component.OnDrawShapes;
+                OnCollided -= component.OnCollision;
+                OnTriggered -= component.OnTrigger;
+                stage.Awake -= component.init_component_internal;
+                stage.Update -= component.Update;
+                stage.FixedUpdate -= component.FixedUpdate;
+            }
+        }
+
         /// <summary>
         /// Check whether a node does or doesn't have a certain type of component.
         /// </summary>

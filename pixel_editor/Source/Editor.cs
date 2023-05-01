@@ -216,6 +216,9 @@ namespace pixel_editor
                     
                 }
             }
+
+            Current.ActivelySelected.Clear();
+            Current.LastSelected = null;
         }
         private void GetEvents()
         {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using BoundingBox2D = Pixel.Types.Physics.BoundingBox2D;
@@ -40,28 +41,24 @@ namespace Pixel.Types.Physics
         {
             if (Interop.Stage is not Stage stage)
                 return;
-
             var area = ProjectSettings.PhysicsArea;
-
             quadTree ??= new QuadTree(new BoundingBox2D(-area.X, -area.Y, area.X, area.Y));
+            
+            BoundingBox2D range = new(area / -2, area / 2);
+            List<Node> foundNodes = new();
 
-            quadTree.Clear();
-
-            stage.FixedUpdateMethod(0.1f);
-
-            Parallel.For(0, stage.nodes.Count, (i) =>
+            for( int i = 0; i < stage.nodes.Count; ++i)
             {
+                if (stage.nodes.Count <= i)
+                    return;
                 Node? node = stage.nodes[i];
-
                 var hasCollider = node.col != null;
-
                 if (hasCollider)
                     quadTree.Insert(node);
-            });
-
-            BoundingBox2D range = new(area / -2, area / 2);
-
-            List<Node> foundNodes = new();
+            };
+            
+            // This is here so the physics updates are all more precise for collision, it's not the best cuz it's a bit harder to find/read
+            stage.FixedUpdateMethod(0.1f);
 
             quadTree.Query(range, foundNodes);
 
@@ -91,8 +88,8 @@ namespace Pixel.Types.Physics
 
                 }
             });
+            quadTree.Clear();
         }
-
         private static void Collide(Rigidbody rigidBody, Collider staticCollider)
         {
             if (rigidBody is null || staticCollider is null)
@@ -131,7 +128,7 @@ namespace Pixel.Types.Physics
         }
         private static void Collide(Rigidbody A, Rigidbody B)
         {
-            if (A == null || B == null || A.node is null || B.node is null || A.node.col is null || B.node.col is null)
+            if (IsNull(A, B))
                 return;
 
             Polygon polyA = A.node.col.Polygon;
@@ -141,6 +138,11 @@ namespace Pixel.Types.Physics
 
             if (collision == null)
                 return;
+
+
+            if (IsNull(A, B))
+                return;
+
 
             if (!(A.node.col.IsTrigger || B.node.col.IsTrigger))
             {
@@ -160,8 +162,15 @@ namespace Pixel.Types.Physics
                 B.ApplyImpulse(impulse);
             }
 
+            if (IsNull(A, B))
+                return;
+
             Collision collisionA, collisionB;
             GetCollisionObjects(A.node.col, B.node.col, collision.normal, collision.depth, out collisionA, out collisionB);
+
+            if (IsNull(A, B))
+                return;
+
             if (collisionA.collider.IsTrigger || collisionB.collider.IsTrigger)
             {
                 collisionA.collider.node.OnTriggered?.Invoke(collisionB);
@@ -171,6 +180,10 @@ namespace Pixel.Types.Physics
             collisionA.collider.node.OnCollided?.Invoke(collisionB);
             collisionB.collider.node.OnCollided?.Invoke(collisionA);
 
+            static bool IsNull(Rigidbody A, Rigidbody B)
+            {
+                return A == null || B == null || A.node is null || B.node is null || A.node.col is null || B.node.col is null;
+            }
         }
         private static void GetCollisionObjects(Collider aCol, Collider bCol, Vector2 normal, float depth, out Collision collisionA, out Collision collisionB)
         {
@@ -192,7 +205,6 @@ namespace Pixel.Types.Physics
             collisionA = new(bCol, aCollisionPoint, normal, depth);
             collisionB = new(aCol, bCollisionPoint, -normal, depth);
         }
-      
     }
 }
 public class QuadTree
@@ -285,10 +297,9 @@ public class QuadTree
             return;
 
         foreach (var node in nodes)
-        {
-            if (range.Intersects(node.GetComponent<Collider>().BoundingBox))
-                found.Add(node);
-        }
+            if (node != null && node.col != null)
+                if (range.Intersects(node.col.BoundingBox))
+                    found.Add(node);
 
         if (children[0] == null)
             return;
