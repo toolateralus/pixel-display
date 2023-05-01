@@ -19,7 +19,7 @@ namespace Pixel
 
             Node node = new("camera");
             var cam = node.AddComponent<CameraController>();
-           
+
             stage.AddNode(floor);
             stage.AddNode(node);
            

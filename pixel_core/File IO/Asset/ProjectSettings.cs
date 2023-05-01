@@ -14,7 +14,7 @@ namespace Pixel
         [JsonProperty] public static Color EditorHighlightColor = System.Drawing.Color.Orange;
         [JsonProperty] public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
         [JsonProperty] public static int PhysicsTimeStep = 16;
-        [JsonProperty] public static Vector2 CurrentResolution = new(256, 256);
+        [JsonProperty] public static Vector2 CurrentResolution = new(512, 288);
 
         public ProjectSettings(string name, bool shouldUpload = false) : base(name, shouldUpload)
         {

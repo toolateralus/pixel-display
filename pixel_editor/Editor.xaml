@@ -14,16 +14,62 @@
                         ScaleX="{Binding ElementName=editorWindow, Path=ScaleValue}"
                         ScaleY="{Binding ElementName=editorWindow, Path=ScaleValue}" />
         </Grid.LayoutTransform>
-            <Image  x:Name="image"
-                    Grid.Row="1" 
-                    Grid.Column="1" 
-                    RenderOptions.BitmapScalingMode = "NearestNeighbor"
-                    Grid.RowSpan="23"
-                    Grid.ColumnSpan="23" 
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    />
-            <Grid x:Name="inspectorGrid" Height="Auto" Width="Auto">
+        <Image  x:Name="image" RenderOptions.BitmapScalingMode = "NearestNeighbor" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Grid x:Name="inspectorGrid" Height="Auto" Width="Auto">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+            <Grid x:Name="ConsoleGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="11" Grid.Column="18">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="3*"/>
                     <RowDefinition Height="3*"/>
@@ -77,6 +123,115 @@
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
+                <TextBox  x:Name="editorMessages" 
+                                                        Text =""
+                                                        Grid.Row="20"
+                                                        Visibility="Visible"
+                                                        FontSize="3.95" 
+                                                        FontFamily="MS Gothic"
+                                                        Grid.Column="0"
+                                                        Grid.ColumnSpan="36" 
+                                                        Grid.RowSpan="4" 
+                                                        Background="Black"
+                                                        Foreground="White"
+                                                        CaretBrush="Gray"
+                                                        TextWrapping="Wrap"
+                                                        AcceptsReturn="True"
+                                                        VerticalAlignment="Stretch"
+                                                        HorizontalAlignment="Stretch"
+                                                        TextElement.FontStretch="SemiCondensed"
+                                                        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                                        ScrollViewer.VerticalScrollBarVisibility="Hidden" >
+
+                </TextBox>
+                <ListBox 
+                                                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                                    Visibility="Visible"
+                                                    VerticalAlignment="Stretch"
+                                                    HorizontalAlignment="Stretch"
+                                                    x:Name="consoleOutput" 
+                                                    Background="Black"
+                                                    Foreground="White"
+                                                    FontSize="3.95"
+                                                    FontStyle="Normal"
+                                                    FontStretch="SemiCondensed"
+                                                    FontFamily="MS Gothic"
+                                                    Grid.Column="0"
+                                                    Grid.Row="0"
+                                                    Grid.RowSpan="20"
+                                                    Grid.ColumnSpan="26">
+
+                </ListBox>
+            </Grid>
+            <Grid Visibility="Visible" x:Name="FileViewerGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="17" Grid.Column="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <ListBox 
+                    Background="Black"
+                    Foreground="White"
+                    FontSize="3.95"
+                    FontStyle="Normal"
+                    FontStretch="SemiCondensed"
+                    Height="auto" 
+                    Width="auto" 
+                    x:Name="fileViewerListBox"
+                    SelectionChanged="fv_selection_changed" 
+                    Grid.ColumnSpan="26" 
+                    Grid.RowSpan="26">
+            </ListBox>
+        </Grid>
                 
                 <Label  FontSize="3" 
                     FontWeight="Bold" 
@@ -91,7 +246,6 @@
                     Background="Black"
                     Foreground="White"
                     Content=""/>
-                
                 <Button HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom"
                     TextBlock.FontFamily="MS Gothic" 
@@ -140,180 +294,6 @@
                 Grid.Column="4"  
                 Click="OnToggleGameView"
                 x:Name="ToggleGameView"/>
-                
-                <DockPanel Grid.Row="15" Grid.Column="14" Grid.RowSpan="10" Grid.ColumnSpan="14">
-                    <TabControl BorderThickness="0" >
-                    <TabItem Header="Console" BorderThickness="0" FontSize="4">
-                        <Grid >
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox  x:Name="editorMessages" 
-                                      Text =""
-                                      Grid.Row="20"
-                                      Visibility="Visible"
-                                      FontSize="3.95" 
-                                      FontFamily="MS Gothic"
-                                      Grid.Column="0"
-                                      Grid.ColumnSpan="36" 
-                                      Grid.RowSpan="4" 
-                                      Background="Black"
-                                      Foreground="White"
-                                      CaretBrush="Gray"
-                                      TextWrapping="Wrap"
-                                      AcceptsReturn="True"
-                                      VerticalAlignment="Stretch"
-                                      HorizontalAlignment="Stretch"
-                                      TextElement.FontStretch="SemiCondensed"
-                                      ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                                      ScrollViewer.VerticalScrollBarVisibility="Hidden" >
-                                     
-                            </TextBox>
-                            <ListBox 
-                                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                                    Visibility="Visible"
-                                    VerticalAlignment="Top"
-                                    HorizontalAlignment="Stretch"
-                                    x:Name="consoleOutput" 
-                                    Background="Black"
-                                    Foreground="White"
-                                    FontSize="3.95"
-                                    FontStyle="Normal"
-                                    FontStretch="SemiCondensed"
-                                    FontFamily="MS Gothic"
-                                    Grid.Column="0" 
-                                    Grid.Row="0"
-                                    Grid.ColumnSpan="36" 
-                                    Grid.RowSpan="20">
-
-                            </ListBox>
-                        </Grid>
-                    </TabItem>
-                    <TabItem Header="File Viewer" >
-                        <Grid Visibility="Visible" x:Name="FileViewerGrid" Height="Auto" Width="Auto">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                                <RowDefinition Height="3*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                                <ColumnDefinition Width="3*"/>
-                            </Grid.ColumnDefinitions>
-                            <ListBox 
-                        Background="Black"
-                        Foreground="White"
-                        FontSize="3.95"
-                        FontStyle="Normal"
-                        FontStretch="SemiCondensed"
-                        Height="auto" 
-                        Width="auto" 
-                        x:Name="fileViewerListBox"
-                        SelectionChanged="fv_selection_changed" 
-                        Grid.ColumnSpan="26" 
-                        Grid.RowSpan="26">
-                            </ListBox>
-                        </Grid>
-                    </TabItem>
-                    <TabItem Header="Menu 3" >
-                    </TabItem>
-                </TabControl>
-                </DockPanel>
-        </Grid>
+            </Grid>
     </Grid>
 </Window>
