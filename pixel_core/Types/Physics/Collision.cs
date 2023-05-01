@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using BoundingBox2D = Pixel.Types.Physics.BoundingBox2D;
 
@@ -28,6 +29,7 @@ namespace Pixel.Types.Physics
 
     public class Physics
     {
+        static QuadTree quadTree = null;
         public static bool AllowEntries { get; private set; } = true;
         public static void SetActive(bool value) => AllowEntries = value;
         public static void Step()
@@ -37,7 +39,9 @@ namespace Pixel.Types.Physics
 
             var area = ProjectSettings.PhysicsArea;
 
-            var quadTree = new QuadTree(new BoundingBox2D(-area.X, -area.Y, area.X, area.Y));
+            quadTree ??= new QuadTree(new BoundingBox2D(-area.X, -area.Y, area.X, area.Y));
+
+            quadTree.Clear();
 
             for (int i = 0; i < stage.nodes.Count; i++)
             {
@@ -54,7 +58,6 @@ namespace Pixel.Types.Physics
             List<Node> foundNodes = new();
 
             quadTree.Query(range, foundNodes);
-
 
             Parallel.For(0, foundNodes.Count, (i) => {
                 var A = foundNodes[i];
@@ -109,7 +112,15 @@ namespace Pixel.Types.Physics
                 rigidBody.velocity -= collision.normal * dot;
             }
             GetCollisionObjects(staticCollider, rbCollider, collision.normal, collision.depth, out var collisionA, out var collisionB);
-            AttemptCallbacks(collisionA, collisionB);
+           
+            if (collisionA.collider.IsTrigger || collisionB.collider.IsTrigger)
+            {
+                collisionA.collider.node.OnTriggered?.Invoke(collisionB);
+                collisionB.collider.node.OnTriggered?.Invoke(collisionA);
+                return;
+            }
+            collisionA.collider.node.OnCollided?.Invoke(collisionB);
+            collisionB.collider.node.OnCollided?.Invoke(collisionA);
         }
         private static void Collide(Rigidbody A, Rigidbody B)
         {
@@ -124,11 +135,33 @@ namespace Pixel.Types.Physics
                 return;
 
             if (!(A.node.col.IsTrigger || B.node.col.IsTrigger))
-                ComputeImpulse(A, B, collision);
+            {
+                Vector2 correction = collision.normal * collision.depth;
+                A.Position += correction / 2;
+                B.Position -= correction / 2;
+
+                Vector2 aRelVelocity = A.velocity - B.velocity;
+
+                float aRelInertia = Vector2.Dot(aRelVelocity, collision.normal) * (A.mass + B.mass);
+
+                float minRestitution = MathF.Min(A.restitution, B.restitution);
+                float totalEnergy = aRelInertia * minRestitution;
+
+                Vector2 impulse = totalEnergy * collision.normal;
+                A.ApplyImpulse(-impulse);
+                B.ApplyImpulse(impulse);
+            }
 
             Collision collisionA, collisionB;
             GetCollisionObjects(A.node.col, B.node.col, collision.normal, collision.depth, out collisionA, out collisionB);
-            AttemptCallbacks(collisionA, collisionB);
+            if (collisionA.collider.IsTrigger || collisionB.collider.IsTrigger)
+            {
+                collisionA.collider.node.OnTriggered?.Invoke(collisionB);
+                collisionB.collider.node.OnTriggered?.Invoke(collisionA);
+                return;
+            }
+            collisionA.collider.node.OnCollided?.Invoke(collisionB);
+            collisionB.collider.node.OnCollided?.Invoke(collisionA);
 
         }
         private static void GetCollisionObjects(Collider aCol, Collider bCol, Vector2 normal, float depth, out Collision collisionA, out Collision collisionB)
@@ -151,34 +184,7 @@ namespace Pixel.Types.Physics
             collisionA = new(bCol, aCollisionPoint, normal, depth);
             collisionB = new(aCol, bCollisionPoint, -normal, depth);
         }
-        private static void AttemptCallbacks(Collision A, Collision B)
-        {
-            if (A.collider.IsTrigger || B.collider.IsTrigger)
-            {
-                A.collider.node.OnTrigger(B);
-                B.collider.node.OnTrigger(A);
-                return;
-            }
-            A.collider.node.OnCollision(B);
-            B.collider.node.OnCollision(A);
-        }
-        private static void ComputeImpulse(Rigidbody rbA, Rigidbody rbB, Collision collision)
-        {
-            Vector2 correction = collision.normal * collision.depth;
-            rbA.Position += correction / 2;
-            rbB.Position -= correction / 2;
-
-            Vector2 aRelVelocity = rbA.velocity - rbB.velocity;
-
-            float aRelInertia = Vector2.Dot(aRelVelocity, collision.normal) * (rbA.mass + rbB.mass);
-
-            float minRestitution = MathF.Min(rbA.restitution, rbB.restitution);
-            float totalEnergy = aRelInertia * minRestitution;
-
-            Vector2 impulse = totalEnergy * collision.normal;
-            rbA.ApplyImpulse(-impulse);
-            rbB.ApplyImpulse(impulse);
-        }
+      
     }
 }
 public class QuadTree
@@ -195,6 +201,12 @@ public class QuadTree
         nodes = new List<Node>();
         children = new QuadTree[4];
     }
+
+    public QuadTree()
+    {
+
+    }
+
     public void Clear()
     {
         nodes.Clear();

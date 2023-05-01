@@ -64,12 +64,6 @@ namespace Pixel
         public event Action Update;
         public event Action<float> FixedUpdate;
 
-        public bool AwakeMethod()
-        {
-            Awake?.Invoke();
-            return false; 
-
-        }
         public void UpdateMethod()
         {
             Awake?.Invoke();

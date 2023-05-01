@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Pixel
 {
@@ -133,7 +134,6 @@ namespace Pixel
             }
         }
         public void SetActive(bool value) => _enabled = value;
-
         public void Child(Node child)
         {
             if (ContainsCycle(child))
@@ -221,81 +221,7 @@ namespace Pixel
 
         #region Events/Messages
 
-        public void Awake()
-        {
-            if (awake)
-                return;
-
-            ComponentsBusy = true;
-            for (int i = 0; i < children.Count; i++)
-            {
-                Node? child = children[i];
-                child.Awake();
-            }
-            for (int i = 0; i < Components.Count; i++)
-            {
-                var pair = Components.ElementAt(i);
-                var key = pair.Key;
-
-                for (int j = 0; j < Components[key].Count; ++j)
-                    Components[key].ElementAt(j).init_component_internal();
-            }
-
-            awake = true;
-            ComponentsBusy = false;
-        }
-        public void FixedUpdate(float delta)
-        {
-            if (!awake || !Enabled)  return;
-            for (int i = 0; i < children.Count; i++)
-            {
-                Node? child = children[i];
-                
-                if (child_offsets.Count < i || !(child_offsets.ElementAt(i) is var kvp && kvp.Key != UUID))
-                    continue;
-                child.FixedUpdate(delta);
-                child.Position = Position + kvp.Value;
-            }
-            ComponentsBusy = true;
-            for (int i = 0; i < Components.Count; i++)
-            {
-                var pair = Components.ElementAt(i);
-                for (int j = 0; j < pair.Value.Count; ++j)
-                {
-                    Component c = pair.Value.ElementAt(j);
-                    if (c is not null && c.Enabled)
-                        c.FixedUpdate(delta);
-                }
-            }
-            ComponentsBusy = false;
-        }
-        public void Update()
-        {
-            if (!awake || !Enabled) return;
-
-            ComponentsBusy = true;
-            for (int i = 0; i < children.Count; i++)
-            {
-                Node? child = children[i];
-                child.Update();
-            }
-            for (int i = 0; i < Components.Count; i++)
-            {
-                var pair = Components.ElementAt(i);
-                var key = pair.Key;
-
-                for (int j = 0; j < pair.Value.Count; ++j)
-                {
-                    Component c = pair.Value.ElementAt(j);
-                    if (c is not null && c.Enabled)
-                        c?.Update();
-                }
-            }
-            while (ComponentActionQueue.Count > 0)
-                ComponentActionQueue.Dequeue().Invoke();
-            ComponentsBusy = false;
-        }
-
+        
         public void Destroy()
         {
             ComponentsBusy = true;
@@ -338,48 +264,6 @@ namespace Pixel
                 foreach (var c in component.Value)
                     c.Dispose();
         }
-
-        public void OnTrigger(Collision otherBody)
-        {
-            if (!awake) return;
-            ComponentsBusy = true;
-            for (int i = 0; i < children.Count; i++)
-            {
-                Node? child = children[i];
-                child.OnTrigger(otherBody);
-            }
-            for (int i = 0; i < Components.Count; i++)
-            {
-                var pair = Components.ElementAt(i);
-                var key = pair.Key;
-
-                for (int j = 0; j < Components[key].Count; ++j)
-                    Components[key].ElementAt(j)?.OnTrigger(otherBody);
-            }
-            OnTriggered?.Invoke(otherBody);
-            ComponentsBusy = false;
-        }
-        public void OnCollision(Collision otherBody)
-        {
-            if (!awake) return;
-            ComponentsBusy = true;
-            for (int i = 0; i < children.Count; i++)
-            {
-                Node? child = children[i];
-                child.OnCollision(otherBody);
-            }
-            for (int i = 0; i < Components.Count; i++)
-            {
-                var pair = Components.ElementAt(i);
-                var key = pair.Key;
-
-                for (int j = 0; j < Components[key].Count; ++j)
-                    Components[key].ElementAt(j)?.OnCollision(otherBody);
-            }
-            OnCollided?.Invoke(otherBody);
-            ComponentsBusy = false;
-        }
-
         public void OnDrawShapes()
         {
             var compTypes = Components.Values;
@@ -428,7 +312,7 @@ namespace Pixel
                 component.node = this;
 
                 if (Interop.IsRunning)
-                    component.Awake();
+                    component.init_component_internal();
             }
 
             if (ComponentsBusy)
@@ -536,9 +420,6 @@ namespace Pixel
 
             stage.AddNode(clone);
 
-            if (clone.ParentStage is null || clone.parentStage != stage)
-
-                clone.Awake();
             return clone;
         }
         internal static Node Instantiate(Node projectile, Vector2 position)
@@ -550,18 +431,33 @@ namespace Pixel
 
         internal void SubscribeToEngine(bool v, Stage stage)
         {
-            if (v)
-            {
-                stage.Awake += Awake;
-                stage.Update += Update;
-                stage.FixedUpdate += FixedUpdate;
-            }
-            else
-            {
-                stage.Awake -= Awake;
-                stage.Update -= Update;
-                stage.FixedUpdate -= FixedUpdate;
-            }
+            Parallel.ForEach(Components, (comp) => {
+                foreach (Component _component in comp.Value)
+                    if (v)
+                    {
+                        OnDestroyed += _component.on_destroy_internal;
+
+                        OnCollided += _component.OnCollision;
+                        OnTriggered += _component.OnTrigger;
+
+                        stage.Awake += _component.init_component_internal;
+                        stage.Update += _component.Update;
+                        stage.FixedUpdate += _component.FixedUpdate;
+                    }
+                    else
+                    {
+                        OnDestroyed -= _component.on_destroy_internal;
+
+
+                        OnCollided -= _component.OnCollision;
+                        OnTriggered -= _component.OnTrigger;
+
+                        stage.Awake -= _component.init_component_internal;
+                        stage.Update -= _component.Update;
+                        stage.FixedUpdate -= _component.FixedUpdate;
+                    }
+            });
+              
 
         }
 

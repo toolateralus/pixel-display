@@ -246,9 +246,6 @@ namespace Pixel
                 return;
             }
             IsRunning = true;
-            if (Current.GetStage() is Stage stage)
-                Log($"Stage is fully awake: {stage.AwakeMethod()}");
-
         }
         #endregion
         #region Editor Events

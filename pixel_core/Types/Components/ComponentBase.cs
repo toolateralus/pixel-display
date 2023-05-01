@@ -43,6 +43,8 @@ namespace Pixel.Types.Components
         public ref Matrix3x2 Transform { get => ref node.Transform; }
         public string Name { get; set; } = "";
         public bool selected_by_editor;
+        private bool awake;
+
         public string UUID => _uuid;
         public Component()
         {
@@ -89,6 +91,10 @@ namespace Pixel.Types.Components
         /// </summary>
         internal protected void init_component_internal()
         {
+            if (awake)
+                return;
+
+            awake = true;
             Name = $"{GetType().Name}";
             Awake();
         }
