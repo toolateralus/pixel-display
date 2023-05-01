@@ -11,11 +11,95 @@ namespace Pixel
     /// </summary>
     public class LUA
     {
-        #region pixel_engine lua library (C# functions)
-
         public static List<LuaFunction> functions_list = new();
+        static Dictionary<string, object> env_vars = new();
+        private static readonly KeraLua.Lua state = new();
         public static bool envMode = false;
 
+        private static void PrintLUA(string print)
+        {
+            FromString($"print(\"{print}\")");
+        }
+        public LUA() => RefreshFunctions();
+        public void RefreshFunctions()
+        {
+            var type = GetType();
+            var methods = type.GetRuntimeMethods();
+            foreach (var method in methods)
+                if (method.ReturnType == typeof(LuaFunction))
+                {
+                    LuaFunction function = (LuaFunction)method.Invoke(null, null);
+                    functions_list.Add(function);
+                    state.Register(method.Name, function);
+                }
+        }
+        public static (bool result, string err) FromString(string luaString)
+        {
+            if (luaString is null || luaString is "")
+            {
+                Interop.Log("Lua component was called to run but it had no valid lua code to run.");
+                return (true, "No code found");
+            }
+            var result = state.DoString(luaString);
+            if (result)
+                return (false, "nil");
+            return (true, state.ToString(1));
+        }
+        public static bool FromFile(string fileName)
+        {
+            var result = state.LoadFile(fileName);
+            if (result != LuaStatus.OK)
+            {
+                Interop.Log(state.ToString(1));
+                return false;
+            }
+            result = state.PCall(0, -1, 0);
+            if (result != LuaStatus.OK)
+            {
+                Interop.Log(state.ToString(1));
+                return false;
+            }
+            return true;
+        }
+        public static IntPtr GetHandle()
+        {
+            return state.Handle;
+        }
+        public static string Environment(string line)
+        {
+            if (line == "*c();\r\n")
+            {
+                Interop.Log("", false, true);
+                return "";
+            }
+
+            if (line == "env();\r\n")
+            {
+                env();
+                return "";
+            }
+
+            if (line.Contains(' '))
+            {
+                string[] split = line.Split(' ');
+
+                if (split[0] is not string s1 || s1 is "" || split[1] is not string s2 || s2 is "")
+                    return "";
+
+
+                if (!env_vars.ContainsKey(s1))
+                    env_vars.Add(s1, s2);
+                else env_vars[s1] = s2;
+
+                Interop.Log($"{s1} : {s2} added to environment vars.");
+
+                return s2;
+            }
+
+            return "";
+        }
+
+        #region pixel_engine lua library (C# functions)
         public static LuaFunction dispose() => new((p) =>
         {
             var ct = env_vars.Count;
@@ -23,7 +107,6 @@ namespace Pixel
             FromString($"{ct} environment variables released.");
             return 0;
         });
-
         public static LuaFunction env() => new((p) =>
         {
             env_vars ??= new();
@@ -102,12 +185,6 @@ namespace Pixel
             }
             return 0;
         });
-
-        private static void PrintLUA(string print)
-        {
-            FromString($"print(\"{print}\")");
-        }
-
         public static LuaFunction list_env() => new((p) =>
         {
             var state = KeraLua.Lua.FromIntPtr(p);
@@ -131,89 +208,6 @@ namespace Pixel
             return 0;
         });
         #endregion
-
-
-        static Dictionary<string, object> env_vars = new();
-        private static readonly KeraLua.Lua state = new();
-        public LUA() => RefreshFunctions();
-        public void RefreshFunctions()
-        {
-            var type = GetType();
-            var methods = type.GetRuntimeMethods();
-            foreach (var method in methods)
-                if (method.ReturnType == typeof(LuaFunction))
-                {
-                    LuaFunction function = (LuaFunction)method.Invoke(null, null);
-                    functions_list.Add(function);
-                    state.Register(method.Name, function);
-                }
-        }
-        public static (bool result, string err) FromString(string luaString)
-        {
-            if (luaString is null || luaString is "")
-            {
-                Interop.Log("Lua component was called to run but it had no valid lua code to run.");
-                return (true, "No code found");
-            }
-            var result = state.DoString(luaString);
-            if (result)
-                return (false, "nil");
-            return (true, state.ToString(1));
-        }
-        public static bool FromFile(string fileName)
-        {
-            var result = state.LoadFile(fileName);
-            if (result != LuaStatus.OK)
-            {
-                Interop.Log(state.ToString(1));
-                return false;
-            }
-            result = state.PCall(0, -1, 0);
-            if (result != LuaStatus.OK)
-            {
-                Interop.Log(state.ToString(1));
-                return false;
-            }
-            return true;
-        }
-
-        public static IntPtr GetHandle()
-        {
-            return state.Handle; 
-        }
-
-        public static string Environment(string line)
-        {
-            if (line == "*c();\r\n")
-            {
-                Interop.Log("", false, true);
-                return "";
-            }
-
-            if (line == "env();\r\n")
-            {
-                env();
-                return "";
-            }
-
-            if (line.Contains(' '))
-            {
-                string[] split = line.Split(' ');
-                
-                if (split[0] is not string s1 || s1 is  "" || split[1] is not string s2 || s2 is "")
-                    return "";
-
-
-                if (!env_vars.ContainsKey(s1))
-                    env_vars.Add(s1, s2);
-                else env_vars[s1] = s2;
-
-                Interop.Log($"{s1} : {s2} added to environment vars.");
-
-                return s2;
-            }
-
-            return "";
-        }
     }
+   
 }
