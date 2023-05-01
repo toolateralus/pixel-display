@@ -19,7 +19,7 @@ namespace Pixel
         public override void Dispose()
         {
         }
-        public override void on_draw_shapes_internal()
+        public override void OnDrawShapes()
         {
             AnimateLength();
             RunAnimation();

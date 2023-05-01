@@ -136,7 +136,7 @@ namespace Pixel
             if (lit)
                lightmap =  GetLightmap();
         }
-        public override void on_draw_shapes_internal()
+        public override void OnDrawShapes()
         {
             if (selected_by_editor)
             {

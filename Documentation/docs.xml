@@ -186,6 +186,7 @@
             <summary>
             Will be called each frame by the renderer at the time that the shape drawer is collecting a cycle's worth of debug data.
             </summary>
+            
         </member>
         <member name="M:Pixel.Types.Components.Component.on_destroy_internal">
             <summary>
@@ -573,7 +574,7 @@
             <param name="newNode"></param>
             <returns></returns>
         </member>
-        <member name="M:Pixel.Node.SubscribeToEngine(System.Boolean,Pixel.Stage)">
+        <member name="M:Pixel.Node.SubscribeToEngine(System.Boolean)">
             <summary>
             A way for a node to subscribe/unsubscribe from events like Update/FixedUpdate/Awake/OnCollision etc. this does not need to be called by the user.
             </summary>

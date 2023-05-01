@@ -3,6 +3,7 @@ using Pixel.Types.Components;
 using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -100,7 +101,6 @@ namespace Pixel
         /// A way to group nodes and query them without looking for components.
         /// </summary>
         [JsonProperty] public string tag = "Untagged";
-
         /// <summary>
         /// The node directly above this one in the hierarchy.
         /// </summary>
@@ -109,12 +109,10 @@ namespace Pixel
         /// Every child node of this node.
         /// </summary>
         [JsonProperty] public List<Node> children = new();
-
         /// <summary>
         /// A list of the offset between <see cref="this"/> <see cref="Node"/> and it's children to maintain during physics updates.
         /// </summary>
         internal Dictionary<string, Vector2> child_offsets = new();
-
         /// <summary>
         /// A cached <see cref="Rigidbody"></see> to save <see cref="GetComponent{T}(int)"></see> calls/allocations.
         /// </summary>
@@ -127,12 +125,10 @@ namespace Pixel
         /// A cached <see cref="Sprite"></see> to save <see cref="GetComponent{T}(int)"></see> calls/allocations.
         /// </summary>
         internal Sprite sprite;
-
         /// <summary>
         /// A dictionary of lists of <see cref="Component"/> stored by <see cref="Type"/>
         /// </summary>
         [JsonProperty] public Dictionary<Type, List<Component>> Components { get; set; } = new Dictionary<Type, List<Component>>();
-
         // Transform
         /// <summary>
         /// A transform matrix updated with Position,Rotation,Scale frequently.
@@ -174,8 +170,6 @@ namespace Pixel
                 Transform.M22 = value.Y;
             }
         }
-
-        public void SetActive(bool value) => Enabled = value;
 
 
         #region Hierarchy Functions
@@ -281,48 +275,46 @@ namespace Pixel
         /// </summary>
         /// <param name="v"></param>
         /// <param name="stage"></param>
-        internal void SubscribeToEngine(bool v, Stage stage)
-        {
-            Parallel.ForEach(Components, (comp) => {
-                foreach (Component _component in comp.Value)
-                    GetEvents(v, stage, _component);
-            });
-
-            foreach (var node in children)
-            {
-                Parallel.ForEach(node.Components, (comp) => {
-                    foreach (Component _component in comp.Value)
-                        GetEvents(v, stage, _component);
-                });
-            }
-
-
-        }
-
-        private void GetEvents(bool v, Stage stage, Component _component)
+        internal void SubscribeToEngine(bool v)
         {
             if (v)
             {
-                OnDestroyed += _component.on_destroy_internal;
-                stage.OnDrawShapes += _component.on_draw_shapes_internal;
-                OnCollided += _component.OnCollision;
-                OnTriggered += _component.OnTrigger;
+                if (Interop.Stage != null)
+                    Interop.Stage.FixedUpdate += update_transform_hierarchy_internal;
 
-                stage.Awake += _component.init_component_internal;
-                stage.Update += _component.Update;
-                stage.FixedUpdate += _component.FixedUpdate;
-            }
+                Parallel.ForEach(Components, (comp) => {
+                    foreach (Component _component in comp.Value)
+                        SubscribeComponent(_component);
+                });
+
+                foreach (var node in children)
+                {
+                    Parallel.ForEach(node.Components, (comp) => {
+                        foreach (Component _component in comp.Value)
+                            SubscribeComponent(_component);
+                    });
+                    Interop.Stage.FixedUpdate += node.update_transform_hierarchy_internal;
+                }
+            } 
             else
             {
-                OnDestroyed -= _component.on_destroy_internal;
-                stage.OnDrawShapes -= _component.on_draw_shapes_internal;
+                if (Interop.Stage != null)
+                    Interop.Stage.FixedUpdate -= update_transform_hierarchy_internal;
 
-                OnCollided -= _component.OnCollision;
-                OnTriggered -= _component.OnTrigger;
+                Parallel.ForEach(Components, (comp) => {
+                    foreach (Component _component in comp.Value)
+                        UnsubscribeComponent(_component);
+                });
 
-                stage.Awake -= _component.init_component_internal;
-                stage.Update -= _component.Update;
-                stage.FixedUpdate -= _component.FixedUpdate;
+                foreach (var node in children)
+                {
+                    Parallel.ForEach(node.Components, (comp) => {
+                        foreach (Component _component in comp.Value)
+                            UnsubscribeComponent(_component);
+
+                    });
+                    Interop.Stage.FixedUpdate -= node.update_transform_hierarchy_internal;
+                }
             }
         }
 
@@ -349,6 +341,21 @@ namespace Pixel
                     c.Dispose();
         }
        
+        internal protected void update_transform_hierarchy_internal(float delta)
+        {
+            for (int i = 0; i < children.Count; i++)
+            {
+                Node? child = children[i];
+
+                if (child_offsets.Count < i || !child_offsets.ContainsKey(child.UUID))
+                    continue;
+
+                Vector2 offset = child_offsets[child.UUID];
+
+                if (child != null)
+                    child.Position = Position + offset;
+            }
+        }
         #endregion
         #region Component Functions
 
@@ -394,7 +401,7 @@ namespace Pixel
 
             return component;
         }
-        private void SubscribeComponent(Component component)        
+        private void SubscribeComponent(Component component)
         {
             if (Interop.Stage is Stage stage)
             {

@@ -114,7 +114,9 @@ namespace Pixel.Types.Components
         /// <summary>
         /// Will be called each frame by the renderer at the time that the shape drawer is collecting a cycle's worth of debug data.
         /// </summary>
-        public virtual void on_draw_shapes_internal() { }
+        /// 
+        internal protected void on_draw_shapes_internal() => OnDrawShapes();
+        public virtual void OnDrawShapes() { }
         /// <summary>
         /// is called before Destroy to perform Dispose.
         /// </summary>

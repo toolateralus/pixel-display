@@ -139,7 +139,7 @@ namespace Pixel
             if (nodes.Contains(node))
                 return;
 
-            node.SubscribeToEngine(true, this);
+            node.SubscribeToEngine(true);
 
             if(node.parent is null)
                 nodes.Add(node);
@@ -239,7 +239,7 @@ namespace Pixel
             if (!nodes.Contains(node))
                 return;
             nodes.Remove(node);
-            node.SubscribeToEngine(false, this);
+            node.SubscribeToEngine(false);
         }
       
         public override void Sync()

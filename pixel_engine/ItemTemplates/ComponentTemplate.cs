@@ -26,7 +26,7 @@ namespace Pixel
 
         }
         // for debug gizmos/visualizations
-        public override void on_draw_shapes_internal()
+        public override void OnDrawShapes()
         {
         }
     }
