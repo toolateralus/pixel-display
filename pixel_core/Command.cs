@@ -38,8 +38,8 @@ namespace Pixel.Types
         public void Invoke() => action?.Invoke(args);
         public bool Equals(string input)
         {
-            CSharpInterpreter.ParseArguments(input, out _, out var withoutArgs);
-            withoutArgs = CSharpInterpreter.ParseLoopParams(withoutArgs, out _);
+            CommandInterpreter.ParseArguments(input, out _, out var withoutArgs);
+            withoutArgs = CommandInterpreter.ParseLoopParams(withoutArgs, out _);
 
             string[] split = phrase.Split(PhraseVariantSeperator);
 

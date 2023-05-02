@@ -435,7 +435,7 @@ namespace pixel_editor
 
                 if (line.Contains("wait(") && (line.Contains(')') || line.Contains(");")))
                 {
-                    CSharpInterpreter.ParseArguments(line, out string[] args, out _);
+                    CommandInterpreter.ParseArguments(line, out string[] args, out _);
                     int delayMs = args[0].ToInt();
                     if (delayMs == -1)
                     {

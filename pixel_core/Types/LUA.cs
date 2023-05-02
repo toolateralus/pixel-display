@@ -233,14 +233,12 @@ namespace Pixel
             this.Value = value;
             this.Type = type;
         }
-        public List<Token> Members { get; } = new(); 
-           
         [Obsolete]
         public Token? ToValue()
         {
-            foreach (var interpreter in (IEnumerable<ArithmeticInterpreter>)(from intptr in Interpreter.ActiveInterpreters
-                                                                             where intptr as ArithmeticInterpreter != null
-                                                                             let arith_intptr = intptr as ArithmeticInterpreter
+            foreach (var interpreter in (IEnumerable<TokenInterpreter>)(from intptr in Interpreter.ActiveInterpreters
+                                                                             where intptr as TokenInterpreter != null
+                                                                             let arith_intptr = intptr as TokenInterpreter
                                                                              select arith_intptr))
                 if (interpreter.variables.ContainsKey(Value))
                     return interpreter.variables[Value];
@@ -288,7 +286,7 @@ namespace Pixel
         public virtual double? Invoke(List<Token> args) {
             if (function is null)
             {
-                Interop.Log("Function not implmeneted.");
+                Interop.Log("Function not implemented.");
                 return 1;
             }
             else
@@ -416,12 +414,132 @@ namespace Pixel
             }
         }
     }
-    public class ArithmeticInterpreter : IInterpreter
+    public class Interpreter
+    {
+        internal static List<IInterpreter> ActiveInterpreters = new() { new CommandInterpreter(), new TokenInterpreter() };
+        public Interpreter()
+        {
+        }
+        public static TokenFamily CheckFamily(TokenType type)
+        {
+            switch (type)
+            {
+                case TokenType.IDENTIFIER:
+                    return TokenFamily.IDENTIFIER;
+
+                case TokenType.VAR_DECL:
+                case TokenType.DELETE:
+                case TokenType.FOR:
+                case TokenType.IF:
+                case TokenType.NULL:
+                case TokenType.FUNCTION:
+                case TokenType.RETURN:
+                    return TokenFamily.KEYWORD;
+
+
+                case TokenType.ASSIGN:
+                case TokenType.LEFTPAREN:
+                case TokenType.RIGHTPAREN:
+                case TokenType.ADD:
+                case TokenType.SUBTRACT:
+                case TokenType.MULTIPLY:
+                case TokenType.DIVIDE:
+                case TokenType.OBJECT_ACCESSOR:
+                    return TokenFamily.OPERATOR;
+
+                case TokenType.NUMBER:
+                case TokenType.CHAR:
+                    return TokenFamily.VALUE;
+
+                default:
+                    return TokenFamily.UNDEFINED;
+            };
+        }
+        public static void TryCallLine(string line)
+        {
+            foreach (var interpreter in ActiveInterpreters)
+                interpreter.RunAsync(line);
+        }
+        public static void TryParse(string input, out List<object> value)
+        {
+            value = new();
+            for (int i = 0; i < 5; ++i)
+                switch (i)
+                {
+                    // string
+                    case 0:
+                        try
+                        {
+                            value.Add(input);
+                        }
+                        catch (Exception) { };
+                        continue;
+                    // bool
+                    case 1:
+                        try
+                        {
+                            if (bool.TryParse(input, out var val))
+                                value.Add(val);
+                        }
+                        catch (Exception)
+                        {
+
+                        };
+                        continue;
+                    // int
+                    case 2:
+                        try
+                        {
+                            if (int.TryParse(input, out var val))
+                                value.Add(val);
+                        }
+                        catch (Exception) { };
+                        continue;
+                    // float
+                    case 3:
+                        try
+                        {
+                            if (float.TryParse(input, out var val))
+                                value.Add(val);
+                        }
+                        catch (Exception) { };
+                        continue;
+                    // vec2
+                    case 4:
+                        try
+                        {
+                            Vector2 vec = input.ToVector();
+                            value.Add(vec);
+
+                        }
+                        catch (Exception) { };
+                        continue;
+
+                }
+        }
+        public static async Task<Command[]> GetCommands()
+        {
+            EditorEvent e = new(EditorEventFlags.GET_COMMAND_LIBRARY_C_SHARP);
+            object? lib = null;
+            e.action = (e) => { lib = e.First(); };
+            Interop.RaiseInspectorEvent(e);
+            float time = 0;
+
+            while (!e.processed && time < 1500)
+            {
+                if (lib is Command[] commands)
+                    return commands;
+
+                time += 15f;
+                await Task.Delay(15);
+            }
+            return null;
+        }
+    }
+    public class TokenInterpreter : IInterpreter
     {
         private Stack<Token> tokens = new();
         internal Dictionary<string, Token> variables = new();
-
-        private int index;
         public void PushTokensOntoStack(Stack<Token> tokens)
         {
             this.tokens.Clear();
@@ -429,18 +547,15 @@ namespace Pixel
             while(tokens.Count > 0) 
                 this.tokens.Push(tokens.Pop());
 
-            index = 0;
         }
+        
         public double? Evaluate()
         {
             var result = ParseExpression();
-            if (index < tokens.Count)
-            {
-                Interop.Log($"Unexpected token: {tokens.Peek().Value}");
-                return null;
-            }
+
             return result;
-        }
+        }   
+
         private double? PerformFunctionExecution()
         {
             var keyword = tokens.Pop();
@@ -803,7 +918,7 @@ namespace Pixel
             return;
         }
     }
-    public class CSharpInterpreter : IInterpreter
+    public class CommandInterpreter : IInterpreter
     {
         public async Task RunAsync(string line)
         {
@@ -811,7 +926,7 @@ namespace Pixel
             line = ParseLoopParams(line, out string loop_param);
 
 
-            var getCmdsTask = Interpreter.GetCommands();
+            var getCmdsTask = GetCommands();
             
             if (getCmdsTask is null)
                 return;
@@ -997,128 +1112,6 @@ namespace Pixel
             return arguments;
         }
         #endregion
-    }
-    public class Interpreter
-    {
-        internal static List<IInterpreter> ActiveInterpreters = new() { new CSharpInterpreter(), new ArithmeticInterpreter() };
-        public Interpreter()
-        {
-        }
-        public static TokenFamily CheckFamily(TokenType type)
-        {
-            switch (type)
-            {
-                case TokenType.IDENTIFIER:
-                    return TokenFamily.IDENTIFIER;
-
-                case TokenType.VAR_DECL:
-                case TokenType.DELETE:
-                case TokenType.FOR:
-                case TokenType.IF:
-                case TokenType.NULL:
-                case TokenType.FUNCTION:
-                case TokenType.RETURN:
-                    return TokenFamily.KEYWORD;
-
-
-                case TokenType.ASSIGN:
-                case TokenType.LEFTPAREN:
-                case TokenType.RIGHTPAREN:
-                case TokenType.ADD:
-                case TokenType.SUBTRACT:
-                case TokenType.MULTIPLY:
-                case TokenType.DIVIDE:
-                case TokenType.OBJECT_ACCESSOR:
-                    return TokenFamily.OPERATOR;
-
-                case TokenType.NUMBER:
-                case TokenType.CHAR:
-                    return TokenFamily.VALUE;
-
-                default:
-                    return TokenFamily.UNDEFINED;
-            };
-        }
-        public static void TryCallLine(string line)
-        {
-            foreach (var interpreter in ActiveInterpreters)
-                interpreter.RunAsync(line);
-        }
-        public static void TryParse(string input, out List<object> value)
-        {
-            value = new();
-            for (int i = 0; i < 5; ++i)
-                switch (i)
-                {
-                    // string
-                    case 0:
-                        try
-                        {
-                            value.Add(input);
-                        }
-                        catch (Exception) { };
-                        continue;
-                    // bool
-                    case 1:
-                        try
-                        {
-                            if (bool.TryParse(input, out var val))
-                                value.Add(val);
-                        }
-                        catch (Exception)
-                        {
-
-                        };
-                        continue;
-                    // int
-                    case 2:
-                        try
-                        {
-                            if (int.TryParse(input, out var val))
-                                value.Add(val);
-                        }
-                        catch (Exception) { };
-                        continue;
-                    // float
-                    case 3:
-                        try
-                        {
-                            if (float.TryParse(input, out var val))
-                                value.Add(val);
-                        }
-                        catch (Exception) { };
-                        continue;
-                    // vec2
-                    case 4:
-                        try
-                        {
-                            Vector2 vec = input.ToVector();
-                            value.Add(vec);
-
-                        }
-                        catch (Exception) { };
-                        continue;
-
-                }
-        }
-        public static async Task<Command[]> GetCommands()
-        {
-            EditorEvent e = new(EditorEventFlags.GET_COMMAND_LIBRARY_C_SHARP);
-            object? lib = null;
-            e.action = (e) => { lib = e.First(); };
-            Interop.RaiseInspectorEvent(e);
-            float time = 0;
-
-            while (!e.processed && time < 1500)
-            {
-                if (lib is Command[] commands)
-                    return commands;
-
-                time += 15f;
-                await Task.Delay(15);
-            }
-            return null;
-        }
     }
     public enum TokenFamily : long
         {
