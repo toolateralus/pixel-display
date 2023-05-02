@@ -836,7 +836,8 @@ namespace Pixel
         {
             ParseArguments(line, out string[] args, out _);
             line = ParseLoopParams(line, out string loop_param);
-            
+
+
             var getCmdsTask = Interpreter.GetCommands();
             
             if (getCmdsTask is null)
@@ -848,11 +849,14 @@ namespace Pixel
                 return;
 
             var commands = getCmdsTask.Result;
+          
+            if (loop_param.ToInt() is int i && i <= 0)
+                i = 1;
 
             foreach (Command command in commands)
                 if (command.Equals(line))
                 {
-                    ExecuteCommand(args, command, loop_param.ToInt());
+                    ExecuteCommand(args, command, i);
                     if (command.error != null)
                     {
                         Interop.Log(command.error);
@@ -912,9 +916,8 @@ namespace Pixel
                                 parsed_objects.Add(parsed_arg_obj);
                         }
                         command.args = parsed_objects.ToArray();
-                        command.Invoke();
                     }
-                    else command.Invoke();
+                    command.Invoke();
                 }
                 catch (Exception e)
                 {
