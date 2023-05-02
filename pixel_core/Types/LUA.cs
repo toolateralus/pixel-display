@@ -249,7 +249,20 @@ namespace Pixel
     public class Function : Token
     {
         #region Standard Functions
-        Function print = new((args) =>
+
+        static Function()
+        {
+            Functions = new() 
+            {
+                print,
+            
+            
+            };
+        }
+
+        static List<Function> Functions = new();
+
+        static Function print = new((args) =>
         {
             string output = "";
             foreach (var arg in args)
@@ -259,7 +272,7 @@ namespace Pixel
             Interop.Log(output);
 
         }, TokenType.NULL)
-        { 
+        {
             String = "print",
         };
 
@@ -267,7 +280,6 @@ namespace Pixel
         #endregion
         public Action<List<Token>> function;
         public TokenType ReturnType = TokenType.NULL;
-        public static List<Function> Functions = new();
         public Function(Action<List<Token>> funct, TokenType returnType) : base(TokenType.FUNCTION, "funct") {
             function = funct;
             ReturnType = returnType;
@@ -276,9 +288,15 @@ namespace Pixel
 
         public virtual double? Invoke(List<Token> args) {
             if (function is null)
+            {
                 Interop.Log("Function not implmeneted.");
-            else function.Invoke(args);
-            return 0; 
+                return 1;
+            }
+            else
+            {
+                function.Invoke(args);
+                return 0;
+            }
         }
         public bool Equals(Token token)
         {
@@ -291,7 +309,7 @@ namespace Pixel
             foreach(var funct in Functions)
                 if (funct.Equals(function))
                     return funct.Invoke(arguments);
-            return null;
+            return 1;
         }
     }
     public class Tokenizer
@@ -501,14 +519,17 @@ namespace Pixel
             }
             return null;
         }
-
         private double? PerformFunctionExecution()
         {
             var keyword = tokens.Pop();
-            var funct_name = tokens.Pop();
+            var function = tokens.Pop();
+            var functName = function.String;
 
-            if (funct_name.Type != TokenType.IDENTIFIER)
+            if (function.Type != TokenType.IDENTIFIER)
                 return null;
+
+            // theres no way for the parser to know it's a function so we just rectify it here.
+            function = new(TokenType.FUNCTION, functName);
 
             List<Token> arguments = new();
 
@@ -519,17 +540,7 @@ namespace Pixel
                 var family = CheckFamily(token.Type);
 
                 if (family == TokenFamily.IDENTIFIER)
-                {
-                    var value = token.ToValue();
-                    if (value is null)
-                    {
-                        Interop.Log("argument value couldnt be found.");
-                        token = tokens.Pop();
-                        continue;
-                    }
-                    else arguments.Add(new Token(TokenType.IDENTIFIER, value.ToString()));
-                }
-
+                    arguments.Add(token);
 
                 switch (family)
                 {
@@ -540,12 +551,10 @@ namespace Pixel
 
                     case TokenFamily.VALUE:
                         token = tokens.Pop();
-                        Interop.Log("Value type argument passed into function");
                         arguments.Add(token);
                         continue;
                     case TokenFamily.IDENTIFIER:
                         token = tokens.Pop();
-                        Interop.Log("Value type argument passed into function");
                         arguments.Add(token);
                         continue;
                     default:
@@ -553,10 +562,9 @@ namespace Pixel
                 }
             }
 
-            return Function.Call(funct_name, arguments);
+            return Function.Call(function, arguments);
 
         }
-
         private double? PerformVariableDeletion()
         {
             var keyword = tokens.Pop();

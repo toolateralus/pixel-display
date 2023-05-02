@@ -67,7 +67,7 @@ namespace Pixel
             string intResult = "";
 
             foreach (var x in input)
-                if (Constants.int_chars.Contains(x))
+                if (char.IsDigit(x))
                     intResult += x;
 
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
