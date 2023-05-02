@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Printing;
 using System.Reflection;
 using System.Security.AccessControl;
+using static Pixel.Interpreter;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -226,54 +227,52 @@ namespace Pixel
         /// <summary>
         /// the string representation of the token
         /// </summary>
-        public string String { get; set; }
-        /// <summary>
-        /// A pointer to the object, also for caching.
-        /// </summary>
+        public string Value { get; set; }
         public Token(TokenType type, string value)
         {
-            this.String = value;
+            this.Value = value;
             this.Type = type;
         }
-        public object? ToValue()
+        public List<Token> Members { get; } = new(); 
+           
+        [Obsolete]
+        public Token? ToValue()
         {
             foreach (var interpreter in (IEnumerable<ArithmeticInterpreter>)(from intptr in Interpreter.ActiveInterpreters
                                                                              where intptr as ArithmeticInterpreter != null
                                                                              let arith_intptr = intptr as ArithmeticInterpreter
                                                                              select arith_intptr))
-                if (interpreter.variables.ContainsKey(String))
-                    return interpreter.variables[String].value;
+                if (interpreter.variables.ContainsKey(Value))
+                    return interpreter.variables[Value];
             return null;
         }
     }
     public class Function : Token
     {
         #region Standard Functions
-
+        static List<Function> Functions = new();
         static Function()
         {
-            Functions = new() 
+            Functions = new()
             {
                 print,
-            
-            
+
+
             };
         }
-
-        static List<Function> Functions = new();
 
         static Function print = new((args) =>
         {
             string output = "";
             foreach (var arg in args)
             {
-                output += arg.String + " ";
+                output += arg.Value + " ";
             }
             Interop.Log(output);
 
         }, TokenType.NULL)
         {
-            String = "print",
+            Value = "print",
         };
 
 
@@ -300,7 +299,7 @@ namespace Pixel
         }
         public bool Equals(Token token)
         {
-            if (token.String == String && token.Type == Type)
+            if (token.Value == Value && token.Type == Type)
                 return true;
             return false;
         }
@@ -400,7 +399,7 @@ namespace Pixel
                         position++;
                         return new Token(TokenType.DIVIDE, "/");
                     case '.':
-                        return new Token(TokenType.OJECT_ACCESSOR, ".");
+                        return new Token(TokenType.OBJECT_ACCESSOR, ".");
                 }
                 return null;
             }
@@ -420,7 +419,7 @@ namespace Pixel
     public class ArithmeticInterpreter : IInterpreter
     {
         private Stack<Token> tokens = new();
-        internal Dictionary<string, (TokenType type, object value)> variables = new();
+        internal Dictionary<string, Token> variables = new();
 
         private int index;
         public void PushTokensOntoStack(Stack<Token> tokens)
@@ -437,54 +436,193 @@ namespace Pixel
             var result = ParseExpression();
             if (index < tokens.Count)
             {
-                Interop.Log($"Unexpected token: {tokens.Peek().String}");
+                Interop.Log($"Unexpected token: {tokens.Peek().Value}");
                 return null;
             }
             return result;
         }
-        public enum TokenFamily : long
+        private double? PerformFunctionExecution()
         {
-            UNDEFINED = -long.MaxValue,
-            KEYWORD = 0,
-            OPERATOR = 1,
-            VALUE = 2,
-            IDENTIFIER = 4,
-        }
-        private TokenFamily CheckFamily(TokenType type)
-        {
-            switch (type)
+            var keyword = tokens.Pop();
+            var function = tokens.Pop();
+            var functName = function.Value;
+
+            if (function.Type != TokenType.IDENTIFIER)
+                return null;
+
+            // theres no way for the parser to know it's a function so we just rectify it here.
+            function = new(TokenType.FUNCTION, functName);
+
+            List<Token> arguments = new();
+
+            // parsing function arguments
+            while (tokens.Count > 0)
             {
-                case TokenType.IDENTIFIER:
-                    return TokenFamily.IDENTIFIER;
+                var token = tokens.Peek();
+                var family = CheckFamily(token.Type);
 
-                case TokenType.VAR_DECL:
-                case TokenType.DELETE:
+                if (family == TokenFamily.IDENTIFIER)
+                {
+                    if (variables.ContainsKey(token.Value))
+                    {
+                        arguments.Add(variables[token.Value]);
+                        tokens.Pop();
+                        continue;
+                    }
+                }
+
+                switch (family)
+                {
+                    case TokenFamily.UNDEFINED:
+                    case TokenFamily.KEYWORD:
+                    case TokenFamily.OPERATOR:
+                        continue;
+
+                    case TokenFamily.VALUE:
+                        token = tokens.Pop();
+                        arguments.Add(token);
+                        continue;
+                    case TokenFamily.IDENTIFIER:
+                        token = tokens.Pop();
+                        arguments.Add(token);
+                        continue;
+                    default:
+                        continue;
+                }
+            }
+
+            return Function.Call(function, arguments);
+
+        }
+        private double? PerformVariableDeletion()
+        {
+            var keyword = tokens.Pop();
+            var identifier = tokens.Pop();
+
+            if (!variables.ContainsKey(identifier.Value))
+            {
+                Interop.Log("delete failed: variable not found.");
+                return null;
+            }
+
+            variables.Remove(identifier.Value);
+            Interop.Log("delete succeeded.");
+            return null;
+        }
+        private double? PerformVariableAcess(Token identifier)
+        {
+            variables.TryGetValue(identifier.Value, out var value);
+
+            var accessor = tokens.Pop();
+            var @operator = accessor.Type;
+
+            if (CheckFamily(@operator) != TokenFamily.OPERATOR)
+                return null;
+
+            switch (@operator)
+            {
+                case TokenType.OBJECT_ACCESSOR:
+                    return PerformObjectMemberAccess(value);
                 case TokenType.ASSIGN:
-                case TokenType.FOR:
-                case TokenType.IF:
-                case TokenType.RETURN:
-                case TokenType.NULL:
-                case TokenType.FUNCTION:
-                case TokenType.OJECT_ACCESSOR:
-                    return TokenFamily.KEYWORD;
+                    return PerformObjectOverwrite(identifier.Value);
+
+                    //TODO: implement math expressions between pre defined variables
+            }
+            return null;
+        }
+        private double? PerformObjectAccess()
+        {
+            var identifier = tokens.Pop();
+
+            if (variables.ContainsKey(identifier.Value))
+                return PerformVariableAcess(identifier);
 
 
-                case TokenType.LEFTPAREN:
-                case TokenType.RIGHTPAREN:
-                case TokenType.ADD:
-                case TokenType.SUBTRACT:
-                case TokenType.MULTIPLY:
-                case TokenType.DIVIDE:
-                    return TokenFamily.OPERATOR;
+            return null;
+        }
+        private double? PerformObjectOverwrite(string key)
+        {
+            var newVal = tokens.Pop();
+            
+            if (CheckFamily(newVal.Type) != TokenFamily.VALUE)
+                return null;
 
-                case TokenType.NUMBER:
-                case TokenType.CHAR:
-                    return TokenFamily.VALUE;
+            variables[key] = newVal;
+            return null;
+        }
+        private double? PerformObjectMemberAccess(Token value)
+        {
+            var target = tokens.Pop();
+
+            if (target.Type != TokenType.IDENTIFIER)
+                return null;
+
+            var assignment = tokens.Pop();
+
+            if (assignment.Type != TokenType.ASSIGN)
+                return null;
+
+            var newValue = tokens.Pop();
+
+            if (CheckFamily(newValue.Type) != TokenFamily.VALUE)
+                return null;
+
+            var type = value.GetType();
+            var field = type.GetRuntimeField(target.Value);
+
+            if (field != null)
+            {
+                Interop.Log($"{target} set to {newValue}!");
+                field.SetValue(value, newValue);
+                return null;
+            }
+            Interop.Log("Object access failure.");
+            return null;
+        }
+        private double? PerformVariableDeclaration()
+        {
+            var keyword = tokens.Pop();
+
+            var identifier = tokens.Pop();
+
+            if (identifier.Type != TokenType.IDENTIFIER)
+                return null;
+
+            var assignment_operator = tokens.Pop();
+
+            if (assignment_operator.Type != TokenType.ASSIGN)
+                return null;
+
+            var value = tokens.Pop();
+
+            switch (CheckFamily(value.Type))
+            {
+                case TokenFamily.UNDEFINED:
+                case TokenFamily.KEYWORD:
+                case TokenFamily.OPERATOR:
+                    Interop.Log($"Invalid variable declaration. Cannot convert {value.Type} to {identifier.Type}");
+                    break;
+
+                case TokenFamily.IDENTIFIER:
+                case TokenFamily.VALUE:
+                    switch (value.Type)
+                    {
+                        case TokenType.NULL:
+                        case TokenType.NUMBER:
+                        case TokenType.IDENTIFIER:
+                        case TokenType.CHAR:
+                            Interop.Log($"{value.Type} {identifier.Value} = {value.Value}");
+                            variables.Add(identifier.Value, new(identifier.Type, value.Value));
+                            break;
+                    }
+                    return null;
 
                 default:
-                    return TokenFamily.UNDEFINED;
-            };
+                    break;
+            }
+            return null;
         }
+        
         private double? ParseExpression()
         {
             var keyword = tokens.Peek();
@@ -516,181 +654,6 @@ namespace Pixel
                 case TokenFamily.IDENTIFIER:
                     return PerformObjectAccess();
 
-            }
-            return null;
-        }
-        private double? PerformFunctionExecution()
-        {
-            var keyword = tokens.Pop();
-            var function = tokens.Pop();
-            var functName = function.String;
-
-            if (function.Type != TokenType.IDENTIFIER)
-                return null;
-
-            // theres no way for the parser to know it's a function so we just rectify it here.
-            function = new(TokenType.FUNCTION, functName);
-
-            List<Token> arguments = new();
-
-            // parsing function arguments
-            while (tokens.Count > 0)
-            {
-                var token = tokens.Peek();
-                var family = CheckFamily(token.Type);
-
-                if (family == TokenFamily.IDENTIFIER)
-                    arguments.Add(token);
-
-                switch (family)
-                {
-                    case TokenFamily.UNDEFINED:
-                    case TokenFamily.KEYWORD:
-                    case TokenFamily.OPERATOR:
-                        continue;
-
-                    case TokenFamily.VALUE:
-                        token = tokens.Pop();
-                        arguments.Add(token);
-                        continue;
-                    case TokenFamily.IDENTIFIER:
-                        token = tokens.Pop();
-                        arguments.Add(token);
-                        continue;
-                    default:
-                        continue;
-                }
-            }
-
-            return Function.Call(function, arguments);
-
-        }
-        private double? PerformVariableDeletion()
-        {
-            var keyword = tokens.Pop();
-            var identifier = tokens.Pop();
-
-            if (!variables.ContainsKey(identifier.String))
-            {
-                Interop.Log("delete failed: variable not found.");
-                return null;
-            }
-
-            variables.Remove(identifier.String);
-            Interop.Log("delete succeeded.");
-            return null;
-        }
-        private double? PerformVariableAcess(Token identifier)
-        {
-            variables.TryGetValue(identifier.String, out var value);
-
-            var accessor = tokens.Pop();
-            var @operator = accessor.Type;
-
-            switch (@operator)
-            {
-                case TokenType.OJECT_ACCESSOR:
-                    return PerformObjectMemberAccess(value);
-                case TokenType.ASSIGN:
-                    return PerformObjectOverwrite(identifier.String);
-            }
-            return null;
-        }
-        private double? PerformObjectAccess()
-        {
-            var identifier = tokens.Pop();
-
-            if (variables.ContainsKey(identifier.String))
-                return PerformVariableAcess(identifier);
-            return null;
-        }
-        private double? PerformObjectOverwrite(string key)
-        {
-            var newVal = tokens.Pop();
-            
-            if (CheckFamily(newVal.Type) != TokenFamily.VALUE)
-                return null;
-
-            variables[key] = (newVal.Type, newVal.String);
-            return null;
-        }
-        private double? PerformObjectMemberAccess((TokenType, object) value)
-        {
-            var target = tokens.Pop();
-
-            if (target.Type != TokenType.IDENTIFIER)
-                return null;
-
-            var assignment = tokens.Pop();
-
-            if (assignment.Type != TokenType.ASSIGN)
-                return null;
-
-            var newValue = tokens.Pop();
-
-            if (CheckFamily(newValue.Type) != TokenFamily.VALUE)
-                return null;
-
-
-            var type = value.GetType();
-            var field = type.GetRuntimeField(target.String);
-
-            if (field != null)
-            {
-                Interop.Log($"{target} set to {newValue}!");
-                field.SetValue(value, newValue);
-                return null;
-            }
-            Interop.Log("Object access failure.");
-            return null;
-        }
-        private double? PerformVariableDeclaration()
-        {
-            var keyword = tokens.Pop();
-
-            var identifier = tokens.Pop();
-
-            if (identifier.Type != TokenType.IDENTIFIER)
-                return null;
-
-            var assignment_operator = tokens.Pop();
-
-            if (assignment_operator.Type != TokenType.ASSIGN)
-                return null;
-
-            var value = tokens.Pop();
-
-            switch (CheckFamily(value.Type))
-            {
-                case TokenFamily.UNDEFINED:
-                    break;
-
-                case TokenFamily.KEYWORD:
-                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
-                    break;
-
-                case TokenFamily.OPERATOR:
-                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
-                    break;
-
-                case TokenFamily.VALUE:
-                    switch (value.Type)
-                    {
-                        case TokenType.NULL:
-                        case TokenType.NUMBER:
-                        case TokenType.CHAR:
-                            Interop.Log($"newly declared variable found as type : {value.Type}");
-                            variables.Add(identifier.String, (identifier.Type, value));
-                            break;
-                    }
-                    return null;
-
-                case TokenFamily.IDENTIFIER:
-                    Interop.Log("Invalid variable declaration. Type was not found.");
-                    break;
-
-                default:
-                    break;
             }
             return null;
         }
@@ -770,7 +733,7 @@ namespace Pixel
             if (isNumber)
             {
                 tokens.Pop();
-                return double.Parse(token.String);
+                return double.Parse(token.Value);
             }
 
             if (isLeftParentheses)
@@ -788,6 +751,7 @@ namespace Pixel
 
             return null;
         }
+        
         private static double PerformMultiplication(double left, TokenType op, double right)
         {
             if (op == TokenType.MULTIPLY)
@@ -796,7 +760,7 @@ namespace Pixel
                 left /= right;
             return left;
         }
-        static double PerformAddition(double left, TokenType op, double right)
+        private static double PerformAddition(double left, TokenType op, double right)
         {
             if (op == TokenType.ADD)
                 left += right;
@@ -805,6 +769,7 @@ namespace Pixel
                 left -= right;
             return left;
         }
+
         bool HasAdditionOperators() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.ADD || tokens.Peek().Type == TokenType.SUBTRACT);
         bool HasMultiplicationOperator() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.MULTIPLY || tokens.Peek().Type == TokenType.DIVIDE);
         public async Task RunAsync(string input)
@@ -833,8 +798,8 @@ namespace Pixel
             var val = Evaluate();
 
             if (val.HasValue)
-                Interop.Log($"expr result : {val.Value}.");
-            else Interop.Log("expr did not evaluate.");
+                Interop.Log($"{val.Value}");
+
             return;
         }
     }
@@ -1039,6 +1004,41 @@ namespace Pixel
         public Interpreter()
         {
         }
+        public static TokenFamily CheckFamily(TokenType type)
+        {
+            switch (type)
+            {
+                case TokenType.IDENTIFIER:
+                    return TokenFamily.IDENTIFIER;
+
+                case TokenType.VAR_DECL:
+                case TokenType.DELETE:
+                case TokenType.FOR:
+                case TokenType.IF:
+                case TokenType.NULL:
+                case TokenType.FUNCTION:
+                case TokenType.RETURN:
+                    return TokenFamily.KEYWORD;
+
+
+                case TokenType.ASSIGN:
+                case TokenType.LEFTPAREN:
+                case TokenType.RIGHTPAREN:
+                case TokenType.ADD:
+                case TokenType.SUBTRACT:
+                case TokenType.MULTIPLY:
+                case TokenType.DIVIDE:
+                case TokenType.OBJECT_ACCESSOR:
+                    return TokenFamily.OPERATOR;
+
+                case TokenType.NUMBER:
+                case TokenType.CHAR:
+                    return TokenFamily.VALUE;
+
+                default:
+                    return TokenFamily.UNDEFINED;
+            };
+        }
         public static void TryCallLine(string line)
         {
             foreach (var interpreter in ActiveInterpreters)
@@ -1120,6 +1120,14 @@ namespace Pixel
             return null;
         }
     }
+    public enum TokenFamily : long
+        {
+            UNDEFINED = -long.MaxValue,
+            KEYWORD = 0,
+            OPERATOR = 1,
+            VALUE = 2,
+            IDENTIFIER = 4,
+        }
     public enum TokenType
     {
         VAR_DECL,
@@ -1143,7 +1151,7 @@ namespace Pixel
         NUMBER,
         CHAR,
         IDENTIFIER,
-        OJECT_ACCESSOR,
+        OBJECT_ACCESSOR,
         FUNCTION,
     }
     public interface IInterpreter

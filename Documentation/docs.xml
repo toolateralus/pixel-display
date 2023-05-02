@@ -481,14 +481,9 @@
             The type of the token, used for performing operations and executing expressions.
             </summary>
         </member>
-        <member name="P:Pixel.Token.String">
+        <member name="P:Pixel.Token.Value">
             <summary>
             the string representation of the token
-            </summary>
-        </member>
-        <member name="M:Pixel.Token.#ctor(Pixel.TokenType,System.String)">
-            <summary>
-            A pointer to the object, also for caching.
             </summary>
         </member>
         <member name="T:Pixel.Node">
