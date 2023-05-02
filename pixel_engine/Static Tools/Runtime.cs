@@ -176,13 +176,10 @@ namespace Pixel
                 if (IsDiposing)
                     return;
 
-                
-
                 CMouse.Update();
 
                 if (Application.Current is null)
                     return;
-
 
                 Current.renderHost?.Render();
 

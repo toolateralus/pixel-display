@@ -226,7 +226,7 @@ namespace Pixel
         /// <summary>
         /// the string representation of the token
         /// </summary>
-        public string String { get; }
+        public string String { get; set; }
         /// <summary>
         /// A pointer to the object, also for caching.
         /// </summary>
@@ -248,19 +248,50 @@ namespace Pixel
     }
     public class Function : Token
     {
-        public Action<string[]> function;
+        #region Standard Functions
+        Function print = new((args) =>
+        {
+            string output = "";
+            foreach (var arg in args)
+            {
+                output += arg.String + " ";
+            }
+            Interop.Log(output);
+
+        }, TokenType.NULL)
+        { 
+            String = "print",
+        };
+
+
+        #endregion
+        public Action<List<Token>> function;
         public TokenType ReturnType = TokenType.NULL;
-        
-        public Function(Action<string[]> funct, TokenType returnType) : base(TokenType.FUNCTION, "funct") {
+        public static List<Function> Functions = new();
+        public Function(Action<List<Token>> funct, TokenType returnType) : base(TokenType.FUNCTION, "funct") {
             function = funct;
             ReturnType = returnType;
+            Functions.Add(this);
         }
 
-        public virtual Token Invoke(string[] args) {
+        public virtual double? Invoke(List<Token> args) {
             if (function is null)
                 Interop.Log("Function not implmeneted.");
             else function.Invoke(args);
-            return this; 
+            return 0; 
+        }
+        public bool Equals(Token token)
+        {
+            if (token.String == String && token.Type == Type)
+                return true;
+            return false;
+        }
+        internal static double? Call(Token function, List<Token> arguments)
+        {
+            foreach(var funct in Functions)
+                if (funct.Equals(function))
+                    return funct.Invoke(arguments);
+            return null;
         }
     }
     public class Tokenizer
@@ -415,6 +446,8 @@ namespace Pixel
                 case TokenType.IF:
                 case TokenType.RETURN:
                 case TokenType.NULL:
+                case TokenType.FUNCTION:
+                case TokenType.OJECT_ACCESSOR:
                     return TokenFamily.KEYWORD;
 
 
@@ -452,6 +485,8 @@ namespace Pixel
                             return PerformVariableDeclaration();
                         case TokenType.DELETE:
                             return PerformVariableDeletion();
+                        case TokenType.FUNCTION:
+                            return PerformFunctionExecution();
                         default:
                             break;
                     }
@@ -466,6 +501,62 @@ namespace Pixel
             }
             return null;
         }
+
+        private double? PerformFunctionExecution()
+        {
+            var keyword = tokens.Pop();
+            var funct_name = tokens.Pop();
+
+            if (funct_name.Type != TokenType.IDENTIFIER)
+                return null;
+
+            List<Token> arguments = new();
+
+            // parsing function arguments
+            while (tokens.Count > 0)
+            {
+                var token = tokens.Peek();
+                var family = CheckFamily(token.Type);
+
+                if (family == TokenFamily.IDENTIFIER)
+                {
+                    var value = token.ToValue();
+                    if (value is null)
+                    {
+                        Interop.Log("argument value couldnt be found.");
+                        token = tokens.Pop();
+                        continue;
+                    }
+                    else arguments.Add(new Token(TokenType.IDENTIFIER, value.ToString()));
+                }
+
+
+                switch (family)
+                {
+                    case TokenFamily.UNDEFINED:
+                    case TokenFamily.KEYWORD:
+                    case TokenFamily.OPERATOR:
+                        continue;
+
+                    case TokenFamily.VALUE:
+                        token = tokens.Pop();
+                        Interop.Log("Value type argument passed into function");
+                        arguments.Add(token);
+                        continue;
+                    case TokenFamily.IDENTIFIER:
+                        token = tokens.Pop();
+                        Interop.Log("Value type argument passed into function");
+                        arguments.Add(token);
+                        continue;
+                    default:
+                        continue;
+                }
+            }
+
+            return Function.Call(funct_name, arguments);
+
+        }
+
         private double? PerformVariableDeletion()
         {
             var keyword = tokens.Pop();
