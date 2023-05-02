@@ -1,21 +1,13 @@
 ﻿using KeraLua;
-using Pixel.FileIO;
 using Pixel.Statics;
 using Pixel.Types;
-using Pixel.Types.Physics;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using System.Printing;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media.TextFormatting;
 
 namespace Pixel
 {
@@ -227,88 +219,88 @@ namespace Pixel
     {
         private List<Token> tokens;
         private int index;
-
         public ExpressionEvaluator(List<Token> tokens)
         {
             this.tokens = tokens;
             index = 0;
         }
-        public double Evaluate()
+        public double? Evaluate()
         {
             var result = ParseExpression();
 
             if (index < tokens.Count)
-                throw new Exception($"Unexpected token: {tokens[index].String}");
+            {
+                Interop.Log($"Unexpected token: {tokens[index].String}");
+                return null;
+            }
 
             return result;
         }
-        private double ParseExpression()
+        private double? ParseExpression()
         {
             return ParseAddition();
         }
-        private double ParseAddition()
+        private double? ParseAddition()
         {
             var left = ParseMultiplication();
-
-
-            while (hasOperators())
+            if (!left.HasValue)
+                return null;
+            while (HasAdditionOperators())
             {
                 var op = tokens[index].Type;
                 index++;
                 var right = ParseMultiplication();
-                left = performAddition(left, op, right);
+                if (!right.HasValue)
+                    return null;
+                left = PerformAddition(left.Value, op, right.Value);
             }
-
             return left;
-
-            static double performAddition(double left, TokenType op, double right)
-            {
-                if (op == TokenType.Add)
-                    left += right;
-
-                if (op == TokenType.Subtract)
-                    left -= right;
-                return left;
-            }
-
-            bool hasOperators() => index < tokens.Count && tokens[index].Type == TokenType.Add || tokens[index].Type == TokenType.Subtract;
         }
-        private double ParseMultiplication()
+        private double? ParseMultiplication()
         {
             var left = ParseUnary();
             
-            static double performMultiplication(double left, TokenType op, double right)
-            {
-                if (op == TokenType.Multiply)
-                    left *= right;
-                else if (op == TokenType.Divide)
-                    left /= right;
-                return left;
-            }
-            bool hasOperators() => index < tokens.Count && tokens[index].Type == TokenType.Multiply || tokens[index].Type == TokenType.Divide;
+            if (!left.HasValue)
+                return null;
 
-            while (hasOperators())
+            while (HasMultiplicationOperator())
             {
                 var op = tokens[index].Type;
                 index++;
                 var right = ParseUnary();
-                left = performMultiplication(left, op, right);
+                    
+                    if (!right.HasValue)
+                        return null;
+                left = PerformMultiplication(left.Value, op, right.Value);
             }
-
             return left;
-
         }
-        private double ParseUnary()
+        private double? ParseUnary()
         {
-            if (index < tokens.Count && tokens[index].Type == TokenType.Subtract)
+            if (tokens.Count <= index)
+                return null;
+
+            var token = tokens[index];
+            double result;
+
+            var init = ParsePrimary();
+
+            if (!init.HasValue)
+                return null;
+
+            if (token.Type == TokenType.Subtract)
             {
                 index++;
-                return -ParseUnary();
+                result = -init.Value;
+            }
+            else
+            {
+                result = init.Value;
             }
 
-            return ParsePrimary();
+            return result;
         }
-        private double ParsePrimary()
+        private double? ParsePrimary()
         {
             if (index < tokens.Count)
             {
@@ -329,15 +321,33 @@ namespace Pixel
                     bool missing_args = index >= tokens.Count || token.Type != TokenType.RightParen;
                     
                     if (missing_args)
-                        throw new Exception($"Missing closing parenthesis");
+                        throw new Exception($"Missing closing parentheses");
                     
                     index++;
                     return result;
                 }
             }
-
-            throw new Exception($"Unexpected token: {tokens[index].String}");
+            return 0;
         }
+        private static double PerformMultiplication(double left, TokenType op, double right)
+        {
+            if (op == TokenType.Multiply)
+                left *= right;
+            else if (op == TokenType.Divide)
+                left /= right;
+            return left;
+        }
+        static double PerformAddition(double left, TokenType op, double right)
+        {
+            if (op == TokenType.Add)
+                left += right;
+
+            if (op == TokenType.Subtract)
+                left -= right;
+            return left;
+        }
+        bool HasAdditionOperators() => index < tokens.Count && (tokens[index].Type == TokenType.Add || tokens[index].Type == TokenType.Subtract);
+        bool HasMultiplicationOperator() => index < tokens.Count && (tokens[index].Type == TokenType.Multiply || tokens[index].Type == TokenType.Divide);
     }
     public class Token
     {
@@ -367,7 +377,6 @@ namespace Pixel
             this.input = input;
             this.position = 0;
         }
-
         public Token? GetNextToken()
         {
             if (position >= input.Length)
@@ -383,7 +392,7 @@ namespace Pixel
 
             return parseOperators(currentChar);
 
-            Token parseLetters()
+            Token? parseLetters()
             {
                 StringBuilder identifierBuilder = new StringBuilder();
 
@@ -403,10 +412,10 @@ namespace Pixel
                     "if" => new Token(TokenType.If, identifier),
                     "return" => new Token(TokenType.Return, identifier),
                     "null" => new Token(TokenType.Null, identifier),
-                    _ => throw new InvalidCastException(),
+                    _ => null
                 };
             }
-            Token parseDigits()
+            Token? parseDigits()
             {
                 StringBuilder numberBuilder = new StringBuilder();
 
@@ -418,7 +427,7 @@ namespace Pixel
 
                 return new Token(TokenType.Number, numberBuilder.ToString());
             }
-            Token parseOperators(char currentChar)
+            Token? parseOperators(char currentChar)
             {
                 switch (currentChar)
                 {
@@ -444,7 +453,7 @@ namespace Pixel
                         position++;
                         return new Token(TokenType.Divide, "/");
                 }
-                throw new Exception($"Unknown token at position {position}: {currentChar}");
+                return null;
             }
         }
     }
@@ -476,12 +485,13 @@ namespace Pixel
             }
             return null;
         }
-        public double EvaluateExpression(string expression)
+        public static (bool, double) EvaluateExpression(string expression)
         {
             var tokenizer = new Tokenizer(expression);
-            var tokens = new List<Token>();
-            Token? nextToken;
 
+            var tokens = new List<Token>(); 
+            Token? nextToken;
+            int attempts = 0; 
             do
             {
                 nextToken = tokenizer.GetNextToken();
@@ -489,50 +499,26 @@ namespace Pixel
                 if (nextToken != null)
                     tokens.Add(nextToken);
 
+                attempts++;
             } 
-            while (nextToken != null);
+            while (nextToken != null && attempts < 10000);
 
             var evaluator = new ExpressionEvaluator(tokens);
-            return evaluator.Evaluate();
-        }
-        public void Execute(string command)
-        {
-            if (command.StartsWith(TokenType.VarDecl.ToString()))
-            {
-                string[] parts = command.Split(' ');
-                if (parts.Length != 3 || parts[1] != TokenType.Assignment.ToString())
-                {
-                    Interop.Log("Invalid variable declaration.");
-                    return;
-                }
-
-                string variableName = parts[0].Substring(3);
-                double value = EvaluateExpression(parts[2]);
-                variables[variableName] = value;
-            }
-            else if (command.StartsWith("print"))
-            {
-                // Parse expression and print result
-                string expression = command.Substring(6);
-                double value = EvaluateExpression(expression);
-                Console.WriteLine(value);
-            }
-            else
-            {
-                Console.WriteLine("Unknown command.");
-            }
+            
+            var val = evaluator.Evaluate();
+            
+            if (val.HasValue)
+                return (true, val.Value);
+            else return (false, -1);
         }
         public static void TryCallLine(string line)
         {
-            if (LUA.envMode)
-            {
-                var arg = LUA.Environment(line);
-                TryParse(arg, out var objs);
-                return;
-            }
-
             foreach (var interpreter in ActiveInterpreters)
                 interpreter.RunAsync(line);
+
+
+            var output = EvaluateExpression(line);
+            Interop.Log(output);
         }
         public static void TryParse(string input, out List<object> value)
         {
