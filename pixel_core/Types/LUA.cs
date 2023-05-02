@@ -235,6 +235,33 @@ namespace Pixel
             this.String = value;
             this.Type = type;
         }
+        public object? ToValue()
+        {
+            foreach (var interpreter in (IEnumerable<ArithmeticInterpreter>)(from intptr in Interpreter.ActiveInterpreters
+                                                                             where intptr as ArithmeticInterpreter != null
+                                                                             let arith_intptr = intptr as ArithmeticInterpreter
+                                                                             select arith_intptr))
+                if (interpreter.variables.ContainsKey(String))
+                    return interpreter.variables[String].value;
+            return null;
+        }
+    }
+    public class Function : Token
+    {
+        public Action<string[]> function;
+        public TokenType ReturnType = TokenType.NULL;
+        
+        public Function(Action<string[]> funct, TokenType returnType) : base(TokenType.FUNCTION, "funct") {
+            function = funct;
+            ReturnType = returnType;
+        }
+
+        public virtual Token Invoke(string[] args) {
+            if (function is null)
+                Interop.Log("Function not implmeneted.");
+            else function.Invoke(args);
+            return this; 
+        }
     }
     public class Tokenizer
     {
@@ -276,13 +303,14 @@ namespace Pixel
 
                 return identifier switch
                 {
-                    "var" => new Token(TokenType.VarDecl, identifier),
-                    "delete" => new Token(TokenType.Delete, identifier),
-                    "for" => new Token(TokenType.For, identifier),
-                    "if" => new Token(TokenType.If, identifier),
-                    "return" => new Token(TokenType.Return, identifier),
-                    "null" => new Token(TokenType.Null, identifier),
-                    _ => new Token(TokenType.Identifier, identifier),
+                    "var" => new Token(TokenType.VAR_DECL, identifier),
+                    "delete" => new Token(TokenType.DELETE, identifier),
+                    "for" => new Token(TokenType.FOR, identifier),
+                    "if" => new Token(TokenType.IF, identifier),
+                    "return" => new Token(TokenType.RETURN, identifier),
+                    "null" => new Token(TokenType.NULL, identifier),
+                    "funct" => new Token(TokenType.FUNCTION, identifier),
+                    _ => new Token(TokenType.IDENTIFIER, identifier),
                 };
             }
             Token? parseDigits()
@@ -295,7 +323,7 @@ namespace Pixel
                     position++;
                 }
 
-                return new Token(TokenType.Number, numberBuilder.ToString());
+                return new Token(TokenType.NUMBER, numberBuilder.ToString());
             }
             Token? parseOperators(char currentChar)
             {
@@ -303,27 +331,27 @@ namespace Pixel
                 {
                     case '+':
                         position++;
-                        return new Token(TokenType.Add, "+");
+                        return new Token(TokenType.ADD, "+");
                     case '-':
                         position++;
-                        return new Token(TokenType.Subtract, "-");
+                        return new Token(TokenType.SUBTRACT, "-");
                     case '=':
                         position++;
-                        return new Token(TokenType.Assignment, "=");
+                        return new Token(TokenType.ASSIGN, "=");
                     case '(':
                         position++;
-                        return new Token(TokenType.LeftParen, "(");
+                        return new Token(TokenType.LEFTPAREN, "(");
                     case ')':
                         position++;
-                        return new Token(TokenType.RightParen, ")");
+                        return new Token(TokenType.RIGHTPAREN, ")");
                     case '*':
                         position++;
-                        return new Token(TokenType.Multiply, "*");
+                        return new Token(TokenType.MULTIPLY, "*");
                     case '/':
                         position++;
-                        return new Token(TokenType.Divide, "/");
+                        return new Token(TokenType.DIVIDE, "/");
                     case '.':
-                        return new Token(TokenType.ObjectAccessor, ".");
+                        return new Token(TokenType.OJECT_ACCESSOR, ".");
                 }
                 return null;
             }
@@ -343,7 +371,7 @@ namespace Pixel
     public class ArithmeticInterpreter : IInterpreter
     {
         private Stack<Token> tokens = new();
-        private Dictionary<string, (TokenType, object)> variables = new();
+        internal Dictionary<string, (TokenType type, object value)> variables = new();
 
         private int index;
         public void PushTokensOntoStack(Stack<Token> tokens)
@@ -377,42 +405,40 @@ namespace Pixel
         {
             switch (type)
             {
-                case TokenType.Identifier:
+                case TokenType.IDENTIFIER:
                     return TokenFamily.IDENTIFIER;
 
-                case TokenType.VarDecl:
-                case TokenType.Delete:
-                case TokenType.Assignment:
-                case TokenType.For:
-                case TokenType.If:
-                case TokenType.Return:
-                case TokenType.Null:
+                case TokenType.VAR_DECL:
+                case TokenType.DELETE:
+                case TokenType.ASSIGN:
+                case TokenType.FOR:
+                case TokenType.IF:
+                case TokenType.RETURN:
+                case TokenType.NULL:
                     return TokenFamily.KEYWORD;
 
 
-                case TokenType.LeftParen:
-                case TokenType.RightParen:
-                case TokenType.Add:
-                case TokenType.Subtract:
-                case TokenType.Multiply:
-                case TokenType.Divide:
+                case TokenType.LEFTPAREN:
+                case TokenType.RIGHTPAREN:
+                case TokenType.ADD:
+                case TokenType.SUBTRACT:
+                case TokenType.MULTIPLY:
+                case TokenType.DIVIDE:
                     return TokenFamily.OPERATOR;
 
-                case TokenType.Number:
-                case TokenType.Char:
+                case TokenType.NUMBER:
+                case TokenType.CHAR:
                     return TokenFamily.VALUE;
 
                 default:
                     return TokenFamily.UNDEFINED;
             };
         }
-
         private double? ParseExpression()
         {
-            var keyword = tokens.Pop();
+            var keyword = tokens.Peek();
             var type = keyword.Type;
             var family = CheckFamily(type);
-            
             switch (family)
             {
                 case TokenFamily.UNDEFINED:
@@ -422,9 +448,9 @@ namespace Pixel
                 case TokenFamily.KEYWORD:
                     switch (type)
                     {
-                        case TokenType.VarDecl:
+                        case TokenType.VAR_DECL:
                             return PerformVariableDeclaration();
-                        case TokenType.Delete:
+                        case TokenType.DELETE:
                             return PerformVariableDeletion();
                         default:
                             break;
@@ -435,14 +461,14 @@ namespace Pixel
                 case TokenFamily.VALUE:
                     return ParseAddition();
                 case TokenFamily.IDENTIFIER:
-                    return PerformObjectAccess(keyword);
+                    return PerformObjectAccess();
 
             }
             return null;
         }
-
         private double? PerformVariableDeletion()
         {
+            var keyword = tokens.Pop();
             var identifier = tokens.Pop();
 
             if (!variables.ContainsKey(identifier.String))
@@ -455,12 +481,8 @@ namespace Pixel
             Interop.Log("delete succeeded.");
             return null;
         }
-
-        private double? PerformObjectAccess(Token identifier)
+        private double? PerformVariableAcess(Token identifier)
         {
-            if (!variables.ContainsKey(identifier.String))
-                return null;
-
             variables.TryGetValue(identifier.String, out var value);
 
             var accessor = tokens.Pop();
@@ -468,14 +490,21 @@ namespace Pixel
 
             switch (@operator)
             {
-                case TokenType.ObjectAccessor:
+                case TokenType.OJECT_ACCESSOR:
                     return PerformObjectMemberAccess(value);
-                case TokenType.Assignment:
+                case TokenType.ASSIGN:
                     return PerformObjectOverwrite(identifier.String);
             }
             return null;
         }
+        private double? PerformObjectAccess()
+        {
+            var identifier = tokens.Pop();
 
+            if (variables.ContainsKey(identifier.String))
+                return PerformVariableAcess(identifier);
+            return null;
+        }
         private double? PerformObjectOverwrite(string key)
         {
             var newVal = tokens.Pop();
@@ -486,17 +515,16 @@ namespace Pixel
             variables[key] = (newVal.Type, newVal.String);
             return null;
         }
-
         private double? PerformObjectMemberAccess((TokenType, object) value)
         {
             var target = tokens.Pop();
 
-            if (target.Type != TokenType.Identifier)
+            if (target.Type != TokenType.IDENTIFIER)
                 return null;
 
             var assignment = tokens.Pop();
 
-            if (assignment.Type != TokenType.Assignment)
+            if (assignment.Type != TokenType.ASSIGN)
                 return null;
 
             var newValue = tokens.Pop();
@@ -517,7 +545,56 @@ namespace Pixel
             Interop.Log("Object access failure.");
             return null;
         }
+        private double? PerformVariableDeclaration()
+        {
+            var keyword = tokens.Pop();
 
+            var identifier = tokens.Pop();
+
+            if (identifier.Type != TokenType.IDENTIFIER)
+                return null;
+
+            var assignment_operator = tokens.Pop();
+
+            if (assignment_operator.Type != TokenType.ASSIGN)
+                return null;
+
+            var value = tokens.Pop();
+
+            switch (CheckFamily(value.Type))
+            {
+                case TokenFamily.UNDEFINED:
+                    break;
+
+                case TokenFamily.KEYWORD:
+                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
+                    break;
+
+                case TokenFamily.OPERATOR:
+                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
+                    break;
+
+                case TokenFamily.VALUE:
+                    switch (value.Type)
+                    {
+                        case TokenType.NULL:
+                        case TokenType.NUMBER:
+                        case TokenType.CHAR:
+                            Interop.Log($"newly declared variable found as type : {value.Type}");
+                            variables.Add(identifier.String, (identifier.Type, value));
+                            break;
+                    }
+                    return null;
+
+                case TokenFamily.IDENTIFIER:
+                    Interop.Log("Invalid variable declaration. Type was not found.");
+                    break;
+
+                default:
+                    break;
+            }
+            return null;
+        }
         private double? ParseAddition()
         {
             var left = ParseMultiplication();
@@ -570,7 +647,7 @@ namespace Pixel
             if (!init.HasValue)
                 return null;
 
-            if (token.Type == TokenType.Subtract)
+            if (token.Type == TokenType.SUBTRACT)
             {
                 tokens.Pop();
                 result = -init.Value;
@@ -588,8 +665,8 @@ namespace Pixel
                 return null;
 
             var token = tokens.Peek();
-            bool isNumber = token.Type == TokenType.Number;
-            bool isLeftParentheses = token.Type == TokenType.LeftParen;
+            bool isNumber = token.Type == TokenType.NUMBER;
+            bool isLeftParentheses = token.Type == TokenType.LEFTPAREN;
 
             if (isNumber)
             {
@@ -601,7 +678,7 @@ namespace Pixel
             {
                 tokens.Pop();
                 var result = ParseExpression();
-                bool missing_args = tokens.Count == 0 || token.Type != TokenType.RightParen;
+                bool missing_args = tokens.Count == 0 || token.Type != TokenType.RIGHTPAREN;
 
                 if (missing_args)
                     throw new Exception($"Missing closing parentheses");
@@ -612,76 +689,25 @@ namespace Pixel
 
             return null;
         }
-
-        private double? PerformVariableDeclaration()
-        {
-            var identifier = tokens.Pop();
-
-            if (identifier.Type != TokenType.Identifier)
-                return null;
-
-            var assignment_operator = tokens.Pop();
-
-            if (assignment_operator.Type != TokenType.Assignment)
-                return null;
-
-            var value = tokens.Pop();
-
-            switch (CheckFamily(value.Type))
-            {
-                case TokenFamily.UNDEFINED:
-                    break;
-
-                case TokenFamily.KEYWORD:
-                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
-                    break;
-
-                case TokenFamily.OPERATOR:
-                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
-                    break;
-
-                case TokenFamily.VALUE:
-                    switch (value.Type)
-                    {
-                        case TokenType.Null:
-                        case TokenType.Number:
-                        case TokenType.Char:
-                            Interop.Log($"newly declared variable found as type : {value.Type}");
-                            variables.Add(identifier.String, (identifier.Type, value));
-                            break;
-                    }
-                    return null;
-
-                case TokenFamily.IDENTIFIER:
-                    Interop.Log("Invalid variable declaration. Type was not found.");
-                    break;
-
-                default:
-                    break;
-            }
-            return null;
-        }
         private static double PerformMultiplication(double left, TokenType op, double right)
         {
-            if (op == TokenType.Multiply)
+            if (op == TokenType.MULTIPLY)
                 left *= right;
-            else if (op == TokenType.Divide)
+            else if (op == TokenType.DIVIDE)
                 left /= right;
             return left;
         }
         static double PerformAddition(double left, TokenType op, double right)
         {
-            if (op == TokenType.Add)
+            if (op == TokenType.ADD)
                 left += right;
 
-            if (op == TokenType.Subtract)
+            if (op == TokenType.SUBTRACT)
                 left -= right;
             return left;
         }
-
-
-        bool HasAdditionOperators() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.Add || tokens.Peek().Type == TokenType.Subtract);
-        bool HasMultiplicationOperator() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.Multiply || tokens.Peek().Type == TokenType.Divide);
+        bool HasAdditionOperators() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.ADD || tokens.Peek().Type == TokenType.SUBTRACT);
+        bool HasMultiplicationOperator() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.MULTIPLY || tokens.Peek().Type == TokenType.DIVIDE);
         public async Task RunAsync(string input)
         {
             var tokenizer = new Tokenizer(input);
@@ -907,7 +933,7 @@ namespace Pixel
     }
     public class Interpreter
     {
-        static List<IInterpreter> ActiveInterpreters = new() { new CSharpInterpreter(), new ArithmeticInterpreter() };
+        internal static List<IInterpreter> ActiveInterpreters = new() { new CSharpInterpreter(), new ArithmeticInterpreter() };
         public Interpreter()
         {
         }
@@ -994,28 +1020,29 @@ namespace Pixel
     }
     public enum TokenType
     {
-        VarDecl,
-        Delete,
+        VAR_DECL,
+        DELETE,
         
-        LeftParen,
-        RightParen,
+        LEFTPAREN,
+        RIGHTPAREN,
         
-        Assignment,
-        Add,
-        Subtract,
+        ASSIGN,
+        ADD,
+        SUBTRACT,
 
-        Multiply,
-        Divide,
+        MULTIPLY,
+        DIVIDE,
 
-        For,
-        If,
-        Return,
-        Null,
+        FOR,
+        IF,
+        RETURN,
+        NULL,
 
-        Number,
-        Char,
-        Identifier,
-        ObjectAccessor,
+        NUMBER,
+        CHAR,
+        IDENTIFIER,
+        OJECT_ACCESSOR,
+        FUNCTION,
     }
     public interface IInterpreter
     {
