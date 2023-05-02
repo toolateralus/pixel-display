@@ -4,124 +4,40 @@
         <name>Pixel Core</name>
     </assembly>
     <members>
-        <member name="M:Pixel.ExtensionMethods.ToInt(System.String)">
+        <member name="F:Pixel.Types.Command.phrase">
             <summary>
-            Takes a string of any format and returns a integer value. If the string contains no number chars, it will return -1.
-            </summary>
-            <param name="input"></param>
-            <returns>an integer of value based on the order and frequency of numbers in the input string.</returns>
-        </member>
-        <member name="M:Pixel.ExtensionMethods.ToFileNameFormat(System.String)">
-            <summary>
-            Since the assets system handles the file 
-            
-            , this format is only relevant to the naming convention used for files.
-            </summary>
-            <param name="input"></param>
-            <returns>A formatted version of the string that will not cause file-saving errors</returns>
-        </member>
-        <member name="M:Pixel.ExtensionMethods.Flatten``1(``0[0:,0:])">
-            <summary>
-            
-            </summary>
-            <param name="colors"></param>
-            <returns> A one dimensional array containing all the elements of the two-dimensional array passed in.</returns>
-        </member>
-        <member name="M:Pixel.Vector2ExtensionMethods.Normalized(System.Numerics.Vector2)">
-            <summary>
-             TODO: fix possible  'divide by zero'
-              Normalize a vector
-            </summary>
-            <param name="v"></param>
-            <returns>A normalized Vector from the length of the current</returns>
-        </member>
-        <member name="P:Pixel.FileIO.FileBase.Path">
-            <summary>
-            the absolute path corrected to the machine that's running the program, and WorkingRoot in Constants.
+            the way the command must be typed to be successfully interpreted. note: if your command looks like this -> node.List(); then you need to type this as node.List;
             </summary>
         </member>
-        <member name="M:Pixel.Project.Load">
+        <member name="F:Pixel.Types.Command.description">
             <summary>
-            Runs an import file dialog and when appropriately navigated to a project file, loads it.-
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Pixel.Project.#ctor(System.String)">
-            <summary>
-            use this for new projects and overwrite the default stage data, this prevents lockups
-            </summary>
-            <param name="name"></param>
-        </member>
-        <member name="M:Pixel.Assets.Importer.Import(System.Boolean)">
-            <summary>
-            Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
+            A short summary of the function and usage of the command.
             </summary>
         </member>
-        <member name="T:Pixel.WaveForms">
+        <member name="F:Pixel.Types.Command.syntax">
             <summary>
-            must be refactored to not be static or to not use instanced data.
+            Syntactical guidelines for using the command properly, etc default args or explanation of syntax.
             </summary>
         </member>
-        <member name="P:Pixel.WaveForms.Next">
+        <member name="F:Pixel.Types.Command.argumentTypes">
             <summary>
-            Samples a random vertex point on a Sine Wave operating within pre-defined parameters.
+            declaring members in this list will flag your command to have x arguments of n type, see CommandParser.type_identifiers {todo: make some documentation for this as its a private protected array}.
             </summary>
         </member>
-        <member name="M:Pixel.WaveForms.GetPointOnSine(System.Single,System.Single,System.Single,System.Int32)">
+        <member name="F:Pixel.Types.Command.error">
             <summary>
-            Manually define parameters for a sample from a sine wave.
-            </summary>
-            <param name="startPosition">the start of the wave</param>
-            <param name="endPosition">the end position of the wave</param>
-            <param name="Tau">A float within the range of 0 to PI * 2</param>
-            <param name="vertexIndex">the individual vertex of the wave which will be returned</param>
-            <param name="x">out X of the returned vector</param>
-            <param name="y">out Y of the returned vector</param>
-            <returns>A Vertex position on the specified wave.</returns>
-        </member>
-        <member name="M:Pixel.WaveForms.GetPointOnSine">
-            <summary>
-            Sample a sine wave under the current defined parameters of the static class Sine.
-            </summary>
-            <returns>A Vertex position at a random point on a sine wave</returns>
-        </member>
-        <member name="M:Pixel.IAnimate.Start(System.Single,System.Boolean)">
-            <summary>
-            Starts the animation.
-            </summary>
-            <param name="speed"></param>
-            <param name="looping"></param>
-        </member>
-        <member name="M:Pixel.IAnimate.Stop(System.Boolean)">
-            <summary>
-            Stops the animation.
-            </summary>
-            <param name="reset"></param>
-        </member>
-        <member name="M:Pixel.IAnimate.Next">
-            <summary>
-            Gets the next frame in the animation, or skips frames if  an increment of greater than one is provided
-            /// </summary>
-            <param name="increment"></param>
-        </member>
-        <member name="M:Pixel.IAnimate.Previous">
-            <summary>
-            Gets the previous frame in the animation, or skips back multiple frames if an increment of greater than one is provided
-            </summary>
-            <param name="increment"></param>
-        </member>
-        <member name="F:Pixel.Animation`1.frameTime">
-            <summary>
-            this is the number of frames to wait between displaying frames.
+            this is only not null when there has been an error, and will likely contain a string of information about the error.
             </summary>
         </member>
-        <member name="M:Pixel.Animation`1.#ctor(`0[],System.Int32,System.Boolean,System.Boolean)">
+        <member name="F:Pixel.Types.Command.action">
             <summary>
-            frameTime is exclusive (I think, if you input 16 frames will be 15 cycles long.)
+            this is what is invoked when the command is successfully called, and it is invoked under the parameters of this.args as needed.
             </summary>
-            <param name="data"></param>
-            <param name="frameTime"></param>
-            <param name="looping"></param>
+        </member>
+        <member name="F:Pixel.Types.Command.args">
+            <summary>
+            use this as a way to pass parameters into a command
+            </summary>
         </member>
         <member name="T:Pixel.Types.Components.Component">
             <summary>
@@ -282,6 +198,125 @@
             A basic shape mostly used for drawing debug shapes.
             </summary>
         </member>
+        <member name="M:Pixel.ExtensionMethods.ToInt(System.String)">
+            <summary>
+            Takes a string of any format and returns a integer value. If the string contains no number chars, it will return -1.
+            </summary>
+            <param name="input"></param>
+            <returns>an integer of value based on the order and frequency of numbers in the input string.</returns>
+        </member>
+        <member name="M:Pixel.ExtensionMethods.ToFileNameFormat(System.String)">
+            <summary>
+            Since the assets system handles the file 
+            
+            , this format is only relevant to the naming convention used for files.
+            </summary>
+            <param name="input"></param>
+            <returns>A formatted version of the string that will not cause file-saving errors</returns>
+        </member>
+        <member name="M:Pixel.ExtensionMethods.Flatten``1(``0[0:,0:])">
+            <summary>
+            
+            </summary>
+            <param name="colors"></param>
+            <returns> A one dimensional array containing all the elements of the two-dimensional array passed in.</returns>
+        </member>
+        <member name="M:Pixel.Vector2ExtensionMethods.Normalized(System.Numerics.Vector2)">
+            <summary>
+             TODO: fix possible  'divide by zero'
+              Normalize a vector
+            </summary>
+            <param name="v"></param>
+            <returns>A normalized Vector from the length of the current</returns>
+        </member>
+        <member name="P:Pixel.FileIO.FileBase.Path">
+            <summary>
+            the absolute path corrected to the machine that's running the program, and WorkingRoot in Constants.
+            </summary>
+        </member>
+        <member name="M:Pixel.Project.Load">
+            <summary>
+            Runs an import file dialog and when appropriately navigated to a project file, loads it.-
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Pixel.Project.#ctor(System.String)">
+            <summary>
+            use this for new projects and overwrite the default stage data, this prevents lockups
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="M:Pixel.Assets.Importer.Import(System.Boolean)">
+            <summary>
+            Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
+            </summary>
+        </member>
+        <member name="T:Pixel.WaveForms">
+            <summary>
+            must be refactored to not be static or to not use instanced data.
+            </summary>
+        </member>
+        <member name="P:Pixel.WaveForms.Next">
+            <summary>
+            Samples a random vertex point on a Sine Wave operating within pre-defined parameters.
+            </summary>
+        </member>
+        <member name="M:Pixel.WaveForms.GetPointOnSine(System.Single,System.Single,System.Single,System.Int32)">
+            <summary>
+            Manually define parameters for a sample from a sine wave.
+            </summary>
+            <param name="startPosition">the start of the wave</param>
+            <param name="endPosition">the end position of the wave</param>
+            <param name="Tau">A float within the range of 0 to PI * 2</param>
+            <param name="vertexIndex">the individual vertex of the wave which will be returned</param>
+            <param name="x">out X of the returned vector</param>
+            <param name="y">out Y of the returned vector</param>
+            <returns>A Vertex position on the specified wave.</returns>
+        </member>
+        <member name="M:Pixel.WaveForms.GetPointOnSine">
+            <summary>
+            Sample a sine wave under the current defined parameters of the static class Sine.
+            </summary>
+            <returns>A Vertex position at a random point on a sine wave</returns>
+        </member>
+        <member name="M:Pixel.IAnimate.Start(System.Single,System.Boolean)">
+            <summary>
+            Starts the animation.
+            </summary>
+            <param name="speed"></param>
+            <param name="looping"></param>
+        </member>
+        <member name="M:Pixel.IAnimate.Stop(System.Boolean)">
+            <summary>
+            Stops the animation.
+            </summary>
+            <param name="reset"></param>
+        </member>
+        <member name="M:Pixel.IAnimate.Next">
+            <summary>
+            Gets the next frame in the animation, or skips frames if  an increment of greater than one is provided
+            /// </summary>
+            <param name="increment"></param>
+        </member>
+        <member name="M:Pixel.IAnimate.Previous">
+            <summary>
+            Gets the previous frame in the animation, or skips back multiple frames if an increment of greater than one is provided
+            </summary>
+            <param name="increment"></param>
+        </member>
+        <member name="F:Pixel.Animation`1.frameTime">
+            <summary>
+            this is the number of frames to wait between displaying frames.
+            </summary>
+        </member>
+        <member name="M:Pixel.Animation`1.#ctor(`0[],System.Int32,System.Boolean,System.Boolean)">
+            <summary>
+            frameTime is exclusive (I think, if you input 16 frames will be 15 cycles long.)
+            </summary>
+            <param name="data"></param>
+            <param name="frameTime"></param>
+            <param name="looping"></param>
+        </member>
         <member name="M:Pixel.Animator.Start">
             <summary>
             this wrapper allows params to be passed in when pressed from inspector.
@@ -439,6 +474,21 @@
         <member name="T:Pixel.LUA">
             <summary>
             A mostly static class functioning as a wrapper for KeraLua Lua usage. Also contains all Pixel LuaFunctions aka PixelLua library :D
+            </summary>
+        </member>
+        <member name="P:Pixel.Token.Type">
+            <summary>
+            The type of the token, used for performing operations and executing expressions.
+            </summary>
+        </member>
+        <member name="P:Pixel.Token.String">
+            <summary>
+            the string representation of the token
+            </summary>
+        </member>
+        <member name="M:Pixel.Token.#ctor(Pixel.TokenType,System.String)">
+            <summary>
+            A pointer to the object, also for caching.
             </summary>
         </member>
         <member name="T:Pixel.Node">

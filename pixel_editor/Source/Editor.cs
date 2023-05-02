@@ -2,6 +2,7 @@
 using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
+using Pixel.Types;
 using Pixel_Editor;
 using Pixel_Editor.Source;
 using System;
@@ -434,7 +435,7 @@ namespace pixel_editor
 
                 if (line.Contains("wait(") && (line.Contains(')') || line.Contains(");")))
                 {
-                    CommandParser.ParseArguments(line, out string[] args, out _);
+                    CSharpInterpreter.ParseArguments(line, out string[] args, out _);
                     int delayMs = args[0].ToInt();
                     if (delayMs == -1)
                     {
@@ -448,7 +449,7 @@ namespace pixel_editor
                 }
 
                 if (line != "")
-                    CommandParser.TryCallLine(line);
+                    Interpreter.TryCallLine(line);
             }
         }
         private void OnToggleConsole(object sender, RoutedEventArgs e)

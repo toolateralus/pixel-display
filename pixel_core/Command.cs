@@ -1,7 +1,7 @@
-﻿                                                                                                                                                                                                                                                                                  using System;
-using Pixel;
+﻿using Pixel;
+using System;
 
-namespace pixel_editor
+namespace Pixel.Types
 {
     public enum PromptResult { Yes, No, Ok, Cancel, Timeout};
     public partial class Command
@@ -38,8 +38,8 @@ namespace pixel_editor
         public void Invoke() => action?.Invoke(args);
         public bool Equals(string input)
         {
-            CommandParser.ParseArguments(input, out _, out var withoutArgs);
-            withoutArgs = CommandParser.ParseLoopParams(withoutArgs, out _);
+            CSharpInterpreter.ParseArguments(input, out _, out var withoutArgs);
+            withoutArgs = CSharpInterpreter.ParseLoopParams(withoutArgs, out _);
 
             string[] split = phrase.Split(PhraseVariantSeperator);
 
@@ -48,7 +48,7 @@ namespace pixel_editor
                     return true;
             return false;
         }
-        public static void Success(string syntax) => Runtime.Log($"{syntax} call successful");
+        public static void Success(string syntax) => Interop.Log($"{syntax} call successful");
     }
 }
 

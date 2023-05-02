@@ -1,7 +1,7 @@
 ﻿using Pixel;
 using System;
 
-namespace pixel_editor
+namespace Pixel.Types
 {
     public enum CmdError { ArgumentNotFound, NullReference, InvalidOperation, InvalidCast };
     public partial class Command
@@ -15,30 +15,30 @@ namespace pixel_editor
         };
         public static void Error(string cmdName, string errorInfo)
         {
-            Runtime.Log($"{cmdName} was not called : {errorInfo}");
+            Interop.Log($"{cmdName} was not called : {errorInfo}");
         }
         public static void Error(string cmdName, CmdError error)
         {
             switch (error)
             {
                 case CmdError.ArgumentNotFound:
-                    Runtime.Log($"{cmdName}" + errorMessages[0]);
+                    Interop.Log($"{cmdName}" + errorMessages[0]);
                         break;       
                     
-                case CmdError.NullReference:  
-                    Runtime.Log($"{cmdName}" + errorMessages[1]);
+                case CmdError.NullReference:
+                    Interop.Log($"{cmdName}" + errorMessages[1]);
                         break;                 
                                                
                 case CmdError.InvalidOperation:
-                    Runtime.Log($"{cmdName}" + errorMessages[2]);
+                    Interop.Log($"{cmdName}" + errorMessages[2]);
                         break;                 
                                                
-                case CmdError.InvalidCast:    
-                    Runtime.Log($"{cmdName}" + errorMessages[3]);
+                case CmdError.InvalidCast:
+                    Interop.Log($"{cmdName}" + errorMessages[3]);
                         break;               
                                              
-                default:                       
-                    Runtime.Log($"{cmdName}" + errorMessages[4]);
+                default:
+                    Interop.Log($"{cmdName}" + errorMessages[4]);
                          break;
             };
         }

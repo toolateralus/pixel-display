@@ -17,6 +17,7 @@ namespace Pixel
         GET_FILE_VIEWER_SELECTED_OBJECT = 32,
         FOCUS_NODE = 64,
         CLEAR_CONSOLE = 128,
+        GET_COMMAND_LIBRARY_C_SHARP = 256,
     }
     /// <summary>
     /// This is a class used to pass info and requests to the Editor without the context neccesary from being lower in the hierarchy.

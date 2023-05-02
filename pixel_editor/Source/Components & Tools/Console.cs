@@ -3,6 +3,7 @@ using Pixel;
 using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
+using Pixel.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -432,61 +433,6 @@ namespace pixel_editor
             }
             Inspector.OnInspectorMoved.Invoke((int)vec.X, (int)vec.Y);
         }
-        #endregion
-        public static void Print(object? o, bool includeDateTime = false)
-        {
-            var msg = o.ToString();
-            var e = new EditorEvent(EditorEventFlags.PRINT, msg, includeDateTime);
-            Editor.QueueEvent(e);
-        }
-        public static void Error(object? o = null, int? textColorAlterationDuration = null)
-        {
-            string? msg = o.ToString();
-            EditorEvent e = new(EditorEventFlags.PRINT_ERR, msg, false);
-
-            if (textColorAlterationDuration is not null)
-                e.action = RedTextAsync((int)textColorAlterationDuration);
-            Editor.QueueEvent(e);
-        }
-        public static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
-        {
-            Console.Print(question);
-            for (int i = 0; i < waitDuration * 100; i++)
-            {
-                if (i % 100 == 0)
-                {
-                    int seconds = 10 * (5000 - i) / 1000;
-                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
-                }
-
-                if (Keyboard.IsKeyDown(Key.Y))
-                    return PromptResult.Yes;
-                if (Keyboard.IsKeyDown(Key.N))
-                    return PromptResult.No;
-                if (Keyboard.IsKeyDown(Key.End))
-                    return PromptResult.Cancel;
-
-                await Task.Delay(10);
-            };
-            return PromptResult.Timeout;
-        }
-        public static void Clear(bool randomPixel = false)
-        {
-            EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE, "");
-            Editor.QueueEvent(editorEvent);
-
-            if (randomPixel)
-                Error("Console Cleared", 1);
-        }
-        public static Action<object[]?> RedTextAsync(int delay)
-        {
-            return async (o) =>
-            {
-                Editor.Current.RedText().Invoke(o);
-                await Task.Delay(delay * 1000);
-                Editor.Current.BlackText().Invoke(o);
-            };
-        }
         public static bool TryGetArgAtIndex<T>(int index, out T? arg, object[] o)
         {
             bool hasArg = o != null && o.Length > index;
@@ -638,6 +584,62 @@ namespace pixel_editor
                 method.Invoke(node, null);
                 Print($"\"{nName}.{fName}()\" Call succesful.");
             }
+        }
+        #endregion
+
+        public static void Print(object? o, bool includeDateTime = false)
+        {
+            var msg = o.ToString();
+            var e = new EditorEvent(EditorEventFlags.PRINT, msg, includeDateTime);
+            Editor.QueueEvent(e);
+        }
+        public static void Error(object? o = null, int? textColorAlterationDuration = null)
+        {
+            string? msg = o.ToString();
+            EditorEvent e = new(EditorEventFlags.PRINT_ERR, msg, false);
+
+            if (textColorAlterationDuration is not null)
+                e.action = RedTextAsync((int)textColorAlterationDuration);
+            Editor.QueueEvent(e);
+        }
+        public static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
+        {
+            Console.Print(question);
+            for (int i = 0; i < waitDuration * 100; i++)
+            {
+                if (i % 100 == 0)
+                {
+                    int seconds = 10 * (5000 - i) / 1000;
+                    Console.Print($"[Y/N/End] {seconds} seconds remaining");
+                }
+
+                if (Keyboard.IsKeyDown(Key.Y))
+                    return PromptResult.Yes;
+                if (Keyboard.IsKeyDown(Key.N))
+                    return PromptResult.No;
+                if (Keyboard.IsKeyDown(Key.End))
+                    return PromptResult.Cancel;
+
+                await Task.Delay(10);
+            };
+            return PromptResult.Timeout;
+        }
+        public static void Clear(bool randomPixel = false)
+        {
+            EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE, "");
+            Editor.QueueEvent(editorEvent);
+
+            if (randomPixel)
+                Error("Console Cleared", 1);
+        }
+        public static Action<object[]?> RedTextAsync(int delay)
+        {
+            return async (o) =>
+            {
+                Editor.Current.RedText().Invoke(o);
+                await Task.Delay(delay * 1000);
+                Editor.Current.BlackText().Invoke(o);
+            };
         }
         public List<Command> LoadedCommands = new();
     }
