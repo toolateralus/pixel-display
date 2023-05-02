@@ -142,7 +142,7 @@ namespace Pixel
             {
                 if (!(Interop.IsRunning && Interop.Initialized))
                     throw;
-                Interop.Log("JSON Read Failed : \n" + e.Message, true, false);
+                Interop.Log("JSON Read Failed : \n" + e.Message);
             }
             return obj;
         }

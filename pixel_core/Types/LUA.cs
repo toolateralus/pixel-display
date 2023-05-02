@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Printing;
 using System.Reflection;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -74,7 +76,7 @@ namespace Pixel
         {
             if (line == "*c();\r\n")
             {
-                Interop.Log("", false, true);
+                Interop.ClearConsole();
                 return "";
             }
 
@@ -215,140 +217,6 @@ namespace Pixel
         });
         #endregion
     }
-    public class ExpressionEvaluator
-    {
-        private List<Token> tokens;
-        private int index;
-        public ExpressionEvaluator(List<Token> tokens)
-        {
-            this.tokens = tokens;
-            index = 0;
-        }
-        public double? Evaluate()
-        {
-            var result = ParseExpression();
-
-            if (index < tokens.Count)
-            {
-                Interop.Log($"Unexpected token: {tokens[index].String}");
-                return null;
-            }
-
-            return result;
-        }
-        private double? ParseExpression()
-        {
-            return ParseAddition();
-        }
-        private double? ParseAddition()
-        {
-            var left = ParseMultiplication();
-            if (!left.HasValue)
-                return null;
-            while (HasAdditionOperators())
-            {
-                var op = tokens[index].Type;
-                index++;
-                var right = ParseMultiplication();
-                if (!right.HasValue)
-                    return null;
-                left = PerformAddition(left.Value, op, right.Value);
-            }
-            return left;
-        }
-        private double? ParseMultiplication()
-        {
-            var left = ParseUnary();
-            
-            if (!left.HasValue)
-                return null;
-
-            while (HasMultiplicationOperator())
-            {
-                var op = tokens[index].Type;
-                index++;
-                var right = ParseUnary();
-                    
-                    if (!right.HasValue)
-                        return null;
-                left = PerformMultiplication(left.Value, op, right.Value);
-            }
-            return left;
-        }
-        private double? ParseUnary()
-        {
-            if (tokens.Count <= index)
-                return null;
-
-            var token = tokens[index];
-            double result;
-
-            var init = ParsePrimary();
-
-            if (!init.HasValue)
-                return null;
-
-            if (token.Type == TokenType.Subtract)
-            {
-                index++;
-                result = -init.Value;
-            }
-            else
-            {
-                result = init.Value;
-            }
-
-            return result;
-        }
-        private double? ParsePrimary()
-        {
-            if (index < tokens.Count)
-            {
-                var token = tokens[index];
-                bool isNumber = token.Type == TokenType.Number;
-                bool isLeftParentheses = token.Type == TokenType.LeftParen;
-
-                if (isNumber)
-                {
-                    index++;
-                    return double.Parse(token.String);
-                }
-
-                if (isLeftParentheses)
-                {
-                    index++;
-                    var result = ParseExpression();
-                    bool missing_args = index >= tokens.Count || token.Type != TokenType.RightParen;
-                    
-                    if (missing_args)
-                        throw new Exception($"Missing closing parentheses");
-                    
-                    index++;
-                    return result;
-                }
-            }
-            return 0;
-        }
-        private static double PerformMultiplication(double left, TokenType op, double right)
-        {
-            if (op == TokenType.Multiply)
-                left *= right;
-            else if (op == TokenType.Divide)
-                left /= right;
-            return left;
-        }
-        static double PerformAddition(double left, TokenType op, double right)
-        {
-            if (op == TokenType.Add)
-                left += right;
-
-            if (op == TokenType.Subtract)
-                left -= right;
-            return left;
-        }
-        bool HasAdditionOperators() => index < tokens.Count && (tokens[index].Type == TokenType.Add || tokens[index].Type == TokenType.Subtract);
-        bool HasMultiplicationOperator() => index < tokens.Count && (tokens[index].Type == TokenType.Multiply || tokens[index].Type == TokenType.Divide);
-    }
     public class Token
     {
         /// <summary>
@@ -384,6 +252,8 @@ namespace Pixel
 
             char currentChar = input[position];
 
+            currentChar = IgnoreWhitespace(currentChar);
+
             if (char.IsDigit(currentChar))
                 return parseDigits();
 
@@ -396,7 +266,7 @@ namespace Pixel
             {
                 StringBuilder identifierBuilder = new StringBuilder();
 
-                while (position < input.Length && Char.IsLetterOrDigit(input[position]))
+                while (position < input.Length && char.IsLetterOrDigit(input[position]))
                 {
                     identifierBuilder.Append(input[position]);
                     position++;
@@ -412,7 +282,7 @@ namespace Pixel
                     "if" => new Token(TokenType.If, identifier),
                     "return" => new Token(TokenType.Return, identifier),
                     "null" => new Token(TokenType.Null, identifier),
-                    _ => null
+                    _ => new Token(TokenType.Identifier, identifier),
                 };
             }
             Token? parseDigits()
@@ -455,184 +325,322 @@ namespace Pixel
                 }
                 return null;
             }
+
+            char IgnoreWhitespace(char currentChar)
+            {
+                if (currentChar is ' ' && position + 1 < input.Length)
+                {
+                    position++;
+                    currentChar = input[position];
+                }
+
+                return currentChar;
+            }
         }
     }
-    public class Interpreter
+    public class ArithmeticInterpreter : IInterpreter
     {
-        static List<IInterpreter> ActiveInterpreters = new() { new CSharpInterpreter() };
-        private Dictionary<string, double> variables;
-        
-        public Interpreter()
+        private Stack<Token> tokens = new();
+        private Dictionary<string, (TokenType, object)> variables = new();
+
+        private int index;
+        public void PushTokensOntoStack(Stack<Token> tokens)
         {
-            variables = new Dictionary<string, double>();
+            this.tokens.Clear();
+
+            while(tokens.Count > 0) 
+                this.tokens.Push(tokens.Pop());
+
+            index = 0;
+        }
+        public double? Evaluate()
+        {
+            var result = ParseExpression();
+            if (index < tokens.Count)
+            {
+                Interop.Log($"Unexpected token: {tokens.Peek().String}");
+                return null;
+            }
+            return result;
         }
 
-        public static async Task<Command[]> GetCommands()
+        
+
+        public enum TokenFamily : long
         {
-            EditorEvent e = new(EditorEventFlags.GET_COMMAND_LIBRARY_C_SHARP);
-            object? lib = null;
-            e.action = (e) => { lib = e.First(); };
-            Interop.RaiseInspectorEvent(e);
-            float time = 0;
+            UNDEFINED = -long.MaxValue,
+            KEYWORD = 0,
+            OPERATOR = 1,
+            VALUE = 2,
+            IDENTIFIER = 4,
+        }
 
-            while (!e.processed && time < 1500)
+      
+        private TokenFamily CheckFamily(TokenType type)
+        {
+            switch (type)
             {
-                if (lib is Command[] commands)
-                    return commands;
+                case TokenType.Identifier:
+                    return TokenFamily.IDENTIFIER;
 
-                time += 15f;
-                await Task.Delay(15);
+                case TokenType.VarDecl:
+                case TokenType.Delete:
+                case TokenType.Assignment:
+                case TokenType.For:
+                case TokenType.If:
+                case TokenType.Return:
+                case TokenType.Null:
+                    return TokenFamily.KEYWORD;
+
+
+                case TokenType.LeftParen:
+                case TokenType.RightParen:
+                case TokenType.Add:
+                case TokenType.Subtract:
+                case TokenType.Multiply:
+                case TokenType.Divide:
+                    return TokenFamily.OPERATOR;
+
+                case TokenType.Number:
+                case TokenType.Char:
+                    return TokenFamily.VALUE;
+
+                default:
+                    return TokenFamily.UNDEFINED;
+            };
+        }
+
+        private double? ParseExpression()
+        {
+            var keyword = tokens.Pop();
+            var type = keyword.Type;
+            var family = CheckFamily(type);
+            
+            switch (family)
+            {
+                case TokenFamily.UNDEFINED:
+                    Interop.Log(keyword);
+                    break;
+
+                case TokenFamily.KEYWORD:
+                    return ParseKeyword();
+
+                case TokenFamily.OPERATOR:
+                    break;
+
+                case TokenFamily.VALUE:
+                    return ParseAddition();
+
+                case TokenFamily.IDENTIFIER:
+                    return AccessObject();
+
             }
             return null;
         }
-        public static (bool, double) EvaluateExpression(string expression)
-        {
-            var tokenizer = new Tokenizer(expression);
 
-            var tokens = new List<Token>(); 
+        private double? AccessObject()
+        {
+            return null;
+        }
+
+        private double? ParseKeyword()
+        {
+
+            return TryDeclareVariable();
+            double? TryDeclareVariable()
+            {   
+                var identifier = tokens.Pop();
+
+                if (identifier.Type != TokenType.Identifier)
+                    return null;
+
+                var assignment_operator = tokens.Pop();
+
+                if (assignment_operator.Type != TokenType.Assignment)
+                    return null;
+
+                var value = tokens.Pop();
+
+                switch (CheckFamily(value.Type))
+                {
+                    case TokenFamily.UNDEFINED:
+                        break;
+                    case TokenFamily.KEYWORD:
+                        Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
+                        break;
+
+                    case TokenFamily.OPERATOR:
+                        Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
+                        break;
+
+                    case TokenFamily.VALUE:
+                        switch (value.Type)
+                        {
+                            case TokenType.Null:
+                            case TokenType.Number:
+                            case TokenType.Char:
+                                Interop.Log($"newly declared variable found as type : {value.Type}");
+                                variables.Add(identifier.String, (identifier.Type, value));
+                                break;
+                        }
+                        return null;
+                    case TokenFamily.IDENTIFIER:
+                        Interop.Log("Invalid variable declaration. Type was not found.");
+                        break;
+                    default:
+                        return null;
+                }
+                return null;
+            }
+        }
+
+
+        private double? ParseAddition()
+        {
+            var left = ParseMultiplication();
+
+            if (!left.HasValue)
+                return null;
+
+            while (HasAdditionOperators())
+            {
+                var op = tokens.Pop().Type;
+
+                var right = ParseMultiplication();
+
+                if (!right.HasValue)
+                    return null;
+
+                left = PerformAddition(left.Value, op, right.Value);
+            }
+            return left;
+        }
+        private double? ParseMultiplication()
+        {
+            var left = ParseUnary();
+
+            if (!left.HasValue)
+                return null;
+
+            while (HasMultiplicationOperator())
+            {
+                var op = tokens.Pop().Type;
+                var right = ParseUnary();
+
+                if (!right.HasValue)
+                    return null;
+
+                left = PerformMultiplication(left.Value, op, right.Value);
+            }
+            return left;
+        }
+        private double? ParseUnary()
+        {
+            if (tokens.Count == 0)
+                return null;
+
+            var token = tokens.Peek();
+            double result;
+
+            var init = ParsePrimary();
+
+            if (!init.HasValue)
+                return null;
+
+            if (token.Type == TokenType.Subtract)
+            {
+                tokens.Pop();
+                result = -init.Value;
+            }
+            else
+            {
+                result = init.Value;
+            }
+
+            return result;
+        }
+        private double? ParsePrimary()
+        {
+            if (tokens.Count == 0)
+                return null;
+
+            var token = tokens.Peek();
+            bool isNumber = token.Type == TokenType.Number;
+            bool isLeftParentheses = token.Type == TokenType.LeftParen;
+
+            if (isNumber)
+            {
+                tokens.Pop();
+                return double.Parse(token.String);
+            }
+
+            if (isLeftParentheses)
+            {
+                tokens.Pop();
+                var result = ParseExpression();
+                bool missing_args = tokens.Count == 0 || token.Type != TokenType.RightParen;
+
+                if (missing_args)
+                    throw new Exception($"Missing closing parentheses");
+
+                tokens.Pop();
+                return result;
+            }
+
+            return null;
+        }
+        private static double PerformMultiplication(double left, TokenType op, double right)
+        {
+            if (op == TokenType.Multiply)
+                left *= right;
+            else if (op == TokenType.Divide)
+                left /= right;
+            return left;
+        }
+        static double PerformAddition(double left, TokenType op, double right)
+        {
+            if (op == TokenType.Add)
+                left += right;
+
+            if (op == TokenType.Subtract)
+                left -= right;
+            return left;
+        }
+        bool HasAdditionOperators() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.Add || tokens.Peek().Type == TokenType.Subtract);
+        bool HasMultiplicationOperator() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.Multiply || tokens.Peek().Type == TokenType.Divide);
+        public async Task RunAsync(string input)
+        {
+            var tokenizer = new Tokenizer(input);
+
+            var tokens = new Stack<Token>();
             Token? nextToken;
-            int attempts = 0; 
+            int attempts = 0;
+
             do
             {
                 nextToken = tokenizer.GetNextToken();
-                
+
                 if (nextToken != null)
-                    tokens.Add(nextToken);
+                    tokens.Push(nextToken);
+
+                await Task.Delay(1);
 
                 attempts++;
-            } 
-            while (nextToken != null && attempts < 10000);
+            }
+            while (nextToken != null && attempts < 1000);
 
-            var evaluator = new ExpressionEvaluator(tokens);
-            
-            var val = evaluator.Evaluate();
-            
+            PushTokensOntoStack(tokens);
+
+            var val = Evaluate();
+
             if (val.HasValue)
-                return (true, val.Value);
-            else return (false, -1);
+                Interop.Log($"expr result : {val.Value}.");
+            else Interop.Log("expr did not evaluate.");
+            return;
         }
-        public static void TryCallLine(string line)
-        {
-            foreach (var interpreter in ActiveInterpreters)
-                interpreter.RunAsync(line);
-
-
-            var output = EvaluateExpression(line);
-            Interop.Log(output);
-        }
-        public static void TryParse(string input, out List<object> value)
-        {
-            value = new();
-            for (int i = 0; i < 5; ++i)
-                switch (i)
-                {
-                    // string
-                    case 0:
-                        try
-                        {
-                            value.Add(input);
-                        }
-                        catch (Exception) { };
-                        continue;
-                    // bool
-                    case 1:
-                        try
-                        {
-                            if (bool.TryParse(input, out var val))
-                                value.Add(val);
-                        }
-                        catch (Exception)
-                        {
-
-                        };
-                        continue;
-                    // int
-                    case 2:
-                        try
-                        {
-                            if (int.TryParse(input, out var val))
-                                value.Add(val);
-                        }
-                        catch (Exception) { };
-                        continue;
-                    // float
-                    case 3:
-                        try
-                        {
-                            if (float.TryParse(input, out var val))
-                                value.Add(val);
-                        }
-                        catch (Exception) { };
-                        continue;
-                    // vec2
-                    case 4:
-                        try
-                        {
-                            Vector2 vec = input.ToVector();
-                            value.Add(vec);
-
-                        }
-                        catch (Exception) { };
-                        continue;
-
-                }
-        }
-        private static string TypeToString(TokenType obj)
-        {
-            return obj switch
-            {
-                TokenType.VarDecl => "var",
-                TokenType.Subtract => "-",
-                TokenType.Add => "+",
-                TokenType.Multiply => "*",
-                TokenType.Divide => "/",
-                TokenType.For => "for",
-                TokenType.If => "if",
-                TokenType.Return => "return",
-                TokenType.Assignment => "=",
-                TokenType.LeftParen => "(",
-                TokenType.RightParen => ")",
-                TokenType.Delete => "delete",
-                TokenType.Null => "null",
-                _ => "null",
-            };
-        }
-       
-    }
-    public enum TokenType
-    {
-        VarDecl,
-        Delete,
-        
-        LeftParen,
-        RightParen,
-        
-        Assignment,
-        Add,
-        Subtract,
-
-        Multiply,
-        Divide,
-
-        For,
-        If,
-        Return,
-        Null,
-
-        Number,
-        Char,
     }
     public class CSharpInterpreter : IInterpreter
     {
-        private const char Loop = '$';
-        private const char EndLine = ';';
-        private const char ArgumentsStart = '(';
-        private const char ArgumentsEnd = ')';
-        private const string ParameterSeperator = ", ";
-        public static bool HasArgs(string input)
-        {
-            return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
-        }
         public async Task RunAsync(string line)
         {
             ParseArguments(line, out string[] args, out _);
@@ -663,6 +671,18 @@ namespace Pixel
                     Command.Success(command.syntax);
                 }
             return;
+        }
+        #region Grammar
+        private const char Loop = '$';
+        private const char EndLine = ';';
+        private const char ArgumentsStart = '(';
+        private const char ArgumentsEnd = ')';
+        private const string ParameterSeperator = ", ";
+        #endregion
+        #region Parsing
+        public static bool HasArgs(string input)
+        {
+            return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
         }
         private static Vector2 Vec2(string? arg0)
         {
@@ -809,6 +829,118 @@ namespace Pixel
             arguments = SplitArgsIntoParams(args_str);
             return arguments;
         }
+        #endregion
+    }
+    public class Interpreter
+    {
+        static List<IInterpreter> ActiveInterpreters = new() { new CSharpInterpreter(), new ArithmeticInterpreter() };
+        public Interpreter()
+        {
+        }
+        public static void TryCallLine(string line)
+        {
+            foreach (var interpreter in ActiveInterpreters)
+                interpreter.RunAsync(line);
+        }
+        public static void TryParse(string input, out List<object> value)
+        {
+            value = new();
+            for (int i = 0; i < 5; ++i)
+                switch (i)
+                {
+                    // string
+                    case 0:
+                        try
+                        {
+                            value.Add(input);
+                        }
+                        catch (Exception) { };
+                        continue;
+                    // bool
+                    case 1:
+                        try
+                        {
+                            if (bool.TryParse(input, out var val))
+                                value.Add(val);
+                        }
+                        catch (Exception)
+                        {
+
+                        };
+                        continue;
+                    // int
+                    case 2:
+                        try
+                        {
+                            if (int.TryParse(input, out var val))
+                                value.Add(val);
+                        }
+                        catch (Exception) { };
+                        continue;
+                    // float
+                    case 3:
+                        try
+                        {
+                            if (float.TryParse(input, out var val))
+                                value.Add(val);
+                        }
+                        catch (Exception) { };
+                        continue;
+                    // vec2
+                    case 4:
+                        try
+                        {
+                            Vector2 vec = input.ToVector();
+                            value.Add(vec);
+
+                        }
+                        catch (Exception) { };
+                        continue;
+
+                }
+        }
+        public static async Task<Command[]> GetCommands()
+        {
+            EditorEvent e = new(EditorEventFlags.GET_COMMAND_LIBRARY_C_SHARP);
+            object? lib = null;
+            e.action = (e) => { lib = e.First(); };
+            Interop.RaiseInspectorEvent(e);
+            float time = 0;
+
+            while (!e.processed && time < 1500)
+            {
+                if (lib is Command[] commands)
+                    return commands;
+
+                time += 15f;
+                await Task.Delay(15);
+            }
+            return null;
+        }
+    }
+    public enum TokenType
+    {
+        VarDecl,
+        Delete,
+        
+        LeftParen,
+        RightParen,
+        
+        Assignment,
+        Add,
+        Subtract,
+
+        Multiply,
+        Divide,
+
+        For,
+        If,
+        Return,
+        Null,
+
+        Number,
+        Char,
+        Identifier,
     }
     public interface IInterpreter
     {

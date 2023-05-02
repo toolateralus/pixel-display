@@ -55,9 +55,14 @@ namespace Pixel
             }
         }
 
-        public static void Log(object obj, bool includeDateTime = false, bool clearConsole = false)
+        public static void ClearConsole()
         {
-            EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), includeDateTime);
+            EditorEvent e = new(EditorEventFlags.CLEAR_CONSOLE);
+            RaiseInspectorEvent(e);
+        }
+        public static void Log(object obj)
+        {
+            EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), false);
             RaiseInspectorEvent(e);
         }
         internal static Task<Metadata> GetSelectedFileMetadataAsync()
