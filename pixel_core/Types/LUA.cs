@@ -322,6 +322,8 @@ namespace Pixel
                     case '/':
                         position++;
                         return new Token(TokenType.Divide, "/");
+                    case '.':
+                        return new Token(TokenType.ObjectAccessor, ".");
                 }
                 return null;
             }
@@ -363,9 +365,6 @@ namespace Pixel
             }
             return result;
         }
-
-        
-
         public enum TokenFamily : long
         {
             UNDEFINED = -long.MaxValue,
@@ -374,8 +373,6 @@ namespace Pixel
             VALUE = 2,
             IDENTIFIER = 4,
         }
-
-      
         private TokenFamily CheckFamily(TokenType type)
         {
             switch (type)
@@ -423,77 +420,103 @@ namespace Pixel
                     break;
 
                 case TokenFamily.KEYWORD:
-                    return ParseKeyword();
-
+                    switch (type)
+                    {
+                        case TokenType.VarDecl:
+                            return PerformVariableDeclaration();
+                        case TokenType.Delete:
+                            return PerformVariableDeletion();
+                        default:
+                            break;
+                    }
+                    break;
                 case TokenFamily.OPERATOR:
                     break;
-
                 case TokenFamily.VALUE:
                     return ParseAddition();
-
                 case TokenFamily.IDENTIFIER:
-                    return AccessObject();
+                    return PerformObjectAccess(keyword);
 
             }
             return null;
         }
 
-        private double? AccessObject()
+        private double? PerformVariableDeletion()
         {
-            return null;
-        }
+            var identifier = tokens.Pop();
 
-        private double? ParseKeyword()
-        {
-
-            return TryDeclareVariable();
-            double? TryDeclareVariable()
-            {   
-                var identifier = tokens.Pop();
-
-                if (identifier.Type != TokenType.Identifier)
-                    return null;
-
-                var assignment_operator = tokens.Pop();
-
-                if (assignment_operator.Type != TokenType.Assignment)
-                    return null;
-
-                var value = tokens.Pop();
-
-                switch (CheckFamily(value.Type))
-                {
-                    case TokenFamily.UNDEFINED:
-                        break;
-                    case TokenFamily.KEYWORD:
-                        Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
-                        break;
-
-                    case TokenFamily.OPERATOR:
-                        Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
-                        break;
-
-                    case TokenFamily.VALUE:
-                        switch (value.Type)
-                        {
-                            case TokenType.Null:
-                            case TokenType.Number:
-                            case TokenType.Char:
-                                Interop.Log($"newly declared variable found as type : {value.Type}");
-                                variables.Add(identifier.String, (identifier.Type, value));
-                                break;
-                        }
-                        return null;
-                    case TokenFamily.IDENTIFIER:
-                        Interop.Log("Invalid variable declaration. Type was not found.");
-                        break;
-                    default:
-                        return null;
-                }
+            if (!variables.ContainsKey(identifier.String))
+            {
+                Interop.Log("delete failed: variable not found.");
                 return null;
             }
+
+            variables.Remove(identifier.String);
+            Interop.Log("delete succeeded.");
+            return null;
         }
 
+        private double? PerformObjectAccess(Token identifier)
+        {
+            if (!variables.ContainsKey(identifier.String))
+                return null;
+
+            variables.TryGetValue(identifier.String, out var value);
+
+            var accessor = tokens.Pop();
+            var @operator = accessor.Type;
+
+            switch (@operator)
+            {
+                case TokenType.ObjectAccessor:
+                    return PerformObjectMemberAccess(value);
+                case TokenType.Assignment:
+                    return PerformObjectOverwrite(identifier.String);
+            }
+            return null;
+        }
+
+        private double? PerformObjectOverwrite(string key)
+        {
+            var newVal = tokens.Pop();
+            
+            if (CheckFamily(newVal.Type) != TokenFamily.VALUE)
+                return null;
+
+            variables[key] = (newVal.Type, newVal.String);
+            return null;
+        }
+
+        private double? PerformObjectMemberAccess((TokenType, object) value)
+        {
+            var target = tokens.Pop();
+
+            if (target.Type != TokenType.Identifier)
+                return null;
+
+            var assignment = tokens.Pop();
+
+            if (assignment.Type != TokenType.Assignment)
+                return null;
+
+            var newValue = tokens.Pop();
+
+            if (CheckFamily(newValue.Type) != TokenFamily.VALUE)
+                return null;
+
+
+            var type = value.GetType();
+            var field = type.GetRuntimeField(target.String);
+
+            if (field != null)
+            {
+                Interop.Log($"{target} set to {newValue}!");
+                field.SetValue(value, newValue);
+                return null;
+            }
+            Interop.Log("Object access failure.");
+            return null;
+        }
 
         private double? ParseAddition()
         {
@@ -589,6 +612,55 @@ namespace Pixel
 
             return null;
         }
+
+        private double? PerformVariableDeclaration()
+        {
+            var identifier = tokens.Pop();
+
+            if (identifier.Type != TokenType.Identifier)
+                return null;
+
+            var assignment_operator = tokens.Pop();
+
+            if (assignment_operator.Type != TokenType.Assignment)
+                return null;
+
+            var value = tokens.Pop();
+
+            switch (CheckFamily(value.Type))
+            {
+                case TokenFamily.UNDEFINED:
+                    break;
+
+                case TokenFamily.KEYWORD:
+                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
+                    break;
+
+                case TokenFamily.OPERATOR:
+                    Interop.Log("Invalid variable declaration. Cannot convert {value} to {identifier}");
+                    break;
+
+                case TokenFamily.VALUE:
+                    switch (value.Type)
+                    {
+                        case TokenType.Null:
+                        case TokenType.Number:
+                        case TokenType.Char:
+                            Interop.Log($"newly declared variable found as type : {value.Type}");
+                            variables.Add(identifier.String, (identifier.Type, value));
+                            break;
+                    }
+                    return null;
+
+                case TokenFamily.IDENTIFIER:
+                    Interop.Log("Invalid variable declaration. Type was not found.");
+                    break;
+
+                default:
+                    break;
+            }
+            return null;
+        }
         private static double PerformMultiplication(double left, TokenType op, double right)
         {
             if (op == TokenType.Multiply)
@@ -606,6 +678,8 @@ namespace Pixel
                 left -= right;
             return left;
         }
+
+
         bool HasAdditionOperators() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.Add || tokens.Peek().Type == TokenType.Subtract);
         bool HasMultiplicationOperator() => tokens.Count > 0 && (tokens.Peek().Type == TokenType.Multiply || tokens.Peek().Type == TokenType.Divide);
         public async Task RunAsync(string input)
@@ -941,6 +1015,7 @@ namespace Pixel
         Number,
         Char,
         Identifier,
+        ObjectAccessor,
     }
     public interface IInterpreter
     {
