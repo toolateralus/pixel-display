@@ -16,8 +16,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel Engine", "pixel_engin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pixel Core", "pixel_core\Pixel Core.csproj", "{995C220C-7911-4643-ADA5-3FADBEC8A272}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixel Lang", "Pixel Lang\Pixel Lang.csproj", "{0D1E7168-4435-4B47-96B9-98B04D96A7C8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,18 +62,6 @@ Global
 		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|x64.Build.0 = Release|Any CPU
 		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|x86.ActiveCfg = Release|Any CPU
 		{995C220C-7911-4643-ADA5-3FADBEC8A272}.Release|x86.Build.0 = Release|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Debug|x64.Build.0 = Debug|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Debug|x86.Build.0 = Debug|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Release|x64.ActiveCfg = Release|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Release|x64.Build.0 = Release|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Release|x86.ActiveCfg = Release|Any CPU
-		{0D1E7168-4435-4B47-96B9-98B04D96A7C8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

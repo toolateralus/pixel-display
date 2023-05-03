@@ -9,6 +9,7 @@ using System.Printing;
 using System.Reflection;
 using System.Security.AccessControl;
 using System.Text;
+using PixelLang;
 using System.Threading.Tasks;
 
 namespace Pixel

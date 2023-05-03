@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Reflection;
 using pixel_editor;
 using Console = pixel_editor.Console;
+using PixelLang;
 
 namespace Pixel_Editor.Source
 {

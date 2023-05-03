@@ -15,11 +15,16 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="KeraLua" Version="1.3.3" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\pixel_core\Pixel Core.csproj" />
 	  <ProjectReference Include="..\pixel_engine\Pixel Engine.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="PixelLang">
+	    <HintPath>..\..\pixel-lang\Pixel Lang\bin\Release\net6.0\PixelLang.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 	<ItemGroup>
 	  <Compile Update="Source\ComponentEditor.cs">

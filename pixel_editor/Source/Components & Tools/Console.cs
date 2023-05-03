@@ -17,7 +17,6 @@ namespace pixel_editor
 {
     public class Console
     {
-        private const string divider = "-- -- --";
         public static Console Current
         {
             get
@@ -61,35 +60,16 @@ namespace pixel_editor
             }
             set => current = value;
         }
-
-        private static string ParseMethodName(LuaFunction item)
-        {
-            const string nums = "1234567890<>_";
-            var name = item.Method.Name;
-
-            foreach (char disallowed in nums)
-                for (int found = 0; found < name.Length; found++)
-                {
-                    char y = name[found];
-                    if (y == disallowed)
-                    {
-                        found = 0;
-                        name = name.Replace($"{y}", "");
-                    }
-                }
-            name = name.Remove(name.Length - 1);
-            name += ';';
-            return name;
-        }
-
         private static Console current;
-        
-        // todo: implement a typical function helper like help set(); or whatever, so you can search up a command and get deeper description.
+        private const string divider = "-- -- --";
+       
         public Dictionary<string, string> extended_help = new()
         {
             {"help", "type help{cmd name} name to get a more in depth description of the function/usages of a command"},
 
         };
+        public List<Command> LoadedCommands = new();
+
         #region General Commands
         public static Command cmd_help() => new()
         {
@@ -164,8 +144,6 @@ namespace pixel_editor
             description = "gets a node and attempts to write the provided value to specified field.",
 
         };
-
-        
         public static Command cmd_help_cmd() => new()
         {
             phrase = "help;",
@@ -602,6 +580,14 @@ namespace pixel_editor
                 e.action = RedTextAsync((int)textColorAlterationDuration);
             EditorEventHandler.QueueEvent(e);
         }
+        public static void Clear(bool randomPixel = false)
+        {
+            EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE, "");
+            EditorEventHandler.QueueEvent(editorEvent);
+
+            if (randomPixel)
+                Error("Console Cleared", 1);
+        }
         public static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
         {
             Console.Print(question);
@@ -624,13 +610,25 @@ namespace pixel_editor
             };
             return PromptResult.Timeout;
         }
-        public static void Clear(bool randomPixel = false)
-        {
-            EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE, "");
-            EditorEventHandler.QueueEvent(editorEvent);
 
-            if (randomPixel)
-                Error("Console Cleared", 1);
+        private static string ParseMethodName(LuaFunction item)
+        {
+            const string nums = "1234567890<>_";
+            var name = item.Method.Name;
+
+            foreach (char disallowed in nums)
+                for (int found = 0; found < name.Length; found++)
+                {
+                    char y = name[found];
+                    if (y == disallowed)
+                    {
+                        found = 0;
+                        name = name.Replace($"{y}", "");
+                    }
+                }
+            name = name.Remove(name.Length - 1);
+            name += ';';
+            return name;
         }
         public static Action<object[]?> RedTextAsync(int delay)
         {
@@ -641,6 +639,5 @@ namespace pixel_editor
                 Editor.Current.BlackText().Invoke(o);
             };
         }
-        public List<Command> LoadedCommands = new();
     }
 }

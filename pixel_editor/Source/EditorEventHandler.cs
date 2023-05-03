@@ -18,8 +18,6 @@ namespace pixel_editor
                 Editor.Current.consoleOutput.Dispatcher.Invoke(() => Editor.Current.consoleOutput.Items.Clear());
             Pending.Push(e);
         }
-
-
         protected internal void ExecuteAll()
         {
             EditorEvent e;
@@ -35,12 +33,11 @@ namespace pixel_editor
         {
             switch (e.flags)
             {
-                case EditorEventFlags.PRINT:
+                case EditorEventFlags.PRINT:    
                     break;
                 case EditorEventFlags.PRINT_ERR:
                     Console.Error(e.message, 1);
                     break;
-
 
                 case EditorEventFlags.DO_NOT_PRINT:
                 case EditorEventFlags.COMPONENT_EDITOR_UPDATE:
