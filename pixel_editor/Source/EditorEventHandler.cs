@@ -10,9 +10,16 @@ namespace pixel_editor
 {
     public class EditorEventHandler
     {
-        protected internal static Editor Editor => Editor.Current;
-        protected internal Action<EditorEvent> InspectorEventRaised;
-        protected internal Stack<EditorEvent> Pending = new();
+        protected internal static Action<EditorEvent> InspectorEventRaised;
+        protected internal static Stack<EditorEvent> Pending = new();
+        public static void QueueEvent(EditorEvent e)
+        {
+            if (e.flags.HasFlag(EditorEventFlags.CLEAR_CONSOLE))
+                Editor.Current.consoleOutput.Dispatcher.Invoke(() => Editor.Current.consoleOutput.Items.Clear());
+            Pending.Push(e);
+        }
+
+
         protected internal void ExecuteAll()
         {
             EditorEvent e;
@@ -46,7 +53,7 @@ namespace pixel_editor
                     break;
 
                 case EditorEventFlags.GET_FILE_VIEWER_SELECTED_METADATA:
-                    var obj = Editor.fileViewer.GetSelectedMeta();
+                    var obj = Editor.Current.fileViewer.GetSelectedMeta();
                     if (obj != null)
                         e.args = new object[] { obj };
                     e.action.Invoke(e.args);
@@ -58,7 +65,7 @@ namespace pixel_editor
                     e.action.Invoke(e.args);
                     return;
                 case EditorEventFlags.GET_FILE_VIEWER_SELECTED_OBJECT:
-                    var obj1 = Editor.fileViewer.GetSelectedObject();
+                    var obj1 = Editor.Current.fileViewer.GetSelectedObject();
                     if (obj1 != null)
                         e.args = new object[] { obj1 };
                     e.action.Invoke(e.args);

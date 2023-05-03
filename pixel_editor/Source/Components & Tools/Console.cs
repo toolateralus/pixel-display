@@ -591,7 +591,7 @@ namespace pixel_editor
         {
             var msg = o.ToString();
             var e = new EditorEvent(EditorEventFlags.PRINT, msg, includeDateTime);
-            Editor.QueueEvent(e);
+            EditorEventHandler.QueueEvent(e);
         }
         public static void Error(object? o = null, int? textColorAlterationDuration = null)
         {
@@ -600,7 +600,7 @@ namespace pixel_editor
 
             if (textColorAlterationDuration is not null)
                 e.action = RedTextAsync((int)textColorAlterationDuration);
-            Editor.QueueEvent(e);
+            EditorEventHandler.QueueEvent(e);
         }
         public static async Task<PromptResult> PromptAsync(string question, float? waitDuration = 60f)
         {
@@ -627,7 +627,7 @@ namespace pixel_editor
         public static void Clear(bool randomPixel = false)
         {
             EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE, "");
-            Editor.QueueEvent(editorEvent);
+            EditorEventHandler.QueueEvent(editorEvent);
 
             if (randomPixel)
                 Error("Console Cleared", 1);

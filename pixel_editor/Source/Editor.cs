@@ -7,6 +7,7 @@ using Pixel_Editor;
 using Pixel_Editor.Source;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -82,15 +83,12 @@ namespace pixel_editor
             Runtime.Current.Inspector = inspector;
         }
         public EditorSettings settings;
-
         private TabItem draggedTabItem;
-
         private void TabItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             // Get the TabItem that is being dragged
             draggedTabItem = sender as TabItem;
         }
-
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (draggedTabItem != null && e.LeftButton == MouseButtonState.Pressed)
@@ -99,7 +97,6 @@ namespace pixel_editor
                 DragDrop.DoDragDrop(draggedTabItem, draggedTabItem, DragDropEffects.Move);
             }
         }
-
         private void TabItem_Drop(object sender, DragEventArgs e)
         {
             // Get the target DockPanel
@@ -149,9 +146,17 @@ namespace pixel_editor
             fileViewer = new(FileViewerGrid, fileViewerListBox);
 
             Console.Print(motd);
+
+            Interpreter.Interop.OutputStream += RecieveConsoleOutput;
             Runtime.OutputImages.Add(image);
             Runtime.SetOutputImageAsMain(image);
         }
+
+        private void RecieveConsoleOutput(string? obj)
+        {
+            Console.Print(obj);
+        }
+
         private static void InitializeSettings()
         {
             Metadata meta = new(Constants.WorkingRoot + "\\obj\\editorSettings.asset");
@@ -222,7 +227,7 @@ namespace pixel_editor
         }
         private void GetEvents()
         {
-            Runtime.InspectorEventRaised += QueueEvent;
+            Runtime.InspectorEventRaised += EditorEventHandler.QueueEvent;
             CompositionTarget.Rendering += Update;
 
             Runtime.OnProjectSet += OnProjectSet;
@@ -230,14 +235,24 @@ namespace pixel_editor
         }
         private void UnsubscribeEvents()
         {
-            Runtime.InspectorEventRaised -= QueueEvent;
+            Runtime.InspectorEventRaised -= EditorEventHandler.QueueEvent;
             CompositionTarget.Rendering -= Update;
 
             Runtime.OnProjectSet -= OnProjectSet;
             Runtime.OnStageSet -= OnStageSet;
         }
+
+
+        static bool cmd_interp_active = false;
         private void GetInputs()
         {
+            static void toggleCmdInterpreter()
+            {
+                if (cmd_interp_active)
+                   Interpreter.TryUnsubscribeInterpreter<CommandInterpreter>();
+                Interpreter.SubscribeInterpreter(new CommandInterpreter());
+            }
+            Input.RegisterAction(this, toggleCmdInterpreter, Key.F7);
             Input.RegisterAction(this, ResetEditor, Key.F5); 
             Input.RegisterAction(this, Console.cmd_clear_console().Invoke, Key.F10);
             Input.RegisterAction(this, SendCommandKeybind, Key.Return);
@@ -473,12 +488,6 @@ namespace pixel_editor
         /// For users to pass an event to the inspector to be executed as soon as possible
         /// </summary>
         /// <param name="e"></param>
-        public static void QueueEvent(EditorEvent e)
-        {
-            if (e.flags.HasFlag(EditorEventFlags.CLEAR_CONSOLE))
-                Current.consoleOutput.Dispatcher.Invoke(() => Current.consoleOutput.Items.Clear());
-            Current.Events.Pending.Push(e); 
-        }
         private void OnPlay(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
