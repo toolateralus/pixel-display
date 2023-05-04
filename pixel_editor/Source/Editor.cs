@@ -79,7 +79,38 @@ namespace pixel_editor
         static List<Tool> Tools = new List<Tool>();
         public Editor()
         {
-            InitializeEditor();
+            if (current != null && current != this)
+            {
+                Close();
+                return;
+            }
+
+            current = this;
+            InitializeComponent();
+
+            Importer.Import(false);
+
+            InitializeSettings();
+
+            Project project = Project.Default;
+            Runtime.Initialize(project);
+
+            GetEvents();
+            GetInputs();
+
+            Tools = Tool.InitializeToolkit();
+
+            OnStageSet(StagingHost.Standard());
+
+            OnProjectSet(Runtime.Current.project);
+
+            fileViewer = new(FileViewerGrid, fileViewerListBox);
+
+            Console.Print(motd);
+
+            Output.Stream += (obj) => Console.Print(obj);
+            Runtime.OutputImages.Add(image);
+            Runtime.SetOutputImageAsMain(image);
             inspector = new Inspector(inspectorGrid);
             Runtime.Current.Inspector = inspector;
         }
@@ -116,43 +147,7 @@ namespace pixel_editor
                 targetDockPanel.Children.Add(droppedTabItem);
             }
         }
-        private void InitializeEditor()
-        {
-            if (current != null && current != this)
-            {
-                Close();
-                return; 
-            }
-
-
-            current = this;
-            InitializeComponent();
-            
-            Importer.Import(false);
-           
-            InitializeSettings();
-            
-            Project project = Project.Default;
-            Runtime.Initialize(project);
-           
-            GetEvents();
-            GetInputs();
-            
-            Tools = Tool.InitializeToolkit();
-
-            OnStageSet(StagingHost.Standard());
-
-            OnProjectSet(Runtime.Current.project);
-
-            fileViewer = new(FileViewerGrid, fileViewerListBox);
-
-            Console.Print(motd);
-
-            Output.Stream += (obj) => Console.Print(obj);
-            Runtime.OutputImages.Add(image);
-            Runtime.SetOutputImageAsMain(image);
-        }
-
+       
         private static void InitializeSettings()
         {
             Metadata meta = new(Constants.WorkingRoot + "\\obj\\editorSettings.asset");
