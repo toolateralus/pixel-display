@@ -148,14 +148,9 @@ namespace pixel_editor
 
             Console.Print(motd);
 
-            Interpreter.Interop.OutputStream += RecieveConsoleOutput;
+            Output.Stream += (obj) => Console.Print(obj);
             Runtime.OutputImages.Add(image);
             Runtime.SetOutputImageAsMain(image);
-        }
-
-        private void RecieveConsoleOutput(string? obj)
-        {
-            Console.Print(obj);
         }
 
         private static void InitializeSettings()
@@ -250,8 +245,13 @@ namespace pixel_editor
             static void toggleCmdInterpreter()
             {
                 if (cmd_interp_active)
-                   Interpreter.TryUnsubscribeInterpreter<CommandInterpreter>();
-                Interpreter.SubscribeInterpreter(new CommandInterpreter());
+                {
+                    Interpreter.TryUnsubscribeInterpreter<CommandInterpreter>();
+                    cmd_interp_active = false;
+                    return;
+                }
+                cmd_interp_active = true;
+                Interpreter.SubscribeInterpreter<CommandInterpreter>();
             }
             Input.RegisterAction(this, toggleCmdInterpreter, Key.F7);
             Input.RegisterAction(this, ResetEditor, Key.F5); 

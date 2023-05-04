@@ -11,6 +11,7 @@ using System.Security.AccessControl;
 using System.Text;
 using PixelLang;
 using System.Threading.Tasks;
+using PixelLang.Core;
 
 namespace Pixel
 {
