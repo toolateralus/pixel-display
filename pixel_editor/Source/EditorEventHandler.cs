@@ -15,7 +15,7 @@ namespace pixel_editor
         public static void QueueEvent(EditorEvent e)
         {
             if (e.flags.HasFlag(EditorEventFlags.CLEAR_CONSOLE))
-                Editor.Current.viewModel.ConsoleOutput.Dispatcher.Invoke(() => Editor.Current.viewModel.ConsoleOutput.Items.Clear());
+                Editor.Current.viewModel.Messages.Clear();
             Pending.Push(e);
         }
         protected internal void ExecuteAll()
@@ -83,11 +83,11 @@ namespace pixel_editor
             e.action?.Invoke(e.args);
             e.processed = true;
 
-            if (Editor.Current.viewModel.ConsoleOutput.Items.Count >= Editor.Current.settings.ConsoleMaxLines)
+            if (Editor.Current.viewModel.Messages.Count >= Editor.Current.settings.ConsoleMaxLines)
                 Console.Clear();
 
-            Editor.Current.viewModel.ConsoleOutput.Items.Add(e.message);
-            Editor.Current.viewModel.ConsoleOutput.ScrollIntoView(e.message);
+            Editor.Current.viewModel.Messages.Add(e.message);
+            //Editor.Current.viewModel.ConsoleOutput.ScrollIntoView(e.message);
         }
     }
 }

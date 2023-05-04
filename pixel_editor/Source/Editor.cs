@@ -254,7 +254,6 @@ namespace pixel_editor
             Input.RegisterAction(this, toggleCmdInterpreter, Key.F7);
             Input.RegisterAction(this, ResetEditor, Key.F5); 
             Input.RegisterAction(this, Console.cmd_clear_console().Invoke, Key.F10);
-            Input.RegisterAction(this, viewModel.SendCommandKeybind, Key.Return);
             Input.RegisterAction(this, ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(this, () => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(this, DestroySelected, Key.Delete);
@@ -395,18 +394,6 @@ namespace pixel_editor
             stageName = obj.Name;
             Console.Print("Stage " + stageName + " set.");
             Current.Title = $"{projectName} : : {stageName}";
-        }
-       
-        private async void OnCommandSent(object sender, RoutedEventArgs e)
-        {
-            if (e.RoutedEvent != null)
-                e.Handled = true;
-
-            viewModel.OnCommandSent();
-        }
-        private void OnToggleConsole(object sender, RoutedEventArgs e)
-        {
-            viewModel.OnToggleConsole();
         }
         /// <summary>
         /// For users to pass an event to the inspector to be executed as soon as possible

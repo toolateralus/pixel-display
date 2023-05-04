@@ -575,9 +575,6 @@ namespace pixel_editor
         {
             string? msg = o.ToString();
             EditorEvent e = new(EditorEventFlags.PRINT_ERR, msg, false);
-
-            if (textColorAlterationDuration is not null)
-                e.action = RedTextAsync((int)textColorAlterationDuration);
             EditorEventHandler.QueueEvent(e);
         }
         public static void Clear(bool randomPixel = false)
@@ -629,15 +626,6 @@ namespace pixel_editor
             name = name.Remove(name.Length - 1);
             name += ';';
             return name;
-        }
-        public static Action<object[]?> RedTextAsync(int delay)
-        {
-            return async (o) =>
-            {
-                Editor.Current.viewModel.RedText().Invoke(o);
-                await Task.Delay(delay * 1000);
-                Editor.Current.viewModel.BlackText().Invoke(o);
-            };
         }
     }
 }
