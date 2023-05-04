@@ -22,11 +22,6 @@
 	  <ProjectReference Include="..\pixel_engine\Pixel Engine.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Reference Include="PixelLang">
-	    <HintPath>..\pixel-lang\Release\net6.0\PixelLang.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
-	<ItemGroup>
 	  <Compile Update="Source\ComponentEditor.cs">
 	    <SubType>Code</SubType>
 	  </Compile>
