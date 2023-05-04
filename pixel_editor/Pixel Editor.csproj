@@ -23,7 +23,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="PixelLang">
-	    <HintPath>..\..\pixel-lang\Pixel Lang\bin\Release\net6.0\PixelLang.dll</HintPath>
+	    <HintPath>..\pixel-lang\Release\net6.0\PixelLang.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 	<ItemGroup>
