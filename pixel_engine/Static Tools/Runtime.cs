@@ -182,18 +182,12 @@ namespace Pixel
                     return;
 
                 Current.renderHost?.Render();
-
-                Application.Current?.Dispatcher.Invoke(() =>
-                {
-                    if (Application.Current is null)
-                        return;
-                    Input.Refresh();
-                    var renderer = Current.renderHost?.GetRenderer();
-                    if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
-                        return;
-                    Application.Current.Dispatcher.Invoke(() =>
-                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
-                });
+                Input.Refresh();
+                var renderer = Current.renderHost?.GetRenderer();
+                if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
+                    continue;
+                Application.Current.Dispatcher.Invoke(() =>
+                    CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
 
                 if (IsRunning)
                 {
