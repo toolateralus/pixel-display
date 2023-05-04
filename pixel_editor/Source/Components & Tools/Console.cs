@@ -634,9 +634,9 @@ namespace pixel_editor
         {
             return async (o) =>
             {
-                Editor.Current.RedText().Invoke(o);
+                Editor.Current.viewModel.RedText().Invoke(o);
                 await Task.Delay(delay * 1000);
-                Editor.Current.BlackText().Invoke(o);
+                Editor.Current.viewModel.BlackText().Invoke(o);
             };
         }
     }

@@ -23,6 +23,7 @@ namespace pixel_editor
 {
     public partial class Editor : Window
     {
+        internal EditorViewModel viewModel;
         SolidColorBrush framerateBrush = new(); 
         internal ComponentEditor componentEditor;
         internal FileViewer fileViewer;
@@ -87,6 +88,7 @@ namespace pixel_editor
 
             current = this;
             InitializeComponent();
+            viewModel = new(this);
 
             Importer.Import(false);
 
@@ -113,6 +115,7 @@ namespace pixel_editor
             Runtime.SetOutputImageAsMain(image);
             inspector = new Inspector(inspectorGrid);
             Runtime.Current.Inspector = inspector;
+            DataContext = viewModel;
         }
         public EditorSettings settings;
         private TabItem draggedTabItem;
@@ -251,7 +254,7 @@ namespace pixel_editor
             Input.RegisterAction(this, toggleCmdInterpreter, Key.F7);
             Input.RegisterAction(this, ResetEditor, Key.F5); 
             Input.RegisterAction(this, Console.cmd_clear_console().Invoke, Key.F10);
-            Input.RegisterAction(this, SendCommandKeybind, Key.Return);
+            Input.RegisterAction(this, viewModel.SendCommandKeybind, Key.Return);
             Input.RegisterAction(this, ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(this, () => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(this, DestroySelected, Key.Delete);
@@ -371,38 +374,9 @@ namespace pixel_editor
         {
             Keyboard.ClearFocus();
         }
-        void SendCommandKeybind()
-        {
-            if (!editorMessages.IsKeyboardFocusWithin)
-                return;
-
-            OnCommandSent(new(), new());
-
-            editorMessages.Clear();
-        }
         #endregion
         #region UI Events
 
-        internal Action<object?> RedText(object? o = null)
-        {
-            return (o) =>
-            {
-                consoleOutput.Foreground = Brushes.Red;
-            };
-        }
-        /// <summary>
-        /// if the color's brightness is under 610 (a+r+g+b) this continually gets a new color every ms for 1000 ms or until it's bright enough then returns it
-        /// </summary>
-        /// <param name="c"></param>
-        /// <returns>A color with a brightness value greater than 610 </returns>
-        internal Action<object?> BlackText(object? o = null)
-        {
-            return (o) =>
-            {
-                consoleOutput.Foreground = Brushes.White;
-                consoleOutput.Background = Brushes.Black;
-            };
-        }
         private void OnProjectSet(Project obj)
         {
             projectName = obj.Name;
@@ -428,57 +402,11 @@ namespace pixel_editor
             if (e.RoutedEvent != null)
                 e.Handled = true;
 
-            // the max amt of lines that a script can consist of
-            int cap = 5;
-
-            int lineCt = editorMessages.LineCount - 1;
-
-            if (lineCt < cap)
-                cap = lineCt;
-
-            for (int i = 0; i < cap; ++i)
-            {
-
-                string line = editorMessages.GetLineText(i);
-
-                if (string.IsNullOrEmpty(line))
-                    continue;
-
-                if (line.Contains("wait(") && (line.Contains(')') || line.Contains(");")))
-                {
-                    CommandInterpreter.ParseArguments(line, out string[] args, out _);
-                    int delayMs = args[0].ToInt();
-                    if (delayMs == -1)
-                    {
-                        Command.Error("wait(int delay);", 0);
-                        continue;
-                    }
-                    Runtime.Log($"waiting for {delayMs} ms");
-                    await Task.Delay(i);
-                    Runtime.Log($"done waiting");
-                    continue;
-                }
-
-                if (line != "")
-                    Interpreter.TryCallLine(line);
-            }
+            viewModel.OnCommandSent();
         }
         private void OnToggleConsole(object sender, RoutedEventArgs e)
         {
-            if (!consoleOpen)
-            {
-                consoleOpen = true;
-
-                editorMessages.Visibility = Visibility.Collapsed;
-                consoleOutput.Visibility = Visibility.Collapsed;
-
-                return;
-            }
-
-            editorMessages.Visibility = Visibility.Visible;
-            consoleOutput.Visibility = Visibility.Visible;
-
-            consoleOpen = false;
+            viewModel.OnToggleConsole();
         }
         /// <summary>
         /// For users to pass an event to the inspector to be executed as soon as possible
@@ -542,7 +470,6 @@ namespace pixel_editor
         #endregion
         #region Add Node Menu
 
-        bool consoleOpen = true;
         bool addNodeContextMenuOpen = false;
         Grid addNodeContextMenu;
         List<Action> addNodeActions = new();
