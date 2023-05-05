@@ -52,23 +52,23 @@ namespace Pixel
         public static bool Get(Key key, InputEventType type = InputEventType.KeyDown)
         {
             bool input_value = false;
-            Application.Current?.Dispatcher.Invoke(delegate
+            try
+            {
+                Application.Current?.Dispatcher.Invoke(() =>
                 {
-                    try
+                    input_value = type switch
                     {
-                        input_value = type switch
-                        {
-                            InputEventType.KeyDown => Keyboard.IsKeyDown(key),
-                            InputEventType.KeyUp => Keyboard.IsKeyUp(key),
-                            InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
-                            _ => false,
-                        };
-                    }
-                    catch (Exception e)
-                    {
-                        Runtime.Log(e.Message);
-                    }
+                        InputEventType.KeyDown => Keyboard.IsKeyDown(key),
+                        InputEventType.KeyUp => Keyboard.IsKeyUp(key),
+                        InputEventType.KeyToggle => Keyboard.IsKeyToggled(key),
+                        _ => false,
+                    };
                 });
+            }
+            catch (TaskCanceledException e)
+            {
+                Runtime.Log(e.Message);
+            }
             return input_value;
         }
         public static void RegisterAction(object caller, Action action, Key key, InputEventType type = InputEventType.KeyDown)

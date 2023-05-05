@@ -186,8 +186,15 @@ namespace Pixel
                 var renderer = Current.renderHost?.GetRenderer();
                 if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
                     continue;
-                Application.Current.Dispatcher.Invoke(() =>
-                    CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
+                try
+                {
+                    Application.Current?.Dispatcher.Invoke(() =>
+                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
+                }
+                catch (TaskCanceledException e)
+                {
+                    Runtime.Log(e.Message);
+                }
 
                 if (IsRunning)
                 {
