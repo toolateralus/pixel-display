@@ -15,7 +15,7 @@
                         ScaleX="{Binding ElementName=editorWindow, Path=ScaleValue}"
                         ScaleY="{Binding ElementName=editorWindow, Path=ScaleValue}" />
         </Grid.LayoutTransform>
-        <Image  x:Name="image" RenderOptions.BitmapScalingMode = "NearestNeighbor" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <local:StageViewerWindow />
         <Grid x:Name="inspectorGrid" Height="Auto" Width="Auto">
             <Grid.RowDefinitions>
                 <RowDefinition Height="3*"/>
@@ -71,7 +71,7 @@
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <local:ConsoleWindow Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="11" Grid.Column="18"/>
-            <local:FileViewerWindow Visibility="Visible" x:Name="FileViewerGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="17" Grid.Column="18" />
+            <local:FileViewerWindow Visibility="Visible" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="17" Grid.Column="18" />
             <Label  FontSize="3" 
                 FontWeight="Bold" 
                 FontFamily="MS Gothic"

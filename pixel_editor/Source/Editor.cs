@@ -20,6 +20,7 @@ namespace Pixel_Editor
 {
     public partial class Editor : Window
     {
+        public EditorInputEvents input = new();
         internal EditorViewModel viewModel;
         SolidColorBrush framerateBrush = new(); 
         internal ComponentEditor componentEditor;
@@ -108,8 +109,6 @@ namespace Pixel_Editor
             Console.Print(motd);
 
             Output.Stream += (obj) => Console.Print(obj);
-            Runtime.OutputImages.Add(image);
-            Runtime.SetOutputImageAsMain(image);
             inspector = new Inspector(inspectorGrid);
             Runtime.Current.Inspector = inspector;
             DataContext = viewModel;
@@ -425,15 +424,6 @@ namespace Pixel_Editor
                 return; 
             Library.SaveAll();
         }
-        private void OnToggleFileViewer(object sender, RoutedEventArgs e)
-        {
-            if(e.RoutedEvent != null)
-                e.Handled = true;
-
-            if (FileViewerGrid.Visibility == Visibility.Hidden)
-                FileViewerGrid.Visibility = Visibility.Visible;
-            else FileViewerGrid.Visibility = Visibility.Hidden;
-        }
    
         private void OnImportFileButtonPressed(object sender, RoutedEventArgs e)
         {
@@ -528,6 +518,7 @@ namespace Pixel_Editor
             {"Floor", Floor.Standard},
             {"UI Image", Image.Standard},
         };
+        internal System.Windows.Controls.Image mainImage;
         #endregion
     }
 }
