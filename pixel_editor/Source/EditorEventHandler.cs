@@ -1,29 +1,26 @@
 ﻿using Pixel;
-using Pixel.Assets;
-using Pixel.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace Pixel_Editor
 {
     public class EditorEventHandler
     {
         protected internal static Action<EditorEvent> InspectorEventRaised;
-        protected internal static Stack<EditorEvent> Pending = new();
+        protected internal static Queue<EditorEvent> Pending = new();
         public static void QueueEvent(EditorEvent e)
         {
             if (e.flags.HasFlag(EditorEventFlags.CLEAR_CONSOLE))
                 ConsoleWindow.ClearAll();
-            Pending.Push(e);
+            Pending.Enqueue(e);
         }
         protected internal void ExecuteAll()
         {
             EditorEvent e;
             for (int i = 0; Pending.Count > 0; ++i)
             {
-                e = Pending.Pop();
+                e = Pending.Dequeue();
                 if (e is null)
                     return;
                 ExecuteEditorEvent(e);
@@ -84,7 +81,6 @@ namespace Pixel_Editor
             e.processed = true;;
 
             ConsoleWindow.SendMessage(e.message);
-            //Editor.Current.viewModel.ConsoleOutput.ScrollIntoView(e.message);
         }
     }
 }

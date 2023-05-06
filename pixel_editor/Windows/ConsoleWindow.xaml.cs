@@ -1,4 +1,5 @@
 ﻿using PixelLang;
+using PixelLang.Tools;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -48,11 +49,11 @@ namespace Pixel_Editor
             ClearAllAction -= viewModel.ClearMessages;
             viewModel.CommandSent -= OnCommandSent;
         }
-        public async void OnCommandSent(string command)
+        public void OnCommandSent(string command)
         {
             if (string.IsNullOrEmpty(command))
                 return;
-            await Interpreter.TryCallLine(command);
+            InputProcessor.TryCallLine(command);
         }
     }
 }

@@ -12,6 +12,7 @@ using System.Reflection;
 using Pixel_Editor;
 using Console = Pixel_Editor.Console;
 using PixelLang;
+using PixelLang.Tools;
 
 namespace Pixel_Editor.Source
 {
@@ -285,7 +286,7 @@ namespace Pixel_Editor.Source
             foreach (var info in fields)
                 if (info.Name == o)
                 {
-                    Interpreter.TryParse(inputFields[i].Text, out List<object> results);
+                    InputProcessor.TryParse(inputFields[i].Text, out List<object> results);
                     foreach (var obj in results)
                         if (obj.GetType() == info.FieldType)
                         {

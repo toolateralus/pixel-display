@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
 using Image = Pixel.Image;
+using PixelLang.Tools;
 
 namespace Pixel_Editor
 {
@@ -240,12 +241,12 @@ namespace Pixel_Editor
             {
                 if (cmd_interp_active)
                 {
-                    Interpreter.TryUnsubscribeInterpreter<CommandInterpreter>();
+                    InputProcessor.TryUnsubscribeInterpreter<CommandInterpreter>();
                     cmd_interp_active = false;
                     return;
                 }
                 cmd_interp_active = true;
-                Interpreter.SubscribeInterpreter<CommandInterpreter>();
+                InputProcessor.SubscribeInterpreter<CommandInterpreter>();
             }
             Input.RegisterAction(this, toggleCmdInterpreter, Key.F7);
             Input.RegisterAction(this, ResetEditor, Key.F5); 

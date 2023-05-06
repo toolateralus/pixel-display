@@ -1,17 +1,13 @@
 ﻿using KeraLua;
 using Pixel.Statics;
 using Pixel.Types;
+using PixelLang.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Printing;
 using System.Reflection;
-using System.Security.AccessControl;
-using System.Text;
-using PixelLang;
 using System.Threading.Tasks;
-using PixelLang.Core;
 
 namespace Pixel
 {
@@ -283,6 +279,8 @@ namespace Pixel
         private const char ArgumentsStart = '(';
         private const char ArgumentsEnd = ')';
         private const string ParameterSeperator = ", ";
+
+        public int Count => 0;
         #endregion
         #region Parsing
         public static bool HasArgs(string input)
