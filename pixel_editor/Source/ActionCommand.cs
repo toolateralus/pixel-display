@@ -3,19 +3,16 @@ using System.Windows.Input;
 
 namespace Pixel_Editor
 {
-    public class MethodCommand : ICommand
+    public class ActionCommand : ICommand
     {
-        private readonly Action? _execute;
-
-        public MethodCommand(Action execute)
+        public Action? _execute;
+        public ActionCommand(Action execute)
         {
             _execute = execute;
         }
-
+        public ActionCommand() {}
         public bool CanExecute(object? parameter) => true;
-
         public void Execute(object? parameter) => _execute?.Invoke();
-
         public event EventHandler? CanExecuteChanged;
     }
 }

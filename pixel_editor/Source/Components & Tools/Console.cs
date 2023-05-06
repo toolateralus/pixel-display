@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Input;
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class Console
     {
@@ -567,8 +567,8 @@ namespace pixel_editor
 
         public static void Print(object? o, bool includeDateTime = false)
         {
-            var msg = o.ToString();
-            var e = new EditorEvent(EditorEventFlags.PRINT, msg, includeDateTime);
+            var msg = o?.ToString();
+            var e = new EditorEvent(EditorEventFlags.PRINT, msg ?? "NULL", includeDateTime);
             EditorEventHandler.QueueEvent(e);
         }
         public static void Error(object? o = null, int? textColorAlterationDuration = null)

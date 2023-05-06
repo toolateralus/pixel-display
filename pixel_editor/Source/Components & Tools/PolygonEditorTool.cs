@@ -3,7 +3,7 @@ using Pixel.Types.Physics;
 using System.Numerics;
 using System.Windows.Input;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     internal class PolygonEditorTool : Tool
     {

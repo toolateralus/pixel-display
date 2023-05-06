@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class EditorEventHandler
     {
@@ -15,7 +15,7 @@ namespace pixel_editor
         public static void QueueEvent(EditorEvent e)
         {
             if (e.flags.HasFlag(EditorEventFlags.CLEAR_CONSOLE))
-                Editor.Current.viewModel.Messages.Clear();
+                ConsoleWindow.ClearAll();
             Pending.Push(e);
         }
         protected internal void ExecuteAll()
@@ -81,12 +81,9 @@ namespace pixel_editor
             }
 
             e.action?.Invoke(e.args);
-            e.processed = true;
+            e.processed = true;;
 
-            if (Editor.Current.viewModel.Messages.Count >= Editor.Current.settings.ConsoleMaxLines)
-                Console.Clear();
-
-            Editor.Current.viewModel.Messages.Add(e.message);
+            ConsoleWindow.SendMessage(e.message);
             //Editor.Current.viewModel.ConsoleOutput.ScrollIntoView(e.message);
         }
     }

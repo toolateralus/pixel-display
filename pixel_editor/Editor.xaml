@@ -1,65 +1,13 @@
-﻿<Window x:Class="pixel_editor.Editor"
+﻿<Window x:Class="Pixel_Editor.Editor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:local="clr-namespace:Pixel_Editor.Behaviors"
+        xmlns:local="clr-namespace:Pixel_Editor"
         Title="Pixel Editor" 
         Name="editorWindow"
         WindowStartupLocation="CenterScreen"
         Width="1920" Height="1080"
         Background="Black">
     <Window.Resources>
-        <TextBox  x:Key="consoleInput" x:Shared="False"
-                Text ="{Binding CommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Grid.Row="20"
-                Grid.Column="0"
-                Grid.ColumnSpan="36" 
-                Grid.RowSpan="4" 
-                Visibility="Visible"
-                Background="Black"
-                Foreground="White"
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Stretch"
-                FontSize="3.95" 
-                FontFamily="MS Gothic"
-                CaretBrush="Gray"
-                TextWrapping="Wrap"
-                AcceptsReturn="True"
-                TextElement.FontStretch="SemiCondensed"
-                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                ScrollViewer.VerticalScrollBarVisibility="Hidden" >
-            <TextBox.InputBindings>
-                <KeyBinding Key="Enter" Command="{Binding SendCommand}" />
-            </TextBox.InputBindings>
-        </TextBox>
-        <ListBox x:Key="consoleOutput" x:Shared="False"
-                ItemsSource="{Binding Messages}"
-                Visibility="Visible"
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Stretch"
-                Background="Black"
-                Foreground="White"
-                Grid.Column="0"
-                Grid.Row="0"
-                Grid.RowSpan="20"
-                Grid.ColumnSpan="26"
-                ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                FontSize="3.95"
-                FontFamily="MS Gothic"
-                ScrollViewer.CanContentScroll="True"
-                ScrollViewer.PanningMode="VerticalOnly"
-                ScrollViewer.PanningRatio="1"
-                ScrollViewer.PanningDeceleration="0.001" >
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding}" />
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-            <i:Interaction.Behaviors>
-                <local:ScrollIntoViewBehavior ScrollIntoViewTrigger="{Binding LastMessage}" />
-            </i:Interaction.Behaviors>
-        </ListBox>
     </Window.Resources>
     <Grid Name="MainGrid" SizeChanged="MainGrid_SizeChanged">
         <Grid.LayoutTransform>
@@ -125,81 +73,7 @@
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
             <Grid x:Name="ConsoleGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="11" Grid.Column="18">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="3*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                </Grid.ColumnDefinitions>
-                <ContentControl
-                    Content="{StaticResource consoleInput}"
-                    Grid.Row="20"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="36" 
-                    Grid.RowSpan="4" 
-                    Visibility="Visible"
-                    Background="Black"
-                    Foreground="White"
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Stretch" />
-                <ContentControl
-                    Content="{StaticResource consoleOutput}"
-                    Visibility="Visible"
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Stretch"
-                    Background="Black"
-                    Foreground="White"
-                    Grid.Column="0"
-                    Grid.Row="0"
-                    Grid.RowSpan="20"
-                    Grid.ColumnSpan="26"/>
+                <local:ConsoleWindow />
             </Grid>
             <Grid Visibility="Visible" x:Name="FileViewerGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="17" Grid.Column="18">
             <Grid.RowDefinitions>

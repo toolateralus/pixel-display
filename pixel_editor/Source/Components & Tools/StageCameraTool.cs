@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Numerics;
 using Pixel;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public enum StageCameraState : byte { Following, Idle, Inactive};
 

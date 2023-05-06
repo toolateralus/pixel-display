@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace pixel_editor.Source.Attributes
+namespace Pixel_Editor.Source.Attributes
 {
     public class Asdf
     {

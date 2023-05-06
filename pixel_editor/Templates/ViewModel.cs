@@ -1,13 +1,8 @@
-﻿using Pixel_Editor.Source;
-using PixelLang;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 
 namespace Pixel_Editor
 {
-    public class EditorViewModel : INotifyPropertyChanged
+    class ViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)

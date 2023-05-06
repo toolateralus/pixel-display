@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Drawing.Text;
 using Pixel.Types.Components;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class Inspector
     {

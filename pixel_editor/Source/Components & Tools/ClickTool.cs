@@ -2,7 +2,7 @@
 using System;
 using System.Windows.Input;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class ClickTool : Tool
     {

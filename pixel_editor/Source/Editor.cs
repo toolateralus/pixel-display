@@ -4,14 +4,10 @@ using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
 using Pixel.Types;
-using Pixel_Editor;
 using Pixel_Editor.Source;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,7 +15,7 @@ using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
 using Image = Pixel.Image;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public partial class Editor : Window
     {
@@ -88,7 +84,7 @@ namespace pixel_editor
 
             current = this;
             InitializeComponent();
-            viewModel = new(this);
+            viewModel = new();
 
             Importer.Import(false);
 

@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class NodeRelationshipTool : Tool
     {

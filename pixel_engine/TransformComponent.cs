@@ -1,5 +1,5 @@
 ﻿using Pixel.Types.Components;
-using pixel_editor;
+using Pixel_Editor;
 using System;
 using System.Numerics;
 

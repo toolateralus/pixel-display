@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace pixel_editor.Scale
+namespace Pixel_Editor.Scale
 {
     public static class ScaleToWindowSizeBehavior
     {

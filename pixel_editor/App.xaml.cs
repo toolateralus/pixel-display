@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     /// <summary>
     /// Interaction logic for App.xaml

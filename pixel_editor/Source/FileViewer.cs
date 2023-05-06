@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class FileViewer
     {

@@ -9,7 +9,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Xml.Linq;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class DragTool : Tool
     {

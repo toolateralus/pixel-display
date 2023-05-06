@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace pixel_editor.Properties {
+namespace Pixel_Editor.Properties {
     using System;
     
     

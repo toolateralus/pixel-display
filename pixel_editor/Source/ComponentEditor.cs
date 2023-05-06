@@ -9,8 +9,8 @@ using Pixel;
 using Component = Pixel.Types.Components.Component;
 using System.Windows.Input;
 using System.Reflection;
-using pixel_editor;
-using Console = pixel_editor.Console;
+using Pixel_Editor;
+using Console = Pixel_Editor.Console;
 using PixelLang;
 
 namespace Pixel_Editor.Source
@@ -249,7 +249,7 @@ namespace Pixel_Editor.Source
             {
                 Component? Component = (Component)field.GetValue(component);
                 if (Component is null)
-                    pixel_editor.Console.Error("Cannot edit a null component.");
+                    Pixel_Editor.Console.Error("Cannot edit a null component.");
                 Refresh(Component);
             };
             i++;

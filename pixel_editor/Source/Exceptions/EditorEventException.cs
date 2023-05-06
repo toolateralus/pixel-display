@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     [Serializable]
     internal class EditorEventNullException : NullReferenceException

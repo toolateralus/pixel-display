@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     public class Tool
     {

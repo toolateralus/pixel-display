@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace pixel_editor
+namespace Pixel_Editor
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class HideFromEditorAttribute : Attribute
