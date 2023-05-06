@@ -1,4 +1,5 @@
 ﻿using Pixel;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,21 +12,20 @@ namespace Pixel_Editor
     /// </summary>
     public partial class StageViewerWindow : UserControl
     {
-        public static BitmapImage SourceImage { get; set; } = new();
         public StageViewerWindow()
         {
             InitializeComponent();
             DataContext = this;
             Editor.Current.mainImage = image;
             Runtime.SetOutputImageAsMain(image);
+            image.PreviewMouseDown += (s, e) => Editor.Current.input.MouseDown?.Invoke(s, e);
+            image.PreviewMouseUp += (s, e) => Editor.Current.input.MouseUp?.Invoke(s, e);
+            image.PreviewKeyDown += (s, e) => Editor.Current.input.KeyDown?.Invoke(s, e);
+            image.PreviewKeyUp += (s, e) => Editor.Current.input.KeyUp?.Invoke(s, e);
+            image.MouseEnter += (s, e) => Editor.Current.input.MouseEnter?.Invoke(s, e);
+            image.MouseLeave += (s, e) => Editor.Current.input.MouseLeave?.Invoke(s, e);
+            image.PreviewMouseMove += (s, e) => Editor.Current.input.MouseMove?.Invoke(s, e);
+            image.PreviewMouseWheel += (s, e) => Editor.Current.input.MouseWheel?.Invoke(s, e);
         }
-        protected override void OnMouseDown(MouseButtonEventArgs e) => Editor.Current.input.MouseDown?.Invoke(this, e);
-        protected override void OnMouseUp(MouseButtonEventArgs e) => Editor.Current.input.MouseUp?.Invoke(this, e);
-        protected override void OnKeyDown(KeyEventArgs e) => Editor.Current.input.KeyDown?.Invoke(this, e);
-        protected override void OnKeyUp(KeyEventArgs e) => Editor.Current.input.KeyUp?.Invoke(this, e);
-        protected override void OnMouseEnter(MouseEventArgs e) => Editor.Current.input.MouseEnter?.Invoke(this, e);
-        protected override void OnMouseLeave(MouseEventArgs e) => Editor.Current.input.MouseLeave?.Invoke(this, e);
-        protected override void OnMouseMove(MouseEventArgs e) => Editor.Current.input.MouseMove?.Invoke(this, e);
-        protected override void OnMouseWheel(MouseWheelEventArgs e) => Editor.Current.input.MouseWheel?.Invoke(this, e);
     }
 }

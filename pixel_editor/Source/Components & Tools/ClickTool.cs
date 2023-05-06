@@ -11,7 +11,7 @@ namespace Pixel_Editor
             Editor.Current.input.MouseDown += Click;
         }
 
-        private void Click(StageViewerWindow sender, MouseEventArgs args)
+        private void Click(object? sender, MouseEventArgs args)
         {
             if (args.LeftButton != MouseButtonState.Pressed)
                 return;

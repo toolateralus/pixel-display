@@ -64,11 +64,6 @@
             SelectionChanged="OnSelectionChanged"
             Background="Black"
             Foreground="White"
-            FontSize="3.95"
-            FontStyle="Normal"
-            FontStretch="SemiCondensed"
-            Height="auto" 
-            Width="auto" 
             x:Name="fileViewerListBox"
             Grid.ColumnSpan="26" 
             Grid.RowSpan="26">

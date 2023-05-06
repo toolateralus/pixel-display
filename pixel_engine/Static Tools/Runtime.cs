@@ -69,7 +69,6 @@ namespace Pixel
         public static event Action<EditorEvent>? InspectorEventRaised;
         public static event Action<Project> OnProjectSet = new(delegate { });
         public static event Action<Stage> OnStageSet = new(delegate { });
-        public object? Inspector { get; set; } = null;
         public static bool Initialized { get; private set; } = false;
         /// <summary>
         /// Setting this to true will toggle physics
