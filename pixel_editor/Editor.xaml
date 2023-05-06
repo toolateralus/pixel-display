@@ -7,8 +7,6 @@
         WindowStartupLocation="CenterScreen"
         Width="1920" Height="1080"
         Background="Black">
-    <Window.Resources>
-    </Window.Resources>
     <Grid Name="MainGrid" SizeChanged="MainGrid_SizeChanged">
         <Grid.LayoutTransform>
             <ScaleTransform x:Name="ApplicationScaleTransform"
@@ -19,63 +17,6 @@
         </Grid.LayoutTransform>
         <Image  x:Name="image" RenderOptions.BitmapScalingMode = "NearestNeighbor" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Grid x:Name="inspectorGrid" Height="Auto" Width="Auto">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="3*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                </Grid.ColumnDefinitions>
-            <Grid x:Name="ConsoleGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="11" Grid.Column="18">
-                <local:ConsoleWindow />
-            </Grid>
-            <Grid Visibility="Visible" x:Name="FileViewerGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="17" Grid.Column="18">
             <Grid.RowDefinitions>
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="3*"/>
@@ -129,20 +70,8 @@
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <ListBox 
-                    Background="Black"
-                    Foreground="White"
-                    FontSize="3.95"
-                    FontStyle="Normal"
-                    FontStretch="SemiCondensed"
-                    Height="auto" 
-                    Width="auto" 
-                    x:Name="fileViewerListBox"
-                    SelectionChanged="fv_selection_changed" 
-                    Grid.ColumnSpan="26" 
-                    Grid.RowSpan="26">
-            </ListBox>
-        </Grid>
+            <local:ConsoleWindow Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="11" Grid.Column="18"/>
+            <local:FileViewerWindow Visibility="Visible" x:Name="FileViewerGrid" Grid.RowSpan="6" Grid.ColumnSpan="8" Grid.Row="17" Grid.Column="18" />
             <Label  FontSize="3" 
                 FontWeight="Bold" 
                 FontFamily="MS Gothic"

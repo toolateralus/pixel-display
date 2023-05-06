@@ -103,7 +103,7 @@ namespace Pixel_Editor
 
             OnProjectSet(Runtime.Current.project);
 
-            fileViewer = new(FileViewerGrid, fileViewerListBox);
+            fileViewer = new();
 
             Console.Print(motd);
 
@@ -335,9 +335,6 @@ namespace Pixel_Editor
                 framerateLabel.Content =
                     $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
             }
-        }
-        public void fv_selection_changed(object? sender, EventArgs e)
-        {
         }
         #region Fields/Properties
         string stageName, projectName;

@@ -21,17 +21,9 @@ namespace Pixel_Editor
         {
             InitializeComponent();
             DataContext = viewModel;
-
             Loaded += OnLoaded;
             Unloaded += OnUnLoaded;
         }
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            SendMessageAction += AddMessage;
-            ClearAllAction += viewModel.ClearMessages;
-            viewModel.CommandSent += OnCommandSent;
-        }
-
         private void AddMessage(string message)
         {
             viewModel.AddMessage(message);
@@ -42,18 +34,23 @@ namespace Pixel_Editor
                 scrollViewer.ScrollToBottom();
             }
         }
-
-        private void OnUnLoaded(object sender, RoutedEventArgs e)
-        {
-            SendMessageAction -= AddMessage;
-            ClearAllAction -= viewModel.ClearMessages;
-            viewModel.CommandSent -= OnCommandSent;
-        }
         public void OnCommandSent(string command)
         {
             if (string.IsNullOrEmpty(command))
                 return;
             InputProcessor.TryCallLine(command);
+        }
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            SendMessageAction += AddMessage;
+            ClearAllAction += viewModel.ClearMessages;
+            viewModel.CommandSent += OnCommandSent;
+        }
+        private void OnUnLoaded(object sender, RoutedEventArgs e)
+        {
+            SendMessageAction -= AddMessage;
+            ClearAllAction -= viewModel.ClearMessages;
+            viewModel.CommandSent -= OnCommandSent;
         }
     }
 }

@@ -13,13 +13,8 @@ namespace Pixel_Editor
 {
     public class FileViewer
     {
-        private ListBox listBox;
-        private Grid grid;
-        public FileViewer(Grid fileViewerGrid, ListBox fileViewerListBox)
+        public FileViewer()
         {
-            grid = fileViewerGrid;
-            listBox = fileViewerListBox;
-
             Refresh();
         }
 
@@ -27,7 +22,7 @@ namespace Pixel_Editor
         {
             List<Metadata> lib = Library.GetAllKeys();
 
-            listBox.Items.Clear();
+            FileViewerWindow.ClearPaths();
 
             string lastExt = "";
             if (lib != null)
@@ -39,13 +34,13 @@ namespace Pixel_Editor
                 {
                     if (item.extension != lastExt)
                     {
-                        listBox.Items.Add(GetExtensionFullName(item.extension));
+                        FileViewerWindow.AddPath(GetExtensionFullName(item.extension));
                         lastExt = item.extension;
                     }
                     var path = item.pathFromProjectRoot;
-                    listBox.Items.Add(path);
+                    FileViewerWindow.AddPath(path);
                 }
-                listBox.ScrollIntoView(lib.First().pathFromProjectRoot);
+                FileViewerWindow.ScrollIntoView(lib.First().pathFromProjectRoot);
             }
         }
         private static System.Drawing.Color GetColorFromExtension(string extension)
@@ -114,7 +109,7 @@ namespace Pixel_Editor
         /// <returns></returns>
         public object? GetSelectedObject()
         {
-            var item = listBox.SelectedItem;
+            var item = Pixel_Editor.FileViewerWindow.GetSelectedItem();
             if (item is string path)
             {
                 var meta = Library.FetchMetaRelative(path);
@@ -128,7 +123,7 @@ namespace Pixel_Editor
         }
         public Metadata? GetSelectedMeta()
         {
-            var item = listBox.SelectedItem;
+            var item = FileViewerWindow.GetSelectedItem();
             if (item is string path)
             {
                 var meta = Library.FetchMetaRelative(path);
