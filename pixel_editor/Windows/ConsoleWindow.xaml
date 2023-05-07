@@ -8,80 +8,9 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
-            <RowDefinition Height="3*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-        </Grid.ColumnDefinitions>
-        <TextBox
-                Text ="{Binding CommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Grid.Row="20"
-                Grid.Column="0"
-                Grid.ColumnSpan="36" 
-                Grid.RowSpan="4" 
-                Visibility="Visible"
-                Background="Black"
-                Foreground="White"
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Stretch"
-                FontFamily="MS Gothic"
-                CaretBrush="Gray"
-                TextWrapping="Wrap"
-                AcceptsReturn="True"
-                TextElement.FontStretch="SemiCondensed"
-                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                ScrollViewer.VerticalScrollBarVisibility="Hidden" >
-            <TextBox.InputBindings>
-                <KeyBinding Key="Enter" Command="{Binding SendCommand}" />
-            </TextBox.InputBindings>
-        </TextBox>
         <ListBox x:Name="messagesBox"
                 ItemsSource="{Binding Messages}"
                 Visibility="Visible"
@@ -89,22 +18,24 @@
                 HorizontalAlignment="Stretch"
                 Background="Black"
                 Foreground="White"
-                Grid.Column="0"
-                Grid.Row="0"
-                Grid.RowSpan="20"
-                Grid.ColumnSpan="26"
-                ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                FontFamily="MS Gothic"
-                ScrollViewer.CanContentScroll="True"
-                ScrollViewer.PanningMode="VerticalOnly"
-                ScrollViewer.PanningRatio="1"
-                ScrollViewer.PanningDeceleration="0.001" >
+                Grid.Row="0" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <TextBox
+                Text ="{Binding CommandLine, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Grid.Row="1"
+                Background="Black"
+                Foreground="White"
+                CaretBrush="Gray"
+                TextWrapping="Wrap"
+                AcceptsReturn="True" >
+            <TextBox.InputBindings>
+                <KeyBinding Key="Enter" Command="{Binding SendCommand}" />
+            </TextBox.InputBindings>
+        </TextBox>
     </Grid>
 </UserControl>
