@@ -54,7 +54,39 @@
             </Grid.ColumnDefinitions>
             <local:StageViewerWindow Grid.Column="0"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1"/>
-            <Grid x:Name="inspectorGrid" Grid.Column="2" />
+            <Grid Grid.Column="2" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="3" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Grid x:Name="inspectorGrid" Grid.Row="0" />
+                <GridSplitter Grid.Row="1"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />
+                <Grid x:Name="componentEditorGrid" Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                </Grid>
+            </Grid>
         </Grid>
         <GridSplitter Grid.Row="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />
         <Grid Grid.Row="3">
