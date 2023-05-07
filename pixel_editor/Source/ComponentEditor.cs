@@ -28,7 +28,6 @@ namespace Pixel_Editor.Source
         public bool Disposing { get; internal set; }
         public ComponentEditorData data;
         public Grid mainGrid;
-        public Grid myGrid;
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
         List<UIElement> uiElements = new();
@@ -39,13 +38,7 @@ namespace Pixel_Editor.Source
         }
         private void SetupComponentEditorGrid()
         {
-            mainGrid = Editor.Current.inspectorGrid;
-            myGrid ??= new();
-
-            if (!mainGrid.Children.Contains(myGrid))
-                mainGrid.Children.Add(myGrid);
-
-            Inspector.SetRowAndColumn(myGrid, 1, 3, 0, 15);
+            mainGrid = Editor.Current.componentEditorGrid;
         }
         private void GetEvents()
         {
@@ -72,8 +65,7 @@ namespace Pixel_Editor.Source
                 var button = Inspector.GetButton(method.Name + "();", new(0, 0, 0, 0));
                 viewer.Children.Add(button);
                 uiElements.Add(button);
-                Inspector.SetRowAndColumn(button, 1, 4, 22, i++ + 1);
-                button.FontSize = 3;
+                Inspector.SetRowAndColumn(button, 1, 1, 1, i++ + 1);
                 button.Click += delegate
                 {
                     try
@@ -157,7 +149,6 @@ namespace Pixel_Editor.Source
             textbox.Name = $"textBox{i}";
             textbox.AcceptsReturn = true;
             textbox.AcceptsTab = true;
-            textbox.FontSize = 4;
             textbox.VerticalAlignment = VerticalAlignment.Stretch;
             textbox.HorizontalAlignment = HorizontalAlignment.Stretch;
             textbox.LostFocus += (e, o) =>
@@ -174,7 +165,7 @@ namespace Pixel_Editor.Source
             };
             uiElements.Add(textbox);
             viewer.Children.Add(textbox);
-            Inspector.SetRowAndColumn(textbox, 6, 6, 18, i);
+            Inspector.SetRowAndColumn(textbox, 1, 1, 1, i);
             i += 6;
         }
 
@@ -185,10 +176,9 @@ namespace Pixel_Editor.Source
 
             var checkBox = Inspector.GetCheckBox(onCheckBoxChecked(field), i.ToString(), curVal);
             checkBox.Name = $"listBox{i}";
-            checkBox.FontSize = 4;
             uiElements.Add(checkBox);
             viewer.Children.Add(checkBox);
-            Inspector.SetRowAndColumn(checkBox, 1, 1, 22, i++ + 2);
+            Inspector.SetRowAndColumn(checkBox, 1, 1, 1, i++ + 2);
             RoutedEventHandler onCheckBoxChecked(FieldInfo field)
             {
                 return (e, o) =>
@@ -225,16 +215,14 @@ namespace Pixel_Editor.Source
             txtBox.KeyDown += (s, e) => TxtBox_KeyDown(s, e, field, component, strings);
             txtBox.LostKeyboardFocus += Input_LostKeyboardFocus;
             txtBox.GotKeyboardFocus += Input_GotKeyboardFocus;
-            txtBox.FontSize = 4;
-            label.FontSize = 4;
 
             uiElements.Add(txtBox);
             uiElements.Add(label);
 
             viewer.Children.Add(txtBox);
             viewer.Children.Add(label);
-            Inspector.SetRowAndColumn(txtBox, lhs_height, lhs_width, 2, i);
-            Inspector.SetRowAndColumn(label, rhs_height, rhs_width, 0, i++);
+            Inspector.SetRowAndColumn(txtBox, 1, 1, 1, i);
+            Inspector.SetRowAndColumn(label, 1, 1, 0, i++);
             strIndex++;
         }
         private int AddNestedComponentEditorButton(Grid viewer, ref int i, FieldInfo field, string name)
@@ -244,8 +232,7 @@ namespace Pixel_Editor.Source
             viewer.Children.Add(button);
             uiElements.Add(button);
             Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
-            Inspector.SetRowAndColumn(button, 1, 3, 18, i++);
-            button.FontSize = 3;
+            Inspector.SetRowAndColumn(button, 1, 1, 1, i++);
             button.Click += delegate
             {
                 Component? Component = (Component)field.GetValue(component);
@@ -270,13 +257,13 @@ namespace Pixel_Editor.Source
                 uiElements.Add(inputBox);
                 viewer.Children.Add(inputBox);
                 inputFields.Add(inputBox);
-                Inspector.SetRowAndColumn(inputBox, 1, 4, 22, index + 1);
+                Inspector.SetRowAndColumn(inputBox, 1, 1, 1, index + 1);
             }
             Inspector.SetControlColors(nameDisplay, Brushes.DarkSlateGray, Brushes.White);
             uiElements.Add(nameDisplay);
             viewer.Children.Add(nameDisplay);
             editEvents.Add((o, e) => SetVariable(o, e));
-            Inspector.SetRowAndColumn(nameDisplay, 1, 4, 18, index + 1);
+            Inspector.SetRowAndColumn(nameDisplay, 1, 1, 0, index + 1);
         }
         #endregion
         private bool SetVariable(string o, int i)
@@ -322,20 +309,13 @@ namespace Pixel_Editor.Source
                 var hasRefGlobal = mainGrid.Children.Contains(element);
                 if (hasRefGlobal)
                     mainGrid.Children.Remove(element);
-
-                var hasRefLocal = myGrid.Children.Contains(element);
-                if (hasRefLocal)
-                    myGrid.Children.Remove(element);
             }
 
             if (mainGrid != null)
             {
-                if (mainGrid.Children.Contains(myGrid))
-                    mainGrid.Children.Remove(myGrid);
             }
 
             uiElements?.Clear();
-            myGrid?.Children.Clear();
             inputFields?.Clear();
             editEvents?.Clear();
 
