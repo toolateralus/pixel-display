@@ -39,7 +39,6 @@ namespace Pixel_Editor
                 var info = CSFunction.GetFunctionInfo(item);
                 Print($"{item.Value} : {info}");
             }
-
         }, "Shows a list of all available functions and some info");
         private static void PopulateCommandLists()
         {
