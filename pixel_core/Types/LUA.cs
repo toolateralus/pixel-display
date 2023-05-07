@@ -104,14 +104,14 @@ namespace Pixel
 
             return "";
         }
-       
+
 
         #region pixel_engine lua library (C# functions)
         public static LuaFunction dispose() => new((p) =>
         {
             var ct = env_vars.Count;
             env_vars.Clear();
-            FromString($"{ct} environment variables released.");
+            PrintLUA($"{ct} environment variables released.");
             return 0;
         });
         public static LuaFunction env() => new((p) =>
@@ -216,33 +216,5 @@ namespace Pixel
         });
         #endregion
     }
-    public class CommandInterpreter : TokenInterpreterBase
-    {
-        public static async Task<Command[]> GetCommands()
-        {
-            EditorEvent e = new(EditorEventFlags.GET_COMMAND_LIBRARY_C_SHARP);
-            object? lib = null;
-            e.action = (e) => { lib = e.First(); };
-            Interop.RaiseInspectorEvent(e);
-            float time = 0;
-
-            while (!e.processed && time < 1500)
-            {
-                if (lib is Command[] commands)
-                    return commands;
-
-                time += 15f;
-                await Task.Delay(15);
-            }
-            return null;
-        }
-       
-        public async Task RunAsync(Stack<Token> line)
-        {
-
-            
-            return;
-        }
-        
-    }
 }
+   

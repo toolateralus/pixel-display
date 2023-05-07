@@ -230,25 +230,9 @@ namespace Pixel_Editor
             Runtime.OnProjectSet -= OnProjectSet;
             Runtime.OnStageSet -= OnStageSet;
         }
-
-
-        static bool cmd_interp_active = false;
         private void GetInputs()
         {
-            static void toggleCmdInterpreter()
-            {
-                if (cmd_interp_active)
-                {
-                    InputProcessor.TryUnsubscribeInterpreter<CommandInterpreter>();
-                    cmd_interp_active = false;
-                    return;
-                }
-                cmd_interp_active = true;
-                InputProcessor.SubscribeInterpreter<CommandInterpreter>();
-            }
-            Input.RegisterAction(this, toggleCmdInterpreter, Key.F7);
             Input.RegisterAction(this, ResetEditor, Key.F5); 
-            Input.RegisterAction(this, Console.cmd_clear_console().Invoke, Key.F10);
             Input.RegisterAction(this, ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(this, () => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(this, DestroySelected, Key.Delete);

@@ -53,11 +53,6 @@ namespace Pixel_Editor
                     e.action.Invoke(e.args);
                     return;
 
-                case EditorEventFlags.GET_COMMAND_LIBRARY_C_SHARP:
-                    var cmds = Console.Current.LoadedCommands.ToArray();
-                    e.args = new object[] { cmds };
-                    e.action.Invoke(e.args);
-                    return;
                 case EditorEventFlags.GET_FILE_VIEWER_SELECTED_OBJECT:
                     var obj1 = Editor.Current.fileViewer.GetSelectedObject();
                     if (obj1 != null)
