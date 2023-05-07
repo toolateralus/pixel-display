@@ -110,7 +110,6 @@ namespace Pixel_Editor
 
             Output.Stream += (obj) => Console.Print(obj);
             inspector = new Inspector(inspectorGrid);
-            Runtime.Current.Inspector = inspector;
             DataContext = viewModel;
         }
         public EditorSettings settings;

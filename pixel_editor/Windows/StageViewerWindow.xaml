@@ -8,9 +8,8 @@
     <Grid>
         <Image
             x:Name="image"
-            Source="{Binding ImageSource}"
             RenderOptions.BitmapScalingMode ="NearestNeighbor"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"/>
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"/>
     </Grid>
 </UserControl>
