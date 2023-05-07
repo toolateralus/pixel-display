@@ -472,7 +472,6 @@ namespace Pixel_Editor
                     Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
                     button.Name = $"button{i}";
                     addNodeActions.Add(() => AddNodePrefab(new(item.Key, item.Value)));
-                    button.FontSize = 2;
                     button.Click += newNodeButtonClicked;
                     addNodeContextMenu.Children.Add(button);
                     Inspector.SetRowAndColumn(button, 2, 3, 4, i * 2 + 4);
