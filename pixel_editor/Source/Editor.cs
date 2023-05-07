@@ -459,30 +459,26 @@ namespace Pixel_Editor
         private void NewNodeButtonPressed(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            if (!addNodeContextMenuOpen)
-            {
-                addNodeContextMenuOpen = true;
-                addNodeContextMenu = Inspector.GetGrid();
-                inspectorGrid.Children.Add(addNodeContextMenu);
-                Inspector.SetRowAndColumn(addNodeContextMenu, 15, 15, 15, 15);
-
-                int i = 0;
-                foreach (var item in addNodeFunctions)
-                {
-                    Button button = Inspector.GetButton(item.Key, new(0, 0, 0, 0));
-                    button.Name = $"button{i}";
-                    addNodeActions.Add(() => AddNodePrefab(new(item.Key, item.Value)));
-                    button.Click += newNodeButtonClicked;
-                    addNodeContextMenu.Children.Add(button);
-                    Inspector.SetRowAndColumn(button, 2, 3, 4, i * 2 + 4);
-                    i++;
-
-                }
+            if (sender is not Button button || button.ContextMenu is not ContextMenu menu) 
                 return;
+
+            // Clear the existing items
+            menu.Items.Clear();
+
+            // Add new items from the list
+            int i = 0;
+            foreach (var item in addNodeFunctions)
+            {
+                MenuItem menuItem = new MenuItem { Header = item.Key };
+                addNodeActions.Add(() => AddNodePrefab(new(item.Key, item.Value)));
+                menuItem.Name = $"button{i}";
+                menuItem.Click += OnNewContextClicked;
+                menu.Items.Add(menuItem);
+                i++;
             }
-            addNodeContextMenuOpen = false;
-            addNodeContextMenu.Children.Clear();
-            addNodeContextMenu = null;
+
+            // Open the context menu
+            menu.IsOpen = true;
         }
         private void AddNodePrefab(KeyValuePair<string, object> item)
         {
@@ -495,13 +491,13 @@ namespace Pixel_Editor
                 return;
             }
         }
-        private void newNodeButtonClicked(object sender, RoutedEventArgs e)
+        private void OnNewContextClicked(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            if (sender is not Button button) return;
-            foreach (var item in addNodeFunctions)
+            if (sender is not MenuItem menuItem) return;
+            foreach (var _ in addNodeFunctions)
             {
-                if (button.Name.ToInt() is int i && addNodeActions.Count > i)
+                if (menuItem.Name.ToInt() is int i && addNodeActions.Count > i)
                     addNodeActions[i]?.Invoke();
                 return; 
             }
