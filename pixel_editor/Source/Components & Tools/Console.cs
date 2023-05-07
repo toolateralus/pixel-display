@@ -40,6 +40,7 @@ namespace Pixel_Editor
                 Print($"{item.Value} : {info}");
             }
         }, "Shows a list of all available functions and some info");
+        public static CSFunction reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
         {
             var type = Current.GetType();
