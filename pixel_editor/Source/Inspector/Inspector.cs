@@ -129,7 +129,6 @@ namespace Pixel_Editor
                 foreach (var component in componentType)
                     index = ComponentHeader(grid, index, component);
             var addComponentButton = Inspector.GetButton("Add Component", new(0, 0, 0, 0));
-            addComponentButton.FontSize = 2;
             addComponentButton.Click += AddComponentButton_Click;
             SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
             grid.Children.Add(addComponentButton);
@@ -248,7 +247,6 @@ namespace Pixel_Editor
                 Button button = GetButton(item.Key, new(0, 0, 0, 0));
                 button.Name = $"button{i}";
                 addComponentActions.Add(() => AddComponent(new(item.Key, item.Value)));
-                button.FontSize = 2;
                 button.Click += AddComponentClicked;
                 addComponentGrid.Children.Add(button);
                 SetRowAndColumn(button, 1, 2, 0, i);
@@ -308,7 +306,6 @@ namespace Pixel_Editor
             return new()
             {
                 Text = componentName,
-                FontSize = 4f,
                 FontFamily = new FontFamily("MS Gothic"),
                 IsReadOnly = true,
 
@@ -333,7 +330,6 @@ namespace Pixel_Editor
             return new()
             {
                 Text = componentName,
-                FontSize = 4f,
                 FontFamily = new FontFamily("MS Gothic"),
                 IsReadOnly = true,
 
@@ -361,7 +357,6 @@ namespace Pixel_Editor
         private static Button GetRemoveComponentButton(int index, Component component)
         {
             Button editComponentButton = GetButton("Remove", new(0, 0, 0, 0));
-            editComponentButton.FontSize = 3;
             editComponentButton.Click += (_, e) =>
             {
                 e.Handled = true; 
@@ -373,12 +368,11 @@ namespace Pixel_Editor
         private static Button GetEditComponentButton(int index)
         {
             Button editComponentButton = GetButton("Edit", new(0, 0, 0, 0));
-            editComponentButton.FontSize = 3;
             editComponentButton.Click += HandleEditPressed;
             editComponentButton.Name = "edit_button_" + index.ToString();
             return editComponentButton;
         }
-        public static Grid GetGrid(int width = 18, int height = 24, int colWidth = 12, int rowHeight = 12)
+        public static Grid GetGrid(int width = 8, int height = 24, int colWidth = 12, int rowHeight = 12)
         {
             Grid grid = new()
             {
@@ -393,7 +387,7 @@ namespace Pixel_Editor
             for (int x = 0; x < width; ++x)
             {
                 ColumnDefinition col = new();
-                col.Width = new GridLength(colWidth);
+                col.Width = new GridLength(colWidth, GridUnitType.Star);
                 cols.Add(col);
             }
 
