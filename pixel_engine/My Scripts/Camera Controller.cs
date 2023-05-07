@@ -14,7 +14,7 @@ namespace Pixel
         Node camera;
         ParticleSystem ps;
         Vector2 vel = Vector2.Zero;
-        [Field] float speed = 0.15f;
+        [Field] float speed = 0.05f;
 
         public override void Dispose()
         {
@@ -44,8 +44,7 @@ namespace Pixel
             if (camera is null)
                 return;
 
-            float smoothing = Math.Min(vel.Length() / divisorA, 1);
-            float relSpeed = (speed * speed) / camera.Scale.SqrMagnitude();
+            float relSpeed = speed * camera.Scale.Length();
             
             if (Get(Key.LeftShift))
                 relSpeed *= 0.5f;
