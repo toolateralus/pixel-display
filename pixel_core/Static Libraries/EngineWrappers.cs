@@ -1,5 +1,6 @@
 ﻿using Pixel.FileIO;
 using Pixel.Types.Components;
+using Pixel_Core.Types.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,9 +39,15 @@ namespace Pixel
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             Type[] types = assembly.GetTypes();
-
+            
             foreach (Type type in types.Where(t => t.IsSubclassOf(typeof(Component))))
+            {
+                foreach (var attr in type.CustomAttributes)
+                    if (attr.GetType() == typeof(HideFromEditorAttribute))
+                        continue;
+
                 AllComponents.Add(type);
+            }
         }
         public static Stage? Stage
         {
