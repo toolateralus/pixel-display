@@ -36,18 +36,7 @@ namespace Pixel.Types
         /// </summary>
         public object[]? args;
         public void Invoke() => action?.Invoke(args);
-        public bool Equals(string input)
-        {
-            CommandInterpreter.ParseArguments(input, out _, out var withoutArgs);
-            withoutArgs = CommandInterpreter.ParseLoopParams(withoutArgs, out _);
-
-            string[] split = phrase.Split(PhraseVariantSeperator);
-
-            foreach (var line in split)
-                if (line.Equals(withoutArgs))
-                    return true;
-            return false;
-        }
+      
         public static void Success(string syntax) => Interop.Log($"{syntax} call successful");
     }
 }
