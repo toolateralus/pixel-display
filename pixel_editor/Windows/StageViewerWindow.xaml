@@ -8,8 +8,13 @@
     <Grid>
         <Image
             x:Name="image"
-            RenderOptions.BitmapScalingMode ="NearestNeighbor"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"/>
+            RenderOptions.BitmapScalingMode ="NearestNeighbor" />
+        <Label
+            Foreground="{Binding FramerateBrush}"
+            Content="{Binding FramerateLabel}"
+            Background="#88000000"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            FontWeight="Bold" />
     </Grid>
 </UserControl>

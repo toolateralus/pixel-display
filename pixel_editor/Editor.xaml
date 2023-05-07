@@ -105,15 +105,5 @@
             <GridSplitter Grid.Column="1"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />
             <local:FileViewerWindow  Grid.Column="2" />
         </Grid>
-        <Label
-            Width="200"
-            FontWeight="Bold" 
-            FontFamily="MS Gothic"
-            TextBlock.TextAlignment="Left"
-            VerticalAlignment="Top"
-            Grid.Row="1"
-            x:Name="framerateLabel"
-            Foreground="White"
-            Content=""/>
     </Grid>
 </Window>

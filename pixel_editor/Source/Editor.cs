@@ -20,6 +20,7 @@ namespace Pixel_Editor
 {
     public partial class Editor : Window
     {
+        public static Action? EditorUpdate;
         public EditorInputEvents input = new();
         internal EditorViewModel viewModel;
         SolidColorBrush framerateBrush = new(); 
@@ -269,54 +270,12 @@ namespace Pixel_Editor
         {
             CMouse.Update();
 
-            UpdateMetrics();
+            EditorUpdate?.Invoke();
             
             Events.ExecuteAll();
 
             foreach (Tool tool in Tools)
                 tool.Update(1f);
-        }
-        private void UpdateMetrics()
-        {
-            RenderHost renderHost = Runtime.Current.renderHost;
-            RenderInfo info = renderHost.info;
-
-            if (info.frameCount % 60 == 0)
-            {
-                var framerate = info.Framerate;
-                var min = info.lowestFrameRate;
-                var max = info.highestFrameRate;
-                var avg = info.averageFrameRate;
-
-                switch (avg) 
-                {
-                    case < 10:
-                        framerateBrush = Brushes.DarkRed;
-                        break;
-                    case < 20:
-                        framerateBrush = Brushes.Red;
-                        break;
-                    case < 30:
-                        framerateBrush = Brushes.DarkOrange;
-                        break;
-                    case < 40:
-                        framerateBrush = Brushes.Orange;
-                        break;
-                    case < 50:
-                        framerateBrush = Brushes.Yellow;
-                        break;
-                    case < 60:
-                        framerateBrush = Brushes.White;
-                        break;
-                    case > 60:
-                        framerateBrush = Brushes.Green;
-                        break;
-                }
-
-                framerateLabel.Foreground = framerateBrush;
-                framerateLabel.Content =
-                    $"last : {framerate} avg :{avg}\n min : {min} max :{max}";
-            }
         }
         #region Fields/Properties
         string stageName, projectName;
