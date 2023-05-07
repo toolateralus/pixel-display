@@ -106,6 +106,7 @@
             <local:FileViewerWindow  Grid.Column="2" />
         </Grid>
         <Label
+            Width="200"
             FontWeight="Bold" 
             FontFamily="MS Gothic"
             TextBlock.TextAlignment="Left"
