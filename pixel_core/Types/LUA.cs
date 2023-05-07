@@ -1,6 +1,7 @@
 ﻿using KeraLua;
 using Pixel.Statics;
 using Pixel.Types;
+using PixelLang.Interpreters;
 using PixelLang.Types;
 using System;
 using System.Collections.Generic;
@@ -215,7 +216,7 @@ namespace Pixel
         });
         #endregion
     }
-    public class CommandInterpreter : IInterpreter
+    public class CommandInterpreter : TokenInterpreterBase
     {
         public static async Task<Command[]> GetCommands()
         {
@@ -242,166 +243,6 @@ namespace Pixel
             
             return;
         }
-        #region Grammar
-        private const char Loop = '$';
-        private const char EndLine = ';';
-        private const char ArgumentsStart = '(';
-        private const char ArgumentsEnd = ')';
-        private const string ParameterSeperator = ", ";
-
-        public int Count => 0;
-        #endregion
-        #region Parsing
-        public static bool HasArgs(string input)
-        {
-            return input.Contains(ArgumentsStart) && input.Contains(ArgumentsEnd);
-        }
-        private static Vector2 Vec2(string? arg0)
-        {
-            string[] values = arg0.Split(',');
-
-            if (values.Length < 2)
-                return Vector2.Zero;
-
-            var x = RemoveUnwantedChars(values[0]).ToFloat();
-            var y = RemoveUnwantedChars(values[1]).ToFloat();
-
-            return new Vector2(x, y);
-        }
-        private static string String(string arg0)
-        {
-            foreach (var x in arg0)
-                if (Constants.disallowed_chars.Contains(x))
-                    arg0 = arg0.Replace(x, (char)0);
-            return arg0;
-        }
-        private static void ExecuteCommand(string[] args, Command command, int loopCt)
-        {
-            for (int l = 0; l < loopCt; ++l)
-            {
-                try
-                {
-                    if (args.Length > 0)
-                    {
-                        List<object> parsed_objects = new();
-
-                        for (int i = 0; i < args.Length; ++i)
-                        {
-                            object? parsed_arg_obj = ParseParam(args[i], command, i);
-
-                            if (parsed_arg_obj != null)
-                                parsed_objects.Add(parsed_arg_obj);
-                        }
-                        command.args = parsed_objects.ToArray();
-                    }
-                    command.Invoke();
-                }
-                catch (Exception e)
-                {
-                    command.error = e.Message;
-                }
-            }
-        }
-        public static object? ParseParam(string arg, Command command, int index)
-        {
-            // important : this string gets treated like a null/void variable. //
-            object? outArg = "";
-
-            arg = RemoveUnwantedChars(arg);
-
-            if (command.argumentTypes is null || command.argumentTypes.Length < index)
-                return outArg;
-
-            try
-            {
-                switch (command.argumentTypes[index])
-                {
-                    case "vec:":
-                        outArg = Vec2(arg);
-                        break;
-                    case "int:":
-                        outArg = int.Parse(arg);
-                        break;
-                    case "str:":
-                        outArg = String(arg);
-                        break;
-                    case "float:":
-                        outArg = float.Parse(arg);
-                        break;
-                    case "bool:":
-                        outArg = bool.Parse(arg);
-                        break;
-                }
-            }
-            catch (Exception e)
-            {
-                Interop.Log(e.Message);
-            }
-            return outArg;
-        }
-        public static string ParseLoopParams(string input, out string repeaterArgs)
-        {
-            string withoutArgs = "";
-            repeaterArgs = "";
-            if (input.Contains(Loop))
-            {
-                int indexOfStart = input.IndexOf(Loop);
-                int indexOfEnd = input.IndexOf(EndLine);
-
-                for (int i = indexOfStart; i < indexOfEnd; ++i)
-                    repeaterArgs += input[i];
-
-                if (repeaterArgs.Length > 0)
-                    withoutArgs = input.Replace(repeaterArgs, "");
-            }
-            else withoutArgs = input;
-            return withoutArgs;
-        }
-        public static void ParseArguments(string input, out string[] arguments, out string commandPhrase)
-        {
-            var args_str = "";
-            arguments = Array.Empty<string>();
-
-            commandPhrase = GetCmdPhrase(input);
-
-            if (HasArgs(input))
-                arguments = GetParameterArray(input, ref args_str);
-
-
-        }
-        private static string RemoveUnwantedChars(string? arg0)
-        {
-            foreach (var _char in arg0)
-                if (Constants.disallowed_chars.Contains(_char))
-                    arg0 = arg0.Replace($"{_char}", "");
-            return arg0;
-        }
-        public static string[] SplitArgsIntoParams(string args_str) => args_str.Split(ParameterSeperator);
-        public static string GetCmdPhrase(string input)
-        {
-            return input.Split(ArgumentsStart)[0] + EndLine;
-        }
-        public static string GetArguments(string input, string arguments, int argStartIndex, int argEndIndex)
-        {
-            for (int i = argStartIndex; i < argEndIndex; ++i)
-                arguments += input[i];
-            return arguments;
-        }
-        public static void GetArgumentIndices(string input, out int argStartIndex, out int argEndIndex)
-        {
-            argStartIndex = input.IndexOf(ArgumentsStart);
-            argEndIndex = input.IndexOf(EndLine);
-        }
-        public static string[] GetParameterArray(string input, ref string args_str)
-        {
-            string[] arguments;
-            GetArgumentIndices(input, out int argStartIndex, out int argEndIndex);
-            args_str = GetArguments(input, args_str, argStartIndex, argEndIndex);
-            arguments = SplitArgsIntoParams(args_str);
-            return arguments;
-        }
-
-       
-        #endregion
+        
     }
 }
