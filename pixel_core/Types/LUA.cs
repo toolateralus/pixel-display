@@ -238,40 +238,9 @@ namespace Pixel
        
         public async Task RunAsync(Stack<Token> line)
         {
-            return;
 
-            //ParseArguments(line, out string[] args, out _);
-            //line = ParseLoopParams(line, out string loop_param);
-
-
-            //var getCmdsTask = GetCommands();
             
-            //if (getCmdsTask is null)
-            //    return;
-
-            //await getCmdsTask;
-
-            //if (getCmdsTask.Result == null)
-            //    return;
-
-            //var commands = getCmdsTask.Result;
-          
-            //if (loop_param.ToInt() is int i && i <= 0)
-            //    i = 1;
-
-            //foreach (Command command in commands)
-            //    if (command.Equals(line))
-            //    {
-            //        ExecuteCommand(args, command, i);
-            //        if (command.error != null)
-            //        {
-            //            Interop.Log(command.error);
-            //            command.error = null;
-            //            continue;
-            //        }
-            //        Command.Success(command.syntax);
-            //    }
-            //return;
+            return;
         }
         #region Grammar
         private const char Loop = '$';
