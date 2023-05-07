@@ -44,7 +44,7 @@ namespace Pixel
             if (camera is null)
                 return;
 
-            float velocity = Math.Abs(((speed + (vel.Length() / divisorA)) - Math.Max(0.5f, camera.Scale.Length() / divisorB)));
+            float velocity = Math.Abs(((speed + Math.Min((vel.Length() / divisorA), 1) - camera.Scale.Length() / divisorB)));
             
             if (Get(Key.LeftShift))
                 velocity *= 0.5f;
