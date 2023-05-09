@@ -32,68 +32,56 @@ namespace Pixel_Editor
         public ActionCommand? NextCommand { get; }
         public ActionCommand? PreviousHistoryCommand { get; }
         public ActionCommand? NextHistoryCommand { get; }
-        public static void SendMessage(string message) => SendMessageAction?.Invoke(message);
-        public static void ClearAll() => ClearAllAction?.Invoke();
         public ConsoleControl()
         {
             InitializeComponent();
             commandHistory.Add("");
             DataContext = this;
             Loaded += OnLoaded;
-            Unloaded += OnUnLoaded;
-            SendCommand = new ActionCommand(OnSendCommand);
-            ContinueCommand = new ActionCommand(OnContinueCommand);
-            DebugCommand = new ActionCommand(OnDebugCommand);
-            NextCommand = new ActionCommand(OnNextCommand);
-            PreviousHistoryCommand = new ActionCommand(PreviousHistory);
-            NextHistoryCommand = new ActionCommand(NextHistory);
+            Unloaded += OnUnloaded;
+            SendCommand = new ActionCommand(OnSend);
+            ContinueCommand = new ActionCommand(OnContinue);
+            DebugCommand = new ActionCommand(OnDebug);
+            NextCommand = new ActionCommand(OnNext);
+            PreviousHistoryCommand = new ActionCommand(OnPreviousHistory);
+            NextHistoryCommand = new ActionCommand(OnNextHistory);
         }
-
-        private void NextHistory()
-        {
-            commandHistoryIndex = (commandHistoryIndex + commandHistory.Count + 1) % commandHistory.Count;
-            CommandLine.Value = commandHistory[commandHistoryIndex];
-        }
-
-        private void PreviousHistory()
-        {
-            commandHistoryIndex = (commandHistoryIndex + commandHistory.Count - 1) % commandHistory.Count;
-            CommandLine.Value = commandHistory[commandHistoryIndex];
-        }
-
-        private void OnNextCommand() => InterpreterOutput.Continue?.Invoke();
-
-        private void OnDebugCommand()
-        {
-            InterpreterOutput.IsDebugMode = !InterpreterOutput.IsDebugMode;
-            AddMessage($"DEBUG : {InterpreterOutput.IsDebugMode}");
-        }
-
-        private void OnContinueCommand()
-        {
-            InterpreterOutput.IsDebugMode = false;
-            InterpreterOutput.Continue?.Invoke();
-        }
-
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        void OnLoaded(object sender, RoutedEventArgs e)
         {
             SendMessageAction += AddMessage;
             ClearAllAction += ClearMessages;
             SendDebugAction += SendDebug;
             ClearDebugAction += ClearDebug;
         }
-
-        private void ClearDebug() => DebugMessages.Clear();
-
-        private void OnUnLoaded(object sender, RoutedEventArgs e)
+        void OnUnloaded(object sender, RoutedEventArgs e)
         {
             SendMessageAction -= AddMessage;
             ClearAllAction -= ClearMessages;
             SendDebugAction -= SendDebug;
             ClearDebugAction -= ClearDebug;
         }
-
-        private void OnSendCommand()
+        void OnNextHistory()
+        {
+            commandHistoryIndex = (commandHistoryIndex + commandHistory.Count + 1) % commandHistory.Count;
+            CommandLine.Value = commandHistory[commandHistoryIndex];
+        }
+        void OnPreviousHistory()
+        {
+            commandHistoryIndex = (commandHistoryIndex + commandHistory.Count - 1) % commandHistory.Count;
+            CommandLine.Value = commandHistory[commandHistoryIndex];
+        }
+        void OnNext() => InterpreterOutput.Continue?.Invoke();
+        void OnDebug()
+        {
+            InterpreterOutput.IsDebugMode = !InterpreterOutput.IsDebugMode;
+            AddMessage($"DEBUG : {InterpreterOutput.IsDebugMode}");
+        }
+        void OnContinue()
+        {
+            InterpreterOutput.IsDebugMode = false;
+            InterpreterOutput.Continue?.Invoke();
+        }
+        void OnSend()
         {
             string cmd = CommandLine.Value;
             CommandLine.Value = "";
@@ -104,6 +92,7 @@ namespace Pixel_Editor
             commandHistoryIndex = 0;
             InputProcessor.TryCallLine(cmd);
         }
+        void ClearDebug() => DebugMessages.Clear();
         public void AddMessage(string message)
         {
             Messages.Add(message);
@@ -118,6 +107,8 @@ namespace Pixel_Editor
         }
         internal void ClearMessages() => Messages.Clear();
         void SendDebug(string message) => DebugMessages.Add(message);
+        public static void SendMessage(string message) => SendMessageAction?.Invoke(message);
+        public static void ClearAll() => ClearAllAction?.Invoke();
         internal static void ShowMetrics(string[] strings)
         {
             ClearDebugAction?.Invoke();

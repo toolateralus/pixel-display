@@ -38,6 +38,7 @@
         <TextBox
             Text ="{Binding CommandLine.Value ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             AcceptsReturn="True"
+            AcceptsTab="True"
             Grid.Row="2"
             x:Name="input"
             Background="#222"
