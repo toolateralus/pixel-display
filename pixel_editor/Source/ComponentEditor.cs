@@ -13,6 +13,8 @@ using Pixel_Editor;
 using Console = Pixel_Editor.Console;
 using PixelLang;
 using PixelLang.Tools;
+using Microsoft.VisualBasic;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Pixel_Editor.Source
 {
@@ -22,8 +24,6 @@ namespace Pixel_Editor.Source
         public bool Disposing { get; internal set; }
         public ComponentEditorData data;
         public ItemsControl memberStackPanel = new();
-        public List<Action<string, int>> editEvents = new();
-        public List<TextBox> inputFields = new();
         public void Refresh(Component component)
         {
             this.component = component;
@@ -120,18 +120,16 @@ namespace Pixel_Editor.Source
                 AcceptsReturn = true,
                 AcceptsTab = true,
             };
-            textbox.LostFocus += (e, o) =>
+            textbox.LostFocus += (s, e) =>
             {
-                if (o.RoutedEvent != null)
-                    o.Handled = true;
-
-                if (e is not TextBox tb)
+                if (e.RoutedEvent != null)
+                    e.Handled = true;
+                if (s is not TextBox tb)
                     return;
-
                 field.SetValue(component, tb.Text);
-
                 UpdateData();
             };
+            textbox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
             var control = AddContentToList(field.Name);
             control.Content = textbox;
         }
@@ -141,12 +139,20 @@ namespace Pixel_Editor.Source
                 throw new InvalidCastException();
             for (int i = 0; i < array.Length; i++)
             {
-                string? str = array[i];
-                var txtBox = Inspector.GetTextBox(str);
+                int index = i;
+                var txtBox = Inspector.GetTextBox(array[i]);
                 txtBox.IsReadOnly = false;
-                txtBox.KeyDown += (s, e) => TxtBox_KeyDown(s, e, field, component, array);
-                txtBox.LostKeyboardFocus += Input_LostKeyboardFocus;
-                txtBox.GotKeyboardFocus += Input_GotKeyboardFocus;
+                txtBox.KeyDown += InputBox_KeyDown;
+                txtBox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
+                txtBox.LostKeyboardFocus += (s, e) =>
+                {
+                    e.Handled = true;
+                    Inspector.SetControlColors(txtBox, Brushes.DarkSlateGray, Brushes.Black);
+                    array[index] = txtBox.Text;
+                    component?.OnFieldEdited(field.Name);
+                    UpdateData();
+                    Refresh(component);
+                };
                 var control = AddContentToList($"{field.Name}:{i}");
                 control.Content = txtBox;
             }
@@ -208,93 +214,46 @@ namespace Pixel_Editor.Source
                 return;
             Inspector.SetControlColors(textbox, Brushes.DarkSlateGray, Brushes.White);
             textbox.IsReadOnly = false;
-            textbox.GotKeyboardFocus += Input_GotKeyboardFocus;
-            textbox.LostKeyboardFocus += Input_LostKeyboardFocus;
+            textbox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
+            textbox.LostKeyboardFocus += (s, e) => UpdateField(field, textbox, e);
             textbox.KeyDown += InputBox_KeyDown;
-            inputFields.Add(textbox);
-            editEvents.Add((o, e) => SetVariable(o, e));
             var control = AddContentToList(field.Name);
             control.Content = textbox;
         }
         #endregion
-        private bool SetVariable(string o, int i)
-        {
-            Inspector.GetComponentRuntimeInfo(component, out var fields, out _);
-
-            foreach (var info in fields)
-                if (info.Name == o)
-                {
-                    InputProcessor.TryParse(inputFields[i].Text, out List<object> results);
-                    foreach (var obj in results)
-                        if (obj.GetType() == info.FieldType)
-                        {
-                            Runtime.Log($"Field {info.Name} of object {component.Name} -> new {info.FieldType} of value {obj}");
-                            info.SetValue(component, obj);
-                        }
-
-                    Refresh(component);
-                    return true;
-                }
-
-            Refresh(component);
-            return false;
-        }
-        private void ExecuteEditEvent(int index)
-        {
-            if (inputFields.Count > index)
-                if (data.Fields.ElementAt(index) is var field)
-                {
-                    Action<string, int> action = editEvents[index];
-                    string name = field.Name;
-                    action.Invoke(name, index);
-                    component?.OnFieldEdited(name);
-                }
-        }
         internal void Dispose()
         {
             Disposing = true;
             data = null;
-            inputFields?.Clear();
-            editEvents?.Clear();
             Disposing = false;
         }
         #region WPF Events
 
-        private void TxtBox_KeyDown(object sender, KeyEventArgs e, FieldInfo field, Component component, string[] strings)
-        {
-            if (sender is TextBox box)
-            {
-                var index = box.Name.ToInt();
-                var txt = box.Text;
-                if (e.Key == Key.Return)
-                {
-                    if (strings.Length > index)
-                        strings[index] = txt;
-                    field.SetValue(component, strings);
-                    Keyboard.ClearFocus();
-                    UpdateData();
-                }
-            }
-        }
         private void InputBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (sender is not TextBox box)
                 return;
             if (e.Key == Key.Return)
             {
+                e.Handled = true;
                 UpdateData();
                 Keyboard.ClearFocus();
             }
         }
-        private void Input_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void UpdateField(FieldInfo field, TextBox box, KeyboardFocusChangedEventArgs e)
         {
-            if (sender is not TextBox box || data is null)
-                return;
+            e.Handled = true;
             Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
-            for (int i = 0; i < data.Fields.Count; ++i)
-                ExecuteEditEvent(i);
-            UpdateData();
+            InputProcessor.TryParse(box.Text, out List<object> results);
+            foreach (var obj in results)
+                if (obj.GetType() == field.FieldType)
+                {
+                    Runtime.Log($"Field {field.Name} of object {component.Name} -> new {field.FieldType} of value {obj}");
+                    field.SetValue(component, obj);
+                }
             Refresh(component);
+            component?.OnFieldEdited(field.Name);
+            UpdateData();
         }
         internal void UpdateData()
         {
@@ -310,12 +269,13 @@ namespace Pixel_Editor.Source
                 }
         }
 
-        private void Input_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void TextBoxGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            if (sender is not TextBox box) return;
+            if (sender is not TextBox box)
+                return;
+            e.Handled = true;
             Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
             UpdateData();
-
         }
 
         #endregion
