@@ -25,7 +25,6 @@ namespace Pixel_Editor
         public EditorInputEvents input = new();
         internal EditorViewModel viewModel;
         SolidColorBrush framerateBrush = new(); 
-        internal ComponentEditor componentEditor;
         internal FileViewer fileViewer;
         private const string motd = "Session started. Type 'help();' for a list of commands.";
         #region Window Scaling

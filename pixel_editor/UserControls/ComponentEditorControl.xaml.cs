@@ -1,35 +1,38 @@
-﻿using System;
+﻿using Pixel;
+using PixelLang.Tools;
 using System.Collections.Generic;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using static Pixel.Input;
-using Pixel;
-using Component = Pixel.Types.Components.Component;
 using System.Windows.Input;
-using System.Reflection;
-using Pixel_Editor;
-using Console = Pixel_Editor.Console;
-using PixelLang;
-using PixelLang.Tools;
-using Microsoft.VisualBasic;
-using static System.Net.Mime.MediaTypeNames;
+using Pixel_Editor.Source;
+using Component = Pixel.Types.Components.Component;
+using System.Windows.Media;
 
-namespace Pixel_Editor.Source
+namespace Pixel_Editor
 {
-    public class ComponentEditor
+    /// <summary>
+    /// Interaction logic for ComponentEditorControl.xaml
+    /// </summary>
+    public partial class ComponentEditorControl : UserControl
     {
+        public ObservableCollection<MemberEditor> Members { get; private set; } = new();
+        public ComponentEditorControl()
+        {
+            InitializeComponent();
+            DataContext = this;
+        }
         public Component component;
         public bool Disposing { get; internal set; }
         public ComponentEditorData data;
-        public ItemsControl memberStackPanel = new();
         public void Refresh(Component component)
         {
             this.component = component;
-
-            memberStackPanel = Editor.Current.componentEditorControl;
-            memberStackPanel.Items.Clear();
+            Members.Clear();
 
             if (component is null)
                 return;
@@ -55,8 +58,8 @@ namespace Pixel_Editor.Source
                         return;
                     }
                 };
-                var control = AddContentToList(method.Name);
-                control.Content = button;
+                MemberEditor member = new(button, method.Name);
+                Members.Add(member);
             }
         }
         private void SerializeFields()
@@ -91,24 +94,6 @@ namespace Pixel_Editor.Source
             }
         }
 
-        private ContentControl AddContentToList(string label)
-        {
-            Grid memberGrid = new();
-            memberGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(150) });
-            memberGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
-
-            TextBox box = Inspector.GetTextBox(label);
-            Grid.SetColumn(box, 0);
-            memberGrid.Children.Add(box);
-            
-            ContentControl control = new();
-            Grid.SetColumn(control, 1);
-            memberGrid.Children.Add(control);
-
-            memberStackPanel.Items.Add(memberGrid);
-            return control;
-        }
-
         private void AddInputFieldTextBox(FieldInfo field)
         {
             if (field.GetValue(component) is not string currentvalue)
@@ -130,8 +115,8 @@ namespace Pixel_Editor.Source
                 UpdateData();
             };
             textbox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
-            var control = AddContentToList(field.Name);
-            control.Content = textbox;
+            MemberEditor member = new(textbox, field.Name);
+            Members.Add(member);
         }
         private void AddStringArrayTextBox(FieldInfo field)
         {
@@ -153,8 +138,8 @@ namespace Pixel_Editor.Source
                     UpdateData();
                     Refresh(component);
                 };
-                var control = AddContentToList($"{field.Name}:{i}");
-                control.Content = txtBox;
+                MemberEditor member = new(txtBox, $"{field.Name}:{i}");
+                Members.Add(member);
             }
         }
 
@@ -177,8 +162,8 @@ namespace Pixel_Editor.Source
                     field.SetValue(component, val);
                 UpdateData();
             };
-            var control = AddContentToList(field.Name);
-            control.Content = checkBox;
+            MemberEditor member = new(checkBox, field.Name);
+            Members.Add(member);
         }
         private void NewData()
         {
@@ -204,8 +189,8 @@ namespace Pixel_Editor.Source
                 }
                 Refresh(Component);
             };
-            var control = AddContentToList(field.Name);
-            control.Content = button;
+            MemberEditor member = new(button, field.Name);
+            Members.Add(member);
         }
         private void AddOtherTextBox(FieldInfo field)
         {
@@ -217,8 +202,8 @@ namespace Pixel_Editor.Source
             textbox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
             textbox.LostKeyboardFocus += (s, e) => UpdateField(field, textbox, e);
             textbox.KeyDown += InputBox_KeyDown;
-            var control = AddContentToList(field.Name);
-            control.Content = textbox;
+            MemberEditor member = new(textbox, field.Name);
+            Members.Add(member);
         }
         #endregion
         internal void Dispose()
@@ -278,83 +263,40 @@ namespace Pixel_Editor.Source
             UpdateData();
         }
 
-        #endregion
+            #endregion
     }
-    public record ComponentEditorData
+    public class MemberEditor : INotifyPropertyChanged
     {
-        public readonly IReadOnlyCollection<FieldInfo> Fields;
-        public readonly IReadOnlyCollection<MethodInfo> Methods;
-        public readonly List<object> Values;
-        public readonly WeakReference<Component> Component;
+        private string name;
+        private Control inputControl;
 
-        public ComponentEditorData(Component component)
+        public MemberEditor(Control inputControl, string name)
         {
-            Component = new(component);
-            Fields = Inspector.GetSerializedFields(component).ToList();
-            Methods = Inspector.GetSerializedMethods(component).ToList();
-
-            var values = new object[Fields.Count];
-
-            for (int i = 0; i < Fields.Count; i++)
-            {
-                FieldInfo? field = Fields.ElementAt(i);
-                values[i] = GetValueAtIndex(i);
-            }
-
-            Values = values.ToList();
+            this.inputControl = inputControl;
+            this.name = name;
+            PropertyChanged?.Invoke(this, new(nameof(InputControl)));
+            PropertyChanged?.Invoke(this, new(nameof(Name)));
         }
-        public IReadOnlyCollection<object> GetAllValues(out int count)
+
+        public string Name
         {
-            count = Values.Count;
-            return Values;
-        }
-        public object? GetValueAtIndex(int index)
-        {
-            if (IsReferenceAlive(out var component))
-                return Fields.ElementAt(index)?.GetValue(component);
-            return false;
-        }
-        public void UpdateChangedValues(object[] data)
-        {
-            if (data.Length != Values.Count)
+            get => name;
+            set
             {
-                Runtime.Log("component update invalidated : input array was the wrong size.");
-                return;
-            }
-
-            for (int i = 0; i < Values.Count; ++i)
-            {
-                object localVal = Values.ElementAt(i);
-                object newVal = data.ElementAt(i);
-
-                if (localVal == newVal)
-                    continue;
-
-                Values[i] = newVal;
+                name = value;
+                PropertyChanged?.Invoke(this, new(nameof(Name)));
             }
         }
-        public bool SetValueAtIndex(int index, object value)
+        public Control InputControl
         {
-            if (IsReferenceAlive(out var component))
+            get => inputControl;
+            set
             {
-                Fields.ElementAt(index).SetValue(component, value);
-                return true;
+                inputControl = value;
+                PropertyChanged?.Invoke(this, new(nameof(InputControl)));
             }
-            return false;
-        }
-        public bool IsReferenceAlive(out Component component)
-        {
-            if (!Component.TryGetTarget(out component))
-                return false;
-            return true;
-        }
-        public bool HasValueChanged(int index, object value, out object newValue)
-        {
-            newValue = GetValueAtIndex(index);
-            if (newValue == value)
-                return true;
-            return false;
         }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

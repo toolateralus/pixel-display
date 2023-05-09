@@ -22,7 +22,7 @@ namespace Pixel_Editor
         {
             List<Metadata> lib = Library.GetAllKeys();
 
-            FileViewerWindow.ClearPaths();
+            FileViewerControl.ClearPaths();
 
             string lastExt = "";
             if (lib != null)
@@ -34,13 +34,13 @@ namespace Pixel_Editor
                 {
                     if (item.extension != lastExt)
                     {
-                        FileViewerWindow.AddPath(GetExtensionFullName(item.extension));
+                        FileViewerControl.AddPath(GetExtensionFullName(item.extension));
                         lastExt = item.extension;
                     }
                     var path = item.pathFromProjectRoot;
-                    FileViewerWindow.AddPath(path);
+                    FileViewerControl.AddPath(path);
                 }
-                FileViewerWindow.ScrollIntoView(lib.First().pathFromProjectRoot);
+                FileViewerControl.ScrollIntoView(lib.First().pathFromProjectRoot);
             }
         }
         private static System.Drawing.Color GetColorFromExtension(string extension)
@@ -109,7 +109,7 @@ namespace Pixel_Editor
         /// <returns></returns>
         public object? GetSelectedObject()
         {
-            var item = Pixel_Editor.FileViewerWindow.GetSelectedItem();
+            var item = Pixel_Editor.FileViewerControl.GetSelectedItem();
             if (item is string path)
             {
                 var meta = Library.FetchMetaRelative(path);
@@ -123,7 +123,7 @@ namespace Pixel_Editor
         }
         public Metadata? GetSelectedMeta()
         {
-            var item = FileViewerWindow.GetSelectedItem();
+            var item = FileViewerControl.GetSelectedItem();
             if (item is string path)
             {
                 var meta = Library.FetchMetaRelative(path);

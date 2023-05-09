@@ -12,7 +12,7 @@ namespace Pixel_Editor
     /// <summary>
     /// Interaction logic for ConsoleWindow.xaml
     /// </summary>
-    public partial class ConsoleWindow : UserControl
+    public partial class ConsoleControl : UserControl
     {
         public ObservableCollection<string> Messages { get; } = new();
         public ObservableProperty<string> CommandLine { get; } = new("");
@@ -22,7 +22,7 @@ namespace Pixel_Editor
         public ActionCommand? SendCommand { get; }
         public static void SendMessage(string message) => SendMessageAction?.Invoke(message);
         public static void ClearAll() => ClearAllAction?.Invoke();
-        public ConsoleWindow()
+        public ConsoleControl()
         {
             InitializeComponent();
             DataContext = this;

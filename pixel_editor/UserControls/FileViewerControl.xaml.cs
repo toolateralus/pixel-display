@@ -7,16 +7,13 @@ using System.Windows.Controls;
 
 namespace Pixel_Editor
 {
-    /// <summary>
-    /// Interaction logic for FileViewerWindow.xaml
-    /// </summary>
-    public partial class FileViewerWindow : UserControl
+    public partial class FileViewerControl : UserControl
     {
         public static ObservableCollection<string> Paths { get; set; } = new();
         static Action<string>? ScrollIntoViewAction;
         static Action? ClearPathsAction;
         static string NewestSelectedPath = "";
-        public FileViewerWindow()
+        public FileViewerControl()
         {
             InitializeComponent();
             Loaded += OnLoaded;

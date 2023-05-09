@@ -27,10 +27,5 @@
 	    <HintPath>..\PixelLang.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
-	<ItemGroup>
-	  <Compile Update="Source\ComponentEditor.cs">
-	    <SubType>Code</SubType>
-	  </Compile>
-	</ItemGroup>
 
 </Project>

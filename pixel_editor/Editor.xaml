@@ -58,7 +58,7 @@
                 <ColumnDefinition Width="3"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
-            <local:StageViewerWindow Grid.Column="0"/>
+            <local:StageViewerControl Grid.Column="0"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1"/>
             <Grid Grid.Column="2" >
                 <Grid.RowDefinitions>
@@ -68,7 +68,7 @@
                 </Grid.RowDefinitions>
                 <ItemsControl x:Name="inspectorControl" Grid.Row="0" />
                 <GridSplitter Grid.Row="1"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />
-                <ItemsControl x:Name="componentEditorControl" Grid.Row="2" Background="Black" />
+                <ContentControl x:Name="componentEditorControl" Grid.Row="2" Background="Black" />
             </Grid>
         </Grid>
         <GridSplitter Grid.Row="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />
@@ -78,9 +78,9 @@
                 <ColumnDefinition Width="3"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:ConsoleWindow  Grid.Column="0" />
+            <local:ConsoleControl  Grid.Column="0" />
             <GridSplitter Grid.Column="1"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />
-            <local:FileViewerWindow  Grid.Column="2" />
+            <local:FileViewerControl  Grid.Column="2" />
         </Grid>
     </Grid>
 </Window>

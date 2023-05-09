@@ -63,7 +63,6 @@ namespace Pixel_Editor
             OnInspectorMoved += Inspector_OnInspectorMoved;
             RegisterAction(this, DeselectNode, System.Windows.Input.Key.Escape);
         }
-        
         #region Node Function
         public Node? lastSelectedNode;
         public void DeselectNode()
@@ -74,11 +73,7 @@ namespace Pixel_Editor
 
                 activeControls.Clear();
 
-                Editor.Current.componentEditor?.Dispose();
-
                 OnObjectDeselected?.Invoke();
-                if (addComponentMenuOpen)
-                    AddComponentButton_Click(new(), new());
             }
             Runtime.Current.stagingHost.DeselectNode();
             lastSelectedNode = null;
@@ -95,17 +90,16 @@ namespace Pixel_Editor
 
         #endregion
         #region Component Editor
-        Grid addComponentGrid;
-        bool addComponentMenuOpen = false;
         private Dictionary<string, Func<Component>> addComponentFunctions;
         private List<Action> addComponentActions = new();
         public static List<Action> editComponentActions = new();
+        ComponentEditorControl componentEditorControl = new(); 
 
         /// <summary>
         /// Todo: figure out why this dupes the inspector when it's open, It should always just refresh it entirely.
         /// </summary>
         /// <param name="grid"></param>
-        private void RefreshInspector()
+        public void RefreshInspector()
         {
             itemsControl.Items.Clear();
             activeControls.Clear();
@@ -120,6 +114,7 @@ namespace Pixel_Editor
             addComponentButton.ContextMenu = Editor.Current.FindResource("ContextMenu") as ContextMenu;
             addComponentButton.Click += AddComponentButton_Click;
             itemsControl.Items.Add(addComponentButton);
+            componentEditorControl.Refresh(componentEditorControl.component);
             OnInspectorUpdated?.Invoke();
         }
         private Grid TransformHeader()
@@ -147,9 +142,8 @@ namespace Pixel_Editor
             Button editComponentButton = GetButton("Edit", new(0, 0, 0, 0));
             editComponentButton.Click += (s, e) =>
             {
-                Editor.Current.componentEditor ??= new();
-                Editor.Current.componentEditor.Dispose();
-                Editor.Current.componentEditor.Refresh(component);
+                Editor.Current.componentEditorControl.Content = componentEditorControl;
+                componentEditorControl.Refresh(component);
             };
             Grid.SetColumn(editComponentButton, 1);
             memberGrid.Children.Add(editComponentButton);

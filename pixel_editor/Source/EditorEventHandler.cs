@@ -12,7 +12,7 @@ namespace Pixel_Editor
         public static void QueueEvent(EditorEvent e)
         {
             if (e.flags.HasFlag(EditorEventFlags.CLEAR_CONSOLE))
-                ConsoleWindow.ClearAll();
+                ConsoleControl.ClearAll();
             Pending.Enqueue(e);
         }
         protected internal void ExecuteAll()
@@ -38,8 +38,7 @@ namespace Pixel_Editor
 
                 case EditorEventFlags.DO_NOT_PRINT:
                 case EditorEventFlags.COMPONENT_EDITOR_UPDATE:
-                    var component = Editor.Current.componentEditor.component;
-                    Editor.Current?.componentEditor.Refresh(component);
+                    Editor.Current.Inspector.RefreshInspector();
                     break;
 
                 case EditorEventFlags.FILE_VIEWER_UPDATE:
@@ -75,7 +74,7 @@ namespace Pixel_Editor
             e.action?.Invoke(e.args);
             e.processed = true;;
 
-            ConsoleWindow.SendMessage(e.message);
+            ConsoleControl.SendMessage(e.message);
         }
     }
 }

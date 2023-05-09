@@ -10,10 +10,7 @@ using System.Windows.Media.Imaging;
 
 namespace Pixel_Editor
 {
-    /// <summary>
-    /// Interaction logic for StageViewerWindow.xaml
-    /// </summary>
-    public partial class StageViewerWindow : UserControl, INotifyPropertyChanged
+    public partial class StageViewerControl : UserControl, INotifyPropertyChanged
     {
         SolidColorBrush framerateBrush = Brushes.White;
         public SolidColorBrush FramerateBrush
@@ -35,7 +32,7 @@ namespace Pixel_Editor
                 OnPropertyChanged(nameof(FramerateLabel));
             }
         }
-        public StageViewerWindow()
+        public StageViewerControl()
         {
             InitializeComponent();
             DataContext = this;
