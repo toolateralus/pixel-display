@@ -16,6 +16,7 @@ using Brushes = System.Windows.Media.Brushes;
 using Image = Pixel.Image;
 using PixelLang.Tools;
 using System.Windows.Threading;
+using System.Runtime.ConstrainedExecution;
 
 namespace Pixel_Editor
 {
@@ -109,7 +110,9 @@ namespace Pixel_Editor
 
             Console.Print(motd);
 
-            Output.Stream += (obj) => Console.Print(obj);
+            InterpreterOutput.Stream += (obj) => Console.Print(obj);
+            InterpreterOutput.DebugMetrics += ConsoleControl.ShowMetrics;
+            InterpreterOutput.OnClearRequested += ConsoleControl.ClearAll;
             inspector = new Inspector();
             DataContext = viewModel;
         }

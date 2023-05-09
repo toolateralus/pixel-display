@@ -6,35 +6,53 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="3"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="3"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ListBox x:Name="messagesBox"
-                ItemsSource="{Binding Messages}"
-                Visibility="Visible"
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Stretch"
-                Background="Black"
-                Foreground="White"
-                Grid.Row="0" >
+
+        <GridSplitter Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <GridSplitter Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+        <ListBox Grid.Row="0"  x:Name="messagesBox" ItemsSource="{Binding Messages}" Background="#F333" Foreground="White">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <ListBox Grid.Row ="0" Grid.Column ="2" x:Name="debugInfoBox" ItemsSource="{Binding DebugMessages}" Background="#F333" Foreground="White">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
         <TextBox
-                Text ="{Binding CommandLine.Value ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Grid.Row="1"
-                Background="Black"
-                Foreground="White"
-                CaretBrush="Gray"
-                TextWrapping="Wrap"
-                AcceptsReturn="True" >
+            Text ="{Binding CommandLine.Value ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            AcceptsReturn="True"
+            Grid.Row="2"
+            x:Name="input"
+            Background="#222"
+            Foreground="White"
+            Height="Auto"
+            Width="Auto">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter" Command="{Binding SendCommand}" />
             </TextBox.InputBindings>
         </TextBox>
+        <StackPanel Grid.Row ="2" Grid.Column ="2" Orientation="Horizontal">
+            <Button Command="{Binding ContinueCommand}" Content="Continue ▶️" Background="#F333" Foreground="White" Height="Auto" Width="70"/>
+            <Button Command="{Binding NextCommand}" Content="Next  ⏭️" Background="#F333" Foreground="White" Height="Auto" Width="70"/>
+            <Button Command="{Binding DebugCommand}" Content="Debug 🐞" Background="#F333" Foreground="White" Height="Auto" Width="70"/>
+        </StackPanel>
+
     </Grid>
 </UserControl>

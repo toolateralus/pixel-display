@@ -1,6 +1,7 @@
 ﻿using PixelLang;
 using PixelLang.Tools;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -14,12 +15,20 @@ namespace Pixel_Editor
     /// </summary>
     public partial class ConsoleControl : UserControl
     {
+        int commandHistoryIndex = 0;
+        List<string> commandHistory = new();
         public ObservableCollection<string> Messages { get; } = new();
+        public ObservableCollection<string> DebugMessages { get; } = new();
         public ObservableProperty<string> CommandLine { get; } = new("");
         static Action<string>? SendMessageAction;
-        public Action<string>? CommandSent;
+        static Action<string>? SendDebugAction;
+        static Action? ClearDebugAction;
+        public Action<string>? SendCommandAction;
         static Action? ClearAllAction;
         public ActionCommand? SendCommand { get; }
+        public ActionCommand? ContinueCommand { get; }
+        public ActionCommand? DebugCommand { get; }
+        public ActionCommand? NextCommand { get; }
         public static void SendMessage(string message) => SendMessageAction?.Invoke(message);
         public static void ClearAll() => ClearAllAction?.Invoke();
         public ConsoleControl()
@@ -29,29 +38,59 @@ namespace Pixel_Editor
             Loaded += OnLoaded;
             Unloaded += OnUnLoaded;
             SendCommand = new ActionCommand(OnSendCommand);
+            ContinueCommand = new ActionCommand(OnContinueCommand);
+            DebugCommand = new ActionCommand(OnDebugCommand);
+            NextCommand = new ActionCommand(OnNextCommand);
         }
+
+        private void OnNextCommand()
+        {
+            InterpreterOutput.Continue?.Invoke();
+        }
+
+        private void OnDebugCommand()
+        {
+            InterpreterOutput.IsDebugMode = !InterpreterOutput.IsDebugMode;
+            AddMessage($"DEBUG : {InterpreterOutput.IsDebugMode}");
+        }
+
+        private void OnContinueCommand()
+        {
+            InterpreterOutput.IsDebugMode = false;
+            InterpreterOutput.Continue?.Invoke();
+        }
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             SendMessageAction += AddMessage;
             ClearAllAction += ClearMessages;
-            CommandSent += OnCommandSent;
+            SendCommandAction += OnSendCommand;
+            SendDebugAction += SendDebug;
+            ClearDebugAction += ClearDebug;
         }
+
+        private void ClearDebug() => DebugMessages.Clear();
+
         private void OnUnLoaded(object sender, RoutedEventArgs e)
         {
             SendMessageAction -= AddMessage;
             ClearAllAction -= ClearMessages;
-            CommandSent -= OnCommandSent;
+            SendCommandAction -= OnSendCommand;
+            SendDebugAction -= SendDebug;
+            ClearDebugAction -= ClearDebug;
         }
 
-        public static void OnCommandSent(string command)
+        public void OnSendCommand(string command)
         {
             if (string.IsNullOrEmpty(command))
                 return;
+            if (!commandHistory.Contains(command))
+                commandHistory.Add(command);
             InputProcessor.TryCallLine(command);
         }
         private void OnSendCommand()
         {
-            CommandSent?.Invoke(CommandLine.Value);
+            SendCommandAction?.Invoke(CommandLine.Value);
             CommandLine.Value = "";
         }
         public void AddMessage(string message)
@@ -67,5 +106,12 @@ namespace Pixel_Editor
             }
         }
         internal void ClearMessages() => Messages.Clear();
+        void SendDebug(string message) => DebugMessages.Add(message);
+        internal static void ShowMetrics(string[] strings)
+        {
+            ClearDebugAction?.Invoke();
+            foreach(string str in strings)
+                SendDebugAction?.Invoke(str);
+        }
     }
 }

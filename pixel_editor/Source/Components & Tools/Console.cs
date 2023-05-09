@@ -33,23 +33,23 @@ namespace Pixel_Editor
                 PopulateCommandLists();
             }
         }
-        public static CSFunction help() => new((args) => { 
-            foreach (var item in CSFunction.GetCSLibrary())
+        public static Function help() => new((args) => { 
+            foreach (var item in Function.Library())
             {
-                var info = CSFunction.GetFunctionInfo(item);
+                var info = Function.GetInfo(item);
                 Print($"{item.Value} : {info}");
             }
         }, "Shows a list of all available functions and some info");
-        public static CSFunction reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
+        public static Function reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
         {
             var type = Current.GetType();
             var methods = type.GetRuntimeMethods();
 
             foreach (var method in methods)
-                if (method.ReturnType == typeof(CSFunction))
+                if (method.ReturnType == typeof(Function))
                 {
-                    CSFunction? item = (CSFunction)method.Invoke(null, null);
+                    Function? item = (Function)method.Invoke(null, null);
                     string name = method.Name;
                     item.Value = name;
                 }
@@ -57,7 +57,7 @@ namespace Pixel_Editor
             for (int i = 0; i < LUA.functions_list.Count; i++)
             {
                 LuaFunction? item = LUA.functions_list[i];
-                CSFunction cmd = new((a) => item.Invoke(LUA.GetHandle()) , $"LUA {i}");
+                Function cmd = new((a) => item.Invoke(LUA.GetHandle()) , $"LUA {i}");
                 string name = ParseMethodName(item);
                 cmd.Value = name;
             }
