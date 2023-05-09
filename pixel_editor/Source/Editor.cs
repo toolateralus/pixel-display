@@ -234,11 +234,8 @@ namespace Pixel_Editor
         }
         private void GetInputs()
         {
-            Input.RegisterAction(this, ResetEditor, Key.F5); 
-            Input.RegisterAction(this, ClearKeyboardFocus, Key.Escape);
             Input.RegisterAction(this, () => OnSyncBtnPressed(null, null), Key.LeftCtrl);
             Input.RegisterAction(this, DestroySelected, Key.Delete);
-            Input.RegisterAction(this, TryDuplicate, Key.D);
         }
         private void TryDuplicate()
         {
