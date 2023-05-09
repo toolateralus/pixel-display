@@ -68,19 +68,19 @@ namespace Pixel_Editor
             switch (ext)
             {
                 case ".bmp":
-                    return "\n\t- - - Bitmap Image Files - - -\n";
+                    return "\t- - - Bitmap Image Files - - -";
                 case ".png":
-                    return "\n\t- - - Png Image Files - - -\n";
+                    return "\t- - - Png Image Files - - -";
                 case ".jpg":
-                    return "\n\t- - - Jpeg Image Files - - -\n";
+                    return "\t- - - Jpeg Image Files - - -";
                 case ".mp3":
-                    return "\n\t- - - Mp3 Audio Files - - -\n";
+                    return "\t- - - Mp3 Audio Files - - -";
                 case ".asset":
-                    return "\n\t- - - User Asset Files - - -\n";
+                    return "\t- - - User Asset Files - - -";
                 case ".lua":
-                    return "\n\t- - - Lua Script Files - - -\n";
+                    return "\t- - - Lua Script Files - - -";
                 default:
-                    return "\n\t- !! - Unknown Files - !! -\n"; // Sort unknown file extensions to the end
+                    return "\t- !! - Unknown Files - !! -"; // Sort unknown file extensions to the end
             }
         }
         private int GetExtensionIndex(string extension)
