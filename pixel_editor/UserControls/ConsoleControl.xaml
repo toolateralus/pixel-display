@@ -46,6 +46,8 @@
             Width="Auto">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter" Command="{Binding SendCommand}" />
+                <KeyBinding Key="Up" Command="{Binding PreviousHistoryCommand}" />
+                <KeyBinding Key="Down" Command="{Binding NextHistoryCommand}" />
             </TextBox.InputBindings>
         </TextBox>
         <StackPanel Grid.Row ="2" Grid.Column ="2" Orientation="Horizontal">

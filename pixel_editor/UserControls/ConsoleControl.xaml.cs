@@ -1,9 +1,11 @@
-﻿using PixelLang;
+﻿using Pixel.Types;
+using PixelLang;
 using PixelLang.Tools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -23,17 +25,19 @@ namespace Pixel_Editor
         static Action<string>? SendMessageAction;
         static Action<string>? SendDebugAction;
         static Action? ClearDebugAction;
-        public Action<string>? SendCommandAction;
         static Action? ClearAllAction;
-        public ActionCommand? SendCommand { get; }
+        public ActionCommand? SendCommand { get; } 
         public ActionCommand? ContinueCommand { get; }
         public ActionCommand? DebugCommand { get; }
         public ActionCommand? NextCommand { get; }
+        public ActionCommand? PreviousHistoryCommand { get; }
+        public ActionCommand? NextHistoryCommand { get; }
         public static void SendMessage(string message) => SendMessageAction?.Invoke(message);
         public static void ClearAll() => ClearAllAction?.Invoke();
         public ConsoleControl()
         {
             InitializeComponent();
+            commandHistory.Add("");
             DataContext = this;
             Loaded += OnLoaded;
             Unloaded += OnUnLoaded;
@@ -41,12 +45,23 @@ namespace Pixel_Editor
             ContinueCommand = new ActionCommand(OnContinueCommand);
             DebugCommand = new ActionCommand(OnDebugCommand);
             NextCommand = new ActionCommand(OnNextCommand);
+            PreviousHistoryCommand = new ActionCommand(PreviousHistory);
+            NextHistoryCommand = new ActionCommand(NextHistory);
         }
 
-        private void OnNextCommand()
+        private void NextHistory()
         {
-            InterpreterOutput.Continue?.Invoke();
+            commandHistoryIndex = (commandHistoryIndex + commandHistory.Count + 1) % commandHistory.Count;
+            CommandLine.Value = commandHistory[commandHistoryIndex];
         }
+
+        private void PreviousHistory()
+        {
+            commandHistoryIndex = (commandHistoryIndex + commandHistory.Count - 1) % commandHistory.Count;
+            CommandLine.Value = commandHistory[commandHistoryIndex];
+        }
+
+        private void OnNextCommand() => InterpreterOutput.Continue?.Invoke();
 
         private void OnDebugCommand()
         {
@@ -64,7 +79,6 @@ namespace Pixel_Editor
         {
             SendMessageAction += AddMessage;
             ClearAllAction += ClearMessages;
-            SendCommandAction += OnSendCommand;
             SendDebugAction += SendDebug;
             ClearDebugAction += ClearDebug;
         }
@@ -75,23 +89,20 @@ namespace Pixel_Editor
         {
             SendMessageAction -= AddMessage;
             ClearAllAction -= ClearMessages;
-            SendCommandAction -= OnSendCommand;
             SendDebugAction -= SendDebug;
             ClearDebugAction -= ClearDebug;
         }
 
-        public void OnSendCommand(string command)
-        {
-            if (string.IsNullOrEmpty(command))
-                return;
-            if (!commandHistory.Contains(command))
-                commandHistory.Add(command);
-            InputProcessor.TryCallLine(command);
-        }
         private void OnSendCommand()
         {
-            SendCommandAction?.Invoke(CommandLine.Value);
+            string cmd = CommandLine.Value;
             CommandLine.Value = "";
+            if (string.IsNullOrEmpty(cmd))
+                return;
+            if (!commandHistory.Contains(cmd))
+                commandHistory.Add(cmd);
+            commandHistoryIndex = 0;
+            InputProcessor.TryCallLine(cmd);
         }
         public void AddMessage(string message)
         {
