@@ -15,6 +15,7 @@ using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
 using Image = Pixel.Image;
 using PixelLang.Tools;
+using System.Windows.Threading;
 
 namespace Pixel_Editor
 {
@@ -110,7 +111,7 @@ namespace Pixel_Editor
             Console.Print(motd);
 
             Output.Stream += (obj) => Console.Print(obj);
-            inspector = new Inspector(inspectorGrid);
+            inspector = new Inspector();
             DataContext = viewModel;
         }
         public EditorSettings settings;
@@ -306,7 +307,7 @@ namespace Pixel_Editor
      
         private void ClearKeyboardFocus()
         {
-            Keyboard.ClearFocus();
+            Dispatcher.Invoke(Keyboard.ClearFocus);
         }
         #endregion
         #region UI Events

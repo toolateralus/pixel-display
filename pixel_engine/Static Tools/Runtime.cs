@@ -13,6 +13,7 @@ using Pixel.Types.Physics;
 using System.Reflection;
 using System.ComponentModel;
 using Component = Pixel.Types.Components.Component;
+using Pixel_Core.Types.Attributes;
 
 namespace Pixel
 {
@@ -27,9 +28,17 @@ namespace Pixel
             Interop.GetAllTypes();
 
             foreach (Type type in types.Where(t => t.IsSubclassOf(typeof(Component))))
+            {
+                bool shouldContinue = false;
+                foreach (var attribute in type.GetCustomAttributes(true))
+                    if (attribute.GetType() == typeof(HideFromEditorAttribute))
+                        shouldContinue = true;
+                if (shouldContinue)
+                    continue;
                 AllComponents.Add(type);
+            }
 
-           AllComponents = AllComponents.Concat(Interop.AllComponents).ToList();
+            AllComponents = AllComponents.Concat(Interop.AllComponents).ToList();
         }
         public static void Initialize(Project project)
         {

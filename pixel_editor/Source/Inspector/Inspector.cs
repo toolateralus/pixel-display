@@ -53,9 +53,9 @@ namespace Pixel_Editor
             properties = component.GetType().GetProperties();
         }
         #endregion
-        public Inspector(Grid grid)
+        public Inspector()
         {
-            MainGrid = grid;
+            itemsControl = Editor.Current.inspectorControl;
             OnObjectSelected += RefreshInspector;
             OnObjectDeselected += RefreshInspector;
             OnComponentAdded += RefreshInspector;
@@ -71,16 +71,12 @@ namespace Pixel_Editor
             if (lastSelectedNode != null)
             {
                 lastSelectedNode = null;
-                
-                foreach( var x in activeGrids)
-                    x.Visibility = Visibility.Collapsed;
-               
+
                 activeControls.Clear();
-                activeGrids.Clear();
 
                 Editor.Current.componentEditor?.Dispose();
 
-                OnObjectDeselected?.Invoke(grid);
+                OnObjectDeselected?.Invoke();
                 if (addComponentMenuOpen)
                     AddComponentButton_Click(new(), new());
             }
@@ -94,7 +90,7 @@ namespace Pixel_Editor
             foreach (var comp in node.Components)
                 foreach(var component in comp.Value) component.selected_by_editor = true;
 
-            OnObjectSelected?.Invoke(grid);
+            OnObjectSelected?.Invoke();
         }
 
         #endregion
@@ -109,32 +105,24 @@ namespace Pixel_Editor
         /// Todo: figure out why this dupes the inspector when it's open, It should always just refresh it entirely.
         /// </summary>
         /// <param name="grid"></param>
-        private void RefreshInspector(Grid grid)
+        private void RefreshInspector()
         {
-            if (grid != null)
-            {
-                grid.Children.Clear();
-                grid.Visibility = Visibility.Hidden;
-            }
-            activeGrids.Clear();
+            itemsControl.Items.Clear();
             activeControls.Clear();
             editComponentActions.Clear();
-            grid = null;
-            grid = NewInspectorGrid();
             if (lastSelectedNode == null)
                 return;
-            int index = 0;
-            index = TransformHeader(grid, index);
+            itemsControl.Items.Add(TransformHeader());
             foreach (var componentType in lastSelectedNode.Components.Values)
                 foreach (var component in componentType)
-                    index = ComponentHeader(grid, index, component);
+                    itemsControl.Items.Add(ComponentHeader(component));
             var addComponentButton = Inspector.GetButton("Add Component", new(0, 0, 0, 0));
+            addComponentButton.ContextMenu = Editor.Current.FindResource("ContextMenu") as ContextMenu;
             addComponentButton.Click += AddComponentButton_Click;
-            SetRowAndColumn(addComponentButton, 2, 3, 0, index * 2 + 1);
-            grid.Children.Add(addComponentButton);
-            OnInspectorUpdated?.Invoke(grid);
+            itemsControl.Items.Add(addComponentButton);
+            OnInspectorUpdated?.Invoke();
         }
-        private int TransformHeader(Grid grid, int index)
+        private Grid TransformHeader()
         {
             TransformComponent transform = new()
             {
@@ -143,36 +131,35 @@ namespace Pixel_Editor
                 scale = lastSelectedNode.Scale,
                 rotation = lastSelectedNode.Rotation
             };
-            index = ComponentHeader(grid, index, transform, false, lastSelectedNode.Name);
-            return index;
+            return ComponentHeader(transform, false, lastSelectedNode.Name);
         }
-        private int ComponentHeader(Grid grid, int index, Component component, bool removable = true, string? name = null)
+        private Grid ComponentHeader(Component component, bool removable = true, string? name = null)
         {
+            Grid memberGrid = new();
+            memberGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(150) });
+            memberGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+            memberGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+
             var box = GetTextBox(name ?? component.GetType().Name);
-            SetRowAndColumn(box, 2, 4, 0, index * 2);
-            grid.Children.Add(box);
+            Grid.SetColumn(box, 0);
+            memberGrid.Children.Add(box);
 
-            Button editComponentButton = GetEditComponentButton(index);
-            SetRowAndColumn(editComponentButton, 2, 2, 4, index * 2);
-            grid.Children.Add(editComponentButton);
-           
-            if (removable)
-            {
-                Button removeButton = GetRemoveComponentButton(index, component);
-                SetRowAndColumn(removeButton, 2, 2, 6, index * 2);
-                grid.Children.Add(removeButton);
-            }
-
-            editComponentActions.Add(delegate
+            Button editComponentButton = GetButton("Edit", new(0, 0, 0, 0));
+            editComponentButton.Click += (s, e) =>
             {
                 Editor.Current.componentEditor ??= new();
                 Editor.Current.componentEditor.Dispose();
                 Editor.Current.componentEditor.Refresh(component);
-            });
-
-            index++;
-
-            return index;
+            };
+            Grid.SetColumn(editComponentButton, 1);
+            memberGrid.Children.Add(editComponentButton);
+            if (removable)
+            {
+                Button removeButton = GetRemoveComponentButton(component);
+                Grid.SetColumn(removeButton, 2);
+                memberGrid.Children.Add(removeButton);
+            }
+            return memberGrid;
         }
         private void AddComponent(KeyValuePair<string, object> item)
         {
@@ -187,14 +174,9 @@ namespace Pixel_Editor
             e.Handled = true;
             RefreshAddComponentFunctions();
 
-            if (sender is not Button button) return;
-            foreach (var item in addComponentFunctions)
-                if (button.Name.ToInt() is int i && addComponentActions.Count > i)
-                {
-                    addComponentActions[i]?.Invoke();
-                    return; 
-                }
-            ClearAddComponentTray();
+            if (sender is not MenuItem menuItem) return;
+            if (menuItem.Name.ToInt() is int i && addComponentActions.Count > i)
+                addComponentActions[i]?.Invoke();
         }
         private void RefreshAddComponentFunctions()
         {
@@ -223,76 +205,39 @@ namespace Pixel_Editor
         }
         private void AddComponentButton_Click(object sender, RoutedEventArgs e)
         {
-            if(e.RoutedEvent != null)
-                e.Handled = true;
+            if (sender is not Button button || button.ContextMenu is not ContextMenu menu)
+                return;
+            e.Handled = true;
 
             RefreshAddComponentFunctions();
-            if (!addComponentMenuOpen)
-            {
-                PopulateAddComponentTray();
-                return;
-            }
-            ClearAddComponentTray();
-        }
-        private void PopulateAddComponentTray()
-        {
-            addComponentMenuOpen = true;
-            addComponentGrid = GetGrid();
-            MainGrid.Children.Add(addComponentGrid);
-            SetRowAndColumn(addComponentGrid, 10, 10, (int)Editor.Current.settings.InspectorPosition.X, (int)Editor.Current.settings.InspectorPosition.Y);
+            menu.Items.Clear();
 
             int i = 0;
             foreach (var item in addComponentFunctions)
             {
-                Button button = GetButton(item.Key, new(0, 0, 0, 0));
-                button.Name = $"button{i}";
                 addComponentActions.Add(() => AddComponent(new(item.Key, item.Value)));
-                button.Click += AddComponentClicked;
-                addComponentGrid.Children.Add(button);
-                SetRowAndColumn(button, 1, 2, 0, i);
+                MenuItem menuItem = new MenuItem { Header = item.Key };
+                menuItem.Name = $"button{i}";
+                menuItem.Click += AddComponentClicked;
+                menu.Items.Add(menuItem);
                 i++;
-
             }
-            return;
-        }
-        private void ClearAddComponentTray()
-        {
-            addComponentMenuOpen = false;
-            addComponentGrid.Children.Clear();
-            addComponentGrid = null;
+
+            menu.IsOpen = true;
         }
 
         #endregion
         #region UI Function
         
         private List<Control> activeControls = new();
-        private List<Grid> activeGrids = new();
-
-        private Grid MainGrid;
-        private Grid grid;
-
-
-        private Grid NewInspectorGrid()
-        {
-            Grid grid = GetGrid();
-            this.MainGrid.Children.Add(grid);
-            this.MainGrid.UpdateLayout();
-            activeGrids.Add(grid);
-            RePositionInspectorGrid(grid);
-            return grid;
-        }
-
-        private static void RePositionInspectorGrid(Grid grid)
-        {
-            SetRowAndColumn(grid, Editor.Current.settings.InspectorWidth , Editor.Current.settings.InspectorHeight, (int)Editor.Current.settings.InspectorPosition.X, (int)Editor.Current.settings.InspectorPosition.Y);
-        }
-        public static TextBox GetTextBox(string componentName, string style = "default")
+        private ItemsControl itemsControl;
+        public static TextBox GetTextBox(string text, string style = "default")
         {
             return style switch
             {
-                "default" => DefaultStyle(componentName),
-                "mint" => MintStyle(componentName),
-                _ => DefaultStyle(componentName),
+                "default" => DefaultStyle(text),
+                "mint" => MintStyle(text),
+                _ => DefaultStyle(text),
             };
         }
         public static System.Drawing.FontFamily[] GetFonts()
@@ -325,11 +270,11 @@ namespace Pixel_Editor
 
             };
         }
-        private static TextBox DefaultStyle(string componentName)
+        private static TextBox DefaultStyle(string text)
         {
             return new()
             {
-                Text = componentName,
+                Text = text,
                 FontFamily = new FontFamily("MS Gothic"),
                 IsReadOnly = true,
 
@@ -354,7 +299,7 @@ namespace Pixel_Editor
             Margin = margin,
             BorderThickness = new Thickness(0.1,0.1,0.1,0.1),
         };
-        private static Button GetRemoveComponentButton(int index, Component component)
+        private static Button GetRemoveComponentButton(Component component)
         {
             Button editComponentButton = GetButton("Remove", new(0, 0, 0, 0));
             editComponentButton.Click += (_, e) =>
@@ -362,43 +307,8 @@ namespace Pixel_Editor
                 e.Handled = true; 
                 component.RemoveComponent(component);
             };
-            editComponentButton.Name = "remove_button_" + index.ToString();
+            editComponentButton.Name = "remove_button_" + component.GetType().Name;
             return editComponentButton;
-        }
-        private static Button GetEditComponentButton(int index)
-        {
-            Button editComponentButton = GetButton("Edit", new(0, 0, 0, 0));
-            editComponentButton.Click += HandleEditPressed;
-            editComponentButton.Name = "edit_button_" + index.ToString();
-            return editComponentButton;
-        }
-        public static Grid GetGrid(int width = 8, int height = 24, int colWidth = 12, int rowHeight = 12)
-        {
-            Grid grid = new()
-            {
-                ClipToBounds = true,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-            };
-
-            var rows = grid.RowDefinitions;
-            var cols = grid.ColumnDefinitions;
-
-            for (int x = 0; x < width; ++x)
-            {
-                ColumnDefinition col = new();
-                col.Width = new GridLength(colWidth, GridUnitType.Star);
-                cols.Add(col);
-            }
-
-            for (int x = 0; x < height; ++x)
-            {
-                RowDefinition row = new();
-                row.Height = new GridLength(rowHeight);
-                rows.Add(new());
-            }
-
-            return grid;
         }
         public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
         {
@@ -422,11 +332,11 @@ namespace Pixel_Editor
 
         #endregion
         #region Events
-        public static event Action<Grid>? OnObjectSelected;
-        public static event Action<Grid>? OnObjectDeselected;
-        public static event Action<Grid>? OnInspectorUpdated;
-        public static event Action<Grid>? OnComponentAdded;
-        public static event Action<Grid>? OnComponentRemoved;
+        public static event Action? OnObjectSelected;
+        public static event Action? OnObjectDeselected;
+        public static event Action? OnInspectorUpdated;
+        public static event Action? OnComponentAdded;
+        public static event Action? OnComponentRemoved;
         public static Action<int, int>? OnInspectorMoved;
 
         private void Inspector_OnInspectorMoved(int x = 0, int y = 0)
@@ -457,23 +367,6 @@ namespace Pixel_Editor
            from CustomAttributeData data in method.CustomAttributes
            where data.AttributeType == typeof(MethodAttribute)
            select method;
-        public static CheckBox GetCheckBox(RoutedEventHandler e, string content = "", bool currentValue = false)
-        {
-            CheckBox box = new()
-            {
-                Content = content, 
-            };
-            box.Click += e;
-            return box; 
-        }
-        internal static TextBox GetInputField(string curVal)
-        {
-            TextBox box = new()
-            {
-                Text = curVal,
-            };
-            return box;
-        }
 
         #endregion
     }

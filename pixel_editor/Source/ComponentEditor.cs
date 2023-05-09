@@ -18,54 +18,31 @@ namespace Pixel_Editor.Source
 {
     public class ComponentEditor
     {
-        int lhs_width = 2;
-        int lhs_height = 1;
-
-        int rhs_width = 2;
-        int rhs_height = 1;
-
         public Component component;
         public bool Disposing { get; internal set; }
         public ComponentEditorData data;
-        public Grid mainGrid;
+        public ItemsControl memberStackPanel = new();
         public List<Action<string, int>> editEvents = new();
         public List<TextBox> inputFields = new();
-        List<UIElement> uiElements = new();
-
-        public ComponentEditor()
-        {
-            GetEvents();
-        }
-        private void SetupComponentEditorGrid()
-        {
-            mainGrid = Editor.Current.componentEditorGrid;
-        }
-        private void GetEvents()
-        {
-            CompositionTarget.Rendering += Update;
-        }
         public void Refresh(Component component)
         {
             this.component = component;
 
-            SetupComponentEditorGrid();
+            memberStackPanel = Editor.Current.componentEditorControl;
+            memberStackPanel.Items.Clear();
 
             if (component is null)
                 return;
 
             data = new(component);
-
-            AddTextBoxes(mainGrid);
+            AddTextBoxes();
         }
-        private int SerializeMethods(Grid viewer, int i)
+        private void SerializeMethods()
         {
             foreach (var method in data.Methods)
             {
-                AddToEditor(viewer, i, "Method", method.Name, false);
-                var button = Inspector.GetButton(method.Name + "();", new(0, 0, 0, 0));
-                viewer.Children.Add(button);
-                uiElements.Add(button);
-                Inspector.SetRowAndColumn(button, 1, 1, 1, i++ + 1);
+                var button = Inspector.GetButton($"{method.Name}();", new(0, 0, 0, 0));
+                button.HorizontalAlignment = HorizontalAlignment.Stretch;
                 button.Click += delegate
                 {
                     try
@@ -78,79 +55,71 @@ namespace Pixel_Editor.Source
                         return;
                     }
                 };
+                var control = AddContentToList(method.Name);
+                control.Content = button;
             }
-            return i;
         }
-        private int SerializeFields(Grid viewer, int i)
+        private void SerializeFields()
         {
             var fields = data.Fields;
             NewData();
 
             foreach (var field in fields)
             {
-                bool bothColumns = true;
-                string name = field.Name;
-
                 if (field.FieldType.BaseType == typeof(Component))
-                    return AddNestedComponentEditorButton(viewer, ref i, field, name);
-
+                {
+                    AddNestedComponentEditorButton(field);
+                    return;
+                }
                 if (field.FieldType == typeof(bool))
                 {
-                    object obj = field.GetValue(component);
-
-                    if (obj is not bool val)
-                        continue;
-
-                    AddBoolCheckBox(viewer, ref i, field, val);
-                    bothColumns = false;
+                    AddBoolCheckBox(field);
+                    return;
                 }
-
                 foreach (var attr in field.GetCustomAttributes())
                     if (attr.GetType() == typeof(InputFieldAttribute))
-                        AddInputFieldTextBox(viewer, ref i, field, name);
-
-
-
+                    {
+                        AddInputFieldTextBox(field);
+                        return;
+                    }
                 if (field.FieldType == typeof(string[]))
                 {
-                    object obj = field.GetValue(component);
-
-                    if (obj is not string[] strings)
-                        continue;
-
-                    int strIndex = 0;
-
-                    foreach (var str in strings)
-                        AddStringListTextBox(viewer, ref i, field, strings, ref strIndex, str);
-                    bothColumns = false;
-                    return i;
+                    AddStringArrayTextBox(field);
+                    return;
                 }
-
-                string? valStr;
-
-                if (field != null)
-                    valStr = field.GetValue(component)?.ToString();
-                else valStr = "null";
-
-                AddToEditor(viewer, i, valStr, name, bothColumns);
-                i++;
+                AddOtherTextBox(field);
             }
-            return i;
         }
 
-        private void AddInputFieldTextBox(Grid viewer, ref int i, FieldInfo field, string name)
+        private ContentControl AddContentToList(string label)
         {
-            string currentvalue = (string)field.GetValue(component);
+            Grid memberGrid = new();
+            memberGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(150) });
+            memberGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
 
-            if (currentvalue is null)
-                return;
+            TextBox box = Inspector.GetTextBox(label);
+            Grid.SetColumn(box, 0);
+            memberGrid.Children.Add(box);
+            
+            ContentControl control = new();
+            Grid.SetColumn(control, 1);
+            memberGrid.Children.Add(control);
 
-            var textbox = Inspector.GetInputField(currentvalue);
-            textbox.Name = $"textBox{i}";
-            textbox.AcceptsReturn = true;
-            textbox.AcceptsTab = true;
-            textbox.VerticalAlignment = VerticalAlignment.Stretch;
-            textbox.HorizontalAlignment = HorizontalAlignment.Stretch;
+            memberStackPanel.Items.Add(memberGrid);
+            return control;
+        }
+
+        private void AddInputFieldTextBox(FieldInfo field)
+        {
+            if (field.GetValue(component) is not string currentvalue)
+                throw new InvalidCastException();
+            var textbox = new TextBox
+            {
+                Text = currentvalue,
+                Name = field.Name,
+                AcceptsReturn = true,
+                AcceptsTab = true,
+            };
             textbox.LostFocus += (e, o) =>
             {
                 if (o.RoutedEvent != null)
@@ -163,36 +132,47 @@ namespace Pixel_Editor.Source
 
                 UpdateData();
             };
-            uiElements.Add(textbox);
-            viewer.Children.Add(textbox);
-            Inspector.SetRowAndColumn(textbox, 1, 1, 1, i);
-            i += 6;
+            var control = AddContentToList(field.Name);
+            control.Content = textbox;
+        }
+        private void AddStringArrayTextBox(FieldInfo field)
+        {
+            if (field.GetValue(component) is not string[] array)
+                throw new InvalidCastException();
+            for (int i = 0; i < array.Length; i++)
+            {
+                string? str = array[i];
+                var txtBox = Inspector.GetTextBox(str);
+                txtBox.IsReadOnly = false;
+                txtBox.KeyDown += (s, e) => TxtBox_KeyDown(s, e, field, component, array);
+                txtBox.LostKeyboardFocus += Input_LostKeyboardFocus;
+                txtBox.GotKeyboardFocus += Input_GotKeyboardFocus;
+                var control = AddContentToList($"{field.Name}:{i}");
+                control.Content = txtBox;
+            }
         }
 
-        private void AddBoolCheckBox(Grid viewer, ref int i, FieldInfo field, bool val)
+        private void AddBoolCheckBox(FieldInfo field)
         {
             if (field.GetValue(component) is not bool curVal)
-                return;
-
-            var checkBox = Inspector.GetCheckBox(onCheckBoxChecked(field), i.ToString(), curVal);
-            checkBox.Name = $"listBox{i}";
-            uiElements.Add(checkBox);
-            viewer.Children.Add(checkBox);
-            Inspector.SetRowAndColumn(checkBox, 1, 1, 1, i++ + 2);
-            RoutedEventHandler onCheckBoxChecked(FieldInfo field)
+                throw new InvalidCastException();
+            CheckBox checkBox = new()
             {
-                return (e, o) =>
-                {
-                    o.Handled = true;
-                    if (e is not CheckBox cb)
-                        return;
-
-                    if (cb.IsChecked is bool val)
-                        field.SetValue(component, val);
-
-                    UpdateData();
-                };
-            }
+                Content = curVal.ToString(),
+                Name = field.Name,
+                HorizontalAlignment = HorizontalAlignment.Center,
+            };
+            checkBox.Click += (e, o) =>
+            {
+                o.Handled = true;
+                if (e is not CheckBox cb)
+                    return;
+                if (cb.IsChecked is bool val)
+                    field.SetValue(component, val);
+                UpdateData();
+            };
+            var control = AddContentToList(field.Name);
+            control.Content = checkBox;
         }
         private void NewData()
         {
@@ -200,70 +180,41 @@ namespace Pixel_Editor.Source
                 data = new(component);
         }
         #region "Add" Button/TextBox/Grid methods
-        private void AddTextBoxes(Grid viewer)
+        private void AddTextBoxes()
         {
-            int i = 0;
-            i = SerializeFields(viewer, i);
-            i = SerializeMethods(viewer, i);
+            SerializeFields();
+            SerializeMethods();
         }
-        private void AddStringListTextBox(Grid viewer, ref int i, FieldInfo field, string[] strings, ref int strIndex, string str)
+        private void AddNestedComponentEditorButton(FieldInfo field)
         {
-            var label = Inspector.GetTextBox(i.ToString(), "default");
-            var txtBox = Inspector.GetTextBox(str);
-            txtBox.IsReadOnly = false;
-            txtBox.Name = $"listBox{strIndex}";
-            txtBox.KeyDown += (s, e) => TxtBox_KeyDown(s, e, field, component, strings);
-            txtBox.LostKeyboardFocus += Input_LostKeyboardFocus;
-            txtBox.GotKeyboardFocus += Input_GotKeyboardFocus;
-
-            uiElements.Add(txtBox);
-            uiElements.Add(label);
-
-            viewer.Children.Add(txtBox);
-            viewer.Children.Add(label);
-            Inspector.SetRowAndColumn(txtBox, 1, 1, 1, i);
-            Inspector.SetRowAndColumn(label, 1, 1, 0, i++);
-            strIndex++;
-        }
-        private int AddNestedComponentEditorButton(Grid viewer, ref int i, FieldInfo field, string name)
-        {
-            AddToEditor(viewer, i, "open editor for more options.", name, false);
             var button = Inspector.GetButton("Open Editor", new(0, 0, 0, 0));
-            viewer.Children.Add(button);
-            uiElements.Add(button);
             Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
-            Inspector.SetRowAndColumn(button, 1, 1, 1, i++);
             button.Click += delegate
             {
-                Component? Component = (Component)field.GetValue(component);
-                if (Component is null)
+                if (field.GetValue(component) is not Component Component)
+                {
                     Pixel_Editor.Console.Error("Cannot edit a null component.");
+                    return;
+                }
                 Refresh(Component);
             };
-            i++;
-            return i;
+            var control = AddContentToList(field.Name);
+            control.Content = button;
         }
-        private void AddToEditor(Grid viewer, int index, string? valStr, string name, bool bothColumns)
+        private void AddOtherTextBox(FieldInfo field)
         {
-            var nameDisplay = Inspector.GetTextBox(name);
-            if (bothColumns)
-            {
-                var inputBox = Inspector.GetTextBox(valStr);
-                Inspector.SetControlColors(inputBox, Brushes.DarkSlateGray, Brushes.White);
-                inputBox.IsReadOnly = false;
-                inputBox.GotKeyboardFocus += Input_GotKeyboardFocus;
-                inputBox.LostKeyboardFocus += Input_LostKeyboardFocus;
-                inputBox.KeyDown += InputBox_KeyDown;
-                uiElements.Add(inputBox);
-                viewer.Children.Add(inputBox);
-                inputFields.Add(inputBox);
-                Inspector.SetRowAndColumn(inputBox, 1, 1, 1, index + 1);
-            }
-            Inspector.SetControlColors(nameDisplay, Brushes.DarkSlateGray, Brushes.White);
-            uiElements.Add(nameDisplay);
-            viewer.Children.Add(nameDisplay);
+            if (field.GetValue(component)?.ToString() is not string valStr ||
+                Inspector.GetTextBox(valStr) is not TextBox textbox)
+                return;
+            Inspector.SetControlColors(textbox, Brushes.DarkSlateGray, Brushes.White);
+            textbox.IsReadOnly = false;
+            textbox.GotKeyboardFocus += Input_GotKeyboardFocus;
+            textbox.LostKeyboardFocus += Input_LostKeyboardFocus;
+            textbox.KeyDown += InputBox_KeyDown;
+            inputFields.Add(textbox);
             editEvents.Add((o, e) => SetVariable(o, e));
-            Inspector.SetRowAndColumn(nameDisplay, 1, 1, 0, index + 1);
+            var control = AddContentToList(field.Name);
+            control.Content = textbox;
         }
         #endregion
         private bool SetVariable(string o, int i)
@@ -303,22 +254,8 @@ namespace Pixel_Editor.Source
         {
             Disposing = true;
             data = null;
-
-            foreach (var element in uiElements)
-            {
-                var hasRefGlobal = mainGrid.Children.Contains(element);
-                if (hasRefGlobal)
-                    mainGrid.Children.Remove(element);
-            }
-
-            if (mainGrid != null)
-            {
-            }
-
-            uiElements?.Clear();
             inputFields?.Clear();
             editEvents?.Clear();
-
             Disposing = false;
         }
         #region WPF Events
@@ -378,11 +315,6 @@ namespace Pixel_Editor.Source
             if (sender is not TextBox box) return;
             Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
             UpdateData();
-
-        }
-        private void Update(object? sender, EventArgs e)
-        {
-
 
         }
 

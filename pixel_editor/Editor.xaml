@@ -8,7 +8,7 @@
         Width="1920" Height="1080"
         Background="Black">
     <Window.Resources>
-        <ContextMenu x:Key="ContextMenu">
+        <ContextMenu x:Key="ContextMenu" x:Shared="False">
             <ItemsControl />
         </ContextMenu>
     </Window.Resources>
@@ -66,32 +66,9 @@
                     <RowDefinition Height="3" />
                     <RowDefinition Height="1*" />
                 </Grid.RowDefinitions>
-                <Grid x:Name="inspectorGrid" Grid.Row="0" />
+                <ItemsControl x:Name="inspectorControl" Grid.Row="0" />
                 <GridSplitter Grid.Row="1"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />
-                <Grid x:Name="componentEditorGrid" Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                </Grid>
+                <ItemsControl x:Name="componentEditorControl" Grid.Row="2" Background="Black" />
             </Grid>
         </Grid>
         <GridSplitter Grid.Row="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />

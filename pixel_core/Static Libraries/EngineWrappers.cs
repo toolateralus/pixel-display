@@ -42,10 +42,12 @@ namespace Pixel
             
             foreach (Type type in types.Where(t => t.IsSubclassOf(typeof(Component))))
             {
-                foreach (var attr in type.CustomAttributes)
-                    if (attr.GetType() == typeof(HideFromEditorAttribute))
-                        continue;
-
+                bool shouldContinue = false;
+                foreach (var attribute in type.GetCustomAttributes(true))
+                    if (attribute.GetType() == typeof(HideFromEditorAttribute))
+                        shouldContinue = true;
+                if (shouldContinue)
+                    continue;
                 AllComponents.Add(type);
             }
         }
