@@ -3,16 +3,24 @@ using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
 using Pixel.Types.Components;
+using PixelLang.Tools;
 using System.Threading.Tasks;
 
 namespace Pixel
 {
-    public class Lua : Component
+    public enum ScriptingLanguage { PixelLang, LUA};
+    public class Interpreter : Component
     {
         [Field]
         [InputField]
         [JsonProperty]
         string value = "print(\"string\") \n return 0 \n end";
+
+        [JsonProperty] [Field]
+        ScriptingLanguage language = ScriptingLanguage.PixelLang;
+
+        [Field] 
+        public string Langauge = "PL || LUA";
 
         [Field]
         [JsonProperty]
@@ -54,21 +62,56 @@ namespace Pixel
                 Importer.Import();
             }
         }
-        [Method]
-        public void Run()
+
+
+        
+        public override void OnFieldEdited(string field)
         {
-            var execution = LUA.FromString(value);
-            if (execution.result)
+            switch (field)
             {
-                lastExecutionResult = true;
-                lastErr = execution.err;
-                Interop.Log(lastErr);
+                case "Language":
+                {
+                        switch (Langauge)
+                        {
+                            case "PL":
+                                language = ScriptingLanguage.PixelLang;
+                                break;
+                            case "LUA":
+                                language = ScriptingLanguage.LUA;
+                                break;
+                        }
+                        break;
+                }
+
+
             }
-            else
+        }
+
+        [Method]
+        public async void Run()
+        {
+            switch (language)
             {
-                lastExecutionResult = false;
-                lastErr = "nil";
+                case ScriptingLanguage.PixelLang:
+                    var execution = InputProcessor.TryCallLine(value);
+                    await execution;
+                    break;
+                case ScriptingLanguage.LUA:
+                    var lua_exe = LUA.FromString(value);
+                    if (lua_exe.result)
+                    {
+                        lastExecutionResult = true;
+                        lastErr = lua_exe.err;
+                        Interop.Log(lastErr);
+                    }
+                    else
+                    {
+                        lastExecutionResult = false;
+                        lastErr = "nil";
+                    }
+                    break;
             }
+           
         }
         /// <summary>
         /// this should only need to include references to components or nodes.
