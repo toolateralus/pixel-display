@@ -36,15 +36,6 @@ namespace Pixel
         {
             if (m_renderer is null)
                 throw new NullReferenceException("RenderHost does not have a renderer loaded.");
-            Cycle();
-            OnRenderCompleted?.Invoke(DateTime.Now.Ticks / 10000000.0);
-        }
-        /// <summary>
-        /// performs the rendering loop for one cycle or frame.
-        /// </summary>
-        /// <param name="renderSurface"></param>
-        private protected void Cycle()
-        {
             m_renderer.Dispose();
 
             UpdateResolution();
@@ -54,8 +45,8 @@ namespace Pixel
                 ShapeDrawer.Refresh(stage);
                 m_renderer.Draw(stage.StageRenderInfo);
             }
+            OnRenderCompleted?.Invoke(DateTime.Now.Ticks / 10000000.0);
         }
-
         public void MarkDirty()
         {
             m_renderer.MarkDirty();
