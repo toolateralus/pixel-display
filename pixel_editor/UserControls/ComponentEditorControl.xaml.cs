@@ -24,7 +24,6 @@ namespace Pixel_Editor
         public ComponentEditorControl()
         {
             InitializeComponent();
-            DataContext = this;
         }
         public Component component;
         public bool Disposing { get; internal set; }
@@ -79,12 +78,12 @@ namespace Pixel_Editor
                     AddBoolCheckBox(field);
                     continue;
                 }
-                foreach (var attr in field.GetCustomAttributes())
-                    if (attr.GetType() == typeof(InputFieldAttribute))
-                    {
-                        AddInputFieldTextBox(field);
-                        continue;
-                    }
+                if (field.FieldType == typeof(string) &&
+                    field.GetCustomAttribute<InputFieldAttribute>() is not null)
+                {
+                    AddInputFieldTextBox(field);
+                    continue;
+                }
                 if (field.FieldType == typeof(string[]))
                 {
                     AddStringArrayTextBox(field);
