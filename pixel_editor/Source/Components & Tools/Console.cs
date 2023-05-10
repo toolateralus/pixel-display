@@ -9,6 +9,7 @@ using PixelLang.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -40,6 +41,9 @@ namespace Pixel_Editor
                 Print($"{item.Value} : {info}");
             }
         }, "Shows a list of all available functions and some info");
+
+        static Function fromFile = new Function(FromFileAsync, "loads and runs code from a .pl file.") { Value = "fromFile" };
+        static Function getFiles = new Function(GetFiles, "loads and runs code from a .pl file.") { Value = "getFiles" };
         public static Function cd() => new((args) =>
         {
             Token? token = args.FirstOrDefault();
@@ -48,17 +52,44 @@ namespace Pixel_Editor
             {
                 var path = token.Value.Replace("\"", "");
                 path = path.Replace("\\", "");
+                path = path.Replace("\'", "");
                 path = path.Replace("/", "");
                 path = path.Replace("//", "");
-                path = path.Replace(".", "");
 
-                CommandLine.SetCutsomScriptFolderPath(token.Value);
-                InterpreterOutput.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
+                PLang.SetCutsomScriptFolderPath(path);
+                PixelLang.Tools.Console.Log($"Script Path : {PLang.SCRIPT_PATH}");
             }
 
         }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\  and cannot be in a sub-directory.")
         { Value = "cd"};
+        public static async void FromFileAsync(List<Token> args)
+        {
+            if (args.FirstOrDefault() is Token token && token.Type == TType.STRING && token.Value.Contains(".pl"))
+            {
+                token.Value = token.Value.Replace("\\", "");
+                token.Value = token.Value.Replace("\"", "");
 
+                var path = PLang.GetRootDirectory() + token.Value;
+                PixelLang.Tools.Console.Log("reading from path : " + path + "...");
+                if (!File.Exists(path))
+                {
+                    PixelLang.Tools.Console.Log("File not found.");
+                    return;
+                }
+                using var textReader = new StreamReader(path);
+                var code = textReader.ReadToEnd();
+                textReader.Close();
+                PixelLang.Tools.Console.Log("executing from path : " + path + "...");
+                await PLang.TryCallLine(code);
+            }
+        }
+        private static void GetFiles(List<Token> obj)
+        {
+            var files = PLang.GetFiles();
+
+            foreach (var file in files)
+                PixelLang.Tools.Console.Log(file);
+        }
         public static Function reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
         {
