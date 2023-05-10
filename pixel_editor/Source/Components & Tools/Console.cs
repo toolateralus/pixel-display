@@ -40,6 +40,25 @@ namespace Pixel_Editor
                 Print($"{item.Value} : {info}");
             }
         }, "Shows a list of all available functions and some info");
+        public static Function cd() => new((args) =>
+        {
+            Token? token = args.FirstOrDefault();
+
+            if (token is not null && token.Type == TType.STRING)
+            {
+                var path = token.Value.Replace("\"", "");
+                path = path.Replace("\\", "");
+                path = path.Replace("/", "");
+                path = path.Replace("//", "");
+                path = path.Replace(".", "");
+
+                CommandLine.SetCutsomScriptFolderPath(token.Value);
+                InterpreterOutput.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
+            }
+
+        }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\  and cannot be in a sub-directory.")
+        { Value = "cd"};
+
         public static Function reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
         {
