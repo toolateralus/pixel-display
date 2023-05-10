@@ -198,10 +198,15 @@ namespace Pixel
 
                 lock (node.Components)
                 {
-                    foreach (var group in node.Components)
+
+                    for (int z = 0; z < node.Components.Count; ++z)
                     {
+
+                        var group = node.Components.ElementAt(z);
+
                         if (group.Value is null || group.Value.Count == 0)
                             continue;
+
                         List<T> components = group.Value.OfType<T>().ToList();
                         foreach (T component in components)
                         {

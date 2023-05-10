@@ -48,7 +48,7 @@ namespace Pixel
             Collider col = node.AddComponent<Collider>();
 
             Sprite sprite = node.AddComponent<Sprite>();
-            sprite.color = JRandom.Color(aMin: 200);
+            sprite.Color = JRandom.Color(aMin: 200);
 
             node.Scale = Constants.DefaultNodeScale;
             return node;

@@ -73,6 +73,9 @@ namespace Pixel
                 if (char.IsDigit(x))
                     intResult += x;
 
+            if (intResult.Length > 0 && float.Parse(intResult) > int.MaxValue)
+                return int.MaxValue;
+
             return intResult.Length == 0 ? -1 : int.Parse(intResult);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

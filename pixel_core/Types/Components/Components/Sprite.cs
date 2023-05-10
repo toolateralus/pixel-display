@@ -35,11 +35,27 @@ namespace Pixel
         /// <summary>
         /// this will toggle participation in lighting
         /// </summary>
-        [Field][JsonProperty] public bool lit = true;
+        [Field][JsonProperty] public bool lit = false;
         /// <summary>
         /// this is the color that a solid color sprite will be drawn as
         /// </summary>
-        [Field][JsonProperty] public Color color = Color.Blue;
+        public Color Color
+        {
+            get
+            {
+                return color;
+            }
+            set
+            {
+                color = value;
+                IsDirty = true; 
+            }
+        }
+        
+
+        [Field][JsonProperty] 
+        public Color color;
+
         /// <summary>
         /// this determines what layer the sprite will be drawn in, ie -1 for bckground and 1 for on top of that.
         /// </summary>
@@ -75,7 +91,7 @@ namespace Pixel
         }
         public Sprite()
         {
-            texture = new Texture(Vector2.One, Color.Red);
+            texture = Texture.Default; 
         }
         public Sprite(int x, int y) : this()
         {
@@ -114,8 +130,14 @@ namespace Pixel
             switch (Type)
             {
                 case ImageType.SolidColor:
-                    Color[,] colorArray = CBit.SolidColorSquare(Scale, color);
+                    Color[,] colorArray = CBit.SolidColorSquare(Scale, Color);
+
+                    if (texture.Name == Texture.Default.Name)
+                    {
+                        this.texture = new(Scale, Color, "Sprite" + UUID);
+                    }
                     texture.SetImage(colorArray);
+
                     break;
                 case ImageType.Image:
                     if (texture.imgData != null)
@@ -211,9 +233,9 @@ namespace Pixel
                     if (lightAmount > 0)
                     {
                         lightAmount = (float)CMath.Negate((double)lightAmount);
-                        blendedPixel = Color.Blend(existingPixel, Color.Black, lightAmount);
+                        blendedPixel = Pixel.Color.Blend(existingPixel, Pixel.Color.Black, lightAmount);
                     }
-                    else blendedPixel = Color.Blend(existingPixel, light.color, Math.Clamp(lightAmount, 0, 1));
+                    else blendedPixel = Pixel.Color.Blend(existingPixel, light.color, Math.Clamp(lightAmount, 0, 1));
 
                     image.SetPixel(x, y, blendedPixel);
                 }

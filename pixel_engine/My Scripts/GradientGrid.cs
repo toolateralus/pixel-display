@@ -18,7 +18,14 @@ namespace Pixel
     public class BlockGen : Component
     {
         List<Node> nodes = new();
-        Vector2 origin = new Vector2(25, -25);
+       
+        Color[] pallette = new Color[] {
+                System.Drawing.Color.MediumSeaGreen,
+                System.Drawing.Color.MediumSlateBlue,
+                System.Drawing.Color.MediumAquamarine,
+                System.Drawing.Color.DeepPink,
+        };
+
         // you must dispose of any references to nodes and components here, simply set them as null.
         public override void Dispose()
         {
@@ -30,24 +37,24 @@ namespace Pixel
         {
             const int max = 12;
             
-            var pallette = new Color[] {
-                System.Drawing.Color.MediumSeaGreen,
-                System.Drawing.Color.MediumSlateBlue, 
-                System.Drawing.Color.MediumAquamarine, 
-                System.Drawing.Color.DeepPink, 
-            };
+            
             Color color = Color.White;
             Task task = new(async () => { 
                  for(int i = 0; i < max; i++)
                     for (int j = 0; j < max; j++)
                     {
                         var position = i * j;
+                        Vector2 origin = new(Position.X + i, Position.Y - j);
                         Node block = new($"block{position}", origin + new Vector2(i, -j) * 2f, Vector2.One);
+                        
                         var sprite = block.AddComponent<Sprite>();
+                        var col = block.AddComponent<Collider>();
+                        var rb = block.AddComponent<Rigidbody>();
 
                         sprite.Type = ImageType.SolidColor;
                         color = Gradient.Sample(position, max * max, 255, pallette);
-                        sprite.SetImage(Vector2.One * 16, CBit.ByteFromPixel(CBit.SolidColorSquare(Vector2.One * 16, color)));
+
+                        sprite.Color = color;
 
                         nodes.Add(block);
                         await Task.Delay(25);

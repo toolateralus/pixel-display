@@ -53,6 +53,7 @@ namespace Pixel
         {
             SetImage(colors);
         }
+        public static readonly Texture Default = new Texture(Vector2.One, Color.White, "Default Sprite Texture");
         public Texture(Vector2 size, Color color, string name = "Default Texture Asset") : base(name, true)
         {
             this.size = size;
