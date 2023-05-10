@@ -295,7 +295,7 @@
         </member>
         <member name="M:Pixel.Animator.Start">
             <summary>
-            this wrapper allows params to be passed in when pressed from inspector.
+            this wrapper allows params to be passed in when pressed from InspectorControl.
             </summary>
         </member>
         <member name="F:Pixel.Collider.transformedModel">
@@ -753,7 +753,7 @@
         </member>
         <member name="T:FieldAttribute">
             <summary>
-            An attribute for serializing fields to the Inspector.
+            An attribute for serializing fields to the InspectorControl.
             </summary>
         </member>
         <member name="M:Pixel_Core.Types.Attributes.HideFromEditorAttribute.#ctor">

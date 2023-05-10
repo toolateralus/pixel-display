@@ -17,8 +17,8 @@ namespace Pixel_Editor.Source
         public ComponentEditorData(Component component)
         {
             Component = new(component);
-            Fields = Inspector.GetSerializedFields(component).ToList();
-            Methods = Inspector.GetSerializedMethods(component).ToList();
+            Fields = InspectorControl.GetSerializedFields(component).ToList();
+            Methods = InspectorControl.GetSerializedMethods(component).ToList();
 
             var values = new object[Fields.Count];
 

@@ -109,7 +109,6 @@ namespace Pixel_Editor
             InterpreterOutput.Stream += (obj) => Console.Print(obj);
             InterpreterOutput.DebugMetrics += ConsoleControl.ShowMetrics;
             InterpreterOutput.OnClearRequested += ConsoleControl.ClearAll;
-            inspector = new Inspector();
             DataContext = viewModel;
         }
         public EditorSettings settings;
@@ -288,18 +287,31 @@ namespace Pixel_Editor
                 return current;
             }
         }
-        internal Node? LastSelected = null;
-        internal List<Node> ActivelySelected = new();
+        private WeakReference<Node?> lastSelected = new(null);
+        internal Node? LastSelected
+        {
+            get
+            {
+                if (lastSelected.TryGetTarget(out var result))
+                    return result;
+                return null;
+            }
 
-        public Inspector? Inspector => inspector;
-        private readonly Inspector inspector;
+            set
+            {
+                lastSelected = new(value);
+
+            }
+        }
+        internal List<Node> ActivelySelected = new();
         public readonly EditorEventHandler Events = new();
         public byte[] Frame => Runtime.Current.renderHost.GetRenderer().Frame;
         public int Stride => Runtime.Current.renderHost.GetRenderer().Stride;
         public Vector2 Resolution => Runtime.Current.renderHost.GetRenderer().Resolution;
+
         #endregion
         #region Input Events
-     
+
         private void ClearKeyboardFocus()
         {
             Dispatcher.Invoke(Keyboard.ClearFocus);
