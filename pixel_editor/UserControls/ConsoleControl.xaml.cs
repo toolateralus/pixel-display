@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -90,7 +91,8 @@ namespace Pixel_Editor
             if (!commandHistory.Contains(cmd))
                 commandHistory.Add(cmd);
             commandHistoryIndex = 0;
-            InputProcessor.TryCallLine(cmd);
+
+            Dispatcher.InvokeAsync(async () => await InputProcessor.TryCallLine(cmd));
         }
         void ClearDebug() => DebugMessages.Clear();
         public void AddMessage(string message)

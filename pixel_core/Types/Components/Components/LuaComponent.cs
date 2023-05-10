@@ -20,7 +20,7 @@ namespace Pixel
         ScriptingLanguage language = ScriptingLanguage.PixelLang;
 
         [Field] 
-        public string Langauge = "PL || LUA";
+        public string Language = "PL || LUA";
 
         [Field]
         [JsonProperty]
@@ -71,7 +71,7 @@ namespace Pixel
             {
                 case "Language":
                 {
-                        switch (Langauge)
+                        switch (Language)
                         {
                             case "PL":
                                 language = ScriptingLanguage.PixelLang;
