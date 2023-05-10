@@ -41,9 +41,6 @@ namespace Pixel_Editor
                 Print($"{item.Value} : {info}");
             }
         }, "Shows a list of all available functions and some info");
-
-        static Function fromFile = new Function(FromFileAsync, "loads and runs code from a .pl file.") { Value = "fromFile" };
-        static Function getFiles = new Function(GetFiles, "loads and runs code from a .pl file.") { Value = "getFiles" };
         public static Function cd() => new((args) =>
         {
             Token? token = args.FirstOrDefault();
