@@ -41,6 +41,9 @@ namespace Pixel_Editor
                 Print($"{item.Value} : {info}");
             }
         }, "Shows a list of all available functions and some info");
+
+        static Function fromFile = new Function(FromFileAsync, "loads and runs code from a .pl file.") { Value = "fromFile" };
+        static Function getFiles = new Function(GetFiles, "loads and runs code from a .pl file.") { Value = "getFiles" };
         public static Function cd() => new((args) =>
         {
             Token? token = args.FirstOrDefault();
@@ -57,7 +60,7 @@ namespace Pixel_Editor
                 PixelLang.Tools.Console.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
             }
 
-        }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\  and cannot be in a sub-directory.")
+        }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\ and cannot be in a sub-directory.")
         { Value = "cd"};
         public static Function reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
