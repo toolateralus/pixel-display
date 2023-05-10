@@ -15,14 +15,7 @@ namespace Pixel
         {
             if (frameBuffer.Count < 3)
                 return;
-
-            var last = frameBuffer[2];
-            var first = frameBuffer[0];
-
-            frameBuffer[0] = last;
-            frameBuffer[2] = first;
-            frameBuffer[1] = frameBuffer[0];
-
+            
             ByteArrayPool.Shared.Return(frameBuffer[0]);
             Array.Clear(frameBuffer[0]);
         }
@@ -30,8 +23,6 @@ namespace Pixel
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Draw(StageRenderInfo renderInfo)
         {
-
-          
             var Resolution = this.Resolution;
 
             if (Runtime.Current.GetStage() is not Stage stage)
@@ -53,9 +44,10 @@ namespace Pixel
                 if (uiComponent.Enabled)
                     uiComponent.Draw(this);
 
-           
-         
-            Array.Copy(frameBuffer[0], frameBuffer[1], frameBuffer[0].Length);
+            var first = frameBuffer[0];
+            frameBuffer[0] = frameBuffer[2];
+            frameBuffer[2] = frameBuffer[1];
+            frameBuffer[1] = first;
 
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Pixel
@@ -81,11 +82,14 @@ namespace Pixel
         private static void Play(string fileName, float volume, double speed, MediaPlayer playerCopy)
         {
             if (fileName != "")
-                playerCopy.Open(new Uri(fileName, UriKind.RelativeOrAbsolute));
+                Application.Current?.Dispatcher.Invoke(() => 
+                {
+                    playerCopy.Open(new Uri(fileName, UriKind.RelativeOrAbsolute)); 
+                    playerCopy.SpeedRatio = speed;
+                    playerCopy.Volume = volume;
+                    playerCopy.Play();
+                });
 
-            playerCopy.SpeedRatio = speed;
-            playerCopy.Volume = volume;
-            playerCopy.Play();
         }
         public static void PlayFromPath(string fileName = "", float volume = 0.5f, double speed = 1)
         {
