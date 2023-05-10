@@ -72,23 +72,23 @@ namespace Pixel_Editor
                 if (field.FieldType.BaseType == typeof(Component))
                 {
                     AddNestedComponentEditorButton(field);
-                    return;
+                    continue;
                 }
                 if (field.FieldType == typeof(bool))
                 {
                     AddBoolCheckBox(field);
-                    return;
+                    continue;
                 }
                 foreach (var attr in field.GetCustomAttributes())
                     if (attr.GetType() == typeof(InputFieldAttribute))
                     {
                         AddInputFieldTextBox(field);
-                        return;
+                        continue;
                     }
                 if (field.FieldType == typeof(string[]))
                 {
                     AddStringArrayTextBox(field);
-                    return;
+                    continue;
                 }
                 AddOtherTextBox(field);
             }
