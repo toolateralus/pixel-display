@@ -9,6 +9,7 @@ using PixelLang.Types;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -48,17 +49,16 @@ namespace Pixel_Editor
             {
                 var path = token.Value.Replace("\"", "");
                 path = path.Replace("\\", "");
+                path = path.Replace("\'", "");
                 path = path.Replace("/", "");
                 path = path.Replace("//", "");
-                path = path.Replace(".", "");
 
-                CommandLine.SetCutsomScriptFolderPath(token.Value);
-                InterpreterOutput.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
+                CommandLine.SetCutsomScriptFolderPath(path);
+                PixelLang.Tools.Console.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
             }
 
-        }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\  and cannot be in a sub-directory.")
+        }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\ and cannot be in a sub-directory.")
         { Value = "cd"};
-
         public static Function reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
         {

@@ -229,7 +229,7 @@ namespace Pixel_Editor
         {
             e.Handled = true;
             InspectorControl.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
-            InputProcessor.TryParse(box.Text, out List<object> results);
+            PLang.TryParse(box.Text, out List<object> results);
             foreach (var obj in results)
                 if (obj.GetType() == field.FieldType)
                 {

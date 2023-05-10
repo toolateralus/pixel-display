@@ -1,7 +1,11 @@
 ﻿using Pixel.Statics;
 using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 
 namespace Pixel
 {
@@ -20,16 +24,32 @@ namespace Pixel
         /// <summary>
         /// the frame that will be drawn to each cycle.
         /// </summary>
-        public byte[] frame = Array.Empty<byte>();
-     
-        public byte[] latestFrame = Array.Empty<byte>();
+        /// 
+
+        public ByteArrayPool frame_pool = new();
+
+        public class ByteArrayPool : ArrayPool<byte>
+        {
+
+            public override byte[] Rent(int minimumLength)
+            {
+                return Shared.Rent(minimumLength); 
+            }
+
+            public override void Return(byte[] array, bool clearArray = false)
+            {
+                Shared.Return(array, clearArray);
+            }
+        }
+
+        public List<byte[]> frameBuffer = new();
   
         public int stride = 0;
 
         /// <summary>
         /// the frame that is sent out after each cycle, cached.
         /// </summary>
-        public byte[] Frame => latestFrame;
+        public byte[] Frame => frameBuffer.FirstOrDefault(Array.Empty<byte>());
         /// <summary>
         /// the stride of the render output image.
         /// </summary>
@@ -78,13 +98,13 @@ namespace Pixel
             float colorG = (float)color.g / 255 * color.a;
             float colorR = (float)color.r / 255 * color.a;
 
-            float frameB = (float)frame[index + 0] / 255 * (255 - color.a);
-            float frameG = (float)frame[index + 1] / 255 * (255 - color.a);
-            float frameR = (float)frame[index + 2] / 255 * (255 - color.a);
+            float frameB = (float)frameBuffer[0][index + 0] / 255 * (255 - color.a);
+            float frameG = (float)frameBuffer[0][index + 1] / 255 * (255 - color.a);
+            float frameR = (float)frameBuffer[0][index + 2] / 255 * (255 - color.a);
 
-            frame[index + 0] = (byte)(colorB + frameB);
-            frame[index + 1] = (byte)(colorG + frameG);
-            frame[index + 2] = (byte)(colorR + frameR);
+            frameBuffer[0][index + 0] = (byte)(colorB + frameB);
+            frameBuffer[0][index + 1] = (byte)(colorG + frameG);
+            frameBuffer[0][index + 2] = (byte)(colorR + frameR);
         }
         /// <summary>
         /// Places a pixel on the render texture of this cycle at the desired position.
@@ -100,13 +120,13 @@ namespace Pixel
             float colorG = (float)color.g / 255 * color.a;
             float colorR = (float)color.r / 255 * color.a;
 
-            float frameB = (float)frame[index + 0] / 255 * (255 - color.a);
-            float frameG = (float)frame[index + 1] / 255 * (255 - color.a);
-            float frameR = (float)frame[index + 2] / 255 * (255 - color.a);
+            float frameB = (float)frameBuffer[0][index + 0] / 255 * (255 - color.a);
+            float frameG = (float)frameBuffer[0][index + 1] / 255 * (255 - color.a);
+            float frameR = (float)frameBuffer[0][index + 2] / 255 * (255 - color.a);
 
-            frame[index + 0] = (byte)(colorB + frameB);
-            frame[index + 1] = (byte)(colorG + frameG);
-            frame[index + 2] = (byte)(colorR + frameR);
+            frameBuffer[0][index + 0] = (byte)(colorB + frameB);
+            frameBuffer[0][index + 1] = (byte)(colorG + frameG);
+            frameBuffer[0][index + 2] = (byte)(colorR + frameR);
         }
         /// <summary>
         /// calling this will redraw the background next frame
@@ -130,9 +150,9 @@ namespace Pixel
         {
             int index = (int)vector2.Y * stride + ((int)vector2.X * 3);
 
-            float frameB = (float)frame[index + 0] / 255;
-            float frameG = (float)frame[index + 1] / 255;
-            float frameR = (float)frame[index + 2] / 255;
+            float frameB = (float)frameBuffer[0][index + 0] / 255;
+            float frameG = (float)frameBuffer[0][index + 1] / 255;
+            float frameR = (float)frameBuffer[0][index + 2] / 255;
 
             byte a = 255; // assume full alpha
             if (frameB == 0 && frameG == 0 && frameR == 0)

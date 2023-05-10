@@ -11,7 +11,14 @@ namespace Pixel
 {
     public class CRenderer : RendererBase
     {
-        public override void Dispose() => Array.Clear(frame);
+        public override void Dispose()
+        {
+            if (frameBuffer.Count < 3)
+                return;
+            
+            ByteArrayPool.Shared.Return(frameBuffer[0]);
+            Array.Clear(frameBuffer[0]);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Draw(StageRenderInfo renderInfo)
@@ -29,24 +36,25 @@ namespace Pixel
 
             stride = 4 * ((int)Resolution.X * 24 + 31) / 32;
 
-            if (frame.Length != stride * Resolution.Y)
-                frame = new byte[stride * (int)Resolution.Y];
+            while (frameBuffer.Count < 3)
+                frameBuffer.Add(ByteArrayPool.Shared.Rent((int)(stride * Resolution.Y)));
 
             IEnumerable<UIComponent> uiComponents = stage.GetAllComponents<UIComponent>();
             foreach (UIComponent uiComponent in uiComponents.OrderBy(c => c.drawOrder))
                 if (uiComponent.Enabled)
                     uiComponent.Draw(this);
 
-            if (latestFrame.Length != frame.Length)
-                latestFrame = new byte[frame.Length];
+            var first = frameBuffer[0];
+            frameBuffer[0] = frameBuffer[2];
+            frameBuffer[2] = frameBuffer[1];
+            frameBuffer[1] = first;
 
-            Array.Copy(frame, latestFrame, frame.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Render(System.Windows.Controls.Image output)
         {
             if (stride != 0)
-                RenderFromFrame(frame, stride, Resolution, output);
+                RenderFromFrame(frameBuffer[0], stride, Resolution, output);
         }
     }
 }
