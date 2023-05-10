@@ -88,7 +88,12 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Button Command="{Binding AddComponentCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" ContextMenu="{StaticResource ContextMenu}" Content="Add Component"/>
+                <Button
+                    Command="{Binding AddComponentCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
+                    ContextMenu="{StaticResource ContextMenu}"
+                    Visibility="{Binding AddComponentVisibility.Value}"
+                    Content="Add Component"/>
             </StackPanel>
         </Grid>
         <GridSplitter Grid.Row="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Black" BorderBrush="White" BorderThickness="1" />

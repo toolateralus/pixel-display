@@ -95,6 +95,7 @@ namespace Pixel_Editor
         #endregion
         #region Component Editor
         public ObservableCollection<ComponentEditor> ComponentEditors { get; } = new();
+        public ObservableProperty<Visibility> AddComponentVisibility { get; } = new(Visibility.Hidden);
         public ActionCommand AddComponentCommand { get; } = new();
         private Dictionary<string, Func<Component>> addComponentFunctions;
         private List<Action> addComponentActions = new();
@@ -110,7 +111,11 @@ namespace Pixel_Editor
             activeControls.Clear();
             editComponentActions.Clear();
             if (Editor.Current.LastSelected is not Node selectedNode)
+            {
+                AddComponentVisibility.Value = Visibility.Hidden;
                 return;
+            }
+            AddComponentVisibility.Value = Visibility.Visible;
             ComponentEditors.Add(TransformHeader(selectedNode));
             foreach (var componentType in selectedNode.Components.Values)
                 foreach (var component in componentType)
