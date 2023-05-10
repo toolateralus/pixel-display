@@ -193,8 +193,9 @@ namespace Pixel_Editor
         }
         private void AddOtherTextBox(FieldInfo field)
         {
-            if (field.GetValue(component)?.ToString() is not string valStr ||
-                Inspector.GetTextBox(valStr) is not TextBox textbox)
+            if (field.GetValue(component)?.ToString() is not string valStr)
+                valStr = "NULL";
+            if (Inspector.GetTextBox(valStr) is not TextBox textbox)
                 return;
             Inspector.SetControlColors(textbox, Brushes.DarkSlateGray, Brushes.White);
             textbox.IsReadOnly = false;

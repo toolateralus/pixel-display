@@ -38,7 +38,7 @@ namespace Pixel_Editor
 
                 case EditorEventFlags.DO_NOT_PRINT:
                 case EditorEventFlags.COMPONENT_EDITOR_UPDATE:
-                    Editor.Current.Inspector.RefreshInspector();
+                    Editor.Current.Inspector?.RefreshInspector();
                     break;
 
                 case EditorEventFlags.FILE_VIEWER_UPDATE:
