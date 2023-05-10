@@ -61,28 +61,28 @@ namespace Pixel_Editor
             SendDebugAction -= SendDebug;
             ClearDebugAction -= ClearDebug;
         }
-        void OnNextHistory()
+        void OnNextHistory(object? sender)
         {
             commandHistoryIndex = (commandHistoryIndex + commandHistory.Count + 1) % commandHistory.Count;
             CommandLine.Value = commandHistory[commandHistoryIndex];
         }
-        void OnPreviousHistory()
+        void OnPreviousHistory(object? sender)
         {
             commandHistoryIndex = (commandHistoryIndex + commandHistory.Count - 1) % commandHistory.Count;
             CommandLine.Value = commandHistory[commandHistoryIndex];
         }
-        void OnNext() => PixelLang.Tools.Console.Continue?.Invoke();
-        void OnDebug()
+        void OnNext(object? sender) => PixelLang.Tools.Console.Continue?.Invoke();
+        void OnDebug(object? sender)
         {
             PixelLang.Tools.Console.IsDebugMode = !PixelLang.Tools.Console.IsDebugMode;
             AddMessage($"DEBUG : {PixelLang.Tools.Console.IsDebugMode}");
         }
-        void OnContinue()
+        void OnContinue(object? sender)
         {
             PixelLang.Tools.Console.IsDebugMode = false;
             PixelLang.Tools.Console.Continue?.Invoke();
         }
-         void OnSend()
+        void OnSend(object? sender)
         {
             string cmd = CommandLine.Value;
             CommandLine.Value = "";

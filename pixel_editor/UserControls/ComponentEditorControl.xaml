@@ -14,7 +14,7 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="White" Background="Black"/>
                     <ContentPresenter Grid.Column="1" Content="{Binding InputControl}" />

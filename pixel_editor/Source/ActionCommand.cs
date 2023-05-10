@@ -5,14 +5,21 @@ namespace Pixel_Editor
 {
     public class ActionCommand : ICommand
     {
-        public Action? _execute;
-        public ActionCommand(Action execute)
+        private Action<object?>? action;
+
+        public Action<object?>? Action
         {
-            _execute = execute;
+            get => action;
+            set
+            {
+                action = value;
+                CanExecuteChanged?.Invoke(this, new());
+            }
         }
-        public ActionCommand() {}
-        public bool CanExecute(object? parameter) => true;
-        public void Execute(object? parameter) => _execute?.Invoke();
+        public ActionCommand(Action<object?>? execute) => Action = execute;
+        public ActionCommand() { }
+        public bool CanExecute(object? parameter) => Action != null;
+        public void Execute(object? parameter) => Action?.Invoke(parameter);
         public event EventHandler? CanExecuteChanged;
     }
 }

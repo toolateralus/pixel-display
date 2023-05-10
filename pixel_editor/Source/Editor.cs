@@ -1,10 +1,7 @@
 ﻿using Pixel;
-using PixelLang;
 using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Statics;
-using Pixel.Types;
-using Pixel_Editor.Source;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -16,7 +13,6 @@ using Brushes = System.Windows.Media.Brushes;
 using Image = Pixel.Image;
 using PixelLang.Tools;
 using System.Windows.Threading;
-using System.Runtime.ConstrainedExecution;
 
 namespace Pixel_Editor
 {
