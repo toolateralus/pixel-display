@@ -65,7 +65,9 @@ namespace Pixel
             }
 
             List<int> duplicateNames = new();
+
             // TODO: Fix this! it keeps overflowing constantly
+
             foreach (var path in Directory.EnumerateFiles(dir))
             {
                 var splitPath = path.Split("\\").Last().Split('.').ToList();

@@ -188,49 +188,61 @@ namespace Pixel
         public IEnumerable<T> GetAllComponents<T>() where T : Component
         {
             if (nodes is null)
-                return null;
-            List<T> components_found = new();
+                yield break;
+
             for (int i = 0; i < nodes.Count; i++)
             {
-                Node? root = nodes[i];
-                foreach (var group in root.Components)
-                    for (int i1 = 0; i1 < group.Value.Count; i1++)
-                    {
-                        Component? component = group.Value[i1];
-                        if (component is T val)
-                        components_found.Add(val);
-                    }
+                Node node = nodes[i];
+                if (node is null)
+                    continue;
 
-                for (int i2 = 0; i2 < root.children.Count; i2++)
+                lock (node.Components)
                 {
-                    Node? child = root.children[i2];
-                    if (child.Components.ContainsKey(typeof(T)))
+                    foreach (var group in node.Components)
                     {
-                        foreach (var component in child.Components)
+                        if (group.Value is null || group.Value.Count == 0)
+                            continue;
+                        List<T> components = group.Value.OfType<T>().ToList();
+                        foreach (T component in components)
                         {
-                            var comp = component.Value.Where(c => c.GetType() == typeof(T));
-                            if(comp is T val)
-                                components_found.Add(val);
+                            yield return component;
+                        }
+                    }
+                }
 
+                for (int i1 = 0; i1 < node.children.Count; i1++)
+                {
+                    Node child = node.children[i1];
+                    if (child.Components.TryGetValue(typeof(T), out List<Component>? components))
+                    {
+                        // Defensive copying to allow modification while enumerating
+                        List<T> components_found = components.OfType<T>().ToList();
+
+                        foreach (T component in components_found)
+                        {
+                            yield return component;
                         }
                     }
                 }
             }
-            return components_found;
         }
         public IEnumerable<Sprite> GetSprites()
         {
             if (nodes is null)
                 return null;
             List<Sprite> sprites = new();
-            foreach (var root in nodes)
+            for (int i = 0; i < nodes.Count; i++)
             {
+                Node? root = nodes[i];
                 if (root.sprite != null)
                     sprites.Add(root.sprite);
 
-                foreach (var child in root.children)
+                for (int i1 = 0; i1 < root.children.Count; i1++)
+                {
+                    Node? child = root.children[i1];
                     if (child.sprite != null)
                         sprites.Add(child.sprite);
+                }
             }
             return sprites;
         }
