@@ -13,6 +13,9 @@ namespace Pixel
 {
     public static class ExtensionMethods
     {
+
+
+
         #region Matrices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix3x2 Inverted(this Matrix3x2 matrix)
@@ -107,6 +110,16 @@ namespace Pixel
                 result.Add(x);
             return result.ToArray();
         }
+        public static void DestroyAll(this List<Node> array)
+        {
+            for (int i = 0; i < array.Count; i++)
+            {
+                Node? x = array[i];
+                x.Destroy();
+            }
+        }
+
+
         #endregion
 
         #region Image
