@@ -21,7 +21,7 @@ namespace Pixel
     public class Stage : Asset
     {
         [JsonProperty]
-        public Metadata backgroundMetadata;
+        public Metadata? backgroundMetadata;
         [JsonProperty]
         public Matrix3x2 bgTransform = Matrix3x2.CreateScale(512, 512);
         [JsonProperty]
@@ -63,12 +63,12 @@ namespace Pixel
         /// <summary>
         /// Backup background image data.
         /// </summary>
-        public static Metadata DefaultBackgroundMetadata
+        public static Metadata? DefaultBackgroundMetadata
         {
             get
             {
                 if (Library.FetchMeta("Background") is not Metadata meta)
-                    return new(Constants.WorkingRoot + Constants.AssetsDir + "Background" + Constants.PngExt);
+                    return null;
                 return meta;
             }
         }
@@ -112,9 +112,9 @@ namespace Pixel
         }
         private JImage init_background()
         {
-            if (File.Exists(backgroundMetadata.Path))
+            if (backgroundMetadata is not null && File.Exists(backgroundMetadata.Path))
                 return background = new(new Bitmap(backgroundMetadata.Path));
-            throw new MissingMetadataException($"Metadata :\"{backgroundMetadata.Path}\". File not found.");
+            return background = new(CBit.SolidColorSquare(new(16,16), System.Drawing.Color.Gray));
         }
         
         #endregion
@@ -308,7 +308,7 @@ namespace Pixel
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        public Stage(string name, Metadata backgroundMetadata, Hierarchy nodes, string? existingUUID = null) : base(name, true)
+        public Stage(string name, Metadata? backgroundMetadata, Hierarchy nodes, string? existingUUID = null) : base(name, true)
         {
             this.Name = name;
             UUID = existingUUID ?? Pixel.Statics.UUID.NewUUID();
