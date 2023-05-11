@@ -43,7 +43,7 @@ namespace Pixel_Editor
         {
             foreach (var method in data.Methods)
             {
-                var button = Inspector.GetButton($"{method.Name}();", new(0, 0, 0, 0));
+                var button = InspectorControl.GetButton($"{method.Name}();", new(0, 0, 0, 0));
                 button.HorizontalAlignment = HorizontalAlignment.Stretch;
                 button.Click += delegate
                 {
@@ -124,14 +124,14 @@ namespace Pixel_Editor
             for (int i = 0; i < array.Length; i++)
             {
                 int index = i;
-                var txtBox = Inspector.GetTextBox(array[i]);
+                var txtBox = InspectorControl.GetTextBox(array[i]);
                 txtBox.IsReadOnly = false;
                 txtBox.KeyDown += InputBox_KeyDown;
                 txtBox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
                 txtBox.LostKeyboardFocus += (s, e) =>
                 {
                     e.Handled = true;
-                    Inspector.SetControlColors(txtBox, Brushes.DarkSlateGray, Brushes.Black);
+                    InspectorControl.SetControlColors(txtBox, Brushes.DarkSlateGray, Brushes.Black);
                     array[index] = txtBox.Text;
                     component?.OnFieldEdited(field.Name);
                     UpdateData();
@@ -177,8 +177,8 @@ namespace Pixel_Editor
         }
         private void AddNestedComponentEditorButton(FieldInfo field)
         {
-            var button = Inspector.GetButton("Open Editor", new(0, 0, 0, 0));
-            Inspector.SetControlColors(button, Brushes.Red, Brushes.Black);
+            var button = InspectorControl.GetButton("Open Editor", new(0, 0, 0, 0));
+            InspectorControl.SetControlColors(button, Brushes.Red, Brushes.Black);
             button.Click += delegate
             {
                 if (field.GetValue(component) is not Component Component)
@@ -195,9 +195,9 @@ namespace Pixel_Editor
         {
             if (field.GetValue(component)?.ToString() is not string valStr)
                 valStr = "NULL";
-            if (Inspector.GetTextBox(valStr) is not TextBox textbox)
+            if (InspectorControl.GetTextBox(valStr) is not TextBox textbox)
                 return;
-            Inspector.SetControlColors(textbox, Brushes.DarkSlateGray, Brushes.White);
+            InspectorControl.SetControlColors(textbox, Brushes.DarkSlateGray, Brushes.White);
             textbox.IsReadOnly = false;
             textbox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
             textbox.LostKeyboardFocus += (s, e) => UpdateField(field, textbox, e);
@@ -228,7 +228,7 @@ namespace Pixel_Editor
         private void UpdateField(FieldInfo field, TextBox box, KeyboardFocusChangedEventArgs e)
         {
             e.Handled = true;
-            Inspector.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
+            InspectorControl.SetControlColors(box, Brushes.DarkSlateGray, Brushes.Black);
             PLang.TryParse(box.Text, out List<object> results);
             foreach (var obj in results)
                 if (obj.GetType() == field.FieldType)
@@ -259,7 +259,7 @@ namespace Pixel_Editor
             if (sender is not TextBox box)
                 return;
             e.Handled = true;
-            Inspector.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
+            InspectorControl.SetControlColors(box, Brushes.White, Brushes.DarkSlateGray);
             UpdateData();
         }
 

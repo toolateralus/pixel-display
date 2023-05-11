@@ -38,7 +38,7 @@ namespace Pixel_Editor
 
                 case EditorEventFlags.DO_NOT_PRINT:
                 case EditorEventFlags.COMPONENT_EDITOR_UPDATE:
-                    Editor.Current.Inspector?.RefreshInspector();
+                    InspectorControl.RefreshInspectors();
                     break;
 
                 case EditorEventFlags.FILE_VIEWER_UPDATE:
@@ -63,8 +63,8 @@ namespace Pixel_Editor
                     {
                         Editor.Current.ActivelySelected.Add(node);
                         Editor.Current.LastSelected = node;
-                        Editor.Current.Inspector.DeselectNode();
-                        Editor.Current.Inspector.SelectNode(node);
+                        InspectorControl.DeselectNode();
+                        InspectorControl.SelectNode(node);
                         StageCameraTool.TryFollowNode(node);
                     }
                     break;

@@ -21,7 +21,7 @@ namespace Pixel_Editor
 
         internal static bool TryClickNodeOnScreen(out Node? result)
         {
-            Editor.Current.Inspector?.DeselectNode();
+            InspectorControl.DeselectNode();
             result = null;
             Stage stage = Runtime.Current.GetStage();
 
@@ -36,7 +36,7 @@ namespace Pixel_Editor
             bool foundNode = stagingHost.GetNodeAtPoint(stage, CMouse.GlobalPosition, out var node);
 
             if (foundNode)
-                Editor.Current.Inspector?.SelectNode(node);
+                InspectorControl.SelectNode(node);
 
             result = node;
             return foundNode;

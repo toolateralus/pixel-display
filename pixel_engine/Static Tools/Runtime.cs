@@ -131,7 +131,8 @@ namespace Pixel
 
             if (fetchedAsset is null)
             {
-                fetchedAsset = new("temp"+UUID.NewUUID());
+                fetchedAsset = new("projectSettings", false);
+                fetchedAsset.Metadata = meta;
                 IO.WriteJson(fetchedAsset, meta);
             }
 

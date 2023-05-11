@@ -1,23 +1,22 @@
-﻿using System;
-using System.Reflection;
+﻿using Pixel;
 using System.Collections.Generic;
-using Brushes = System.Windows.Media.Brushes;
-using static Pixel.Input;
-using System.Windows;
-using System.Windows.Controls;
-using Pixel;
-using System.Linq;
-using System.Windows.Media;
-using System.Drawing.Text;
-using Component = Pixel.Types.Components.Component;
-using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Drawing.Text;
+using System.Reflection;
+using System.Windows;
+using System;
+using System.Windows.Controls;
+using System.Windows.Media;
+using Component = Pixel.Types.Components.Component;
+using static Pixel.Input;
+using System.Linq;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Data;
 
 namespace Pixel_Editor
 {
-    public class Inspector
+    public partial class InspectorControl : UserControl
     {
         #region Reflection Functions
         public static string GetComponentInfo(Component component)
@@ -57,59 +56,67 @@ namespace Pixel_Editor
             properties = component.GetType().GetProperties();
         }
         #endregion
-        public Inspector()
+        public InspectorControl()
         {
-            Editor.Current.inspectorControl.DataContext = this;
+            InitializeComponent();
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
             OnObjectSelected += RefreshInspector;
             OnObjectDeselected += RefreshInspector;
             OnComponentAdded += RefreshInspector;
             OnComponentRemoved += RefreshInspector;
             OnInspectorMoved += Inspector_OnInspectorMoved;
-            AddComponentCommand.Action = AddComponentButton_Click;
-            RegisterAction(this, DeselectNode, System.Windows.Input.Key.Escape);
+            AddComponentCommand.Action += AddComponentButton_Click;
+            RefreshInspectorsAction += RefreshInspector;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            OnObjectSelected -= RefreshInspector;
+            OnObjectDeselected -= RefreshInspector;
+            OnComponentAdded -= RefreshInspector;
+            OnComponentRemoved -= RefreshInspector;
+            OnInspectorMoved -= Inspector_OnInspectorMoved;
+            AddComponentCommand.Action -= AddComponentButton_Click;
+            RefreshInspectorsAction -= RefreshInspector;
         }
         #region Node Function
-        public void DeselectNode()
+        public static void DeselectNode()
         {
             if (Editor.Current.LastSelected != null)
             {
                 Editor.Current.LastSelected = null;
-
-                activeControls.Clear();
-
                 OnObjectDeselected?.Invoke();
             }
             Runtime.Current.stagingHost.DeselectNode();
             Editor.Current.LastSelected = null;
         }
-        public void SelectNode(Node node)
+        public static void SelectNode(Node node)
         {
             Editor.Current.LastSelected = node;
-            if(node != null)
-            foreach (var comp in node.Components)
-                foreach(var component in comp.Value) component.selected_by_editor = true;
+            if (node != null)
+                foreach (var comp in node.Components)
+                    foreach (var component in comp.Value) component.selected_by_editor = true;
 
             OnObjectSelected?.Invoke();
         }
+        static Action? RefreshInspectorsAction;
 
         #endregion
         #region Component Editor
         public ObservableCollection<ComponentEditor> ComponentEditors { get; } = new();
         public ObservableProperty<Visibility> AddComponentVisibility { get; } = new(Visibility.Hidden);
         public ActionCommand AddComponentCommand { get; } = new();
-        private Dictionary<string, Func<Component>> addComponentFunctions;
+        private Dictionary<string, Func<Component>> addComponentFunctions = new();
         private List<Action> addComponentActions = new();
-        public static List<Action> editComponentActions = new();
-
-        /// <summary>
-        /// Todo: figure out why this dupes the inspector when it's open, It should always just refresh it entirely.
-        /// </summary>
-        /// <param name="grid"></param>
+        public static void RefreshInspectors() => RefreshInspectorsAction?.Invoke();
         public void RefreshInspector()
         {
             ComponentEditors.Clear();
-            activeControls.Clear();
-            editComponentActions.Clear();
             if (Editor.Current.LastSelected is not Node selectedNode)
             {
                 AddComponentVisibility.Value = Visibility.Hidden;
@@ -144,7 +151,7 @@ namespace Pixel_Editor
                 componentEditor.RemoveCommand.Action = (s) =>
                 {
                     component.RemoveComponent(component);
-                    RefreshInspector();
+                    RefreshInspectors();
                 };
             return componentEditor;
         }
@@ -164,7 +171,7 @@ namespace Pixel_Editor
             if (sender is not MenuItem menuItem) return;
             if (menuItem.Name.ToInt() is int i && addComponentActions.Count > i)
                 addComponentActions[i]?.Invoke();
-            RefreshInspector();
+            RefreshInspectors();
         }
         private void RefreshAddComponentFunctions()
         {
@@ -178,7 +185,7 @@ namespace Pixel_Editor
                 var attr = type.GetCustomAttribute(typeof(HideFromEditorAttribute));
 
                 if (attr is not null)
-                    continue; 
+                    continue;
 
                 if (!addComponentFunctions.ContainsKey(type.Name))
                     InstantiateAndAddComponent(type);
@@ -215,8 +222,7 @@ namespace Pixel_Editor
 
         #endregion
         #region UI Function
-        
-        private List<Control> activeControls = new();
+
         public static TextBox GetTextBox(string text, string style = "default")
         {
             return style switch
@@ -275,7 +281,7 @@ namespace Pixel_Editor
 
                 BorderThickness = new Thickness(0.1, 0.1, 0.1, 0.1),
                 Foreground = Brushes.White,
-                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255,30,30,30)),
+                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 30, 30, 30)),
 
             };
         }
@@ -283,33 +289,8 @@ namespace Pixel_Editor
         {
             Content = content,
             Margin = margin,
-            BorderThickness = new Thickness(0.1,0.1,0.1,0.1),
+            BorderThickness = new Thickness(0.1, 0.1, 0.1, 0.1),
         };
-        private static Button GetRemoveComponentButton(Component component)
-        {
-            Button editComponentButton = GetButton("Remove", new(0, 0, 0, 0));
-            editComponentButton.Click += (_, e) =>
-            {
-                e.Handled = true; 
-                component.RemoveComponent(component);
-            };
-            editComponentButton.Name = "remove_button_" + component.GetType().Name;
-            return editComponentButton;
-        }
-        public static void SetRowAndColumn(Grid grid, int height, int width, int x, int y)
-        {
-            grid.SetValue(Grid.RowSpanProperty, height);
-            grid.SetValue(Grid.ColumnSpanProperty, width);
-            grid.SetValue(Grid.RowProperty, y);
-            grid.SetValue(Grid.ColumnProperty, x);
-        }
-        public static void SetRowAndColumn(Control control, int height, int width, int x, int y)
-        {
-            control.SetValue(Grid.RowSpanProperty, height);
-            control.SetValue(Grid.ColumnSpanProperty, width);
-            control.SetValue(Grid.RowProperty, y);
-            control.SetValue(Grid.ColumnProperty, x);
-        }
         public static void SetControlColors(Control control, SolidColorBrush background, SolidColorBrush foreground)
         {
             control.Foreground = foreground;
@@ -329,13 +310,6 @@ namespace Pixel_Editor
         {
             Editor.Current.settings.InspectorPosition.X = x;
             Editor.Current.settings.InspectorPosition.Y = y;
-        }
-        private static void HandleEditPressed(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button)
-                if (button.Name.ToInt() is int i && editComponentActions.Count > i && editComponentActions.Count > i)
-                    editComponentActions[i]?.Invoke();
-                else Runtime.Log("Edit pressed failed.");
         }
         internal static void GetComponentRuntimeInfo(Component component, out IEnumerable<FieldInfo> fields, out IEnumerable<PropertyInfo> properties, out IEnumerable<MethodInfo> methods)
         {
@@ -390,7 +364,6 @@ namespace Pixel_Editor
                 PropertyChanged?.Invoke(this, new(nameof(Control)));
             }
         }
-
         public event PropertyChangedEventHandler? PropertyChanged;
     }
     public class BoolToVisibilityConverter : IValueConverter
@@ -404,7 +377,6 @@ namespace Pixel_Editor
 
             return Visibility.Collapsed; // Default value if not a bool
         }
-
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
