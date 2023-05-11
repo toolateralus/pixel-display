@@ -13,6 +13,9 @@ using Brushes = System.Windows.Media.Brushes;
 using Image = Pixel.Image;
 using PixelLang.Tools;
 using System.Windows.Threading;
+using System.Reflection;
+using System.Linq;
+using Pixel.Types.Components;
 
 namespace Pixel_Editor
 {
@@ -111,6 +114,26 @@ namespace Pixel_Editor
             PixelLang.Tools.Console.OnClearRequested += ConsoleControl.ClearAll;
             inspector = new Inspector();
             DataContext = viewModel;
+
+
+            
+
+            foreach (var item in Runtime.AllComponents)
+            {
+                var methods = item.GetMethods();
+                foreach (var method in methods)
+                {
+                    if (method.GetParameters().Any())
+                        continue;
+
+                    if (method.Name == "Standard")
+                    {
+                        addNodeFunctions[item.Name] = (Func<Node>)method.CreateDelegate(typeof(Func<Node>));
+                        break;
+                    }
+                }
+            }
+
         }
         public EditorSettings settings;
         private TabItem draggedTabItem;
@@ -379,8 +402,6 @@ namespace Pixel_Editor
         #endregion
         #region Add Node Menu
 
-        bool addNodeContextMenuOpen = false;
-        Grid addNodeContextMenu;
         List<Action> addNodeActions = new();
         internal GameView gameView = null;
         private void OnToggleGameView(object sender, RoutedEventArgs e)

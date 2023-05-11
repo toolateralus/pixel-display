@@ -54,7 +54,8 @@
         </member>
         <member name="M:Pixel.Assets.Importer.Import(System.Boolean)">
             <summary>
-            Enumerates through all files in the Asset Import path and attempts to register them to the runtime AssetLibrary instance. 
+            Enumerates through all files in the Asset Import path and at
+            ts to register them to the runtime AssetLibrary instance. 
             </summary>
         </member>
         <member name="T:Pixel.WaveForms">
