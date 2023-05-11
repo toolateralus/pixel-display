@@ -151,7 +151,8 @@ namespace Pixel_Editor
             EditorSettings settings = IO.ReadJson<EditorSettings>(meta);
             if (settings is null)
             {
-                settings = new("temp"+UUID.NewUUID());
+                settings = new("editorSettings", false);
+                settings.Metadata = meta;
                 IO.WriteJson(settings, meta);
             }
             Current.settings = settings;
