@@ -14,6 +14,7 @@ namespace Pixel
     {
         #region Wrapper Actions/Functions
 
+        public static Action<Stage>? OnStageAddedToProject;
         public static Action? OnImport;
         public static event Action? OnDefaultStageRequested;
         public static event Action<Stage>? OnStageSet;
@@ -30,6 +31,7 @@ namespace Pixel
         public static event Func<bool>? OnIsRunningQuery;
         public static event Func<bool>? OnIsInitializedQuery;
         public static List<Type> AllComponents = new();
+        public static float GetLastFrameTime { get; internal set; } = 0.1f;
         static Interop()
         {
             OnImport += GetAllTypes; 
@@ -133,7 +135,6 @@ namespace Pixel
             get => OnProjectGotten?.Invoke();
             set => OnProjectSet?.Invoke(value);
         }
-        public static float GetLastFrameTime { get; internal set; } = 0.1f;
     }
 
 }

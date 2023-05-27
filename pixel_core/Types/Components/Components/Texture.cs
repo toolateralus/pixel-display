@@ -23,7 +23,7 @@ namespace Pixel
             get
             {
                 if (!HasImage && HasImageMetadata)
-                    initializedBitmap = new(imgData.Path);
+                    initializedBitmap = new(imgData.FullPath);
                 return initializedBitmap;
             }
             set => initializedBitmap = value;
@@ -80,7 +80,7 @@ namespace Pixel
         {
             var meta = Library.FetchMetaRelative(relativePath);
             if (meta is not null)
-                jImage = new(new Bitmap(meta.Path));
+                jImage = new(new Bitmap(meta.FullPath));
 
         }
         /// <summary>
@@ -89,8 +89,8 @@ namespace Pixel
         /// <param name="meta"></param>
         public void SetImage(Metadata meta)
         {
-            Metadata = meta;
-            SetImage(meta.Path);
+            metadata = meta;
+            SetImage(meta.FullPath);
         }
         public void SetImage(string fullPath)
         {
@@ -123,7 +123,7 @@ namespace Pixel
             if (imgData is not null)
             {
                 this.imgData = imgData;
-                Image = new(imgData.Path);
+                Image = new(imgData.FullPath);
             }
 
             jImage = new();

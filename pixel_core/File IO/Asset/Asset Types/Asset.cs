@@ -1,24 +1,22 @@
 ﻿using Newtonsoft.Json;
 using Pixel.Assets;
 using Pixel.Statics;
+using System.Dynamic;
+using System.IO;
 
 namespace Pixel.FileIO
 {
     [JsonObject(MemberSerialization.OptIn)]
     public class Asset
     {
-        [JsonProperty] public string Name = "Null Asset!";
-        [JsonProperty] public string UUID = "ae86-1999-krack-uuid";
-        [JsonProperty] public Metadata Metadata;
-        public virtual void Sync()
-        {
-            string defaultPath = Constants.WorkingRoot + Constants.AssetsDir + "\\" + Name + Constants.AssetsExt;
-            Metadata = new(defaultPath);
-        }
+        [JsonProperty] public string Name { get => metadata.Name; set => metadata.Name = value; }
+        [JsonProperty] public string UUID = "nothing";
+        [JsonProperty] public  Metadata metadata = new($"{Constants.WorkingRoot}{Constants.AssetsDir}\\NewAsset{Constants.AssetsExt}");
         internal protected void Save()
         {
-            IO.GuaranteeUniqueName(Metadata, this);
-            IO.WriteJson(this, Metadata);
+            IO.MakeFileNameUnique(this);
+            Upload();
+            IO.WriteJson(this, metadata);
         }
         public Asset(string name, bool shouldUpload = false)
         {
@@ -29,8 +27,7 @@ namespace Pixel.FileIO
 
         public void Upload()
         {
-            Sync();
-            Library.Register(ref Metadata, this);
+            Library.Register(metadata, this);
         }
     }
 }

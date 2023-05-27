@@ -45,7 +45,7 @@ namespace Pixel.Assets
         public static void CheckForDuplicates(ref Metadata meta)
         {
             foreach (var item in Current)
-                if (item.Key.Path == meta.Path)
+                if (item.Key.FullPath == meta.FullPath)
                     meta = item.Key;
         }
         public static bool Register(ref Metadata metadata, object asset)
@@ -111,7 +111,7 @@ namespace Pixel.Assets
         public static Metadata? FetchMetaRelative(string pathRelativeToRoot)
         {
             foreach (var asset in Current)
-                if (asset.Key is not null && asset.Key.pathFromProjectRoot == pathRelativeToRoot)
+                if (asset.Key is not null && asset.Key.RelativeDirectory == pathRelativeToRoot)
                     return asset.Key;
             return default;
 
@@ -164,7 +164,6 @@ namespace Pixel.Assets
 
                     foreach (var x in Interop.Project.stages)
                     {
-                        x.Sync();
                         x.Save();
                     }
                 }
@@ -173,9 +172,8 @@ namespace Pixel.Assets
                     if (assetPair.Value is null || assetPair.Value is not Asset a || a.Name == "NULL")
                         continue;
 
-                    a.Metadata = assetPair.Key;
+                    a.metadata = assetPair.Key;
 
-                    a.Sync();
                     a.Save();
                 }
             }
@@ -195,8 +193,8 @@ namespace Pixel.Assets
             {
                 var stages_meta = Interop.Project.stagesMeta;
 
-                if (!stages_meta.Contains(stage.Metadata))
-                    stages_meta.Add(stage.Metadata);
+                if (!stages_meta.Contains(stage.metadata))
+                    stages_meta.Add(stage.metadata);
             }
         }
         public static List<object>? Clone()
@@ -217,18 +215,18 @@ namespace Pixel.Assets
             if (meta is null)
                 return null;
 
-            var matches = Current.Where(p => p.Key.Path == meta.Path);
+            var matches = Current.Where(p => p.Key.FullPath == meta.FullPath);
             var match = matches?.First();
             var asset = match.Value.Value;
 
             if (asset is null)
             {
-                if (meta.extension == ".bmp" || meta.extension == ".png")
+                if (meta.Extension == ".bmp" || meta.Extension == ".png")
                 {
-                    Bitmap bmp = new(meta.Path);
+                    Bitmap bmp = new(meta.FullPath);
                     return bmp;
                 }
-                if (meta.extension == ".lua")
+                if (meta.Extension == ".lua")
                 {
                     string script = IO.Read(meta);
                     return script;

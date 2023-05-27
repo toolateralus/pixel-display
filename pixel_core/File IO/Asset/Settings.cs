@@ -36,11 +36,5 @@ namespace Pixel
         {
            
         }
-
-        public override void Sync()
-        {
-            Metadata = new(Constants.WorkingRoot + "editorSettings.asset");
-        }
-
     }
 }

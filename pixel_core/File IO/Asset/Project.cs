@@ -54,8 +54,8 @@ namespace Pixel
             Project project = Default;
             Metadata meta = FileDialog.ImportFileDialog();
 
-            if (string.IsNullOrWhiteSpace(meta.fullPath) ||
-                !Path.IsPathFullyQualified(meta.fullPath))
+            if (string.IsNullOrWhiteSpace(meta.FullPath) ||
+                !Path.IsPathFullyQualified(meta.FullPath))
                 return project;
 
             Project? loadedProject = IO.ReadJson<Project>(meta);
@@ -74,7 +74,7 @@ namespace Pixel
         }
         public void AddStage(Stage stage)
         {
-            stagesMeta.Add(stage.Metadata);
+            stagesMeta.Add(stage.metadata);
             stages.Add(stage);
 
             if (stagesMeta.Count > 0)
@@ -90,7 +90,6 @@ namespace Pixel
         public Project(string name)
         {
             Name = name;
-            stages = new List<Stage>();
         }
         public static Project Default => new("Default Project");
         public Project() { }

@@ -12,19 +12,6 @@ namespace Pixel
     public class StagingHost
     {
         public Node? lastSelected;
-        public static Stage Standard()
-        {
-            var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, new());
-            Node floor = Floor.Standard();
-
-            Node node = new("camera");
-            var cam = node.AddComponent<CameraController>();
-
-            stage.AddNode(floor);
-            stage.AddNode(node);
-           
-            return stage;
-        }
         /// <summary>
         /// this is used for editor clicking.
         /// </summary>

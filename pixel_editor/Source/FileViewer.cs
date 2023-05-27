@@ -28,19 +28,19 @@ namespace Pixel_Editor
             if (lib != null)
             {
                 // Sort the list of Metadata objects by their file extension
-                lib = lib.OrderBy(m => GetExtensionIndex(m.extension)).ToList();
+                lib = lib.OrderBy(m => GetExtensionIndex(m.Extension)).ToList();
 
                 foreach (var item in lib)
                 {
-                    if (item.extension != lastExt)
+                    if (item.Extension != lastExt)
                     {
-                        FileViewerControl.AddPath(GetExtensionFullName(item.extension));
-                        lastExt = item.extension;
+                        FileViewerControl.AddPath(GetExtensionFullName(item.Extension));
+                        lastExt = item.Extension;
                     }
-                    var path = item.pathFromProjectRoot;
+                    var path = item.RelativePath;
                     FileViewerControl.AddPath(path);
                 }
-                FileViewerControl.ScrollIntoView(lib.First().pathFromProjectRoot);
+                FileViewerControl.ScrollIntoView(lib.First().RelativePath);
             }
         }
         private static System.Drawing.Color GetColorFromExtension(string extension)

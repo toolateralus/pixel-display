@@ -33,7 +33,7 @@ namespace Pixel
                     break;
                 case ImageType.Image:
                     if (texture.imgData != null)
-                        texture.SetImage(texture.imgData.Path);
+                        texture.SetImage(texture.imgData.FullPath);
                     break;
             }
             dirty = false;

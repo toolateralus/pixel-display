@@ -101,7 +101,7 @@ namespace Pixel
         {
             var playerCopy = GetFreePlayer();
             if (metadata is not null)
-                Play(metadata.Path, volume, speed, playerCopy);
+                Play(metadata.FullPath, volume, speed, playerCopy);
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Pixel
                     var meta = Library.FetchMetaRelative($"\\Assets\\Fonts\\font{i}.bmp");
                     if (meta != null)
                     {
-                        Bitmap bmp = new(meta.Path);
+                        Bitmap bmp = new(meta.FullPath);
                         JImage image = new(bmp);
 
                         if (font_model.ContainsKey(alphabet[i]))

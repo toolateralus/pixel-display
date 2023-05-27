@@ -40,7 +40,7 @@ namespace Pixel
             var meta = Library.FetchMeta("KingCrimsonRequiem");
 
             if (meta != null)
-                Audio.PlayFromPath(meta.Path, 0.45f);
+                Audio.PlayFromPath(meta.FullPath, 0.45f);
 
             if (node.TryGetComponent(out sprite))
                 sprite.Type = ImageType.Image;

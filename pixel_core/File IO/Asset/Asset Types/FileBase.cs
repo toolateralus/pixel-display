@@ -1,18 +1,46 @@
 ﻿using Pixel.Statics;
+using System.Text.Json.Serialization;
 
 namespace Pixel.FileIO
 {
     public abstract class FileBase
     {
-        public string extension = "";
-        public string fullPath = "C:\\\\Users\\Josh\\Appdata\\Roaming\\Pixel\\Assets\\Metadata\\Error";
-        public string Name = "Object Metadata";
-        public string pathFromProjectRoot = "";
+        private string extension = "";
+        private string name = "Object Metadata";
+        private string relativeDirectory = "";
         internal string _uuid = "";
+        [JsonIgnore] private string? fullPath = null;
         public string UUID => _uuid;
-        /// <summary>
-        /// the absolute path corrected to the machine that's running the program, and WorkingRoot in Constants.
-        /// </summary>
-        public string Path => Constants.WorkingRoot + pathFromProjectRoot;
+        public string Extension
+        {
+            get => extension;
+            set
+            {
+                extension = value;
+                fullPath = null;
+            }
+        }
+        public string Name
+        {
+            get => name;
+            set
+            {
+                name = value;
+                fullPath = null;
+            }
+        }
+        public string RelativeDirectory
+        {
+            get => relativeDirectory;
+            set
+            {
+                relativeDirectory = value;
+                fullPath = null;
+            }
+        }
+        [JsonIgnore] public string FullPath => fullPath ??= Constants.WorkingRoot + RelativeDirectory + "\\" + Name + Extension;
+        [JsonIgnore] public string RelativePath => RelativeDirectory + "\\" + Name + Extension;
+        [JsonIgnore] public string Directory => Constants.WorkingRoot + RelativeDirectory;
+        [JsonIgnore] public string FileName => Name + Extension;
     }
 }

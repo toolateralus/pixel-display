@@ -62,19 +62,25 @@ namespace Pixel.Assets
         }
         private static void ImportAndRegister(string _dir)
         {
-            var assets = Import(_dir, ".asset");
-            var bmps = Import(_dir, ".bmp");
-            var pngs = Import(_dir, ".png");
-            var audioFiles = Import(_dir, ".mp3");
-            var lua_scripts = Import(_dir, ".lua");
-            var pl_scripts = Import(_dir, ".pl");
+            var assets = Import(_dir, Constants.AssetsExt);
+            var stages = Import(_dir, Constants.StagesExt);
+            var bmps = Import(_dir, Constants.BmpExt);
+            var pngs = Import(_dir, Constants.PngExt);
+            var audioFiles = Import(_dir, Constants.Mp3Ext);
+            var lua_scripts = Import(_dir, Constants.LuaExt);
+            var pl_scripts = Import(_dir, Constants.PixelLangExt);
 
             foreach (var item in assets)
             {
                 var asset = IO.ReadJson<Asset>(item);
                 Library.Register(item, asset);
             }
-
+            foreach (var stage in stages)
+            {
+                var asset = IO.ReadJson<Stage>(stage);
+                if (asset != null)
+                    Interop.OnStageAddedToProject?.Invoke(asset);
+            }
             foreach (var script in lua_scripts)
             {
                 string text = IO.Read(script);
@@ -98,7 +104,7 @@ namespace Pixel.Assets
         {
             Metadata metadata = FileDialog.ImportFileDialog();
 
-            var isPathValid = System.IO.Path.IsPathFullyQualified(metadata.Path);
+            var isPathValid = System.IO.Path.IsPathFullyQualified(metadata.FullPath);
 
             if (!isPathValid)
                 return;

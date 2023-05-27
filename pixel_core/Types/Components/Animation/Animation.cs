@@ -16,9 +16,9 @@ namespace Pixel
             for (int i = 0; i < frameData.Length * this.frameTime; i += this.frameTime)
             {
                 Metadata? imgMetadata = frameData[i / this.frameTime];
-                if (imgMetadata.extension != Constants.PngExt && imgMetadata.extension != Constants.BmpExt)
+                if (imgMetadata.Extension != Constants.PngExt && imgMetadata.Extension != Constants.BmpExt)
                     continue;
-                Bitmap img = new(imgMetadata.Path);
+                Bitmap img = new(imgMetadata.FullPath);
                 if (img is not null)
                 {
                     var colors = CBit.PixelFromBitmap(img);

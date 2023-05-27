@@ -28,7 +28,6 @@ namespace Pixel
         [JsonProperty]
         Polygon transformedModel = Polygon.Square(1);
 
-        [JsonProperty]
         public Polygon Polygon
         {
             get

@@ -104,7 +104,7 @@ namespace Pixel
             {
                 if (asset != null && asset is Metadata meta)
                 {
-                    texture.SetImage(meta.Path);
+                    texture.SetImage(meta.FullPath);
                     return;
                 }
                 time += 15f;

@@ -38,7 +38,7 @@ namespace Pixel
             if (meta is not null && Library.FetchByMeta(meta) is string value)
             {
                 this.value = value;
-                path = meta.pathFromProjectRoot;
+                path = meta.RelativeDirectory;
 
                 EditorEvent refresh_event = new(EditorEventFlags.COMPONENT_EDITOR_UPDATE);
                 Interop.RaiseInspectorEvent(refresh_event);

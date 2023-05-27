@@ -102,7 +102,7 @@ namespace Pixel
         {
             var task = Interop.GetSelectedFileMetadataAsync();
             await task;
-            string path = task.Result.Path;
+            string path = task.Result.FullPath;
             
             if(path != null)
                 texture.SetImage(path);
@@ -131,17 +131,12 @@ namespace Pixel
             {
                 case ImageType.SolidColor:
                     Color[,] colorArray = CBit.SolidColorSquare(Scale, Color);
-
-                    if (texture.Name == Texture.Default.Name)
-                    {
-                        this.texture = new(Scale, Color, "Sprite" + UUID);
-                    }
                     texture.SetImage(colorArray);
 
                     break;
                 case ImageType.Image:
                     if (texture.imgData != null)
-                        texture.SetImage(texture.imgData.Path);
+                        texture.SetImage(texture.imgData.FullPath);
                     break;
             }
             IsDirty = false;

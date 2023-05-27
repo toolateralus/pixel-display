@@ -19,11 +19,6 @@ namespace Pixel
         public ProjectSettings(string name, bool shouldUpload = false) : base(name, shouldUpload)
         {
         }
-
-        public override void Sync()
-        {
-            Metadata = new(Constants.WorkingRoot + "projectSettings.asset");
-        }
     }
 
 }

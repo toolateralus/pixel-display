@@ -21,7 +21,6 @@ namespace Pixel_Editor
         public static Action? EditorUpdate;
         public EditorInputEvents input = new();
         internal EditorViewModel viewModel;
-        SolidColorBrush framerateBrush = new(); 
         internal FileViewer fileViewer;
         private const string motd = "Session started. Type 'help();' for a list of commands.";
         #region Window Scaling
@@ -98,7 +97,8 @@ namespace Pixel_Editor
 
             Tools = Tool.InitializeToolkit();
 
-            OnStageSet(StagingHost.Standard());
+            if (Runtime.Current.GetStage() is Stage stage)
+                OnStageSet(stage);
 
             OnProjectSet(Runtime.Current.project);
 
@@ -152,7 +152,7 @@ namespace Pixel_Editor
             if (settings is null)
             {
                 settings = new("editorSettings", false);
-                settings.Metadata = meta;
+                settings.metadata = meta;
                 IO.WriteJson(settings, meta);
             }
             Current.settings = settings;
@@ -365,12 +365,6 @@ namespace Pixel_Editor
         }
         private void OnSyncBtnPressed(object sender, RoutedEventArgs e)
         {
-            if (e != null && e.RoutedEvent != null)
-            {
-                e.Handled = true;
-                Library.SaveAll();
-                return; 
-            }
             if (!Input.Get(Key.S))
                 return; 
             Library.SaveAll();
@@ -392,10 +386,8 @@ namespace Pixel_Editor
         #endregion
         #region Add Node Menu
 
-        bool addNodeContextMenuOpen = false;
-        Grid addNodeContextMenu;
         List<Action> addNodeActions = new();
-        internal GameView gameView = null;
+        internal GameView? gameView = null;
         private void OnToggleGameView(object sender, RoutedEventArgs e)
         {
             if (e.RoutedEvent != null)

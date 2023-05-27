@@ -40,7 +40,8 @@ namespace Pixel.Statics
         public const string AssetsExt = ".asset";     // .asset {Pixel Asset Data}
         public const string ProjectFileExtension = ".pixel";   // .pixel {Pixel Project}
         public const string MetadataFileExtension = ".meta";  // .meta {File Metadata} 
-        public const string StageFileExtension = ".stage";   // .stage {Stage File}
+        public const string StagesExt = ".stage";   // .stage {Stage File}
+        internal static string PixelLangExt = ".pl";
 
         public static string WorkingRoot = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Pixel";    // Root directory for resources
 
@@ -59,7 +60,7 @@ namespace Pixel.Statics
             BmpExt,
             AssetsExt,
             ProjectFileExtension,
-            StageFileExtension,
+            StagesExt,
         };
 
         public static Vector2 DefaultResolution = new(480, 480);

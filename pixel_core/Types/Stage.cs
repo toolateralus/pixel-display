@@ -112,8 +112,8 @@ namespace Pixel
         }
         private JImage init_background()
         {
-            if (backgroundMetadata is not null && File.Exists(backgroundMetadata.Path))
-                return background = new(new Bitmap(backgroundMetadata.Path));
+            if (backgroundMetadata is not null && File.Exists(backgroundMetadata.FullPath))
+                return background = new(new Bitmap(backgroundMetadata.FullPath));
             return background = new(CBit.SolidColorSquare(new(16,16), System.Drawing.Color.Gray));
         }
         
@@ -258,17 +258,11 @@ namespace Pixel
             nodes.Remove(node);
             node.SubscribeToEngine(false);
         }
-      
-        public override void Sync()
-        {
-            string defaultPath = Constants.WorkingRoot + Constants.StagesDir + "\\" + Name + Constants.StageFileExtension;
-            Metadata = new(defaultPath);
-        }
         #endregion Node Utils
         #region constructors
         
         [JsonConstructor]
-        internal Stage(Hierarchy nodes, Metadata metadata, Metadata backgroundMetadata, string name = "Stage Asset") : base(name, true)
+        internal Stage(Hierarchy nodes, Metadata metadata, Metadata backgroundMetadata, string name = "Stage Asset") : base(name, false)
         {
             Name = name;
             this.nodes = nodes;
@@ -297,7 +291,7 @@ namespace Pixel
 
                 }
             }
-            Metadata = metadata;
+            base.metadata = metadata;
             this.backgroundMetadata = backgroundMetadata;
             init_background();
         }
@@ -308,9 +302,11 @@ namespace Pixel
         /// <param name="backgroundMeta"></param>
         /// <param name="nodes"></param>
         /// <param name="existingUUID"></param>
-        public Stage(string name, Metadata? backgroundMetadata, Hierarchy nodes, string? existingUUID = null) : base(name, true)
+        public Stage(string name, Metadata? backgroundMetadata, Hierarchy nodes, string? existingUUID = null, string relDir = Constants.StagesDir) : base(name, true)
         {
             this.Name = name;
+            metadata.RelativeDirectory = relDir;
+            metadata.Extension = Constants.StagesExt;
             UUID = existingUUID ?? Pixel.Statics.UUID.NewUUID();
             this.nodes = nodes;
             this.backgroundMetadata = backgroundMetadata;

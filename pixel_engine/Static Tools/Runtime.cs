@@ -99,7 +99,7 @@ namespace Pixel
             if (stage1 is null) return;
             
             stage1.backgroundMetadata = meta;
-            var bmp = new Bitmap(meta.Path);
+            var bmp = new Bitmap(meta.FullPath);
 
             Current.GetStage()?.SetBackground(bmp);
             Current.renderHost.GetRenderer().baseImageDirty = true;
@@ -118,7 +118,8 @@ namespace Pixel
         {
             if (stage is null)
                 return;
-
+            if (!project.stages.Contains(stage))
+                project.AddStage(stage);
             this.stage = stage;
             OnStageSet?.Invoke(stage);
         }
@@ -131,21 +132,12 @@ namespace Pixel
             if (fetchedAsset is null)
             {
                 fetchedAsset = new("projectSettings", false);
-                fetchedAsset.Metadata = meta;
+                fetchedAsset.metadata = meta;
                 IO.WriteJson(fetchedAsset, meta);
             }
 
             projectSettings = fetchedAsset;
             SetResolution();
-        }
-        internal protected static Stage InstantiateDefaultStageIntoProject()
-        {
-            Log("No stage found, either the requested index was out of range or no stages were found in the project." +
-                " A Default will be instantiated and added to the project at the requested index.");
-
-            Stage stage = StagingHost.Standard();
-            Current.project.AddStage(stage);
-            return stage;
         }
         public static async Task<Metadata> GetSelectedFileMetadataAsync()
         {
@@ -334,7 +326,17 @@ namespace Pixel
             Interop.OnStageSet += SetStage;
             Interop.OnFileViewer_SelectedMetadata_Query += GetSelectedFileMetadataAsync;
             Interop.OnEditorEventRaised += RaiseInspectorEvent;
-            Interop.OnDefaultStageRequested += () => SetStage(StagingHost.Standard());
+            Interop.OnDefaultStageRequested += () =>
+            {
+                Stage stage = new("Default Stage", Stage.DefaultBackgroundMetadata, new());
+                SetStage(stage);
+                Node floor = Floor.Standard();
+                Node node = new("camera");
+                var cam = node.AddComponent<CameraController>();
+                stage.AddNode(floor);
+                stage.AddNode(node);
+            };
+            Interop.OnStageAddedToProject += (stage) => project.AddStage(stage);
 
             renderHost = new();
             renderThread = new(RenderLoop);
@@ -345,10 +347,10 @@ namespace Pixel
             physicsWorker.RunWorkerAsync();
 
             Initialized = true;
+            Importer.Import();
+
             project.TryLoadStage(0);
             GetProjectSettings();
-
-            Importer.Import();
         }
         #endregion
 
