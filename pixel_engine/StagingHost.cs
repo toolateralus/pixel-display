@@ -15,6 +15,7 @@ namespace Pixel
         public static Stage Standard()
         {
             var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, new());
+
             Node floor = Floor.Standard();
 
             Node node = new("camera");

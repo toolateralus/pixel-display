@@ -47,42 +47,43 @@ namespace Pixel_Editor
             PreviousHistoryCommand = new ActionCommand(OnPreviousHistory);
             NextHistoryCommand = new ActionCommand(OnNextHistory);
         }
-        void OnLoaded(object sender, RoutedEventArgs e)
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
             SendMessageAction += AddMessage;
             ClearAllAction += ClearMessages;
             SendDebugAction += SendDebug;
             ClearDebugAction += ClearDebug;
         }
-        void OnUnloaded(object sender, RoutedEventArgs e)
+        private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             SendMessageAction -= AddMessage;
             ClearAllAction -= ClearMessages;
             SendDebugAction -= SendDebug;
             ClearDebugAction -= ClearDebug;
         }
-        void OnNextHistory(object? sender)
+        private void OnNextHistory(object? sender)
         {
             commandHistoryIndex = (commandHistoryIndex + commandHistory.Count + 1) % commandHistory.Count;
             CommandLine.Value = commandHistory[commandHistoryIndex];
         }
-        void OnPreviousHistory(object? sender)
+        private void OnPreviousHistory(object? sender)
         {
             commandHistoryIndex = (commandHistoryIndex + commandHistory.Count - 1) % commandHistory.Count;
             CommandLine.Value = commandHistory[commandHistoryIndex];
         }
-        void OnNext(object? sender) => PixelLang.Tools.Console.Continue?.Invoke();
-        void OnDebug(object? sender)
+        private void OnNext(object? sender) => PixelLang.Tools.Console.Continue?.Invoke();
+        private void OnDebug(object? sender)
         {
             PixelLang.Tools.Console.IsDebugMode = !PixelLang.Tools.Console.IsDebugMode;
             AddMessage($"DEBUG : {PixelLang.Tools.Console.IsDebugMode}");
         }
-        void OnContinue(object? sender)
+        private void OnContinue(object? sender)
         {
             PixelLang.Tools.Console.IsDebugMode = false;
             PixelLang.Tools.Console.Continue?.Invoke();
         }
-        void OnSend(object? sender)
+        private void OnSend(object? sender)
         {
             string cmd = CommandLine.Value;
             CommandLine.Value = "";
@@ -94,7 +95,7 @@ namespace Pixel_Editor
 
             Dispatcher.InvokeAsync(async () => await PLang.TryCallLine(cmd));
         }
-        void ClearDebug() => DebugMessages.Clear();
+        private void ClearDebug() => DebugMessages.Clear();
         public void AddMessage(string message)
         {
             Messages.Add(message);

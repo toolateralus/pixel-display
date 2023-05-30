@@ -151,17 +151,23 @@ namespace Pixel
                     return;
 
                 refColor = color;
+
                 Vector2 centerPos = circle.center.Transformed(viewProjScreen) * resolution;
                 float radius = circle.radius * resolution.X;
                 float radiusSquared = radius * radius;
 
-                for (int x = (int)(centerPos.X - radius); x <= centerPos.X + radius; x++)
+                int startX = Math.Max((int)(centerPos.X - radius), 0);
+                int endX = Math.Min((int)(centerPos.X + radius), (int)resolution.X - 1);
+                int startY = Math.Max((int)(centerPos.Y - radius), 0);
+                int endY = Math.Min((int)(centerPos.Y + radius), (int)resolution.Y - 1);
+
+                for (int x = startX; x <= endX; x++)
                 {
-                    for (int y = (int)(centerPos.Y - radius); y <= centerPos.Y + radius; y++)
+                    for (int y = startY; y <= endY; y++)
                     {
                         Vector2 pixelPos = new Vector2(x, y);
                         float distanceSquared = Vector2.DistanceSquared(centerPos, pixelPos);
-                        if (distanceSquared <= radiusSquared && pixelPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
+                        if (distanceSquared <= radiusSquared)
                         {
                             framePos = pixelPos;
                             renderer.WriteColorToFrame(ref refColor, ref framePos);
@@ -172,52 +178,31 @@ namespace Pixel
         }
         static void draw_lines(RendererBase renderer, Matrix3x2 viewProjScreen, Vector2 resolution, ref Vector2 framePos, ref Color refColor)
         {
+            // float interpolated Bresenham's algorithm , ask chatgpt
             foreach ((Line line, Color color) in Lines)
             {
                 refColor = color;
                 Vector2 startPos = line.startPoint.Transformed(viewProjScreen) * resolution;
                 Vector2 endPos = line.endPoint.Transformed(viewProjScreen) * resolution;
-                if (startPos == endPos)
+
+                float x0 = startPos.X;
+                float y0 = startPos.Y;
+                float x1 = endPos.X;
+                float y1 = endPos.Y;
+
+                float deltaX = x1 - x0;
+                float deltaY = y1 - y0;
+                float maxDistance = MathF.Max(MathF.Abs(deltaX), MathF.Abs(deltaY));
+                float stepX = deltaX / maxDistance;
+                float stepY = deltaY / maxDistance;
+
+                for (float t = 0; t <= 1.0f; t += 1.0f / maxDistance)
                 {
-                    if (startPos.IsWithinMaxExclusive(Vector2.Zero, resolution))
-                        renderer.WriteColorToFrame(ref refColor, ref startPos);
-                    continue;
-                }
+                    framePos.X = x0 + t * deltaX;
+                    framePos.Y = y0 + t * deltaY;
 
-                float xDiff = startPos.X - endPos.X;
-                float yDiff = startPos.Y - endPos.Y;
-
-                if (MathF.Abs(xDiff) > MathF.Abs(yDiff))
-                {
-                    float slope = yDiff / xDiff;
-                    float yIntercept = startPos.Y - slope * startPos.X;
-
-                    int endX = (int)MathF.Min(MathF.Max(startPos.X, endPos.X), resolution.X);
-
-                    for (int x = (int)MathF.Max(MathF.Min(startPos.X, endPos.X), 0); x < endX; x++)
-                    {
-                        framePos.X = x;
-                        framePos.Y = slope * x + yIntercept;
-                        if (framePos.Y < 0 || framePos.Y >= resolution.Y)
-                            continue;
+                    if (framePos.X >= 0 && framePos.X < resolution.X && framePos.Y >= 0 && framePos.Y < resolution.Y)
                         renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
-                }
-                else
-                {
-                    float slope = xDiff / yDiff;
-                    float xIntercept = startPos.X - slope * startPos.Y;
-
-                    int endY = (int)MathF.Min(MathF.Max(startPos.Y, endPos.Y), resolution.Y);
-
-                    for (int y = (int)MathF.Max(MathF.Min(startPos.Y, endPos.Y), 0); y < endY; y++)
-                    {
-                        framePos.Y = y;
-                        framePos.X = slope * y + xIntercept;
-                        if (framePos.X < 0 || framePos.X >= resolution.X)
-                            continue;
-                        renderer.WriteColorToFrame(ref refColor, ref framePos);
-                    }
                 }
             }
         }

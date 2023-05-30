@@ -279,8 +279,13 @@ public class QuadTree
 
         if (children[0] == null)
             Split();
+        
 
-        int index = GetChildIndex(node.GetComponent<Collider>().BoundingBox);
+        if (node.col == null)
+            return;
+
+        int index = GetChildIndex(node.col.BoundingBox);
+
         if (index != -1)
             children[index].Insert(node);
         else

@@ -16,8 +16,8 @@ namespace Pixel
             if (frameBuffer.Count < 3)
                 return;
             
-            ByteArrayPool.Shared.Return(frameBuffer[0]);
             Array.Clear(frameBuffer[0]);
+            ByteArrayPool.Shared.Return(frameBuffer[0]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -53,8 +53,8 @@ namespace Pixel
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Render(System.Windows.Controls.Image output)
         {
-            if (stride != 0)
-                RenderFromFrame(frameBuffer[0], stride, Resolution, output);
+            if (stride != 0 && frameBuffer.Count > 2)
+                RenderFromFrame(frameBuffer[1], stride, Resolution, output);
         }
     }
 }

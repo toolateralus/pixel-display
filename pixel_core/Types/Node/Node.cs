@@ -406,12 +406,12 @@ namespace Pixel
             if (Interop.Stage is Stage stage)
             {
                 OnDestroyed         += component.on_destroy_internal;
-                stage.OnDrawShapes  += component.on_draw_shapes_internal;
                 OnCollided          += component.on_collision_internal;
                 OnTriggered         += component.on_trigger_internal;
                 stage.Awake         += component.init_component_internal;
                 stage.Update        += component.update_internal;
                 stage.FixedUpdate   += component.fixed_update_internal;
+                stage.OnDrawShapes  += component.on_draw_shapes_internal;
             }
         }
         private void UnsubscribeComponent(Component component)
@@ -419,12 +419,12 @@ namespace Pixel
             if (Interop.Stage is Stage stage)
             {
                 OnDestroyed         -= component.on_destroy_internal;
-                stage.OnDrawShapes  -= component.on_draw_shapes_internal;
                 OnCollided          -= component.on_collision_internal;
-                OnTriggered         -= component.on_trigger_internal;
+                OnTriggered         -= component.on_trigger_internal;   
                 stage.Awake         -= component.init_component_internal;
                 stage.Update        -= component.update_internal;
                 stage.FixedUpdate   -= component.fixed_update_internal;
+                stage.OnDrawShapes  -= component.on_draw_shapes_internal;
             }
         }
         /// <summary>

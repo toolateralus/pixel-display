@@ -18,7 +18,7 @@ namespace Pixel
 
         [Field]
         // this is for the nGon editor method
-        int vertexCount = 6;
+        public int vertexCount = 6;
 
         /// <summary>
         /// Sets the model to a copy of input.
@@ -74,7 +74,7 @@ namespace Pixel
 
         [Method]
         // for editor.
-        void CreateNGonWithVertexCt() => model = Polygon.nGon(Scale.X - Scale.Y * 2, vertexCount);
+        public void CreateNGonWithVertexCt() => model = Polygon.nGon(Scale.X - Scale.Y * 2, vertexCount);
 
         /// <returns>a copy of the colliders' model, not the model itself</returns>
         public Polygon GetModel() => new(model);

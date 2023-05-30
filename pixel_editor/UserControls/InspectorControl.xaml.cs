@@ -193,6 +193,9 @@ namespace Pixel_Editor
         }
         private void InstantiateAndAddComponent(Type type)
         {
+            if (Editor.Current.LastSelected is null)
+                return;
+
             addComponentFunctions.Add(type.Name, () =>
             {
                 return Editor.Current.LastSelected.AddComponent(type);
