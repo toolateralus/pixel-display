@@ -54,7 +54,7 @@ namespace Pixel_Editor
                 path = path.Replace("//", "");
 
                 CommandLine.SetCutsomScriptFolderPath(path);
-                PixelLang.Tools.Console.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
+                InterpreterOutput.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
             }
 
         }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\ and cannot be in a sub-directory.")

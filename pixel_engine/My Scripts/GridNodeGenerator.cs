@@ -46,9 +46,9 @@ namespace Pixel
             nodes.Clear();
             nodes = null;
         }
-        public override async void Awake()
+        public override void Awake()
         {
-            const int max = 160;
+            const int max = 16;
             var pair = Sine.GetColorfulSineWaveAnim(length, radius);
             pos = pair.pos;
             colors = pair.col;
@@ -78,7 +78,7 @@ namespace Pixel
                 _pos = node.Position;
                 _pos.X += pos_depth.X;
                 _pos.Y += pos_depth.Y;
-                //DrawCircleFilled(_pos, 0.0015f * 75 ,  _col * pos_depth.Z);
+                DrawLine(_pos, _pos * radius, _col * pos_depth.Z);
             }
         }
     }

@@ -46,15 +46,19 @@ namespace Pixel
             float weight = angle - i;
             return (float)((1 - weight) * cos[i] + weight * cos[j]);
         }
-        public static (Animation<Vector3> pos, Animation<Color> col) GetColorfulSineWaveAnim(int length, float radius, byte alpha = 255)
+        public static (Animation<Vector3> pos, Animation<Color> col) GetColorfulSineWaveAnim(int length, float radius, byte alpha = 255, int frameTime = 24)
         {
             float sliceAngle = 360f / length;
+            
             Vector3[] positions = new Vector3[length + 1];
             Color[] col = new Color[length + 1];
-            col[0] = Color.White;
-            positions[0] = new(radius, 0, 0);
+            
             Animation<Vector3> pos;
             Animation<Color> colors;
+            
+            col[0] = Color.White;
+            positions[0] = new(radius, 0, 0);
+            
             Vector2 position = default;
             Color color = default;
 
@@ -62,15 +66,15 @@ namespace Pixel
             {
                 float startAngle = i * sliceAngle;
                 float angle = startAngle * CMath.PI / 180;
-                float cos_val = Sine.Cos(angle) * radius;
-                float sin_val = Sine.Sin(angle) * radius;
+                float cos_val = Cos(angle) * radius;
+                float sin_val = Sin(angle) * radius;
 
                 position.X = cos_val;
                 position.Y = sin_val;
 
-                var sine = Sine.Sin(angle);
+                var sine = Sin(angle);
 
-                float depth = MathF.Abs(sine); // Calculate depth based on sine of angle
+                float depth = MathF.Abs(sine);
 
                 if (sine < 0)
                     depth /= 3;
@@ -82,9 +86,9 @@ namespace Pixel
                 positions[i] = new(position, depth);
             }
 
-            colors = new(col);
+            colors = new(col, frameTime);
 
-            pos = new(positions);
+            pos = new(positions, frameTime);
 
             return (pos, colors);
         }

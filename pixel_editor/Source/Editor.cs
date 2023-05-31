@@ -109,9 +109,9 @@ namespace Pixel_Editor
 
             Console.Print(motd);
 
-            PixelLang.Tools.Console.Stream += (obj) => Console.Print(obj);
-            PixelLang.Tools.Console.DebugMetrics += ConsoleControl.ShowMetrics;
-            PixelLang.Tools.Console.OnClearRequested += ConsoleControl.ClearAll;
+            InterpreterOutput.Stream += (obj) => Console.Print(obj);
+            InterpreterOutput.DebugMetrics += ConsoleControl.ShowMetrics;
+            InterpreterOutput.OnClearRequested += ConsoleControl.ClearAll;
             DataContext = viewModel;
 
 

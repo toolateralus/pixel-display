@@ -14,7 +14,7 @@ namespace Pixel
         [Field]
         [InputField]
         [JsonProperty]
-        string value = "print(\"string\") \n return 0 \n end";
+        string value = "print(\"Hello Squirreld\")";
 
         [JsonProperty] [Field]
         ScriptingLanguage language = ScriptingLanguage.PixelLang;
@@ -93,7 +93,7 @@ namespace Pixel
             switch (language)
             {
                 case ScriptingLanguage.PixelLang:
-                    var execution = PLang.TryCallLine(value);
+                    var execution = InputProcessor.TryCallLine(value);
                     await execution;
                     break;
                 case ScriptingLanguage.LUA:

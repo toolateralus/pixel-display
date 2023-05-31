@@ -72,16 +72,16 @@ namespace Pixel_Editor
             commandHistoryIndex = (commandHistoryIndex + commandHistory.Count - 1) % commandHistory.Count;
             CommandLine.Value = commandHistory[commandHistoryIndex];
         }
-        private void OnNext(object? sender) => PixelLang.Tools.Console.Continue?.Invoke();
+        private void OnNext(object? sender) => InterpreterOutput.Continue?.Invoke();
         private void OnDebug(object? sender)
         {
-            PixelLang.Tools.Console.IsDebugMode = !PixelLang.Tools.Console.IsDebugMode;
-            AddMessage($"DEBUG : {PixelLang.Tools.Console.IsDebugMode}");
+            InterpreterOutput.IsDebugMode = !InterpreterOutput.IsDebugMode;
+            AddMessage($"DEBUG : {InterpreterOutput.IsDebugMode}");
         }
         private void OnContinue(object? sender)
         {
-            PixelLang.Tools.Console.IsDebugMode = false;
-            PixelLang.Tools.Console.Continue?.Invoke();
+            InterpreterOutput.IsDebugMode = false;
+           InterpreterOutput.Continue?.Invoke();
         }
         private void OnSend(object? sender)
         {
@@ -93,9 +93,9 @@ namespace Pixel_Editor
                 commandHistory.Add(cmd);
             commandHistoryIndex = 0;
 
-            Dispatcher.InvokeAsync(async () => await PLang.TryCallLine(cmd));
+            Dispatcher.InvokeAsync(async () => await InputProcessor.TryCallLine(cmd));
         }
-        private void ClearDebug() => DebugMessages.Clear();
+        private void ClearDebug() => Dispatcher.Invoke(() => DebugMessages.Clear());
         public void AddMessage(string message)
         {
             Messages.Add(message);
@@ -108,10 +108,10 @@ namespace Pixel_Editor
                 scrollViewer.ScrollToBottom();
             }
         }
-        internal void ClearMessages() => Messages.Clear();
-        void SendDebug(string message) => DebugMessages.Add(message);
-        public static void SendMessage(string message) => SendMessageAction?.Invoke(message);
-        public static void ClearAll() => ClearAllAction?.Invoke();
+        internal void ClearMessages() => Dispatcher.Invoke(() => Messages.Clear());
+        void SendDebug(string message) => Dispatcher.Invoke(() => DebugMessages.Add(message));
+        public static void SendMessage(string message) => Editor.Current.Dispatcher.Invoke(() => SendMessageAction?.Invoke(message));
+        public static void ClearAll() => Editor.Current.Dispatcher.Invoke(() => ClearAllAction?.Invoke());
         internal static void ShowMetrics(string[] strings)
         {
             ClearDebugAction?.Invoke();
