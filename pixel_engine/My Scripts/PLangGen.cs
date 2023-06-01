@@ -1,4 +1,5 @@
-﻿using Pixel.Types.Components;
+﻿using Pixel.Statics;
+using Pixel.Types.Components;
 using PixelLang.Interpreters;
 using PixelLang.Tools;
 using System;
@@ -12,26 +13,18 @@ namespace Pixel
 {
     public class HookTest : Component
     {
-
+        int? hndl;
         [Method]
         public void Test()
         {
-            PLangHook.HookIntoRenderLoop("");
-            InputProcessor.TryCallLine(
-                "var num = 0; " +
-                "function Update { " +
-                "                  " +
-                "                   " +
-                "                   " +
-                "                   " +
-                " }; ");
-               
-               
-               
-               
-               
-               
-               
+            InputProcessor.TryCallLine("var num = 0; \n function Update { \n => clear; \n num = num + 1; \n => print num; \n }; ");
+            hndl = PLangHook.HookIntoRenderLoop(" => Update; ");
+        }
+        [Method]
+        public void Unhook()
+        {
+            if(hndl.HasValue)
+                PLangHook.Unhook(hndl.Value);
         }
 
         public override void Dispose()
@@ -43,15 +36,9 @@ namespace Pixel
     public static class PLangHook
     {
         public static int[] handles = new int[64];
-        public static List<Action> unhook = new(); 
+        public static Dictionary<int , Action> unhook = new(); 
         public const int HRENDER = 0;
-        
-        static PLangHook()
-        {
-            handles[HRENDER] = 1;
-        }
-
-        public static void HookIntoRenderLoop(string functionDeclaration)
+        public static int HookIntoRenderLoop(string functionDeclaration)
         {
             var funct_decl = GetNextHook(handles[HRENDER]++, functionDeclaration, out var name);
 
@@ -59,28 +46,32 @@ namespace Pixel
 
             Runtime.Current.renderHost.OnRenderCompleted += hook_function;
 
-            unhook.Add(delegate
+            unhook.Add(handles[HRENDER], delegate
             {
                 Runtime.Current.renderHost.OnRenderCompleted -= hook_function;
             });
 
+            return handles[HRENDER];
+
             void hook_function(double _) => InputProcessor.TryCallLine($"=> {name} ;");
         }
-
-        
-
         public static void UnhookAll()
         {
             foreach (var hook in unhook)
-                hook?.Invoke();
+                hook.Value?.Invoke();
             unhook.Clear();
+        }
+        public static void Unhook(int handle)
+        {
+            unhook[handle]?.Invoke();
+            unhook.Remove(handle);
         }
         public static string GetNextHook(int handle, string decl, out string name)
         {
             name = get_render_hook_function_name();
             var decl_str = $"function {name} {{{decl }}} ;";
             return decl_str;
-            string get_render_hook_function_name() => $"Render{handle}";
+            string get_render_hook_function_name() => $"{"V" + UUID.NewUUID()}{handle}";
         }
     }
 
