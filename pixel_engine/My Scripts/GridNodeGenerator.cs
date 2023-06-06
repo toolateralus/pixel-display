@@ -18,7 +18,7 @@ namespace Pixel
     public class GridNodeGenerator : Component
     {
         List<Node> nodes = new();
-        private float radius = 2;
+        private float radius = 0.0015f * 75f;
         private int length = 32;
 
         private Vector3 pos_depth = default;
@@ -28,16 +28,7 @@ namespace Pixel
         private Animation<Vector3> pos;
         private Animation<Color> colors;
 
-        public static Color[] Pallette = new Color[] {
-                System.Drawing.Color.Black,
-                System.Drawing.Color.Gray,
-                System.Drawing.Color.MediumOrchid,
-                System.Drawing.Color.MediumSeaGreen,
-                System.Drawing.Color.MediumSlateBlue,
-                System.Drawing.Color.MediumAquamarine,
-                System.Drawing.Color.DeepPink,
-                System.Drawing.Color.White,
-        };
+        
 
         // you must dispose of any references to nodes and components here, simply set them as null.
         public override void Dispose()
@@ -49,7 +40,7 @@ namespace Pixel
         public override void Awake()
         {
             const int max = 16;
-            var pair = Sine.GetColorfulSineWaveAnim(length, radius);
+            var pair = Sine.GetColorfulSineWaveAnim(length, radius, alpha : 250, frameTime: 4);
             pos = pair.pos;
             colors = pair.col;
             AssembleGrid(max);
@@ -78,7 +69,7 @@ namespace Pixel
                 _pos = node.Position;
                 _pos.X += pos_depth.X;
                 _pos.Y += pos_depth.Y;
-                DrawLine(_pos, _pos * radius, _col * pos_depth.Z);
+                DrawCircleFilled(_pos, radius, _col);
             }
         }
     }

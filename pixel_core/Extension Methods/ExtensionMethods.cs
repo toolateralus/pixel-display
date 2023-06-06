@@ -118,10 +118,17 @@ namespace Pixel
             for (int i = 0; i < array.Count; i++)
             {
                 Node? x = array[i];
-                x.Destroy();
+                x?.Destroy();
             }
         }
-
+        public static void DestroyAll(this List<Component> array)
+        {
+            for (int i = 0; i < array.Count; i++)
+            {
+                Component? x = array[i];
+                x?.node?.Destroy();
+            }
+        }
 
         #endregion
 

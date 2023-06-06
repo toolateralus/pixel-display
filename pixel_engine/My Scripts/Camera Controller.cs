@@ -36,9 +36,6 @@ namespace Pixel
 
         public override void FixedUpdate(float delta)
         {
-            const int divisorA = 10;
-            const int divisorB = divisorA * 10;
-
             if (camera is null)
                 return;
 

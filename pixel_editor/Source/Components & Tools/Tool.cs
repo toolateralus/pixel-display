@@ -32,8 +32,6 @@ namespace Pixel_Editor
                 var obj = Activator.CreateInstance(type);
                 if (obj is Tool tool)
                     list.Add(tool);
-              
-
             }
 
             foreach (Tool tool in list)

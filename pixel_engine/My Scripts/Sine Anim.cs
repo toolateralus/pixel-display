@@ -56,7 +56,7 @@ namespace Pixel
             Animation<Vector3> pos;
             Animation<Color> colors;
             
-            col[0] = Color.White;
+            col[0] = Color.Clear;
             positions[0] = new(radius, 0, 0);
             
             Vector2 position = default;
@@ -79,7 +79,7 @@ namespace Pixel
                 if (sine < 0)
                     depth /= 3;
 
-                color = Gradient.Sample(i, length, alpha: alpha, GridNodeGenerator.Pallette);
+                color = Gradient.Sample(i, length, alpha: alpha, Gradient.Pallette);
 
                 col[i] = color;
 
