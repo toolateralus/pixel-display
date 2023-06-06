@@ -10,6 +10,7 @@ using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PixelLang.Tools;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Pixel
 {
@@ -19,6 +20,7 @@ namespace Pixel
     public class Entity : Component
     {
         const int startHp = 100;
+        [Field]
         int health = startHp;
         bool dead = false;
 
@@ -71,7 +73,7 @@ namespace Pixel
         Rigidbody rb;
         Animator anim;
         Camera cam;
-        
+
         public override void Dispose()
         {
             Audio.FreePlayer(song_handle);
@@ -88,9 +90,16 @@ namespace Pixel
                 if (hit_list.Count > 0)
                 {
                     (int dmg, int speed) weapon = inventory.GetWeaponDamageAndSpeed();
-                    Entity entity = hit_list.First();
+                    
+                    Entity entity = hit_list.FirstOrDefault();
+                    
+                    if (entity is null)
+                        return; 
+
                     Runtime.Log($"dealing {weapon.dmg} damage to {entity.node}");
+
                     entity.Damage(weapon.dmg);
+                    
                     hit_cooldown = true;
                     
                     Task cooldown = new Task(async delegate {

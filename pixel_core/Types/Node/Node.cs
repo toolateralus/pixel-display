@@ -172,8 +172,6 @@ namespace Pixel
                 Transform.M22 = value.Y;
             }
         }
-
-
         #region Hierarchy Functions
         /// <summary>
         /// The method used to insert a node as child of this one.
@@ -307,7 +305,6 @@ namespace Pixel
                     node.SubscribeToEngine(v);
             }
         }
-
         /// <summary>
         /// Destroys this node and all of it's components.
         /// </summary>
@@ -330,7 +327,6 @@ namespace Pixel
                 foreach (var c in component.Value)
                     c.Dispose();
         }
-       
         internal protected void update_transform_hierarchy_internal(float delta)
         {
             for (int i = 0; i < children.Count; i++)
@@ -348,7 +344,6 @@ namespace Pixel
         }
         #endregion
         #region Component Functions
-
         public Component AddComponent(Type type)
         {
             if (type.IsAbstract)
@@ -373,10 +368,8 @@ namespace Pixel
         {
             var type = component.GetType();
 
-
             if (type == typeof(Component))
                 throw new InvalidOperationException("Generic type component was added.");
-
 
             if (type == typeof(Sprite))
                 sprite = component as Sprite; 
@@ -384,6 +377,7 @@ namespace Pixel
             if (type == typeof(Rigidbody))
                 rb = component as Rigidbody;
 
+            // TODO: fix this - really refactor all of collision... this is a massive oversight - this completely ruins the functionality of multiple colliders and it makes adding triggers to nodes that use collision impossible.
             if (type == typeof(Collider))
                 col = component as Collider;
 
@@ -392,7 +386,6 @@ namespace Pixel
 
             Components[type].Add(component);
             component.node = this;
-
 
             if (Interop.IsRunning && !component.awake)
                 component.init_component_internal();
@@ -451,6 +444,9 @@ namespace Pixel
         {
             var type = component.GetType();
 
+            // frees resources, could do this with reflection at the cost of computational expense, deletion is already kinda expensive.
+            component.Dispose(); 
+
             UnsubscribeComponent(component);
 
             if (Components.ContainsKey(type))
@@ -481,7 +477,6 @@ namespace Pixel
                 }
             }
         }
-
         /// <summary>
         /// Check whether a node does or doesn't have a certain type of component.
         /// </summary>
@@ -541,6 +536,5 @@ namespace Pixel
             return component;
         }
         #endregion
-
     }
 }

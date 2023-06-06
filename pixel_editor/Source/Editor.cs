@@ -107,15 +107,10 @@ namespace Pixel_Editor
 
             fileViewer = new();
 
-            Console.Print(motd);
-
             InterpreterOutput.Stream += (obj) => Console.Print(obj);
             InterpreterOutput.DebugMetrics += ConsoleControl.ShowMetrics;
             InterpreterOutput.OnClearRequested += ConsoleControl.ClearAll;
             DataContext = viewModel;
-
-
-            
 
             foreach (var item in Runtime.AllComponents)
             {

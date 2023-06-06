@@ -51,8 +51,9 @@ namespace Pixel
         [JsonProperty]
         public Color colliderPixel = System.Drawing.Color.LimeGreen;
 
+        [Field]
         [JsonProperty]
-        public bool IsTrigger { get; internal set; } = false;
+        public bool IsTrigger = false;
 
         [JsonProperty]
         private BoundingBox2D boundingBox = new();
