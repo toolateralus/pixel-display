@@ -9,6 +9,7 @@ using Assimp.Configs;
 using Metadata = Pixel.FileIO.Metadata;
 using Pixel.Types.Physics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Pixel.Assets
 {
@@ -34,7 +35,7 @@ namespace Pixel.Assets
 
             Vector2[] vectors = new Vector2[mesh.Vertices.Count + 1];
 
-            for (int i = 0; i < mesh.Vertices.Count; i++)
+            for (int i = mesh.Vertices.Count - 1; i >= 0; i--)
             {
                 Vector3D vertex = mesh.Vertices[i];
                 vectors[i] = new(vertex.X, vertex.Y);
@@ -105,7 +106,8 @@ namespace Pixel.Assets
             var pngs = Import(_dir, ".png");
             var audioFiles = Import(_dir, ".mp3");
             var lua_scripts = Import(_dir, ".lua");
-            var pl_scripts = Import(_dir, ".pl");
+            var pl_scripts = Import(_dir, ".pxl");
+            var obj_meshes = Import(_dir, ".obj");
 
             foreach (var item in assets)
             {
@@ -125,9 +127,14 @@ namespace Pixel.Assets
                 Library.Register(script, text);
             }
 
+
+
+
+
             // this hold all "assets" or files without pre-loaded data, which get stored with a null value and just point to the file.
             var other = bmps.Concat(pngs);
             other = other.Concat(audioFiles);
+            other = other.Concat(obj_meshes);
 
             foreach (var item in other)
                 Library.Register(item, null);

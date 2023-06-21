@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Pixel.Assets;
 using Pixel.Types.Components;
 using Pixel.Types.Physics;
 using System.Drawing;
@@ -107,6 +108,17 @@ namespace Pixel
             }
             Interop.Log($"{node.Name}'s collider now has primitive shape : {primitive}");
         }
+
+        [Method]
+        async void MeshColliderFromSelectedAsset()
+        {
+            var task = Interop.GetSelectedFileMetadataAsync();
+            await task;
+            var meta = task.Result;
+            var poly = MeshImporter.GetPolygonFromMesh(meta);
+            SetModel(poly);
+        }
+
         public override void Dispose()
         {
         }

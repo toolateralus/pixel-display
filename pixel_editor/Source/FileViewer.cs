@@ -79,6 +79,11 @@ namespace Pixel_Editor
                     return "\t- - - User Asset Files - - -";
                 case ".lua":
                     return "\t- - - Lua Script Files - - -";
+                case ".pxl":
+                    return "\t- - - Pixel Script Files - - -";
+                case ".obj":
+                    return "\t- - - Obj Mesh Files - - -";
+
                 default:
                     return "\t- !! - Unknown Files - !! -"; // Sort unknown file extensions to the end
             }
@@ -99,6 +104,10 @@ namespace Pixel_Editor
                     return 4;
                 case ".lua":
                     return 5;
+                case ".pxl":
+                    return 6;
+                case ".obj":
+                    return 7;
                 default:
                     return int.MaxValue; // Sort unknown file extensions to the end
             }
