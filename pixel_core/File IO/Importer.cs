@@ -14,18 +14,23 @@ namespace Pixel.Assets
 {
     public class MeshImporter
     {
-        public static Collider GenerateMeshCollider(Metadata meta)
+        public static Collider NewMeshCollider(Metadata meta)
+        {
+            var poly = GetPolygonFromMesh(meta);
+            Node node = new();
+            var collider = node.AddComponent<Collider>();
+            collider.SetModel(poly);
+            return collider;
+        }
+        public static Polygon GetPolygonFromMesh(Metadata meta)
         {
             AssimpContext importer = new AssimpContext();
             importer.SetConfig(new NormalSmoothingAngleConfig(66.0f));
             Scene scene = importer.ImportFile(meta.Path, PostProcessPreset.TargetRealTimeMaximumQuality);
             Mesh mesh = scene.Meshes[0];
 
-            Node node = new();
-            var collider = node.AddComponent<Collider>();
-
             if (scene.MeshCount == 0)
-                return collider;
+                throw new NullReferenceException($"No meshes were found in {meta.Path}");
 
             Vector2[] vectors = new Vector2[mesh.Vertices.Count + 1];
 
@@ -35,9 +40,7 @@ namespace Pixel.Assets
                 vectors[i] = new(vertex.X, vertex.Y);
             }
 
-            var polygon = new Polygon(vectors);
-            collider.SetModel(polygon);
-            return collider;
+            return new Polygon(vectors);
         }
 
     }
