@@ -93,7 +93,7 @@ namespace Pixel_Editor
                 commandHistory.Add(cmd);
             commandHistoryIndex = 0;
 
-            Dispatcher.InvokeAsync(async () => await InputProcessor.TryCallLine(cmd));
+            Task.Run(() => InputProcessor.TryCallLine(cmd));
         }
         private void ClearDebug() => Dispatcher.Invoke(() => DebugMessages.Clear());
         public void AddMessage(string message)

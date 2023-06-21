@@ -93,8 +93,7 @@ namespace Pixel
             switch (language)
             {
                 case ScriptingLanguage.PixelLang:
-                    var execution = InputProcessor.TryCallLine(value);
-                    await execution;
+                    InputProcessor.TryCallLine(value);
                     break;
                 case ScriptingLanguage.LUA:
                     var lua_exe = LUA.FromString(value);

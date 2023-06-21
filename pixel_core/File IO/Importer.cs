@@ -4,9 +4,44 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Assimp;
+using Assimp.Configs;
+using Metadata = Pixel.FileIO.Metadata;
+using Pixel.Types.Physics;
+using System.Numerics;
 
 namespace Pixel.Assets
 {
+    public class MeshImporter
+    {
+        public static Collider GenerateMeshCollider(Metadata meta)
+        {
+            AssimpContext importer = new AssimpContext();
+            importer.SetConfig(new NormalSmoothingAngleConfig(66.0f));
+            Scene scene = importer.ImportFile(meta.Path, PostProcessPreset.TargetRealTimeMaximumQuality);
+            Mesh mesh = scene.Meshes[0];
+
+            Node node = new();
+            var collider = node.AddComponent<Collider>();
+
+            if (scene.MeshCount == 0)
+                return collider;
+
+            Vector2[] vectors = new Vector2[mesh.Vertices.Count + 1];
+
+            for (int i = 0; i < mesh.Vertices.Count; i++)
+            {
+                Vector3D vertex = mesh.Vertices[i];
+                vectors[i] = new(vertex.X, vertex.Y);
+            }
+
+            var polygon = new Polygon(vectors);
+            collider.SetModel(polygon);
+            return collider;
+        }
+
+    }
+
     public class Importer
     {
         public const int maxDepth = 100;
