@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Pixel.Types.Physics;
+using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -82,10 +84,40 @@ namespace Pixel
         }
         public static Color[,] SolidColorSquare(Vector2 size, Color color)
         {
-            var colorData = new Color[(int)size.X, (int)size.Y];
-            for (int x = 0; x < size.X; x++)
-                for (int y = 0; y < size.Y; y++)
+            int sz_x = (int)Math.Floor(size.X);
+            int sz_y = (int)Math.Floor(size.Y);
+
+            var colorData = new Color[sz_x, sz_y];
+            for (int x = 0; x < sz_x; x++)
+                for (int y = 0; y < sz_y; y++)
                     colorData[x, y] = color;
+            return colorData;
+        }
+        public static Color[,] SolidColorPolygon(Polygon polygon, Color color)
+        {
+            BoundingBox2D boundingRect = Polygon.GetBoundingBox(polygon.vertices);
+            int width = (int)Math.Ceiling(boundingRect.Width);
+            int height = (int)Math.Ceiling(boundingRect.Height);
+
+            // Create the color data array
+            var colorData = new Color[width, height];
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    // Calculate the global position of the pixel
+                    Vector2 globalPos = new Vector2(x + boundingRect.X, y + boundingRect.Y);
+
+                    // Check if the pixel is inside the polygon
+                    if (polygon.ContainsPoint(globalPos))
+                    {
+                        // Set the color for the pixel
+                        colorData[x, y] = color;
+                    }
+                }
+            }
+
             return colorData;
         }
         public static void RenderFromFrame(byte[] frame, int stride, Vector2 resolution, System.Windows.Controls.Image output)
