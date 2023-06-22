@@ -58,10 +58,6 @@ namespace Pixel_Engine.My_Scripts
                 if (polygon != null)
                 {
                     Color[,] colorArray = CBit.SolidColorPolygon(polygon, Color);
-
-                    if (texture.Name == Texture.Default.Name)
-                        texture = new Texture(Polygon.GetBoundingBox(polygon.vertices).max, Color, "CustomSprite" + UUID);
-       
                     texture.SetImage(colorArray);
                 }
             }

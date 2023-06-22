@@ -4,6 +4,7 @@ using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices;
 using System.Linq;
 using System.Numerics;
@@ -497,7 +498,7 @@ namespace Pixel
         /// <param name="component"></param>
         /// <param name="index"></param>
         /// <returns>False and null if component didn't exist, else true and component will be the component found.</returns>
-        public bool TryGetComponent<T>(out T component, int index = 0) where T : Component
+        public bool TryGetComponent<T>([NotNullWhen(true)]out T component, int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
             {

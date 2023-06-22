@@ -30,7 +30,10 @@ namespace Pixel
         public override void OnTrigger(Collision collision)
         {
             if (collision.collider.TryGetComponent<Entity>(out var ent) && !hit_list.Contains(ent) && ent != this)
+            {
                 hit_list.Add(ent);
+                Runtime.Log($"entity {ent.Name} added to {Name}'s hit-list (for melee)");
+            }
         }
 
         public void Damage(int value)
@@ -109,10 +112,13 @@ namespace Pixel
                     });
 
                     cooldown.Start();
+
+                    hit_list.Remove(entity);
                 }
         }
         public override void Awake()
         {
+            node.tag = "PLAYER";
             node.TryGetComponent(out rb);
 
             Item weapon = new("default weapon", ItemType.Weapon, 0, new Dictionary<string, int>

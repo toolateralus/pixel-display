@@ -127,11 +127,6 @@ namespace Pixel
             {
                 case ImageType.SolidColor:
                     Color[,] colorArray = CBit.SolidColorSquare(Scale, Color);
-
-                    if (texture.Name == Texture.Default.Name)
-                    {
-                        this.texture = new(Scale, Color, "Sprite" + UUID);
-                    }
                     texture.SetImage(colorArray);
 
                     break;
@@ -261,6 +256,7 @@ namespace Pixel
             viewport.Transform(Transform);
             return viewport.vertices;
         }
+
         internal void SetImage(Color[,] colors) => texture.SetImage(colors);
         public void SetImage(Vector2 size, byte[] color)
         {
@@ -274,6 +270,7 @@ namespace Pixel
                 SetImage(size, image.data);
             }
         }
+
         public override void Dispose()
         {
             texture = null;

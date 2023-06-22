@@ -138,6 +138,9 @@ namespace Pixel
         }
         public static void Unhook(int handle)
         {
+            if (unhook.ContainsKey(handle))
+                return;
+
             unhook[handle]?.Invoke();
             unhook.Remove(handle);
         }

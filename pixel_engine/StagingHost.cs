@@ -19,7 +19,10 @@ namespace Pixel
             Node floor = Floor.Standard();
 
             Node node = new("camera");
-            var cam = node.AddComponent<CameraController>();
+
+            var cam = node.AddComponent<Camera>();
+            // set aspect ratio for widescreen, as stage is.
+            cam.Scale = new(16, 9);
 
             stage.AddNode(floor);
             stage.AddNode(node);

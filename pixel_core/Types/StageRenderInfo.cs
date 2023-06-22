@@ -80,6 +80,10 @@ namespace Pixel
         {
             if (refObject is not Sprite sprite)
                 throw new ArgumentException($"Must pass in object of type {nameof(Sprite)}");
+            
+            // avoid drawing disabled sprites, might be hacky not sure.
+            if (!sprite.Enabled)
+                return;
 
             ViewportOffset = sprite.viewportOffset;
             ViewportScale = sprite.viewportScale.GetDivideSafe();
