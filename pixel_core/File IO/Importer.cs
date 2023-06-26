@@ -27,11 +27,11 @@ namespace Pixel.Assets
         {
             AssimpContext importer = new AssimpContext();
             importer.SetConfig(new NormalSmoothingAngleConfig(66.0f));
-            Scene scene = importer.ImportFile(meta.Path, PostProcessPreset.TargetRealTimeMaximumQuality);
+            Scene scene = importer.ImportFile(meta.FullPath, PostProcessPreset.TargetRealTimeMaximumQuality);
             Mesh mesh = scene.Meshes[0];
 
             if (scene.MeshCount == 0)
-                throw new NullReferenceException($"No meshes were found in {meta.Path}");
+                throw new NullReferenceException($"No meshes were found in {meta.FullPath}");
 
             Vector2[] vectors = new Vector2[mesh.Vertices.Count + 1];
 

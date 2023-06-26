@@ -13,9 +13,10 @@ namespace Pixel
     public class StagingHost
     {
         public Node? lastSelected;
-        public static Stage Standard()
+        public static void AddStandard()
         {
             var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, new());
+            Runtime.Current.SetStage(stage);
 
             Node floor = Floor.Standard();
             floor.Position = floor.Position.WithValue(y: floor.Position.Y + 100);
@@ -32,8 +33,6 @@ namespace Pixel
             stage.AddNode(automa);
             stage.AddNode(floor);
             stage.AddNode(node);
-           
-            return stage;
         }
         /// <summary>
         /// this is used for editor clicking.

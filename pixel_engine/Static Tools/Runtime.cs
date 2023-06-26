@@ -327,16 +327,7 @@ namespace Pixel
             Interop.OnStageSet += SetStage;
             Interop.OnFileViewer_SelectedMetadata_Query += GetSelectedFileMetadataAsync;
             Interop.OnEditorEventRaised += RaiseInspectorEvent;
-            Interop.OnDefaultStageRequested += () =>
-            {
-                Stage stage = new("Default Stage", Stage.DefaultBackgroundMetadata, new());
-                SetStage(stage);
-                Node floor = Floor.Standard();
-                Node node = new("camera");
-                var cam = node.AddComponent<CameraController>();
-                stage.AddNode(floor);
-                stage.AddNode(node);
-            };
+            Interop.OnDefaultStageRequested += StagingHost.AddStandard;
             Interop.OnStageAddedToProject += (stage) => project.AddStage(stage);
 
             renderHost = new();
