@@ -16,6 +16,39 @@ namespace Pixel_Engine.My_Scripts
         }
         public void Initialize(Vector2 Position, int X, int Y, CellularAutoma automa)
         {
+            InitializeLists();
+
+            GetTrigger(Position, X, Y, automa);
+
+            automa.perlin.Seed = Random.Shared.Next();
+
+            GenerateBlocks(Position, automa);
+
+            automa.SetAllChunksActive(false);
+
+            static void GetTrigger(Vector2 Position, int X, int Y, CellularAutoma automa)
+            {
+                Node trigger = new();
+                Collider? collider = trigger.AddComponent<Collider>();
+                collider.IsTrigger = true;
+
+                Vector2 centerPosition = Position + new Vector2(width * CellularAutoma.distributionMagnitude / 2f, width * CellularAutoma.distributionMagnitude / 2f);
+                collider.Position = centerPosition;
+                collider.Scale = new Vector2(20, 20);
+
+                trigger.OnTriggered += (col) =>
+                {
+                    if (col.collider.node.tag != "PLAYER")
+                        return;
+
+                    Runtime.Log($"PLAYER triggered chunk collider at x:{X} y:{Y}");
+                    automa.SetChunkActive(X, Y, true);
+                };
+            }
+        }
+
+        private void InitializeLists()
+        {
             for (int i = 0; i < width; i++)
             {
                 var innerList = new List<Node>(width);
@@ -25,24 +58,10 @@ namespace Pixel_Engine.My_Scripts
                 }
                 Add(innerList);
             }
+        }
 
-
-            Node trigger = new();
-            Collider? collider = trigger.AddComponent<Collider>();
-            collider.IsTrigger = true;
-            collider.Position = Position;
-            collider.Scale = new Vector2(20, 20);
-            trigger.OnTriggered += (col) =>
-            {
-                if (col.collider.node.tag != "PLAYER")
-                    return;
-
-                Runtime.Log($"PLAYER triggered chunk collider at x:{X} y:{Y}");
-                automa.SetChunkActive(X, Y, true);
-            };
-
-            automa.perlin.Seed = Random.Shared.Next();
-
+        private void GenerateBlocks(Vector2 Position, CellularAutoma automa)
+        {
             for (int x = 0; x < width; x += 2)
             {
                 for (int y = 0; y < width; y += 2)
@@ -50,7 +69,7 @@ namespace Pixel_Engine.My_Scripts
                     float v = automa.perlin.GetValue(x, y, x * y);
                     if (v < fill && v > -fill)
                     {
-                        bool isVoid = true; 
+                        bool isVoid = true;
                         for (int z = 0; z < 2; ++z)
                         {
                             for (int n = 0; n < 2; ++n)
@@ -84,32 +103,42 @@ namespace Pixel_Engine.My_Scripts
                     }
                 }
             }
-            automa.SetAllChunksActive(false);
         }
+
         public static void DispenseCoins(CellularAutoma automa, int max)
         {
             int i = 0;
             foreach (var pos in automa.occupiedPositions)
             {
-                if (i > max)
+                if (i >= max)
                     return;
 
-                for (int x = 0; x <= 1; x += 2)
-                    for (int y = 0; y <= 1; y += 2)
-                    {
-                        Vector2 v = new Vector2(x, y) + pos;
-                        if (automa.occupiedPositions.Contains(v))
-                        {
-                            continue;
-                        }
+                bool isVoid = true;
 
-                        Node coin = Coin.Standard();
-                        coin.Position = pos;
-                        Runtime.Log("coin placed");
-                        i++;
+                for (int x = -1; x <= 1; x += 2)
+                {
+                    for (int y = -1; y <= 1; y += 2)
+                    {
+                        Vector2 neighbor = pos + new Vector2(x, y);
+
+                        if (automa.occupiedPositions.Contains(neighbor))
+                        {
+                            isVoid = false;
+                            break;
+                        }
                     }
 
-                
+                    if (!isVoid)
+                        break;
+                }
+
+                if (isVoid)
+                {
+                    Node coin = Coin.Standard();
+                    coin.Position = pos;
+                    Runtime.Log("coin placed");
+                    i++;
+                }
             }
         }
 

@@ -34,14 +34,7 @@ namespace Pixel_Editor
                 PopulateCommandLists();
             }
         }
-        public static ExternFunction help() => new((args) => { 
-            foreach (var item in ExternFunction.Library())
-            {
-                var info = ExternFunction.GetInfo(item);
-                Print($"{item.StrVal} : {info}");
-            }
-            return Token.null_token;
-        }, "Shows a list of all available functions and some info");
+        
         public static ExternFunction cd() => new((args) =>
         {
             Token? token = args.FirstOrDefault();
@@ -62,6 +55,26 @@ namespace Pixel_Editor
         }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\ and cannot be in a sub-directory.")
         { StrVal = "cd"};
         public static ExternFunction reimport() => new((args) => { Importer.Import(); return Token.null_token; }, "runs the importer and refreshes the asset library.");
+        public static ExternFunction getnode() => new((args) => {
+
+            var node = Runtime.Current.GetStage().FindNode(args.First().StrVal);
+            InspectorControl.SelectNode(node);
+            if (node is null)
+                return new(false);
+            return new(true);
+
+        }, "runs the importer and refreshes the asset library.");
+        public static ExternFunction listnodes() => new((args) => {
+
+            var stage = Runtime.Current.GetStage();
+
+            int i = 0;
+            foreach (var item in stage.nodes)
+                Print(i++ + item.Name);
+
+            return Token.null_token;
+
+        }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
         {
             var type = Current.GetType();

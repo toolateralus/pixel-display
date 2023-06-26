@@ -23,12 +23,10 @@ namespace Pixel
             Node node = new("camera");
 
             var cam = node.AddComponent<Camera>();
-            // set aspect ratio for widescreen, since stage background is.
             cam.Scale = new(16, 9);
 
             Node automa = CellularAutoma.Standard();
 
-            // using this default stage has revealed some issues about the way nodes are initialized, it is very broken and seemingly unpredictable.
             stage.AddNode(automa);
             stage.AddNode(floor);
             stage.AddNode(node);
