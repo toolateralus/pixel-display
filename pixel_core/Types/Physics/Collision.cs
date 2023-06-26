@@ -48,9 +48,13 @@ namespace Pixel.Types.Physics
             for( int i = 0; i < stage.nodes.Count; ++i)
             {
                 if (stage.nodes.Count <= i)
-                    return;
+                    break;
 
                 Node? node = stage.nodes[i];
+                
+                if (node == null)
+                    continue; 
+
                 var hasCollider = node.col != null;
                 if (hasCollider)
                     quadTree.Insert(node);
