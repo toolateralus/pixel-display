@@ -13,9 +13,6 @@ namespace Pixel
 {
     public static class ExtensionMethods
     {
-
-
-
         #region Matrices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Matrix3x2 Inverted(this Matrix3x2 matrix)
@@ -32,7 +29,6 @@ namespace Pixel
             matrix.M22 = scale.Y;
         }
         #endregion
-
         #region Strings
         public static Vector2 ToVector(this string input)
         {
@@ -98,7 +94,6 @@ namespace Pixel
             return output;
         }
         #endregion
-
         #region Arrays
         /// <summary>
         /// 
@@ -108,6 +103,9 @@ namespace Pixel
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T[] Flatten<T>(this T[,] array)
         {
+            if (array is null)
+                return default;
+
             List<T> result = new(array.GetLength(0) + array.GetLength(1));
             foreach (var x in array)
                 result.Add(x);
@@ -115,16 +113,27 @@ namespace Pixel
         }
         public static void DestroyAll(this List<Node> array)
         {
+            if (array is null)
+                return;
+
             for (int i = 0; i < array.Count; i++)
             {
                 Node? x = array[i];
-                x.Destroy();
+                x?.Destroy();
             }
         }
+        public static void DestroyAll(this List<Component> array)
+        {
+            if (array is null)
+                return;
 
-
+            for (int i = 0; i < array.Count; i++)
+            {
+                Component? x = array[i];
+                x?.node?.Destroy();
+            }
+        }
         #endregion
-
         #region Image
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static System.Windows.Point GetNormalizedPoint(this System.Windows.Controls.Image img, System.Windows.Point pos)

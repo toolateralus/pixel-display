@@ -4,9 +4,48 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Assimp;
+using Assimp.Configs;
+using Metadata = Pixel.FileIO.Metadata;
+using Pixel.Types.Physics;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Pixel.Assets
 {
+    public class MeshImporter
+    {
+        public static Collider NewMeshCollider(Metadata meta)
+        {
+            var poly = GetPolygonFromMesh(meta);
+            Node node = new();
+            var collider = node.AddComponent<Collider>();
+            collider.SetModel(poly);
+            return collider;
+        }
+        public static Polygon GetPolygonFromMesh(Metadata meta)
+        {
+            AssimpContext importer = new AssimpContext();
+            importer.SetConfig(new NormalSmoothingAngleConfig(66.0f));
+            Scene scene = importer.ImportFile(meta.Path, PostProcessPreset.TargetRealTimeMaximumQuality);
+            Mesh mesh = scene.Meshes[0];
+
+            if (scene.MeshCount == 0)
+                throw new NullReferenceException($"No meshes were found in {meta.Path}");
+
+            Vector2[] vectors = new Vector2[mesh.Vertices.Count + 1];
+
+            for (int i = mesh.Vertices.Count - 1; i >= 0; i--)
+            {
+                Vector3D vertex = mesh.Vertices[i];
+                vectors[i] = new(vertex.X, vertex.Y);
+            }
+
+            return new Polygon(vectors);
+        }
+
+    }
+
     public class Importer
     {
         public const int maxDepth = 100;
@@ -69,6 +108,7 @@ namespace Pixel.Assets
             var audioFiles = Import(_dir, Constants.Mp3Ext);
             var lua_scripts = Import(_dir, Constants.LuaExt);
             var pl_scripts = Import(_dir, Constants.PixelLangExt);
+            var obj_meshes = Import(_dir, ".obj");
 
             foreach (var item in assets)
             {
@@ -93,9 +133,14 @@ namespace Pixel.Assets
                 Library.Register(script, text);
             }
 
+
+
+
+
             // this hold all "assets" or files without pre-loaded data, which get stored with a null value and just point to the file.
             var other = bmps.Concat(pngs);
             other = other.Concat(audioFiles);
+            other = other.Concat(obj_meshes);
 
             foreach (var item in other)
                 Library.Register(item, null);

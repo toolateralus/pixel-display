@@ -16,7 +16,15 @@ namespace Pixel
         /// <param name="alpha"></param>
         /// <param name="gradientColors"></param>
         /// <returns></returns>
-        public static Color Sample(int position, int subdivisions = 360, byte alpha = 255, Color[]? gradientColors = null)
+        /// 
+        public static Color[] Pallette = new Color[] {
+        System.Drawing.Color.MediumOrchid,
+                System.Drawing.Color.MediumSeaGreen,
+                System.Drawing.Color.MediumSlateBlue,
+                System.Drawing.Color.MediumAquamarine,
+                System.Drawing.Color.DeepPink,
+        };
+    public static Color Sample(int position, int subdivisions = 360, byte alpha = 255, Color[]? gradientColors = null)
             {
                 if (position >= subdivisions)
                     position = subdivisions - 1;

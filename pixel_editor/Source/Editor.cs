@@ -13,6 +13,9 @@ using Brushes = System.Windows.Media.Brushes;
 using Image = Pixel.Image;
 using PixelLang.Tools;
 using System.Windows.Threading;
+using System.Reflection;
+using System.Linq;
+using Pixel.Types.Components;
 
 namespace Pixel_Editor
 {
@@ -86,7 +89,7 @@ namespace Pixel_Editor
             viewModel = new();
 
             Importer.Import(false);
-
+            Audio.Initialize();
             InitializeSettings();
 
             Project project = Project.Default;
@@ -104,12 +107,27 @@ namespace Pixel_Editor
 
             fileViewer = new();
 
-            Console.Print(motd);
-
-            PixelLang.Tools.Console.Stream += (obj) => Console.Print(obj);
-            PixelLang.Tools.Console.DebugMetrics += ConsoleControl.ShowMetrics;
-            PixelLang.Tools.Console.OnClearRequested += ConsoleControl.ClearAll;
+            InterpreterOutput.Stream += (obj) => Console.Print(obj);
+            InterpreterOutput.DebugMetrics += ConsoleControl.ShowMetrics;
+            InterpreterOutput.OnClearRequested += ConsoleControl.ClearAll;
             DataContext = viewModel;
+
+            foreach (var item in Runtime.AllComponents)
+            {
+                var methods = item.GetMethods();
+                foreach (var method in methods)
+                {
+                    if (method.GetParameters().Any())
+                        continue;
+
+                    if (method.Name == "Standard")
+                    {
+                        addNodeFunctions[item.Name] = (Func<Node>)method.CreateDelegate(typeof(Func<Node>));
+                        break;
+                    }
+                }
+            }
+
         }
         public EditorSettings settings;
         private TabItem draggedTabItem;

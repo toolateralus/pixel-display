@@ -34,51 +34,58 @@ namespace Pixel_Editor
                 PopulateCommandLists();
             }
         }
-        public static Function help() => new((args) => { 
-            foreach (var item in Function.Library())
+        public static ExternFunction help() => new((args) => { 
+            foreach (var item in ExternFunction.Library())
             {
-                var info = Function.GetInfo(item);
-                Print($"{item.Value} : {info}");
+                var info = ExternFunction.GetInfo(item);
+                Print($"{item.StrVal} : {info}");
             }
+            return Token.null_token;
         }, "Shows a list of all available functions and some info");
-        public static Function cd() => new((args) =>
+        public static ExternFunction cd() => new((args) =>
         {
             Token? token = args.FirstOrDefault();
 
             if (token is not null && token.Type == TType.STRING)
             {
-                var path = token.Value.Replace("\"", "");
+                var path = token.StrVal.Replace("\"", "");
                 path = path.Replace("\\", "");
                 path = path.Replace("\'", "");
                 path = path.Replace("/", "");
                 path = path.Replace("//", "");
 
                 CommandLine.SetCutsomScriptFolderPath(path);
-                PixelLang.Tools.Console.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
+                InterpreterOutput.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
             }
+            return Token.null_token;
 
         }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\ and cannot be in a sub-directory.")
-        { Value = "cd"};
-        public static Function reimport() => new((args) => { Importer.Import(); }, "runs the importer and refreshes the asset library.");
+        { StrVal = "cd"};
+        public static ExternFunction reimport() => new((args) => { Importer.Import(); return Token.null_token; }, "runs the importer and refreshes the asset library.");
         private static void PopulateCommandLists()
         {
             var type = Current.GetType();
             var methods = type.GetRuntimeMethods();
 
             foreach (var method in methods)
-                if (method.ReturnType == typeof(Function))
+                if (method.ReturnType == typeof(ExternFunction))
                 {
-                    Function? item = (Function)method.Invoke(null, null);
+                    ExternFunction? item = (ExternFunction)method.Invoke(null, null);
                     string name = method.Name;
-                    item.Value = name;
+                    item.StrVal = name;
                 }
 
             for (int i = 0; i < LUA.functions_list.Count; i++)
             {
                 LuaFunction? item = LUA.functions_list[i];
-                Function cmd = new((a) => item.Invoke(LUA.GetHandle()) , $"LUA {i}");
+                ExternFunction cmd = new((a) =>
+                {
+                    IntPtr hdnl = LUA.GetHandle();
+                    int value = item.Invoke(hdnl);
+                    return new(value);
+                }, $"LUA {i}");
                 string name = ParseMethodName(item);
-                cmd.Value = name;
+                cmd.StrVal = name;
             }
         }
         public static void Print(object? o, bool includeDateTime = false)

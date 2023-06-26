@@ -226,7 +226,7 @@ namespace Pixel.Assets
                     Bitmap bmp = new(meta.FullPath);
                     return bmp;
                 }
-                if (meta.Extension == ".lua")
+                if (meta.Extension == ".lua" || meta.Extension == ".pxl")
                 {
                     string script = IO.Read(meta);
                     return script;

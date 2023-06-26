@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Pixel.Types.Components;
 using Pixel.Types.Physics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices;
 using System.Linq;
 using System.Numerics;
@@ -172,8 +174,6 @@ namespace Pixel
                 Transform.M22 = value.Y;
             }
         }
-
-
         #region Hierarchy Functions
         /// <summary>
         /// The method used to insert a node as child of this one.
@@ -307,7 +307,6 @@ namespace Pixel
                     node.SubscribeToEngine(v);
             }
         }
-
         /// <summary>
         /// Destroys this node and all of it's components.
         /// </summary>
@@ -330,7 +329,6 @@ namespace Pixel
                 foreach (var c in component.Value)
                     c.Dispose();
         }
-       
         internal protected void update_transform_hierarchy_internal(float delta)
         {
             for (int i = 0; i < children.Count; i++)
@@ -348,7 +346,6 @@ namespace Pixel
         }
         #endregion
         #region Component Functions
-
         public Component AddComponent(Type type)
         {
             if (type.IsAbstract)
@@ -373,10 +370,8 @@ namespace Pixel
         {
             var type = component.GetType();
 
-
             if (type == typeof(Component))
                 throw new InvalidOperationException("Generic type component was added.");
-
 
             if (type == typeof(Sprite))
                 sprite = component as Sprite; 
@@ -384,6 +379,7 @@ namespace Pixel
             if (type == typeof(Rigidbody))
                 rb = component as Rigidbody;
 
+            // TODO: fix this - really refactor all of collision... this is a massive oversight - this completely ruins the functionality of multiple colliders and it makes adding triggers to nodes that use collision impossible.
             if (type == typeof(Collider))
                 col = component as Collider;
 
@@ -392,7 +388,6 @@ namespace Pixel
 
             Components[type].Add(component);
             component.node = this;
-
 
             if (Interop.IsRunning && !component.awake)
                 component.init_component_internal();
@@ -406,12 +401,12 @@ namespace Pixel
             if (Interop.Stage is Stage stage)
             {
                 OnDestroyed         += component.on_destroy_internal;
-                stage.OnDrawShapes  += component.on_draw_shapes_internal;
                 OnCollided          += component.on_collision_internal;
                 OnTriggered         += component.on_trigger_internal;
                 stage.Awake         += component.init_component_internal;
                 stage.Update        += component.update_internal;
                 stage.FixedUpdate   += component.fixed_update_internal;
+                stage.OnDrawShapes  += component.on_draw_shapes_internal;
             }
         }
         private void UnsubscribeComponent(Component component)
@@ -419,12 +414,12 @@ namespace Pixel
             if (Interop.Stage is Stage stage)
             {
                 OnDestroyed         -= component.on_destroy_internal;
-                stage.OnDrawShapes  -= component.on_draw_shapes_internal;
                 OnCollided          -= component.on_collision_internal;
-                OnTriggered         -= component.on_trigger_internal;
+                OnTriggered         -= component.on_trigger_internal;   
                 stage.Awake         -= component.init_component_internal;
                 stage.Update        -= component.update_internal;
                 stage.FixedUpdate   -= component.fixed_update_internal;
+                stage.OnDrawShapes  -= component.on_draw_shapes_internal;
             }
         }
         /// <summary>
@@ -450,6 +445,9 @@ namespace Pixel
         public void RemoveComponent(Component component)
         {
             var type = component.GetType();
+
+            // frees resources, could do this with reflection at the cost of computational expense, deletion is already kinda expensive.
+            component.Dispose(); 
 
             UnsubscribeComponent(component);
 
@@ -481,7 +479,6 @@ namespace Pixel
                 }
             }
         }
-
         /// <summary>
         /// Check whether a node does or doesn't have a certain type of component.
         /// </summary>
@@ -502,7 +499,7 @@ namespace Pixel
         /// <param name="component"></param>
         /// <param name="index"></param>
         /// <returns>False and null if component didn't exist, else true and component will be the component found.</returns>
-        public bool TryGetComponent<T>(out T component, int index = 0) where T : Component
+        public bool TryGetComponent<T>([NotNullWhen(true)]out T component, int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
             {
@@ -540,7 +537,15 @@ namespace Pixel
             T? component = Components[typeof(T)][index] as T;
             return component;
         }
-        #endregion
 
+        public void SetActive(bool value)
+        {
+            foreach (var list in Components)
+                foreach (var comp in list.Value)
+                    comp.Enabled = false;
+
+            Enabled = value;
+        }
+        #endregion
     }
 }

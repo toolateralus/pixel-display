@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Pixel.Assets;
 using Pixel.Types.Components;
 using Pixel.Types.Physics;
 using System.Drawing;
@@ -18,7 +19,7 @@ namespace Pixel
 
         [Field]
         // this is for the nGon editor method
-        int vertexCount = 6;
+        public int vertexCount = 6;
 
         /// <summary>
         /// Sets the model to a copy of input.
@@ -40,7 +41,7 @@ namespace Pixel
 
         [Field]
         [JsonProperty]
-        public bool drawCollider = true;
+        public bool drawCollider = false;
 
         [Field]
         [JsonProperty]
@@ -50,8 +51,9 @@ namespace Pixel
         [JsonProperty]
         public Color colliderPixel = System.Drawing.Color.LimeGreen;
 
+        [Field]
         [JsonProperty]
-        public bool IsTrigger { get; internal set; } = false;
+        public bool IsTrigger = false;
 
         [JsonProperty]
         private BoundingBox2D boundingBox = new();
@@ -73,7 +75,7 @@ namespace Pixel
 
         [Method]
         // for editor.
-        void CreateNGonWithVertexCt() => model = Polygon.nGon(Scale.X - Scale.Y * 2, vertexCount);
+        public void CreateNGonWithVertexCt() => model = Polygon.nGon(Scale.X - Scale.Y * 2, vertexCount);
 
         /// <returns>a copy of the colliders' model, not the model itself</returns>
         public Polygon GetModel() => new(model);
@@ -105,6 +107,17 @@ namespace Pixel
             }
             Interop.Log($"{node.Name}'s collider now has primitive shape : {primitive}");
         }
+
+        [Method]
+        async void MeshColliderFromSelectedAsset()
+        {
+            var task = Interop.GetSelectedFileMetadataAsync();
+            await task;
+            var meta = task.Result;
+            var poly = MeshImporter.GetPolygonFromMesh(meta);
+            SetModel(poly);
+        }
+
         public override void Dispose()
         {
         }

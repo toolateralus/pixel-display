@@ -80,15 +80,21 @@ namespace Pixel
         {
             if (refObject is not Sprite sprite)
                 throw new ArgumentException($"Must pass in object of type {nameof(Sprite)}");
+            
+            // avoid drawing disabled sprites, might be hacky not sure.
+            if (!sprite.Enabled)
+                return;
 
             ViewportOffset = sprite.viewportOffset;
             ViewportScale = sprite.viewportScale.GetDivideSafe();
             camDistance = sprite.camDistance;
             projectionMatInverted = projectionMat.Inverted();
 
-            if (!sprite.lit)
+            if (!sprite.lit && sprite.texture != null)
                 image = sprite.texture.GetImage();
-            else image = sprite.GetLightmap(); 
+            else if (sprite.texture != null)
+                image = sprite.lightmap;
+            else return;
 
             filtering = sprite.textureFiltering;
 

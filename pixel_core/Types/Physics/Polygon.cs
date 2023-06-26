@@ -273,6 +273,40 @@ namespace Pixel.Types.Physics
             polygon.centroid = centroid;
         }
 
+        public bool ContainsPoint(Vector2 globalPos)
+        {
+            int vertCount = vertices.Length;
+            int intersectCount = 0;
+
+            for (int i = 0; i < vertCount; i++)
+            {
+                Vector2 vert1 = vertices[i];
+                Vector2 vert2 = vertices[(i + 1) % vertCount];
+
+                bool isPointAboveMinY = globalPos.Y > MathF.Min(vert1.Y, vert2.Y);
+                bool isPointBelowMaxY = globalPos.Y <= MathF.Max(vert1.Y, vert2.Y);
+                bool isPointToLeftOfMaxX = globalPos.X <= MathF.Max(vert1.X, vert2.X);
+
+                if (isPointAboveMinY && isPointBelowMaxY && isPointToLeftOfMaxX)
+                {
+                    bool isNonHorizontalEdge = vert1.Y != vert2.Y;
+                    if (isNonHorizontalEdge)
+                    {
+                        float xIntersect = (globalPos.Y - vert1.Y) * (vert2.X - vert1.X) / (vert2.Y - vert1.Y) + vert1.X;
+                        bool isPointToLeftOfXIntersect = vert1.X == vert2.X || globalPos.X <= xIntersect;
+                        if (isPointToLeftOfXIntersect)
+                            intersectCount++;
+                    }
+                    else
+                    {
+                        intersectCount++;
+                    }
+                }
+            }
+
+            return intersectCount % 2 == 1;
+        }
+
     }
 
 }

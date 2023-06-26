@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net;
 
 namespace Pixel
@@ -72,5 +73,20 @@ namespace Pixel
 
             return child;
         }
+        public ObservableCollection<Node> TraverseHierarchy()
+        {
+            ObservableCollection<Node> collection = new ObservableCollection<Node>();
+            foreach (var node in this)
+                TraverseNode(node, collection);
+            return collection;
+        }
+
+        private void TraverseNode(Node node, ObservableCollection<Node> collection)
+        {
+            collection.Add(node);
+            foreach (var child in node.children)
+                TraverseNode(child, collection);
+        }
+
     }
 }

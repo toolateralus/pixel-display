@@ -28,6 +28,7 @@ namespace Pixel.Types.Physics
     }
     public class Physics
     {
+        public static Action<double> OnStepComplete;
         static QuadTree quadTree = null;
         /// <summary>
         /// Moves the physics simulation one step forward.
@@ -37,7 +38,7 @@ namespace Pixel.Types.Physics
             if (Interop.Stage is not Stage stage)
                 return;
 
-
+            double resolutions = 0;
             var area = ProjectSettings.PhysicsArea;
             quadTree ??= new QuadTree(new BoundingBox2D(-area.X, -area.Y, area.X, area.Y));
             
@@ -48,6 +49,7 @@ namespace Pixel.Types.Physics
             {
                 if (stage.nodes.Count <= i)
                     return;
+
                 Node? node = stage.nodes[i];
                 var hasCollider = node.col != null;
                 if (hasCollider)
@@ -58,32 +60,42 @@ namespace Pixel.Types.Physics
             quadTree.Query(range, foundNodes);
 
             Parallel.For(0, foundNodes.Count, (i) => {
-                var A = foundNodes[i];
-                for (int j = 0; j < i; ++j)
+            var A = foundNodes[i];
+            for (int j = 0; j < i; ++j)
+            {
+                var B = foundNodes[j];
+
+                if (A is null || B is null)
+                    continue;
+
+                if (B == A)
+                    continue;
+
+                bool a_has_rb = A.rb != null;
+                bool b_has_rb = B.rb != null;
+
+                if (a_has_rb && b_has_rb)
                 {
-                    var B = foundNodes[j];
-
-                    if (A is null || B is null)
-                        continue;
-
-                    if (B == A)
-                        continue;
-
-                    bool a_has_rb = A.rb != null;
-                    bool b_has_rb = B.rb != null;
-
-                    if (a_has_rb && b_has_rb)
-                        Collide(B.rb, A.rb);
-
-                    if (a_has_rb && !b_has_rb)
-                        Collide(A.rb, B.col);
-
-                    if (!a_has_rb && b_has_rb)
-                        Collide(B.rb, A.col);
-
+                    Collide(B.rb, A.rb);
+                    resolutions++;
                 }
+
+                if (a_has_rb && !b_has_rb)
+                {
+                    Collide(A.rb, B.col);
+                    resolutions++;
+                }
+
+                if (!a_has_rb && b_has_rb)
+                {
+                    Collide(B.rb, A.col);
+                    resolutions++;
+                }
+
+            }
             });
             quadTree.Clear();
+            OnStepComplete?.Invoke(resolutions);
         }
         private static void Collide(Rigidbody rigidBody, Collider staticCollider)
         {
@@ -279,8 +291,13 @@ public class QuadTree
 
         if (children[0] == null)
             Split();
+        
 
-        int index = GetChildIndex(node.GetComponent<Collider>().BoundingBox);
+        if (node.col == null)
+            return;
+
+        int index = GetChildIndex(node.col.BoundingBox);
+
         if (index != -1)
             children[index].Insert(node);
         else

@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace Pixel
 {
-    public class Texture : Asset
+    public class Texture
     {
         [Field][JsonProperty] public Vector2 size = new(1, 1);
         [JsonProperty] internal Metadata imgData;
@@ -41,34 +41,34 @@ namespace Pixel
             get => jImage.height;
         }
         #region Constructors / Overrides
-        public Texture(JImage image, string name = "Default Texture Asset") : base(name, true)
+        public Texture(JImage image) 
         {
             jImage = image;
         }
-        public Texture(string filePath, string name = "Default Texture Asset") : base(name, true)
+        public Texture(string filePath) 
         {
             SetImage(filePath);
         }
-        public Texture(Color[,] colors, string name = "Default Texture Asset") : base(name, true)
+        public Texture(Color[,] colors) 
         {
             SetImage(colors);
         }
-        public static readonly Texture Default = new Texture(Vector2.One, Color.White, "Default Sprite Texture");
-        public Texture(Vector2 size, Color color, string name = "Default Texture Asset") : base(name, true)
+        public static Texture Default => new Texture(Vector2.One, Color.White);
+        public static readonly Texture Shared = new Texture(Vector2.One, Color.White);
+        public Texture(Vector2 size, Color color)
         {
             this.size = size;
             SetImage(color);
         }
-        public Texture(Vector2 scale, Metadata imgData, string name = "Default Texture Asset") : base(name, true)
+        public Texture(Vector2 scale, Metadata imgData)
         {
             this.size = scale;
             SetImage(imgData, scale);
         }
         [JsonConstructor]
-        protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name) : base(Name, true)
+        protected Texture(JImage image, Metadata imgData, Vector2 scale, string Name)
         {
             this.imgData = imgData;
-            this.Name = Name;
             this.size = scale;
             this.jImage = image;
         }
@@ -89,7 +89,6 @@ namespace Pixel
         /// <param name="meta"></param>
         public void SetImage(Metadata meta)
         {
-            metadata = meta;
             SetImage(meta.FullPath);
         }
         public void SetImage(string fullPath)

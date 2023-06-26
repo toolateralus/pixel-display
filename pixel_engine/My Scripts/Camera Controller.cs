@@ -12,18 +12,16 @@ namespace Pixel
     public class CameraController : Component
     {
         Node camera;
-        ParticleSystem ps;
         Vector2 vel = Vector2.Zero;
         [Field] float speed = 0.05f;
 
         public override void Dispose()
         {
             camera = null;
-            ps = null;
         }
         public override void Awake()
         {
-            camera = new("camera2");
+            camera = new("Camera Controller Node");
             Camera.First = camera.AddComponent<Camera>();
             camera.Scale = new(16, 9);
             camera.Position = Position + Vector2.One;
@@ -38,9 +36,6 @@ namespace Pixel
 
         public override void FixedUpdate(float delta)
         {
-            const int divisorA = 10;
-            const int divisorB = divisorA * 10;
-
             if (camera is null)
                 return;
 

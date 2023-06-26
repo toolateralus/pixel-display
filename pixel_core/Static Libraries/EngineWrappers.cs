@@ -76,18 +76,18 @@ namespace Pixel
             EditorEvent e = new(EditorEventFlags.PRINT, obj.ToString(), false);
             RaiseInspectorEvent(e);
         }
-        internal static Task<Metadata> GetSelectedFileMetadataAsync()
+        public static Task<Metadata> GetSelectedFileMetadataAsync()
         {
             return OnFileViewer_SelectedMetadata_Query?.Invoke();
         }
-        internal protected static void InstantiateDefaultStageIntoProject()
+        public static void InstantiateDefaultStageIntoProject()
         {
             Log("No stage found, either the requested index was out of range or no stages were found in the project." +
                 " A Default will be instantiated and added to the project at the requested index.");
 
             OnDefaultStageRequested?.Invoke();
         }
-        internal static void RaiseInspectorEvent(EditorEvent e)
+        public static void RaiseInspectorEvent(EditorEvent e)
         {
             OnEditorEventRaised?.Invoke(e);
         }

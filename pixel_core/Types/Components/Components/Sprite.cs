@@ -51,11 +51,8 @@ namespace Pixel
                 IsDirty = true; 
             }
         }
-        
-
         [Field][JsonProperty] 
         public Color color;
-
         /// <summary>
         /// this determines what layer the sprite will be drawn in, ie -1 for bckground and 1 for on top of that.
         /// </summary>
@@ -64,7 +61,6 @@ namespace Pixel
         /// this prevents the image/color data from being overwritten or changed.
         /// </summary>
         [Field][JsonProperty] public bool IsReadOnly = false;
-
         internal JImage lightmap;
         public JImage GetLightmap()
         {
@@ -125,7 +121,7 @@ namespace Pixel
 
         }
         [Method]
-        private void Refresh()
+        public virtual void Refresh()
         {
             switch (Type)
             {
@@ -151,7 +147,7 @@ namespace Pixel
                 Refresh();
 
             if (lit)
-               lightmap =  GetLightmap();
+               lightmap = GetLightmap();
         }
         public override void OnDrawShapes()
         {
@@ -260,6 +256,7 @@ namespace Pixel
             viewport.Transform(Transform);
             return viewport.vertices;
         }
+
         internal void SetImage(Color[,] colors) => texture.SetImage(colors);
         public void SetImage(Vector2 size, byte[] color)
         {
@@ -276,6 +273,8 @@ namespace Pixel
 
         public override void Dispose()
         {
+            texture = null;
+            lightmap = null;
         }
     }
 }

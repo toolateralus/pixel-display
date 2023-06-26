@@ -49,7 +49,17 @@ namespace Pixel
         /// <summary>
         /// the frame that is sent out after each cycle, cached.
         /// </summary>
-        public byte[] Frame => frameBuffer.FirstOrDefault(Array.Empty<byte>());
+        public byte[] Frame
+        {
+            get
+            {
+                if (frameBuffer.Count < 3)
+                    return Array.Empty<byte>();
+
+                return frameBuffer[2];
+            }
+        }
+
         /// <summary>
         /// the stride of the render output image.
         /// </summary>

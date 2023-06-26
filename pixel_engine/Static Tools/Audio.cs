@@ -1,7 +1,10 @@
 ﻿using Pixel.FileIO;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -38,19 +41,27 @@ namespace Pixel
             if (sender is not AudioInstance ai)
                 return;
             ai.locked = true;
-
+        }
+        public void ForceRelease()
+        {
+            locked = false;
+            Stop();
         }
     }
 
     public static class Audio
     {
-        static List<AudioInstance> Players;
-        static Audio()
+        static Dictionary<int, AudioInstance> Players;
+        static public void Initialize()
         {
             Players = new();
-            for (int i = 0; i < 25; ++i)
-                Players.Add(new AudioInstance());      
+            for (int i = 0; i < 8; ++i)
+            {
+                AudioInstance audioInstance = new AudioInstance();
+                Players.Add(audioInstance.GetHashCode(), audioInstance);
+            }
         }
+
         /// <summary>
         /// this allocates an entirely new instance of mediaplayer, it seems to have a gigantic delay. PlayFromPath/PlayFromMeta methods use a cheaper way of cloning the MediaPlayer.
         /// </summary>
@@ -62,26 +73,24 @@ namespace Pixel
             var player = new MediaPlayer();
 
             if (fileName != "")
-                player.Open(new Uri(fileName, UriKind.RelativeOrAbsolute));
-
-            player.SpeedRatio = speed;
-            player.Volume = volume;
-            player.Play();
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    player.Open(new Uri(fileName, UriKind.RelativeOrAbsolute));
+                    player.SpeedRatio = speed;
+                    player.Volume = volume;
+                    player.Play();
+                });
         }
-        public static MediaPlayer GetFreePlayer()
+        private static (int handle, AudioInstance player) GetFreePlayer()
         {
-            var playerCopy = Players.Where(player => !player.locked).FirstOrDefault();
-            if (playerCopy is null)
-            {
-                AudioInstance ai = new AudioInstance();
-                Players.Add(ai);
-                return ai;
-            }
-            return playerCopy;
+            var playerCopy = Players.Where(player => !player.Value.locked);
+            AudioInstance player = playerCopy.FirstOrDefault().Value;
+            int handle = playerCopy.FirstOrDefault().Key;
+            return (handle, player);
         }
         private static void Play(string fileName, float volume, double speed, MediaPlayer playerCopy)
         {
-            if (fileName != "")
+            if (fileName != "" && playerCopy != null)
                 Application.Current?.Dispatcher.Invoke(() => 
                 {
                     playerCopy.Open(new Uri(fileName, UriKind.RelativeOrAbsolute)); 
@@ -91,17 +100,23 @@ namespace Pixel
                 });
 
         }
-        public static void PlayFromPath(string fileName = "", float volume = 0.5f, double speed = 1)
+        public static int PlayFromPath(string fileName = "", float volume = 0.5f, double speed = 1)
         {
-            var playerCopy = GetFreePlayer();
-
-            Play(fileName, volume, speed, playerCopy);
+            var audio = GetFreePlayer();
+            Play(fileName, volume, speed, audio.player);
+            return audio.handle;
         }
-        public static void PlayFromMeta(Metadata metadata, float volume = 0.5f, double speed = 1)
+        public static int PlayFromMeta(Metadata metadata, float volume = 0.5f, double speed = 1)
         {
-            var playerCopy = GetFreePlayer();
-            if (metadata is not null)
-                Play(metadata.FullPath, volume, speed, playerCopy);
+            var audio = GetFreePlayer();
+            Play(metadata.FullPath, volume, speed, audio.player);
+            return audio.handle;
+        }
+
+        internal static void FreePlayer(int song_handle)
+        {
+            if (Players.ContainsKey(song_handle))
+                Application.Current?.Dispatcher.Invoke(() => Players[song_handle].ForceRelease());
         }
     }
 }

@@ -7,10 +7,58 @@ using System.Linq;
 using Pixel.Types.Components;
 using Pixel.Statics;
 using Pixel.Types.Physics;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using PixelLang.Tools;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Pixel
 {
-    public class Player : Component
+    /// <summary>
+    ///  base class for all actors/ entities
+    /// </summary>
+    public class Entity : Component
+    {
+        const int startHp = 100;
+        [Field]
+        int health = startHp;
+        bool dead = false;
+
+
+        internal List<Entity> hit_list = new();
+
+        public override void OnTrigger(Collision collision)
+        {
+            if (collision.collider.TryGetComponent<Entity>(out var ent) && !hit_list.Contains(ent) && ent != this)
+            {
+                hit_list.Add(ent);
+                Runtime.Log($"entity {ent.Name} added to {Name}'s hit-list (for melee)");
+            }
+        }
+
+        public void Damage(int value)
+        {
+            if (dead)
+                return;
+            health -= value;
+            if (health <= 0) 
+                Die();
+
+        }
+
+        private void Die()
+        {
+            health = 0;
+            dead = true; 
+        }
+
+        public override void Dispose()
+        {
+             
+        }
+    }
+
+    public class Player : Entity
     {
         [Field][JsonProperty] public float speed = 0.1f;
         [Field][JsonProperty] private float jumpSpeed = 0.25f;
@@ -20,27 +68,48 @@ namespace Pixel
         private bool isGrounded;
         private Vector2 moveVector = default;
         private int haltIterations = 16;
+        private int song_handle = 0; 
+        private bool hit_cooldown;
+        Inventory inventory = new();
 
         Sprite sprite;
         Rigidbody rb;
         Animator anim;
         Camera cam;
-        
+
         public override void Dispose()
         {
+            Audio.FreePlayer(song_handle);
             sprite = null;
             rb = null;
             anim = null;
             cam = null; 
+
         }
+
         public override void Awake()
         {
+            node.tag = "PLAYER";
             node.TryGetComponent(out rb);
+
+            Item weapon = new("default weapon", ItemType.Weapon, 0, new Dictionary<string, int>
+            {
+                {Item.MinWeaponDamageProperty, 8},
+                {Item.MaxWeaponDamageProperty, 22},
+                {Item.HitSpeedValueProperty, 1000},
+                {Item.StrengthValueProperty, 1},
+                {Item.AgilityValueProperty, 2},
+                {Item.AnimationIDProperty, 0},
+                {Item.ModelIDProperty, 0},
+                {Item.AudioIDProperty, 0}
+            });
+
+            inventory.Add(weapon);
 
             var meta = Library.FetchMeta("KingCrimsonRequiem");
 
             if (meta != null)
-                Audio.PlayFromPath(meta.FullPath, 0.45f);
+                song_handle = Audio.PlayFromPath(meta.FullPath, 0.45f);
 
             if (node.TryGetComponent(out sprite))
                 sprite.Type = ImageType.Image;
@@ -56,6 +125,13 @@ namespace Pixel
 
             if (!takingInput)
                 return;
+
+            if (CMouse.LeftPressedThisFrame)
+            {
+                Fire();
+                InputProcessor.TryCallLine("=> clear;");
+                Runtime.Log("Fired weapon.");
+            }
 
             Move(moveVector);
 
@@ -89,7 +165,6 @@ namespace Pixel
         {
             isGrounded = true;
         }
-
         private void RegisterActions()
         {
             RegisterAction(this, Jump, Key.Up);
@@ -106,25 +181,43 @@ namespace Pixel
                 if (moveVector.X > 0)
                     sprite.Scale = new(1, 1);
             }
-            if (isGrounded)
-                rb?.ApplyImpulse(moveVector.WithValue(y: speed * moveVector.Y) * speed);
-            else rb?.ApplyImpulse(moveVector * speed);
+            rb?.ApplyImpulse(moveVector.WithValue(y: speed * moveVector.Y) * speed);
+        }
+        private void Fire()
+        {
+            if (!hit_cooldown)
+                if (hit_list.Count > 0)
+                {
+                    (int dmg, int speed) weapon = inventory.GetWeaponDamageAndSpeed();
+                    
+                    Entity entity = hit_list.FirstOrDefault();
+                    
+                    if (entity is null)
+                        return; 
+
+                    Runtime.Log($"dealing {weapon.dmg} damage to {entity.node}");
+
+                    entity.Damage(weapon.dmg);
+                    
+                    hit_cooldown = true;
+                    
+                    Task cooldown = new Task(async delegate {
+                        var delay = weapon.speed / 1000;
+                        await Task.Delay(delay);
+                        hit_cooldown = false; 
+                    });
+
+                    cooldown.Start();
+
+                    hit_list.Remove(entity);
+                }
+        }
+        private void Jump()
+        {
+            rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
         }
         
         #region Input 
-        private void Jump()
-        {
-            if (isGrounded)
-            {
-                var meta = Library.FetchMeta("dog_barking");
-                
-                if(meta != null)
-                    Audio.PlayFromMeta(meta, 0.45f);
-
-                rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
-            }
-
-        }
         private void Down()
         {
             moveVector.Y = 1 * speed;
