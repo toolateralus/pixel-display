@@ -52,17 +52,14 @@ namespace Pixel
     public static class Audio
     {
         static Dictionary<int, AudioInstance> Players;
-        static Audio()
+        static public void Initialize()
         {
             Players = new();
-            Application.Current.Dispatcher.Invoke(() => { 
-                lock (Players)
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        AudioInstance audioInstance = new AudioInstance();
-                        Players.Add(audioInstance.GetHashCode(), audioInstance);
-                    }
-            });
+            for (int i = 0; i < 8; ++i)
+            {
+                AudioInstance audioInstance = new AudioInstance();
+                Players.Add(audioInstance.GetHashCode(), audioInstance);
+            }
         }
 
         /// <summary>
@@ -93,7 +90,7 @@ namespace Pixel
         }
         private static void Play(string fileName, float volume, double speed, MediaPlayer playerCopy)
         {
-            if (fileName != "")
+            if (fileName != "" && playerCopy != null)
                 Application.Current?.Dispatcher.Invoke(() => 
                 {
                     playerCopy.Open(new Uri(fileName, UriKind.RelativeOrAbsolute)); 
