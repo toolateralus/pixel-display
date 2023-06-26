@@ -2,6 +2,7 @@
 using Pixel.Assets;
 using Pixel.FileIO;
 using Pixel.Types.Physics;
+using Pixel_Engine.My_Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,13 +18,18 @@ namespace Pixel
             var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, new());
 
             Node floor = Floor.Standard();
+            floor.Position = floor.Position.WithValue(y: floor.Position.Y + 100);
 
             Node node = new("camera");
 
             var cam = node.AddComponent<Camera>();
-            // set aspect ratio for widescreen, as stage is.
+            // set aspect ratio for widescreen, since stage background is.
             cam.Scale = new(16, 9);
 
+            Node automa = CellularAutoma.Standard();
+
+            // using this default stage has revealed some issues about the way nodes are initialized, it is very broken and seemingly unpredictable.
+            stage.AddNode(automa);
             stage.AddNode(floor);
             stage.AddNode(node);
            
@@ -38,8 +44,9 @@ namespace Pixel
         /// <returns></returns>
         public bool GetNodeAtPoint(Stage stage, Vector2 clickPosition, out Node? result)
         {
-            foreach (var node in stage.nodes)
+            for (int i = 0; i < stage.nodes.Count; i++)
             {
+                Node? node = stage.nodes[i];
                 if (node == lastSelected)
                 {
                     DeselectNode();

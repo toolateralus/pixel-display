@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Pixel.Types.Components;
 using Pixel.Types.Physics;
 using System;
@@ -535,6 +536,15 @@ namespace Pixel
                 return null;
             T? component = Components[typeof(T)][index] as T;
             return component;
+        }
+
+        public void SetActive(bool value)
+        {
+            foreach (var list in Components)
+                foreach (var comp in list.Value)
+                    comp.Enabled = false;
+
+            Enabled = value;
         }
         #endregion
     }

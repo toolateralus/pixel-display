@@ -90,7 +90,7 @@ namespace Pixel_Editor
             viewModel = new();
 
             Importer.Import(false);
-
+            Audio.Initialize();
             InitializeSettings();
 
             Project project = Project.Default;

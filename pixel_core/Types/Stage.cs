@@ -23,9 +23,9 @@ namespace Pixel
         [JsonProperty]
         public Metadata? backgroundMetadata;
         [JsonProperty]
-        public Matrix3x2 bgTransform = Matrix3x2.CreateScale(512, 512);
+        public Matrix3x2 bgTransform = Matrix3x2.CreateScale(1024, 1024);
         [JsonProperty]
-        public TextureFiltering backgroundFiltering = TextureFiltering.Point;
+        public TextureFiltering backgroundFiltering = TextureFiltering.Bilinear;
         [JsonProperty]
         public Vector2 backgroundOffset = new(0, 0);
         /// <summary>
