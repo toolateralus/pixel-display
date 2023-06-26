@@ -87,7 +87,7 @@ namespace Pixel
         
         private bool _enabled = true;
         private string _uuid = "";
-        public bool awake;
+        public bool awake = false;
 
         /// <summary>
         /// if this is false the node won't be moved or updated, nor visible.
