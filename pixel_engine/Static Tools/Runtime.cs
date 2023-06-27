@@ -30,11 +30,7 @@ namespace Pixel
 
             foreach (Type type in types.Where(t => t.IsSubclassOf(typeof(Component))))
             {
-                bool shouldContinue = false;
-                foreach (var attribute in type.GetCustomAttributes(true))
-                    if (attribute.GetType() == typeof(HideFromEditorAttribute))
-                        shouldContinue = true;
-                if (shouldContinue)
+                if (type.GetCustomAttributes(typeof(HideFromEditorAttribute), true).Any())
                     continue;
                 AllComponents.Add(type);
             }
@@ -262,38 +258,30 @@ namespace Pixel
 
         #endregion
         #region Interop Wrappers
-
         private Project Interop_OnProjectGotten()
         {
             return project;
         }
-
         private void Interop_OnDrawLine(System.Numerics.Vector2 arg1, System.Numerics.Vector2 arg2, Color arg3)
         {
             ShapeDrawer.DrawLine(arg1, arg2, arg3);
         }
-
         private void Interop_OnDrawCircle(System.Numerics.Vector2 arg1, int arg2, Color arg3)
         {
             ShapeDrawer.DrawCircle(arg1, arg2, arg3);
         }
-
         private void Interop_OnDrawGraphicsFinalize(RendererBase arg1, System.Numerics.Matrix3x2 arg2, System.Numerics.Matrix3x2 arg3)
         {
             ShapeDrawer.DrawGraphics(arg1, arg2, arg3);
         }
-
         private bool Interop_OnIsInitializedQuery()
         {
             return Initialized;
         }
-
         private bool Interop_OnIsRunningQuery()
         {
             return IsRunning;
         }
-
-      
         public static void SetOutputImageAsMain(System.Windows.Controls.Image image)
         {
             // this is how we subscribe to the input events.

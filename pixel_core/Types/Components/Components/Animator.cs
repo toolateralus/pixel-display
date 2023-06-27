@@ -90,11 +90,11 @@ namespace Pixel
 
             animation = anim;
         }
-        /// <summary>
-        /// this wrapper allows params to be passed in when pressed from InspectorControl.
-        /// </summary>
+       
         [Method]
         void Start() => Start(1, true);
+
+
         public override void FixedUpdate(float delta)
         {
             if (animation is null || !animation.playing)

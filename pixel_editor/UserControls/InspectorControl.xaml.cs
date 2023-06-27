@@ -56,11 +56,13 @@ namespace Pixel_Editor
             properties = component.GetType().GetProperties();
         }
         #endregion
+        object editorCollectionLockObj = new object();
         public InspectorControl()
         {
             InitializeComponent();
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
+            BindingOperations.EnableCollectionSynchronization(ComponentEditors, editorCollectionLockObj);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -320,6 +322,7 @@ namespace Pixel_Editor
             properties = component.GetType().GetRuntimeProperties();
             methods = component.GetType().GetRuntimeMethods();
         }
+
         public static IEnumerable<FieldInfo> GetSerializedFields(Component component) =>
            from FieldInfo field in component.GetType().GetRuntimeFields()
            from CustomAttributeData data in field.CustomAttributes

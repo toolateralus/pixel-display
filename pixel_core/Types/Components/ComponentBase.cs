@@ -61,13 +61,6 @@ namespace Pixel.Types.Components
         {
             _uuid = Pixel.Statics.UUID.NewUUID();
         }
-        // begin comment
-        // idk why this is implented twice nor do I know which ones preferable, I think clone works fine.
-        public Component Clone() => (Component)MemberwiseClone();
-        internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
-        // end comment
-       
-        
         internal protected void fixed_update_internal(float frameTime)
         {
             FixedUpdate(frameTime);
@@ -140,10 +133,15 @@ namespace Pixel.Types.Components
         #endregion
         public Vector2 LocalToGlobal(Vector2 local) => local.Transformed(Transform);
         internal Vector2 GlobalToLocal(Vector2 global) => global.Transformed(Transform.Inverted());
-        public bool TryGetComponent<T>([NotNullWhen(true)] out T result, int index = 0) where T : Component
+        public bool TryGetComponent<T>(out T result, int index = 0) where T : Component
         {
-            result = node.GetComponent<T>(index);
-            return result != null;
+            if (node.HasComponent<T>())
+            {
+                result = node.GetComponent<T>(index);
+                return true;
+            }
+            result = default!;
+            return false; 
         }
         /// <summary>
         /// Performs a 'Get Component' call on the Parent node object of the component this is called from.

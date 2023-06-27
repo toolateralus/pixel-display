@@ -202,6 +202,16 @@ namespace Pixel
 
             child.parent = this;
         }
+
+        public void UpdateChildLocal(Node node, Vector2 pos)
+        {
+            if (child_offsets.ContainsKey(node.UUID))
+            {
+                Vector2 offset = Position = pos;
+                child_offsets[node.UUID] = offset;
+            }
+        }
+
         /// <summary>
         /// A way to remove children if they exist under this one.
         /// </summary>
@@ -504,7 +514,7 @@ namespace Pixel
         {
             if (!Components.ContainsKey(typeof(T)))
             {
-                component = null;
+                component = default!;
                 return false;
             }
             component = Components[typeof(T)][index] as T;
@@ -531,12 +541,12 @@ namespace Pixel
         /// <typeparam name="T"></typeparam>
         /// <param name="index"></param>
         /// <returns>A component of type T if exists, else null.</returns>
-        public T? GetComponent<T>(int index = 0) where T : Component
+        public T GetComponent<T>(int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
-                return null;
-            T? component = Components[typeof(T)][index] as T;
-            return component;
+                    throw new MissingComponentException();
+
+            return Components[typeof(T)][index] is not T component ? throw new MissingComponentException() : component;
         }
 
         public void SetActive(bool value)

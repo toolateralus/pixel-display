@@ -198,24 +198,31 @@ namespace Pixel
                         if (y >= maxY)
                             break;
                     }
+                    
                     if (sprite.camDistance <= zBuffer[x, y])
                         continue;
+
                     output.X = x / resX; //texcoord to screen
                     output.Y = y / resY;
                     output.Transform(screenMatInverted); //screen to projection
                     output.Transform(projectionMatInverted); //projection to cam view
+
                     if (output.X > 1 || output.X < -1 || output.Y > 1 || output.Y < -1)
                         continue;
+
                     output.Transform(transform); //cam view to world
                     output.Transform(sprite.transformInverted); //world to sprite view
+                    
                     if (output.X > 1 || output.X < -1 || output.Y > 1 || output.Y < -1)
                         continue;
+
                     output.Transform(sprite.projectionMat); // sprite view to projection
                     output.Transform(screenMat); // projection to texture coord
                     output.X -= MathF.Floor(output.X); // wrap X 0-1
                     output.Y -= MathF.Floor(output.Y); // wrap Y 0-1
                     output.X *= width; // scale texture coord to img size
                     output.Y *= height;
+
                     switch (sprite.filtering)
                     {
                         case TextureFiltering.Point:
@@ -237,6 +244,7 @@ namespace Pixel
                             bl = (bot * img.width + lft) * 4;
                             br = (bot * img.width + rgt) * 4;
 
+                            // TODO:  index out of range error when using a non-square background image (i think that's the cause)
                             color.r = (byte)((img.data[tl + 1] * xOffInv + img.data[tr + 1] * xOffset) * yOffInv + (img.data[bl + 1] * xOffInv + img.data[br + 1] * xOffset) * yOffset);
                             color.g = (byte)((img.data[tl + 2] * xOffInv + img.data[tr + 2] * xOffset) * yOffInv + (img.data[bl + 2] * xOffInv + img.data[br + 2] * xOffset) * yOffset);
                             color.b = (byte)((img.data[tl + 3] * xOffInv + img.data[tr + 3] * xOffset) * yOffInv + (img.data[bl + 3] * xOffInv + img.data[br + 3] * xOffset) * yOffset);

@@ -195,16 +195,24 @@ namespace Pixel_Editor
         {
             if (field.GetValue(component)?.ToString() is not string valStr)
                 valStr = "NULL";
+
             if (InspectorControl.GetTextBox(valStr) is not TextBox textbox)
                 return;
             InspectorControl.SetControlColors(textbox, Brushes.DarkSlateGray, Brushes.White);
+
+            textbox.AcceptsReturn = true;
+            textbox.AcceptsTab = true;
+            textbox.AllowDrop = true;
+
             textbox.IsReadOnly = false;
             textbox.GotKeyboardFocus += TextBoxGotKeyboardFocus;
             textbox.LostKeyboardFocus += (s, e) => UpdateField(field, textbox, e);
-            textbox.KeyDown += InputBox_KeyDown;
+
             MemberEditor member = new(textbox, field.Name);
             Members.Add(member);
         }
+        
+
         #endregion
         internal void Dispose()
         {

@@ -17,7 +17,6 @@ namespace Pixel_Engine.My_Scripts
             var col =  node.GetComponent<Collider>();
             var spr = node.GetComponent<Sprite>();
             
-            spr.color = Color.White; 
             col.IsTrigger = true;
             
             var coin = node.AddComponent<Coin>();

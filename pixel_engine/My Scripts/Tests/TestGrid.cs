@@ -1,21 +1,11 @@
-﻿using Pixel.Assets;
-using Pixel.Types;
-using Pixel.Types.Components;
-using Pixel.Types.Physics;
-using Pixel_Core.Types.Attributes;
-using System;
+﻿using Pixel.Types.Components;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Windows.Input;
-using static Pixel.Input;
-using static Pixel.Runtime;
 using static Pixel.ShapeDrawer;
 
 namespace Pixel
 {
-    public class GridNodeGenerator : Component
+    public class TestGrid : Component
     {
         List<Node> nodes = new();
         private float radius = 0.0015f * 75f;
