@@ -1,76 +1,11 @@
-﻿using Newtonsoft.Json.Serialization;
-using Pixel.Statics;
-using Pixel.Types.Components;
+﻿using Pixel.Statics;
 using Pixel.Types.Physics;
-using PixelLang.Interpreters;
 using PixelLang.Tools;
-using PixelLang.Types;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Threading;
-using System.Xml.Linq;
 
 namespace Pixel
 {
- 
- 
-
-    public class HookTest : Component
-    {
-        int? hndl;
-
-        [Field]
-        string code = @"    
-            
-            i = 100;
-            x = 25;
-
-            function main(int arg) {
-                return 0;
-            };
-
-
-        ";
-        [Method]
-        public void HookIntoRenderLoop()
-        {
-            Token cached = Token.null_token;
-            InputProcessor.TryCallLine(code);
-
-            ExternFunction.InjectFunction(new(F, "") { StrVal = "get_frametime" });
-
-            Token F(List<Token> args)
-            {
-                cached.NumVal = (Runtime.Current.renderHost.info.frameCount);
-                return cached;
-            }
-
-            hndl = PLangHook.AttachHook(Hook.Render, $"get_frametime");
-        }
-        [Method]
-        public void Unhook()
-        {
-            if(hndl.HasValue)
-                PLangHook.Unhook(hndl.Value);
-        }
-
-        public override void Dispose()
-        {
-        }
-
-        public static Node Standard()
-        {
-            var node = Rigidbody.Standard();
-            node.AddComponent<HookTest>();
-            return node;
-        }
-    }
-
-    public enum Hook { Render, Physics, Awake, Destroy } 
     public static class PLangHook
     {
         public static int[] handles = new int[64];

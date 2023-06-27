@@ -1,9 +1,7 @@
 ﻿using Pixel;
 using Pixel.Types.Components;
-using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks;
 using LibNoise.Primitive;
 
 namespace Pixel_Engine.My_Scripts
@@ -18,32 +16,25 @@ namespace Pixel_Engine.My_Scripts
         public int width = 20;
 
         [Field]
-        public int chunks = 1;
-
-        public const int distributionMagnitude = 2;
+        public int chunks = 12;
+        
+        [Field]
+        public int maxCoinCount = 250;
+        
+        [Field]
+        public int distributionMagnitude = 2;
 
         public override async void Awake()
         {
             perlin = new();
-
-            Dispose();
             Generate();
-            //while (true)
-            //{
-            //    SetAllChunksActive(false);
-            //    await Task.Delay(TimeSpan.FromSeconds(15));
-            //}
-
         }
         [Method]
         private void Generate()
         {
+            Dispose();
             Vector2 initialPosition = Position;
-
-
-
             for (int X = 0; X < chunks; ++X)
-            {
                 for (int Y = 0; Y < chunks; ++Y)
                 {
                     Position = initialPosition + new Vector2(X * distributionMagnitude , Y * distributionMagnitude);
@@ -51,7 +42,8 @@ namespace Pixel_Engine.My_Scripts
                     chunk.Initialize(Position, X, Y, this);
                     Chunks.Add(chunk);
                 }
-            }
+            Chunk.DispenseCoins(this, maxCoinCount);
+
         }
         public void SetAllChunksActive(bool value)
         {

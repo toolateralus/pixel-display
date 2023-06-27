@@ -1,11 +1,5 @@
-﻿
-using Pixel.Assets;
-using Pixel.FileIO;
-using Pixel.Types.Physics;
+﻿using Pixel.Types.Physics;
 using Pixel_Engine.My_Scripts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace Pixel

@@ -57,7 +57,8 @@ namespace Pixel_Editor
         public static ExternFunction reimport() => new((args) => { Importer.Import(); return Token.null_token; }, "runs the importer and refreshes the asset library.");
         public static ExternFunction getnode() => new((args) => {
 
-            var node = Runtime.Current.GetStage().FindNode(args.First().StrVal);
+            Stage? stage = Runtime.Current.GetStage();
+            var node = stage.FindNode(args.First().StrVal);
             InspectorControl.SelectNode(node);
             if (node is null)
                 return new(false);
@@ -70,7 +71,7 @@ namespace Pixel_Editor
 
             int i = 0;
             foreach (var item in stage.nodes)
-                Print(i++ + item.Name);
+                Print(i++ + " : " + item.Name);
 
             return Token.null_token;
 
@@ -115,7 +116,7 @@ namespace Pixel_Editor
         }
         public static void Clear(bool randomPixel = false)
         {
-            EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE, "");
+            EditorEvent editorEvent = new EditorEvent(EditorEventFlags.CLEAR_CONSOLE);
             EditorEventHandler.QueueEvent(editorEvent);
 
             if (randomPixel)

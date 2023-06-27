@@ -10,7 +10,6 @@ using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PixelLang.Tools;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Pixel
 {
