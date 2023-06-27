@@ -45,6 +45,8 @@ namespace Pixel
 
         public override void Awake()
         {
+            base.Awake();
+
             node.tag = "PLAYER";
             node.TryGetComponent(out rb);
 
@@ -62,7 +64,6 @@ namespace Pixel
 
             inventory.Add(weapon);
 
-            AddTrigger();
 
             if (node.TryGetComponent(out sprite))
                 sprite.Type = ImageType.Image;
@@ -71,24 +72,6 @@ namespace Pixel
                 anim.Next();
 
             RegisterActions();
-        }
-
-        private void AddTrigger()
-        {
-            Node triggerNode = Rigidbody.StaticBody();
-
-            triggerNode.RemoveComponent(triggerNode.GetComponent<Sprite>());
-
-            Collider? collider = triggerNode.GetComponent<Collider>();
-            collider.IsTrigger = true;
-            collider.drawCollider = true;
-            collider.drawNormals = true;
-            triggerNode.Scale = new Vector2(5, 5);
-            triggerNode.OnTriggered += base.OnTrigger;
-            triggerNode.tag = "INTANGIBLE";
-
-            node.Child(triggerNode);
-            node.UpdateChildLocal(triggerNode, Vector2.Zero);
         }
 
         public override void FixedUpdate(float delta)
@@ -136,10 +119,10 @@ namespace Pixel
         }
         private void RegisterActions()
         {
-            RegisterAction(this, Jump, Key.Up);
-            RegisterAction(this, Down, Key.Down);
-            RegisterAction(this, Left, Key.Left);
-            RegisterAction(this, Right, Key.Right);
+            RegisterAction(this, Jump, Key.W);
+            RegisterAction(this, Down, Key.S);
+            RegisterAction(this, Left, Key.A);
+            RegisterAction(this, Right, Key.D);
         }
         private void Move(Vector2 moveVector)
         {

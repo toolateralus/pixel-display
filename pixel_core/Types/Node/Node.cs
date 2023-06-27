@@ -540,12 +540,12 @@ namespace Pixel
         /// <typeparam name="T"></typeparam>
         /// <param name="index"></param>
         /// <returns>A component of type T if exists, else null.</returns>
-        public T? GetComponent<T>(int index = 0) where T : Component
+        public T GetComponent<T>(int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
-                return null;
-            T? component = Components[typeof(T)][index] as T;
-            return component;
+                throw new MissingComponentException();
+
+            return Components[typeof(T)][index] is not T component ? throw new MissingComponentException() : component;
         }
 
         public void SetActive(bool value)

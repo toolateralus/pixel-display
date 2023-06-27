@@ -44,7 +44,7 @@ namespace Pixel
                     DeselectNode();
                 }
 
-                if (node.GetComponent<Sprite>() is not Sprite sprite)
+                if (!node.TryGetComponent<Sprite>(out var sprite))
                     continue;
 
                 BoundingBox2D box = new(sprite.GetCorners());
