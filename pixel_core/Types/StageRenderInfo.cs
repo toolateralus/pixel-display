@@ -232,7 +232,7 @@ namespace Pixel
                             lft = (int)output.X;
                             top = (int)output.Y;
                             rgt = lft + 1 - width * ((lft + 1) / width);
-                            bot = top + 1 - width * ((top + 1) / height);
+                            bot = top + 1 - height * ((top + 1) / height);
 
                             xOffset = output.X - lft;
                             yOffset = output.Y - top;
@@ -244,7 +244,6 @@ namespace Pixel
                             bl = (bot * img.width + lft) * 4;
                             br = (bot * img.width + rgt) * 4;
 
-                            // TODO:  index out of range error when using a non-square background image (i think that's the cause)
                             color.r = (byte)((img.data[tl + 1] * xOffInv + img.data[tr + 1] * xOffset) * yOffInv + (img.data[bl + 1] * xOffInv + img.data[br + 1] * xOffset) * yOffset);
                             color.g = (byte)((img.data[tl + 2] * xOffInv + img.data[tr + 2] * xOffset) * yOffInv + (img.data[bl + 2] * xOffInv + img.data[br + 2] * xOffset) * yOffset);
                             color.b = (byte)((img.data[tl + 3] * xOffInv + img.data[tr + 3] * xOffset) * yOffInv + (img.data[bl + 3] * xOffInv + img.data[br + 3] * xOffset) * yOffset);
