@@ -275,36 +275,37 @@ namespace Pixel
         /// <summary>
         /// A way for a node to subscribe/unsubscribe from events like Update/FixedUpdate/Awake/OnCollision etc. this does not need to be called by the user.
         /// </summary>
-        /// <param name="v"></param>
+        /// <param name="subscribe"></param>
         /// <param name="stage"></param>
-        internal void SubscribeToEngine(bool v)
+        internal void SubscribeToEngine(bool subscribe, Stage? stage = null)
         {
-            if (v)
+            stage ??= Interop.Stage;
+            if (stage == null)
+                return;
+            if (subscribe)
             {
-                if (Interop.Stage != null)
-                    Interop.Stage.FixedUpdate += update_transform_hierarchy_internal;
+                stage.FixedUpdate += update_transform_hierarchy_internal;
 
                 Parallel.ForEach(Components, (comp) => 
                 {
                     foreach (Component _component in comp.Value)
-                        SubscribeComponent(_component);
+                        SubscribeComponent(_component, stage);
                 });
              
                 foreach (var node in children) 
-                    node.SubscribeToEngine(v);
+                    node.SubscribeToEngine(subscribe, stage);
             }
             else
             {
-                if (Interop.Stage != null)
-                    Interop.Stage.FixedUpdate -= update_transform_hierarchy_internal;
+                stage.FixedUpdate -= update_transform_hierarchy_internal;
 
                 Parallel.ForEach(Components, (comp) => {
                     foreach (Component _component in comp.Value)
-                        UnsubscribeComponent(_component);
+                        UnsubscribeComponent(_component, stage);
                 });
 
                 foreach (var node in children)
-                    node.SubscribeToEngine(v);
+                    node.SubscribeToEngine(subscribe, stage);
             }
         }
         /// <summary>
@@ -396,31 +397,31 @@ namespace Pixel
 
             return component;
         }
-        private void SubscribeComponent(Component component)
+        private void SubscribeComponent(Component component, Stage? stage = null)
         {
-            if (Interop.Stage is Stage stage)
-            {
-                OnDestroyed         += component.on_destroy_internal;
-                OnCollided          += component.on_collision_internal;
-                OnTriggered         += component.on_trigger_internal;
-                stage.Awake         += component.init_component_internal;
-                stage.Update        += component.update_internal;
-                stage.FixedUpdate   += component.fixed_update_internal;
-                stage.OnDrawShapes  += component.on_draw_shapes_internal;
-            }
+            stage ??= Interop.Stage;
+            if (stage == null)
+                return;
+            OnDestroyed         += component.on_destroy_internal;
+            OnCollided          += component.on_collision_internal;
+            OnTriggered         += component.on_trigger_internal;
+            stage.Awake         += component.init_component_internal;
+            stage.Update        += component.update_internal;
+            stage.FixedUpdate   += component.fixed_update_internal;
+            stage.OnDrawShapes  += component.on_draw_shapes_internal;
         }
-        private void UnsubscribeComponent(Component component)
+        private void UnsubscribeComponent(Component component, Stage? stage = null)
         {
-            if (Interop.Stage is Stage stage)
-            {
-                OnDestroyed         -= component.on_destroy_internal;
-                OnCollided          -= component.on_collision_internal;
-                OnTriggered         -= component.on_trigger_internal;   
-                stage.Awake         -= component.init_component_internal;
-                stage.Update        -= component.update_internal;
-                stage.FixedUpdate   -= component.fixed_update_internal;
-                stage.OnDrawShapes  -= component.on_draw_shapes_internal;
-            }
+            stage ??= Interop.Stage;
+            if (stage == null)
+                return;
+            OnDestroyed         -= component.on_destroy_internal;
+            OnCollided          -= component.on_collision_internal;
+            OnTriggered         -= component.on_trigger_internal;   
+            stage.Awake         -= component.init_component_internal;
+            stage.Update        -= component.update_internal;
+            stage.FixedUpdate   -= component.fixed_update_internal;
+            stage.OnDrawShapes  -= component.on_draw_shapes_internal;
         }
         /// <summary>
         /// Used to add a component of type <see cref="T"/>

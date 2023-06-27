@@ -112,8 +112,8 @@ namespace Pixel.Assets
 
             foreach (var item in assets)
             {
-                var asset = IO.ReadJson<Asset>(item);
-                Library.Register(item, asset);
+                if (IO.ReadJson<Asset>(item) is Asset asset)
+                    Library.Register(item, asset);
             }
             foreach (var stage in stages)
             {

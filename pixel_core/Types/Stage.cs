@@ -264,6 +264,7 @@ namespace Pixel
         [JsonConstructor]
         internal Stage(Hierarchy nodes, Metadata metadata, Metadata backgroundMetadata, string name = "Stage Asset") : base(name, false)
         {
+            // TODO Hierarchy nodes components dont load parent node from json
             Name = name;
             this.nodes = nodes;
             foreach (var node in this.nodes)
@@ -274,22 +275,7 @@ namespace Pixel
                     RemoveNode(node);
                     continue;
                 }
-                for (int x = 0; x < node.Components.Count; ++x)
-                {
-                    var type = node.Components.Keys.ElementAt(x);
-                    var compList = node.Components[type];
-                    for (int y = 0; y < compList.Count; ++y)
-                    {
-                        var component = compList[y];
-                        if (component is null)
-                        {
-                            Interop.Log("JSON_ERROR: Null Component Removed From Node.");
-                            node.RemoveComponent(component);
-                        }
-                        component.node ??= node;
-                    }
-
-                }
+                node.SubscribeToEngine(true, this);
             }
             base.metadata = metadata;
             this.backgroundMetadata = backgroundMetadata;
