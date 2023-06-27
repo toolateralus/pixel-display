@@ -202,6 +202,16 @@ namespace Pixel
 
             child.parent = this;
         }
+
+        public void UpdateChildLocal(Node node, Vector2 pos)
+        {
+            if (child_offsets.ContainsKey(node.UUID))
+            {
+                Vector2 offset = Position = pos;
+                child_offsets[node.UUID] = offset;
+            }
+        }
+
         /// <summary>
         /// A way to remove children if they exist under this one.
         /// </summary>

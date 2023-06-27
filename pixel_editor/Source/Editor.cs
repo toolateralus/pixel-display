@@ -27,6 +27,7 @@ namespace Pixel_Editor
         SolidColorBrush framerateBrush = new(); 
         internal FileViewer fileViewer;
         private const string motd = "Session started. Type 'help();' for a list of commands.";
+      
         #region Window Scaling
         public static readonly DependencyProperty ScaleValueProperty =
             DependencyProperty.Register(
@@ -76,6 +77,7 @@ namespace Pixel_Editor
             set => SetValue(ScaleValueProperty, value);
         }
         #endregion
+
         static List<Tool> Tools = new List<Tool>();
         public Editor()
         {
@@ -111,24 +113,30 @@ namespace Pixel_Editor
             InterpreterOutput.DebugMetrics += ConsoleControl.ShowMetrics;
             InterpreterOutput.OnClearRequested += ConsoleControl.ClearAll;
             DataContext = viewModel;
+            GetAllStandardNodes();
 
+        }
+
+        private static void GetAllStandardNodes()
+        {
             foreach (var item in Runtime.AllComponents)
             {
-                var methods = item.GetMethods();
+                var methods = item.GetMethods().Where(m => m.Name == "Standard");
                 foreach (var method in methods)
                 {
                     if (method.GetParameters().Any())
                         continue;
 
-                    if (method.Name == "Standard")
+                    var type = method.DeclaringType;
+                    if (!addNodeFunctions.ContainsKey(type.Name))
                     {
                         addNodeFunctions[item.Name] = (Func<Node>)method.CreateDelegate(typeof(Func<Node>));
                         break;
                     }
                 }
             }
-
         }
+
         public EditorSettings settings;
         private TabItem draggedTabItem;
         private void TabItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -19,9 +19,9 @@ namespace Pixel
             var cam = node.AddComponent<Camera>();
             cam.Scale = new(16, 9);
 
-            Node automa = CellularAutoma.Standard();
+            //Node automa = CellularAutoma.Standard();
+            //stage.AddNode(automa);
 
-            stage.AddNode(automa);
             stage.AddNode(floor);
             stage.AddNode(node);
            

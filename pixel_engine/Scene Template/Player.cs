@@ -4,58 +4,15 @@ using Pixel.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
 using System.Linq;
-using Pixel.Types.Components;
 using Pixel.Statics;
 using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PixelLang.Tools;
+using System.Windows.Shell;
 
 namespace Pixel
 {
-    /// <summary>
-    ///  base class for all actors/ entities
-    /// </summary>
-    public class Entity : Component
-    {
-        const int startHp = 100;
-        [Field]
-        int health = startHp;
-        bool dead = false;
-
-
-        internal List<Entity> hit_list = new();
-
-        public override void OnTrigger(Collision collision)
-        {
-            if (collision.collider.TryGetComponent<Entity>(out var ent) && !hit_list.Contains(ent) && ent != this)
-            {
-                hit_list.Add(ent);
-                Runtime.Log($"entity {ent.Name} added to {Name}'s hit-list (for melee)");
-            }
-        }
-
-        public void Damage(int value)
-        {
-            if (dead)
-                return;
-            health -= value;
-            if (health <= 0) 
-                Die();
-
-        }
-
-        private void Die()
-        {
-            health = 0;
-            dead = true; 
-        }
-
-        public override void Dispose()
-        {
-             
-        }
-    }
 
     public class Player : Entity
     {
@@ -105,10 +62,7 @@ namespace Pixel
 
             inventory.Add(weapon);
 
-            var meta = Library.FetchMeta("KingCrimsonRequiem");
-
-            if (meta != null)
-                song_handle = Audio.PlayFromPath(meta.Path, 0.45f);
+            AddTrigger();
 
             if (node.TryGetComponent(out sprite))
                 sprite.Type = ImageType.Image;
@@ -118,6 +72,25 @@ namespace Pixel
 
             RegisterActions();
         }
+
+        private void AddTrigger()
+        {
+            Node triggerNode = Rigidbody.StaticBody();
+
+            triggerNode.RemoveComponent(triggerNode.GetComponent<Sprite>());
+
+            Collider? collider = triggerNode.GetComponent<Collider>();
+            collider.IsTrigger = true;
+            collider.drawCollider = true;
+            collider.drawNormals = true;
+            triggerNode.Scale = new Vector2(5, 5);
+            triggerNode.OnTriggered += base.OnTrigger;
+            triggerNode.tag = "INTANGIBLE";
+
+            node.Child(triggerNode);
+            node.UpdateChildLocal(triggerNode, Vector2.Zero);
+        }
+
         public override void FixedUpdate(float delta)
         {
             cam ??= Camera.First;
@@ -126,11 +99,7 @@ namespace Pixel
                 return;
 
             if (CMouse.LeftPressedThisFrame)
-            {
                 Fire();
-                InputProcessor.TryCallLine("=> clear;");
-                Runtime.Log("Fired weapon.");
-            }
 
             Move(moveVector);
 
@@ -162,7 +131,8 @@ namespace Pixel
         }
         public override void OnCollision(Collision collider)
         {
-            isGrounded = true;
+            if (collider.collider.node.tag != "INTANGIBLE")
+                isGrounded = true;
         }
         private void RegisterActions()
         {
@@ -184,6 +154,7 @@ namespace Pixel
         }
         private void Fire()
         {
+            // TODO: implement a nicer way of doing this, raycasts or just multi-collider nodes, which requires removing the cached collider system in the node, or expanding it.
             if (!hit_cooldown)
                 if (hit_list.Count > 0)
                 {
@@ -192,7 +163,10 @@ namespace Pixel
                     Entity entity = hit_list.FirstOrDefault();
                     
                     if (entity is null)
+                    {
+                        Runtime.Log("No target found.");
                         return; 
+                    }
 
                     Runtime.Log($"dealing {weapon.dmg} damage to {entity.node}");
 
@@ -213,7 +187,8 @@ namespace Pixel
         }
         private void Jump()
         {
-            rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed * (1f + rb.velocity.Length()));
+            if(isGrounded)
+                rb?.ApplyImpulse(-Vector2.UnitY * jumpSpeed);
         }
         
         #region Input 
