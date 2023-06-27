@@ -135,15 +135,6 @@ namespace Pixel
             projectSettings = fetchedAsset;
             SetResolution();
         }
-        internal protected static Stage InstantiateDefaultStageIntoProject()
-        {
-            Log("No stage found, either the requested index was out of range or no stages were found in the project." +
-                " A Default will be instantiated and added to the project at the requested index.");
-
-            Stage stage = StagingHost.Standard();
-            Current.project.AddStage(stage);
-            return stage;
-        }
         public static async Task<Metadata> GetSelectedFileMetadataAsync()
         {
             EditorEvent e = new(EditorEventFlags.GET_FILE_VIEWER_SELECTED_METADATA);
@@ -323,7 +314,7 @@ namespace Pixel
             Interop.OnStageSet += SetStage;
             Interop.OnFileViewer_SelectedMetadata_Query += GetSelectedFileMetadataAsync;
             Interop.OnEditorEventRaised += RaiseInspectorEvent;
-            Interop.OnDefaultStageRequested += () => SetStage(StagingHost.Standard());
+            Interop.OnDefaultStageRequested += StagingHost.Standard;
 
             renderHost = new();
             renderThread = new(RenderLoop);

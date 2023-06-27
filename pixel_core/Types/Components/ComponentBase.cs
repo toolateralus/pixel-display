@@ -61,13 +61,6 @@ namespace Pixel.Types.Components
         {
             _uuid = Pixel.Statics.UUID.NewUUID();
         }
-        // begin comment
-        // idk why this is implented twice nor do I know which ones preferable, I think clone works fine.
-        public Component Clone() => (Component)MemberwiseClone();
-        internal T GetShallowClone<T>() where T : Component => (T)MemberwiseClone();
-        // end comment
-       
-        
         internal protected void fixed_update_internal(float frameTime)
         {
             FixedUpdate(frameTime);

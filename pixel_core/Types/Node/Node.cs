@@ -513,7 +513,7 @@ namespace Pixel
         {
             if (!Components.ContainsKey(typeof(T)))
             {
-                component = null;
+                component = default!;
                 return false;
             }
             component = Components[typeof(T)][index] as T;
@@ -543,7 +543,7 @@ namespace Pixel
         public T GetComponent<T>(int index = 0) where T : Component
         {
             if (!Components.ContainsKey(typeof(T)))
-                throw new MissingComponentException();
+                    throw new MissingComponentException();
 
             return Components[typeof(T)][index] is not T component ? throw new MissingComponentException() : component;
         }

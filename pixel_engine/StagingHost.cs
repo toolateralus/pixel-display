@@ -7,25 +7,21 @@ namespace Pixel
     public class StagingHost
     {
         public Node? lastSelected;
-        public static Stage Standard()
+        public static void Standard()
         {
             var stage = new Stage("default stage", Stage.DefaultBackgroundMetadata, new());
 
-            Node floor = Floor.Standard();
-            floor.Position = floor.Position.WithValue(y: floor.Position.Y + 100);
+            Runtime.Current.SetStage(stage);
 
+            Node floor = Floor.Standard();
             Node node = new("camera");
 
             var cam = node.AddComponent<Camera>();
             cam.Scale = new(16, 9);
 
-            //Node automa = CellularAutoma.Standard();
-            //stage.AddNode(automa);
-
             stage.AddNode(floor);
             stage.AddNode(node);
            
-            return stage;
         }
         /// <summary>
         /// this is used for editor clicking.
