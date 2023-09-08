@@ -109,9 +109,9 @@ namespace Pixel_Editor
 
             fileViewer = new();
 
-            InterpreterOutput.Stream += (obj) => Console.Print(obj);
-            InterpreterOutput.DebugMetrics += ConsoleControl.ShowMetrics;
-            InterpreterOutput.OnClearRequested += ConsoleControl.ClearAll;
+            PixelLang.Tools.Debug.Stream += (obj) => Console.Print(obj);
+            PixelLang.Tools.Debug.DebugMetrics += ConsoleControl.ShowMetrics;
+            PixelLang.Tools.Debug.OnClearRequested += ConsoleControl.ClearAll;
             DataContext = viewModel;
             GetAllStandardNodes();
 
@@ -227,8 +227,9 @@ namespace Pixel_Editor
             {
                 Current.LastSelected?.Destroy();
 
-                foreach (var selected in Current.ActivelySelected)
+                for (int i = 0; i < Current.ActivelySelected.Count; i++)
                 {
+                    Node? selected = Current.ActivelySelected[i];
                     if (selected is not null)
                     {
                         Console.Print($"Node : {selected.Name} destroyed.", true);

@@ -25,7 +25,7 @@ namespace Pixel.Assets
         }
         public static Polygon GetPolygonFromMesh(Metadata meta)
         {
-            AssimpContext importer = new AssimpContext();
+            AssimpContext importer = new();
             importer.SetConfig(new NormalSmoothingAngleConfig(66.0f));
             Scene scene = importer.ImportFile(meta.FullPath, PostProcessPreset.TargetRealTimeMaximumQuality);
             Mesh mesh = scene.Meshes[0];

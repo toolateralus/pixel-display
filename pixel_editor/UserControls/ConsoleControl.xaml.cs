@@ -72,16 +72,16 @@ namespace Pixel_Editor
             commandHistoryIndex = (commandHistoryIndex + commandHistory.Count - 1) % commandHistory.Count;
             CommandLine.Value = commandHistory[commandHistoryIndex];
         }
-        private void OnNext(object? sender) => InterpreterOutput.Continue?.Invoke();
+        private void OnNext(object? sender) => PixelLang.Tools.Debug.Continue?.Invoke();
         private void OnDebug(object? sender)
         {
-            InterpreterOutput.IsDebugMode = !InterpreterOutput.IsDebugMode;
-            AddMessage($"DEBUG : {InterpreterOutput.IsDebugMode}");
+            PixelLang.Tools.Debug.IsDebugMode = !PixelLang.Tools.Debug.IsDebugMode;
+            AddMessage($"DEBUG : {PixelLang.Tools.Debug.IsDebugMode}");
         }
         private void OnContinue(object? sender)
         {
-            InterpreterOutput.IsDebugMode = false;
-           InterpreterOutput.Continue?.Invoke();
+           PixelLang.Tools.Debug.IsDebugMode = false;
+           PixelLang.Tools.Debug.Continue?.Invoke();
         }
         private void OnSend(object? sender)
         {
@@ -93,7 +93,7 @@ namespace Pixel_Editor
                 commandHistory.Add(cmd);
             commandHistoryIndex = 0;
 
-            Task.Run(() => InputProcessor.TryCallLine(cmd));
+            PixelLang.Tools.Language.TryCallLine(cmd);
         }
         private void ClearDebug() => Dispatcher.Invoke(() => DebugMessages.Clear());
         public void AddMessage(string message)

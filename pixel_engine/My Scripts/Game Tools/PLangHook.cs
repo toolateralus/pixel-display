@@ -33,7 +33,7 @@ namespace Pixel
             {
                 var newFunction = GetNextHook(handles[HPHYSICS]++, in functionDeclaration, out var name);
 
-                InputProcessor.TryCallLine(newFunction);
+                Language.TryCallLine(newFunction);
 
                 Physics.OnStepComplete += hook_function;
 
@@ -44,14 +44,14 @@ namespace Pixel
 
                 return handles[HPHYSICS];
 
-                void hook_function(double _) => InputProcessor.TryCallLine($"{name}();");
+                void hook_function(double _) => Language.TryCallLine($"{name}();");
             }
 
             int render_hook(string functionDeclaration)
             {
                 var newFunction = GetNextHook(handles[HRENDER]++,  in functionDeclaration, out var name);
 
-                InputProcessor.TryCallLine(newFunction);
+                Language.TryCallLine(newFunction);
 
                 Runtime.Current.renderHost.OnRenderCompleted += hook_function;
 
@@ -62,7 +62,7 @@ namespace Pixel
 
                 return handles[HRENDER];
 
-                void hook_function(double _) => InputProcessor.TryCallLine($"{name}();");
+                void hook_function(double _) => Language.TryCallLine($"{name}();");
             }
         }
         public static void UnhookAll()

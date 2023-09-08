@@ -31,31 +31,12 @@ namespace Pixel_Editor
             if (current == null)
             {
                 current = new();
-                PopulateCommandLists();
+                //PopulateCommandLists();
             }
         }
-        
-        public static ExternFunction cd() => new((args) =>
-        {
-            Token? token = args.FirstOrDefault();
-
-            if (token is not null && token.Type == TType.STRING)
-            {
-                var path = token.StrVal.Replace("\"", "");
-                path = path.Replace("\\", "");
-                path = path.Replace("\'", "");
-                path = path.Replace("/", "");
-                path = path.Replace("//", "");
-
-                CommandLine.SetCutsomScriptFolderPath(path);
-                InterpreterOutput.Log($"Script Path : {CommandLine.CustomScriptFolderPath}");
-            }
-            return Token.null_token;
-
-        }, "Changes the directory which scripts are read from, always underneath \\Pixel\\Assets\\ and cannot be in a sub-directory.")
-        { StrVal = "cd"};
-        public static ExternFunction reimport() => new((args) => { Importer.Import(); return Token.null_token; }, "runs the importer and refreshes the asset library.");
-        public static ExternFunction getnode() => new((args) => {
+      
+        public static ExternFunction reimport() => new((i,args) => { Importer.Import(); return Token.null_token; }, "runs the importer and refreshes the asset library.");
+        public static ExternFunction getnode() => new((i,args) => {
 
             Stage? stage = Runtime.Current.GetStage();
             var node = stage.FindNode(args.First().StrVal);
@@ -65,7 +46,7 @@ namespace Pixel_Editor
             return new(true);
 
         }, "runs the importer and refreshes the asset library.");
-        public static ExternFunction listnodes() => new((args) => {
+        public static ExternFunction listnodes() => new((intrptr ,args) => {
 
             var stage = Runtime.Current.GetStage();
 
@@ -92,7 +73,7 @@ namespace Pixel_Editor
             for (int i = 0; i < LUA.functions_list.Count; i++)
             {
                 LuaFunction? item = LUA.functions_list[i];
-                ExternFunction cmd = new((a) =>
+                ExternFunction cmd = new((i,a) =>
                 {
                     IntPtr hdnl = LUA.GetHandle();
                     int value = item.Invoke(hdnl);

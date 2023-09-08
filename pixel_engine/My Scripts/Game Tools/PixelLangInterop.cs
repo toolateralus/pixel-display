@@ -1,6 +1,8 @@
-﻿using Pixel.Types.Components;
+﻿using LibNoise.Modifier;
+using Pixel.Types.Components;
 using PixelLang.Tools;
 using PixelLang.Types;
+using System;
 using System.Collections.Generic;
 
 namespace Pixel
@@ -22,22 +24,24 @@ namespace Pixel
 
 
         ";
+       
+
         [Method]
         public void HookIntoRenderLoop()
         {
             Token cached = Token.null_token;
-            InputProcessor.TryCallLine(code);
+            Language.TryCallLine(code);
 
-            ExternFunction.InjectFunction(new(F, "") { StrVal = "get_frametime" });
-
-            Token F(List<Token> args)
-            {
-                cached.NumVal = (Runtime.Current.renderHost.info.frameCount);
-                return cached;
-            }
+            ExternFunction.InjectFunction(funct: new ExternFunction(TestFunction, "") { StrVal = "get_frametime" });
 
             hndl = PLangHook.AttachHook(Hook.Render, $"get_frametime");
         }
+
+        private Token TestFunction(PixelLang.Interpreters.Interpreter arg1, List<Token> arg2)
+        {
+            throw new NotImplementedException();
+        }
+
         [Method]
         public void Unhook()
         {

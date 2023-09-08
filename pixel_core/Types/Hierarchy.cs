@@ -80,7 +80,6 @@ namespace Pixel
                 TraverseNode(node, collection);
             return collection;
         }
-
         private void TraverseNode(Node node, ObservableCollection<Node> collection)
         {
             collection.Add(node);
