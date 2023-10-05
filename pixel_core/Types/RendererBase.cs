@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Windows.Controls;
 
 namespace Pixel
 {
@@ -84,7 +83,7 @@ namespace Pixel
         /// </summary>
         /// <param name="output"></param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public abstract void Render(System.Windows.Controls.Image output);
+        public abstract void Render(Image output);
         /// <summary>
         /// Takes all the prepared renderInfo from the stage and constructs an image starting with the base image.
         /// </summary>

@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using static Pixel.CBit;
 
 namespace Pixel
@@ -51,10 +50,10 @@ namespace Pixel
 
         }
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public override void Render(System.Windows.Controls.Image output)
+        public override void Render(Image output)
         {
             if (stride != 0 && frameBuffer.Count > 2)
-                RenderFromFrame(frameBuffer[1], stride, Resolution, output);
+                RenderFromFrame(frameBuffer[1], stride, Resolution);
         }
     }
 }

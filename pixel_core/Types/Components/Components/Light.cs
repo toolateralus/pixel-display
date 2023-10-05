@@ -3,7 +3,6 @@ using Pixel.Types.Physics;
 using System;
 using System.Drawing;
 using System.Numerics;
-using System.Windows.Media.Animation;
 
 namespace Pixel
 {

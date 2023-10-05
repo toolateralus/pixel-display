@@ -1,4 +1,5 @@
-﻿using Pixel;
+﻿using System.Drawing;
+using Pixel;
 namespace Pixel
 {
     public static class Gradient
@@ -33,9 +34,9 @@ namespace Pixel
                 float gradientPos = (float)position / subdivisions;
                 int colorSegment = (int)(gradientPos * (gradientColors.Length - 1));
                 float segmentPos = (gradientPos * (gradientColors.Length - 1)) - colorSegment;
-                Color currentColor = Color.Blend(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
-                currentColor.a = alpha;
-                return currentColor;
+                // todo fix this?
+                //Color currentColor = Color.Blend(gradientColors[colorSegment], gradientColors[colorSegment + 1], segmentPos);
+                return gradientColors[colorSegment];
             }
 
     }

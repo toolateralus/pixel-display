@@ -1,5 +1,4 @@
-﻿using LibNoise.Modifier;
-using Pixel.Types.Components;
+﻿using Pixel.Types.Components;
 using PixelLang.Tools;
 using PixelLang.Types;
 using System;

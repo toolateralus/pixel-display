@@ -56,7 +56,7 @@ namespace Pixel
             }
             else
             {
-                meta = new(Constants.WorkingRoot + "\\" + path);
+                meta = new(Constants.WorkingRoot + "/" + path);
                 Library.Register(meta, value);
                 IO.Write(value, meta);
                 Importer.Import();

@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using LibNoise.Modifier;
 using Pixel.Types.Components;
 using Pixel.Types.Physics;
 

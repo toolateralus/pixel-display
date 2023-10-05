@@ -38,8 +38,8 @@ namespace Pixel.FileIO
                 fullPath = null;
             }
         }
-        [JsonIgnore] public string FullPath => fullPath ??= Constants.WorkingRoot + RelativeDirectory + "\\" + Name + Extension;
-        [JsonIgnore] public string RelativePath => RelativeDirectory + "\\" + Name + Extension;
+        [JsonIgnore] public string FullPath => fullPath ??= Constants.WorkingRoot + RelativeDirectory + "/" + Name + Extension;
+        [JsonIgnore] public string RelativePath => RelativeDirectory + "/" + Name + Extension;
         [JsonIgnore] public string Directory => Constants.WorkingRoot + RelativeDirectory;
         [JsonIgnore] public string FileName => Name + Extension;
     }

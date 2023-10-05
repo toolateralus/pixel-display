@@ -50,23 +50,11 @@ namespace Pixel
         {
             width = pixels.GetLength(0);
             height = pixels.GetLength(1);
-            byte[] byteData = CBit.ByteFromPixel(pixels);
+            byte[] byteData = new byte[pixels.Length * 4];
             ApplyColor(byteData);
             data = byteData;
         }
-        public JImage(Bitmap bmpInput)
-        {
-            if (bmpInput is null)
-                return;
-            Color[,] pixels;
-            lock (bmpInput)
-                pixels = CBit.PixelFromBitmap(bmpInput);
-            width = pixels.GetLength(0);
-            height = pixels.GetLength(1);
-            byte[] colorData = CBit.ByteFromPixel(pixels);
-            ApplyColor(colorData);
-            data = colorData;
-        }
+      
         public JImage(BoundingBox2D bounds, byte[] colorData)
         {
             height = (int)bounds.Height;

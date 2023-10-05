@@ -68,7 +68,7 @@ namespace Pixel.Assets
 
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
-
+            
             GetFiles(directory, ext, collection);
 
             return collection;
@@ -78,7 +78,7 @@ namespace Pixel.Assets
             var files = Directory.GetFiles(directory, $"*{ext}");
             foreach (var item in files)
             {
-                var split = item.Split('\\');
+                var split = item.Split('/');
                 Metadata file = new(item);
                 collection.Add(file);
             }
@@ -90,7 +90,7 @@ namespace Pixel.Assets
 
             var dirs = Directory.GetDirectories(dir);
             ImportAndRegister(dir);
-
+            
             if (dirs.Length > 0)
                 foreach (var sub_dir in dirs)
                     ImportRecursively(sub_dir, depth++);
@@ -132,27 +132,18 @@ namespace Pixel.Assets
                 string text = IO.Read(script);
                 Library.Register(script, text);
             }
+            
 
 
 
-
-
+            
             // this hold all "assets" or files without pre-loaded data, which get stored with a null value and just point to the file.
             var other = bmps.Concat(pngs);
             other = other.Concat(audioFiles);
             other = other.Concat(obj_meshes);
-
+            
             foreach (var item in other)
-                Library.Register(item, null);
-        }
-        public static void ImportAssetDialog()
-        {
-            Metadata metadata = FileDialog.ImportFileDialog();
-
-            var isPathValid = System.IO.Path.IsPathFullyQualified(metadata.FullPath);
-
-            if (!isPathValid)
-                return;
+                Library.Register(item, null!);
         }
     }
 }

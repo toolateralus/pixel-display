@@ -104,7 +104,7 @@ namespace Pixel
         public static T[] Flatten<T>(this T[,] array)
         {
             if (array is null)
-                return default;
+                return default!;
 
             List<T> result = new(array.GetLength(0) + array.GetLength(1));
             foreach (var x in array)
@@ -136,44 +136,12 @@ namespace Pixel
         #endregion
         #region Image
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static System.Windows.Point GetNormalizedPoint(this System.Windows.Controls.Image img, System.Windows.Point pos)
+        public static Point GetNormalizedPoint(this Image img, Point pos)
         {
-            pos.X /= img.ActualWidth;
-            pos.Y /= img.ActualHeight;
+            pos.X /= (int)img.Scale.X;
+            pos.Y /= (int)img.Scale.Y;
             return pos;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Bitmap ToBitmap(this Color[,] colors)
-        {
-            int sizeX = colors.GetLength(0);
-            int sizeY = colors.GetLength(1);
-
-            var bitmap = new Bitmap(sizeX, sizeY);
-
-            for (int x = 0; x < sizeX; x++)
-                for (int y = 0; y < sizeY; y++)
-                    bitmap.SetPixel(x, y, colors[x, y]);
-
-            return bitmap;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static System.Windows.Media.PixelFormat ToMediaFormat(this System.Drawing.Imaging.PixelFormat sourceFormat)
-        {
-            switch (sourceFormat)
-            {
-                case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
-                    return System.Windows.Media.PixelFormats.Bgr24;
-
-                case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
-                    return System.Windows.Media.PixelFormats.Bgra32;
-
-                case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
-                    return System.Windows.Media.PixelFormats.Bgr32;
-            }
-            throw new NotImplementedException($"No Media.PixelFormat implemented Imaging.PixelFormat: {sourceFormat.ToString()}");
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Rectangle Rect(this Bitmap bmp) => new Rectangle(0, 0, bmp.Width, bmp.Height);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color Lerp(this Color A, Color B, float T)
         {

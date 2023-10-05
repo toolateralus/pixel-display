@@ -3,12 +3,8 @@ using Pixel.FileIO;
 using Pixel.Statics;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using System.Windows.Markup;
-using System.Xml.Linq;
 
 namespace Pixel
 {
@@ -169,9 +165,9 @@ namespace Pixel
         }
         public static void GetDir(Metadata meta, out string name, out string dir)
         {
-            var split = meta.FullPath.Split('\\');
+            var split = meta.FullPath.Split('/');
 
-            // nullifies C:\\ cuz for some reason it would double up when reconstructing from array
+            // nullifies C:/ cuz for some reason it would double up when reconstructing from array
             split[0] = "";
 
             name = split[^1];
@@ -181,7 +177,7 @@ namespace Pixel
         {
             foreach (var path in Directory.EnumerateFiles(dir))
             {
-                var splitPath = path.Split("\\");
+                var splitPath = path.Split("/");
                 var fileName = splitPath[^1];
 
                 if (fileName == name)

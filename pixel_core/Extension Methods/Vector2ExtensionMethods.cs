@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -81,7 +82,7 @@ namespace Pixel
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWithinMaxExclusive(this Vector2 v, Vector2 min, Vector2 max) => v.X.IsWithinMaxExclusive(min.X, max.X) && v.Y.IsWithinMaxExclusive(min.Y, max.Y);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 ToVector2(this System.Windows.Point v) => new((float)v.X, (float)v.Y);
+        public static Vector2 ToVector2(this Point v) => new((float)v.X, (float)v.Y);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Transformed(this ref Vector2 v, in Matrix3x2 matrix)
         {

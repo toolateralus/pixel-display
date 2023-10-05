@@ -17,7 +17,7 @@ namespace Pixel
 
         [Field]
         [JsonProperty]
-        private string textureName = "Assets\\other\\ball.bmp";
+        private string textureName = "Assets/other/ball.bmp";
         public override void Dispose()
         {
         }

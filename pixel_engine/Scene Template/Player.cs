@@ -1,5 +1,4 @@
 ﻿using static Pixel.Input;
-using Key = System.Windows.Input.Key;
 using Pixel.Assets;
 using System.Numerics;
 using Newtonsoft.Json;
@@ -9,7 +8,7 @@ using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using PixelLang.Tools;
-using System.Windows.Shell;
+using PixelLang.Libraries.Input;
 
 namespace Pixel
 {
@@ -35,7 +34,7 @@ namespace Pixel
 
         public override void Dispose()
         {
-            Audio.FreePlayer(song_handle);
+            //Audio.FreePlayer(song_handle);
             sprite = null;
             rb = null;
             anim = null;
@@ -106,7 +105,7 @@ namespace Pixel
                     if (rb.velocity.Length() < 0.05f)
                     {
                         anim?.Stop();
-                        sprite?.texture.SetImageRelative("\\Assets\\Animations\\Dog walking\\dog_standing.bmp");
+                        sprite?.texture.SetImageRelative("/Assets/Animations/Dog walking/dog_standing.bmp");
                     }
                     else if (playing.HasValue && !playing.Value)
                         anim?.Start();

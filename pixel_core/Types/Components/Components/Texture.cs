@@ -14,20 +14,6 @@ namespace Pixel
         [Field][JsonProperty] public Vector2 size = new(1, 1);
         [JsonProperty] internal Metadata imgData;
         [JsonProperty] private JImage jImage = new();
-        public bool HasImage => initializedBitmap != null;
-        internal bool HasImageMetadata => imgData != null;
-
-        private Bitmap initializedBitmap;
-        public Bitmap? Image
-        {
-            get
-            {
-                if (!HasImage && HasImageMetadata)
-                    initializedBitmap = new(imgData.FullPath);
-                return initializedBitmap;
-            }
-            set => initializedBitmap = value;
-        }
         public byte[] Data
         {
             get => jImage.data;
@@ -76,13 +62,6 @@ namespace Pixel
         {
             return jImage;
         }
-        public void SetImageRelative(string relativePath)
-        {
-            var meta = Library.FetchMetaRelative(relativePath);
-            if (meta is not null)
-                jImage = new(new Bitmap(meta.FullPath));
-
-        }
         /// <summary>
         /// probably the best way to set image.
         /// </summary>
@@ -96,7 +75,7 @@ namespace Pixel
             if (fullPath.Contains('.'))
             {
                 imgData = new(fullPath);
-                jImage = new(new Bitmap(fullPath));
+                // todo: add file loading for byte[] here.
             }
             else throw new FileNamingException("Invalid path");
         }
@@ -122,17 +101,12 @@ namespace Pixel
             if (imgData is not null)
             {
                 this.imgData = imgData;
-                Image = new(imgData.FullPath);
+                //Image = new(imgData.FullPath);
             }
 
             jImage = new();
 
-            // maybe unneccesary
-            if (Image is null)
-                return;
-
-            var colors = CBit.PixelFromBitmap(Image);
-            SetImage(colors);
+            SetImage(new Color[64,64]);
         }
         public void SetImage(Vector2 size, byte[] data)
         {

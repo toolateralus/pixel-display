@@ -69,7 +69,6 @@ namespace Pixel
         private protected Thread renderThread;
         private protected BackgroundWorker physicsWorker;
         
-        public static List<System.Windows.Controls.Image> OutputImages = new();
         public static List<Type> AllComponents = new();
 
         public static event Action<EditorEvent>? InspectorEventRaised;
@@ -93,13 +92,11 @@ namespace Pixel
 
             Stage? stage1 = Current.GetStage();
 
-            if (stage1 is null) return;
+            if (stage1 is null)
+                 return;
             
-            stage1.backgroundMetadata = meta;
-            var bmp = new Bitmap(meta.FullPath);
-
-            Current.GetStage()?.SetBackground(bmp);
-            Current.renderHost.GetRenderer().baseImageDirty = true;
+            stage1.background  = new(new Color[25,25]);
+            // TODO: set stage background to something/
         }
         public void SetProject(Project project)
         {
@@ -122,7 +119,7 @@ namespace Pixel
         }
         private void GetProjectSettings()
         {
-            Metadata meta = new(Constants.WorkingRoot + "\\obj\\projectSettings.asset");
+            Metadata meta = new(Constants.WorkingRoot + "/obj/projectSettings.asset");
 
             var fetchedAsset = IO.ReadJson<ProjectSettings>(meta);
 
@@ -176,23 +173,11 @@ namespace Pixel
 
                 CMouse.Update();
 
-                if (Application.Current is null)
-                    return;
-
                 Current.renderHost?.Render();
                 Input.Refresh();
                 var renderer = Current.renderHost?.GetRenderer();
-                if (OutputImages.Count == 0 || OutputImages.First() is null || renderer is null)
-                    continue;
-                try
-                {
-                    Application.Current?.Dispatcher.Invoke(() =>
-                        CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution, OutputImages.First()));
-                }
-                catch (TaskCanceledException e)
-                {
-                    Runtime.Log(e.Message);
-                }
+                
+                CBit.RenderFromFrame(renderer.Frame, renderer.Stride, renderer.Resolution/* render data */);
 
                 if (IsRunning)
                 {
@@ -282,14 +267,6 @@ namespace Pixel
         {
             return IsRunning;
         }
-        public static void SetOutputImageAsMain(System.Windows.Controls.Image image)
-        {
-            // this is how we subscribe to the input events.
-            CMouse.FocusImage(image);
-            OutputImages.Clear();
-            OutputImages.Add(image);
-        }
-
       
         #endregion
         #region Ctor

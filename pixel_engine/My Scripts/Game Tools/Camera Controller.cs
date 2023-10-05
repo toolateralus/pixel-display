@@ -6,6 +6,7 @@ using static Pixel.Input;
 using static Pixel.ShapeDrawer;
 using static Pixel.Runtime;
 using System;
+using PixelLang.Libraries.Input;
 
 namespace Pixel
 {

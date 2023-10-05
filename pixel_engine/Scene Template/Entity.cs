@@ -2,8 +2,6 @@
 using Pixel.Types.Physics;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Windows.Shell;
 
 namespace Pixel
 {

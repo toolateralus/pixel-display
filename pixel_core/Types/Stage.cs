@@ -10,8 +10,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Windows;
 
 namespace Pixel
 {
@@ -96,10 +94,7 @@ namespace Pixel
         {
             background = value;
         }
-        public void SetBackground(Bitmap value)
-        {
-            background = new(value);
-        }
+        
         public void SetBackground(Color[,] value)
         {
             background = new(value);
@@ -107,15 +102,10 @@ namespace Pixel
         public JImage GetBackground()
         {
             if (background == null && backgroundMetadata != null)
-                return background = init_background();
+                return background = new(new Color[42,42]);
             return background ?? throw new NullReferenceException(nameof(background));
         }
-        private JImage init_background()
-        {
-            if (backgroundMetadata is not null && File.Exists(backgroundMetadata.FullPath))
-                return background = new(new Bitmap(backgroundMetadata.FullPath));
-            return background = new(CBit.SolidColorSquare(new(16,16), System.Drawing.Color.Gray));
-        }
+    
         
         #endregion
         #region Node Utils
@@ -279,7 +269,6 @@ namespace Pixel
             }
             base.metadata = metadata;
             this.backgroundMetadata = backgroundMetadata;
-            init_background();
         }
         /// <summary>
         /// Memberwise copy constructor
@@ -296,7 +285,6 @@ namespace Pixel
             UUID = existingUUID ?? Pixel.Statics.UUID.NewUUID();
             this.nodes = nodes;
             this.backgroundMetadata = backgroundMetadata;
-            init_background();
         }
         #endregion
         

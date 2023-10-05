@@ -4,6 +4,7 @@ using Pixel.FileIO;
 using Pixel.Statics;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Pixel
 {
@@ -39,28 +40,15 @@ namespace Pixel
             {
                 string projDir = Constants.ProjectsDir;
                 string rootDir = Constants.WorkingRoot;
+          
+                                
                 string ext = Constants.ProjectFileExtension;
-                string path = rootDir + projDir + '\\' + Name + ext;
-
+                string path = rootDir + projDir + '/' + Name + ext;
+                
                 return new Metadata(path);
             }
         }
-        /// <summary>
-        /// Runs an import file dialog and when appropriately navigated to a project file, loads it.-
-        /// </summary>
-        /// <returns></returns>
-        public static Project Load()
-        {
-            Project project = Default;
-            Metadata meta = FileDialog.ImportFileDialog();
-
-            if (string.IsNullOrWhiteSpace(meta.FullPath) ||
-                !Path.IsPathFullyQualified(meta.FullPath))
-                return project;
-
-            Project? loadedProject = IO.ReadJson<Project>(meta);
-            return loadedProject is null ? project : loadedProject;
-        }
+       
         internal static string GetPathFromRoot(string filePath)
         {
             var output = filePath.Replace(Constants.WorkingRoot, "");
